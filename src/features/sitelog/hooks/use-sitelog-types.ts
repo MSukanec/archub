@@ -3,6 +3,7 @@ import { getSiteLogTypes } from '../services/getSiteLogTypes';
 import { createSiteLogType, type CreateSiteLogTypeData } from '../services/createSiteLogType';
 import { updateSiteLogType, type UpdateSiteLogTypeData } from '../services/updateSiteLogType';
 import { deleteSiteLogType } from '../services/deleteSiteLogType';
+import { replaceSiteLogType } from '../services/replaceSiteLogType';
 
 export function useSiteLogTypes(organizationId?: string) {
   return useQuery({
@@ -40,14 +41,41 @@ export function useUpdateSiteLogType() {
   });
 }
 
-export function useDeleteSiteLogType() {
+/**
+ * Hook para eliminar un tipo de bitácora.
+ * 
+ * ⚠️ CRÍTICO: Recibe organizationId como parámetro para invalidar correctamente el cache.
+ * Sin esto, los cambios no se reflejan en la UI sin un refresh F5.
+ * 
+ * @param organizationId - ID de la organización para cache invalidation
+ */
+export function useDeleteSiteLogType(organizationId: string | null) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ typeId, organizationId }: { typeId: string; organizationId: string }) => 
-      deleteSiteLogType(typeId, organizationId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['sitelog-types', variables.organizationId] });
+    mutationFn: (typeId: string) => 
+      deleteSiteLogType(typeId, organizationId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sitelog-types', organizationId] });
+    },
+  });
+}
+
+/**
+ * Hook para reemplazar un tipo de bitácora con otro.
+ * 
+ * ⚠️ CRÍTICO: Recibe organizationId como parámetro para invalidar correctamente el cache.
+ * 
+ * @param organizationId - ID de la organización para cache invalidation
+ */
+export function useReplaceSiteLogType(organizationId: string | null) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ oldTypeId, newTypeId }: { oldTypeId: string; newTypeId: string }) =>
+      replaceSiteLogType(oldTypeId, newTypeId, organizationId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sitelog-types', organizationId] });
     },
   });
 }

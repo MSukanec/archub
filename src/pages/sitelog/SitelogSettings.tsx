@@ -1,10 +1,11 @@
 import { Tag, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useSiteLogTypes, useDeleteSiteLogType } from '@/features/sitelog/hooks/use-sitelog-types';
+import { useSiteLogTypes, useDeleteSiteLogType, useReplaceSiteLogType } from '@/features/sitelog/hooks/use-sitelog-types';
 import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
+import { getSiteLogEntriesByType } from '@/features/sitelog/services/getSiteLogEntriesByType';
 import type { SiteLogType } from '@/features/sitelog/services/getSiteLogTypes';
 
 export default function SitelogSettings() {
@@ -14,7 +15,8 @@ export default function SitelogSettings() {
   const { openModal } = useGlobalModalStore();
   
   const { data: siteLogTypes = [], isLoading } = useSiteLogTypes(organizationId);
-  const deleteMutation = useDeleteSiteLogType();
+  const deleteMutation = useDeleteSiteLogType(organizationId || null);
+  const replaceMutation = useReplaceSiteLogType(organizationId || null);
 
   // Separar tipos del sistema y de la organización
   const systemTypes = siteLogTypes.filter(type => type.organization_id === null);
@@ -31,34 +33,95 @@ export default function SitelogSettings() {
     });
   };
 
-  const handleDeleteType = (type: SiteLogType) => {
+  const handleDeleteType = async (type: SiteLogType) => {
     if (!organizationId) return;
 
-    openModal('delete-confirmation', {
-      mode: 'simple',
-      title: '¿Eliminar tipo de bitácora?',
-      description: `Se eliminará el tipo "${type.name}". Las bitácoras existentes con este tipo no se verán afectadas.`,
-      onConfirm: async () => {
-        try {
-          await deleteMutation.mutateAsync({
-            typeId: type.id,
-            organizationId
-          });
+    try {
+      // PASO 1: Contar entradas de bitácora que usan este tipo
+      const associatedCount = await getSiteLogEntriesByType(type.id);
+      
+      // PASO 2: Contar otros tipos disponibles para reemplazo
+      const otherTypes = customTypes.filter(t => t.id !== type.id);
+      const canReplace = associatedCount > 0 && otherTypes.length > 0;
 
-          toast({
-            title: 'Tipo eliminado',
-            description: 'El tipo de bitácora se eliminó correctamente'
-          });
-        } catch (error) {
-          console.error('Error deleting site log type:', error);
-          toast({
-            title: 'Error',
-            description: 'No se pudo eliminar el tipo de bitácora',
-            variant: 'destructive'
-          });
+      // PASO 3: Armar array de consecuencias
+      const consequences: string[] = [];
+      if (associatedCount > 0) {
+        consequences.push(
+          `${associatedCount} entrada${associatedCount === 1 ? '' : 's'} de bitácora será${associatedCount === 1 ? 'á' : 'n'} afectada${associatedCount === 1 ? '' : 's'}`
+        );
+        if (canReplace) {
+          consequences.push('Puedes reemplazarlas con otro tipo o dejarlas sin referencia');
+        } else {
+          consequences.push('Las entradas quedarán sin referencia');
         }
       }
-    });
+
+      // PASO 4: Armar opciones de reemplazo
+      const replacementOptions = otherTypes
+        .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+        .map(t => ({
+          label: t.name,
+          value: t.id
+        }));
+
+      // PASO 5: Abrir modal con toda la data
+      openModal('delete-confirmation', {
+        mode: canReplace ? 'replace' : 'delete',
+        title: 'Eliminar tipo de bitácora',
+        description: `¿Estás seguro de que quieres eliminar "${type.name}"?`,
+        itemName: type.name,
+        consequences: consequences.length > 0 ? consequences : undefined,
+        replacementOptions: canReplace ? replacementOptions : undefined,
+        currentId: type.id,
+        onDelete: () => {
+          deleteMutation.mutate(type.id, {
+            onSuccess: () => {
+              toast({
+                title: 'Tipo eliminado',
+                description: 'El tipo de bitácora se eliminó correctamente'
+              });
+            },
+            onError: (error) => {
+              console.error('Error deleting site log type:', error);
+              toast({
+                title: 'Error',
+                description: 'No se pudo eliminar el tipo de bitácora',
+                variant: 'destructive'
+              });
+            }
+          });
+        },
+        onReplace: (newTypeId: string) => {
+          replaceMutation.mutate(
+            { oldTypeId: type.id, newTypeId },
+            {
+              onSuccess: () => {
+                toast({
+                  title: 'Tipo reemplazado',
+                  description: `${associatedCount} entrada${associatedCount === 1 ? '' : 's'} fue${associatedCount === 1 ? '' : 'ron'} migrada${associatedCount === 1 ? '' : 's'} correctamente`
+                });
+              },
+              onError: (error) => {
+                console.error('Error replacing site log type:', error);
+                toast({
+                  title: 'Error',
+                  description: 'No se pudo reemplazar el tipo de bitácora',
+                  variant: 'destructive'
+                });
+              }
+            }
+          );
+        }
+      });
+    } catch (error) {
+      console.error('Error preparing delete dialog:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo preparar la eliminación',
+        variant: 'destructive'
+      });
+    }
   };
 
   if (isLoading) {
