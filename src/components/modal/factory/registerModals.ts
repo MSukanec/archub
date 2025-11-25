@@ -5,7 +5,8 @@ import { ProjectForm } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
 import ContactForm from '@/features/contacts/forms/ContactForm';
 import { ContactTypeForm } from '@/features/contacts/forms/ContactTypeForm';
-import { ClientObligationModal, ClientPaymentsModal, ClientCommitmentModal, ClientRoleModal, ProjectClientModal } from '@/features/clients';
+import { ClientObligationModal, ClientPaymentsModal, ClientCommitmentModal, ClientRoleModal } from '@/features/clients';
+import { ClientForm } from '@/features/clients/forms/ClientForm';
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
 import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal } from '@/features/materials';
@@ -120,7 +121,15 @@ export function initializeModalRegistry(): void {
     }),
   });
   
-  registerModal('project-client', ProjectClientModal as any, projectConfig);
+  registerModal('project-client', ClientForm as any, { 
+    ...projectConfig, 
+    size: 'md',
+    mapDataToProps: (data) => ({
+      projectId: data?.projectId,
+      clientId: data?.clientId,
+      mode: data?.clientId ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
   registerModal('client-obligation', ClientObligationModal as any, financeConfig);
   registerModal('client-payment', ClientPaymentsModal as any, financeConfig);
   registerModal('installment', ClientPaymentsModal as any, financeConfig);
