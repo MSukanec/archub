@@ -23,6 +23,14 @@ export * from './services/softDeleteProject';
 export * from './services/getProjectStats';
 export * from './services/getProjectActivity';
 export * from './services/uploadProjectImage';
+export * from './services/getProjectModalities';
+export * from './services/createProjectModality';
+export * from './services/updateProjectModality';
+export * from './services/deleteProjectModality';
+export * from './services/getProjectTypes';
+export * from './services/createProjectType';
+export * from './services/updateProjectType';
+export * from './services/deleteProjectType';
 
 // ============ HOOKS ============
 export * from './hooks/use-projects';
@@ -37,6 +45,8 @@ export * from './hooks/use-delete-project';
 export * from './hooks/use-project-stats';
 export * from './hooks/use-project-activity';
 export * from './hooks/use-project-accent-color';
+export * from './hooks/use-project-modalities';
+export * from './hooks/use-project-types';
 
 // ============ TYPES ============
 export * from './types';
@@ -63,16 +73,11 @@ export * from './components/gantt';
 
 // ============ FORMS ============
 export { ProjectForm } from './forms/ProjectForm';
+export { ProjectModalityForm } from './forms/ProjectModalityForm';
+export { ProjectTypeForm } from './forms/ProjectTypeForm';
 
 // ============ LEGACY MODALS (Re-exported for backward compatibility) ============
 // These modals are now in @/features/legacy and will be distributed to appropriate features
 export { GalleryFormModal, DocumentFolderFormModal, DocumentPreviewModal, DocumentUploadFormModal } from '@/features/legacy';
 export { BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal } from '@/features/legacy';
 export { TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
-
-// ============ SUB-FEATURES ============
-// Project Types
-export * from './project-types';
-
-// Project Modalities
-export * from './project-modalities';

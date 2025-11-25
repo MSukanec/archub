@@ -18,7 +18,6 @@ export async function deleteProjectType(typeId: string, organizationId: string) 
     throw new Error('Missing required parameters: typeId and organizationId are required');
   }
 
-  // Soft delete: marcar como eliminado solo si pertenece a la organización y no está ya eliminado
   const { error } = await supabase
     .from('project_types')
     .update({

@@ -1,13 +1,11 @@
 import { Tag, Edit2, Trash2, Layers, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useProjectTypes, useDeleteProjectType } from '@/features/projects/project-types/hooks/use-project-types';
-import { useProjectModalities, useDeleteProjectModality } from '@/features/projects/project-modalities/hooks/use-project-modalities';
+import { useProjectTypes, useDeleteProjectType, useProjectModalities, useDeleteProjectModality } from '@/features/projects';
+import type { ProjectType, ProjectModality } from '@/features/projects';
 import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
-import type { ProjectType } from '@/features/projects/project-types/services/getProjectTypes';
-import type { ProjectModality } from '@/features/projects/project-modalities/services/getProjectModalities';
 
 export default function ProjectSettingsTab() {
   const { toast } = useToast();

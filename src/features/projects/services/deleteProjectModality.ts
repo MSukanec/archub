@@ -18,7 +18,6 @@ export async function deleteProjectModality(modalityId: string, organizationId: 
     throw new Error('Missing required parameters: modalityId and organizationId are required');
   }
 
-  // Soft delete: marcar como eliminado solo si pertenece a la organización y no está ya eliminado
   const { error } = await supabase
     .from('project_modalities')
     .update({

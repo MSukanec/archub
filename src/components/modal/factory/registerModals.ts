@@ -13,8 +13,8 @@ import { UserFormModal, ChangelogFormModal, NotificationFormModal, AnnouncementF
 import { SiteLogModal } from '@/features/sitelog/modals/SiteLogModal';
 import { SiteLogModalView } from '@/features/sitelog/modals/SiteLogModalView';
 import { SiteLogTypeModal } from '@/features/sitelog/modals/SiteLogTypeModal';
-import { ProjectTypeModal } from '@/features/projects/project-types/modals/ProjectTypeModal';
-import { ProjectModalityModal } from '@/features/projects/project-modalities/modals/ProjectModalityModal';
+import { ProjectTypeForm } from '@/features/projects/forms/ProjectTypeForm';
+import { ProjectModalityForm } from '@/features/projects/forms/ProjectModalityForm';
 import { PersonnelAttendanceModal, PersonnelAddModal, PersonnelDataModal, PersonnelRatesModal, AdminLaborModal } from '@/features/personnel';
 import { SubcontractFormModal, SubcontractBidFormModal, SubcontractAwardModal, SubcontractTaskFormModal } from '@/features/subcontracts';
 import { PDFExporterModal } from '@/features/pdf';
@@ -86,8 +86,22 @@ export function initializeModalRegistry(): void {
   registerModal('renew-insurance', RenewInsuranceFormModal as any, projectConfig);
   registerModal('indirect', IndirectModal as any, projectConfig);
   registerModal('cost-modal', CostModal as any, projectConfig);
-  registerModal('projectType', ProjectTypeModal as any, { ...projectConfig, size: 'md' });
-  registerModal('projectModality', ProjectModalityModal as any, { ...projectConfig, size: 'md' });
+  registerModal('projectType', ProjectTypeForm as any, { 
+    ...projectConfig, 
+    size: 'md',
+    mapDataToProps: (data) => ({
+      projectType: data?.projectType,
+      mode: data?.isEditing || data?.projectType ? 'edit' : 'create',
+    }),
+  });
+  registerModal('projectModality', ProjectModalityForm as any, { 
+    ...projectConfig, 
+    size: 'md',
+    mapDataToProps: (data) => ({
+      projectModality: data?.projectModality,
+      mode: data?.isEditing || data?.projectModality ? 'edit' : 'create',
+    }),
+  });
   
   registerModal('contact', ContactForm as any, { 
     ...generalConfig, 

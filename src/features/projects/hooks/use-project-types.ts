@@ -20,9 +20,7 @@ export function useCreateProjectType() {
   return useMutation({
     mutationFn: (data: CreateProjectTypeData) => createProjectType(data),
     onSuccess: (_, variables) => {
-      // Invalidar query con organizationId (feature hook)
       queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
-      // Invalidar query legacy (sin organizationId) usada en modales
       queryClient.invalidateQueries({ queryKey: ['project-types'] });
     },
   });
@@ -38,9 +36,7 @@ export function useUpdateProjectType() {
       data: UpdateProjectTypeData 
     }) => updateProjectType(typeId, organizationId, data),
     onSuccess: (_, variables) => {
-      // Invalidar query con organizationId (feature hook)
       queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
-      // Invalidar query legacy (sin organizationId) usada en modales
       queryClient.invalidateQueries({ queryKey: ['project-types'] });
     },
   });
@@ -53,9 +49,7 @@ export function useDeleteProjectType() {
     mutationFn: ({ typeId, organizationId }: { typeId: string; organizationId: string }) => 
       deleteProjectType(typeId, organizationId),
     onSuccess: (_, variables) => {
-      // Invalidar query con organizationId (feature hook)
       queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
-      // Invalidar query legacy (sin organizationId) usada en modales
       queryClient.invalidateQueries({ queryKey: ['project-types'] });
     },
   });

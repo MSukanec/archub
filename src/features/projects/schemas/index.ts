@@ -30,3 +30,15 @@ export const updateProjectSchema = z.object({
 
 export type CreateProjectForm = z.infer<typeof createProjectSchema>;
 export type UpdateProjectForm = z.infer<typeof updateProjectSchema>;
+
+export const projectModalitySchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres'),
+});
+
+export type ProjectModalityFormData = z.infer<typeof projectModalitySchema>;
+
+export const projectTypeSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido').max(100, 'Máximo 100 caracteres'),
+});
+
+export type ProjectTypeFormData = z.infer<typeof projectTypeSchema>;

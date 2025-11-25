@@ -15,8 +15,7 @@ import UploadImageAndShowField from "@/components/ui-custom/fields/UploadImageAn
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/features/organization";
-import { useProjectTypes } from "@/features/projects/project-types";
-import { useProjectModalities } from "@/features/projects/project-modalities";
+import { useProjectTypes, useProjectModalities } from "@/features/projects";
 import { useProjectContext } from "@/stores/projectContext";
 import { useToast } from "@/hooks/use-toast";
 import { useUpdateChecklist } from "@/hooks/use-update-checklist";

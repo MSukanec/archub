@@ -1,16 +1,5 @@
 import { supabase } from '@/lib/supabase';
-
-export interface ProjectType {
-  id: string;
-  name: string;
-  is_default: boolean;
-  created_at: string;
-  organization_id: string | null;
-  updated_at: string;
-  created_by: string | null;
-  is_deleted: boolean;
-  deleted_at: string | null;
-}
+import type { ProjectType } from '../types';
 
 /**
  * Obtiene los tipos de proyecto disponibles para una organización.

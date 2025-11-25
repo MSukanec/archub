@@ -110,3 +110,27 @@ export interface UploadedProjectImage {
   file_url: string;
   file_path: string;
 }
+
+export interface ProjectModality {
+  id: string;
+  name: string;
+  is_default: boolean;
+  created_at: string;
+  organization_id: string | null;
+  updated_at: string;
+  created_by: string | null;
+  is_deleted: boolean;
+  deleted_at: string | null;
+}
+
+export interface ProjectType {
+  id: string;
+  name: string;
+  is_default: boolean;
+  created_at: string;
+  organization_id: string | null;
+  updated_at: string;
+  created_by: string | null;
+  is_deleted: boolean;
+  deleted_at: string | null;
+}

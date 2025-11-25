@@ -26,7 +26,6 @@ export async function updateProjectModality(
     throw new Error('Missing required parameters: modalityId and organizationId are required');
   }
 
-  // Actualizar solo si pertenece a la organización (no modalidades del sistema)
   const { error } = await supabase
     .from('project_modalities')
     .update({

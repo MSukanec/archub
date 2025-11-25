@@ -26,7 +26,6 @@ export async function updateProjectType(
     throw new Error('Missing required parameters: typeId and organizationId are required');
   }
 
-  // Actualizar solo si pertenece a la organización (no tipos del sistema)
   const { error } = await supabase
     .from('project_types')
     .update({

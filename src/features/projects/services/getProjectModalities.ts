@@ -1,16 +1,5 @@
 import { supabase } from '@/lib/supabase';
-
-export interface ProjectModality {
-  id: string;
-  name: string;
-  is_default: boolean;
-  created_at: string;
-  organization_id: string | null;
-  updated_at: string;
-  created_by: string | null;
-  is_deleted: boolean;
-  deleted_at: string | null;
-}
+import type { ProjectModality } from '../types';
 
 /**
  * Obtiene las modalidades de proyecto disponibles para una organización.
