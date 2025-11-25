@@ -3,7 +3,7 @@ import { registerModal, ModalConfig } from './registry';
 import { MemberFormModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, PartnerModal, OrganizationFormModal, ProfileOrganizationFormModal } from '@/features/organization';
 import { ProjectForm } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
-import { ContactFormModal, ContactModalView } from '@/features/contacts';
+import ContactForm from '@/features/contacts/forms/ContactForm';
 import { ClientObligationModal, ClientPaymentsModal, ClientCommitmentModal, ClientRoleModal, ProjectClientModal } from '@/features/clients';
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
 import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
@@ -88,8 +88,15 @@ export function initializeModalRegistry(): void {
   registerModal('projectType', ProjectTypeModal as any, { ...projectConfig, size: 'md' });
   registerModal('projectModality', ProjectModalityModal as any, { ...projectConfig, size: 'md' });
   
-  registerModal('contact', ContactFormModal as any, { ...generalConfig, size: 'lg' });
-  registerModal('contact-view', ContactModalView as any, { ...generalConfig, size: 'lg' });
+  registerModal('contact', ContactForm as any, { 
+    ...generalConfig, 
+    size: 'lg',
+    mapDataToProps: (data) => ({
+      contactId: data?.contactId,
+      contact: data?.contact,
+      mode: data?.mode || (data?.contactId ? 'view' : 'create'),
+    }),
+  });
   
   registerModal('project-client', ProjectClientModal as any, projectConfig);
   registerModal('client-obligation', ClientObligationModal as any, financeConfig);
