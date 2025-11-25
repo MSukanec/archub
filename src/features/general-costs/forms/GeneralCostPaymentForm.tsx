@@ -450,6 +450,7 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
 
   const [filesToUpload, setFilesToUpload] = React.useState<any[]>([])
   const [existingFiles, setExistingFiles] = React.useState<any[]>([])
+  const lastPaymentIdRef = React.useRef<string | undefined>(undefined)
 
   // Fetch existing payment data for edit/view mode
   const { data: existingPayment, isLoading: loadingPayment } = useGeneralCostPayment(
@@ -485,7 +486,9 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
 
   // Load existing payment data
   React.useEffect(() => {
-    if (existingPayment && mode !== 'create') {
+    if (existingPayment && mode !== 'create' && paymentId !== lastPaymentIdRef.current) {
+      lastPaymentIdRef.current = paymentId
+      
       // Normalize payment_date: convert to local timezone naive date
       let paymentDate: Date;
       if (existingPayment.payment_date) {
@@ -508,7 +511,7 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
         status: existingPayment.status || 'confirmed',
       })
     }
-  }, [existingPayment, mode, form])
+  }, [existingPayment, mode, paymentId])
 
   // Load existing files
   React.useEffect(() => {
@@ -539,7 +542,7 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
         }
       }
     }
-  }, [currencies, wallets, mode, paymentId, form])
+  }, [currencies, wallets, mode, paymentId])
 
   // Mutations
   const createPaymentMutation = useCreateGeneralCostPayment()
