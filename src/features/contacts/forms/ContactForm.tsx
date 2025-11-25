@@ -133,20 +133,12 @@ function FormPanel({
 }) {
   const linkedUser = contact?.linked_user || foundUser;
   
-  // Estado local para actualizar el nombre en tiempo real (onBlur)
-  const [displayNameLive, setDisplayNameLive] = useState<string>(
-    contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre'
-  );
-  
   // Observar cambios en los campos nombre y apellido
   const firstName = form.watch('first_name');
   const lastName = form.watch('last_name');
   
-  // Actualizar el nombre cuando el usuario sale del campo (onBlur)
-  const handleNameBlur = () => {
-    const newName = `${firstName || ''} ${lastName || ''}`.trim() || 'Sin nombre';
-    setDisplayNameLive(newName);
-  };
+  // Actualizar el nombre en tiempo real (letra por letra)
+  const displayNameLive = `${firstName || ''} ${lastName || ''}`.trim() || 'Sin nombre';
   
   const initials = displayNameLive
     .split(' ')
@@ -204,10 +196,6 @@ function FormPanel({
                   <Input 
                     placeholder="Nombre" 
                     {...field}
-                    onBlur={(e) => {
-                      field.onBlur();
-                      handleNameBlur();
-                    }}
                     disabled={!!contact?.linked_user}
                     data-testid="input-first-name"
                   />
@@ -227,10 +215,6 @@ function FormPanel({
                   <Input 
                     placeholder="Apellido" 
                     {...field}
-                    onBlur={(e) => {
-                      field.onBlur();
-                      handleNameBlur();
-                    }}
                     disabled={!!contact?.linked_user}
                     data-testid="input-last-name"
                   />
