@@ -26,15 +26,83 @@ interface GeneralCostFormProps {
   mode?: 'create' | 'edit' | 'view'
 }
 
+// Subcomponente: Formulario para create/edit
+function FormPanel({
+  form,
+  onSubmit,
+}: {
+  form: ReturnType<typeof useForm<GeneralCostFormData>>
+  onSubmit: (data: GeneralCostFormData) => void
+}) {
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Nombre */}
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: Servicios administrativos, Gastos de oficina, etc."
+                  {...field}
+                  data-testid="input-general-cost-name"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Descripción */}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Descripción detallada del gasto general..."
+                  rows={3}
+                  {...field}
+                  data-testid="textarea-general-cost-description"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
+  )
+}
+
+// Subcomponente: Vista lectura
+function ViewPanel({ generalCost }: { generalCost: any }) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="text-sm text-muted-foreground mb-1">Nombre</p>
+        <p className="font-medium">{generalCost.name}</p>
+      </div>
+      {generalCost.description && (
+        <div>
+          <p className="text-sm text-muted-foreground mb-1">Descripción</p>
+          <p className="text-sm">{generalCost.description}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function GeneralCostForm({ modalData, onClose, mode = 'create' }: GeneralCostFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const { data: userData } = useCurrentUser()
   const queryClient = useQueryClient()
-
-  const isCreate = mode === 'create'
-  const isEdit = mode === 'edit'
-  const isView = mode === 'view'
 
   const organizationId = modalData?.organizationId || userData?.organization?.id
 
@@ -43,7 +111,7 @@ export function GeneralCostForm({ modalData, onClose, mode = 'create' }: General
 
   // Fetch existing general cost data if editing or viewing
   const { data: existingGeneralCost, isLoading: isLoadingGeneralCost } = useGeneralCost(
-    (isEdit || isView) ? modalData?.generalCostId || null : null
+    (mode === 'edit' || mode === 'view') ? modalData?.generalCostId || null : null
   )
 
   const form = useForm<GeneralCostFormData>({
@@ -80,7 +148,7 @@ export function GeneralCostForm({ modalData, onClose, mode = 'create' }: General
     setIsSubmitting(true)
 
     try {
-      if (isEdit && modalData?.generalCostId) {
+      if (mode === 'edit' && modalData?.generalCostId) {
         await updateGeneralCost.mutateAsync({
           generalCostId: modalData.generalCostId,
           generalCost: {
@@ -88,7 +156,7 @@ export function GeneralCostForm({ modalData, onClose, mode = 'create' }: General
             description: data.description || undefined
           }
         })
-      } else {
+      } else if (mode === 'create') {
         const currentMember = members.find((m: any) => m.user_id === userData?.user?.id)
         if (!currentMember) {
           toast({
@@ -116,93 +184,50 @@ export function GeneralCostForm({ modalData, onClose, mode = 'create' }: General
   }
 
   // Determine title and description based on mode
-  const getTitle = () => {
-    if (isView) return 'Detalle de Gasto General'
-    if (isCreate) return 'Nuevo Gasto General'
-    return 'Editar Gasto General'
+  const getHeader = () => {
+    switch (mode) {
+      case 'view':
+        return {
+          title: 'Detalle de Gasto General',
+          description: 'Información completa del concepto de gasto'
+        }
+      case 'edit':
+        return {
+          title: 'Editar Gasto General',
+          description: 'Modifica los datos del gasto general'
+        }
+      case 'create':
+      default:
+        return {
+          title: 'Nuevo Gasto General',
+          description: 'Agrega un nuevo concepto de gasto general para tu organización'
+        }
+    }
   }
 
-  const getDescription = () => {
-    if (isView) return 'Información completa del concepto de gasto'
-    if (isCreate) return 'Agrega un nuevo concepto de gasto general para tu organización'
-    return 'Modifica los datos del gasto general'
-  }
+  const header = getHeader()
 
   return (
     <ModalLayout onClose={onClose} size="md">
       <ModalHeader 
-        title={getTitle()}
-        description={getDescription()}
+        title={header.title}
+        description={header.description}
         icon={Receipt}
       />
       
       <ModalBody>
-        {/* VIEW MODE */}
-        {isView && existingGeneralCost ? (
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Nombre</p>
-              <p className="font-medium">{existingGeneralCost.name}</p>
-            </div>
-            {existingGeneralCost.description && (
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Descripción</p>
-                <p className="text-sm">{existingGeneralCost.description}</p>
-              </div>
-            )}
-          </div>
+        {mode === 'view' && existingGeneralCost ? (
+          <ViewPanel generalCost={existingGeneralCost} />
         ) : (
-          /* CREATE / EDIT MODE */
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* Nombre */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ej: Servicios administrativos, Gastos de oficina, etc."
-                        {...field}
-                        data-testid="input-general-cost-name"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Descripción */}
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descripción</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Descripción detallada del gasto general..."
-                        rows={3}
-                        {...field}
-                        data-testid="textarea-general-cost-description"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </form>
-          </Form>
+          <FormPanel form={form} onSubmit={onSubmit} />
         )}
       </ModalBody>
 
-      {!isView && (
+      {mode !== 'view' && (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={onClose}
-          rightLabel={isCreate ? 'Crear' : 'Actualizar'}
+          rightLabel={mode === 'create' ? 'Crear' : 'Actualizar'}
           onRightClick={form.handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}
           submitDisabled={isSubmitting}

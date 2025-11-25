@@ -1,0 +1,62 @@
+Quiero que modifiques ÚNICAMENTE ESTE archivo siguiendo estos 3 cambios específicos.
+
+NO cambies arquitectura, NO limpies otras cosas, NO reescribas nada que no esté mencionado abajo.
+
+────────────────────────────────────────
+1) UNIFICAR LA PROP “mode”
+Este componente debe usar una única fuente de verdad para los modos:
+mode: "create" | "edit" | "view"
+
+Asegurate de:
+- que no haya condiciones duplicadas,
+- que todo el render correspondiente dependa solo de “mode”,
+- que create/edit/view estén correctamente diferenciados.
+
+No inventes panelStore ni nada, solo unificá mode correctamente.
+
+────────────────────────────────────────
+2) AGREGAR PANEL INTERNO (mínimo)
+Agregá un pequeño wrapper interno para separar partes de la UI:
+
+<FormPanel />  → inputs para create/edit  
+<ViewPanel />  → UI de vista limpia
+
+Estos dos subcomponentes deben quedar DENTRO del mismo archivo, no en archivos separados.
+
+Solo separá lógicamente:
+- edición/creación = formulario
+- vista = presentación visual
+
+No agregues Zustand ni lógica compleja.  
+El objetivo es ORDENAR el JSX, nada más.
+
+────────────────────────────────────────
+3) ASEGURAR LA ESTRUCTURA VISUAL ESTÁNDAR DEL SISTEMA
+Revisá y corregí estas tres cosas:
+
+✔ El modal debe usar SIEMPRE:
+   - <ModalHeader />
+   - <ModalBody />
+   - <ModalFooter />
+
+✔ NO debe agregar paddings propios en el wrapper interno.
+✔ NO debe crear headers propios o divs que reemplacen a ModalHeader.
+✔ NO debe duplicar lógi­ca estética del sistema madre.
+
+Corregí únicamente si este modal rompe esa regla.
+
+────────────────────────────────────────
+IMPORTANTE:
+✔ No renombres el archivo.  
+✔ No cambies API de hooks.  
+✔ No agregues funcionalidad nueva.  
+✔ No reescribas todo el modal.  
+✔ No cambies nada que no esté en esta lista.  
+
+Solo aplicá estos 3 ajustes puntuales.
+
+────────────────────────────────────────
+A continuación te paso el archivo para modificar:
+[PEGAR AQUÍ GeneralCostForm.tsx]
+
+Realizá SOLO estos 3 cambios y nada más.
