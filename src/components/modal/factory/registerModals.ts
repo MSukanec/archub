@@ -82,8 +82,10 @@ export function initializeModalRegistry(): void {
   registerModal('projectModality', ProjectModalityModal as any, { ...projectConfig, size: 'md' });
   
   registerModal('contact', ContactFormModal as any, { ...generalConfig, size: 'lg' });
+  registerModal('contact-view', ContactModalView as any, { ...generalConfig, size: 'lg' });
   
   registerModal('project-client', ProjectClientModal as any, projectConfig);
+  registerModal('client-obligation', ClientObligationModal as any, financeConfig);
   registerModal('client-payment', ClientPaymentsModal as any, financeConfig);
   registerModal('installment', ClientPaymentsModal as any, financeConfig);
   registerModal('client-commitment', ClientCommitmentModal as any, financeConfig);
@@ -138,6 +140,7 @@ export function initializeModalRegistry(): void {
   registerModal('support-conversation-start', SupportConversationStartModal as any, adminConfig);
   registerModal('plan', PlanFormModal as any, adminConfig);
   registerModal('plan-price', PlanPriceFormModal as any, adminConfig);
+  registerModal('downgrade', DowngradeModal as any, adminConfig);
   
   registerModal('pdf-exporter', PDFExporterModal as any, { ...generalConfig, size: 'full' });
   

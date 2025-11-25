@@ -25,20 +25,20 @@ export function ModalProvider() {
   useEffect(() => {
     const handleGlobalEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && stack.length > 0) {
+        e.preventDefault();
+        e.stopPropagation();
+        
         const topModal = stack[stack.length - 1];
         const entry = getModal(topModal.type);
         
         if (entry?.config.preventCloseOnEsc) {
-          e.preventDefault();
           return;
         }
         
         if (blockCloseForDirtyForms) {
-          e.preventDefault();
           return;
         }
         
-        e.preventDefault();
         popModal();
       }
     };
