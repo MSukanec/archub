@@ -17,7 +17,7 @@ function generateContactAvatarPath(organizationId: string, contactId: string, fi
 
 /**
  * Upload contact avatar directly to storage (no media_files)
- * Saves URL directly to contacts.contact_avatar_url column
+ * Saves image_bucket and image_path to contacts table (like project_data)
  */
 export async function uploadContactAvatarDirect(
   file: File,
@@ -57,10 +57,13 @@ export async function uploadContactAvatarDirect(
       throw new Error(`Error al subir archivo: ${uploadError.message}`);
     }
 
-    // Update contact with avatar URL
+    // Save metadata to contacts table (image_bucket + image_path, like project_data)
     const { error: dbError } = await supabase
       .from('contacts')
-      .update({ contact_avatar_url: filePath })
+      .update({
+        image_bucket: bucket,
+        image_path: filePath
+      })
       .eq('id', contactId);
 
     if (dbError) {
@@ -192,7 +195,36 @@ export async function uploadOrgLogo(
   return uploadFile(file, context);
 }
 
-// Deprecated: use uploadContactAvatarDirect instead
+/**
+ * Get contact avatar URL by loading bucket+path from DB and generating signed URL on-demand
+ */
+export async function getContactAvatarUrl(contactId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('contacts')
+    .select('image_bucket, image_path')
+    .eq('id', contactId)
+    .single();
+  
+  if (error || !data?.image_bucket || !data?.image_path) {
+    return null;
+  }
+
+  try {
+    const { data: urlData, error: urlError } = await supabase.storage
+      .from(data.image_bucket as BucketName)
+      .createSignedUrl(data.image_path, 3600);
+
+    if (urlError || !urlData?.signedUrl) {
+      return null;
+    }
+
+    return urlData.signedUrl;
+  } catch (err) {
+    return null;
+  }
+}
+
+// Alias for compatibility
 export async function uploadContactAvatar(
   file: File,
   contactId: string,

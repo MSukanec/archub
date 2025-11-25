@@ -24,7 +24,7 @@ import { useContactTypes } from "@/features/contacts/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { CONTACT_QUERY_KEYS } from "@/features/contacts/constants";
-import { uploadContactAvatar } from "@/lib/storage/uploadHelpers";
+import { uploadContactAvatar, getContactAvatarUrl } from "@/lib/storage/uploadHelpers";
 import { compressImage } from "@/lib/imageCompression";
 import { supabase } from "@/lib/supabase";
 
@@ -381,6 +381,7 @@ function FormPanel({
 // Subcomponente: Vista de lectura
 function ViewPanel({
   contact,
+  contactAvatarUrl,
   onEdit,
   onDelete,
   existingFiles,
@@ -389,6 +390,7 @@ function ViewPanel({
   isAlreadyMember,
 }: {
   contact: Contact;
+  contactAvatarUrl?: string;
   onEdit?: () => void;
   onDelete?: () => void;
   existingFiles: any[];
@@ -397,7 +399,7 @@ function ViewPanel({
   isAlreadyMember?: boolean;
 }) {
   const displayName = getDisplayName(contact);
-  const avatarUrl = contact.linked_user?.avatar_url || "";
+  const linkedUserAvatarUrl = contact.linked_user?.avatar_url || "";
 
   const handleCall = () => {
     if (contact.phone) {
@@ -416,16 +418,16 @@ function ViewPanel({
       <div className="text-center pt-4 pb-6">
         <div className="flex justify-center mb-4">
           <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
-            {contact.contact_avatar_url && contact.contact_avatar_url.trim() !== '' && (
+            {contactAvatarUrl && contactAvatarUrl.trim() !== '' && (
               <AvatarImage 
-                src={contact.contact_avatar_url} 
+                src={contactAvatarUrl} 
                 alt={`Avatar de ${displayName}`}
                 className="object-cover"
               />
             )}
-            {!contact.contact_avatar_url && avatarUrl && avatarUrl.trim() !== '' && (
+            {!contactAvatarUrl && linkedUserAvatarUrl && linkedUserAvatarUrl.trim() !== '' && (
               <AvatarImage 
-                src={avatarUrl} 
+                src={linkedUserAvatarUrl} 
                 alt={`Avatar de ${displayName}`}
                 className="object-cover"
               />
@@ -608,7 +610,7 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
   // State
   const [foundUser, setFoundUser] = useState<any>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
-  const [contactAvatarUrl, setContactAvatarUrl] = useState(contact?.contact_avatar_url || '');
+  const [contactAvatarUrl, setContactAvatarUrl] = useState<string>('');
   const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
 
   // Fetch contact if editing
@@ -632,7 +634,23 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
   });
 
   const editingContact = contact || fetchedContact;
-  const currentAvatarUrl = contactAvatarUrl || editingContact?.contact_avatar_url;
+
+  // Load avatar URL from storage
+  useEffect(() => {
+    if (!editingContact?.id) {
+      setContactAvatarUrl('');
+      return;
+    }
+
+    const loadAvatarUrl = async () => {
+      const url = await getContactAvatarUrl(editingContact.id);
+      setContactAvatarUrl(url || '');
+    };
+
+    loadAvatarUrl();
+  }, [editingContact?.id]);
+
+  const currentAvatarUrl = contactAvatarUrl;
 
   // Form setup
   const form = useForm<CreateContactForm>({
@@ -1031,7 +1049,8 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
       <ModalBody>
         {mode === "view" && editingContact ? (
           <ViewPanel
-            contact={{ ...editingContact, contact_avatar_url: currentAvatarUrl }}
+            contact={editingContact}
+            contactAvatarUrl={currentAvatarUrl}
             existingFiles={[]}
             handleShare={handleShare}
             inviteMemberMutation={inviteMemberMutation}
