@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Camera, Upload, X, ImageIcon } from 'lucide-react';
+import { Camera, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { uploadProjectImage, deleteProjectImage, updateProjectImageUrl } from '@/features/projects';
 import { compressImage, formatCompressionStats } from '@/lib/imageCompression';
@@ -275,7 +274,7 @@ export default function ImageUploadAndShowField({
           <>
             {/* No Image Placeholder - styled like EmptyState */}
             <div 
-              className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-[var(--accent)] hover:border-[var(--accent)]/80 transition-colors rounded-lg"
+              className="w-full h-full flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-[var(--accent)] hover:border-[var(--accent)]/80 transition-colors rounded-lg hover:bg-muted/20"
               onClick={() => document.getElementById('hero-image-input')?.click()}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -298,19 +297,6 @@ export default function ImageUploadAndShowField({
                     Formatos: JPG, PNG, WebP • Tamaño máximo: 2MB
                   </p>
                 </div>
-                <Button 
-                  type="button"
-                  disabled={isUploading} 
-                  variant="default"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    document.getElementById('hero-image-input')?.click();
-                  }}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  {isUploading ? 'Subiendo...' : 'Seleccionar Imagen'}
-                </Button>
               </div>
             </div>
           </>
