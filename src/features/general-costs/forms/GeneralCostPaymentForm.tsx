@@ -508,7 +508,7 @@ export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCo
         status: existingPayment.status || 'confirmed',
       })
     }
-  }, [existingPayment, mode])
+  }, [existingPayment, mode, form])
 
   // Load existing files
   React.useEffect(() => {
