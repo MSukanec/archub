@@ -113,18 +113,17 @@ function DeleteContent({
             </div>
           )}
 
-          {/* Advertencia dinámica para replace */}
-          <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
-              <p className="text-sm text-destructive font-medium">
-                {actionType === 'replace' 
-                  ? 'Esta acción reemplazará todas las referencias'
-                  : 'Esta acción no se puede deshacer'
-                }
-              </p>
+          {/* Advertencia contextual - Solo para reemplazar */}
+          {actionType === 'replace' && (
+            <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
+                <p className="text-sm text-destructive font-medium">
+                  Esta acción reemplazará todas las referencias
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>

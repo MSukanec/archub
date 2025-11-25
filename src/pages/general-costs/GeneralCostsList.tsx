@@ -57,7 +57,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       });
     }
   };
-  const { data: generalCosts = [], isLoading } = useGeneralCosts(organizationId || null);
+  const { data: generalCosts = [], isLoading } = useGeneralCosts(organizationId);
   const { data: payments = [] } = useGeneralCostsPayments(organizationId);
 
   // Configure Mobile Action Bar - Always show 5 buttons
