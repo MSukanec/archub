@@ -50,8 +50,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       onNewGeneralCost();
     } else {
       openModal('general-costs', {
-        organizationId: userData?.organization?.id,
-        isEditing: false
+        organizationId: userData?.organization?.id
       });
     }
   };
@@ -140,7 +139,6 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
   const handleEdit = (generalCost: GeneralCost) => {
     openModal('general-costs', {
       organizationId: userData?.organization?.id,
-      isEditing: true,
       generalCostId: generalCost.id
     });
   };

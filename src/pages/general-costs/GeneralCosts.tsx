@@ -41,8 +41,7 @@ export default function GeneralCosts() {
 
   const handleNewGeneralCost = () => {
     openModal('general-costs', {
-      organizationId: userData?.organization?.id,
-      isEditing: false
+      organizationId: userData?.organization?.id
     })
   }
 

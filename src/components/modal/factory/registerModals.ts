@@ -98,7 +98,15 @@ export function initializeModalRegistry(): void {
   registerModal('payment', PaymentFormModal as any, financeConfig);
   registerModal('bank-transfer-receipt', BankTransferReceiptModal as any, { ...financeConfig, size: 'md' });
   
-  registerModal('general-costs', GeneralCostsModal as any, { ...financeConfig, size: 'md' });
+  registerModal('general-costs', GeneralCostsModal as any, { 
+    ...financeConfig, 
+    size: 'md',
+    mapDataToProps: (data) => ({
+      organizationId: data?.organizationId,
+      generalCostId: data?.generalCostId,
+      mode: data?.generalCostId ? 'edit' : (data?.mode || 'create')
+    })
+  });
   registerModal('general-costs-payment', GeneralCostsPaymentModal as any, financeConfig);
   registerModal('general-costs-payment-view', GeneralCostsPaymentViewModal as any, financeConfig);
   

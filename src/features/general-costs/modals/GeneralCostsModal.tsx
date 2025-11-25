@@ -3,9 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Receipt } from 'lucide-react'
 
-import { FormModalLayout } from '@/components/modal'
-import { FormModalHeader } from '@/components/modal'
-import { FormModalFooter } from '@/components/modal'
+import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -22,26 +20,31 @@ import { generalCostSchema, type GeneralCostFormData } from '../schemas'
 interface GeneralCostsModalProps {
   modalData?: {
     organizationId?: string
-    isEditing?: boolean
     generalCostId?: string
   }
   onClose: () => void
+  mode?: 'create' | 'edit' | 'view'
 }
 
-export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps) {
+export function GeneralCostsModal({ modalData, onClose, mode = 'create' }: GeneralCostsModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   const { data: userData } = useCurrentUser()
   const queryClient = useQueryClient()
 
+  const isCreate = mode === 'create'
+  const isEdit = mode === 'edit'
+  const isView = mode === 'view'
+
   const organizationId = modalData?.organizationId || userData?.organization?.id
-  const isEditing = modalData?.isEditing || false
 
   // Fetch organization members to get current member ID
   const { data: members = [] } = useOrganizationMembers(organizationId || undefined)
 
-  // Fetch existing general cost data if editing
-  const { data: existingGeneralCost, isLoading: isLoadingGeneralCost } = useGeneralCost(isEditing ? modalData?.generalCostId || null : null)
+  // Fetch existing general cost data if editing or viewing
+  const { data: existingGeneralCost, isLoading: isLoadingGeneralCost } = useGeneralCost(
+    (isEdit || isView) ? modalData?.generalCostId || null : null
+  )
 
   const form = useForm<GeneralCostFormData>({
     resolver: zodResolver(generalCostSchema),
@@ -77,8 +80,7 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
     setIsSubmitting(true)
 
     try {
-      if (isEditing && modalData?.generalCostId) {
-        // Modo edición
+      if (isEdit && modalData?.generalCostId) {
         await updateGeneralCost.mutateAsync({
           generalCostId: modalData.generalCostId,
           generalCost: {
@@ -87,7 +89,6 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
           }
         })
       } else {
-        // Modo creación - buscar currentMember como lo hace SiteLogModal
         const currentMember = members.find((m: any) => m.user_id === userData?.user?.id)
         if (!currentMember) {
           toast({
@@ -109,87 +110,100 @@ export function GeneralCostsModal({ modalData, onClose }: GeneralCostsModalProps
       onClose()
     } catch (error) {
       console.error('Error saving general cost:', error)
-      // Los hooks ya manejan el toast de error
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const editPanel = (
-    <div className="space-y-6">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          
-          {/* Nombre */}
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ej: Servicios administrativos, Gastos de oficina, etc."
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+  // VIEW MODE
+  if (isView && existingGeneralCost) {
+    return (
+      <ModalLayout onClose={onClose} size="md">
+        <ModalHeader 
+          title="Detalle de Gasto General" 
+          description="Información completa del concepto de gasto"
+          icon={Receipt}
+        />
+        <ModalBody>
+          <div className="space-y-6">
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Nombre</p>
+              <p className="font-medium">{existingGeneralCost.name}</p>
+            </div>
+            {existingGeneralCost.description && (
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Descripción</p>
+                <p className="text-sm">{existingGeneralCost.description}</p>
+              </div>
             )}
-          />
+          </div>
+        </ModalBody>
+      </ModalLayout>
+    )
+  }
 
-          {/* Descripción */}
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descripción</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Descripción detallada del gasto general..."
-                    rows={3}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-        </form>
-      </Form>
-    </div>
-  )
-
-  const headerContent = (
-    <FormModalHeader
-      title={isEditing ? 'Editar Gasto General' : 'Nuevo Gasto General'}
-      description={isEditing ? 'Modifica los datos del gasto general' : 'Agrega un nuevo concepto de gasto general para tu organización'}
-      icon={Receipt}
-    />
-  )
-
-  const footerContent = (
-    <FormModalFooter
-      leftLabel="Cancelar"
-      onLeftClick={onClose}
-      rightLabel={isEditing ? 'Actualizar' : 'Crear'}
-      onRightClick={form.handleSubmit(onSubmit)}
-      isSubmitting={isSubmitting}
-      showLoadingSpinner={isSubmitting}
-    />
-  )
-
+  // CREATE / EDIT MODE
   return (
-    <FormModalLayout
-      columns={1}
-      viewPanel={null}
-      editPanel={editPanel}
-      headerContent={headerContent}
-      footerContent={footerContent}
-      isEditing={true}
-      onClose={onClose}
-    />
+    <ModalLayout onClose={onClose} size="md">
+      <ModalHeader 
+        title={isCreate ? 'Nuevo Gasto General' : 'Editar Gasto General'}
+        description={isCreate 
+          ? 'Agrega un nuevo concepto de gasto general para tu organización' 
+          : 'Modifica los datos del gasto general'}
+        icon={Receipt}
+      />
+      <ModalBody>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Nombre */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ej: Servicios administrativos, Gastos de oficina, etc."
+                      {...field}
+                      data-testid="input-general-cost-name"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Descripción */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Descripción detallada del gasto general..."
+                      rows={3}
+                      {...field}
+                      data-testid="textarea-general-cost-description"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
+      </ModalBody>
+      <ModalFooter
+        leftLabel="Cancelar"
+        onLeftClick={onClose}
+        rightLabel={isCreate ? 'Crear' : 'Actualizar'}
+        onRightClick={form.handleSubmit(onSubmit)}
+        isSubmitting={isSubmitting}
+        submitDisabled={isSubmitting}
+      />
+    </ModalLayout>
   )
 }
