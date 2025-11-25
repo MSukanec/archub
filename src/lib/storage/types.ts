@@ -9,6 +9,7 @@ export type EntityType =
   | 'contract'
   | 'permit'
   | 'technical_plan'
+  | 'contact_avatar'
   | 'contact_document'
   | 'general_cost_payment_attachment'
   | 'sitelog_attachment'

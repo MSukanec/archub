@@ -69,6 +69,12 @@ export const ENTITY_CONFIG: Record<EntityType, EntityConfig> = {
     compressionPreset: 'document',
     visibility: 'organization'
   },
+  'contact_avatar': {
+    bucket: 'private-assets',
+    basePath: 'organizations/{org_id}/contacts/avatars',
+    compressionPreset: 'avatar',
+    visibility: 'organization'
+  },
   'contact_document': {
     bucket: 'private-assets',
     basePath: 'organizations/{org_id}/contacts/documents',

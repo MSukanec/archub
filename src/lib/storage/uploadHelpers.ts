@@ -108,3 +108,22 @@ export async function uploadOrgLogo(
 
   return uploadFile(file, context);
 }
+
+export async function uploadContactAvatar(
+  file: File,
+  contactId: string,
+  organizationId: string
+): Promise<UploadResult> {
+  const context: UploadContext = {
+    entity: 'contact_avatar',
+    organization_id: organizationId,
+    link_to: {
+      contact_id: contactId
+    },
+    category: 'avatar',
+    description: 'Contact avatar',
+    is_cover: true
+  };
+
+  return uploadFile(file, context);
+}

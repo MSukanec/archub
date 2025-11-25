@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { UserPlus, Mail, Phone, Building2, MapPin, FileText, Link2, Share2, Building, Upload, Eye, Edit, Trash2, User } from "lucide-react";
+import { UserPlus, Mail, Phone, Building2, MapPin, FileText, Link2, Share2, Building, Upload, Eye, Edit, Trash2, User, Camera } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from "@/components/modal";
@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ComboBoxMultiSelectField } from "@/components/ui-custom/fields/ComboBoxMultiSelectField";
-import { UploadMultiFileField } from "@/components/ui-custom/fields/UploadMultiFileField";
 import { PhoneField } from "@/components/ui-custom/fields/PhoneField";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -23,13 +22,8 @@ import { useContactTypes } from "@/features/contacts/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { CONTACT_QUERY_KEYS } from "@/features/contacts/constants";
-import {
-  useContactAttachments,
-  useCreateContactAttachment,
-  useDeleteContactAttachment,
-  useSetContactAvatar,
-} from "@/features/contacts/hooks";
-import { getAttachmentPublicUrl } from "@/features/contacts/utils";
+import { uploadContactAvatar } from "@/lib/storage/uploadHelpers";
+import { compressImage } from "@/lib/imageCompression";
 import { supabase } from "@/lib/supabase";
 
 const createContactSchema = z.object({
@@ -70,7 +64,7 @@ interface Contact {
   location?: string;
   notes?: string;
   linked_user_id?: string;
-  avatar_attachment_id?: string;
+  contact_avatar_url?: string;
   created_at: string;
   linked_user?: {
     id: string;
@@ -114,10 +108,8 @@ function FormPanel({
   foundUser,
   isAlreadyMember,
   inviteMemberMutation,
-  filesToUpload,
-  setFilesToUpload,
-  existingFiles,
-  handleExistingFileDelete,
+  onAvatarChange,
+  avatarUploading,
 }: {
   form: ReturnType<typeof useForm<CreateContactForm>>;
   onSubmit: (data: CreateContactForm) => void;
@@ -127,16 +119,52 @@ function FormPanel({
   foundUser?: any;
   isAlreadyMember?: boolean;
   inviteMemberMutation?: any;
-  filesToUpload: any[];
-  setFilesToUpload: (files: any[]) => void;
-  existingFiles: any[];
-  handleExistingFileDelete?: (fileId: string) => Promise<void>;
+  onAvatarChange: (file: File) => Promise<void>;
+  avatarUploading: boolean;
 }) {
   const linkedUser = contact?.linked_user || foundUser;
   
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Avatar upload - solo si es edición */}
+        {contact && (
+          <div className="mb-4 p-4 border border-accent/20 bg-accent/5 rounded-lg">
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-sm font-medium">Foto de perfil</label>
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.currentTarget.files?.[0];
+                    if (file) onAvatarChange(file);
+                    e.currentTarget.value = '';
+                  }}
+                  className="hidden"
+                  disabled={avatarUploading}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={avatarUploading}
+                  className="cursor-pointer"
+                  asChild
+                >
+                  <span className="flex items-center gap-2">
+                    <Camera className="h-4 w-4" />
+                    {avatarUploading ? 'Subiendo...' : 'Cambiar foto'}
+                  </span>
+                </Button>
+              </label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              La imagen se comprimirá y guardará automáticamente
+            </p>
+          </div>
+        )}
+
         {linkedUser && (
           <div className="mb-4 p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -333,34 +361,6 @@ function FormPanel({
           )}
         />
 
-        {/* Adjuntos - Solo mostrar si es edición */}
-        {contact && (
-          <>
-            <Separator />
-            <div className="space-y-2">
-              <FormLabel className="flex items-center gap-2">
-                <Upload className="h-4 w-4" />
-                Archivos y Media
-              </FormLabel>
-              <p className="text-xs text-muted-foreground">
-                Gestiona los archivos adjuntos del contacto
-              </p>
-              <UploadMultiFileField
-                existingFiles={existingFiles}
-                filesToUpload={filesToUpload}
-                onFilesChange={setFilesToUpload}
-                onExistingFileDelete={handleExistingFileDelete}
-                emptyStateTitle="Sin archivos adjuntos"
-                emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
-                newFileBadgeText="Nuevo"
-                maxSize={10 * 1024 * 1024}
-                acceptedTypes={{
-                  'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
-                }}
-              />
-            </div>
-          </>
-        )}
       </form>
     </Form>
   );
@@ -404,7 +404,14 @@ function ViewPanel({
       <div className="text-center pt-4 pb-6">
         <div className="flex justify-center mb-4">
           <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
-            {avatarUrl && avatarUrl.trim() !== '' && (
+            {contact.contact_avatar_url && contact.contact_avatar_url.trim() !== '' && (
+              <AvatarImage 
+                src={contact.contact_avatar_url} 
+                alt={`Avatar de ${displayName}`}
+                className="object-cover"
+              />
+            )}
+            {!contact.contact_avatar_url && avatarUrl && avatarUrl.trim() !== '' && (
               <AvatarImage 
                 src={avatarUrl} 
                 alt={`Avatar de ${displayName}`}
@@ -570,24 +577,6 @@ function ViewPanel({
         </div>
       )}
 
-      {existingFiles.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">Archivos</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {existingFiles.map((file) => (
-              <div key={file.id} className="aspect-square rounded-lg border bg-muted overflow-hidden">
-                {file.file_type === 'image' || file.mime_type?.startsWith('image/') ? (
-                  <img src={file.file_url} alt={file.file_name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-muted">
-                    <FileText className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -604,9 +593,10 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
   // Auto-detect mode
   const mode = modeProp || (contactId ? 'view' : 'create');
 
-  // State for attachments
-  const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
+  // State
   const [foundUser, setFoundUser] = useState<any>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [contactAvatarUrl, setContactAvatarUrl] = useState(contact?.contact_avatar_url || '');
 
   // Fetch contact if editing
   const { data: fetchedContact, isLoading: contactLoading } = useQuery({
@@ -629,18 +619,7 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
   });
 
   const editingContact = contact || fetchedContact;
-
-  // Fetch attachments
-  const { data: attachments = [] } = useContactAttachments(editingContact?.id);
-  const createAttachment = useCreateContactAttachment();
-  const deleteAttachment = useDeleteContactAttachment();
-  const setAvatar = useSetContactAvatar();
-
-  const existingFiles = attachments.map(attachment => ({
-    ...attachment,
-    file_url: getAttachmentPublicUrl(attachment),
-    file_type: attachment.mime_type?.split('/')[0] || 'document'
-  }));
+  const currentAvatarUrl = contactAvatarUrl || editingContact?.contact_avatar_url;
 
   // Form setup
   const form = useForm<CreateContactForm>({
@@ -780,22 +759,44 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
     },
   });
 
-  const handleExistingFileDelete = async (fileId: string) => {
-    const attachment = attachments.find(a => a.id === fileId);
-    if (!attachment) return;
-
-    if (attachment.id === editingContact?.avatar_attachment_id) {
-      try {
-        await setAvatar.mutateAsync({
-          contactId: editingContact.id,
-          attachmentId: ''
+  const handleAvatarUpload = async (file: File) => {
+    if (!editingContact?.id || !organizationId) return;
+    
+    try {
+      setAvatarUploading(true);
+      
+      // Compress the image
+      const compressed = await compressImage(file, 'avatar');
+      
+      // Upload to storage
+      const result = await uploadContactAvatar(compressed, editingContact.id, organizationId);
+      
+      if (result.file_url) {
+        // Update contact with new avatar URL
+        const { error } = await supabase
+          .from('contacts')
+          .update({ contact_avatar_url: result.file_url })
+          .eq('id', editingContact.id);
+        
+        if (error) throw error;
+        
+        setContactAvatarUrl(result.file_url);
+        queryClient.invalidateQueries({ queryKey: CONTACT_QUERY_KEYS.all });
+        
+        toast({
+          title: 'Avatar actualizado',
+          description: 'La foto de perfil ha sido actualizada exitosamente'
         });
-      } catch (error) {
-        console.error('Error removing avatar:', error);
       }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo subir el avatar',
+        variant: 'destructive'
+      });
+    } finally {
+      setAvatarUploading(false);
     }
-
-    await deleteAttachment.mutateAsync(fileId);
   };
 
   const createContactMutation = useMutation({
@@ -952,23 +953,6 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
 
   const onSubmit = async (data: CreateContactForm) => {
     createContactMutation.mutate(data);
-
-    // Upload new files if any
-    if (filesToUpload.length > 0 && editingContact) {
-      for (const fileInput of filesToUpload) {
-        try {
-          await createAttachment.mutateAsync({
-            contactId: editingContact.id,
-            file: fileInput.file,
-            category: 'photo',
-            createdBy: userData?.user?.id || ''
-          });
-        } catch (error) {
-          console.error('Error uploading file:', error);
-        }
-      }
-      setFilesToUpload([]);
-    }
   };
 
   const handleShare = () => {
@@ -1044,8 +1028,8 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
       <ModalBody>
         {mode === "view" && editingContact ? (
           <ViewPanel
-            contact={editingContact}
-            existingFiles={existingFiles}
+            contact={{ ...editingContact, contact_avatar_url: currentAvatarUrl }}
+            existingFiles={[]}
             handleShare={handleShare}
             inviteMemberMutation={inviteMemberMutation}
             isAlreadyMember={isAlreadyMember}
@@ -1060,10 +1044,8 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
             foundUser={foundUser}
             isAlreadyMember={isAlreadyMember}
             inviteMemberMutation={inviteMemberMutation}
-            filesToUpload={filesToUpload}
-            setFilesToUpload={setFilesToUpload}
-            existingFiles={existingFiles}
-            handleExistingFileDelete={handleExistingFileDelete}
+            onAvatarChange={handleAvatarUpload}
+            avatarUploading={avatarUploading}
           />
         )}
       </ModalBody>

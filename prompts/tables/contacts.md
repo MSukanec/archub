@@ -1,38 +1,5 @@
 # Detalle de las tablas de Supabase para CONTACTOS:
 
----------- TABLA CONTACT_ATTACHMENTS:
-
-create table public.contact_attachments (
-  id uuid not null default gen_random_uuid (),
-  contact_id uuid not null,
-  storage_bucket text not null,
-  storage_path text not null,
-  file_name text not null,
-  mime_type text null,
-  size_bytes bigint null,
-  category text not null,
-  metadata jsonb not null default '{}'::jsonb,
-  created_by uuid null,
-  created_at timestamp with time zone not null default now(),
-  organization_id uuid null,
-  constraint contact_attachments_pkey primary key (id),
-  constraint contact_attachments_contact_id_fkey foreign KEY (contact_id) references contacts (id) on delete CASCADE,
-  constraint contact_attachments_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
-  constraint contact_attachments_category_check check (
-    (
-      category = any (
-        array[
-          'dni_front'::text,
-          'dni_back'::text,
-          'document'::text,
-          'photo'::text,
-          'other'::text
-        ]
-      )
-    )
-  )
-) TABLESPACE pg_default;
-
 ---------- TABLA CONTACT_TYPE_LINKS:
 
 create table public.contact_type_links (
@@ -80,7 +47,6 @@ create table public.contacts (
   full_name text null,
   updated_at timestamp with time zone null default now(),
   national_id text null,
-  avatar_attachment_id uuid null,
   avatar_updated_at timestamp with time zone null,
   is_local boolean null default true,
   display_name_override text null,
@@ -88,9 +54,9 @@ create table public.contacts (
   sync_status text null default 'local'::text,
   is_deleted boolean not null default false,
   deleted_at timestamp with time zone null,
+  contact_avatar_url text null,
   constraint contacts_pkey primary key (id),
   constraint contacts_national_id_org_key unique (organization_id, national_id),
-  constraint contacts_avatar_attachment_id_fkey foreign KEY (avatar_attachment_id) references contact_attachments (id) on delete set null,
   constraint contacts_linked_user_id_fkey foreign KEY (linked_user_id) references users (id) on delete set null,
   constraint contacts_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
 ) TABLESPACE pg_default;

@@ -669,7 +669,7 @@ export const contacts = pgTable("contacts", {
   notes: text("notes"),
   national_id: text("national_id"),
   linked_user_id: uuid("linked_user_id"),
-  avatar_attachment_id: uuid("avatar_attachment_id"),
+  contact_avatar_url: text("contact_avatar_url"),
   avatar_updated_at: timestamp("avatar_updated_at", { withTimezone: true }),
   is_local: boolean("is_local").default(true),
   display_name_override: text("display_name_override"),
