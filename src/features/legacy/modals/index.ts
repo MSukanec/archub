@@ -1,4 +1,3 @@
-export { ProjectModal } from './ProjectModal';
 export { GalleryFormModal } from './GalleryFormModal';
 export { DocumentFolderFormModal } from './DocumentFolderFormModal';
 export { DocumentPreviewModal } from './DocumentPreviewModal';

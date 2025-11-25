@@ -66,7 +66,6 @@ export { ProjectForm } from './forms/ProjectForm';
 
 // ============ LEGACY MODALS (Re-exported for backward compatibility) ============
 // These modals are now in @/features/legacy and will be distributed to appropriate features
-export { ProjectModal } from '@/features/legacy';
 export { GalleryFormModal, DocumentFolderFormModal, DocumentPreviewModal, DocumentUploadFormModal } from '@/features/legacy';
 export { BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal } from '@/features/legacy';
 export { TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
