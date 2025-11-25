@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { TableActionButtons } from '@/components/ui-custom/tables-and-trees/TableActionButtons';
+import { Separator } from '@/components/ui/separator';
 import TaskMaterialsUnitCost from '@/components/construction/TaskMaterialsUnitCost';
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
 import { useTaskMaterials } from '@/hooks/use-generated-tasks';
@@ -381,13 +381,51 @@ const TaskActionButtons = ({
   ) : null;
 
   return (
-    <TableActionButtons
-      onEdit={onDuplicateTask ? () => onDuplicateTask(task) : undefined}
-      onDelete={onDeleteTask ? () => onDeleteTask(task.id) : undefined}
-      editLabel="Duplicar"
-      deleteLabel="Eliminar"
-      additionalButtons={[viewButton]}
-    />
+    <div className="flex items-center gap-1">
+      {/* View button (outside popover) */}
+      {viewButton}
+      
+      {/* Actions popover with duplicar and eliminar */}
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            title="Más acciones"
+          >
+            <GripVertical className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-48 p-0" align="end">
+          <div className="space-y-1 p-2">
+            {onDuplicateTask && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDuplicateTask(task)}
+                className="w-full justify-start gap-2 h-8"
+              >
+                <Copy className="h-4 w-4" />
+                Duplicar
+              </Button>
+            )}
+            {onDuplicateTask && onDeleteTask && <Separator className="my-1" />}
+            {onDeleteTask && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDeleteTask(task.id)}
+                className="w-full justify-start gap-2 h-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+              >
+                <Trash2 className="h-4 w-4" />
+                Eliminar
+              </Button>
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 };
 
