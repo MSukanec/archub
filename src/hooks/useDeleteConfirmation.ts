@@ -20,7 +20,7 @@ interface UseDeleteConfirmationOptions {
 }
 
 export function useDeleteConfirmation() {
-  const { openModal, closeModal } = useGlobalModalStore()
+  const { openModal, popModal } = useGlobalModalStore()
 
   const showDeleteConfirmation = (options: UseDeleteConfirmationOptions) => {
     openModal('delete-confirmation', {
@@ -40,6 +40,6 @@ export function useDeleteConfirmation() {
 
   return {
     showDeleteConfirmation,
-    closeDeleteConfirmation: closeModal
+    closeDeleteConfirmation: popModal
   }
 }

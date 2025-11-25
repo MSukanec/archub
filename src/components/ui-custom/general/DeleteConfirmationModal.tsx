@@ -170,10 +170,10 @@ function DeleteContent({
 export default function DeleteConfirmationModal({
   modalData,
   onClose,
-  onConfirm,
-  onDelete,
-  onReplace,
-  isLoading = false
+  onConfirm: confirmProp,
+  onDelete: deleteProp,
+  onReplace: replaceProp,
+  isLoading: isLoadingProp = false
 }: DeleteConfirmationModalProps) {
   const { popModal } = useGlobalModalStore()
   
@@ -186,6 +186,12 @@ export default function DeleteConfirmationModal({
   const destructiveActionText = modalData?.destructiveActionText || 'Eliminar'
   const replacementOptions = modalData?.replacementOptions || []
   const currentCategoryId = modalData?.currentCategoryId
+  
+  // Leer callbacks de modalData (cuando se pasa a través de openModal)
+  const onConfirm = confirmProp || (modalData as any)?.onConfirm
+  const onDelete = deleteProp || (modalData as any)?.onDelete
+  const onReplace = replaceProp || (modalData as any)?.onReplace
+  const isLoading = isLoadingProp || (modalData as any)?.isLoading || false
 
   const [actionType, setActionType] = useState<'delete' | 'replace'>('delete')
   const [selectedReplacementId, setSelectedReplacementId] = useState<string>('')
