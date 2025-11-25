@@ -17,7 +17,8 @@ export { ModalStepHeader } from './foundation/ModalStepHeader';
 export { ModalStepFooter } from './foundation/ModalStepFooter';
 export { ModalSectionButton } from './foundation/ModalSectionButton';
 export { 
-  DrawerBase, 
+  DrawerBase,
+  type DrawerBaseProps,
   type DrawerSnapPoint 
 } from './foundation/DrawerBase';
 
@@ -37,23 +38,41 @@ export {
   useIsModalOpen,
   useModalStack,
   useModalStackSize,
+  useCanCloseModal,
   type ModalStackItem
 } from './state/globalModalStore';
+
+/**
+ * @deprecated Use local useState in modals instead. See panelStore.ts for migration guide.
+ */
 export { useModalPanelStore } from './state/panelStore';
 
-// Factory & Registry (Modal rendering and registration)
-export { ModalFactory } from './factory/ModalFactory';
+// Provider & Container (New in v2.0)
+export { ModalProvider } from './ModalProvider';
+export { ModalContainer } from './ModalContainer';
+
+// Registry (Modal registration and lookup)
 export { 
   registerModal, 
   getModal, 
   hasModal, 
-  getRegisteredModals, 
+  getRegisteredModals,
+  getModalsByCategory,
   modalRegistry,
-  type BaseModalProps,
-  type ModalRegistryEntry
+  type ModalConfig,
+  type ModalRegistryEntry,
+  type ModalCategory,
+  type ModalType,
+  type ModalData
 } from './factory/registry';
 export { initializeModalRegistry } from './factory/registerModals';
-export * from './factory/types';
+
+// Types
+export type { 
+  StepModalConfig,
+  StepFooterAction,
+  StepModalFooterConfig
+} from './factory/types';
 
 // Utilities (Error handling, readiness, etc.)
 export * from './utils/modal-readiness';

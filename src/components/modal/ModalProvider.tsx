@@ -8,7 +8,7 @@ initializeModalRegistry();
 
 export function ModalProvider() {
   const stack = useModalStack();
-  const { blockCloseForDirtyForms } = useGlobalModalStore();
+  const { blockCloseForDirtyForms, popModal } = useGlobalModalStore();
 
   useEffect(() => {
     if (stack.length > 0) {
@@ -37,12 +37,15 @@ export function ModalProvider() {
           e.preventDefault();
           return;
         }
+        
+        e.preventDefault();
+        popModal();
       }
     };
 
     document.addEventListener('keydown', handleGlobalEsc, true);
     return () => document.removeEventListener('keydown', handleGlobalEsc, true);
-  }, [stack, blockCloseForDirtyForms]);
+  }, [stack, blockCloseForDirtyForms, popModal]);
 
   if (stack.length === 0) return null;
 

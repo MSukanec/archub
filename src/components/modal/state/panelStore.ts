@@ -11,6 +11,20 @@ interface ModalPanelState {
   resetToView: () => void;
 }
 
+/**
+ * @deprecated This store is deprecated and will be removed in a future version.
+ * Modals should manage their own panel state using useState internally.
+ * 
+ * Migration path:
+ * 1. Move panel state to local useState in your modal component
+ * 2. Pass panel state down to child components as props
+ * 3. Remove useModalPanelStore import
+ * 
+ * Example:
+ * ```tsx
+ * const [currentPanel, setPanel] = useState<'view' | 'edit' | 'subform'>('view');
+ * ```
+ */
 export const useModalPanelStore = create<ModalPanelState>((set) => ({
   currentPanel: 'view',
   currentSubform: null,

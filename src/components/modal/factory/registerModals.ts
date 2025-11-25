@@ -1,4 +1,4 @@
-import { registerModal } from './registry';
+import { registerModal, ModalConfig } from './registry';
 
 import { MemberFormModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, PartnerModal, OrganizationFormModal, ProfileOrganizationFormModal } from '@/features/organization';
 import { ProjectModal, GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/projects';
@@ -21,101 +21,129 @@ import { GeneralCostsPaymentModal } from '@/features/general-costs/modals/Genera
 import { GeneralCostsPaymentViewModal } from '@/features/general-costs/modals/GeneralCostsPaymentViewModal';
 import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal } from '@/features/learning';
 
+const organizationConfig: ModalConfig = { category: 'organization', size: 'md' };
+const projectConfig: ModalConfig = { category: 'project', size: 'lg' };
+const financeConfig: ModalConfig = { category: 'finance', size: 'lg' };
+const learningConfig: ModalConfig = { category: 'learning', size: 'lg' };
+const adminConfig: ModalConfig = { category: 'admin', size: 'md' };
+const generalConfig: ModalConfig = { category: 'general', size: 'md' };
+
+let initialized = false;
+
 export function initializeModalRegistry(): void {
-  registerModal('member', MemberFormModal as any, { category: 'organization' });
-  registerModal('partner', PartnerModal as any, { category: 'organization' });
-  registerModal('board', BoardFormModal as any, { category: 'organization' });
-  registerModal('card', CardFormModal as any, { category: 'organization' });
-  registerModal('list', ListFormModal as any, { category: 'organization' });
-  registerModal('organization', OrganizationFormModal as any, { category: 'organization' });
-  registerModal('profile-organization', ProfileOrganizationFormModal as any, { category: 'organization' });
-  registerModal('organization-movement-concept', OrganizationMovementConceptFormModal as any, { category: 'organization' });
+  if (initialized) return;
+  initialized = true;
+
+  registerModal('member', MemberFormModal as any, organizationConfig);
+  registerModal('partner', PartnerModal as any, organizationConfig);
+  registerModal('board', BoardFormModal as any, organizationConfig);
+  registerModal('card', CardFormModal as any, organizationConfig);
+  registerModal('list', ListFormModal as any, organizationConfig);
+  registerModal('organization', OrganizationFormModal as any, { ...organizationConfig, size: 'lg' });
+  registerModal('profile-organization', ProfileOrganizationFormModal as any, organizationConfig);
+  registerModal('organization-movement-concept', OrganizationMovementConceptFormModal as any, organizationConfig);
   
-  registerModal('project', ProjectModal as any, { category: 'project' });
-  registerModal('gallery', GalleryFormModal as any, { category: 'project' });
-  registerModal('document-folder', DocumentFolderFormModal as any, { category: 'project' });
-  registerModal('document-upload', DocumentUploadFormModal as any, { category: 'project' });
-  registerModal('budget', BudgetFormModal as any, { category: 'project' });
-  registerModal('budget-task-bulk-add', BudgetTaskFormModal as any, { category: 'project' });
-  registerModal('construction-phase', ConstructionPhaseFormModal as any, { category: 'project' });
-  registerModal('construction-task', TaskMultiModal as any, { category: 'project' });
-  registerModal('construction-task-schedule', ConstructionTaskScheduleModal as any, { category: 'project' });
-  registerModal('dependency-connection', DependencyConnectionModal as any, { category: 'project' });
-  registerModal('budget-item', BudgetItemModal as any, { category: 'project' });
-  registerModal('task', TaskModal as any, { category: 'project' });
-  registerModal('analysis-task', TaskModal as any, { category: 'project' });
-  registerModal('task-category', TaskCategoryFormModal as any, { category: 'project' });
-  registerModal('task-division', TaskDivisionFormModal as any, { category: 'project' });
-  registerModal('task-parameter', TaskParameterFormModal as any, { category: 'project' });
-  registerModal('task-parameter-option', TaskParameterOptionFormModal as any, { category: 'project' });
-  registerModal('parameter-visibility-config', ParameterVisibilityConfigModal as any, { category: 'project' });
-  registerModal('add-parameter-to-canvas', AddParameterToCanvasModal as any, { category: 'project' });
-  registerModal('insurance', InsuranceFormModal as any, { category: 'project' });
-  registerModal('renew-insurance', RenewInsuranceFormModal as any, { category: 'project' });
-  registerModal('indirect', IndirectModal as any, { category: 'project' });
-  registerModal('cost-modal', CostModal as any, { category: 'project' });
-  registerModal('projectType', ProjectTypeModal as any, { category: 'project' });
-  registerModal('projectModality', ProjectModalityModal as any, { category: 'project' });
+  registerModal('project', ProjectModal as any, { ...projectConfig, size: 'xl' });
+  registerModal('gallery', GalleryFormModal as any, projectConfig);
+  registerModal('document-folder', DocumentFolderFormModal as any, { ...projectConfig, size: 'md' });
+  registerModal('document-upload', DocumentUploadFormModal as any, projectConfig);
+  registerModal('budget', BudgetFormModal as any, projectConfig);
+  registerModal('budget-task-bulk-add', BudgetTaskFormModal as any, projectConfig);
+  registerModal('construction-phase', ConstructionPhaseFormModal as any, { ...projectConfig, size: 'md' });
+  registerModal('construction-task', TaskMultiModal as any, { ...projectConfig, size: 'xl' });
+  registerModal('construction-task-schedule', ConstructionTaskScheduleModal as any, projectConfig);
+  registerModal('dependency-connection', DependencyConnectionModal as any, { ...projectConfig, size: 'md' });
+  registerModal('budget-item', BudgetItemModal as any, projectConfig);
+  registerModal('task', TaskModal as any, projectConfig);
+  registerModal('analysis-task', TaskModal as any, projectConfig);
+  registerModal('task-category', TaskCategoryFormModal as any, { ...projectConfig, size: 'md' });
+  registerModal('task-division', TaskDivisionFormModal as any, { ...projectConfig, size: 'md' });
+  registerModal('task-parameter', TaskParameterFormModal as any, { ...projectConfig, size: 'md' });
+  registerModal('task-parameter-option', TaskParameterOptionFormModal as any, { 
+    ...projectConfig, 
+    size: 'sm',
+    preventCloseOnEsc: true,
+  });
+  registerModal('parameter-visibility-config', ParameterVisibilityConfigModal as any, { 
+    ...projectConfig, 
+    size: 'sm',
+    preventCloseOnEsc: true,
+  });
+  registerModal('add-parameter-to-canvas', AddParameterToCanvasModal as any, { 
+    ...projectConfig, 
+    size: 'sm',
+    preventCloseOnEsc: true,
+  });
+  registerModal('insurance', InsuranceFormModal as any, projectConfig);
+  registerModal('renew-insurance', RenewInsuranceFormModal as any, projectConfig);
+  registerModal('indirect', IndirectModal as any, projectConfig);
+  registerModal('cost-modal', CostModal as any, projectConfig);
+  registerModal('projectType', ProjectTypeModal as any, { ...projectConfig, size: 'md' });
+  registerModal('projectModality', ProjectModalityModal as any, { ...projectConfig, size: 'md' });
   
-  registerModal('contact', ContactFormModal as any, { category: 'general' });
+  registerModal('contact', ContactFormModal as any, { ...generalConfig, size: 'lg' });
   
-  registerModal('project-client', ProjectClientModal as any, { category: 'project' });
-  registerModal('client-payment', ClientPaymentsModal as any, { category: 'finance' });
-  registerModal('installment', ClientPaymentsModal as any, { category: 'finance' });
-  registerModal('client-commitment', ClientCommitmentModal as any, { category: 'finance' });
-  registerModal('clientRole', ClientRoleModal as any, { category: 'general' });
+  registerModal('project-client', ProjectClientModal as any, projectConfig);
+  registerModal('client-payment', ClientPaymentsModal as any, financeConfig);
+  registerModal('installment', ClientPaymentsModal as any, financeConfig);
+  registerModal('client-commitment', ClientCommitmentModal as any, financeConfig);
+  registerModal('clientRole', ClientRoleModal as any, generalConfig);
   
-  registerModal('movement', MovementModal as any, { category: 'finance' });
-  registerModal('movements-view', MovementModalView as any, { category: 'finance' });
-  registerModal('movement-concept', MovementConceptFormModal as any, { category: 'finance' });
-  registerModal('movement-import', MovementImportStepModal as any, { category: 'finance' });
-  registerModal('payment', PaymentFormModal as any, { category: 'finance' });
-  registerModal('bank-transfer-receipt', BankTransferReceiptModal as any, { category: 'finance' });
+  registerModal('movement', MovementModal as any, financeConfig);
+  registerModal('movements-view', MovementModalView as any, financeConfig);
+  registerModal('movement-concept', MovementConceptFormModal as any, { ...financeConfig, size: 'md' });
+  registerModal('movement-import', MovementImportStepModal as any, { ...financeConfig, size: 'xl' });
+  registerModal('payment', PaymentFormModal as any, financeConfig);
+  registerModal('bank-transfer-receipt', BankTransferReceiptModal as any, { ...financeConfig, size: 'md' });
   
-  registerModal('general-costs', GeneralCostsModal as any, { category: 'finance' });
-  registerModal('general-costs-payment', GeneralCostsPaymentModal as any, { category: 'finance' });
-  registerModal('general-costs-payment-view', GeneralCostsPaymentViewModal as any, { category: 'finance' });
+  registerModal('general-costs', GeneralCostsModal as any, { ...financeConfig, size: 'md' });
+  registerModal('general-costs-payment', GeneralCostsPaymentModal as any, financeConfig);
+  registerModal('general-costs-payment-view', GeneralCostsPaymentViewModal as any, financeConfig);
   
-  registerModal('material-form', MaterialFormModal as any, { category: 'project' });
-  registerModal('material-category-form', MaterialCategoryFormModal as any, { category: 'project' });
-  registerModal('brand-form', BrandFormModal as any, { category: 'project' });
-  registerModal('product-form', AdminProductModal as any, { category: 'project' });
-  registerModal('unit-presentation-form', UnitPresentationFormModal as any, { category: 'project' });
-  registerModal('provider-product', ProviderProductModal as any, { category: 'project' });
-  registerModal('custom-product', ProductModal as any, { category: 'project' });
+  registerModal('material-form', MaterialFormModal as any, projectConfig);
+  registerModal('material-category-form', MaterialCategoryFormModal as any, { ...projectConfig, size: 'md' });
+  registerModal('brand-form', BrandFormModal as any, { ...projectConfig, size: 'md' });
+  registerModal('product-form', AdminProductModal as any, projectConfig);
+  registerModal('unit-presentation-form', UnitPresentationFormModal as any, { ...projectConfig, size: 'md' });
+  registerModal('provider-product', ProviderProductModal as any, projectConfig);
+  registerModal('custom-product', ProductModal as any, projectConfig);
   
-  registerModal('attendance', PersonnelAttendanceModal as any, { category: 'project' });
-  registerModal('personnel', PersonnelAddModal as any, { category: 'project' });
-  registerModal('personnel-data', PersonnelDataModal as any, { category: 'project' });
-  registerModal('personnelRates', PersonnelRatesModal as any, { category: 'project' });
-  registerModal('labor-type-form', AdminLaborModal as any, { category: 'admin' });
+  registerModal('attendance', PersonnelAttendanceModal as any, projectConfig);
+  registerModal('personnel', PersonnelAddModal as any, projectConfig);
+  registerModal('personnel-data', PersonnelDataModal as any, projectConfig);
+  registerModal('personnelRates', PersonnelRatesModal as any, projectConfig);
+  registerModal('labor-type-form', AdminLaborModal as any, adminConfig);
   
-  registerModal('subcontract', SubcontractFormModal as any, { category: 'project' });
-  registerModal('subcontract-bid', SubcontractBidFormModal as any, { category: 'project' });
-  registerModal('subcontract-award', SubcontractAwardModal as any, { category: 'project' });
-  registerModal('subcontract-task', SubcontractTaskFormModal as any, { category: 'project' });
+  registerModal('subcontract', SubcontractFormModal as any, { ...projectConfig, size: 'xl' });
+  registerModal('subcontract-bid', SubcontractBidFormModal as any, projectConfig);
+  registerModal('subcontract-award', SubcontractAwardModal as any, projectConfig);
+  registerModal('subcontract-task', SubcontractTaskFormModal as any, projectConfig);
   
-  registerModal('site-log', SiteLogModal as any, { category: 'project' });
-  registerModal('site-log-view', SiteLogModalView as any, { category: 'project' });
-  registerModal('siteLogType', SiteLogTypeModal as any, { category: 'admin' });
+  registerModal('site-log', SiteLogModal as any, { ...projectConfig, size: 'xl' });
+  registerModal('site-log-view', SiteLogModalView as any, { ...projectConfig, size: 'xl' });
+  registerModal('siteLogType', SiteLogTypeModal as any, adminConfig);
   
-  registerModal('course', CourseModal as any, { category: 'learning' });
-  registerModal('course-module', CourseModuleFormModal as any, { category: 'learning' });
-  registerModal('lesson', LessonFormModal as any, { category: 'learning' });
-  registerModal('course-enrollment', CourseEnrollmentModal as any, { category: 'learning' });
-  registerModal('coupon', CouponFormModal as any, { category: 'learning' });
-  registerModal('payment-method', PaymentMethodModal as any, { category: 'learning' });
+  registerModal('course', CourseModal as any, { ...learningConfig, size: 'xl' });
+  registerModal('course-module', CourseModuleFormModal as any, learningConfig);
+  registerModal('lesson', LessonFormModal as any, learningConfig);
+  registerModal('course-enrollment', CourseEnrollmentModal as any, learningConfig);
+  registerModal('coupon', CouponFormModal as any, learningConfig);
+  registerModal('payment-method', PaymentMethodModal as any, { ...learningConfig, size: 'md' });
   
-  registerModal('admin-user', UserFormModal as any, { category: 'admin' });
-  registerModal('admin-organization', OrganizationFormModal as any, { category: 'admin' });
-  registerModal('changelog-entry', ChangelogFormModal as any, { category: 'admin' });
-  registerModal('notification', NotificationFormModal as any, { category: 'admin' });
-  registerModal('announcement', AnnouncementFormModal as any, { category: 'admin' });
-  registerModal('support-conversation-start', SupportConversationStartModal as any, { category: 'admin' });
-  registerModal('plan', PlanFormModal as any, { category: 'admin' });
-  registerModal('plan-price', PlanPriceFormModal as any, { category: 'admin' });
+  registerModal('admin-user', UserFormModal as any, adminConfig);
+  registerModal('admin-organization', OrganizationFormModal as any, { ...adminConfig, size: 'lg' });
+  registerModal('changelog-entry', ChangelogFormModal as any, adminConfig);
+  registerModal('notification', NotificationFormModal as any, adminConfig);
+  registerModal('announcement', AnnouncementFormModal as any, adminConfig);
+  registerModal('support-conversation-start', SupportConversationStartModal as any, adminConfig);
+  registerModal('plan', PlanFormModal as any, adminConfig);
+  registerModal('plan-price', PlanPriceFormModal as any, adminConfig);
   
-  registerModal('pdf-exporter', PDFExporterModal as any, { category: 'general' });
+  registerModal('pdf-exporter', PDFExporterModal as any, { ...generalConfig, size: 'full' });
   
-  registerModal('delete-confirmation', DeleteConfirmationModal as any, { category: 'general' });
+  registerModal('delete-confirmation', DeleteConfirmationModal as any, { 
+    ...generalConfig, 
+    size: 'sm',
+    preventCloseOnBackdrop: true,
+  });
 }

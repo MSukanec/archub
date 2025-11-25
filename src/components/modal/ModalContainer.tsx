@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ModalRegistryEntry } from './factory/registry';
 import { ModalStackItem, useGlobalModalStore } from './state/globalModalStore';
-import { ModalLayout } from './foundation/ModalLayout';
 import { DrawerBase } from './foundation/DrawerBase';
 
 interface ModalContainerProps {
@@ -67,15 +66,7 @@ export function ModalContainer({ entry, modal, zIndex, stackIndex }: ModalContai
 
   return (
     <div style={{ position: 'relative', zIndex }}>
-      <ModalLayout
-        onClose={handleClose}
-        size={config.size}
-        preventClickOutsideClose={config.preventCloseOnBackdrop}
-        preventEscapeClose={config.preventCloseOnEsc}
-        stackIndex={stackIndex}
-      >
-        <Component {...modalProps} />
-      </ModalLayout>
+      <Component {...modalProps} />
     </div>
   );
 }
