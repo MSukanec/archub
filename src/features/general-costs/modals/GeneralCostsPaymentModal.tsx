@@ -236,7 +236,7 @@ export function GeneralCostsPaymentModal({ modalData, onClose }: GeneralCostsPay
             await uploadFile(fileInput.file, {
               entity: 'general_cost_payment_attachment',
               organization_id: userData.organization.id,
-              user_id: userData.user.id,
+              created_by_member_id: currentMember.id,
               link_to: {
                 general_cost_payment_id: savedPaymentId,
               },

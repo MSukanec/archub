@@ -1,17 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { getGeneralCostPaymentFiles } from '../services/getGeneralCostPaymentFiles'
 
 export function useGeneralCostPaymentMedia(paymentId: string | undefined) {
+  const { data: userData } = useCurrentUser()
+  const organizationId = userData?.organization?.id
+
   return useQuery({
-    queryKey: ['general-cost-payment-media', paymentId],
+    queryKey: ['general-cost-payment-media', paymentId, organizationId],
     queryFn: async () => {
-      if (!paymentId || !supabase) return []
+      if (!paymentId || !organizationId) return []
       
-      // NOTE: Currently media_links doesn't have general_cost_payment_id column
-      // TODO: Enable this query once column is added to database
-      console.log('[DEBUG] Skipping media files fetch - general_cost_payment_id column not in database')
-      return []
+      return await getGeneralCostPaymentFiles(paymentId, organizationId)
     },
-    enabled: !!paymentId
+    enabled: !!paymentId && !!organizationId
   })
 }

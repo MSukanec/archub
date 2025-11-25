@@ -14,21 +14,7 @@ Preferred communication style: Simple, everyday language.
 - **Dynamic Color System**: Project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors and organic radial gradients.
 - **Modals**: Responsive Dialog component with standardized patterns using `FormModalLayout`, React Hook Form with Zod validation.
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub with a two-level sidebar system.
-- **Layout Architecture (Nov 24, 2024)**: 
-  - **Migration to Experience-Based Layouts**: Successfully migrated from device-based structure (`src/layout/desktop/`, `src/layout/mobile/`, `src/layout/public/`) to experience-based organization (`src/layouts/`). This aligns with Feature-Sliced Design principles and product domains. Migration completed with 95+ files updated and zero compatibility shims.
-  - **Dashboard Layout**: Implemented in `src/layouts/dashboard/` for authenticated app experiences:
-    - `components/Sidebar/`: LeftSidebar, RightSidebar, ButtonSidebar, SidebarIconButton
-    - `components/Topbar/`: Header, Footer, ActionBar, ProjectSelectorButton, OrganizationSelectorButton
-    - `components/MobileMenu/`: MobileMenu, MobileMenuButton, HeaderMobile, useMobileMenuStore
-    - `components/MobileActionBar/`: ActionBarMobile, ActionBarMobileContext, SwipeableCard, SwipeContainer
-    - Core files: DashboardLayout.tsx (main wrapper), PageLayout.tsx (page-level layout), HeroLayout.tsx (pages with full-width hero sections), layoutWidth.ts (utilities)
-  - **Marketing Layout**: Implemented in `src/layouts/marketing/` for public-facing pages (landing, blog, course catalog):
-    - `components/Header.tsx`: Unified transparent navbar with `bg-black/30` backdrop-blur, white text/buttons for optimal contrast over any background (light or dark)
-    - `components/Footer.tsx`: Comprehensive footer with SEO-friendly links
-    - MarketingLayout.tsx: Main layout with SEO meta tags, scroll handling, hero slots, sticky content support
-  - **Barrel Exports**: Centralized `src/layouts/index.ts` for clean imports (`import { DashboardLayout, MarketingLayout, ActionBar, MobileMenu } from "@/layouts"`)
-  - **Migration Status**: ✅ Complete. Legacy `src/layout/desktop/`, `src/layout/mobile/`, `src/layout/public/`, and `src/layout/course-landing/` folders removed. All 95+ consumer files successfully migrated to import from `@/layouts`. Application running without errors.
-  - **Future Roadmap**: Additional layout types planned: `root/` (global providers), `auth/` (login/register), `workspace/` (viewer mode with minimal UI)
+- **Layout Architecture**: Migrated to experience-based layouts (`src/layouts/`) including Dashboard Layout (authenticated app) and Marketing Layout (public-facing pages).
 - **Content Theming System**: Unified CSS theming layer with dynamic background switching via `useContentBackground` hook.
 
 ### Technical Implementations
@@ -42,40 +28,23 @@ Preferred communication style: Simple, everyday language.
 ### System Design Choices
 - **Module Architecture**: Feature-Sliced Design adopted for core modules (PROJECTS, SUBCONTRACTS, PERSONNEL, CLIENTS, FINANCES, LEARNING, MEDIA, SITELOG, etc.), ensuring strict separation of concerns.
 - **Multi-tenancy**: Services consistently filter data by `organization_id`.
-- **Soft Delete**: Implemented for key entities (organizations, contacts, projects, etc.) with all SELECT queries filtering `is_deleted = false`.
-- **Core Feature Management**: Comprehensive CRUD operations and related functionalities are implemented using Feature-Sliced Design for Projects, Subcontracts, Personnel, Materials, Financial, Contacts, Sitelog, Project Types, and Project Modalities. This includes mutation services via Express API and read operations via Supabase/API, ensuring authentication, validation, and consistent design patterns.
-- **Learning Module**: Supports course management, video integration, progress tracking, notes, enrollment, pricing, and payment integration following a strict architectural pattern.
-  - **Course Data Architecture**: Split between `COURSES` table (core data: title, price, visibility) and `COURSE_DETAILS` table (marketing data: instructor info, SEO, badges). Backend's `splitCourseData()` handles automatic data distribution.
-  - **Course Soft Delete**: Implemented with `is_deleted` and `deleted_at` columns. All queries filter `is_deleted=false`, DELETE operations use UPDATE to set `is_deleted=true`.
-  - **Course Media Management**: Course images (cover, instructor photo, OG image) managed exclusively via `MEDIA_LINKS` table. Legacy URL columns removed from schema.
-  - **Course Mutations**: Admin course create/update operations route through `/api/admin/courses` REST endpoint (not direct Supabase) to ensure proper data splitting between tables.
-- **AI Assistant**: Implemented with a clean frontend/backend separation. The frontend uses API services and React Query hooks for chat interaction, while the backend orchestrates context-aware GPT-4o powered responses using specialized tools for finance, organization, and project data.
+- **Soft Delete**: Implemented for key entities with all SELECT queries filtering `is_deleted = false`.
+- **Core Feature Management**: Comprehensive CRUD operations for Projects, Subcontracts, Personnel, Materials, Financial, Contacts, Sitelog, Project Types, and Project Modalities using Feature-Sliced Design.
+- **Learning Module**: Supports course management, video integration, progress tracking, notes, enrollment, pricing, and payment integration with a split data architecture (`COURSES`, `COURSE_DETAILS`) and soft delete.
+- **AI Assistant**: Clean frontend/backend separation, orchestrating context-aware GPT-4o powered responses using specialized tools.
 - **Payment Architecture**: Unified `payments` table supporting multiple gateways and centralized checkout.
-- **Access Control**: `PlanRestricted` component system provides comprehensive access control for organization membership and subscription plans (FREE, PRO, TEAMS, ENTERPRISE).
+- **Access Control**: `PlanRestricted` component system provides comprehensive access control for organization membership and subscription plans.
 - **Cost System**: Three-tier cost system (Seencel Cost, Organization Cost, Independent Cost).
-- **Media Uploads**: Unified `UploadImageAndShowField` component for project image uploads with dual-mode support, size limits, drag-and-drop, and inline editing. Client payments now use a scalable `MEDIA_FILES` + `MEDIA_LINKS` architecture for attachments.
-- **Image Compression System**: Client-side automatic image compression using `browser-image-compression` with 6 predefined presets (project-cover, sitelog-photo, course-cover, avatar, document, default). Reduces bandwidth by ~60-80%, speeds up uploads, and cuts storage costs. Implemented across all upload components with robust error handling and size validation. See `prompts/Upload.md` for full documentation.
-- **3-Bucket Storage Architecture**: Organized file storage across three Supabase buckets (public-assets, private-assets, social-assets) with automatic routing by entity type. Metadata persistence (bucket + path) enables on-demand signed URL generation, preventing URL expiration issues. Centralized uploadFile() function handles compression, routing, and database transactions. All project images now use metadata-based storage with automatic URL refresh. See `prompts/Upload.md` for complete architecture documentation.
-- **General Costs Payment Attachments (Nov 24, 2024)**: Migrated from legacy `file_url` column to unified `media_files` + `media_links` system for 1-to-many attachment support. Implemented `UploadMultiFileField` component supporting PDFs, images, Word, Excel with 2MB max per file and automatic image compression. Entity type `general_cost_payment_attachment` stored in private-assets bucket at `organizations/{org_id}/finance/general-costs/attachments/`. Private files use signed URLs (1-hour expiration) for secure access. Cache invalidation after uploads/deletes ensures UI reflects changes immediately.
-- **Public Media Access**: Course images (cover, instructor, OG) use `is_public` flag in `media_links` for public accessibility. Course media automatically marked as public, enabling display on unauthenticated landing pages while keeping organizational media protected.
-- **Course Module Images (Nov 24, 2024)**: Course module images/GIFs integrated into unified storage system using 'course_module_image' entity type. Stored in public-assets bucket at `marketplace/courses/{course_id}/module-images/`. Path builder extended to support `{course_id}` placeholder. Images display on course landing pages via existing media_links query. Upload only available in edit mode after module creation to ensure proper ID association.
-- **Project Selector Filtering**: The header project selector (`ProjectSelectorButton`) exclusively displays projects with `status='active'` to enhance usability in large portfolios.
-- **Project Activity Tracking (Nov 24, 2024)**: `last_active_at` timestamp updated automatically when projects are selected via backend API endpoint `PUT /api/projects/:id/last-active`. Implemented fire-and-forget pattern to avoid blocking UX. Updates triggered from 4 places: ProjectContextInitializer (auto-load), ProjectActivesTab, ProjectListTab, and OrganizationDashboard.
-- **Auto-Active New Projects (Nov 24, 2024)**: When creating new projects, system automatically sets them as `last_project_id` in `user_organization_preferences`, making them immediately active without manual selection. Updates context and `last_active_at` timestamp during project creation.
-- **Hooks Consolidation (Nov 2024)**: Systematic consolidation of React hooks according to Feature-Sliced Design principles. Status: 43% consolidated (21 global hooks + 15 migrated to features), 57% documented for future migration. Eliminated 2 duplicate hooks, migrated hooks to existing features (contacts, projects, materials, personnel, general-costs). Remaining ~50 hooks documented for future feature creation (finances, tasks, design, construction, budgets, kanban, partners). All feature-specific hooks converted to re-exports from their respective features, maintaining backward compatibility. See `/tmp/resumen-consolidacion-hooks.md` for complete documentation.
-- **HeroLayout Pattern (Nov 24, 2024)**: Created specialized `HeroLayout` component for pages featuring full-width hero sections (Type B pages). Architecture:
-  - **Desktop**: Hero (fullwidth, no padding) → Content (with sidebar padding)
-  - **Mobile**: Hero (200px) → Content (with normal padding)
-  - **Features**: `hideAIChat` prop to disable FloatingAIChat on specific pages (e.g., Learning Dashboard, Project Dashboard)
-  - **Pages using HeroLayout**: Learning Dashboard (`src/pages/learning/dashboard/LearningDashboard.tsx`), Project Dashboard (`src/pages/project/Project.tsx`)
-- **Project Dashboard Migration (Nov 24, 2024)**: 
-  - Moved from `src/pages/professional/project/dashboard/` to `src/pages/project/Project.tsx`
-  - Consolidated ProjectDashboard.tsx + Project.tsx into single Project.tsx component
-  - Replaced DashboardLayout with HeroLayout for full-width project hero section
-  - Hero includes: project image (dynamic background), project name, status badge (En Proceso), current time, and date - all styled responsively for mobile/desktop
-  - KPI cards remain below hero section unchanged
-  - Removed old dashboard directory structure
-- **Sitelog Attachments Migration (Nov 24, 2024)**: Migrated sitelog photo/video attachments from legacy `project_media` table to unified `media_files` + `media_links` system. Entity type `sitelog_attachment` stored in private-assets bucket at `organizations/{org_id}/projects/{project_id}/sitelogs/`. Both `getSiteLogFiles` and `getSitelogGalleryFiles` now support signed URLs (1-hour expiration) for secure access. Uses `uploadFile` from unified storage instead of legacy `uploadMediaFileV2`. Compression preset: `sitelog-photo` for images.
+- **Media Uploads**: Unified `UploadImageAndShowField` component for project image uploads and `UploadMultiFileField` for general attachments. Uses a scalable `MEDIA_FILES` + `MEDIA_LINKS` architecture.
+- **Image Compression System**: Client-side automatic image compression using `browser-image-compression` with 6 predefined presets.
+- **3-Bucket Storage Architecture**: Organized file storage across three Supabase buckets (public-assets, private-assets, social-assets) with automatic routing and metadata persistence for on-demand signed URL generation.
+- **Public Media Access**: `is_public` flag in `media_links` allows public accessibility for course images while protecting organizational media.
+- **Project Selector Filtering**: Header project selector displays only `active` projects.
+- **Project Activity Tracking**: `last_active_at` timestamp updated automatically when projects are selected or newly created via a fire-and-forget backend API endpoint.
+- **Hooks Consolidation**: Systematic consolidation of React hooks according to Feature-Sliced Design principles.
+- **HeroLayout Pattern**: Specialized `HeroLayout` component for pages with full-width hero sections, used in Learning Dashboard and Project Dashboard.
+- **Sitelog Attachments Migration**: Migrated sitelog photo/video attachments to unified `media_files` + `media_links` system with signed URLs.
+- **General Costs Payment Storage**: Fully integrated general costs payment attachments with unified 3-bucket storage, signed URLs, and proper referential integrity.
 
 ## External Dependencies
 - **Supabase**: Authentication.

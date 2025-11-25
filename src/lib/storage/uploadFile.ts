@@ -85,6 +85,7 @@ export async function uploadFile(
           project_id: context.link_to.project_id,
           contact_id: context.link_to.contact_id,
           general_cost_id: context.link_to.general_cost_id,
+          general_cost_payment_id: context.link_to.general_cost_payment_id,
           site_log_id: context.link_to.sitelog_id,
           course_id: context.link_to.course_id,
           course_module_id: context.link_to.course_module_id,

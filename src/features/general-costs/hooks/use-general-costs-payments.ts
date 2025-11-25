@@ -120,9 +120,9 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
         throw error
       }
 
-      // NOTE: Currently media_links doesn't have a general_cost_payment_id column
-      // Temporarily returning 0 for attachments_count until database schema is updated
-      // TODO: Add general_cost_payment_id column to media_links table
+      // NOTE: media_links now has general_cost_payment_id column
+      // Attachments are loaded dynamically in ViewModal using useGeneralCostPaymentMedia hook
+      // getGeneralCostPaymentFiles handles signed URL generation for private-assets
       return (data || []).map(payment => {
         // Supabase returns single relations as arrays, convert to single objects
         const walletData = Array.isArray(payment.wallet) ? payment.wallet[0] : payment.wallet
@@ -134,7 +134,7 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
             ...walletData,
             wallets: Array.isArray(walletData.wallets) ? walletData.wallets[0] : walletData.wallets
           } : null,
-          attachments_count: 0
+          attachments_count: 0 // TODO: Calculate from media_links count if needed for list view
         }
       }) as unknown as GeneralCostPayment[]
     },
