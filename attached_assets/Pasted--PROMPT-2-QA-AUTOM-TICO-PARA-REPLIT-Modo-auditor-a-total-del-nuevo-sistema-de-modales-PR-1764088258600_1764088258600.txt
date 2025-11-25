@@ -1,0 +1,121 @@
+🧨 PROMPT #2 – QA AUTOMÁTICO PARA REPLIT
+
+(Modo auditoría total del nuevo sistema de modales)
+
+🔵 PROMPT — PEGAR EN REPLIT
+
+Ahora que ya aplicaste el refactor completo del sistema de modales, necesito que actúes como un QA técnico senior de un equipo de una SaaS moderna (tipo Vercel, Linear, Notion o Stripe) y revises módulo por módulo todo lo que se hizo, garantizando que:
+
+No quedó ningún archivo obsoleto
+
+No hay imports rotos
+
+No hay referencias antiguas a ModalFactory ni PanelStore
+
+El nuevo ModalProvider funciona para todos los casos
+
+El store global (globalModalStore) está correctamente integrado
+
+Todos los modals del registry funcionan
+
+Los modals se abren y se cierran correctamente
+
+El stack funciona con múltiples modals apilados
+
+ModalLayout y DrawerBase responden al tamaño de pantalla
+
+No hay warnings ni console errors
+
+Los estilos visuales son consistentes
+
+No hay duplicados en el registro
+
+Los modos view/edit/subform siguen funcionando
+
+El sistema está listo para soportar:
+
+importación masiva (wizard)
+
+IA interna
+
+deep linking (?modal=xxx)
+
+steps dentro del modal
+
+dirty state
+
+varios modals en cascada
+
+🧩 INSTRUCCIONES DE REVISIÓN
+
+Revisá carpeta por carpeta en este orden:
+
+src/components/modal/state/
+
+src/components/modal/foundation/
+
+src/components/modal/registry.ts
+
+src/components/modal/registerModals/*
+
+src/components/modal/ModalProvider.tsx
+
+src/components/modal/ModalContainer.tsx
+
+Todos los componentes que usan openModal, pushModal, popModal
+
+Integración con App.tsx
+
+Integración con Layout
+
+Integración con DrawerBase
+
+🧿 POR CADA ARCHIVO, HACÉ:
+
+Para cada archivo revisado:
+
+detectar si falta algún import
+
+detectar si sobra código
+
+si hay lógica duplicada
+
+si el nombre de archivo es coherente
+
+si cumple las interfaces nuevas
+
+si los props coinciden con lo que usa el Provider
+
+si el z-index y stack funcionan
+
+si el focus-trap funciona
+
+si la accesibilidad está bien (aria-label, aria-describedby)
+
+si el modal se cierra correctamente según flags del registry
+
+si DrawerBase implementa las mismas reglas que ModalLayout
+
+🧨 AL FINAL DEL QA, NECESITO:
+
+Replit debe entregar:
+
+✔ Un reporte completo con:
+
+archivos corregidos
+
+archivos eliminados
+
+código obsoleto
+
+mejoras aplicadas
+
+sugerencias adicionales
+
+✔ Y luego, aplicar todas las correcciones necesarias
+
+(salvo que indiquen cambios estructurales profundos; en ese caso pedime confirmación).
+
+🧨 FIN DEL PROMPT DE QA
+
+Mati, con este segundo prompt Replit te revisa TODO como si fuera un equipo de QA completo.

@@ -270,8 +270,6 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       </Form>
 
       {/* Groups functionality removed - simplified system */}
-
-      {/* Assignment Modal is now handled by ModalFactory */}
     </div>
   );
 
@@ -289,7 +287,7 @@ export function TaskParameterFormModal({ modalData, onClose }: TaskParameterForm
       onLeftClick={onClose}
       rightLabel={parameter ? "Actualizar" : "Guardar"}
       onRightClick={form.handleSubmit(handleSubmit)}
-      isLoading={isSubmitting}
+      isSubmitting={isSubmitting}
     />
   );
 

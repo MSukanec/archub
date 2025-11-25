@@ -561,7 +561,7 @@ export function KanbanBox({ lists, cards, boardId, onCardMove, onCreateList, onD
         </Droppable>
       </DragDropContext>
 
-      {/* Modals are managed by ModalFactory now */}
+      {/* Modals are managed by ModalProvider */}
 
     </>
   );
