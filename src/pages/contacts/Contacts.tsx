@@ -178,7 +178,7 @@ export default function Contacts() {
         'El contacto dejará de aparecer en tus listas. Todos tus datos vinculados (proyectos, pagos, registros) permanecerán intactos y seguros.',
       itemName: contactName,
       destructiveActionText: 'Eliminar contacto',
-      onDelete: () => {
+      onConfirm: () => {
         deleteContactMutation.mutate(
           { contactId: contact.id, organizationId },
           {
