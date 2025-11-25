@@ -139,17 +139,17 @@ export default function Contacts() {
 
   const handleViewContact = (contact: any) => {
     openModal('contact', {
-      editingContact: contact,
-      isEditing: true,
-      initialPanel: 'view',
+      contactId: contact.id,
+      contact: contact,
+      mode: 'view',
     });
   };
 
   const handleEditContact = (contact: any) => {
     openModal('contact', {
-      editingContact: contact,
-      isEditing: true,
-      initialPanel: 'edit',
+      contactId: contact.id,
+      contact: contact,
+      mode: 'edit',
     });
   };
 

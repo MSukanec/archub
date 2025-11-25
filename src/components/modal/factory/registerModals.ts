@@ -92,9 +92,9 @@ export function initializeModalRegistry(): void {
     ...generalConfig, 
     size: 'lg',
     mapDataToProps: (data) => ({
-      contactId: data?.contactId,
+      contactId: data?.contactId || data?.contact?.id,
       contact: data?.contact,
-      mode: data?.mode || (data?.contactId ? 'view' : 'create'),
+      mode: data?.mode || (data?.contactId || data?.contact?.id ? 'view' : 'create'),
     }),
   });
   
