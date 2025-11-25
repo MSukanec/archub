@@ -15,7 +15,9 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ComboBoxMultiSelectField } from "@/components/ui-custom/fields/ComboBoxMultiSelectField";
+import { UploadMultiFileField } from "@/components/ui-custom/fields/UploadMultiFileField";
 import { PhoneField } from "@/components/ui-custom/fields/PhoneField";
+import { AvatarUploader } from "@/components/ui-custom/AvatarUploader";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useContactTypes } from "@/features/contacts/hooks";
@@ -81,6 +83,7 @@ interface ContactFormProps {
   };
   onClose: () => void;
   mode?: "create" | "edit" | "view";
+  onAvatarUpload?: (url: string) => void;
 }
 
 // Helper functions
@@ -110,6 +113,9 @@ function FormPanel({
   inviteMemberMutation,
   onAvatarChange,
   avatarUploading,
+  filesToUpload,
+  setFilesToUpload,
+  currentAvatarUrl,
 }: {
   form: ReturnType<typeof useForm<CreateContactForm>>;
   onSubmit: (data: CreateContactForm) => void;
@@ -121,48 +127,31 @@ function FormPanel({
   inviteMemberMutation?: any;
   onAvatarChange: (file: File) => Promise<void>;
   avatarUploading: boolean;
+  filesToUpload: any[];
+  setFilesToUpload: (files: any[]) => void;
+  currentAvatarUrl?: string;
 }) {
   const linkedUser = contact?.linked_user || foundUser;
+  const displayName = contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre';
+  const initials = displayName
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
   
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Avatar upload - solo si es edición */}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Avatar uploader - solo si es edición */}
         {contact && (
-          <div className="mb-4 p-4 border border-accent/20 bg-accent/5 rounded-lg">
-            <div className="flex items-center justify-between mb-3">
-              <label className="text-sm font-medium">Foto de perfil</label>
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.currentTarget.files?.[0];
-                    if (file) onAvatarChange(file);
-                    e.currentTarget.value = '';
-                  }}
-                  className="hidden"
-                  disabled={avatarUploading}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={avatarUploading}
-                  className="cursor-pointer"
-                  asChild
-                >
-                  <span className="flex items-center gap-2">
-                    <Camera className="h-4 w-4" />
-                    {avatarUploading ? 'Subiendo...' : 'Cambiar foto'}
-                  </span>
-                </Button>
-              </label>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              La imagen se comprimirá y guardará automáticamente
-            </p>
-          </div>
+          <AvatarUploader
+            avatarUrl={currentAvatarUrl}
+            initials={initials}
+            displayName={displayName}
+            onAvatarSelect={onAvatarChange}
+            isUploading={avatarUploading}
+          />
         )}
 
         {linkedUser && (
@@ -360,6 +349,35 @@ function FormPanel({
             </FormItem>
           )}
         />
+
+        {/* File Upload - solo si es edición */}
+        {contact && (
+          <>
+            <Separator />
+            <div className="space-y-2">
+              <FormLabel className="flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                Archivos adjuntos
+              </FormLabel>
+              <p className="text-xs text-muted-foreground">
+                Gestiona los archivos adjuntos del contacto
+              </p>
+              <UploadMultiFileField
+                existingFiles={[]}
+                filesToUpload={filesToUpload}
+                onFilesChange={setFilesToUpload}
+                emptyStateTitle="Sin archivos adjuntos"
+                emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
+                newFileBadgeText="Nuevo"
+                maxSize={10 * 1024 * 1024}
+                acceptedTypes={{
+                  'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
+                  'application/pdf': ['.pdf'],
+                }}
+              />
+            </div>
+          </>
+        )}
 
       </form>
     </Form>
@@ -597,6 +615,7 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
   const [foundUser, setFoundUser] = useState<any>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [contactAvatarUrl, setContactAvatarUrl] = useState(contact?.contact_avatar_url || '');
+  const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
 
   // Fetch contact if editing
   const { data: fetchedContact, isLoading: contactLoading } = useQuery({
@@ -1046,6 +1065,9 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
             inviteMemberMutation={inviteMemberMutation}
             onAvatarChange={handleAvatarUpload}
             avatarUploading={avatarUploading}
+            filesToUpload={filesToUpload}
+            setFilesToUpload={setFilesToUpload}
+            currentAvatarUrl={currentAvatarUrl}
           />
         )}
       </ModalBody>
