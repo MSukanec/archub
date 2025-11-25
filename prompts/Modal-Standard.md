@@ -79,20 +79,43 @@ import {
 
 ---
 
-## 3.1 COLUMNAS EN EL BODY
+## 3.1 COLUMNAS EN EL BODY - CONTROL GRANULAR
 
-**REGLA:**
-- **Default:** 1 columna
-- **Mobile:** SIEMPRE 1 columna (automático)
-- **Desktop:** 1 o 2 según el modal
+**IMPORTANTE:** El sistema de columnas funciona en DOS NIVELES:
 
-Para modales con forms extensos, puedes usar 2 columnas en desktop:
-
+### Nivel 1: ModalLayout `columns` (Macro - Rara vez usado)
 ```tsx
 <ModalLayout onClose={onClose} size="lg" columns={2}>
 ```
+→ Esto hace que TODO el contenido en desktop se muestre en 2 columnas.
 
-Esto hace que en desktop los campos se muestren en 2 columnas (lado a lado), pero en mobile sigue siendo 1 columna.
+**⚠️ CASI NUNCA** usarás esto porque queremos control granular.
+
+### Nivel 2: Grid interno en el Form (Micro - Control granular - LO NORMAL)
+Para que **CIERTOS CAMPOS ESPECÍFICOS** estén inline en desktop y otros no:
+
+```tsx
+<ModalLayout onClose={onClose} size="lg">  {/* columns no especificado = default 1 */}
+  <ModalBody>
+    {/* Estos DOS campos inline en desktop, 1 columna en mobile */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <FormField name="amount" />
+      <FormField name="date" />
+    </div>
+    
+    {/* Este campo ocupa TODO el ancho */}
+    <FormField name="description" />
+    
+    {/* Otros dos inline */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <FormField name="category" />
+      <FormField name="status" />
+    </div>
+  </ModalBody>
+</ModalLayout>
+```
+
+**REGLA DE ORO:** Nunca te pediré "2 columnas en todo". Solo te pediré "estos campos inline".
 
 ---
 
@@ -269,6 +292,20 @@ src/components/modal/
 
 ---
 
+## 11.1 REFACTORIZACIÓN DE MODALS EXISTENTES
+
+Cuando refactorices un modal existente (consolidar múltiples archivos en uno):
+
+**CHECKLIST PREVIO:**
+- [ ] ¿El ModalHeader tiene `description`? **OBLIGATORIO**
+  - Ejemplo: `<ModalHeader title="Editar Pago" description="Actualiza los detalles del pago" />`
+  - Si no existe, **agrega una descripción clara** que explique qué hace el modal
+- [ ] Revisar que todos los modos (CREATE, EDIT, VIEW) tengan titulo y descripción apropiados
+- [ ] Verificar que VIEW mode NO use inputs disabled (usa ViewPanel en su lugar)
+- [ ] Revisar control de columnas: ¿Necesita campos inline? (grid interno, NO `columns={2}`)
+
+---
+
 ## 12. CHECKLIST QA
 
 Después de crear/refactorizar:
@@ -280,6 +317,7 @@ Después de crear/refactorizar:
 - [ ] Verificar que funciona en Drawer (mobile)
 - [ ] Confirmar que no hay errores de import
 - [ ] Confirmar que los botones están en ModalFooter
+- [ ] ModalHeader tiene descripción clara
 - [ ] Borrar archivos viejos (edit-modal, view-modal, etc.)
 - [ ] Quitar código muerto y console.logs
 - [ ] Actualizar registerModals.ts
