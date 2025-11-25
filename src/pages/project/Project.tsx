@@ -156,7 +156,7 @@ export default function Project() {
         <StatCard 
           data-testid="stat-card-bitacoras"
           className="w-full cursor-pointer hover:bg-accent/5 transition-colors"
-          onClick={() => navigate('/sitelog')}
+          onClick={() => navigate('/construction/logs')}
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">

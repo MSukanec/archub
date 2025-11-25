@@ -136,7 +136,7 @@ export default function Sitelog() {
     icon: BookOpen,
     title: "Bitácora de Obra",
     description: "Registra el progreso diario del proyecto con entradas detalladas de obra, condiciones climáticas, personal y eventos importantes",
-    organizationId: currentOrganizationId,
+    organizationId: currentOrganizationId || undefined,
     showMembers: true,
     showProjectSelector: true,
     tabs: [
