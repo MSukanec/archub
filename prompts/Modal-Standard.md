@@ -566,36 +566,96 @@ export function ClientPaymentForm({
 
 Algunos modales necesitan comportamientos o estilos especiales. Sigue el mismo estándar pero con ajustes mínimos:
 
-### Modal de Eliminación / Confirmación Destructiva
+### Modal de Eliminación / Confirmación Destructiva (SaaS Premium)
+
+El `DeleteConfirmationForm` es un modal **universal y reutilizable** para eliminar elementos en toda la aplicación.
+
+**Principios clave:**
+- ✅ NO tiene lógica de negocio
+- ✅ Solo UI + callbacks
+- ✅ Soporta eliminación simple o reemplazo
+- ✅ Recibe todos los datos desde afuera
+
+**Props del Modal:**
 
 ```tsx
-<ModalLayout onClose={popModal} size="md">
-  <ModalHeader 
-    title="Confirmar eliminación"
-    description="Esta acción no se puede deshacer"
-    icon={Trash2}
-  />
-  
-  <ModalBody>
-    {/* Contenido con advertencias */}
-    <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
-      <AlertTriangle className="h-4 w-4 text-destructive" />
-      <p className="text-sm text-destructive">Esta acción no se puede deshacer</p>
-    </div>
-  </ModalBody>
-
-  <ModalFooter
-    leftLabel="Cancelar"
-    onLeftClick={popModal}
-    submitText="Eliminar"
-    onSubmit={handleDelete}
-    submitVariant="destructive"    {/* ← Botón rojo */}
-    submitDisabled={isSubmitDisabled()}
-  />
-</ModalLayout>
+modalData: {
+  mode: 'delete' | 'replace'
+  title: string                          // Ej: "Eliminar tipo de gasto"
+  description: string                    // Ej: "Esta acción no se puede deshacer"
+  itemName: string                       // Ej: "Servicios administrativos"
+  consequences?: string[]                // Ej: ['5 pagos perderán referencia', '...']
+  replacementOptions?: { label, value }[] // Opciones para reemplazo
+  currentId?: string                     // ID actual (para filtrar en ComboBox)
+  onDelete: () => void                   // Callback de feature (ejecuta mutación)
+  onReplace?: (newId: string) => void    // Callback de feature (reemplaza + elimina)
+}
 ```
 
-**Clave:** El único cambio es `submitVariant="destructive"` en ModalFooter. Todo lo demás sigue el estándar.
+**Uso desde un TAB (GeneralCostsTab):**
+
+```tsx
+const handleDeleteGeneralCostType = () => {
+  const availableReplacements = allTypes.filter(t => t.id !== typeId)
+  
+  openModal('delete-confirmation', {
+    mode: availableReplacements.length > 0 ? 'replace' : 'delete',
+    title: 'Eliminar tipo de gasto',
+    description: 'Esta acción no se puede deshacer',
+    itemName: type.name,
+    consequences: [
+      '5 pagos están asociados a este concepto',
+      'Si lo eliminas, los pagos quedarán sin referencia',
+      'Opcionalmente puedes reemplazarlos con otro tipo'
+    ],
+    replacementOptions: availableReplacements.map(t => ({
+      label: t.name,
+      value: t.id
+    })),
+    currentId: typeId,
+    onDelete: () => deleteGeneralCostType(typeId),
+    onReplace: (newId) => replaceGeneralCostType(typeId, newId)
+  })
+}
+```
+
+**En el feature (useDeleteGeneralCostType hook):**
+
+```tsx
+const deleteGeneralCostType = useMutation({
+  mutationFn: async (id: string) => {
+    // Backend hace: DELETE FROM general_cost_types WHERE id = ?
+    return apiRequest('DELETE', `/api/general-costs/types/${id}`)
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['/api/general-costs/types'] })
+  }
+})
+
+const replaceGeneralCostType = useMutation({
+  mutationFn: async ({ oldId, newId }: { oldId: string; newId: string }) => {
+    // Backend hace en ORDEN:
+    // 1. UPDATE payments SET type_id = newId WHERE type_id = oldId
+    // 2. DELETE FROM general_cost_types WHERE id = oldId
+    return apiRequest('POST', '/api/general-costs/types/replace', { oldId, newId })
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['/api/general-costs/types'] })
+    queryClient.invalidateQueries({ queryKey: ['/api/general-costs/payments'] })
+  }
+})
+```
+
+**Flujo:**
+1. Usuario abre modal desde el TAB
+2. Si hay elementos relacionados → ve opción de "reemplazar"
+3. Elige "Eliminar" o "Reemplazar por otro"
+4. Presiona botón rojo
+5. Feature ejecuta callback (mutación)
+6. Backend hace la lógica transaccional
+7. Modal cierra
+
+**El modal es transparente** - no sabe qué elimina, solo orquesta UI.
 
 ---
 

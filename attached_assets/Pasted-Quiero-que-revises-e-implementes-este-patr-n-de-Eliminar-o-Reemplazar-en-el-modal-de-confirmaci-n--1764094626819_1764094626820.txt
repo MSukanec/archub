@@ -1,0 +1,94 @@
+Quiero que revises e implementes este patrón de “Eliminar o Reemplazar” en el modal de confirmación:
+
+OBJETIVO:
+El DeleteConfirmationModal NO debe tener lógica de negocio.
+Debe recibir callbacks y opciones completas desde afuera.
+Debe manejar 2 flujos:
+1. Eliminar definitivamente
+2. Reemplazar por otro item (si el feature lo permite)
+
+QUIERO QUE IMPLEMENTES ESTO:
+
+────────────────────────────────────────
+1) EL MODAL SOLO HACE UI + CALLBACKS
+El modal NO debe ejecutar mutaciones ni tocar Supabase directamente.
+El modal debe tener props así:
+
+{
+  mode: "delete" | "replace",
+  title: string,
+  description?: string,
+  consequences?: string[],
+  itemName: string,
+  replacementOptions?: { label: string; value: string }[],
+  currentId?: string,
+  onDelete: () => void,
+  onReplace?: (newId: string) => void
+}
+
+El modal:
+- Muestra advertencias
+- Si mode === "replace": muestra un <Select>
+- Si el usuario elige eliminar → llama onDelete()
+- Si elige reemplazar → llama onReplace(selectedId)
+- Cierra el modal
+
+NO debe tener queries, NO debe tener useMutation, NO debe conocer tablas.
+
+────────────────────────────────────────
+2) TODA LA LÓGICA DE NEGOCIO SE MUEVE A “HOOKS POR FEATURE”
+Quiero que verifiques que cada feature tenga su par de mutaciones:
+
+deleteX(id)
+replaceX(oldId, newId)
+
+Ejemplo:
+deleteGeneralCostType(id)
+replaceGeneralCostType(oldId, newId)
+
+Si no existen, crealos en:
+src/features/<feature>/mutations/
+
+La mutación replaceX debe hacer:
+- UPDATE pagos SET tipo_id = newId WHERE tipo_id = oldId
+- DELETE FROM tipo WHERE id = oldId
+
+En ese orden.
+
+────────────────────────────────────────
+3) LAS PÁGINAS ARMARÁN LA DATA PARA EL MODAL
+Quiero que las páginas (no el modal) construyan:
+
+- mode: "delete" o "replace"
+- replacementOptions (filtrando el actual)
+- onDelete: deleteX(id)
+- onReplace: replaceX(id, newId)
+
+Ejemplo:
+
+openModal("delete-confirmation", {
+  mode: hasReplacements ? "replace" : "delete",
+  title: "Eliminar tipo de gasto",
+  itemName: type.name,
+  consequences: [...],
+  replacementOptions: options,
+  onDelete: () => deleteGeneralCostType(id),
+  onReplace: (newId) => replaceGeneralCostType(id, newId),
+});
+
+────────────────────────────────────────
+4) OBJETIVO FINAL
+Quiero que revises mi DeleteConfirmationModal y:
+- lo limpies
+- elimines toda lógica de negocio
+- separes UI de acciones
+- te asegures que usa ModalLayout, ModalHeader, ModalBody y ModalFooter
+- verifiques que reciba “replacementOptions” desde afuera
+- verifiques que solo llame onDelete o onReplace
+- dejes el modal completamente universal para todos los features
+
+Este modal debe quedar como un COMPONENTE GLOBAL nivel SaaS Premium, reutilizable en 100+ casos.
+
+────────────────────────────────────────
+Aquí te paso el archivo actual para corregir:
+[PEGAR AQUÍ DeleteConfirmationModal.tsx]
