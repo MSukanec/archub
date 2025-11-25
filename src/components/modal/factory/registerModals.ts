@@ -9,7 +9,7 @@ import { ClientObligationModal } from '@/features/clients';
 import { ClientForm } from '@/features/clients/forms/ClientForm';
 import ClientPaymentForm from '@/features/clients/forms/ClientPaymentForm';
 import ClientRoleForm from '@/features/clients/forms/ClientRoleForm';
-import ClientCommitmentForm from '@/features/clients/forms/ClientCommitmentForm';
+import { ClientCommitmentForm } from '@/features/clients/forms/ClientCommitmentForm';
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
 import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal } from '@/features/materials';

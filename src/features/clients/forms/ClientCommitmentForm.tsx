@@ -8,21 +8,21 @@ import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/m
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { DollarSign } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
+import { DollarSign, CalendarIcon, Info } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationMembers } from '@/features/organization'
 import { formatContactName } from '@/utils/contacts'
+import { cn } from '@/lib/utils'
 import { 
   useProjectClients, 
   useClientCommitment, 
   useCreateClientCommitment, 
   useUpdateClientCommitment 
 } from '@/features/clients/hooks'
-import { InstallmentsPlanSection } from '../modals/commitment-sections/InstallmentsPlanSection'
-import { InstallmentsIndexingSection } from '../modals/commitment-sections/InstallmentsIndexingSection'
-import { InformationalNotice } from '../modals/commitment-sections/InformationalNotice'
 
 const clientCommitmentSchema = z.object({
   created_by: z.string().min(1, 'Creador es requerido'),
@@ -87,6 +87,196 @@ const clientCommitmentSchema = z.object({
 })
 
 type ClientCommitmentFormData = z.infer<typeof clientCommitmentSchema>
+
+// ============= INLINE SUBCOMPONENTS =============
+
+// Sección de Plan de Cuotas (inline)
+function InstallmentsPlanSection({ form }: { form: any }) {
+  return (
+    <div className="space-y-4 pt-4 border-t border-border">
+      <h3 className="text-sm font-semibold text-foreground">Plan de Cuotas</h3>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="installments_count"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Número de cuotas *</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="Ej: 12"
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                  value={field.value || ''}
+                  data-testid="input-installments-count"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="installments_frequency"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Frecuencia *</FormLabel>
+              <FormControl>
+                <Select value={field.value || ''} onValueChange={field.onChange}>
+                  <SelectTrigger data-testid="select-installments-frequency">
+                    <SelectValue placeholder="Seleccionar frecuencia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">Mensual</SelectItem>
+                    <SelectItem value="bimonthly">Bimestral</SelectItem>
+                    <SelectItem value="quarterly">Trimestral</SelectItem>
+                    <SelectItem value="yearly">Anual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="installments_start_date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fecha de inicio *</FormLabel>
+              <FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="relative">
+                      <Input
+                        placeholder="Seleccionar fecha"
+                        value={field.value ? format(new Date(field.value), 'dd/MM/yyyy', { locale: es }) : ''}
+                        className="pr-10 cursor-pointer"
+                        readOnly
+                        data-testid="input-installments-start-date"
+                      />
+                      <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ? new Date(field.value) : undefined}
+                      onSelect={(date: Date | undefined) => field.onChange(date?.toISOString())}
+                      locale={es}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="installments_distribution"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Distribución *</FormLabel>
+              <FormControl>
+                <Select value={field.value || ''} onValueChange={field.onChange}>
+                  <SelectTrigger data-testid="select-installments-distribution">
+                    <SelectValue placeholder="Seleccionar distribución" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="equal">Cuotas iguales</SelectItem>
+                    <SelectItem value="custom">Montos personalizados</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
+  )
+}
+
+// Sección de Indexación (inline)
+function InstallmentsIndexingSection({ form }: { form: any }) {
+  return (
+    <div className="space-y-4 pt-4 border-t border-border">
+      <h3 className="text-sm font-semibold text-foreground">Indexación</h3>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="index_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Índice de actualización *</FormLabel>
+              <FormControl>
+                <Select value={field.value || ''} onValueChange={field.onChange}>
+                  <SelectTrigger data-testid="select-index-type">
+                    <SelectValue placeholder="Seleccionar índice" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cac">CAC (Costo de la Construcción)</SelectItem>
+                    <SelectItem value="uvi">UVI (Unidad de Vivienda)</SelectItem>
+                    <SelectItem value="ipc">IPC (Índice de Precios al Consumidor)</SelectItem>
+                    <SelectItem value="custom_index">Índice personalizado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="index_frequency"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Frecuencia de indexación *</FormLabel>
+              <FormControl>
+                <Select value={field.value || ''} onValueChange={field.onChange}>
+                  <SelectTrigger data-testid="select-index-frequency">
+                    <SelectValue placeholder="Seleccionar frecuencia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">Mensual</SelectItem>
+                    <SelectItem value="quarterly">Trimestral</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
+  )
+}
+
+// Aviso Informacional (inline)
+function InformationalNotice({ message }: { message: string }) {
+  return (
+    <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-border">
+      <div className="flex items-start gap-3">
+        <Info className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {message}
+        </p>
+      </div>
+    </div>
+  )
+}
 
 // Subcomponente: Formulario para create/edit
 function FormPanel({
@@ -570,5 +760,3 @@ export function ClientCommitmentForm({ modalData, onClose, mode = 'create' }: Cl
     </ModalLayout>
   )
 }
-
-export default ClientCommitmentForm
