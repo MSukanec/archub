@@ -95,7 +95,7 @@ export default function Project() {
           <div className="flex flex-wrap gap-2">
             {currentProject.project_data?.project_type?.name && (
               <Badge 
-                className="text-[14px] sm:text-[16px] md:text-[18px] font-medium px-3 py-1"
+                className="text-xs font-medium px-2.5 py-1"
                 style={{ 
                   backgroundColor: `${projectColor}40`,
                   color: projectColor,
@@ -110,7 +110,7 @@ export default function Project() {
             
             {currentProject.project_data?.project_modality?.name && (
               <Badge 
-                className="text-[14px] sm:text-[16px] md:text-[18px] font-medium px-3 py-1"
+                className="text-xs font-medium px-2.5 py-1"
                 style={{ 
                   backgroundColor: `${projectColor}40`,
                   color: projectColor,
@@ -125,7 +125,7 @@ export default function Project() {
             
             {currentProject.status && (
               <Badge 
-                className="text-[14px] sm:text-[16px] md:text-[18px] font-medium px-3 py-1"
+                className="text-xs font-medium px-2.5 py-1"
                 style={{ 
                   backgroundColor: `${projectColor}40`,
                   color: projectColor,
