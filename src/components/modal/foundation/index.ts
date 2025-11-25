@@ -5,3 +5,4 @@ export { default as ModalBody, FormModalBody } from './ModalBody';
 export { ModalStepHeader, FormModalStepHeader } from './ModalStepHeader';
 export { ModalStepFooter, FormModalStepFooter } from './ModalStepFooter';
 export { ModalSectionButton, FormSubsectionButton } from './ModalSectionButton';
+export { DrawerBase, type DrawerSnapPoint } from './DrawerBase';
