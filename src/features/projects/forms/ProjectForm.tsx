@@ -88,10 +88,9 @@ interface Project {
 }
 
 interface ProjectFormProps {
-  modalData?: {
-    project?: Project;
-    mode?: 'create' | 'edit' | 'view';
-  };
+  modalData?: any;
+  project?: Project;
+  mode?: 'create' | 'edit' | 'view';
   onClose: () => void;
 }
 
@@ -359,9 +358,9 @@ function ViewPanel({
   );
 }
 
-export function ProjectForm({ modalData, onClose }: ProjectFormProps) {
-  const project = modalData?.project;
-  const mode = modalData?.mode || (project ? 'edit' : 'create');
+export function ProjectForm({ modalData, project: projectProp, mode: modeProp, onClose }: ProjectFormProps) {
+  const project = projectProp || modalData?.project || modalData?.editingProject;
+  const mode = modeProp || modalData?.mode || (project ? 'edit' : 'create');
   
   const hasInitializedRef = useRef(false);
   

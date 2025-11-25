@@ -29,11 +29,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useGeneralCostPaymentMedia } from '../hooks/use-general-cost-payment-media'
 
 interface GeneralCostPaymentFormProps {
-  modalData?: {
-    organizationId: string
-    paymentId?: string
-    mode?: 'create' | 'edit' | 'view'
-  }
+  modalData?: any
+  organizationId?: string
+  paymentId?: string
+  mode?: 'create' | 'edit' | 'view'
   onClose: () => void
 }
 
@@ -442,8 +441,10 @@ function ViewPanel({
   )
 }
 
-export default function GeneralCostPaymentForm({ modalData, onClose }: GeneralCostPaymentFormProps) {
-  const { organizationId, paymentId, mode = 'create' } = modalData || {}
+export default function GeneralCostPaymentForm({ modalData, organizationId: orgIdProp, paymentId: paymentIdProp, mode: modeProp, onClose }: GeneralCostPaymentFormProps) {
+  const organizationId = orgIdProp || modalData?.organizationId
+  const paymentId = paymentIdProp || modalData?.paymentId
+  const mode = modeProp || modalData?.mode || 'create'
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
   const queryClient = useQueryClient()
