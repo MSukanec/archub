@@ -21,6 +21,7 @@ interface DeleteConfirmationFormProps {
     itemType?: string
     itemDetails?: string
     destructiveActionText?: string
+    consequences?: string[]  // Ej: ['5 pagos perderán su referencia', 'Los reportes se verán afectados']
     replacementOptions?: ReplacementOption[]
     currentCategoryId?: string
   }
@@ -38,6 +39,7 @@ function DeleteContent({
   itemName,
   itemType,
   itemDetails,
+  consequences,
   actionType,
   setActionType,
   selectedReplacementId,
@@ -52,6 +54,7 @@ function DeleteContent({
   itemName?: string
   itemType?: string
   itemDetails?: string
+  consequences?: string[]
   actionType: 'delete' | 'replace'
   setActionType: (value: 'delete' | 'replace') => void
   selectedReplacementId: string
@@ -79,6 +82,21 @@ function DeleteContent({
           {description}
         </p>
       </div>
+
+      {/* Consecuencias */}
+      {consequences && consequences.length > 0 && (
+        <div className="rounded-lg border border-warning/25 bg-warning/5 p-4">
+          <p className="text-sm font-semibold text-warning mb-2">¿Qué pasará?</p>
+          <ul className="space-y-1.5">
+            {consequences.map((consequence, idx) => (
+              <li key={idx} className="text-sm text-muted-foreground flex gap-2">
+                <span className="text-warning flex-shrink-0">•</span>
+                <span>{consequence}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Modo DANGEROUS - Escribir para confirmar */}
       {mode === 'dangerous' && itemName && (
@@ -183,6 +201,7 @@ export default function DeleteConfirmationForm({
   const itemName = modalData?.itemName
   const itemType = modalData?.itemType || 'elemento'
   const itemDetails = modalData?.itemDetails
+  const consequences = modalData?.consequences || []
   const destructiveActionText = modalData?.destructiveActionText || 'Eliminar'
   const replacementOptions = modalData?.replacementOptions || []
   const currentCategoryId = modalData?.currentCategoryId
@@ -262,6 +281,7 @@ export default function DeleteConfirmationForm({
           itemName={itemName}
           itemType={itemType}
           itemDetails={itemDetails}
+          consequences={consequences}
           actionType={actionType}
           setActionType={setActionType}
           selectedReplacementId={selectedReplacementId}
