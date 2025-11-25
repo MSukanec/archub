@@ -5,8 +5,9 @@ import { ProjectForm } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
 import ContactForm from '@/features/contacts/forms/ContactForm';
 import { ContactTypeForm } from '@/features/contacts/forms/ContactTypeForm';
-import { ClientObligationModal, ClientPaymentsModal, ClientCommitmentModal, ClientRoleModal } from '@/features/clients';
+import { ClientObligationModal, ClientCommitmentModal, ClientRoleModal } from '@/features/clients';
 import { ClientForm } from '@/features/clients/forms/ClientForm';
+import ClientPaymentForm from '@/features/clients/forms/ClientPaymentForm';
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
 import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal } from '@/features/materials';
@@ -131,8 +132,24 @@ export function initializeModalRegistry(): void {
     })
   });
   registerModal('client-obligation', ClientObligationModal as any, financeConfig);
-  registerModal('client-payment', ClientPaymentsModal as any, financeConfig);
-  registerModal('installment', ClientPaymentsModal as any, financeConfig);
+  registerModal('client-payment', ClientPaymentForm as any, { 
+    ...financeConfig,
+    mapDataToProps: (data) => ({
+      projectId: data?.projectId,
+      organizationId: data?.organizationId,
+      paymentId: data?.paymentId,
+      mode: data?.paymentId ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
+  registerModal('installment', ClientPaymentForm as any, { 
+    ...financeConfig,
+    mapDataToProps: (data) => ({
+      projectId: data?.projectId,
+      organizationId: data?.organizationId,
+      paymentId: data?.paymentId,
+      mode: data?.paymentId ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
   registerModal('client-commitment', ClientCommitmentModal as any, financeConfig);
   registerModal('clientRole', ClientRoleModal as any, generalConfig);
   
