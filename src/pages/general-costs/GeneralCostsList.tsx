@@ -11,6 +11,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal';
 import { useGeneralCosts } from "@/features/general-costs/hooks/use-general-costs";
 import { useDeleteGeneralCost } from "@/features/general-costs/hooks/use-delete-general-cost";
+import { useReplaceGeneralCost } from "@/features/general-costs/hooks/use-replace-general-cost";
 import { useGeneralCostsPayments } from "@/hooks/use-general-costs-payments";
 import GeneralCostRow from "@/features/finances/components/GeneralCostRow";
 import type { GeneralCost } from "@/features/general-costs/types";
@@ -25,6 +26,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const deleteGeneralCost = useDeleteGeneralCost();
+  const replaceGeneralCost = useReplaceGeneralCost();
   
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -145,12 +147,45 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
 
   // Función para eliminar gasto general
   const handleDelete = (generalCost: GeneralCost) => {
+    // Contar cuántos pagos están asociados a este concepto
+    const associatedPayments = payments.filter(p => p.general_cost_id === generalCost.id);
+    const hasReplacements = generalCosts.filter(gc => gc.id !== generalCost.id).length > 0;
+    
+    // Determinar el modo: si hay pagos y hay otros conceptos disponibles, usar 'replace'
+    const mode = associatedPayments.length > 0 && hasReplacements ? 'replace' : 'delete';
+    
+    // Preparar opciones de reemplazo
+    const replacementOptions = generalCosts
+      .filter(gc => gc.id !== generalCost.id)
+      .map(gc => ({
+        label: gc.name,
+        value: gc.id
+      }));
+    
+    // Preparar consecuencias
+    const consequences: string[] = [];
+    if (associatedPayments.length > 0) {
+      consequences.push(`${associatedPayments.length} pago${associatedPayments.length === 1 ? '' : 's'} están asociado${associatedPayments.length === 1 ? '' : 's'} a este concepto`);
+      if (mode === 'replace') {
+        consequences.push('Puedes reemplazarlos con otro concepto o dejarlos sin referencia');
+      } else {
+        consequences.push('Los pagos quedarán sin referencia a ningún concepto');
+      }
+    }
+    
     openModal('delete-confirmation', {
-      title: 'Eliminar Gasto General',
-      message: `¿Estás seguro de que quieres eliminar el gasto general "${generalCost.name}"? Esta acción no se puede deshacer.`,
-      mode: 'dangerous',
-      onConfirm: () => {
+      mode,
+      title: 'Eliminar concepto de gasto',
+      description: `¿Estás seguro de que quieres eliminar "${generalCost.name}"?`,
+      itemName: generalCost.name,
+      consequences: consequences.length > 0 ? consequences : undefined,
+      replacementOptions: mode === 'replace' ? replacementOptions : undefined,
+      currentId: generalCost.id,
+      onDelete: () => {
         deleteGeneralCost.mutate(generalCost.id);
+      },
+      onReplace: (newId: string) => {
+        replaceGeneralCost.mutate({ oldId: generalCost.id, newId });
       }
     });
   };
