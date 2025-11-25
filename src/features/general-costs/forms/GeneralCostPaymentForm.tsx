@@ -63,6 +63,9 @@ function FormPanel({
   setFilesToUpload: (files: any[]) => void
   handleExistingFileDelete: (fileId: string) => void
 }) {
+  // Move state out of render function (CRITICAL: Fix React Hooks warning)
+  const [openDatePicker, setOpenDatePicker] = React.useState(false)
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -82,44 +85,41 @@ function FormPanel({
           <FormField
             control={form.control}
             name="payment_date"
-            render={({ field }) => {
-              const [open, setOpen] = React.useState(false)
-              return (
-                <FormItem>
-                  <FormLabel>Fecha *</FormLabel>
-                  <FormControl>
-                    <Popover open={open} onOpenChange={setOpen}>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <div className="relative">
-                            <Input
-                              placeholder="Seleccionar fecha"
-                              value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
-                              className="pr-10 cursor-pointer"
-                              readOnly
-                              data-testid="input-payment-date"
-                            />
-                            <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                          </div>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
-                          initialFocus
-                          autoClose
-                          onClose={() => setOpen(false)}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )
-            }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha *</FormLabel>
+                <FormControl>
+                  <Popover open={openDatePicker} onOpenChange={setOpenDatePicker}>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            placeholder="Seleccionar fecha"
+                            value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                            className="pr-10 cursor-pointer"
+                            readOnly
+                            data-testid="input-payment-date"
+                          />
+                          <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                        </div>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
+                        initialFocus
+                        autoClose
+                        onClose={() => setOpenDatePicker(false)}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
           <FormField

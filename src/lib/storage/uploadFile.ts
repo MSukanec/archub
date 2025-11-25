@@ -77,38 +77,43 @@ export async function uploadFile(
     if (context.link_to) {
       const visibility = getVisibility(context.entity);
       
+      // Build media_link object only with defined values (Handles 3 cases: A) no org, B) with org no project, C) with org and project)
+      const mediaLinkData: Record<string, any> = {
+        media_file_id: mediaFile.id,
+        visibility,
+        is_public: isPublic,
+        is_cover: context.is_cover || false,
+        created_by: createdById
+      };
+
+      // Add optional fields ONLY if they are defined
+      if (context.organization_id) mediaLinkData.organization_id = context.organization_id;
+      if (context.link_to.project_id) mediaLinkData.project_id = context.link_to.project_id;
+      if (context.link_to.contact_id) mediaLinkData.contact_id = context.link_to.contact_id;
+      if (context.link_to.general_cost_id) mediaLinkData.general_cost_id = context.link_to.general_cost_id;
+      if (context.link_to.general_cost_payment_id) mediaLinkData.general_cost_payment_id = context.link_to.general_cost_payment_id;
+      if (context.link_to.sitelog_id) mediaLinkData.site_log_id = context.link_to.sitelog_id;
+      if (context.link_to.course_id) mediaLinkData.course_id = context.link_to.course_id;
+      if (context.link_to.course_module_id) mediaLinkData.course_module_id = context.link_to.course_module_id;
+      if (context.link_to.course_lesson_id) mediaLinkData.course_lesson_id = context.link_to.course_lesson_id;
+      if (context.link_to.movement_id) mediaLinkData.movement_id = context.link_to.movement_id;
+      if (context.link_to.client_payment_id) mediaLinkData.client_payment_id = context.link_to.client_payment_id;
+      if (context.category) mediaLinkData.category = context.category;
+      if (context.description) mediaLinkData.description = context.description;
+      if (context.position !== undefined) mediaLinkData.position = context.position;
+      if (context.metadata) mediaLinkData.metadata = context.metadata;
+      
       const { data: mediaLink, error: mediaLinkError } = await supabase
         .from('media_links')
-        .insert({
-          media_file_id: mediaFile.id,
-          organization_id: context.organization_id,
-          project_id: context.link_to.project_id,
-          contact_id: context.link_to.contact_id,
-          general_cost_id: context.link_to.general_cost_id,
-          general_cost_payment_id: context.link_to.general_cost_payment_id,
-          site_log_id: context.link_to.sitelog_id,
-          course_id: context.link_to.course_id,
-          course_module_id: context.link_to.course_module_id,
-          course_lesson_id: context.link_to.course_lesson_id,
-          movement_id: context.link_to.movement_id,
-          client_payment_id: context.link_to.client_payment_id,
-          visibility,
-          is_public: isPublic,
-          category: context.category,
-          description: context.description,
-          is_cover: context.is_cover || false,
-          position: context.position,
-          metadata: context.metadata,
-          created_by: createdById
-        })
+        .insert(mediaLinkData)
         .select()
         .single();
 
       if (mediaLinkError) {
         console.error('Error creating media link:', mediaLinkError, {
-          site_log_id: context.link_to.sitelog_id,
-          course_id: context.link_to.course_id,
-          contact_id: context.link_to.contact_id
+          mediaLinkData,
+          organization_id: context.organization_id,
+          entity: context.entity
         });
         throw new Error(`Error al vincular archivo: ${mediaLinkError.message}`);
       }
