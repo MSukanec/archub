@@ -104,6 +104,24 @@ export async function getContacts(
       }
     }
     
+    // Generate signed URLs for contact avatars (if they exist)
+    const avatarUrlsByContactId = new Map<string, string>();
+    for (const contact of contacts) {
+      if (contact.image_bucket && contact.image_path) {
+        try {
+          const { data, error } = await ctx.supabase.storage
+            .from(contact.image_bucket)
+            .createSignedUrl(contact.image_path, 3600);
+          
+          if (data?.signedUrl && !error) {
+            avatarUrlsByContactId.set(contact.id, data.signedUrl);
+          }
+        } catch (err) {
+          // Silently skip if signed URL generation fails
+        }
+      }
+    }
+    
     // Combine all data
     const enrichedContacts = contacts
       .filter((contact: any) => contact.linked_user_id !== userId) // Filter out current user
@@ -119,11 +137,15 @@ export async function getContacts(
         
         const attachments_count = attachmentCountsByContact.get(contact.id) || 0;
         
+        // Use contact avatar if available, otherwise use linked user avatar
+        const avatar_url = avatarUrlsByContactId.get(contact.id) || linked_user?.avatar_url || null;
+        
         return {
           ...contact,
           linked_user,
           contact_types,
-          attachments_count
+          attachments_count,
+          avatar_url
         };
       });
     

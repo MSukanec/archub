@@ -18,6 +18,7 @@ type Contact = {
     name: string;
   }>;
   linked_user_id?: string;
+  avatar_url?: string;
   linked_user?: {
     id: string;
     full_name: string;
@@ -72,10 +73,8 @@ export default function ContactRow({
 
   let subtitle = email || company_name || "";
 
-  const avatarUrl = linked_user?.avatar_url || "";
-  const avatarFallback = linked_user
-    ? getInitials(linked_user.full_name)
-    : getInitials(displayName);
+  const avatarUrl = contact.avatar_url || "";
+  const avatarFallback = getInitials(displayName);
 
   const cardContent = (
     <>
