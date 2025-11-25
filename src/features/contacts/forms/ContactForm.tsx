@@ -143,16 +143,14 @@ function FormPanel({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Avatar uploader - solo si es edición */}
-        {contact && (
-          <AvatarUploader
-            avatarUrl={currentAvatarUrl}
-            initials={initials}
-            displayName={displayName}
-            onAvatarSelect={onAvatarChange}
-            isUploading={avatarUploading}
-          />
-        )}
+        {/* Avatar uploader */}
+        <AvatarUploader
+          avatarUrl={currentAvatarUrl}
+          initials={initials}
+          displayName={displayName}
+          onAvatarSelect={onAvatarChange}
+          isUploading={avatarUploading}
+        />
 
         {linkedUser && (
           <div className="mb-4 p-3 border border-accent/20 bg-accent/5 rounded-lg flex items-center justify-between">
@@ -350,34 +348,30 @@ function FormPanel({
           )}
         />
 
-        {/* File Upload - solo si es edición */}
-        {contact && (
-          <>
-            <Separator />
-            <div className="space-y-2">
-              <FormLabel className="flex items-center gap-2">
-                <Upload className="h-4 w-4" />
-                Archivos adjuntos
-              </FormLabel>
-              <p className="text-xs text-muted-foreground">
-                Gestiona los archivos adjuntos del contacto
-              </p>
-              <UploadMultiFileField
-                existingFiles={[]}
-                filesToUpload={filesToUpload}
-                onFilesChange={setFilesToUpload}
-                emptyStateTitle="Sin archivos adjuntos"
-                emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
-                newFileBadgeText="Nuevo"
-                maxSize={10 * 1024 * 1024}
-                acceptedTypes={{
-                  'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
-                  'application/pdf': ['.pdf'],
-                }}
-              />
-            </div>
-          </>
-        )}
+        {/* File Upload */}
+        <Separator />
+        <div className="space-y-2">
+          <FormLabel className="flex items-center gap-2">
+            <Upload className="h-4 w-4" />
+            Archivos adjuntos
+          </FormLabel>
+          <p className="text-xs text-muted-foreground">
+            Gestiona los archivos adjuntos del contacto
+          </p>
+          <UploadMultiFileField
+            existingFiles={[]}
+            filesToUpload={filesToUpload}
+            onFilesChange={setFilesToUpload}
+            emptyStateTitle="Sin archivos adjuntos"
+            emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
+            newFileBadgeText="Nuevo"
+            maxSize={10 * 1024 * 1024}
+            acceptedTypes={{
+              'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
+              'application/pdf': ['.pdf'],
+            }}
+          />
+        </div>
 
       </form>
     </Form>
