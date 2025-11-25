@@ -456,7 +456,11 @@ export function ModalLayout({
             <readinessState.LoadingGate>
               <div className="p-8"></div>
             </readinessState.LoadingGate>
+          ) : children ? (
+            // Nueva API: children ya contiene la estructura (ModalBody, etc)
+            children
           ) : (
+            // Vieja API: envolver en ModalBody
             <ModalBody 
               columns={columns} 
               data-testid={`modal-body-${modalId}`}
