@@ -1,4 +1,5 @@
-import React, { ReactNode, useEffect, useRef, useCallback, useState, cloneElement, isValidElement } from "react";
+import { ReactNode, useEffect, useRef, useCallback, useState, cloneElement, isValidElement } from "react";
+import { createPortal } from "react-dom";
 import { X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -6,6 +7,16 @@ import { useModalPanelStore } from "../state/panelStore";
 import ModalBody from "./ModalBody";
 import { ModalErrorBoundary } from "../utils/ModalErrorBoundary";
 import { ModalReadinessState } from "../utils/modal-readiness";
+
+export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+
+const sizeClasses: Record<ModalSize, string> = {
+  sm: 'md:max-w-[400px]',
+  md: 'md:max-w-[550px] md:min-w-[450px]',
+  lg: 'md:max-w-[750px] md:min-w-[600px]',
+  xl: 'md:max-w-[1000px] md:min-w-[800px]',
+  full: 'md:max-w-none md:min-w-0 md:w-screen md:h-screen md:rounded-none',
+};
 
 interface ModalLayoutProps {
   viewPanel?: ReactNode;
@@ -23,9 +34,13 @@ interface ModalLayoutProps {
   isEditing?: boolean;
   /** Función para manejar submit con ENTER key */
   onSubmit?: () => void;
-  /** Modal ancho (1200px en desktop) */
+  
+  /** Size variant for the modal: 'sm' | 'md' | 'lg' | 'xl' | 'full' */
+  size?: ModalSize;
+  
+  /** @deprecated Use size="xl" instead. Modal ancho (1000px en desktop) */
   wide?: boolean;
-  /** Modal pantalla completa */
+  /** @deprecated Use size="full" instead. Modal pantalla completa */
   fullscreen?: boolean;
   
   /** Estado de readiness del modal */
@@ -75,6 +90,9 @@ interface ModalLayoutProps {
   
   /** Descripción del modal para accessibility */
   ariaDescription?: string;
+  
+  /** Use drawer pattern on mobile devices (slide up from bottom) */
+  mobileDrawer?: boolean;
 }
 
 export function ModalLayout({
@@ -89,6 +107,7 @@ export function ModalLayout({
   stepContent,
   isEditing = false,
   onSubmit,
+  size,
   wide = false,
   fullscreen = false,
   
@@ -108,6 +127,7 @@ export function ModalLayout({
   modalId = `modal-${Date.now()}`,
   ariaLabel,
   ariaDescription,
+  mobileDrawer = false,
 }: ModalLayoutProps) {
   
   const { currentPanel, setPanel } = useModalPanelStore();
@@ -115,6 +135,14 @@ export function ModalLayout({
   const overlayRef = useRef<HTMLDivElement>(null);
   const [focusableElements, setFocusableElements] = useState<HTMLElement[]>([]);
   const lastActiveElement = useRef<HTMLElement | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  const resolvedSize: ModalSize = size || (fullscreen ? 'full' : wide ? 'xl' : 'md');
+
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
 
   useEffect(() => {
     lastActiveElement.current = document.activeElement as HTMLElement;
@@ -320,12 +348,14 @@ export function ModalLayout({
     }
   };
 
+  const isFullSize = resolvedSize === 'full';
+
   const modalContent = (
     <div 
       ref={overlayRef}
       className={cn(
         "fixed inset-0 z-50 bg-black/80",
-        enableAnimations && "animate-in fade-in duration-75"
+        enableAnimations && "animate-in fade-in duration-200 ease-out"
       )}
       onClick={handleOverlayClick}
       data-testid={`modal-overlay-${modalId}`}
@@ -340,10 +370,23 @@ export function ModalLayout({
         data-modal-content
         data-testid={`modal-content-${modalId}`}
         className={cn(
-          "fixed inset-0 flex flex-col bg-background shadow-lg transition ease-in-out duration-250",
-          "md:inset-auto md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2",
-          "md:w-auto md:min-w-[750px] md:max-w-[90vw] md:max-h-[90vh] md:border md:rounded-lg",
-          enableAnimations && "animate-in fade-in-0 zoom-in-95 md:slide-in-from-bottom-4 duration-200",
+          "fixed flex flex-col bg-background shadow-2xl",
+          "inset-0 w-full h-full",
+          "pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]",
+          "pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]",
+          !isFullSize && [
+            "md:inset-auto md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2",
+            "md:w-auto md:h-auto md:max-h-[90vh] md:border md:rounded-lg",
+            "md:pb-0 md:pt-0 md:pl-0 md:pr-0",
+          ],
+          isFullSize && [
+            "md:inset-0 md:w-screen md:h-screen md:rounded-none md:border-none",
+          ],
+          sizeClasses[resolvedSize],
+          enableAnimations && [
+            "animate-in fade-in-0 zoom-in-95 duration-200 ease-out",
+            mobileDrawer && "slide-in-from-bottom-full md:slide-in-from-bottom-0",
+          ],
           className
         )}
         onClick={(e) => e.stopPropagation()}
@@ -431,14 +474,19 @@ export function ModalLayout({
     </div>
   );
 
-  return (
+  if (!isMounted) {
+    return null;
+  }
+
+  return createPortal(
     <ModalErrorBoundary
       onClose={onClose}
       fallbackTitle="Error en Modal"
       fallbackDescription="Ha ocurrido un error al cargar este modal."
     >
       {modalContent}
-    </ModalErrorBoundary>
+    </ModalErrorBoundary>,
+    document.body
   );
 }
 

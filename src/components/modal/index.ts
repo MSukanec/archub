@@ -17,7 +17,14 @@ export { ModalStepFooter as FormModalStepFooter } from './foundation/ModalStepFo
 export { ModalSectionButton as FormSubsectionButton } from './foundation/ModalSectionButton';
 
 // State
-export { useGlobalModalStore } from './state/globalModalStore';
+export { 
+  useGlobalModalStore,
+  useCurrentModal,
+  useIsModalOpen,
+  useModalStack,
+  useModalStackSize,
+  type ModalStackItem
+} from './state/globalModalStore';
 export { useModalPanelStore } from './state/panelStore';
 
 // Factory
