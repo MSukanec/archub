@@ -802,9 +802,13 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
       // Update local state with new avatar URL
       setContactAvatarUrl(result.url);
       
-      // Invalidate queries to refresh contact data across the app
-      await queryClient.invalidateQueries({ queryKey: CONTACT_QUERY_KEYS.lists() });
-      await queryClient.invalidateQueries({ queryKey: CONTACT_QUERY_KEYS.detail(organizationId, editingContact.id) });
+      // Force refetch of contact data to ensure avatar updates everywhere
+      await queryClient.refetchQueries({ 
+        queryKey: CONTACT_QUERY_KEYS.list(organizationId) 
+      });
+      await queryClient.refetchQueries({ 
+        queryKey: CONTACT_QUERY_KEYS.detail(organizationId, editingContact.id) 
+      });
       
       toast({
         title: 'Avatar actualizado',
