@@ -159,9 +159,10 @@ export default function GeneralCostsPaymentsTab() {
 
   const handleView = (payment: GeneralCostPayment) => {
     if (!organizationId) return;
-    openModal('general-costs-payment-view', {
+    openModal('general-costs-payment', {
       organizationId,
       paymentId: payment.id,
+      mode: 'view',
     });
   };
 
