@@ -12,7 +12,7 @@ interface ReplacementOption {
   value: string
 }
 
-interface DeleteConfirmationModalProps {
+interface DeleteConfirmationFormProps {
   modalData?: {
     mode?: 'simple' | 'dangerous' | 'replace'
     title?: string
@@ -167,14 +167,14 @@ function DeleteContent({
   )
 }
 
-export default function DeleteConfirmationModal({
+export default function DeleteConfirmationForm({
   modalData,
   onClose,
   onConfirm: confirmProp,
   onDelete: deleteProp,
   onReplace: replaceProp,
   isLoading: isLoadingProp = false
-}: DeleteConfirmationModalProps) {
+}: DeleteConfirmationFormProps) {
   const { popModal } = useGlobalModalStore()
   
   const mode = modalData?.mode || 'simple'

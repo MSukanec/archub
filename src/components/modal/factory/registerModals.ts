@@ -5,7 +5,7 @@ import { ProjectModal, GalleryFormModal, DocumentFolderFormModal, DocumentUpload
 import { ContactFormModal, ContactModalView } from '@/features/contacts';
 import { ClientObligationModal, ClientPaymentsModal, ClientCommitmentModal, ClientRoleModal, ProjectClientModal } from '@/features/clients';
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
-import { default as DeleteConfirmationModal } from '@/components/ui-custom/general/DeleteConfirmationModal';
+import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal } from '@/features/materials';
 import { UserFormModal, ChangelogFormModal, NotificationFormModal, AnnouncementFormModal, SupportConversationStartModal, PlanFormModal, PlanPriceFormModal, DowngradeModal } from '@/features/users';
 import { SiteLogModal } from '@/features/sitelog/modals/SiteLogModal';
@@ -152,7 +152,7 @@ export function initializeModalRegistry(): void {
   
   registerModal('pdf-exporter', PDFExporterModal as any, { ...generalConfig, size: 'full' });
   
-  registerModal('delete-confirmation', DeleteConfirmationModal as any, { 
+  registerModal('delete-confirmation', DeleteConfirmationForm as any, { 
     ...generalConfig, 
     size: 'sm',
     preventCloseOnBackdrop: true,
