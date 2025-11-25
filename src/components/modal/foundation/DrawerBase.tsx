@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 export type DrawerSnapPoint = 'auto' | 'half' | 'full';
 
-interface DrawerBaseProps {
+export interface DrawerBaseProps {
   children: ReactNode;
   isOpen: boolean;
   onClose: () => void;
@@ -18,6 +18,9 @@ interface DrawerBaseProps {
   dismissible?: boolean;
   showDragHandle?: boolean;
   preventScroll?: boolean;
+  preventCloseOnBackdrop?: boolean;
+  
+  zIndex?: number;
   
   className?: string;
   overlayClassName?: string;
@@ -35,6 +38,8 @@ export function DrawerBase({
   dismissible = true,
   showDragHandle = true,
   preventScroll = true,
+  preventCloseOnBackdrop = false,
+  zIndex = 50,
   className,
   overlayClassName,
   ariaLabel,
@@ -110,13 +115,16 @@ export function DrawerBase({
   
   if (!isMounted || !isOpen) return null;
   
+  const canCloseOnBackdrop = dismissible && !preventCloseOnBackdrop;
+  
   const content = (
     <div
       className={cn(
-        'fixed inset-0 z-50',
+        'fixed inset-0',
         overlayClassName
       )}
-      onClick={dismissible ? onClose : undefined}
+      style={{ zIndex }}
+      onClick={canCloseOnBackdrop ? onClose : undefined}
     >
       <div className="absolute inset-0 bg-black/80 animate-in fade-in duration-200" />
       

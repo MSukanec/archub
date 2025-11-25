@@ -19,6 +19,9 @@ const sizeClasses: Record<ModalSize, string> = {
 };
 
 interface ModalLayoutProps {
+  /** Direct children content (new simplified API) */
+  children?: ReactNode;
+  
   viewPanel?: ReactNode;
   editPanel?: ReactNode;
   subformPanel?: ReactNode;
@@ -93,9 +96,13 @@ interface ModalLayoutProps {
   
   /** Use drawer pattern on mobile devices (slide up from bottom) */
   mobileDrawer?: boolean;
+  
+  /** Position in the modal stack (for z-index calculation) */
+  stackIndex?: number;
 }
 
 export function ModalLayout({
+  children,
   viewPanel,
   editPanel,
   subformPanel,
@@ -128,6 +135,7 @@ export function ModalLayout({
   ariaLabel,
   ariaDescription,
   mobileDrawer = false,
+  stackIndex = 0,
 }: ModalLayoutProps) {
   
   const { currentPanel, setPanel } = useModalPanelStore();
@@ -332,6 +340,10 @@ export function ModalLayout({
   }, [preventClickOutsideClose, handleClose]);
 
   const getCurrentPanel = () => {
+    if (children) {
+      return children;
+    }
+    
     if (stepContent) {
       return stepContent;
     }
@@ -349,14 +361,20 @@ export function ModalLayout({
   };
 
   const isFullSize = resolvedSize === 'full';
+  const calculatedZIndex = 50 + stackIndex * 10;
+  const overlayOpacity = Math.min(0.8, 0.5 + stackIndex * 0.1);
 
   const modalContent = (
     <div 
       ref={overlayRef}
       className={cn(
-        "fixed inset-0 z-50 bg-black/80",
+        "fixed inset-0",
         enableAnimations && "animate-in fade-in duration-200 ease-out"
       )}
+      style={{ 
+        zIndex: calculatedZIndex,
+        backgroundColor: `rgba(0, 0, 0, ${overlayOpacity})`,
+      }}
       onClick={handleOverlayClick}
       data-testid={`modal-overlay-${modalId}`}
     >

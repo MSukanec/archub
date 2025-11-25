@@ -1,44 +1,60 @@
 import { ComponentType } from 'react';
-import { ModalType, ModalData } from './types';
 
-export interface BaseModalProps {
-  modalData?: ModalData;
-  onClose: () => void;
+export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+export type ModalCategory = 'admin' | 'project' | 'finance' | 'organization' | 'learning' | 'general';
+
+export interface ModalConfig {
+  size?: ModalSize;
+  category?: ModalCategory;
+  drawerOnMobile?: boolean;
+  preventCloseOnBackdrop?: boolean;
+  preventCloseOnEsc?: boolean;
+  mapDataToProps?: (data: Record<string, any> | null) => Record<string, any>;
 }
 
-export interface ModalRegistryEntry<P extends BaseModalProps = BaseModalProps> {
-  component: ComponentType<P>;
-  displayName?: string;
-  category?: 'admin' | 'project' | 'finance' | 'organization' | 'learning' | 'general';
+export interface ModalRegistryEntry {
+  component: ComponentType<any>;
+  config: ModalConfig;
 }
 
-export type ModalRegistryType = {
-  [K in ModalType]?: ModalRegistryEntry;
-};
+const registry: Record<string, ModalRegistryEntry> = {};
 
-const registry: ModalRegistryType = {};
-
-export function registerModal<P extends BaseModalProps>(
-  type: ModalType,
-  component: ComponentType<P>,
-  options?: Omit<ModalRegistryEntry<P>, 'component'>
+export function registerModal(
+  type: string,
+  component: ComponentType<any>,
+  config: ModalConfig = {}
 ): void {
   registry[type] = {
-    component: component as ComponentType<BaseModalProps>,
-    ...options,
+    component,
+    config: {
+      size: 'md',
+      drawerOnMobile: true,
+      preventCloseOnBackdrop: false,
+      preventCloseOnEsc: false,
+      ...config,
+    },
   };
 }
 
-export function getModal(type: ModalType): ModalRegistryEntry | undefined {
+export function getModal(type: string): ModalRegistryEntry | undefined {
   return registry[type];
 }
 
-export function hasModal(type: ModalType): boolean {
+export function hasModal(type: string): boolean {
   return type in registry;
 }
 
-export function getRegisteredModals(): ModalType[] {
-  return Object.keys(registry) as ModalType[];
+export function getRegisteredModals(): string[] {
+  return Object.keys(registry);
+}
+
+export function getModalsByCategory(category: ModalCategory): string[] {
+  return Object.entries(registry)
+    .filter(([_, entry]) => entry.config.category === category)
+    .map(([type]) => type);
 }
 
 export { registry as modalRegistry };
+
+export type ModalType = string;
+export type ModalData = Record<string, any>;

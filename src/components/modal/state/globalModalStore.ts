@@ -1,101 +1,76 @@
 import { create } from 'zustand';
-import { ModalType, ModalData } from '../factory/types';
+import { subscribeWithSelector } from 'zustand/middleware';
 
 export interface ModalStackItem {
-  type: ModalType;
-  data: ModalData | null;
+  type: string;
+  data: Record<string, any> | null;
   id: string;
 }
 
 interface GlobalModalState {
   stack: ModalStackItem[];
   
-  open: boolean;
-  type: ModalType | null;
-  data: ModalData | null;
+  blockCloseForDirtyForms: boolean;
   
-  openModal: (type: ModalType, data?: ModalData | null) => void;
-  pushModal: (type: ModalType, data?: ModalData | null) => void;
+  openModal: (type: string, data?: Record<string, any> | null) => void;
+  pushModal: (type: string, data?: Record<string, any> | null) => void;
   popModal: () => void;
-  closeModal: () => void;
   closeAll: () => void;
-  updateModalData: (data: Partial<ModalData>) => void;
+  updateModalData: (data: Record<string, any>) => void;
+  
+  setBlockClose: () => void;
+  clearBlockClose: () => void;
 }
 
 const generateModalId = () => 
   `modal-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-export const useGlobalModalStore = create<GlobalModalState>((set) => ({
-  stack: [],
-  open: false,
-  type: null,
-  data: null,
-
-  openModal: (type, data = null) => {
-    const newItem: ModalStackItem = { type, data, id: generateModalId() };
-    set({
-      stack: [newItem],
-      open: true,
-      type,
-      data,
-    });
-  },
-
-  pushModal: (type, data = null) => set((state) => {
-    const newItem: ModalStackItem = { type, data, id: generateModalId() };
-    const newStack = [...state.stack, newItem];
-    return {
-      stack: newStack,
-      open: true,
-      type,
-      data,
-    };
-  }),
-
-  popModal: () => set((state) => {
-    const newStack = state.stack.slice(0, -1);
-    const topModal = newStack.length > 0 ? newStack[newStack.length - 1] : null;
-    return {
-      stack: newStack,
-      open: newStack.length > 0,
-      type: topModal?.type ?? null,
-      data: topModal?.data ?? null,
-    };
-  }),
-
-  closeModal: () => set((state) => {
-    const newStack = state.stack.slice(0, -1);
-    const topModal = newStack.length > 0 ? newStack[newStack.length - 1] : null;
-    return {
-      stack: newStack,
-      open: newStack.length > 0,
-      type: topModal?.type ?? null,
-      data: topModal?.data ?? null,
-    };
-  }),
-
-  closeAll: () => set({
+export const useGlobalModalStore = create<GlobalModalState>()(
+  subscribeWithSelector((set, get) => ({
     stack: [],
-    open: false,
-    type: null,
-    data: null,
-  }),
+    blockCloseForDirtyForms: false,
 
-  updateModalData: (data) => set((state) => {
-    if (state.stack.length === 0) return state;
-    const newStack = [...state.stack];
-    const currentIndex = newStack.length - 1;
-    const updatedData = { ...newStack[currentIndex].data, ...data };
-    newStack[currentIndex] = {
-      ...newStack[currentIndex],
-      data: updatedData,
-    };
-    return {
-      stack: newStack,
-      data: updatedData,
-    };
-  }),
-}));
+    openModal: (type, data = null) => {
+      const newItem: ModalStackItem = { type, data, id: generateModalId() };
+      set({ stack: [newItem] });
+    },
+
+    pushModal: (type, data = null) => {
+      const newItem: ModalStackItem = { type, data, id: generateModalId() };
+      set((state) => ({ stack: [...state.stack, newItem] }));
+    },
+
+    popModal: () => {
+      const { blockCloseForDirtyForms } = get();
+      if (blockCloseForDirtyForms) {
+        return;
+      }
+      set((state) => ({ stack: state.stack.slice(0, -1) }));
+    },
+
+    closeAll: () => {
+      const { blockCloseForDirtyForms } = get();
+      if (blockCloseForDirtyForms) {
+        return;
+      }
+      set({ stack: [], blockCloseForDirtyForms: false });
+    },
+
+    updateModalData: (data) => set((state) => {
+      if (state.stack.length === 0) return state;
+      const newStack = [...state.stack];
+      const currentIndex = newStack.length - 1;
+      newStack[currentIndex] = {
+        ...newStack[currentIndex],
+        data: { ...newStack[currentIndex].data, ...data },
+      };
+      return { stack: newStack };
+    }),
+
+    setBlockClose: () => set({ blockCloseForDirtyForms: true }),
+    clearBlockClose: () => set({ blockCloseForDirtyForms: false }),
+  }))
+);
 
 export const useCurrentModal = () => 
   useGlobalModalStore((state) => 
@@ -110,3 +85,6 @@ export const useModalStack = () =>
 
 export const useModalStackSize = () => 
   useGlobalModalStore((state) => state.stack.length);
+
+export const useCanCloseModal = () =>
+  useGlobalModalStore((state) => !state.blockCloseForDirtyForms);
