@@ -87,6 +87,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const [filterUnit, setFilterUnit] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
+  // Multi-select state
+  const [selectedPayments, setSelectedPayments] = useState<ClientPaymentWithRelations[]>([]);
+
   // Use feature hooks to get client payments, commitments, and all project clients
   const { data: paymentsData, isLoading } = useClientPayments(activeProjectId || undefined, organizationId);
   const { data: commitmentsData } = useClientCommitments(activeProjectId || undefined, organizationId);
