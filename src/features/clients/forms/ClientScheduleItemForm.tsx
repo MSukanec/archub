@@ -23,6 +23,7 @@ import {
   User
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationCurrencies } from '@/hooks/use-currencies';
 import { formatContactName } from '@/utils/contacts';
 import { cn } from '@/lib/utils';
@@ -433,15 +434,17 @@ export function ClientScheduleItemForm({
   const createMutation = useCreateClientPaymentSchedule();
   const updateMutation = useUpdateClientPaymentSchedule();
 
+  const { data: userData } = useCurrentUser();
+  
   const defaultCurrencyId = useMemo(() => {
     if (existingItem?.currency_id) return existingItem.currency_id;
-    if (preselectedCommitmentId && commitments) {
-      const commitment = commitments.find(c => c.id === preselectedCommitmentId);
-      if (commitment) return commitment.currency_id;
+    // Use organization's default currency
+    if (userData?.preferences?.default_currency) {
+      return userData.preferences.default_currency;
     }
     if (currencies?.[0]?.currency?.id) return currencies[0].currency.id;
     return '';
-  }, [existingItem, preselectedCommitmentId, commitments, currencies]);
+  }, [existingItem, userData?.preferences?.default_currency, currencies]);
 
   const form = useForm<ClientScheduleItemFormData>({
     resolver: zodResolver(clientScheduleItemSchema),
@@ -471,12 +474,12 @@ export function ClientScheduleItemForm({
   useEffect(() => {
     if (preselectedCommitmentId && mode === 'create' && commitments?.length) {
       form.setValue('commitment_id', preselectedCommitmentId);
-      const commitment = commitments.find(c => c.id === preselectedCommitmentId);
-      if (commitment) {
-        form.setValue('currency_id', commitment.currency_id);
+      // Set currency to organization's default, not the commitment's currency
+      if (userData?.preferences?.default_currency) {
+        form.setValue('currency_id', userData.preferences.default_currency);
       }
     }
-  }, [preselectedCommitmentId, mode, commitments, form]);
+  }, [preselectedCommitmentId, mode, commitments, userData?.preferences?.default_currency, form]);
 
   const onSubmit = async (data: ClientScheduleItemFormData) => {
     if (!organizationId || !projectId) {

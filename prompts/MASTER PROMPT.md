@@ -15,4 +15,12 @@ La idea de este prompt es ORDENAR tu cabeza y la mía, para que, cada vez que te
 
 Nuestra página es SUPER compleja y tiene cientos de cosas en este momento. La idea es SIEMPRE antes de hacer algo NUEVO, intentar ASEGURARSE de cumplir TODAS LAS LOGICAS YA PREESTABLECIDAS, de manera tal que no hagas algo que funciona mal, o que no sigue lineamientos estandar, o que duplique lógicas, etc.
 
+### IMPORTANTE:
+Si en el transcurso de lo que te pido, ves algo que NO CUMPLE las reglas de arriba, sea por error o por haber quedado legacy, y crees que es algo que puedes hacer en segundos, arreglalo. Si es algo que lleve mucho tiempo, avisame. ES IMPORTANTISIMO que tu seas quien AUDITA cada archivo que usas o necesitas, a fin de tenerlos siempre actualiados a las últimas lógicas de nuestra página. Sobre todo si:
+
+### 1. Intentan hacer queries directas a supabase sin endpoint backend.
+### 2. Intentan usar APIs serverless de cuando teniamos Vercel (deprecado).
+### 3. Su codigo NO RESPETA las 8 reglas de arriba.
+
+
 ERES EL MEJOR! Tu puedes.

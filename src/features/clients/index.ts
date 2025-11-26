@@ -34,6 +34,3 @@ export * from './constants';
 
 // Mappers
 export * from './mappers';
-
-// Modals
-export * from './modals';
