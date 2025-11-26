@@ -336,11 +336,29 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
   const isViewMode = mode === 'view';
 
   // Query to get available contacts
-  const { data: contacts = [], isLoading: contactsLoading } = useQuery<any[]>({
+  const { data: allContacts = [], isLoading: contactsLoading } = useQuery<any[]>({
     queryKey: [`/api/contacts?organization_id=${organizationId}`],
     enabled: !!organizationId,
     staleTime: 5 * 60 * 1000,
   });
+
+  // Query to get existing project clients (to filter them from contact selector)
+  const { data: existingProjectClients = [] } = useQuery<any[]>({
+    queryKey: [`/api/projects/${projectId}/clients?organization_id=${organizationId}`],
+    enabled: !!organizationId && !!projectId && !isEditing && !isViewMode,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Filter out contacts that are already clients of this project (only in create mode)
+  const contacts = useMemo(() => {
+    if (isEditing || isViewMode) return allContacts;
+    
+    const existingContactIds = new Set(
+      existingProjectClients.map((client: any) => client.contact_id)
+    );
+    
+    return allContacts.filter((contact: any) => !existingContactIds.has(contact.id));
+  }, [allContacts, existingProjectClients, isEditing, isViewMode]);
 
   // Query to get client roles
   const { data: clientRoles = [], isLoading: clientRolesLoading } = useQuery<any[]>({
