@@ -63,7 +63,46 @@ export function StepValidation({
     return grouped;
   }, [errors]);
 
-  // Detectar errores de celdas vacías en campos editables (date, number, currency, string)
+  // Detectar errores de celdas vacías ORIGINALES en campos editables
+  // Esto se basa en parsedData y columnMapping, NO en errors (que cambia con correcciones)
+  const originalEmptyCellErrors = useMemo(() => {
+    if (!parsedData || !columnMapping) return [];
+    
+    const emptyErrors: ValidationError[] = [];
+    
+    for (let rowIndex = 0; rowIndex < parsedData.rows.length; rowIndex++) {
+      const row = parsedData.rows[rowIndex];
+      
+      for (const [colIndexStr, field] of Object.entries(columnMapping)) {
+        if (!field) continue;
+        
+        const colIndex = parseInt(colIndexStr);
+        const value = row[colIndex];
+        const isEmpty = value === null || value === undefined || String(value).trim() === '';
+        
+        if (isEmpty) {
+          const fieldConfig = targetSchema.find(f => f.field === field);
+          const isEditableType = fieldConfig && ['date', 'number', 'currency', 'string'].includes(fieldConfig.type);
+          const isRequired = fieldConfig?.required;
+          
+          if (isEditableType && isRequired) {
+            emptyErrors.push({
+              row: rowIndex,
+              column: field,
+              field,
+              message: `Campo "${fieldConfig?.label || field}" está vacío`,
+              value: null,
+              severity: 'error',
+            });
+          }
+        }
+      }
+    }
+    
+    return emptyErrors;
+  }, [parsedData, columnMapping, targetSchema]);
+
+  // Detectar errores de celdas vacías en campos editables (para contador de errores)
   const emptyCellErrors = useMemo(() => {
     return errors.filter(e => {
       const isEmpty = e.value === null || e.value === undefined || String(e.value).trim() === '';
@@ -73,15 +112,15 @@ export function StepValidation({
     });
   }, [errors, targetSchema]);
 
-  // Agrupar errores de celdas vacías por fila
+  // Agrupar errores ORIGINALES de celdas vacías por fila (para mostrar en tabla)
   const rowsWithEmptyCells = useMemo(() => {
     const rows: Record<number, ValidationError[]> = {};
-    for (const error of emptyCellErrors) {
+    for (const error of originalEmptyCellErrors) {
       if (!rows[error.row]) rows[error.row] = [];
       rows[error.row].push(error);
     }
     return rows;
-  }, [emptyCellErrors]);
+  }, [originalEmptyCellErrors]);
 
   const hasEditableErrors = Object.keys(rowsWithEmptyCells).length > 0;
 
@@ -174,14 +213,14 @@ export function StepValidation({
 
   const originalRowsWithErrors = useMemo(() => {
     const rows = new Set<number>();
-    for (const error of emptyCellErrors) {
+    for (const error of originalEmptyCellErrors) {
       rows.add(error.row);
     }
     return Array.from(rows).sort((a, b) => a - b);
-  }, [emptyCellErrors]);
+  }, [originalEmptyCellErrors]);
 
   const getOriginalErrorsForRow = (rowIndex: number): ValidationError[] => {
-    return emptyCellErrors.filter(e => e.row === rowIndex);
+    return originalEmptyCellErrors.filter(e => e.row === rowIndex);
   };
 
   if (errors.length === 0 && summary.missingRequiredFields.length === 0) {
@@ -262,7 +301,7 @@ export function StepValidation({
           .map(([colIndex, field]) => ({ colIndex: parseInt(colIndex), field: field! }))
           .sort((a, b) => a.colIndex - b.colIndex);
         
-        const errorFields = new Set(emptyCellErrors.map(e => e.field));
+        const errorFields = new Set(originalEmptyCellErrors.map(e => e.field));
         
         return (
           <Card className="border-blue-500/30 bg-blue-500/5">
