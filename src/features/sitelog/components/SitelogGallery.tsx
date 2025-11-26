@@ -55,12 +55,16 @@ export function SitelogGallery({ files, onDelete, onDownload, onEdit }: SitelogG
     [files]
   );
 
-  // Agrupar archivos por semana
+  // Agrupar archivos por semana (usa la fecha de la bitácora, no la fecha de subida)
   const groupedByWeek = useMemo(() => {
     const groups = new Map<string, GroupedFiles>();
 
     galleryFiles.forEach(file => {
-      const fileDate = new Date(file.created_at);
+      // Obtener el archivo original para acceder a site_log.date
+      const originalFile = files.find(f => f.id === file.id);
+      const fileDate = originalFile?.site_log?.date 
+        ? new Date(originalFile.site_log.date) 
+        : new Date(file.created_at);
       const weekStart = startOfWeek(fileDate, { weekStartsOn: 1, locale: es }); // Lunes
       const weekEnd = endOfWeek(fileDate, { weekStartsOn: 1, locale: es }); // Domingo
       
