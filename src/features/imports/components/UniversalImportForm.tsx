@@ -83,6 +83,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [contextOverrideToOrg, setContextOverrideToOrg] = useState(false);
+  const [defaultFieldValues, setDefaultFieldValues] = useState<Record<string, string>>({});
 
   const { suggestMapping, saveMappings, isLoading: isLoadingAI } = useAISuggestMapping();
 
@@ -286,6 +287,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     columnMapping,
     manualMappings,
     valueMapConfig: config.valueMapConfig,
+    defaultFieldValues,
   });
 
   const conflicts = useMemo(() => {
@@ -631,6 +633,14 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           mappedRow[field] = value;
         }
 
+        // Inject default values for fields that weren't in the file
+        for (const [fieldName, fieldValue] of Object.entries(defaultFieldValues)) {
+          // Only inject if field wasn't already mapped from file
+          if (mappedRow[fieldName] === undefined) {
+            mappedRow[fieldName] = fieldValue;
+          }
+        }
+
         // Inject _projectId based on context
         if (config.projectContext?.type === 'organization') {
           if (!projectColumnDetection.hasProjectColumn) {
@@ -855,6 +865,10 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             availableClients={config.availableClients}
             selectedClientId={selectedClientId}
             onClientSelect={setSelectedClientId}
+            defaultFieldValues={defaultFieldValues}
+            onDefaultFieldValueChange={(fieldName, value) => {
+              setDefaultFieldValues(prev => ({ ...prev, [fieldName]: value }));
+            }}
           />
         ) : null;
       case 3:

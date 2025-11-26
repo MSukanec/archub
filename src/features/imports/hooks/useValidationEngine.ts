@@ -8,6 +8,7 @@ interface UseValidationEngineProps {
   columnMapping: ColumnMapping;
   manualMappings?: ManualMapping;
   valueMapConfig?: Record<string, Record<string, string>>;
+  defaultFieldValues?: Record<string, string>;
 }
 
 interface ValidationSummary {
@@ -35,6 +36,7 @@ export function useValidationEngine({
   columnMapping,
   manualMappings = {},
   valueMapConfig = {},
+  defaultFieldValues = {},
 }: UseValidationEngineProps): UseValidationEngineReturn {
 
   const requiredFields = useMemo(() => {
@@ -46,8 +48,13 @@ export function useValidationEngine({
   }, [columnMapping]);
 
   const missingRequiredFields = useMemo(() => {
-    return requiredFields.filter(field => !mappedFields.has(field));
-  }, [requiredFields, mappedFields]);
+    return requiredFields.filter(field => {
+      // Field is covered if it's mapped from file OR has a default value
+      const isMapped = mappedFields.has(field);
+      const hasDefaultValue = defaultFieldValues[field] !== undefined && defaultFieldValues[field] !== '';
+      return !isMapped && !hasDefaultValue;
+    });
+  }, [requiredFields, mappedFields, defaultFieldValues]);
 
   const unmappedColumns = useMemo(() => {
     if (!parsedData) return [];

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowRight, Check, AlertCircle, HelpCircle, Loader2, Sparkles, FolderKanban, Building2, Info, AlertTriangle, UserCircle } from 'lucide-react';
+import { ArrowRight, Check, AlertCircle, HelpCircle, Loader2, Sparkles, FolderKanban, Building2, Info, AlertTriangle, UserCircle, Coins, Wallet } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,10 @@ interface StepMappingProps {
   selectedClientId?: string | null;
   /** Callback cuando se selecciona un cliente */
   onClientSelect?: (clientId: string) => void;
+  /** Valores por defecto para campos obligatorios sin columna */
+  defaultFieldValues?: Record<string, string>;
+  /** Callback cuando se selecciona un valor por defecto */
+  onDefaultFieldValueChange?: (fieldName: string, value: string) => void;
 }
 
 function getAIBadge(confidence: number) {
@@ -78,6 +82,8 @@ export function StepMapping({
   availableClients,
   selectedClientId,
   onClientSelect,
+  defaultFieldValues,
+  onDefaultFieldValueChange,
 }: StepMappingProps) {
   const contextName = projectContext?.type === 'project' 
     ? projectContext.projectName 
@@ -95,6 +101,27 @@ export function StepMapping({
   const missingRequiredFields = useMemo(() => {
     return requiredFields.filter(f => !mappedFields.has(f.field));
   }, [requiredFields, mappedFields]);
+
+  // Campos obligatorios faltantes que tienen opciones de foreign-key disponibles
+  const missingRequiredWithOptions = useMemo(() => {
+    return missingRequiredFields.filter(f => 
+      f.foreignKeyConfig && 
+      f.foreignKeyConfig.options && 
+      f.foreignKeyConfig.options.length > 0
+    );
+  }, [missingRequiredFields]);
+
+  // Campos obligatorios faltantes SIN opciones (realmente bloqueantes)
+  const missingRequiredWithoutOptions = useMemo(() => {
+    return missingRequiredFields.filter(f => {
+      // Si tiene foreign-key con opciones, no es bloqueante
+      if (f.foreignKeyConfig?.options && f.foreignKeyConfig.options.length > 0) {
+        // Pero solo si ya se seleccionó un valor por defecto
+        return !defaultFieldValues?.[f.field];
+      }
+      return true;
+    });
+  }, [missingRequiredFields, defaultFieldValues]);
 
   const getMappingStatus = (columnIndex: number): 'mapped' | 'unmapped' | 'required-missing' => {
     const field = columnMapping[columnIndex];
@@ -319,7 +346,8 @@ export function StepMapping({
         </Card>
       )}
 
-      {missingRequiredFields.length > 0 && (
+      {/* Campos obligatorios faltantes SIN opciones (bloqueantes) */}
+      {missingRequiredWithoutOptions.length > 0 && (
         <Card className="border-amber-500/50 bg-amber-500/5">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
@@ -327,7 +355,7 @@ export function StepMapping({
               <div className="space-y-1">
                 <p className="font-medium text-amber-500">Campos obligatorios sin asignar</p>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {missingRequiredFields.map(field => (
+                  {missingRequiredWithoutOptions.map(field => (
                     <Badge key={field.field} variant="outline" className="border-amber-500/50 text-amber-500">
                       {field.label}
                     </Badge>
@@ -338,6 +366,80 @@ export function StepMapping({
           </CardContent>
         </Card>
       )}
+
+      {/* Selectores para campos obligatorios faltantes CON opciones */}
+      {missingRequiredWithOptions.map(field => {
+        const selectedValue = defaultFieldValues?.[field.field];
+        const options = field.foreignKeyConfig?.options || [];
+        const fieldIcon = field.field.includes('currency') ? Coins : 
+                         field.field.includes('wallet') ? Wallet : AlertCircle;
+        const IconComponent = fieldIcon;
+        
+        return (
+          <Card key={field.field} className={cn(
+            "border-blue-500/30",
+            selectedValue ? "bg-green-500/5 border-green-500/30" : "bg-blue-500/5"
+          )}>
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <IconComponent className={cn(
+                  "h-5 w-5 flex-shrink-0 mt-0.5",
+                  selectedValue ? "text-green-500" : "text-blue-500"
+                )} />
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <p className={cn(
+                      "font-medium",
+                      selectedValue ? "text-green-500" : "text-blue-500"
+                    )}>
+                      {selectedValue ? (
+                        <>
+                          <Check className="h-4 w-4 inline mr-1" />
+                          {field.label} asignado
+                        </>
+                      ) : (
+                        `Seleccionar ${field.label}`
+                      )}
+                    </p>
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-amber-500/50 text-amber-500">
+                      Requerido
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedValue 
+                      ? `Todos los registros usarán el valor seleccionado.`
+                      : `No se detectó columna de "${field.label}" en el archivo. Selecciona un valor para todos los registros.`
+                    }
+                  </p>
+                  <div className="pt-1">
+                    <Select
+                      value={selectedValue || ''}
+                      onValueChange={(value) => onDefaultFieldValueChange?.(field.field, value)}
+                    >
+                      <SelectTrigger 
+                        className={cn(
+                          "w-full",
+                          selectedValue && "border-green-500/50"
+                        )}
+                        data-testid={`select-default-${field.field}`}
+                      >
+                        <SelectValue placeholder={`Selecciona ${field.label.toLowerCase()}`} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {options.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
 
       <ScrollArea className="h-[400px] pr-4">
         <div className="space-y-3">
