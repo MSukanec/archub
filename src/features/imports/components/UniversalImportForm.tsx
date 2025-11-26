@@ -394,6 +394,142 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     return conflictGroups;
   }, [parsedData, extendedSchema, columnMapping, config.valueMapConfig]);
 
+  // Calculate successful mappings (values that were auto-matched correctly)
+  const successfulMappings = useMemo(() => {
+    if (!parsedData) return [];
+    
+    const mappingGroups: Array<{
+      field: string;
+      fieldLabel: string;
+      mappings: Array<{ originalValue: string; mappedTo: string; mappedLabel: string }>;
+    }> = [];
+
+    const foreignKeyFields = extendedSchema.filter(f => f.type === 'foreign-key');
+
+    for (const field of foreignKeyFields) {
+      const columnIndex = Object.entries(columnMapping).find(([_, f]) => f === field.field)?.[0];
+      if (!columnIndex) continue;
+
+      const colIdx = parseInt(columnIndex);
+      const uniqueValues = new Set<string>();
+      
+      parsedData.rows.forEach(row => {
+        const value = row[colIdx];
+        if (value && String(value).trim()) {
+          uniqueValues.add(String(value).trim());
+        }
+      });
+
+      const matchedMappings: Array<{ originalValue: string; mappedTo: string; mappedLabel: string }> = [];
+      const valueMap = config.valueMapConfig?.[field.field] || {};
+      const valueMapKeys = Object.keys(valueMap);
+      
+      const foreignKeyOptions = field.foreignKeyConfig?.options || [];
+
+      uniqueValues.forEach(value => {
+        const normalized = value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+        
+        // Check in valueMap first
+        let matchedKey: string | null = null;
+        let matchedValue: string | null = null;
+        let matchedLabel: string | null = null;
+        
+        // Exact match in valueMap
+        if (valueMapKeys.includes(normalized)) {
+          matchedKey = normalized;
+          matchedValue = valueMap[normalized];
+          matchedLabel = matchedKey.charAt(0).toUpperCase() + matchedKey.slice(1);
+        }
+        
+        // Partial match in valueMap
+        if (!matchedKey) {
+          for (const key of valueMapKeys) {
+            if (key.includes(normalized) || normalized.includes(key)) {
+              matchedKey = key;
+              matchedValue = valueMap[key];
+              matchedLabel = matchedKey.charAt(0).toUpperCase() + matchedKey.slice(1);
+              break;
+            }
+          }
+        }
+        
+        // Check in foreignKeyConfig options
+        if (!matchedKey) {
+          for (const opt of foreignKeyOptions) {
+            const optLabel = opt.label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+            if (optLabel === normalized || optLabel.includes(normalized) || normalized.includes(optLabel)) {
+              matchedKey = opt.value;
+              matchedValue = opt.value;
+              matchedLabel = opt.label;
+              break;
+            }
+          }
+        }
+        
+        // Fuzzy match (80% threshold)
+        if (!matchedKey && normalized.length > 3) {
+          for (const key of valueMapKeys) {
+            if (key.length > 3) {
+              const longer = normalized.length > key.length ? normalized : key;
+              const shorter = normalized.length > key.length ? key : normalized;
+              let matches = 0;
+              for (let i = 0; i < shorter.length; i++) {
+                if (longer.includes(shorter[i])) matches++;
+              }
+              const similarity = matches / longer.length;
+              if (similarity > 0.8) {
+                matchedKey = key;
+                matchedValue = valueMap[key];
+                matchedLabel = matchedKey.charAt(0).toUpperCase() + matchedKey.slice(1);
+                break;
+              }
+            }
+          }
+        }
+        
+        // Fuzzy match in foreignKeyConfig
+        if (!matchedKey && normalized.length > 3) {
+          for (const opt of foreignKeyOptions) {
+            const optLabel = opt.label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+            if (optLabel.length > 3) {
+              const longer = normalized.length > optLabel.length ? normalized : optLabel;
+              const shorter = normalized.length > optLabel.length ? optLabel : normalized;
+              let matches = 0;
+              for (let i = 0; i < shorter.length; i++) {
+                if (longer.includes(shorter[i])) matches++;
+              }
+              const similarity = matches / longer.length;
+              if (similarity > 0.8) {
+                matchedKey = opt.value;
+                matchedValue = opt.value;
+                matchedLabel = opt.label;
+                break;
+              }
+            }
+          }
+        }
+        
+        if (matchedKey && matchedValue && matchedLabel) {
+          matchedMappings.push({
+            originalValue: value,
+            mappedTo: matchedValue,
+            mappedLabel: matchedLabel,
+          });
+        }
+      });
+
+      if (matchedMappings.length > 0) {
+        mappingGroups.push({
+          field: field.field,
+          fieldLabel: field.label,
+          mappings: matchedMappings,
+        });
+      }
+    }
+
+    return mappingGroups;
+  }, [parsedData, extendedSchema, columnMapping, config.valueMapConfig]);
+
   const handleMappingChange = useCallback((columnIndex: number, field: string | null) => {
     setColumnMapping(prev => {
       const next = { ...prev };
