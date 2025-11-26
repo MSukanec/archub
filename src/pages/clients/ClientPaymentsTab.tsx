@@ -146,22 +146,31 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     let countSkipped = 0;
     let latestPaymentDate: string | null = null;
 
-    // Track totals by original currency for breakdown (SIEMPRE se calcula)
+    // Track totals by original currency for breakdown
     const confirmedByCurrency = new Map<string, { symbol: string; amount: number }>();
     const pendingByCurrency = new Map<string, { symbol: string; amount: number }>();
 
-    // SIEMPRE calcular la suma real de montos sin conversión
     allPayments.forEach(payment => {
       if (!payment.currency) return;
 
       const currencySymbol = payment.currency.symbol;
 
-      // Contar por estado - SIEMPRE sumar los montos reales en su moneda original
+      // Convert amount to commitment currency using payment's exchange_rate
+      let convertedAmount = payment.amount;
+      if (commitmentCurrency && payment.currency.id !== commitmentCurrency.id) {
+        if (payment.exchange_rate && payment.exchange_rate > 0) {
+          convertedAmount = payment.amount / payment.exchange_rate;
+        } else {
+          countSkipped += 1;
+          convertedAmount = 0; // Skip if no exchange rate
+        }
+      }
+
       if (payment.status === 'confirmed') {
-        totalConfirmed += payment.amount;
+        totalConfirmed += convertedAmount;
         countConfirmed += 1;
         
-        // Track by original currency
+        // Track by original currency (unconverted amounts)
         const existing = confirmedByCurrency.get(currencySymbol);
         if (existing) {
           existing.amount += payment.amount;
@@ -169,10 +178,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           confirmedByCurrency.set(currencySymbol, { symbol: currencySymbol, amount: payment.amount });
         }
       } else if (payment.status === 'pending') {
-        totalPending += payment.amount;
+        totalPending += convertedAmount;
         countPending += 1;
         
-        // Track by original currency
+        // Track by original currency (unconverted amounts)
         const existing = pendingByCurrency.get(currencySymbol);
         if (existing) {
           existing.amount += payment.amount;
@@ -180,7 +189,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           pendingByCurrency.set(currencySymbol, { symbol: currencySymbol, amount: payment.amount });
         }
       } else if (payment.status === 'rejected') {
-        totalRejected += payment.amount;
+        totalRejected += convertedAmount;
         countRejected += 1;
       }
 
