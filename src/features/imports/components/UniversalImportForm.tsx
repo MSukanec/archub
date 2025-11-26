@@ -513,9 +513,12 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
               );
               mappedRow._clientId = matchedClient?.id || null;
             }
-            // Clean up the client_name field as we've extracted _clientId
-            delete mappedRow.client_name;
+          } else {
+            // If clientValue is null (from "Omitir valor" mapping), explicitly set _clientId to null
+            mappedRow._clientId = null;
           }
+          // Clean up the client_name field as we've extracted _clientId
+          delete mappedRow.client_name;
         }
 
         mappedRows.push(mappedRow);
