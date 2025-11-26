@@ -28,7 +28,8 @@ import {
   useProjectClients, 
   useClientPayment, 
   useCreateClientPayment, 
-  useUpdateClientPayment 
+  useUpdateClientPayment,
+  useClientCommitments,
 } from '@/features/clients/hooks'
 import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge'
 
@@ -38,6 +39,7 @@ const clientPaymentSchema = z.object({
   }),
   created_by: z.string().min(1, 'Creador es requerido'),
   client_id: z.string().min(1, 'Cliente es requerido'),
+  commitment_id: z.string().optional(),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
@@ -55,6 +57,8 @@ function FormPanel({
   onSubmit,
   projectClients,
   clientsLoading,
+  commitments,
+  commitmentsLoading,
   currencies,
   currenciesLoading,
   wallets,
@@ -69,6 +73,8 @@ function FormPanel({
   onSubmit: (data: ClientPaymentFormData) => void;
   projectClients: any[];
   clientsLoading: boolean;
+  commitments: any[];
+  commitmentsLoading: boolean;
   currencies: any[];
   currenciesLoading: boolean;
   wallets: any[];
@@ -79,6 +85,8 @@ function FormPanel({
   existingFiles: any[];
   onExistingFileDelete?: (fileId: string) => Promise<void>;
 }) {
+  const selectedClientId = form.watch('client_id');
+
   const clientOptions = useMemo(() => {
     if (!projectClients) return []
     
@@ -92,6 +100,28 @@ function FormPanel({
       })
       .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
   }, [projectClients])
+
+  const clientCommitments = useMemo(() => {
+    if (!commitments || !selectedClientId) return [];
+    return commitments.filter(c => c.client_id === selectedClientId);
+  }, [commitments, selectedClientId]);
+
+  const commitmentOptions = useMemo(() => {
+    return clientCommitments.map(c => ({
+      value: c.id,
+      label: c.unit_name 
+        ? `${c.unit_name}${c.currency?.symbol ? ` - ${c.currency.symbol} ${c.amount?.toLocaleString('es-AR') || '0'}` : ''}`
+        : `Compromiso ${c.currency?.symbol ? `- ${c.currency.symbol} ${c.amount?.toLocaleString('es-AR') || '0'}` : ''}`,
+    }));
+  }, [clientCommitments]);
+
+  React.useEffect(() => {
+    if (clientCommitments.length === 1) {
+      form.setValue('commitment_id', clientCommitments[0].id);
+    } else if (clientCommitments.length === 0) {
+      form.setValue('commitment_id', undefined);
+    }
+  }, [clientCommitments, form])
 
   if (isLoading) {
     return (
@@ -286,8 +316,43 @@ function FormPanel({
           />
         </div>
 
-        {/* Row 4: Estado / Referencia */}
+        {/* Row 4: Compromiso / Estado */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="commitment_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Compromiso</FormLabel>
+                <FormControl>
+                  <Select 
+                    value={field.value || ''} 
+                    onValueChange={field.onChange}
+                    disabled={commitmentsLoading || !selectedClientId || clientCommitments.length === 0}
+                  >
+                    <SelectTrigger data-testid="select-payment-commitment">
+                      <SelectValue placeholder={
+                        !selectedClientId 
+                          ? "Selecciona un cliente primero" 
+                          : clientCommitments.length === 0 
+                            ? "Sin compromisos" 
+                            : "Seleccionar compromiso"
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {commitmentOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="status"
@@ -313,24 +378,6 @@ function FormPanel({
               </FormItem>
             )}
           />
-
-          <FormField
-            control={form.control}
-            name="reference"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Referencia (opcional)</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ej: TRX-12345"
-                    {...field}
-                    data-testid="input-payment-reference"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
 
         {/* Row 5: Notas */}
@@ -346,6 +393,25 @@ function FormPanel({
                   rows={2}
                   {...field}
                   data-testid="textarea-payment-notes"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Row 6: Referencia (100% ancho) */}
+        <FormField
+          control={form.control}
+          name="reference"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Referencia (opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: TRX-12345"
+                  {...field}
+                  data-testid="input-payment-reference"
                 />
               </FormControl>
               <FormMessage />
@@ -542,6 +608,7 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
   // Hooks para obtener datos
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
   const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId, organizationId)
+  const { data: commitments, isLoading: commitmentsLoading } = useClientCommitments(projectId, organizationId)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId || '')
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
 
@@ -556,6 +623,7 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
       payment_date: new Date(),
       created_by: '',
       client_id: '',
+      commitment_id: undefined,
       wallet_id: '',
       amount: 0,
       currency_id: '',
@@ -577,6 +645,7 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
         payment_date: paymentDate,
         created_by: existingPayment.created_by || currentMember?.id || '',
         client_id: existingPayment.client_id || '',
+        commitment_id: existingPayment.commitment_id || undefined,
         wallet_id: existingPayment.wallet_id || '',
         amount: existingPayment.amount || 0,
         currency_id: existingPayment.currency_id || '',
@@ -691,6 +760,7 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
           paymentId,
           updates: {
             client_id: data.client_id,
+            commitment_id: data.commitment_id || null,
             wallet_id: data.wallet_id,
             amount: data.amount,
             currency_id: data.currency_id,
@@ -714,7 +784,7 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
             status: data.status,
             reference: data.reference || null,
             notes: data.notes || null,
-            commitment_id: null,
+            commitment_id: data.commitment_id || null,
             schedule_id: null,
           },
           projectId: projectId || '',
@@ -830,6 +900,8 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
             onSubmit={onSubmit}
             projectClients={projectClients || []}
             clientsLoading={clientsLoading}
+            commitments={commitments || []}
+            commitmentsLoading={commitmentsLoading}
             currencies={currencies || []}
             currenciesLoading={currenciesLoading}
             wallets={wallets || []}
