@@ -98,7 +98,7 @@ export async function getSitelogGalleryFiles(
       query = query.eq('project_id', projectId);
     }
 
-    const { data, error } = await query.order('site_logs.log_date', { ascending: false });
+    const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) throw error;
 

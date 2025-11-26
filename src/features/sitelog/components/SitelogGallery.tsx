@@ -59,7 +59,22 @@ export function SitelogGallery({ files, onDelete, onDownload, onEdit }: SitelogG
   const groupedByWeek = useMemo(() => {
     const groups = new Map<string, GroupedFiles>();
 
-    galleryFiles.forEach(file => {
+    // Primero ordenar archivos por fecha de bitácora (más recientes primero)
+    const sortedFiles = [...galleryFiles].sort((a, b) => {
+      const originalA = files.find(f => f.id === a.id);
+      const originalB = files.find(f => f.id === b.id);
+      
+      const dateA = originalA?.site_log?.date 
+        ? new Date(originalA.site_log.date).getTime()
+        : new Date(a.created_at).getTime();
+      const dateB = originalB?.site_log?.date 
+        ? new Date(originalB.site_log.date).getTime()
+        : new Date(b.created_at).getTime();
+      
+      return dateB - dateA; // Más recientes primero
+    });
+
+    sortedFiles.forEach(file => {
       // Obtener el archivo original para acceder a site_log.date
       const originalFile = files.find(f => f.id === file.id);
       const fileDate = originalFile?.site_log?.date 
@@ -88,7 +103,7 @@ export function SitelogGallery({ files, onDelete, onDownload, onEdit }: SitelogG
     return Array.from(groups.values()).sort((a, b) => 
       b.weekStart.getTime() - a.weekStart.getTime()
     );
-  }, [galleryFiles]);
+  }, [galleryFiles, files]);
 
   if (files.length === 0) {
     return null;
