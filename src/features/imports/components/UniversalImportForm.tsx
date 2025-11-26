@@ -757,11 +757,11 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
 
         // Convert date fields to ISO format (YYYY-MM-DD)
         for (const schemaField of config.targetSchema) {
-          if (schemaField.type === 'date' && mappedRow[schemaField.name]) {
-            const rawValue = String(mappedRow[schemaField.name]).trim();
+          if (schemaField.type === 'date' && mappedRow[schemaField.field]) {
+            const rawValue = String(mappedRow[schemaField.field]).trim();
             const parsedDate = parseDateToISO(rawValue);
             if (parsedDate) {
-              mappedRow[schemaField.name] = parsedDate;
+              mappedRow[schemaField.field] = parsedDate;
             }
             // If parsing fails, keep original value - database will show the error
           }
