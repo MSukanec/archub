@@ -21,6 +21,7 @@ import { registerBillingRoutes } from './routes/billing';
 import { registerLearningRoutes } from './routes/learning';
 import { registerOrganizationRoutes } from './routes/organization';
 import { registerCommunityRoutes } from './routes/community';
+import { registerImportRoutes } from './routes/import';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
@@ -79,6 +80,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register community routes (active users, organizations, projects, stats)
   registerCommunityRoutes(app, deps);
+
+  // Register import routes (AI suggest mapping, save mappings)
+  registerImportRoutes(app, deps);
 
   // Diagnostic endpoints for payments
   app.get("/api/diag/last-payment-events", async (req, res) => {
