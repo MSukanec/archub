@@ -4,6 +4,8 @@ import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/m
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useProjectContext } from '@/stores/projectContext';
+import { useUpdateUserOrganizationPreferences } from '@/features/organization';
 
 import { useFileParser } from '../hooks/useFileParser';
 import { useColumnAutoMap } from '../hooks/useColumnAutoMap';
@@ -66,6 +68,11 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.preferences?.last_organization_id || userData?.organization?.id;
+  const userId = userData?.user?.id;
+  
+  // Global project context hooks (to change context like the header selector)
+  const { setSelectedProject, currentOrganizationId } = useProjectContext();
+  const updatePreferencesMutation = useUpdateUserOrganizationPreferences(userId);
   
   const [currentStep, setCurrentStep] = useState(1);
   const [columnMapping, setColumnMapping] = useState<ColumnMapping>({});
@@ -789,11 +796,29 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     setCurrentStep(1);
   };
 
-  const handleSwitchToOrgContext = useCallback(() => {
+  const handleSwitchToOrgContext = useCallback(async () => {
+    if (!currentOrganizationId) return;
+    
+    // Update preference in database to persist organization-wide view (same as header selector)
+    await updatePreferencesMutation.mutateAsync({
+      organizationId: currentOrganizationId,
+      lastProjectId: null
+    });
+    
+    // Set to null to indicate organization-wide view (same as header selector)
+    setSelectedProject(null, currentOrganizationId);
+    
+    // Also set local state for immediate UI update
     setContextOverrideToOrg(true);
+    
     // Re-trigger auto-mapping now that project_name field will be available
     setColumnMapping({});
-  }, []);
+    
+    toast({
+      title: 'Contexto actualizado',
+      description: 'Ahora estás importando a nivel organización. Mapea la columna "Proyecto" al campo correspondiente.',
+    });
+  }, [currentOrganizationId, updatePreferencesMutation, setSelectedProject, toast]);
 
   const renderStep = () => {
     switch (currentStep) {

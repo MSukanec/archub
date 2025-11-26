@@ -237,10 +237,10 @@ export function StepMapping({
                   </p>
                 </div>
                 <Button
-                  variant="outline"
+                  variant="default"
                   size="sm"
                   onClick={onSwitchToOrgContext}
-                  className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                  className="bg-destructive text-white hover:bg-destructive/90"
                   data-testid="button-switch-to-org-context"
                 >
                   <Building2 className="h-4 w-4 mr-2" />
