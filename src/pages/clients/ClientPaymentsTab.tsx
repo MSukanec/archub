@@ -329,9 +329,15 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       {
         field: 'client_name',
         label: 'Cliente (Nombre)',
-        type: 'string',
+        type: 'foreign-key',
         required: true,
         description: 'Ej: Juan García',
+        foreignKeyConfig: {
+          entityName: 'client',
+          labelKey: 'label',
+          valueKey: 'value',
+          options: [], // Will be populated dynamically with availableClients
+        },
       },
       {
         field: 'amount',
@@ -425,6 +431,52 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       ? { type: 'project', projectId: activeProjectId, projectName: projectName || undefined }
       : { type: 'organization', organizationId: organizationId!, organizationName: organizationName || undefined };
 
+    // Build available clients list for foreign-key resolution
+    const getClientDisplayName = (contact: { company_name?: string | null; full_name?: string | null; first_name?: string | null; last_name?: string | null } | null): string => {
+      if (!contact) return '';
+      return String(contact.company_name || 
+             contact.full_name || 
+             `${contact.first_name || ''} ${contact.last_name || ''}`.trim());
+    };
+
+    const availableClientsMap = new Map<string, { id: string; name: string }>();
+    
+    // Add clients from projectClientsData (primary source)
+    if (projectClientsData && projectClientsData.length > 0) {
+      projectClientsData.forEach(client => {
+        if (client.contact && client.id) {
+          const clientName = getClientDisplayName(client.contact);
+          if (clientName && !availableClientsMap.has(client.id)) {
+            availableClientsMap.set(client.id, { id: client.id, name: clientName });
+          }
+        }
+      });
+    }
+    
+    // Add clients from commitments
+    if (commitmentsData && commitmentsData.length > 0) {
+      commitmentsData.forEach(commitment => {
+        if (commitment.project_client?.contact && commitment.client_id) {
+          const clientName = getClientDisplayName(commitment.project_client.contact);
+          if (clientName && !availableClientsMap.has(commitment.client_id)) {
+            availableClientsMap.set(commitment.client_id, { id: commitment.client_id, name: clientName });
+          }
+        }
+      });
+    }
+    
+    // Add clients from existing payments
+    allPayments.forEach(payment => {
+      if (payment.client?.contact && payment.client_id) {
+        const clientName = getClientDisplayName(payment.client.contact);
+        if (clientName && !availableClientsMap.has(payment.client_id)) {
+          availableClientsMap.set(payment.client_id, { id: payment.client_id, name: clientName });
+        }
+      }
+    });
+
+    const availableClients = Array.from(availableClientsMap.values());
+
     // Abrir modal de importación universal
     openModal('universal-import', {
       config: {
@@ -434,6 +486,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         valueMapConfig,
         projectContext,
         availableProjects: projectsData?.map(p => ({ id: p.id, name: p.name })) || [],
+        availableClients,
         onImport: async (rows: any[]) => {
           const clientsData: Record<string, string> = {};
           

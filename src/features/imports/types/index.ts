@@ -32,6 +32,9 @@ export interface ImportConfig {
   
   /** Lista de proyectos disponibles para mapeo (si contexto es organización) */
   availableProjects?: Array<{ id: string; name: string }>;
+  
+  /** Lista de clientes disponibles para mapeo de foreign-key */
+  availableClients?: Array<{ id: string; name: string }>;
 }
 
 export interface ParsedData {

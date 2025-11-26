@@ -74,6 +74,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
   const [importProgress, setImportProgress] = useState(0);
   const [aiConfidence, setAIConfidence] = useState<Record<string, number>>({});
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [contextOverrideToOrg, setContextOverrideToOrg] = useState(false);
 
   const { suggestMapping, saveMappings, isLoading: isLoadingAI } = useAISuggestMapping();
@@ -107,6 +108,27 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     };
   }, [parsedData]);
 
+  // Detectar si hay columna de cliente en el archivo
+  const clientColumnDetection = useMemo(() => {
+    if (!parsedData) return { hasClientColumn: false, clientColumnIndex: -1 };
+    
+    const clientKeywords = ['cliente', 'client', 'customer', 'comprador'];
+    
+    const clientColumnIndex = parsedData.headers.findIndex(header => {
+      const normalizedHeader = header.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+      return clientKeywords.some(keyword => 
+        normalizedHeader === keyword || 
+        normalizedHeader.includes(keyword) ||
+        keyword.includes(normalizedHeader)
+      );
+    });
+    
+    return {
+      hasClientColumn: clientColumnIndex !== -1,
+      clientColumnIndex,
+    };
+  }, [parsedData]);
+
   // Effective project context: allows overriding from project to organization
   const effectiveProjectContext = useMemo(() => {
     if (contextOverrideToOrg && config.projectContext?.type === 'project') {
@@ -128,14 +150,36 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
 
   // Dynamically extend schema to include project_name field when importing at org level with project column
   // Also extends when user has overridden project context to organization
+  // Additionally, merge availableClients into client_name field's foreignKeyConfig.options
   const extendedSchema = useMemo(() => {
     const shouldAddProjectField = 
       (effectiveProjectContext?.type === 'organization' && projectColumnDetection.hasProjectColumn && config.availableProjects?.length) ||
       (contextOverrideToOrg && projectColumnDetection.hasProjectColumn && config.availableProjects?.length);
     
+    let schema = [...config.targetSchema];
+    
+    // Merge availableClients into client_name field if it exists and has availableClients
+    if (config.availableClients?.length) {
+      schema = schema.map(field => {
+        if (field.field === 'client_name' && field.type === 'foreign-key') {
+          return {
+            ...field,
+            foreignKeyConfig: {
+              ...field.foreignKeyConfig,
+              entityName: field.foreignKeyConfig?.entityName || 'client',
+              labelKey: field.foreignKeyConfig?.labelKey || 'label',
+              valueKey: field.foreignKeyConfig?.valueKey || 'value',
+              options: config.availableClients!.map(c => ({ label: c.name, value: c.id }))
+            }
+          };
+        }
+        return field;
+      });
+    }
+    
     if (shouldAddProjectField) {
       return [
-        ...config.targetSchema,
+        ...schema,
         {
           field: 'project_name',
           label: 'Proyecto',
@@ -151,8 +195,8 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
         }
       ];
     }
-    return config.targetSchema;
-  }, [config.targetSchema, effectiveProjectContext, projectColumnDetection.hasProjectColumn, config.availableProjects, contextOverrideToOrg]);
+    return schema;
+  }, [config.targetSchema, effectiveProjectContext, projectColumnDetection.hasProjectColumn, config.availableProjects, contextOverrideToOrg, config.availableClients]);
 
   const { 
     autoMapping, 
@@ -420,6 +464,31 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           mappedRow._projectId = config.projectContext.projectId;
         }
 
+        // Inject _clientId based on client column detection
+        if (!clientColumnDetection.hasClientColumn && selectedClientId) {
+          // Use selected client from dropdown when no client column in file
+          mappedRow._clientId = selectedClientId;
+        } else if (clientColumnDetection.hasClientColumn) {
+          // Client mapping happens in conflicts step via manual mappings
+          // The client_name field will be processed through foreignKeyConfig
+          const clientValue = mappedRow.client_name;
+          if (clientValue) {
+            // Check if already a valid ID (from manual mapping in conflicts step)
+            const isClientId = config.availableClients?.some(c => c.id === clientValue);
+            if (isClientId) {
+              mappedRow._clientId = clientValue;
+            } else {
+              // Try to match by name
+              const matchedClient = config.availableClients?.find(c => 
+                c.name.toLowerCase().trim() === String(clientValue).toLowerCase().trim()
+              );
+              mappedRow._clientId = matchedClient?.id || null;
+            }
+            // Clean up the client_name field as we've extracted _clientId
+            delete mappedRow.client_name;
+          }
+        }
+
         mappedRows.push(mappedRow);
         setImportProgress(Math.round(((i + 1) / parsedData.rows.length) * 100));
       }
@@ -469,6 +538,15 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             return false;
           }
         }
+        
+        // If availableClients exists but no client column in file, require selectedClientId
+        if (!clientColumnDetection.hasClientColumn && 
+            config.availableClients && 
+            config.availableClients.length > 0 && 
+            !selectedClientId) {
+          return false;
+        }
+        
         return validationSummary.missingRequiredFields.length === 0;
       }
       case 3:
@@ -482,7 +560,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       default:
         return false;
     }
-  }, [currentStep, parsedData, validationSummary, conflicts, manualMappings, effectiveProjectContext, projectColumnDetection, selectedProjectId, columnMapping, hasProjectContextConflict]);
+  }, [currentStep, parsedData, validationSummary, conflicts, manualMappings, effectiveProjectContext, projectColumnDetection, selectedProjectId, columnMapping, hasProjectContextConflict, clientColumnDetection, config.availableClients, selectedClientId]);
 
   const goNext = () => {
     if (currentStep < 5 && canGoNext) {
@@ -554,6 +632,11 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             onProjectSelect={setSelectedProjectId}
             hasProjectContextConflict={hasProjectContextConflict}
             onSwitchToOrgContext={handleSwitchToOrgContext}
+            hasClientColumn={clientColumnDetection.hasClientColumn}
+            clientColumnIndex={clientColumnDetection.clientColumnIndex}
+            availableClients={config.availableClients}
+            selectedClientId={selectedClientId}
+            onClientSelect={setSelectedClientId}
           />
         ) : null;
       case 3:

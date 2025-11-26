@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowRight, Check, AlertCircle, HelpCircle, Loader2, Sparkles, FolderKanban, Building2, Info, AlertTriangle } from 'lucide-react';
+import { ArrowRight, Check, AlertCircle, HelpCircle, Loader2, Sparkles, FolderKanban, Building2, Info, AlertTriangle, UserCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -35,6 +35,16 @@ interface StepMappingProps {
   hasProjectContextConflict?: boolean;
   /** Callback para cambiar a contexto de organización */
   onSwitchToOrgContext?: () => void;
+  /** Se detectó columna de cliente en el archivo */
+  hasClientColumn?: boolean;
+  /** Índice de la columna de cliente detectada */
+  clientColumnIndex?: number;
+  /** Lista de clientes disponibles para selección */
+  availableClients?: Array<{ id: string; name: string }>;
+  /** Cliente seleccionado cuando no hay columna de cliente */
+  selectedClientId?: string | null;
+  /** Callback cuando se selecciona un cliente */
+  onClientSelect?: (clientId: string) => void;
 }
 
 function getAIBadge(confidence: number) {
@@ -63,6 +73,11 @@ export function StepMapping({
   onProjectSelect,
   hasProjectContextConflict,
   onSwitchToOrgContext,
+  hasClientColumn,
+  clientColumnIndex,
+  availableClients,
+  selectedClientId,
+  onClientSelect,
 }: StepMappingProps) {
   const contextName = projectContext?.type === 'project' 
     ? projectContext.projectName 
@@ -231,6 +246,59 @@ export function StepMapping({
                   <Building2 className="h-4 w-4 mr-2" />
                   Cambiar a contexto de Organización
                 </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Selector de cliente cuando no hay columna de cliente en el archivo */}
+      {!hasClientColumn && availableClients && availableClients.length > 0 && (
+        <Card className="border-orange-500/30 bg-orange-500/5">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <UserCircle className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-orange-500">
+                    Asignación de Cliente
+                  </p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  No se detectó columna de cliente en el archivo. Selecciona el cliente al que se asignarán todos los registros.
+                </p>
+                <div className="pt-2">
+                  <Select
+                    value={selectedClientId || ''}
+                    onValueChange={(value) => onClientSelect?.(value)}
+                  >
+                    <SelectTrigger 
+                      className={cn(
+                        "w-full",
+                        selectedClientId && "border-green-500/50"
+                      )}
+                      data-testid="select-client-for-import"
+                    >
+                      <SelectValue placeholder="Selecciona el cliente para estos registros" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableClients.map(client => (
+                        <SelectItem key={client.id} value={client.id}>
+                          <div className="flex items-center gap-2">
+                            <UserCircle className="h-4 w-4 text-muted-foreground" />
+                            <span>{client.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedClientId && (
+                    <p className="text-xs text-green-600 mt-1.5 flex items-center gap-1">
+                      <Check className="h-3 w-3" />
+                      Todos los registros se asignarán a este cliente
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
