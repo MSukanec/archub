@@ -14,7 +14,7 @@ import { createClientRole, updateClientRole, getClientRoleUsageCount, getClientR
 import { CLIENT_QUERY_KEYS } from '@/features/clients/constants';
 import { useDeleteClientRole } from '@/features/clients/hooks/use-delete-client-role';
 import { useReplaceClientRole } from '@/features/clients/hooks/use-replace-client-role';
-import { useGlobalModalStore } from '@/stores/globalModalStore';
+import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
 import type { ClientRole } from '@/features/clients/types';
 
 const clientRoleSchema = z.object({
