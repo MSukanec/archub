@@ -26,7 +26,7 @@ import {
 import { useProject } from '@/features/projects/hooks/use-project'
 import { useProjects } from '@/features/projects/hooks/use-projects'
 import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge'
-import { useOrganizationWallets } from '@/features/organization/hooks'
+import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization/hooks'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import type { TargetField, ImportConfig, ProjectContext } from '@/features/imports/types'
 
@@ -74,6 +74,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   
   // Get organization currencies for import
   const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId);
+  
+  // Get organization members to find current member for created_by FK
+  const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
 
   // Filter states
   const [filterWallet, setFilterWallet] = useState<string>('all');
@@ -610,20 +613,26 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           // Fallback to organization wallets if no payments exist
           // IMPORTANT: client_payments.wallet_id is FK to organization_wallets.id, NOT wallets.id
           if (walletsMap.size === 0 && organizationWallets && organizationWallets.length > 0) {
+            console.log('[Import] Using organizationWallets fallback:', organizationWallets);
             organizationWallets.forEach(ow => {
               if (ow.wallets?.name && ow.id) {
                 const normalizedName = ow.wallets.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+                console.log('[Import] Adding wallet to map:', { name: normalizedName, id: ow.id, is_default: ow.is_default });
                 walletsMap.set(normalizedName, ow.id); // Use organization_wallets.id
                 if (!defaultWalletId && ow.is_default) {
                   defaultWalletId = ow.id; // Use organization_wallets.id
+                  console.log('[Import] Set defaultWalletId from is_default:', defaultWalletId);
                 }
               }
             });
             // If no default wallet, use the first one
             if (!defaultWalletId && organizationWallets.length > 0) {
               defaultWalletId = organizationWallets[0].id; // Use organization_wallets.id
+              console.log('[Import] Set defaultWalletId from first wallet:', defaultWalletId);
             }
           }
+          console.log('[Import] Final walletsMap:', Object.fromEntries(walletsMap));
+          console.log('[Import] Final defaultWalletId:', defaultWalletId);
 
           // Validar que TODOS los clientes existan ANTES de importar
           const invalidRows: Array<{ index: number; reason: string }> = [];
@@ -734,10 +743,15 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
                 const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(walletInput);
                 if (isUUID) {
                   resolvedWalletId = walletInput;
+                  console.log('[Import] wallet_name is UUID, using directly:', resolvedWalletId);
                 } else {
                   resolvedWalletId = walletsMap.get(walletInput.toLowerCase()) || defaultWalletId;
+                  console.log('[Import] Resolved wallet_name:', { input: walletInput, resolved: resolvedWalletId });
                 }
+              } else {
+                console.log('[Import] No wallet_name in row, using defaultWalletId:', defaultWalletId);
               }
+              console.log('[Import] Final resolvedWalletId for this row:', resolvedWalletId);
 
               const paymentData = {
                 client_id: row._clientId,
@@ -760,11 +774,17 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
                 throw new Error('No se pudo determinar el proyecto para este pago');
               }
               
+              // Find current organization member (created_by FK references organization_members.id, NOT users.id)
+              const currentMember = organizationMembers.find((m: any) => m.user_id === userData?.user?.id);
+              if (!currentMember) {
+                throw new Error('No se encontró el miembro de la organización actual');
+              }
+              
               await createPaymentMutation.mutateAsync({
                 payment: paymentData,
                 projectId: targetProjectId,
                 organizationId,
-                createdBy: userData.user.id,
+                createdBy: currentMember.id,
               });
               
               successCount++;
