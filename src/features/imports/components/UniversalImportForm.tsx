@@ -25,6 +25,62 @@ import type {
   IMPORT_STEPS 
 } from '../types';
 
+/**
+ * Parse various date formats to ISO (YYYY-MM-DD)
+ * Supports: DD/MM, DD/MM/YY, DD/MM/YYYY, DD-MM-YYYY, etc.
+ * Also supports ISO format (YYYY-MM-DD) which passes through unchanged.
+ */
+function parseDateToISO(value: string): string | null {
+  if (!value) return null;
+  
+  const cleaned = value.trim();
+  
+  // Already in ISO format (YYYY-MM-DD)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) {
+    return cleaned;
+  }
+  
+  // Handle DD/MM/YYYY or DD-MM-YYYY
+  const fullDateMatch = cleaned.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+  if (fullDateMatch) {
+    const day = fullDateMatch[1].padStart(2, '0');
+    const month = fullDateMatch[2].padStart(2, '0');
+    const year = fullDateMatch[3];
+    return `${year}-${month}-${day}`;
+  }
+  
+  // Handle DD/MM/YY (2-digit year)
+  const shortYearMatch = cleaned.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2})$/);
+  if (shortYearMatch) {
+    const day = shortYearMatch[1].padStart(2, '0');
+    const month = shortYearMatch[2].padStart(2, '0');
+    const shortYear = parseInt(shortYearMatch[3]);
+    // Assume 2000s for years < 50, 1900s otherwise
+    const year = shortYear < 50 ? 2000 + shortYear : 1900 + shortYear;
+    return `${year}-${month}-${day}`;
+  }
+  
+  // Handle DD/MM (current year)
+  const dayMonthMatch = cleaned.match(/^(\d{1,2})[\/\-.](\d{1,2})$/);
+  if (dayMonthMatch) {
+    const day = dayMonthMatch[1].padStart(2, '0');
+    const month = dayMonthMatch[2].padStart(2, '0');
+    const year = new Date().getFullYear();
+    return `${year}-${month}-${day}`;
+  }
+  
+  // Try to parse as Date object (for Excel serial numbers or other formats)
+  const dateObj = new Date(cleaned);
+  if (!isNaN(dateObj.getTime())) {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  
+  return null; // Could not parse
+}
+
 interface UniversalImportFormProps {
   modalData?: {
     config: ImportConfig;
@@ -697,6 +753,18 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
         } else if (config.projectContext?.type === 'project') {
           // For project context, use the project from context
           mappedRow._projectId = config.projectContext.projectId;
+        }
+
+        // Convert date fields to ISO format (YYYY-MM-DD)
+        for (const schemaField of config.targetSchema) {
+          if (schemaField.type === 'date' && mappedRow[schemaField.name]) {
+            const rawValue = String(mappedRow[schemaField.name]).trim();
+            const parsedDate = parseDateToISO(rawValue);
+            if (parsedDate) {
+              mappedRow[schemaField.name] = parsedDate;
+            }
+            // If parsing fails, keep original value - database will show the error
+          }
         }
 
         // Inject _clientId based on client column detection
