@@ -99,7 +99,7 @@ export function Header({ navigation }: HeaderProps) {
       return (
         <div className="hidden md:flex items-center space-x-3">
           <Link href="/home">
-            <Button size="sm" className="h-8 px-3 bg-white/10 hover:bg-white/20 text-white border-white/20" data-testid="button-dashboard">
+            <Button variant="default" size="sm" className="h-8 px-3" data-testid="button-dashboard">
               Ingresar
             </Button>
           </Link>
