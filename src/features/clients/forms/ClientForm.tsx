@@ -360,6 +360,20 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
     staleTime: 2 * 60 * 1000,
   });
 
+  // Query to get client roles
+  const { data: clientRoles = [], isLoading: clientRolesLoading } = useQuery<any[]>({
+    queryKey: [`/api/client-roles`],
+    enabled: !!organizationId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Query to get existing client data when editing
+  const { data: existingClient, isLoading: existingClientLoading } = useQuery<any>({
+    queryKey: [`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`],
+    enabled: !!clientId && !!projectId && !!organizationId && (isEditing || isViewMode),
+    staleTime: 2 * 60 * 1000,
+  });
+
   // Filter out contacts that are already clients of this project (only in create mode)
   // In edit mode, ensure the current client's contact is always included in the list
   const contacts = useMemo(() => {
@@ -390,20 +404,6 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
     
     return allContacts.filter((contact: any) => !existingContactIds.has(contact.id));
   }, [allContacts, existingProjectClients, isEditing, isViewMode, existingClient]);
-
-  // Query to get client roles
-  const { data: clientRoles = [], isLoading: clientRolesLoading } = useQuery<any[]>({
-    queryKey: [`/api/client-roles`],
-    enabled: !!organizationId,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  // Query to get existing client data when editing
-  const { data: existingClient, isLoading: existingClientLoading } = useQuery<any>({
-    queryKey: [`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`],
-    enabled: !!clientId && !!projectId && !!organizationId && (isEditing || isViewMode),
-    staleTime: 2 * 60 * 1000,
-  });
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
