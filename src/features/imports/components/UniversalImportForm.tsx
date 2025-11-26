@@ -580,7 +580,8 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
         return validationSummary.missingRequiredFields.length === 0;
       }
       case 3:
-        return validationSummary.errors === 0 && validationSummary.warnings === 0;
+        // Only block on errors, warnings (like unmatched foreign-keys) can be resolved in conflicts step
+        return validationSummary.errors === 0;
       case 4:
         return conflicts.every(c => 
           c.originalValues.every(v => manualMappings[`${c.field}_${v}`] !== undefined)

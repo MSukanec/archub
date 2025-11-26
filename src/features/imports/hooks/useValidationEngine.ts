@@ -84,30 +84,34 @@ export function useValidationEngine({
     switch (fieldConfig.type) {
       case 'foreign-key': {
         const fieldValueMap = valueMapConfig[field];
+        const foreignKeyOptions = fieldConfig.foreignKeyConfig?.options || [];
+        const normalized = stringValue.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+        
+        // Check in valueMapConfig first
+        let hasMatch = false;
         if (fieldValueMap) {
-          const normalized = stringValue.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-          const hasMatch = Object.keys(fieldValueMap).some(key => 
+          hasMatch = Object.keys(fieldValueMap).some(key => 
             key === normalized || 
             key.includes(normalized) || 
             normalized.includes(key)
           );
-          
-          if (!hasMatch && !isValidUUID(stringValue)) {
-            return {
-              row: rowIndex,
-              column: field,
-              field,
-              message: `"${stringValue}" no coincide con ningún ${fieldConfig.label}`,
-              value,
-              severity: 'warning',
-            };
-          }
-        } else if (!isValidUUID(stringValue)) {
+        }
+        
+        // Then check in foreignKeyConfig options
+        if (!hasMatch && foreignKeyOptions.length > 0) {
+          hasMatch = foreignKeyOptions.some(opt => {
+            const optLabel = opt.label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+            return optLabel === normalized || optLabel.includes(normalized) || normalized.includes(optLabel);
+          });
+        }
+        
+        // If still no match and not a UUID, it's a warning (will be resolved in conflicts step)
+        if (!hasMatch && !isValidUUID(stringValue)) {
           return {
             row: rowIndex,
             column: field,
             field,
-            message: `"${stringValue}" no es un ID válido`,
+            message: `"${stringValue}" no se encontró en el sistema`,
             value,
             severity: 'warning',
           };
