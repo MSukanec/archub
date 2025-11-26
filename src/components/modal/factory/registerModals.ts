@@ -12,6 +12,7 @@ import ClientRoleForm from '@/features/clients/forms/ClientRoleForm';
 import { ClientCommitmentForm } from '@/features/clients/forms/ClientCommitmentForm';
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
 import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
+import { UniversalImportForm } from '@/components/forms/imports';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal } from '@/features/materials';
 import { UserFormModal, ChangelogFormModal, NotificationFormModal, AnnouncementFormModal, SupportConversationStartModal, PlanFormModal, PlanPriceFormModal, DowngradeModal } from '@/features/users';
 import SiteLogForm from '@/features/sitelog/forms/SiteLogForm';
@@ -176,6 +177,14 @@ export function initializeModalRegistry(): void {
   registerModal('movement-import', MovementImportStepModal as any, { ...financeConfig, size: 'xl' });
   registerModal('payment', PaymentFormModal as any, financeConfig);
   registerModal('bank-transfer-receipt', BankTransferReceiptModal as any, { ...financeConfig, size: 'md' });
+  
+  registerModal('universal-import', UniversalImportForm as any, {
+    ...generalConfig,
+    size: 'xl',
+    mapDataToProps: (data) => ({
+      config: data?.config,
+    }),
+  });
   
   registerModal('general-costs', GeneralCostForm as any, { 
     ...financeConfig, 
