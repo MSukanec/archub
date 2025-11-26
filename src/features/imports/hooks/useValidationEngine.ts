@@ -178,7 +178,11 @@ export function useValidationEngine({
     }
 
     for (const requiredField of requiredFields) {
-      if (!mappedFields.has(requiredField)) {
+      // Skip if field is mapped from file OR has a default value
+      const isMapped = mappedFields.has(requiredField);
+      const hasDefaultValue = defaultFieldValues[requiredField] !== undefined && defaultFieldValues[requiredField] !== '';
+      
+      if (!isMapped && !hasDefaultValue) {
         const fieldConfig = targetSchema.find(f => f.field === requiredField);
         errors.push({
           row: rowIndex,
@@ -192,7 +196,7 @@ export function useValidationEngine({
     }
 
     return errors;
-  }, [parsedData, columnMapping, validateValue, requiredFields, mappedFields, targetSchema]);
+  }, [parsedData, columnMapping, validateValue, requiredFields, mappedFields, targetSchema, defaultFieldValues]);
 
   const allErrors = useMemo(() => {
     if (!parsedData) return [];
