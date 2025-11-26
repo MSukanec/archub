@@ -243,7 +243,18 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       }
       return next;
     });
-  }, []);
+    
+    if (parsedData) {
+      const header = parsedData.headers[columnIndex];
+      if (header && aiConfidence[header] !== undefined) {
+        setAIConfidence(prev => {
+          const next = { ...prev };
+          delete next[header];
+          return next;
+        });
+      }
+    }
+  }, [parsedData, aiConfidence]);
 
   const handleManualMappingChange = useCallback((field: string, originalValue: string, mappedValue: string | null) => {
     const key = `${field}_${originalValue}`;
@@ -335,7 +346,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
         const mappingsToSave = Object.entries(columnMapping)
           .filter(([_, field]) => field)
           .map(([index, field]) => ({
-            sourceHeader: parsedData.headers[parseInt(index)],
+            sourceHeader: parsedData.headers[parseInt(index)].toLowerCase().trim(),
             targetField: field!
           }));
         
