@@ -372,7 +372,9 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
   const { data: existingClient, isLoading: existingClientLoading } = useQuery<any>({
     queryKey: CLIENT_QUERY_KEYS.projectClient(projectId, clientId, organizationId),
     queryFn: async () => {
-      const res = await fetch(`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`);
+      const res = await fetch(`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`, {
+        credentials: 'include',
+      });
       if (!res.ok) throw new Error('Failed to fetch client');
       return res.json();
     },
