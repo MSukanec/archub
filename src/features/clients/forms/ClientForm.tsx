@@ -544,14 +544,19 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
 
       <ModalBody>
         {mode === 'view' ? (
-          existingClient && (
+          existingClientLoading ? (
+            <div className="space-y-4 p-8 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+              <p className="text-sm text-muted-foreground">Cargando información del cliente...</p>
+            </div>
+          ) : existingClient ? (
             <ViewPanel
               existingClient={existingClient}
               contactInfo={contactInfo}
               roleInfo={roleInfo}
               statusBadge={statusBadge}
             />
-          )
+          ) : null
         ) : (
           <FormPanel
             form={form}
@@ -563,6 +568,7 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
             isEditing={isEditing}
             isViewMode={isViewMode}
             handleGoToContacts={handleGoToContacts}
+            isLoadingExisting={existingClientLoading && (isEditing || isViewMode)}
           />
         )}
       </ModalBody>

@@ -48,9 +48,9 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   console.log('[ClientListTab] activeProjectId:', activeProjectId);
   console.log('[ClientListTab] enabled:', !!activeProjectId && !!organizationId);
 
-  // Prefetch contacts and client roles for faster modal opening
+  // Prefetch contacts (LIGHT mode) and client roles for faster modal opening
   useQuery({
-    queryKey: [`/api/contacts?organization_id=${organizationId}`],
+    queryKey: [`/api/contacts?organization_id=${organizationId}&mode=light`],
     enabled: !!organizationId,
     staleTime: 5 * 60 * 1000,
   });
