@@ -22,11 +22,18 @@ export async function getContacts(
     
     // LIGHT MODE: Fast query for selectors - only basic fields, no enrichment
     if (mode === 'light') {
-      const { data: contacts, error: contactsError } = await ctx.supabase
+      let query = ctx.supabase
         .from('contacts')
         .select('id, first_name, last_name, full_name, email, phone')
         .eq('organization_id', organizationId)
         .order('first_name', { ascending: true });
+      
+      // Filter out current user directly in query (not selecting linked_user_id, so use .neq)
+      if (userId) {
+        query = query.neq('linked_user_id', userId);
+      }
+      
+      const { data: contacts, error: contactsError } = await query;
       
       if (contactsError) {
         console.error('Error fetching contacts (light):', contactsError);
@@ -36,12 +43,9 @@ export async function getContacts(
         };
       }
       
-      // Filter out current user
-      const filteredContacts = (contacts || []).filter((c: any) => c.linked_user_id !== userId);
-      
       return {
         success: true,
-        data: filteredContacts
+        data: contacts || []
       };
     }
     
