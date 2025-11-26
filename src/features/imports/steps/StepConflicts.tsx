@@ -20,6 +20,7 @@ interface SuccessfulMappingGroup {
   field: string;
   fieldLabel: string;
   mappings: Array<{ originalValue: string; mappedTo: string; mappedLabel: string }>;
+  options: Array<{ label: string; value: string }>;
 }
 
 interface StepConflictsProps {
@@ -169,6 +170,11 @@ export function StepConflicts({
               
               {successfulMappings.map((group) => {
                 const isExpanded = expandedSuccessful.has(group.field);
+                const searchTerm = searchTerms[`success_${group.field}`] || '';
+                
+                const filteredOptions = group.options.filter(opt => 
+                  opt.label.toLowerCase().includes(searchTerm.toLowerCase())
+                );
                 
                 return (
                   <Card key={group.field} className="border-green-500/20 bg-green-500/5">
@@ -189,27 +195,83 @@ export function StepConflicts({
                             </p>
                           </div>
                         </div>
-                        <Check className="h-4 w-4 text-green-500" />
+                        <Badge variant="default" className="bg-green-500/20 text-green-700 dark:text-green-300 border-green-500/30">
+                          <Check className="h-3 w-3 mr-1" />
+                          Resuelto
+                        </Badge>
                       </div>
                     </CardHeader>
 
                     {isExpanded && (
-                      <CardContent className="pt-0 pb-3 px-3">
-                        <div className="space-y-1.5">
-                          {group.mappings.map((mapping, idx) => (
-                            <div 
-                              key={`${mapping.originalValue}-${idx}`}
-                              className="flex items-center gap-2 p-2 rounded-md bg-background/50 border border-green-500/20"
-                            >
-                              <Badge variant="outline" className="font-mono text-xs bg-background">
-                                {mapping.originalValue}
-                              </Badge>
-                              <ArrowRight className="h-3 w-3 text-green-500 flex-shrink-0" />
-                              <Badge className="bg-green-500/20 text-green-700 dark:text-green-300 border-green-500/30">
-                                {mapping.mappedLabel}
-                              </Badge>
-                            </div>
-                          ))}
+                      <CardContent className="pt-0 pb-3 px-3 space-y-3">
+                        {group.options.length > 10 && (
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              placeholder="Buscar opciones..."
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerms(prev => ({ ...prev, [`success_${group.field}`]: e.target.value }))}
+                              className="pl-9 h-8 text-sm"
+                            />
+                          </div>
+                        )}
+
+                        <div className="space-y-2">
+                          {group.mappings.map((mapping, idx) => {
+                            const mappingKey = `${group.field}_${mapping.originalValue}`;
+                            const currentMapping = manualMappings[mappingKey];
+                            // Use manual mapping if set, otherwise use the auto-mapped value
+                            const displayValue: string = currentMapping !== undefined 
+                              ? (currentMapping === '' ? 'skip' : (currentMapping || mapping.mappedTo))
+                              : mapping.mappedTo;
+
+                            return (
+                              <div 
+                                key={`${mapping.originalValue}-${idx}`}
+                                className="flex items-center gap-2 p-2 rounded-lg border border-green-500/30 bg-green-500/5"
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <Badge variant="outline" className="font-mono text-xs">
+                                    {mapping.originalValue}
+                                  </Badge>
+                                </div>
+
+                                <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+
+                                <div className="w-[180px] flex-shrink-0">
+                                  <Select
+                                    value={displayValue}
+                                    onValueChange={(value) => {
+                                      if (value === 'skip') {
+                                        onManualMappingChange(group.field, mapping.originalValue, '');
+                                      } else {
+                                        onManualMappingChange(group.field, mapping.originalValue, value);
+                                      }
+                                    }}
+                                  >
+                                    <SelectTrigger 
+                                      className="h-8 text-sm border-green-500/30"
+                                      data-testid={`select-success-${group.field}-${mapping.originalValue}`}
+                                    >
+                                      <SelectValue placeholder="Seleccionar..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="skip">
+                                        <span className="text-amber-500">Omitir valor</span>
+                                      </SelectItem>
+                                      {filteredOptions.map(option => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                          {option.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                              </div>
+                            );
+                          })}
                         </div>
                       </CardContent>
                     )}

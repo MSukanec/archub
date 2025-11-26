@@ -26,6 +26,7 @@ import {
 import { useProject } from '@/features/projects/hooks/use-project'
 import { useProjects } from '@/features/projects/hooks/use-projects'
 import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge'
+import { useOrganizationWallets } from '@/features/organization/hooks'
 import type { TargetField, ImportConfig, ProjectContext } from '@/features/imports/types'
 
 interface ClientPaymentsTabProps {
@@ -66,6 +67,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   
   // Get all projects for organization-level import
   const { data: projectsData } = useProjects(organizationId);
+  
+  // Get organization wallets for import
+  const { data: organizationWallets } = useOrganizationWallets(organizationId);
 
   // Filter states
   const [filterWallet, setFilterWallet] = useState<string>('all');
@@ -373,9 +377,18 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       {
         field: 'wallet_name',
         label: 'Billetera (opcional)',
-        type: 'string',
+        type: 'foreign-key',
         required: false,
         description: 'Ej: Efectivo, Banco, Tarjeta',
+        foreignKeyConfig: {
+          entityName: 'wallet',
+          labelKey: 'label',
+          valueKey: 'value',
+          options: (organizationWallets || []).map(ow => ({
+            label: ow.wallets?.name || 'Sin nombre',
+            value: ow.wallet_id,
+          })),
+        },
       },
       {
         field: 'status',
@@ -411,6 +424,15 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       },
     ];
 
+    // Build wallet value map from organization wallets
+    const walletValueMap: Record<string, string> = {};
+    (organizationWallets || []).forEach(ow => {
+      if (ow.wallets?.name && ow.wallet_id) {
+        const normalizedName = ow.wallets.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+        walletValueMap[normalizedName] = ow.wallet_id;
+      }
+    });
+
     // Value map para traducir valores del CSV a IDs reales
     const valueMapConfig: Record<string, Record<string, string>> = {
       currency_code: {
@@ -424,6 +446,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         'rechazado': 'rejected',
         'anulado': 'void',
       },
+      wallet_name: walletValueMap,
     };
 
     // Contexto de proyecto para la importación - always pass project context with name

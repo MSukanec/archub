@@ -411,28 +411,41 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       field: string;
       fieldLabel: string;
       mappings: Array<{ originalValue: string; mappedTo: string; mappedLabel: string }>;
+      options: Array<{ label: string; value: string }>;
     }> = [];
 
     const foreignKeyFields = extendedSchema.filter(f => f.type === 'foreign-key');
 
     for (const field of foreignKeyFields) {
       const columnIndex = Object.entries(columnMapping).find(([_, f]) => f === field.field)?.[0];
-      if (!columnIndex) continue;
-
-      const colIdx = parseInt(columnIndex);
+      // Note: For successful mappings, we also want to show fields that were NOT mapped from the file
+      // but have values coming from valueMapConfig or foreignKeyConfig (e.g., wallets matched via valueMap)
+      
+      const colIdx = columnIndex ? parseInt(columnIndex) : -1;
       const uniqueValues = new Set<string>();
       
-      parsedData.rows.forEach(row => {
-        const value = row[colIdx];
-        if (value && String(value).trim()) {
-          uniqueValues.add(String(value).trim());
-        }
-      });
+      // Collect unique values from the file column (if mapped)
+      if (colIdx >= 0) {
+        parsedData.rows.forEach(row => {
+          const value = row[colIdx];
+          if (value && String(value).trim()) {
+            uniqueValues.add(String(value).trim());
+          }
+        });
+      }
 
       const matchedMappings: Array<{ originalValue: string; mappedTo: string; mappedLabel: string }> = [];
       const valueMap = config.valueMapConfig?.[field.field] || {};
       const valueMapKeys = Object.keys(valueMap);
       const foreignKeyOptions = field.foreignKeyConfig?.options || [];
+      
+      // Build options list for the SELECT (same as conflicts do)
+      const options = foreignKeyOptions.length > 0 
+        ? foreignKeyOptions 
+        : Object.entries(valueMap).map(([key, val]) => ({
+            label: key.charAt(0).toUpperCase() + key.slice(1),
+            value: val as string,
+          }));
 
       uniqueValues.forEach(value => {
         // Skip if this value is in conflicts - it's NOT a successful mapping
@@ -533,6 +546,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           field: field.field,
           fieldLabel: field.label,
           mappings: matchedMappings,
+          options, // Include options for SELECT editing
         });
       }
     }
