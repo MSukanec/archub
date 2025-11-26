@@ -21,19 +21,14 @@ export async function getContacts(
     const { organizationId, userId, mode = 'full' } = params;
     
     // LIGHT MODE: Fast query for selectors - only basic fields, no enrichment
+    // NOTE: We include linked_user_id to filter out current user, but don't use .neq() 
+    // because it excludes NULL values. We filter client-side instead.
     if (mode === 'light') {
-      let query = ctx.supabase
+      const { data: contacts, error: contactsError } = await ctx.supabase
         .from('contacts')
-        .select('id, first_name, last_name, full_name, email, phone')
+        .select('id, first_name, last_name, full_name, email, phone, linked_user_id')
         .eq('organization_id', organizationId)
         .order('first_name', { ascending: true });
-      
-      // Filter out current user directly in query (not selecting linked_user_id, so use .neq)
-      if (userId) {
-        query = query.neq('linked_user_id', userId);
-      }
-      
-      const { data: contacts, error: contactsError } = await query;
       
       if (contactsError) {
         console.error('Error fetching contacts (light):', contactsError);
@@ -43,9 +38,14 @@ export async function getContacts(
         };
       }
       
+      // Filter out current user client-side (handles NULL linked_user_id correctly)
+      const filteredContacts = (contacts || []).filter((c: any) => 
+        !c.linked_user_id || c.linked_user_id !== userId
+      );
+      
       return {
         success: true,
-        data: contacts || []
+        data: filteredContacts
       };
     }
     

@@ -361,15 +361,35 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
   });
 
   // Filter out contacts that are already clients of this project (only in create mode)
+  // In edit mode, ensure the current client's contact is always included in the list
   const contacts = useMemo(() => {
-    if (isEditing || isViewMode) return allContacts;
+    if (isEditing || isViewMode) {
+      // In edit/view mode, we need to ensure the current contact is in the list
+      // even if it wouldn't normally be returned by the light query
+      if (existingClient?.contact_id && existingClient?.contacts) {
+        const contactInList = allContacts.find((c: any) => c.id === existingClient.contact_id);
+        if (!contactInList) {
+          // Add the current client's contact to the list
+          const currentContact = existingClient.contacts;
+          return [...allContacts, {
+            id: currentContact.id,
+            first_name: currentContact.first_name,
+            last_name: currentContact.last_name,
+            full_name: currentContact.full_name,
+            email: currentContact.email,
+            phone: currentContact.phone,
+          }];
+        }
+      }
+      return allContacts;
+    }
     
     const existingContactIds = new Set(
       existingProjectClients.map((client: any) => client.contact_id)
     );
     
     return allContacts.filter((contact: any) => !existingContactIds.has(contact.id));
-  }, [allContacts, existingProjectClients, isEditing, isViewMode]);
+  }, [allContacts, existingProjectClients, isEditing, isViewMode, existingClient]);
 
   // Query to get client roles
   const { data: clientRoles = [], isLoading: clientRolesLoading } = useQuery<any[]>({
