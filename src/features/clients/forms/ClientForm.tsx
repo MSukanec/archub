@@ -368,16 +368,10 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
   });
 
   // Query to get existing client data when editing
-  // IMPORTANT: Use the same queryKey pattern as CLIENT_QUERY_KEYS.projectClient for proper cache invalidation
+  // Use URL as queryKey so default fetcher works correctly
+  const clientQueryUrl = `/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`;
   const { data: existingClient, isLoading: existingClientLoading } = useQuery<any>({
-    queryKey: CLIENT_QUERY_KEYS.projectClient(projectId, clientId, organizationId),
-    queryFn: async () => {
-      const res = await fetch(`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`, {
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error('Failed to fetch client');
-      return res.json();
-    },
+    queryKey: [clientQueryUrl],
     enabled: !!clientId && !!projectId && !!organizationId && (isEditing || isViewMode),
     staleTime: 0, // Always fetch fresh data when editing
   });
@@ -468,7 +462,7 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
         }),
         ...(isEditing && clientId && organizationId ? [
           queryClient.invalidateQueries({
-            queryKey: CLIENT_QUERY_KEYS.projectClient(projectId, clientId, organizationId),
+            queryKey: [clientQueryUrl],
           })
         ] : []),
       ]);
