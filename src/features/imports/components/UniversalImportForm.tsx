@@ -74,6 +74,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
   const [importProgress, setImportProgress] = useState(0);
   const [aiConfidence, setAIConfidence] = useState<Record<string, number>>({});
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [contextOverrideToOrg, setContextOverrideToOrg] = useState(false);
 
   const { suggestMapping, saveMappings, isLoading: isLoadingAI } = useAISuggestMapping();
 
@@ -85,7 +86,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     reset: resetParser 
   } = useFileParser();
 
-  // Detectar si hay columna de proyecto en el archivo (must be before useColumnAutoMap)
+  // Detectar si hay columna de proyecto en el archivo (must be before other useMemos that depend on it)
   const projectColumnDetection = useMemo(() => {
     if (!parsedData) return { hasProjectColumn: false, projectColumnIndex: -1 };
     
@@ -106,9 +107,33 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     };
   }, [parsedData]);
 
+  // Effective project context: allows overriding from project to organization
+  const effectiveProjectContext = useMemo(() => {
+    if (contextOverrideToOrg && config.projectContext?.type === 'project') {
+      return {
+        type: 'organization' as const,
+        organizationId: organizationId || '',
+        organizationName: 'Organización',
+      };
+    }
+    return config.projectContext;
+  }, [config.projectContext, contextOverrideToOrg, organizationId]);
+
+  // Detect conflict: project context + project column = should block or switch to org
+  const hasProjectContextConflict = useMemo(() => {
+    return config.projectContext?.type === 'project' && 
+           projectColumnDetection.hasProjectColumn && 
+           !contextOverrideToOrg;
+  }, [config.projectContext, projectColumnDetection.hasProjectColumn, contextOverrideToOrg]);
+
   // Dynamically extend schema to include project_name field when importing at org level with project column
+  // Also extends when user has overridden project context to organization
   const extendedSchema = useMemo(() => {
-    if (config.projectContext?.type === 'organization' && projectColumnDetection.hasProjectColumn && config.availableProjects?.length) {
+    const shouldAddProjectField = 
+      (effectiveProjectContext?.type === 'organization' && projectColumnDetection.hasProjectColumn && config.availableProjects?.length) ||
+      (contextOverrideToOrg && projectColumnDetection.hasProjectColumn && config.availableProjects?.length);
+    
+    if (shouldAddProjectField) {
       return [
         ...config.targetSchema,
         {
@@ -121,13 +146,13 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             entityName: 'project',
             labelKey: 'label',
             valueKey: 'value',
-            options: config.availableProjects.map(p => ({ label: p.name, value: p.id }))
+            options: config.availableProjects!.map(p => ({ label: p.name, value: p.id }))
           }
         }
       ];
     }
     return config.targetSchema;
-  }, [config.targetSchema, config.projectContext, projectColumnDetection.hasProjectColumn, config.availableProjects]);
+  }, [config.targetSchema, effectiveProjectContext, projectColumnDetection.hasProjectColumn, config.availableProjects, contextOverrideToOrg]);
 
   const { 
     autoMapping, 
@@ -425,14 +450,19 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       case 1:
         return parsedData !== null;
       case 2: {
-        // If organization context without project column, require selectedProjectId
-        if (config.projectContext?.type === 'organization' && 
+        // Block if project context + project column without override (user must switch to org context)
+        if (hasProjectContextConflict) {
+          return false;
+        }
+        
+        // If organization context (or overridden to org) without project column, require selectedProjectId
+        if (effectiveProjectContext?.type === 'organization' && 
             !projectColumnDetection.hasProjectColumn && 
             !selectedProjectId) {
           return false;
         }
-        // Also check if project column exists but is not mapped
-        if (config.projectContext?.type === 'organization' && 
+        // Check if project column exists but is not mapped (when in org context or overridden)
+        if (effectiveProjectContext?.type === 'organization' && 
             projectColumnDetection.hasProjectColumn) {
           const projectFieldMapped = Object.values(columnMapping).includes('project_name');
           if (!projectFieldMapped) {
@@ -452,7 +482,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       default:
         return false;
     }
-  }, [currentStep, parsedData, validationSummary, conflicts, manualMappings, config.projectContext, projectColumnDetection, selectedProjectId, columnMapping]);
+  }, [currentStep, parsedData, validationSummary, conflicts, manualMappings, effectiveProjectContext, projectColumnDetection, selectedProjectId, columnMapping, hasProjectContextConflict]);
 
   const goNext = () => {
     if (currentStep < 5 && canGoNext) {
@@ -488,6 +518,12 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     setCurrentStep(1);
   };
 
+  const handleSwitchToOrgContext = useCallback(() => {
+    setContextOverrideToOrg(true);
+    // Re-trigger auto-mapping now that project_name field will be available
+    setColumnMapping({});
+  }, []);
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -510,12 +546,14 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             getSuggestions={getSuggestions}
             aiConfidence={aiConfidence}
             isLoadingAI={isLoadingAI}
-            projectContext={config.projectContext}
+            projectContext={effectiveProjectContext}
             hasProjectColumn={projectColumnDetection.hasProjectColumn}
             projectColumnIndex={projectColumnDetection.projectColumnIndex}
             availableProjects={config.availableProjects}
             selectedProjectId={selectedProjectId}
             onProjectSelect={setSelectedProjectId}
+            hasProjectContextConflict={hasProjectContextConflict}
+            onSwitchToOrgContext={handleSwitchToOrgContext}
           />
         ) : null;
       case 3:

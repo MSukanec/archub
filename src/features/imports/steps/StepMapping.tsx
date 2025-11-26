@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
-import { ArrowRight, Check, AlertCircle, HelpCircle, Loader2, Sparkles, FolderKanban, Building2, Info } from 'lucide-react';
+import { ArrowRight, Check, AlertCircle, HelpCircle, Loader2, Sparkles, FolderKanban, Building2, Info, AlertTriangle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -30,6 +31,10 @@ interface StepMappingProps {
   selectedProjectId?: string | null;
   /** Callback cuando se selecciona un proyecto */
   onProjectSelect?: (projectId: string) => void;
+  /** Hay conflicto: contexto proyecto + columna proyecto sin override */
+  hasProjectContextConflict?: boolean;
+  /** Callback para cambiar a contexto de organización */
+  onSwitchToOrgContext?: () => void;
 }
 
 function getAIBadge(confidence: number) {
@@ -56,6 +61,8 @@ export function StepMapping({
   availableProjects,
   selectedProjectId,
   onProjectSelect,
+  hasProjectContextConflict,
+  onSwitchToOrgContext,
 }: StepMappingProps) {
   const contextName = projectContext?.type === 'project' 
     ? projectContext.projectName 
@@ -200,18 +207,30 @@ export function StepMapping({
         </Card>
       )}
 
-      {/* Alerta si se detectó columna de proyecto pero hay contexto de proyecto */}
-      {hasProjectColumn && projectContext?.type === 'project' && (
-        <Card className="border-amber-500/50 bg-amber-500/5">
+      {/* Alerta BLOQUEANTE si se detectó columna de proyecto en contexto de proyecto */}
+      {hasProjectContextConflict && (
+        <Card className="border-destructive bg-destructive/5">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="font-medium text-amber-500">Columna "Proyecto" detectada</p>
-                <p className="text-xs text-amber-600/80">
-                  El archivo tiene una columna de proyecto, pero estás importando a un proyecto específico.
-                  Los registros serán asignados al proyecto activo (se ignorará la columna de proyecto del archivo).
-                </p>
+              <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+              <div className="space-y-3 flex-1">
+                <div className="space-y-1">
+                  <p className="font-medium text-destructive">Columna "Proyecto" detectada</p>
+                  <p className="text-sm text-destructive/80">
+                    Tu archivo tiene una columna de proyecto, pero estás importando a un proyecto específico.
+                    Para usar la columna de proyecto del archivo, debes cambiar a contexto de organización.
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onSwitchToOrgContext}
+                  className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                  data-testid="button-switch-to-org-context"
+                >
+                  <Building2 className="h-4 w-4 mr-2" />
+                  Cambiar a contexto de Organización
+                </Button>
               </div>
             </div>
           </CardContent>
