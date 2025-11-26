@@ -84,6 +84,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [contextOverrideToOrg, setContextOverrideToOrg] = useState(false);
   const [defaultFieldValues, setDefaultFieldValues] = useState<Record<string, string>>({});
+  const [cellCorrections, setCellCorrections] = useState<Record<string, string>>({});
 
   const { suggestMapping, saveMappings, isLoading: isLoadingAI } = useAISuggestMapping();
 
@@ -288,6 +289,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     manualMappings,
     valueMapConfig: config.valueMapConfig,
     defaultFieldValues,
+    cellCorrections,
   });
 
   const conflicts = useMemo(() => {
@@ -603,6 +605,18 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     });
   }, []);
 
+  const handleCellCorrectionChange = useCallback((rowIndex: number, field: string, value: string) => {
+    const key = `${rowIndex}_${field}`;
+    setCellCorrections(prev => {
+      if (!value || value.trim() === '') {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      }
+      return { ...prev, [key]: value.trim() };
+    });
+  }, []);
+
   const handleImport = async () => {
     if (!parsedData) return;
 
@@ -633,10 +647,20 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           mappedRow[field] = value;
         }
 
+        // Apply cell corrections for empty cells that user filled in
+        for (const [correctionKey, correctionValue] of Object.entries(cellCorrections)) {
+          const [rowIndexStr, fieldName] = correctionKey.split('_');
+          const correctionRowIndex = parseInt(rowIndexStr);
+          if (correctionRowIndex === i && correctionValue) {
+            // Override the value with the user correction
+            mappedRow[fieldName] = correctionValue;
+          }
+        }
+
         // Inject default values for fields that weren't in the file
         for (const [fieldName, fieldValue] of Object.entries(defaultFieldValues)) {
-          // Only inject if field wasn't already mapped from file
-          if (mappedRow[fieldName] === undefined) {
+          // Only inject if field wasn't already mapped from file AND wasn't corrected
+          if (mappedRow[fieldName] === undefined || mappedRow[fieldName] === null || mappedRow[fieldName] === '') {
             mappedRow[fieldName] = fieldValue;
           }
         }
@@ -877,6 +901,10 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             errors={validationErrors}
             summary={validationSummary}
             targetSchema={extendedSchema}
+            parsedData={parsedData}
+            columnMapping={columnMapping}
+            cellCorrections={cellCorrections}
+            onCellCorrectionChange={handleCellCorrectionChange}
           />
         );
       case 4:

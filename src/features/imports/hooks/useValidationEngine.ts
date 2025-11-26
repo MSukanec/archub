@@ -9,6 +9,7 @@ interface UseValidationEngineProps {
   manualMappings?: ManualMapping;
   valueMapConfig?: Record<string, Record<string, string>>;
   defaultFieldValues?: Record<string, string>;
+  cellCorrections?: Record<string, string>;
 }
 
 interface ValidationSummary {
@@ -37,6 +38,7 @@ export function useValidationEngine({
   manualMappings = {},
   valueMapConfig = {},
   defaultFieldValues = {},
+  cellCorrections = {},
 }: UseValidationEngineProps): UseValidationEngineReturn {
 
   const requiredFields = useMemo(() => {
@@ -169,6 +171,14 @@ export function useValidationEngine({
 
     for (const [colIndexStr, field] of Object.entries(columnMapping)) {
       if (!field) continue;
+      
+      // Check if this cell has a correction
+      const correctionKey = `${rowIndex}_${field}`;
+      if (cellCorrections[correctionKey]) {
+        // Cell has been corrected, skip validation for this field
+        continue;
+      }
+      
       const colIndex = parseInt(colIndexStr);
       const value = row[colIndex];
       const error = validateValue(field, value, rowIndex);
@@ -178,11 +188,12 @@ export function useValidationEngine({
     }
 
     for (const requiredField of requiredFields) {
-      // Skip if field is mapped from file OR has a default value
+      // Skip if field is mapped from file OR has a default value OR has a cell correction
       const isMapped = mappedFields.has(requiredField);
       const hasDefaultValue = defaultFieldValues[requiredField] !== undefined && defaultFieldValues[requiredField] !== '';
+      const hasCellCorrection = cellCorrections[`${rowIndex}_${requiredField}`] !== undefined && cellCorrections[`${rowIndex}_${requiredField}`] !== '';
       
-      if (!isMapped && !hasDefaultValue) {
+      if (!isMapped && !hasDefaultValue && !hasCellCorrection) {
         const fieldConfig = targetSchema.find(f => f.field === requiredField);
         errors.push({
           row: rowIndex,
@@ -196,7 +207,7 @@ export function useValidationEngine({
     }
 
     return errors;
-  }, [parsedData, columnMapping, validateValue, requiredFields, mappedFields, targetSchema, defaultFieldValues]);
+  }, [parsedData, columnMapping, validateValue, requiredFields, mappedFields, targetSchema, defaultFieldValues, cellCorrections]);
 
   const allErrors = useMemo(() => {
     if (!parsedData) return [];

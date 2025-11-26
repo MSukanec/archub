@@ -1,11 +1,14 @@
-import { useMemo } from 'react';
-import { AlertCircle, CheckCircle, AlertTriangle, XCircle, ChevronDown, ChevronRight } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { AlertCircle, CheckCircle, AlertTriangle, XCircle, ChevronDown, Edit3, Check, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import type { ValidationError, TargetField } from '../types';
+import type { ValidationError, TargetField, ParsedData, ColumnMapping } from '../types';
 
 interface ValidationSummary {
   totalRows: number;
@@ -22,6 +25,10 @@ interface StepValidationProps {
   summary: ValidationSummary;
   targetSchema: TargetField[];
   onResolveError?: (error: ValidationError) => void;
+  parsedData?: ParsedData | null;
+  columnMapping?: ColumnMapping;
+  cellCorrections?: Record<string, string>;
+  onCellCorrectionChange?: (rowIndex: number, field: string, value: string) => void;
 }
 
 export function StepValidation({
@@ -29,7 +36,14 @@ export function StepValidation({
   summary,
   targetSchema,
   onResolveError,
+  parsedData,
+  columnMapping,
+  cellCorrections = {},
+  onCellCorrectionChange,
 }: StepValidationProps) {
+  const [editingCell, setEditingCell] = useState<{ row: number; field: string } | null>(null);
+  const [editValue, setEditValue] = useState('');
+
   const getFieldLabel = (fieldName: string): string => {
     const field = targetSchema.find(f => f.field === fieldName);
     return field?.label || fieldName;
@@ -47,13 +61,67 @@ export function StepValidation({
     return grouped;
   }, [errors]);
 
-  const criticalErrors = useMemo(() => {
-    return errors.filter(e => e.severity === 'error');
-  }, [errors]);
+  // Detectar errores de celdas vacías en campos editables (date, number, currency, string)
+  const emptyCellErrors = useMemo(() => {
+    return errors.filter(e => {
+      const isEmpty = e.value === null || e.value === undefined || String(e.value).trim() === '';
+      const fieldConfig = targetSchema.find(f => f.field === e.field);
+      const isEditableType = fieldConfig && ['date', 'number', 'currency', 'string'].includes(fieldConfig.type);
+      return isEmpty && isEditableType && e.severity === 'error';
+    });
+  }, [errors, targetSchema]);
 
-  const warnings = useMemo(() => {
-    return errors.filter(e => e.severity === 'warning');
-  }, [errors]);
+  // Agrupar errores de celdas vacías por fila
+  const rowsWithEmptyCells = useMemo(() => {
+    const rows: Record<number, ValidationError[]> = {};
+    for (const error of emptyCellErrors) {
+      if (!rows[error.row]) rows[error.row] = [];
+      rows[error.row].push(error);
+    }
+    return rows;
+  }, [emptyCellErrors]);
+
+  const hasEditableErrors = Object.keys(rowsWithEmptyCells).length > 0;
+
+  const handleStartEdit = (rowIndex: number, field: string) => {
+    const key = `${rowIndex}_${field}`;
+    const currentValue = cellCorrections[key] || '';
+    setEditValue(currentValue);
+    setEditingCell({ row: rowIndex, field });
+  };
+
+  const handleSaveEdit = () => {
+    if (editingCell && onCellCorrectionChange) {
+      onCellCorrectionChange(editingCell.row, editingCell.field, editValue);
+    }
+    setEditingCell(null);
+    setEditValue('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCell(null);
+    setEditValue('');
+  };
+
+  const getCorrectedValue = (rowIndex: number, field: string): string | null => {
+    const key = `${rowIndex}_${field}`;
+    return cellCorrections[key] || null;
+  };
+
+  const getOriginalValue = (rowIndex: number, colIndex: number): string => {
+    if (!parsedData || rowIndex >= parsedData.rows.length) return '';
+    const value = parsedData.rows[rowIndex][colIndex];
+    if (value === null || value === undefined) return '';
+    return String(value);
+  };
+
+  const getColumnIndexForField = (field: string): number => {
+    if (!columnMapping) return -1;
+    for (const [colIndex, mappedField] of Object.entries(columnMapping)) {
+      if (mappedField === field) return parseInt(colIndex);
+    }
+    return -1;
+  };
 
   if (errors.length === 0 && summary.missingRequiredFields.length === 0) {
     return (
@@ -126,14 +194,133 @@ export function StepValidation({
         </Card>
       )}
 
-      <ScrollArea className="h-[350px]">
+      {/* Editor de celdas vacías */}
+      {hasEditableErrors && parsedData && columnMapping && onCellCorrectionChange && (
+        <Card className="border-blue-500/30 bg-blue-500/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-blue-500 text-base">
+              <Edit3 className="h-5 w-5" />
+              Completar datos faltantes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Algunas filas tienen celdas vacías en campos obligatorios. Hacé clic para completarlas:
+            </p>
+            <ScrollArea className="max-h-[250px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">#</TableHead>
+                    {Object.keys(rowsWithEmptyCells).length > 0 && 
+                      rowsWithEmptyCells[parseInt(Object.keys(rowsWithEmptyCells)[0])].map(error => (
+                        <TableHead key={error.field}>{getFieldLabel(error.field)}</TableHead>
+                      ))
+                    }
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Object.entries(rowsWithEmptyCells).map(([rowIndexStr, rowErrors]) => {
+                    const rowIndex = parseInt(rowIndexStr);
+                    return (
+                      <TableRow key={rowIndex}>
+                        <TableCell className="font-medium text-muted-foreground">
+                          {rowIndex + 1}
+                        </TableCell>
+                        {rowErrors.map(error => {
+                          const correctedValue = getCorrectedValue(rowIndex, error.field);
+                          const isEditing = editingCell?.row === rowIndex && editingCell?.field === error.field;
+                          const colIndex = getColumnIndexForField(error.field);
+                          const originalValue = colIndex >= 0 ? getOriginalValue(rowIndex, colIndex) : '';
+
+                          if (isEditing) {
+                            return (
+                              <TableCell key={error.field} className="p-1">
+                                <div className="flex items-center gap-1">
+                                  <Input
+                                    value={editValue}
+                                    onChange={(e) => setEditValue(e.target.value)}
+                                    className="h-8 text-sm"
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') handleSaveEdit();
+                                      if (e.key === 'Escape') handleCancelEdit();
+                                    }}
+                                    data-testid={`input-cell-${rowIndex}-${error.field}`}
+                                  />
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-green-500 hover:text-green-600"
+                                    onClick={handleSaveEdit}
+                                  >
+                                    <Check className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                    onClick={handleCancelEdit}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            );
+                          }
+
+                          return (
+                            <TableCell 
+                              key={error.field}
+                              className={cn(
+                                "cursor-pointer transition-colors",
+                                correctedValue 
+                                  ? "bg-green-500/10 hover:bg-green-500/20" 
+                                  : "bg-destructive/10 hover:bg-destructive/20"
+                              )}
+                              onClick={() => handleStartEdit(rowIndex, error.field)}
+                              data-testid={`cell-${rowIndex}-${error.field}`}
+                            >
+                              {correctedValue ? (
+                                <span className="text-green-600 font-medium">{correctedValue}</span>
+                              ) : (
+                                <span className="text-destructive/60 italic text-sm">
+                                  {originalValue || '(vacío) - clic para completar'}
+                                </span>
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+            <p className="text-xs text-muted-foreground mt-3">
+              Las celdas en verde ya fueron completadas. Las rojas aún necesitan un valor.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      <ScrollArea className="h-[300px]">
         <div className="space-y-3 pr-4">
           {Object.entries(errorsByField).map(([field, fieldErrors]) => {
             const fieldLabel = getFieldLabel(field);
             const hasErrors = fieldErrors.some(e => e.severity === 'error');
             const hasWarnings = fieldErrors.some(e => e.severity === 'warning');
             
-            const uniqueValues = Array.from(new Set(fieldErrors.map(e => String(e.value)))).slice(0, 5);
+            // Filtrar errores que ya fueron corregidos con cellCorrections
+            const uncorrectedErrors = fieldErrors.filter(e => {
+              const key = `${e.row}_${e.field}`;
+              return !cellCorrections[key];
+            });
+
+            // Si todos los errores de este campo fueron corregidos, no mostrar
+            if (uncorrectedErrors.length === 0) return null;
+            
+            const uniqueValues = Array.from(new Set(uncorrectedErrors.map(e => String(e.value)))).slice(0, 5);
 
             return (
               <Collapsible key={field}>
@@ -153,7 +340,7 @@ export function StepValidation({
                           <div className="text-left">
                             <p className="font-medium">{fieldLabel}</p>
                             <p className="text-sm text-muted-foreground">
-                              {fieldErrors.length} {fieldErrors.length === 1 ? 'fila afectada' : 'filas afectadas'}
+                              {uncorrectedErrors.length} {uncorrectedErrors.length === 1 ? 'fila afectada' : 'filas afectadas'}
                             </p>
                           </div>
                         </div>
@@ -161,12 +348,12 @@ export function StepValidation({
                           <div className="flex gap-1">
                             {hasErrors && (
                               <Badge variant="destructive" className="text-xs">
-                                {fieldErrors.filter(e => e.severity === 'error').length} errores
+                                {uncorrectedErrors.filter(e => e.severity === 'error').length} errores
                               </Badge>
                             )}
                             {hasWarnings && (
                               <Badge variant="outline" className="text-xs border-amber-500/50 text-amber-500">
-                                {fieldErrors.filter(e => e.severity === 'warning').length} advertencias
+                                {uncorrectedErrors.filter(e => e.severity === 'warning').length} advertencias
                               </Badge>
                             )}
                           </div>
@@ -183,19 +370,19 @@ export function StepValidation({
                         <div className="flex flex-wrap gap-2">
                           {uniqueValues.map((value, idx) => (
                             <Badge key={idx} variant="outline" className="font-mono text-xs">
-                              {value || '(vacío)'}
+                              {value === 'null' || value === 'undefined' || value === '' ? '(vacío)' : value}
                             </Badge>
                           ))}
-                          {Array.from(new Set(fieldErrors.map(e => String(e.value)))).length > 5 && (
+                          {Array.from(new Set(uncorrectedErrors.map(e => String(e.value)))).length > 5 && (
                             <Badge variant="outline" className="text-xs">
-                              +{Array.from(new Set(fieldErrors.map(e => String(e.value)))).length - 5} más
+                              +{Array.from(new Set(uncorrectedErrors.map(e => String(e.value)))).length - 5} más
                             </Badge>
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-2">
                           {hasWarnings && !hasErrors 
                             ? "Podrás asignar estos valores en el siguiente paso"
-                            : fieldErrors[0].message
+                            : uncorrectedErrors[0]?.message
                           }
                         </p>
                       </div>
