@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowRight, Check, AlertCircle, HelpCircle, Loader2, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, AlertCircle, HelpCircle, Loader2, Sparkles, FolderKanban, Building2, Info } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { format, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import type { ParsedData, ColumnMapping, TargetField } from '../types';
+import type { ParsedData, ColumnMapping, TargetField, ProjectContext } from '../types';
 
 interface StepMappingProps {
   parsedData: ParsedData;
@@ -18,6 +18,14 @@ interface StepMappingProps {
   getSuggestions?: (headerIndex: number) => Array<{ field: string; label: string; similarity: number }>;
   aiConfidence?: Record<string, number>;
   isLoadingAI?: boolean;
+  /** Contexto de proyecto/organización */
+  projectContext?: ProjectContext;
+  /** Nombre del proyecto activo (si aplica) */
+  projectName?: string;
+  /** Se detectó columna de proyecto en el archivo */
+  hasProjectColumn?: boolean;
+  /** Índice de la columna de proyecto detectada */
+  projectColumnIndex?: number;
 }
 
 function getAIBadge(confidence: number) {
@@ -38,6 +46,10 @@ export function StepMapping({
   getSuggestions,
   aiConfidence,
   isLoadingAI,
+  projectContext,
+  projectName,
+  hasProjectColumn,
+  projectColumnIndex,
 }: StepMappingProps) {
   const mappedFields = useMemo(() => {
     return new Set(Object.values(columnMapping).filter(Boolean) as string[]);
@@ -102,6 +114,61 @@ export function StepMapping({
 
   return (
     <div className="space-y-6">
+      {/* Contexto de proyecto */}
+      {projectContext && (
+        <Card className={cn(
+          "border-primary/30",
+          projectContext.type === 'project' ? "bg-primary/5" : "bg-purple-500/5 border-purple-500/30"
+        )}>
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              {projectContext.type === 'project' ? (
+                <FolderKanban className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+              ) : (
+                <Building2 className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
+              )}
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center gap-2">
+                  <p className={cn(
+                    "font-medium",
+                    projectContext.type === 'project' ? "text-primary" : "text-purple-500"
+                  )}>
+                    {projectContext.type === 'project' 
+                      ? `Importando al proyecto${projectName ? `: ${projectName}` : ' activo'}`
+                      : 'Importando a nivel organización'
+                    }
+                  </p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {projectContext.type === 'project' 
+                    ? 'Todos los registros serán asignados a este proyecto.'
+                    : 'Se requiere una columna "Proyecto" para asignar cada registro.'
+                  }
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Alerta si se detectó columna de proyecto pero hay contexto de proyecto */}
+      {hasProjectColumn && projectContext?.type === 'project' && (
+        <Card className="border-amber-500/50 bg-amber-500/5">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-medium text-amber-500">Columna "Proyecto" detectada</p>
+                <p className="text-xs text-amber-600/80">
+                  El archivo tiene una columna de proyecto, pero estás importando a un proyecto específico.
+                  Los registros serán asignados al proyecto activo (se ignorará la columna de proyecto del archivo).
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {isLoadingAI && (
         <Card className="border-blue-500/50 bg-blue-500/5">
           <CardContent className="p-4">

@@ -14,6 +14,10 @@ export interface TargetField {
   };
 }
 
+export type ProjectContext = 
+  | { type: 'project'; projectId: string; projectName?: string }
+  | { type: 'organization'; organizationId: string };
+
 export interface ImportConfig {
   entityName: string;
   entityNamePlural: string;
@@ -22,6 +26,12 @@ export interface ImportConfig {
   valueMapConfig?: Record<string, Record<string, string>>;
   onImport: (rows: Record<string, any>[]) => Promise<void>;
   aiSuggestMapping?: (header: string, schema: TargetField[]) => Promise<string | null>;
+  
+  /** Contexto de proyecto/organización para la importación */
+  projectContext?: ProjectContext;
+  
+  /** Lista de proyectos disponibles para mapeo (si contexto es organización) */
+  availableProjects?: Array<{ id: string; name: string }>;
 }
 
 export interface ParsedData {

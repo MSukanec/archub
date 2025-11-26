@@ -23,7 +23,7 @@ import {
   type ClientPaymentWithRelations,
 } from '@/features/clients'
 import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge'
-import type { TargetField, ImportConfig } from '@/components/forms/imports/types'
+import type { TargetField, ImportConfig, ProjectContext } from '@/features/imports/types'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
@@ -409,6 +409,12 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       },
     };
 
+    // Contexto de proyecto para la importación
+    const projectContext: ProjectContext = {
+      type: 'project',
+      projectId: activeProjectId!,
+    };
+
     // Abrir modal de importación universal
     openModal('universal-import', {
       config: {
@@ -416,6 +422,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         entityNamePlural: 'Pagos de Clientes',
         targetSchema,
         valueMapConfig,
+        projectContext,
         onImport: async (rows: any[]) => {
           // Obtener los clientes desde TODOS los clientes del proyecto, no solo los pagos
           // Esto incluye clientes sin pagos previos

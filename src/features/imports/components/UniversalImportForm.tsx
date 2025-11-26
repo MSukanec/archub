@@ -129,6 +129,27 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     }
   }, [parsedData, autoMapping, columnMapping, organizationId, config.targetSchema, config.entityName, suggestMapping]);
 
+  // Detectar si hay columna de proyecto en el archivo
+  const projectColumnDetection = useMemo(() => {
+    if (!parsedData) return { hasProjectColumn: false, projectColumnIndex: -1 };
+    
+    const projectKeywords = ['proyecto', 'project', 'obra', 'propiedad', 'unidad de negocio'];
+    
+    const projectColumnIndex = parsedData.headers.findIndex(header => {
+      const normalizedHeader = header.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+      return projectKeywords.some(keyword => 
+        normalizedHeader === keyword || 
+        normalizedHeader.includes(keyword) ||
+        keyword.includes(normalizedHeader)
+      );
+    });
+    
+    return {
+      hasProjectColumn: projectColumnIndex !== -1,
+      projectColumnIndex,
+    };
+  }, [parsedData]);
+
   const { 
     errors: validationErrors, 
     summary: validationSummary,
@@ -396,6 +417,9 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             getSuggestions={getSuggestions}
             aiConfidence={aiConfidence}
             isLoadingAI={isLoadingAI}
+            projectContext={config.projectContext}
+            hasProjectColumn={projectColumnDetection.hasProjectColumn}
+            projectColumnIndex={projectColumnDetection.projectColumnIndex}
           />
         ) : null;
       case 3:
