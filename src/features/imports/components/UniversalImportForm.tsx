@@ -316,9 +316,6 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       const foreignKeyLabels = foreignKeyOptions.map(opt => opt.label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim());
 
       uniqueValues.forEach(value => {
-        const mappingKey = `${field.field}_${value}`;
-        if (manualMappings[mappingKey] !== undefined) return;
-        
         const normalized = value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
         
         // Check in valueMap first
@@ -335,7 +332,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           hasMatch = foreignKeyLabels.some(label => label === normalized);
         }
         
-        // Fuzzy match in valueMap
+        // Fuzzy match in valueMap (only for very similar values, 80% threshold)
         if (!hasMatch && normalized.length > 3) {
           for (const key of valueMapKeys) {
             if (key.length > 3) {
@@ -346,7 +343,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
                 if (longer.includes(shorter[i])) matches++;
               }
               const similarity = matches / longer.length;
-              if (similarity > 0.6) {
+              if (similarity > 0.8) {
                 hasMatch = true;
                 break;
               }
@@ -354,7 +351,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           }
         }
         
-        // Fuzzy match in foreignKeyConfig options
+        // Fuzzy match in foreignKeyConfig options (only for very similar values, 80% threshold)
         if (!hasMatch && normalized.length > 3) {
           for (const label of foreignKeyLabels) {
             if (label.length > 3) {
@@ -365,7 +362,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
                 if (longer.includes(shorter[i])) matches++;
               }
               const similarity = matches / longer.length;
-              if (similarity > 0.6) {
+              if (similarity > 0.8) {
                 hasMatch = true;
                 break;
               }
@@ -395,7 +392,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     }
 
     return conflictGroups;
-  }, [parsedData, extendedSchema, columnMapping, manualMappings, config.valueMapConfig]);
+  }, [parsedData, extendedSchema, columnMapping, config.valueMapConfig]);
 
   const handleMappingChange = useCallback((columnIndex: number, field: string | null) => {
     setColumnMapping(prev => {
