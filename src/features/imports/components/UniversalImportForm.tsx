@@ -3,10 +3,12 @@ import { Upload, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
 import { useFileParser } from '../hooks/useFileParser';
 import { useColumnAutoMap } from '../hooks/useColumnAutoMap';
 import { useValidationEngine } from '../hooks/useValidationEngine';
+import { useAISuggestMapping } from '../hooks/useAISuggestMapping';
 
 import { StepPreview } from '../steps/StepPreview';
 import { StepMapping } from '../steps/StepMapping';
@@ -62,12 +64,17 @@ interface ImportFormContentProps {
 
 function ImportFormContent({ config, onClose }: ImportFormContentProps) {
   const { toast } = useToast();
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.preferences?.last_organization_id || userData?.organization?.id;
   
   const [currentStep, setCurrentStep] = useState(1);
   const [columnMapping, setColumnMapping] = useState<ColumnMapping>({});
   const [manualMappings, setManualMappings] = useState<ManualMapping>({});
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
+  const [aiConfidence, setAIConfidence] = useState<Record<string, number>>({});
+
+  const { suggestMapping, saveMappings, isLoading: isLoadingAI } = useAISuggestMapping();
 
   const { 
     parsedData, 
@@ -91,8 +98,36 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
   useEffect(() => {
     if (parsedData && Object.keys(columnMapping).length === 0 && Object.keys(autoMapping).length > 0) {
       setColumnMapping(autoMapping);
+      
+      if (organizationId && parsedData.headers.length > 0) {
+        suggestMapping({
+          headers: parsedData.headers,
+          sampleRows: parsedData.rows.slice(0, 5).map(row => 
+            Object.fromEntries(parsedData.headers.map((h, i) => [h, row[i]]))
+          ),
+          targetSchema: config.targetSchema,
+          entity: config.entityName.toLowerCase().replace(/\s+/g, '_'),
+          organizationId
+        }).then(result => {
+          if (Object.keys(result.mapping).length > 0) {
+            const updatedMapping = { ...autoMapping };
+            const updatedConfidence: Record<string, number> = {};
+            
+            for (const [header, field] of Object.entries(result.mapping)) {
+              const headerIndex = parsedData.headers.findIndex(h => h === header);
+              if (headerIndex !== -1 && !autoMapping[headerIndex]) {
+                updatedMapping[headerIndex] = field;
+                updatedConfidence[header] = result.confidence[header] || 0.8;
+              }
+            }
+            
+            setColumnMapping(updatedMapping);
+            setAIConfidence(updatedConfidence);
+          }
+        });
+      }
     }
-  }, [parsedData, autoMapping, columnMapping]);
+  }, [parsedData, autoMapping, columnMapping, organizationId, config.targetSchema, config.entityName, suggestMapping]);
 
   const { 
     errors: validationErrors, 
@@ -296,6 +331,21 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
 
   const goNext = () => {
     if (currentStep < 5 && canGoNext) {
+      if (currentStep === 2 && organizationId && parsedData) {
+        const mappingsToSave = Object.entries(columnMapping)
+          .filter(([_, field]) => field)
+          .map(([index, field]) => ({
+            sourceHeader: parsedData.headers[parseInt(index)],
+            targetField: field!
+          }));
+        
+        saveMappings({
+          organizationId,
+          entity: config.entityName.toLowerCase().replace(/\s+/g, '_'),
+          mappings: mappingsToSave
+        });
+      }
+      
       setCurrentStep(prev => prev + 1);
     }
   };
@@ -333,6 +383,8 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             columnMapping={columnMapping}
             onMappingChange={handleMappingChange}
             getSuggestions={getSuggestions}
+            aiConfidence={aiConfidence}
+            isLoadingAI={isLoadingAI}
           />
         ) : null;
       case 3:

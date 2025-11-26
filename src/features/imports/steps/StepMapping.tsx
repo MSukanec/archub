@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowRight, Check, AlertCircle, HelpCircle } from 'lucide-react';
+import { ArrowRight, Check, AlertCircle, HelpCircle, Loader2, Sparkles } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,6 +16,18 @@ interface StepMappingProps {
   columnMapping: ColumnMapping;
   onMappingChange: (columnIndex: number, field: string | null) => void;
   getSuggestions?: (headerIndex: number) => Array<{ field: string; label: string; similarity: number }>;
+  aiConfidence?: Record<string, number>;
+  isLoadingAI?: boolean;
+}
+
+function getAIBadge(confidence: number) {
+  if (confidence >= 0.9) {
+    return { label: 'IA', className: 'bg-green-500/10 text-green-600 border-green-500/30' };
+  }
+  if (confidence >= 0.7) {
+    return { label: `IA ${Math.round(confidence * 100)}%`, className: 'bg-blue-500/10 text-blue-600 border-blue-500/30' };
+  }
+  return { label: 'IA ?', className: 'bg-amber-500/10 text-amber-600 border-amber-500/30' };
 }
 
 export function StepMapping({
@@ -24,6 +36,8 @@ export function StepMapping({
   columnMapping,
   onMappingChange,
   getSuggestions,
+  aiConfidence,
+  isLoadingAI,
 }: StepMappingProps) {
   const mappedFields = useMemo(() => {
     return new Set(Object.values(columnMapping).filter(Boolean) as string[]);
@@ -88,6 +102,20 @@ export function StepMapping({
 
   return (
     <div className="space-y-6">
+      {isLoadingAI && (
+        <Card className="border-blue-500/50 bg-blue-500/5">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-blue-500" />
+                <span className="text-sm text-blue-600">Analizando con IA...</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {missingRequiredFields.length > 0 && (
         <Card className="border-amber-500/50 bg-amber-500/5">
           <CardContent className="p-4">
@@ -135,6 +163,17 @@ export function StepMapping({
                         <p className="font-medium truncate">{header}</p>
                         {status === 'mapped' && (
                           <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        )}
+                        {status === 'mapped' && aiConfidence?.[header] !== undefined && (
+                          <Badge 
+                            variant="outline" 
+                            className={cn(
+                              "text-[10px] px-1.5 py-0 flex-shrink-0",
+                              getAIBadge(aiConfidence[header]).className
+                            )}
+                          >
+                            {getAIBadge(aiConfidence[header]).label}
+                          </Badge>
                         )}
                       </div>
                       {sampleValues.length > 0 && (
