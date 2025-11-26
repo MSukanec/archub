@@ -15,14 +15,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { MiniEmptyState } from '@/components/ui-custom/fields/MiniEmptyState';
-import { Users, UserPlus, Building2, FileText, Mail, Phone, Badge as BadgeIcon } from 'lucide-react';
+import { Users, UserPlus, FileText, Mail, Phone, Badge as BadgeIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const clientSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
-  unit: z.string().optional(),
   clientRoleId: z.string().optional(),
   status: z.enum(['active', 'inactive', 'deleted', 'potential', 'rejected', 'completed']).optional(),
   isPrimary: z.enum(['yes', 'no']).optional(),
@@ -128,27 +127,8 @@ function FormPanel({
           />
         </div>
 
-        {/* Row 2: Unidad Funcional / Estado / Cliente Principal (3 columns on desktop, 1 on mobile) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="unit"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Unidad Funcional (Opcional)</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Ej: Dpto 101"
-                    disabled={isViewMode}
-                    data-testid="input-client-unit"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
+        {/* Row 2: Estado / Cliente Principal (2 columns on desktop, 1 on mobile) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="status"
@@ -311,20 +291,6 @@ function ViewPanel({
             </div>
           </div>
         )}
-
-        {existingClient?.unit && (
-          <div className="flex items-start gap-3 p-3 rounded-lg border bg-card" data-testid="card-client-unit">
-            <div className="p-2 bg-accent/10 rounded-lg">
-              <Building2 className="h-5 w-5 text-accent" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground">Unidad Funcional</p>
-              <p className="font-medium text-sm truncate" title={existingClient.unit}>
-                {existingClient.unit}
-              </p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Notas */}
@@ -394,7 +360,6 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
     resolver: zodResolver(clientSchema),
     defaultValues: {
       contactId: '',
-      unit: '',
       clientRoleId: '',
       status: 'active',
       isPrimary: 'yes',
@@ -407,7 +372,6 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
     if (existingClient && (isEditing || isViewMode)) {
       form.reset({
         contactId: existingClient.contact_id || '',
-        unit: existingClient.unit || '',
         clientRoleId: existingClient.client_role_id || '',
         status: existingClient.status || 'active',
         isPrimary: existingClient.is_primary ? 'yes' : 'no',
@@ -422,7 +386,6 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
 
       const payload: any = {
         organization_id: organizationId,
-        unit: data.unit || null,
         client_role_id: (data.clientRoleId && data.clientRoleId !== '') ? data.clientRoleId : null,
         status: data.status || 'active',
         is_primary: data.isPrimary === 'yes',
@@ -582,7 +545,7 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
           rightLabel={isEditing ? 'Guardar Cambios' : 'Agregar Cliente'}
           onRightClick={form.handleSubmit(handleSubmit)}
           isSubmitting={isLoading || isLoadingData}
-          disabled={isLoading || isLoadingData}
+          submitDisabled={isLoading || isLoadingData}
           data-testid="footer-client-form"
         />
       )}

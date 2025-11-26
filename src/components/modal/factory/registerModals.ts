@@ -5,7 +5,6 @@ import { ProjectForm } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
 import ContactForm from '@/features/contacts/forms/ContactForm';
 import { ContactTypeForm } from '@/features/contacts/forms/ContactTypeForm';
-import { ClientObligationModal } from '@/features/clients';
 import { ClientForm } from '@/features/clients/forms/ClientForm';
 import ClientPaymentForm from '@/features/clients/forms/ClientPaymentForm';
 import ClientRoleForm from '@/features/clients/forms/ClientRoleForm';
@@ -134,7 +133,6 @@ export function initializeModalRegistry(): void {
       mode: data?.clientId ? (data?.mode || 'edit') : (data?.mode || 'create')
     })
   });
-  registerModal('client-obligation', ClientObligationModal as any, financeConfig);
   registerModal('client-payment', ClientPaymentForm as any, { 
     ...financeConfig,
     mapDataToProps: (data) => ({

@@ -127,12 +127,9 @@ export default function ClientPaymentRow({
         <div className="font-semibold text-sm truncate">
           {getClientName(payment)}
         </div>
-        {/* Línea 2: Unidad funcional o billetera */}
+        {/* Línea 2: Billetera */}
         <div className="text-muted-foreground text-sm truncate">
-          {payment.client?.unit 
-            ? `Unidad: ${payment.client.unit}`
-            : payment.wallet?.wallets?.name || 'Sin billetera'
-          }
+          {payment.wallet?.wallets?.name || 'Sin billetera'}
         </div>
         {/* Línea 3: Fecha de pago */}
         <div className="text-muted-foreground text-sm truncate">

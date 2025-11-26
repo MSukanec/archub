@@ -8,7 +8,6 @@ import { z } from 'zod';
 export const projectClientSchema = z.object({
   contact_id: z.string().min(1, 'El contacto es requerido'),
   client_role_id: z.string().nullable().optional(),
-  unit: z.string().nullable().optional(),
   is_primary: z.boolean().default(true),
   notes: z.string().nullable().optional(),
   status: z.enum(['active', 'inactive', 'deleted', 'potential', 'rejected', 'completed']).default('active'),

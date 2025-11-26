@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 interface Client {
   id: string;
   contact_id: string;
-  unit: string | null;
   notes: string | null;
   is_primary: boolean;
   status: string;
@@ -171,15 +170,11 @@ export default function ClientRow({
   // Get status config
   const statusConfig = getStatusConfig(client.status);
   
-  // Build metadata string (role + unit if exists)
+  // Build metadata string (role if exists)
   const metadata: string[] = [];
   
   if (client.role?.name) {
     metadata.push(client.role.name);
-  }
-  
-  if (client.unit) {
-    metadata.push(`Unidad: ${client.unit}`);
   }
 
   // Contenido interno del card

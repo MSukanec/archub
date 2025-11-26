@@ -7,10 +7,11 @@ import { es } from 'date-fns/locale'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
-import { DollarSign, CalendarIcon, Info } from 'lucide-react'
+import { DollarSign, CalendarIcon, Info, Building2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
@@ -27,6 +28,8 @@ import {
 const clientCommitmentSchema = z.object({
   created_by: z.string().min(1, 'Creador es requerido'),
   client_id: z.string().min(1, 'Cliente es requerido'),
+  unit_name: z.string().optional(),
+  unit_description: z.string().optional(),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
   exchange_rate: z.number().optional(),
@@ -46,7 +49,7 @@ const clientCommitmentSchema = z.object({
         path: ["installments_count"]
       });
     }
-    if (!data.installments_frequency || data.installments_frequency === '') {
+    if (!data.installments_frequency) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "La frecuencia de cuotas es requerida",
@@ -60,7 +63,7 @@ const clientCommitmentSchema = z.object({
         path: ["installments_start_date"]
       });
     }
-    if (!data.installments_distribution || data.installments_distribution === '') {
+    if (!data.installments_distribution) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "El tipo de distribución de cuotas es requerido",
@@ -69,14 +72,14 @@ const clientCommitmentSchema = z.object({
     }
   }
   if (data.commitment_method === 'installments_indexed') {
-    if (!data.index_type || data.index_type === '') {
+    if (!data.index_type) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "El tipo de índice es requerido",
         path: ["index_type"]
       });
     }
-    if (!data.index_frequency || data.index_frequency === '') {
+    if (!data.index_frequency) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "La frecuencia de indexación es requerida",
@@ -330,7 +333,6 @@ function FormPanel({
                     {projectClients?.map((client) => (
                       <SelectItem key={client.id} value={client.id}>
                         {formatContactName(client.contact)}
-                        {client.unit && ` - ${client.unit}`}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -341,7 +343,27 @@ function FormPanel({
           )}
         />
 
-        {/* Row 2: Moneda / Monto Comprometido / Tipo de Cambio (3 columnas) */}
+        {/* Row 2: Unidad Funcional (opcional) */}
+        <FormField
+          control={form.control}
+          name="unit_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Unidad Funcional (Opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  value={field.value || ''}
+                  placeholder="Ej: Dpto 3B, Cochera 12, Local 5..."
+                  data-testid="input-commitment-unit-name"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Row 3: Moneda / Monto Comprometido / Tipo de Cambio (3 columnas) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <FormField
             control={form.control}
@@ -421,7 +443,7 @@ function FormPanel({
           />
         </div>
 
-        {/* Row 3: Método de Compromiso */}
+        {/* Row 4: Método de Compromiso */}
         <FormField
           control={form.control}
           name="commitment_method"
@@ -443,6 +465,27 @@ function FormPanel({
                     <SelectItem value="custom">Personalizado</SelectItem>
                   </SelectContent>
                 </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Row 5: Descripción de la unidad (opcional) - en su propia fila */}
+        <FormField
+          control={form.control}
+          name="unit_description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción de la Unidad (Opcional)</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  value={field.value || ''}
+                  placeholder="Detalles adicionales sobre la unidad funcional, características, ubicación, etc."
+                  rows={3}
+                  data-testid="textarea-commitment-unit-description"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -502,8 +545,11 @@ function ViewPanel({
             <span className="text-base font-semibold" data-testid="text-commitment-client-name">
               {formatContactName(existingCommitment.project_client?.contact) || '-'}
             </span>
-            {existingCommitment.project_client?.unit && (
-              <span className="text-sm text-muted-foreground">Unidad: {existingCommitment.project_client.unit}</span>
+            {existingCommitment.unit_name && (
+              <span className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                <Building2 className="h-3.5 w-3.5" />
+                {existingCommitment.unit_name}
+              </span>
             )}
           </div>
         </div>
@@ -524,6 +570,15 @@ function ViewPanel({
           {getCommitmentMethodLabel(existingCommitment.commitment_method || 'fixed')}
         </span>
       </div>
+
+      {existingCommitment.unit_description && (
+        <div>
+          <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Descripción de la Unidad</h4>
+          <p className="text-sm text-foreground" data-testid="text-commitment-unit-description">
+            {existingCommitment.unit_description}
+          </p>
+        </div>
+      )}
 
       <div className="pt-4 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
@@ -577,6 +632,8 @@ export function ClientCommitmentForm({ modalData, onClose, mode = 'create' }: Cl
     defaultValues: {
       created_by: '',
       client_id: '',
+      unit_name: '',
+      unit_description: '',
       amount: 0,
       currency_id: '',
       exchange_rate: undefined,
@@ -598,6 +655,8 @@ export function ClientCommitmentForm({ modalData, onClose, mode = 'create' }: Cl
       form.reset({
         created_by: existingCommitment.created_by || currentMember?.id || '',
         client_id: existingCommitment.client_id || '',
+        unit_name: existingCommitment.unit_name || '',
+        unit_description: existingCommitment.unit_description || '',
         amount: existingCommitment.amount || 0,
         currency_id: existingCommitment.currency_id || '',
         exchange_rate: existingCommitment.exchange_rate || undefined,
@@ -638,6 +697,8 @@ export function ClientCommitmentForm({ modalData, onClose, mode = 'create' }: Cl
           commitmentId,
           updates: {
             client_id: data.client_id,
+            unit_name: data.unit_name || null,
+            unit_description: data.unit_description || null,
             amount: data.amount,
             currency_id: data.currency_id,
             exchange_rate: data.exchange_rate || 1,
@@ -655,6 +716,8 @@ export function ClientCommitmentForm({ modalData, onClose, mode = 'create' }: Cl
         await createCommitmentMutation.mutateAsync({
           commitment: {
             client_id: data.client_id,
+            unit_name: data.unit_name || null,
+            unit_description: data.unit_description || null,
             amount: data.amount,
             currency_id: data.currency_id,
             exchange_rate: data.exchange_rate || 1,

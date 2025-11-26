@@ -85,10 +85,9 @@ function FormPanel({
     return projectClients
       .map(client => {
         const name = formatContactName(client.contact)
-        const label = client.unit ? `${name} - ${client.unit}` : name
         return {
           value: client.id,
-          label: label
+          label: name
         }
       })
       .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
@@ -399,9 +398,6 @@ function ViewPanel({
             <span className="text-base font-semibold" data-testid="text-payment-client-name">
               {formatContactName(existingPayment.client?.contact) || '-'}
             </span>
-            {existingPayment.client?.unit && (
-              <span className="text-sm text-muted-foreground">Unidad: {existingPayment.client.unit}</span>
-            )}
           </div>
         </div>
         <div>

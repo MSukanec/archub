@@ -4,7 +4,7 @@ import DataRowCard, { DataRowCardProps } from '@/components/ui-custom/general/Da
 interface ClientObligation {
   id: string;
   client_id: string;
-  unit?: string;
+  unit_name?: string | null;
   committed_amount: number;
   currency_id: string;
   exchange_rate?: number;
@@ -142,9 +142,9 @@ export default function ClientObligationRow({
         <div className="font-semibold text-sm truncate">
           {getClientDisplayName(obligation)}
         </div>
-        {obligation.unit && (
+        {obligation.unit_name && (
           <div className="text-muted-foreground text-sm truncate">
-            Unidad: {obligation.unit}
+            Unidad: {obligation.unit_name}
           </div>
         )}
       </div>

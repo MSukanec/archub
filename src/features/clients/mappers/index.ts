@@ -32,7 +32,6 @@ export interface CurrencyFinancial {
 export interface ProjectClientSummary {
   id: string;
   contact_id: string;
-  unit: string | null;
   notes: string | null;
   is_primary: boolean;
   status: string;
@@ -106,7 +105,6 @@ export function mapToClientListItems(
       id: client.id,
       contact: client.contact,
       role: client.role,
-      unit: client.unit,
       is_primary: client.is_primary,
       status: client.status,
       notes: client.notes,
@@ -254,7 +252,6 @@ export function mapToClientSummary(
   return {
     id: client.id,
     contact_id: client.contact_id,
-    unit: client.unit,
     notes: client.notes,
     is_primary: client.is_primary,
     status: client.status,

@@ -51,7 +51,6 @@ export interface ProjectClient {
   project_id: string;
   contact_id: string;
   organization_id: string;
-  unit: string | null;
   is_primary: boolean;
   notes: string | null;
   status: 'active' | 'inactive' | 'deleted' | 'potential' | 'rejected' | 'completed';
@@ -80,6 +79,8 @@ export interface ClientCommitment {
   currency_id: string;
   exchange_rate: number;
   commitment_method: 'fixed' | 'installments_fixed' | 'installments_indexed' | 'milestones' | 'custom';
+  unit_name: string | null;
+  unit_description: string | null;
   installments_count?: number | null;
   installments_frequency?: 'monthly' | 'bimonthly' | 'quarterly' | 'yearly' | null;
   installments_start_date?: string | null;
@@ -233,7 +234,6 @@ export interface ClientListItem {
   id: string;
   contact: Contact | null;
   role: ClientRole | null;
-  unit: string | null;
   is_primary: boolean;
   status: string;
   notes: string | null;
