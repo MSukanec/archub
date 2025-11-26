@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { AlertCircle, CheckCircle, AlertTriangle, XCircle, ChevronDown, Edit3, Check, X } from 'lucide-react';
+import { AlertCircle, CheckCircle, AlertTriangle, XCircle, ChevronDown, Edit3, Check, X, Pencil } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import { format, isValid, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 import type { ValidationError, TargetField, ParsedData, ColumnMapping } from '../types';
 
 interface ValidationSummary {
@@ -110,11 +112,56 @@ export function StepValidation({
     return cellCorrections[key] || null;
   };
 
+  const formatDisplayValue = (value: unknown, field: string): string => {
+    if (value === null || value === undefined) return '';
+    const strValue = String(value);
+    if (!strValue.trim()) return '';
+    
+    const fieldConfig = targetSchema.find(f => f.field === field);
+    
+    if (fieldConfig?.type === 'date') {
+      try {
+        let dateObj: Date;
+        if (value instanceof Date) {
+          dateObj = value;
+        } else if (typeof value === 'string') {
+          dateObj = new Date(value);
+          if (!isValid(dateObj)) {
+            dateObj = parseISO(value);
+          }
+        } else {
+          return strValue;
+        }
+        
+        if (isValid(dateObj)) {
+          return format(dateObj, 'dd/MM/yyyy', { locale: es });
+        }
+      } catch {
+        return strValue;
+      }
+    }
+    
+    if (fieldConfig?.type === 'currency' || fieldConfig?.type === 'number') {
+      const num = parseFloat(strValue);
+      if (!isNaN(num)) {
+        return num.toLocaleString('es-AR');
+      }
+    }
+    
+    return strValue;
+  };
+
   const getOriginalValue = (rowIndex: number, colIndex: number): string => {
     if (!parsedData || rowIndex >= parsedData.rows.length) return '';
     const value = parsedData.rows[rowIndex][colIndex];
     if (value === null || value === undefined) return '';
     return String(value);
+  };
+
+  const getFormattedOriginalValue = (rowIndex: number, colIndex: number, field: string): string => {
+    if (!parsedData || rowIndex >= parsedData.rows.length) return '';
+    const value = parsedData.rows[rowIndex][colIndex];
+    return formatDisplayValue(value, field);
   };
 
   const getColumnIndexForField = (field: string): number => {
@@ -123,6 +170,18 @@ export function StepValidation({
       if (mappedField === field) return parseInt(colIndex);
     }
     return -1;
+  };
+
+  const originalRowsWithErrors = useMemo(() => {
+    const rows = new Set<number>();
+    for (const error of emptyCellErrors) {
+      rows.add(error.row);
+    }
+    return Array.from(rows).sort((a, b) => a - b);
+  }, [emptyCellErrors]);
+
+  const getOriginalErrorsForRow = (rowIndex: number): ValidationError[] => {
+    return emptyCellErrors.filter(e => e.row === rowIndex);
   };
 
   if (errors.length === 0 && summary.missingRequiredFields.length === 0) {
@@ -198,13 +257,11 @@ export function StepValidation({
 
       {/* Editor de celdas vacías - muestra todas las columnas para contexto */}
       {hasEditableErrors && parsedData && columnMapping && onCellCorrectionChange && (() => {
-        // Obtener todas las columnas mapeadas para mostrar contexto
         const mappedColumns = Object.entries(columnMapping)
           .filter(([_, field]) => field)
           .map(([colIndex, field]) => ({ colIndex: parseInt(colIndex), field: field! }))
           .sort((a, b) => a.colIndex - b.colIndex);
         
-        // Obtener los campos que tienen errores para esta fila
         const errorFields = new Set(emptyCellErrors.map(e => e.field));
         
         return (
@@ -217,7 +274,7 @@ export function StepValidation({
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Algunas filas tienen celdas vacías en campos obligatorios. Hacé clic en las celdas rojas para completarlas:
+                Algunas filas tienen celdas vacías en campos obligatorios. Hacé clic en las celdas marcadas para completarlas:
               </p>
               <ScrollArea className="max-h-[300px]">
                 <Table>
@@ -238,8 +295,8 @@ export function StepValidation({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Object.entries(rowsWithEmptyCells).map(([rowIndexStr, rowErrors]) => {
-                      const rowIndex = parseInt(rowIndexStr);
+                    {originalRowsWithErrors.map((rowIndex) => {
+                      const rowErrors = getOriginalErrorsForRow(rowIndex);
                       const rowErrorFields = new Set(rowErrors.map(e => e.field));
                       
                       return (
@@ -251,9 +308,8 @@ export function StepValidation({
                             const hasError = rowErrorFields.has(field);
                             const correctedValue = getCorrectedValue(rowIndex, field);
                             const isEditing = editingCell?.row === rowIndex && editingCell?.field === field;
-                            const originalValue = getOriginalValue(rowIndex, colIndex);
+                            const formattedValue = getFormattedOriginalValue(rowIndex, colIndex, field);
                             
-                            // Si es celda con error, mostrar editor
                             if (hasError) {
                               if (isEditing) {
                                 return (
@@ -294,30 +350,38 @@ export function StepValidation({
                               return (
                                 <TableCell 
                                   key={field}
-                                  className={cn(
-                                    "cursor-pointer transition-colors",
-                                    correctedValue 
-                                      ? "bg-green-500/10 hover:bg-green-500/20" 
-                                      : "bg-destructive/10 hover:bg-destructive/20"
-                                  )}
-                                  onClick={() => handleStartEdit(rowIndex, field)}
+                                  className="p-1"
                                   data-testid={`cell-${rowIndex}-${field}`}
                                 >
-                                  {correctedValue ? (
-                                    <span className="text-green-600 font-medium">{correctedValue}</span>
-                                  ) : (
-                                    <span className="text-destructive/60 italic text-sm">
-                                      (vacío)
-                                    </span>
-                                  )}
+                                  <div
+                                    onClick={() => handleStartEdit(rowIndex, field)}
+                                    className={cn(
+                                      "flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-all",
+                                      "border-2 border-dashed",
+                                      correctedValue 
+                                        ? "border-green-500/50 bg-green-500/10 hover:bg-green-500/20" 
+                                        : "border-destructive/50 bg-destructive/5 hover:bg-destructive/10 hover:border-destructive"
+                                    )}
+                                  >
+                                    {correctedValue ? (
+                                      <>
+                                        <span className="text-green-600 font-medium flex-1">{correctedValue}</span>
+                                        <Pencil className="h-3 w-3 text-green-500/60" />
+                                      </>
+                                    ) : (
+                                      <>
+                                        <span className="text-destructive/70 text-sm flex-1">Completar</span>
+                                        <Pencil className="h-3 w-3 text-destructive/60" />
+                                      </>
+                                    )}
+                                  </div>
                                 </TableCell>
                               );
                             }
                             
-                            // Celda normal sin error - solo mostrar el valor
                             return (
                               <TableCell key={field} className="text-muted-foreground">
-                                {originalValue || '-'}
+                                {formattedValue || '-'}
                               </TableCell>
                             );
                           })}
@@ -328,7 +392,7 @@ export function StepValidation({
                 </Table>
               </ScrollArea>
               <p className="text-xs text-muted-foreground mt-3">
-                Las celdas en verde ya fueron completadas. Las rojas aún necesitan un valor. Las demás columnas muestran contexto.
+                Las celdas en verde ya fueron completadas. Las celdas con borde rojo aún necesitan un valor.
               </p>
             </CardContent>
           </Card>
