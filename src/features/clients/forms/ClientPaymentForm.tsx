@@ -751,7 +751,7 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
               link_to: {
                 client_payment_id: createdPaymentId,
               },
-              category: 'attachment',
+              category: 'document',
               description: fileInput.description || fileInput.file.name,
             })
           } catch (uploadError: any) {
