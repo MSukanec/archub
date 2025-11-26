@@ -63,6 +63,7 @@ function FormPanel({
   filesToUpload,
   setFilesToUpload,
   existingFiles,
+  onExistingFileDelete,
 }: {
   form: ReturnType<typeof useForm<ClientPaymentFormData>>;
   onSubmit: (data: ClientPaymentFormData) => void;
@@ -76,6 +77,7 @@ function FormPanel({
   filesToUpload: any[];
   setFilesToUpload: (files: any[]) => void;
   existingFiles: any[];
+  onExistingFileDelete?: (fileId: string) => Promise<void>;
 }) {
   const clientOptions = useMemo(() => {
     if (!projectClients) return []
@@ -368,6 +370,7 @@ function FormPanel({
               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
             }}
             imageCompressionPreset="document"
+            onExistingFileDelete={onExistingFileDelete}
             emptyStateTitle="Sin archivos adjuntos"
             emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
             newFileBadgeText="Nuevo"
@@ -527,6 +530,21 @@ interface ClientPaymentFormProps {
   mode?: 'create' | 'edit' | 'view';
 }
 
+// Subcomponente: Panel de lectura con vista de archivos
+function ViewPanelWithFiles({
+  existingPayment,
+  attachments,
+}: {
+  existingPayment: any;
+  attachments: any[];
+}) {
+  return (
+    <div className="space-y-6">
+      <ViewPanel existingPayment={existingPayment} attachments={attachments} />
+    </div>
+  )
+}
+
 export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: ClientPaymentFormProps) {
   const { projectId, organizationId, paymentId } = modalData || {}
   const { data: userData } = useCurrentUser()
@@ -663,6 +681,25 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
   // Mutations for create/update
   const createPaymentMutation = useCreateClientPayment()
   const updatePaymentMutation = useUpdateClientPayment()
+  const queryClient = useQueryClient()
+
+  // Handle deletion of existing files
+  const handleExistingFileDelete = async (fileId: string) => {
+    try {
+      await deleteFile(fileId, false)
+      queryClient.invalidateQueries({ queryKey: ['client-payment-media', paymentId] })
+      toast({
+        title: 'Archivo eliminado',
+        description: 'El archivo ha sido eliminado correctamente',
+      })
+    } catch (error: any) {
+      toast({
+        title: 'Error al eliminar archivo',
+        description: error.message,
+        variant: 'destructive',
+      })
+    }
+  }
 
   const onSubmit = async (data: ClientPaymentFormData) => {
     try {
@@ -705,41 +742,44 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
         })
       }
 
-      // Upload file IF it exists
-      if (filesToUpload.length > 0 && filesToUpload[0].file) {
-        const createdPaymentId = paymentResult?.id || paymentId
-        
-        if (!createdPaymentId) {
+      // Upload files if they exist
+      const createdPaymentId = paymentResult?.id || paymentId
+      
+      if (filesToUpload.length > 0 && createdPaymentId) {
+        if (!organizationId) {
           toast({
             variant: 'destructive',
-            title: 'Error al subir archivo',
-            description: 'No se pudo obtener el ID del pago para subir el archivo.',
+            title: 'Error al subir archivos',
+            description: 'No se encontró el ID de la organización.',
             duration: 8000,
           })
           return;
         }
-        
-        try {
-          await uploadMediaFileV2({
-            file: filesToUpload[0].file,
-            organization_id: organizationId || '',
-            created_by: data.created_by,
-            bucket: 'media',
-            client_payment_id: createdPaymentId,
-            project_id: projectId || '',
-            visibility: 'organization',
-            category: 'document',
-          })
-        } catch (uploadError: any) {
-          console.error('Error uploading file:', uploadError)
-          toast({
-            variant: 'destructive',
-            title: 'Error al subir archivo',
-            description: `El pago se ${mode === 'edit' ? 'actualizó' : 'registró'} correctamente, pero el archivo no pudo subirse: ${uploadError.message || 'Error desconocido'}. Puedes editarlo más tarde para agregar el archivo.`,
-            duration: 8000,
-          })
-          return;
+
+        for (const fileInput of filesToUpload) {
+          try {
+            await uploadFile(fileInput.file, {
+              entity: 'client_payment_attachment',
+              organization_id: organizationId,
+              created_by_member_id: currentMember?.id,
+              link_to: {
+                client_payment_id: createdPaymentId,
+              },
+              category: 'attachment',
+              description: fileInput.description || fileInput.file.name,
+            })
+          } catch (uploadError: any) {
+            console.error('Error uploading file:', uploadError)
+            toast({
+              variant: 'destructive',
+              title: 'Error al subir archivo',
+              description: uploadError.message || 'Error desconocido',
+              duration: 8000,
+            })
+          }
         }
+        queryClient.invalidateQueries({ queryKey: ['client-payment-media', createdPaymentId] })
+        setFilesToUpload([])
       }
       
       toast({
@@ -816,6 +856,7 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
             filesToUpload={filesToUpload}
             setFilesToUpload={setFilesToUpload}
             existingFiles={existingFiles}
+            onExistingFileDelete={handleExistingFileDelete}
           />
         )}
       </ModalBody>
