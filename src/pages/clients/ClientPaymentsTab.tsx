@@ -510,6 +510,13 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         projectContext,
         availableProjects: projectsData?.map(p => ({ id: p.id, name: p.name })) || [],
         availableClients,
+        fieldHelpMessages: {
+          wallet_name: {
+            message: 'Las billeteras que no se encuentran deben agregarse primero en la configuración de tu organización.',
+            linkText: 'Ir a Configuración de Finanzas',
+            linkPath: '/settings/finances',
+          },
+        },
         onImport: async (rows: any[]) => {
           const clientsData: Record<string, string> = {};
           

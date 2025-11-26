@@ -848,6 +848,8 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
             manualMappings={manualMappings}
             onManualMappingChange={handleManualMappingChange}
             targetSchema={extendedSchema}
+            fieldHelpMessages={config.fieldHelpMessages}
+            onCloseModal={onClose}
           />
         );
       case 5:

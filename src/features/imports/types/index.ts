@@ -18,6 +18,12 @@ export type ProjectContext =
   | { type: 'project'; projectId: string; projectName?: string }
   | { type: 'organization'; organizationId: string; organizationName?: string };
 
+export interface FieldHelpMessage {
+  message: string;
+  linkText: string;
+  linkPath: string;
+}
+
 export interface ImportConfig {
   entityName: string;
   entityNamePlural: string;
@@ -35,6 +41,9 @@ export interface ImportConfig {
   
   /** Lista de clientes disponibles para mapeo de foreign-key */
   availableClients?: Array<{ id: string; name: string }>;
+  
+  /** Mensajes de ayuda para campos específicos (se muestran en conflictos) */
+  fieldHelpMessages?: Record<string, FieldHelpMessage>;
 }
 
 export interface ParsedData {

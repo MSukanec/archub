@@ -1,11 +1,13 @@
 import { useState, useMemo } from 'react';
-import { AlertTriangle, Check, X, Search, Plus, ChevronRight, CheckCircle2, ArrowRight } from 'lucide-react';
+import { AlertTriangle, Check, X, Search, Plus, ChevronRight, CheckCircle2, ArrowRight, Info, ExternalLink } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import type { TargetField, ManualMapping, ValidationError } from '../types';
 
@@ -23,6 +25,12 @@ interface SuccessfulMappingGroup {
   options: Array<{ label: string; value: string }>;
 }
 
+interface FieldHelpMessage {
+  message: string;
+  linkText: string;
+  linkPath: string;
+}
+
 interface StepConflictsProps {
   conflicts: ConflictGroup[];
   successfulMappings?: SuccessfulMappingGroup[];
@@ -30,6 +38,8 @@ interface StepConflictsProps {
   onManualMappingChange: (field: string, originalValue: string, mappedValue: string | null) => void;
   targetSchema: TargetField[];
   onCreateNew?: (field: string, name: string, originalValue: string) => void;
+  fieldHelpMessages?: Record<string, FieldHelpMessage>;
+  onCloseModal?: () => void;
 }
 
 export function StepConflicts({
@@ -39,10 +49,20 @@ export function StepConflicts({
   onManualMappingChange,
   targetSchema,
   onCreateNew,
+  fieldHelpMessages = {},
+  onCloseModal,
 }: StepConflictsProps) {
+  const [, navigate] = useLocation();
   const [searchTerms, setSearchTerms] = useState<Record<string, string>>({});
   const [expandedConflicts, setExpandedConflicts] = useState<Set<string>>(new Set());
   const [expandedSuccessful, setExpandedSuccessful] = useState<Set<string>>(new Set());
+
+  const handleHelpLinkClick = (path: string) => {
+    if (onCloseModal) {
+      onCloseModal();
+    }
+    navigate(path);
+  };
 
   const getFieldLabel = (fieldName: string): string => {
     const field = targetSchema.find(f => f.field === fieldName);
@@ -442,6 +462,24 @@ export function StepConflicts({
                             <Plus className="h-3 w-3 mr-2" />
                             Crear nuevo {conflict.fieldLabel.toLowerCase()}
                           </Button>
+                        )}
+
+                        {/* Field-specific help message */}
+                        {fieldHelpMessages[conflict.field] && (
+                          <Alert className="mt-3 border-blue-500/30 bg-blue-500/5">
+                            <Info className="h-4 w-4 text-blue-500" />
+                            <AlertDescription className="text-xs text-blue-700 dark:text-blue-300">
+                              {fieldHelpMessages[conflict.field].message}{' '}
+                              <button
+                                type="button"
+                                onClick={() => handleHelpLinkClick(fieldHelpMessages[conflict.field].linkPath)}
+                                className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                              >
+                                {fieldHelpMessages[conflict.field].linkText}
+                                <ExternalLink className="h-3 w-3" />
+                              </button>
+                            </AlertDescription>
+                          </Alert>
                         )}
                       </CardContent>
                     )}
