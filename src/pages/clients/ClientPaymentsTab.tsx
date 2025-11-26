@@ -389,7 +389,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           valueKey: 'value',
           options: (organizationWallets || []).map(ow => ({
             label: ow.wallets?.name || 'Sin nombre',
-            value: ow.wallet_id,
+            value: ow.id, // Use organization_wallets.id (FK target for client_payments.wallet_id)
           })),
         },
       },
@@ -428,11 +428,12 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     ];
 
     // Build wallet value map from organization wallets
+    // IMPORTANT: client_payments.wallet_id is FK to organization_wallets.id, NOT wallets.id
     const walletValueMap: Record<string, string> = {};
     (organizationWallets || []).forEach(ow => {
-      if (ow.wallets?.name && ow.wallet_id) {
+      if (ow.wallets?.name && ow.id) {
         const normalizedName = ow.wallets.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-        walletValueMap[normalizedName] = ow.wallet_id;
+        walletValueMap[normalizedName] = ow.id; // Use organization_wallets.id, not wallet_id
       }
     });
 
@@ -607,19 +608,20 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           });
           
           // Fallback to organization wallets if no payments exist
+          // IMPORTANT: client_payments.wallet_id is FK to organization_wallets.id, NOT wallets.id
           if (walletsMap.size === 0 && organizationWallets && organizationWallets.length > 0) {
             organizationWallets.forEach(ow => {
-              if (ow.wallets?.name && ow.wallet_id) {
+              if (ow.wallets?.name && ow.id) {
                 const normalizedName = ow.wallets.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-                walletsMap.set(normalizedName, ow.wallet_id);
+                walletsMap.set(normalizedName, ow.id); // Use organization_wallets.id
                 if (!defaultWalletId && ow.is_default) {
-                  defaultWalletId = ow.wallet_id;
+                  defaultWalletId = ow.id; // Use organization_wallets.id
                 }
               }
             });
             // If no default wallet, use the first one
             if (!defaultWalletId && organizationWallets.length > 0) {
-              defaultWalletId = organizationWallets[0].wallet_id;
+              defaultWalletId = organizationWallets[0].id; // Use organization_wallets.id
             }
           }
 
