@@ -746,6 +746,7 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
             await uploadFile(fileInput.file, {
               entity: 'client_payment_attachment',
               organization_id: organizationId,
+              project_id: projectId,
               created_by_member_id: currentMember?.id,
               link_to: {
                 client_payment_id: createdPaymentId,
