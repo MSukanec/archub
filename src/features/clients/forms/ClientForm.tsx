@@ -41,6 +41,7 @@ function FormPanel({
   isEditing,
   isViewMode,
   handleGoToContacts,
+  isLoadingExisting,
 }: {
   form: ReturnType<typeof useForm<ClientFormData>>;
   onSubmit: (data: ClientFormData) => void;
@@ -51,11 +52,21 @@ function FormPanel({
   isEditing: boolean;
   isViewMode: boolean;
   handleGoToContacts: () => void;
+  isLoadingExisting?: boolean;
 }) {
   const contactOptions = contacts.map(contact => ({
     value: contact.id,
     label: `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.email,
   }));
+
+  if (isLoadingExisting) {
+    return (
+      <div className="space-y-4 p-8 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+        <p className="text-sm text-muted-foreground">Cargando información del cliente...</p>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
