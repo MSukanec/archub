@@ -330,8 +330,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         field: 'client_name',
         label: 'Cliente (Nombre)',
         type: 'foreign-key',
-        required: true,
-        description: 'Ej: Juan García',
+        required: false,
+        description: 'Ej: Juan García (opcional, puede omitirse)',
         foreignKeyConfig: {
           entityName: 'client',
           labelKey: 'label',
@@ -557,16 +557,25 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
               errors.push('Proyecto no especificado');
             }
             
-            // Validar cliente
-            const clientNameInput = (row.client_id || row.client_name || '') as string;
+            // Validar cliente (opcional - client_id puede ser null)
+            const clientNameInput = (row._clientId || row.client_id || row.client_name || '') as string;
             const clientName = clientNameInput.toLowerCase().trim();
-            const clientId = clientsData[clientName];
+            let clientId: string | null = null;
             
-            if (!clientNameInput.trim()) {
-              errors.push('Nombre de cliente vacío');
-            } else if (!clientId) {
-              errors.push(`Cliente "${clientNameInput}" no encontrado. Clientes disponibles: ${Object.keys(clientsData).slice(0, 3).join(', ')}${Object.keys(clientsData).length > 3 ? '...' : ''}`);
+            // Si hay un nombre de cliente, intentar resolverlo
+            if (clientNameInput.trim()) {
+              // Check if it's already a UUID (from manual mapping in conflicts step)
+              const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clientNameInput.trim());
+              if (isUUID) {
+                clientId = clientNameInput.trim();
+              } else {
+                clientId = clientsData[clientName] || null;
+                if (!clientId) {
+                  errors.push(`Cliente "${clientNameInput}" no encontrado. Clientes disponibles: ${Object.keys(clientsData).slice(0, 3).join(', ')}${Object.keys(clientsData).length > 3 ? '...' : ''}`);
+                }
+              }
             }
+            // Si clientNameInput está vacío o es null, clientId queda como null (permitido)
             
             // Validar moneda
             const currencyCode = (row.currency_id || row.currency_code || '') as string;
