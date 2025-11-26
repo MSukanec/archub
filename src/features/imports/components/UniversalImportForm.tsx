@@ -310,6 +310,10 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       const unmatchedValues: string[] = [];
       const valueMap = config.valueMapConfig?.[field.field] || {};
       const valueMapKeys = Object.keys(valueMap);
+      
+      // Also get options from foreignKeyConfig for matching
+      const foreignKeyOptions = field.foreignKeyConfig?.options || [];
+      const foreignKeyLabels = foreignKeyOptions.map(opt => opt.label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim());
 
       uniqueValues.forEach(value => {
         const mappingKey = `${field.field}_${value}`;
@@ -317,6 +321,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
         
         const normalized = value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
         
+        // Check in valueMap first
         let hasMatch = valueMapKeys.some(key => key === normalized);
         
         if (!hasMatch) {
@@ -325,11 +330,36 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           );
         }
         
+        // Then check in foreignKeyConfig options (exact match)
+        if (!hasMatch) {
+          hasMatch = foreignKeyLabels.some(label => label === normalized);
+        }
+        
+        // Fuzzy match in valueMap
         if (!hasMatch && normalized.length > 3) {
           for (const key of valueMapKeys) {
             if (key.length > 3) {
               const longer = normalized.length > key.length ? normalized : key;
               const shorter = normalized.length > key.length ? key : normalized;
+              let matches = 0;
+              for (let i = 0; i < shorter.length; i++) {
+                if (longer.includes(shorter[i])) matches++;
+              }
+              const similarity = matches / longer.length;
+              if (similarity > 0.6) {
+                hasMatch = true;
+                break;
+              }
+            }
+          }
+        }
+        
+        // Fuzzy match in foreignKeyConfig options
+        if (!hasMatch && normalized.length > 3) {
+          for (const label of foreignKeyLabels) {
+            if (label.length > 3) {
+              const longer = normalized.length > label.length ? normalized : label;
+              const shorter = normalized.length > label.length ? label : normalized;
               let matches = 0;
               for (let i = 0; i < shorter.length; i++) {
                 if (longer.includes(shorter[i])) matches++;
