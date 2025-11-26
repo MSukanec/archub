@@ -368,10 +368,16 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
   });
 
   // Query to get existing client data when editing
+  // IMPORTANT: Use the same queryKey pattern as CLIENT_QUERY_KEYS.projectClient for proper cache invalidation
   const { data: existingClient, isLoading: existingClientLoading } = useQuery<any>({
-    queryKey: [`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`],
+    queryKey: CLIENT_QUERY_KEYS.projectClient(projectId, clientId, organizationId),
+    queryFn: async () => {
+      const res = await fetch(`/api/projects/${projectId}/clients/${clientId}?organization_id=${organizationId}`);
+      if (!res.ok) throw new Error('Failed to fetch client');
+      return res.json();
+    },
     enabled: !!clientId && !!projectId && !!organizationId && (isEditing || isViewMode),
-    staleTime: 2 * 60 * 1000,
+    staleTime: 0, // Always fetch fresh data when editing
   });
 
   // Filter out contacts that are already clients of this project (only in create mode)
