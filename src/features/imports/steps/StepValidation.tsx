@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
 import { AlertCircle, CheckCircle, AlertTriangle, XCircle, ChevronDown, Edit3, Check, X, Pencil } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +11,117 @@ import { cn } from '@/lib/utils';
 import { format, isValid, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { ValidationError, TargetField, ParsedData, ColumnMapping } from '../types';
+
+/**
+ * Masked Date Input - Format: DD/MM/AAAA
+ * Only allows numbers, slashes are fixed
+ */
+interface MaskedDateInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  autoFocus?: boolean;
+  className?: string;
+}
+
+function MaskedDateInput({ value, onChange, onSave, onCancel, autoFocus, className }: MaskedDateInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Convert DD/MM/YYYY to just digits for internal state
+  const getDigitsFromValue = (val: string): string => {
+    return val.replace(/\D/g, '').slice(0, 8);
+  };
+  
+  // Format digits to DD/MM/YYYY display
+  const formatToDisplay = (digits: string): string => {
+    if (digits.length === 0) return '';
+    
+    let result = '';
+    for (let i = 0; i < digits.length && i < 8; i++) {
+      if (i === 2 || i === 4) result += '/';
+      result += digits[i];
+    }
+    return result;
+  };
+  
+  const [digits, setDigits] = useState(() => getDigitsFromValue(value));
+  
+  useEffect(() => {
+    if (autoFocus && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [autoFocus]);
+  
+  // Update parent when digits change
+  useEffect(() => {
+    const formatted = formatToDisplay(digits);
+    if (formatted !== value) {
+      onChange(formatted);
+    }
+  }, [digits, onChange, value]);
+  
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    // Allow: backspace, delete, tab, escape, enter
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      setDigits(prev => prev.slice(0, -1));
+      return;
+    }
+    
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      onSave();
+      return;
+    }
+    
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      onCancel();
+      return;
+    }
+    
+    // Block non-numeric keys (except navigation)
+    if (!/^\d$/.test(e.key) && !['Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+      e.preventDefault();
+      return;
+    }
+    
+    // Add digit if under limit
+    if (/^\d$/.test(e.key) && digits.length < 8) {
+      e.preventDefault();
+      setDigits(prev => prev + e.key);
+    }
+  };
+  
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    // Extract only digits from pasted or changed content
+    const newDigits = e.target.value.replace(/\D/g, '').slice(0, 8);
+    setDigits(newDigits);
+  };
+  
+  const displayValue = formatToDisplay(digits);
+  const placeholder = 'DD/MM/AAAA'.slice(displayValue.length);
+  
+  return (
+    <div className={cn("relative", className)}>
+      <div className="flex items-center h-8 px-2 rounded border border-input bg-background font-mono text-sm">
+        <span>{displayValue}</span>
+        <span className="text-muted-foreground/40">{placeholder}</span>
+        <input
+          ref={inputRef}
+          type="text"
+          inputMode="numeric"
+          value={displayValue}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-text"
+          data-testid="masked-date-input"
+        />
+      </div>
+    </div>
+  );
+}
 
 interface ValidationSummary {
   totalRows: number;
@@ -383,21 +494,35 @@ export function StepValidation({
                             const formattedValue = getFormattedOriginalValue(rowIndex, colIndex, field);
                             
                             if (hasError) {
+                              const fieldConfig = targetSchema.find(f => f.field === field);
+                              const isDateField = fieldConfig?.type === 'date';
+                              
                               if (isEditing) {
                                 return (
                                   <TableCell key={field} className="p-1">
                                     <div className="flex items-center gap-1">
-                                      <Input
-                                        value={editValue}
-                                        onChange={(e) => setEditValue(e.target.value)}
-                                        className="h-8 text-sm min-w-[100px]"
-                                        autoFocus
-                                        onKeyDown={(e) => {
-                                          if (e.key === 'Enter') handleSaveEdit();
-                                          if (e.key === 'Escape') handleCancelEdit();
-                                        }}
-                                        data-testid={`input-cell-${rowIndex}-${field}`}
-                                      />
+                                      {isDateField ? (
+                                        <MaskedDateInput
+                                          value={editValue}
+                                          onChange={setEditValue}
+                                          onSave={handleSaveEdit}
+                                          onCancel={handleCancelEdit}
+                                          autoFocus
+                                          className="min-w-[120px]"
+                                        />
+                                      ) : (
+                                        <Input
+                                          value={editValue}
+                                          onChange={(e) => setEditValue(e.target.value)}
+                                          className="h-8 text-sm min-w-[100px]"
+                                          autoFocus
+                                          onKeyDown={(e) => {
+                                            if (e.key === 'Enter') handleSaveEdit();
+                                            if (e.key === 'Escape') handleCancelEdit();
+                                          }}
+                                          data-testid={`input-cell-${rowIndex}-${field}`}
+                                        />
+                                      )}
                                       <Button
                                         size="icon"
                                         variant="ghost"
