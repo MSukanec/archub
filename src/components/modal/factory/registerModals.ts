@@ -128,7 +128,7 @@ export function initializeModalRegistry(): void {
   
   registerModal('project-client', ClientForm as any, { 
     ...projectConfig, 
-    size: 'lg',
+    size: 'xl',
     mapDataToProps: (data) => ({
       projectId: data?.projectId,
       clientId: data?.clientId,
