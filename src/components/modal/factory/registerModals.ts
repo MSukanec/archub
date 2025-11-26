@@ -9,6 +9,7 @@ import { ClientForm } from '@/features/clients/forms/ClientForm';
 import ClientPaymentForm from '@/features/clients/forms/ClientPaymentForm';
 import ClientRoleForm from '@/features/clients/forms/ClientRoleForm';
 import { ClientCommitmentForm } from '@/features/clients/forms/ClientCommitmentForm';
+import { ClientScheduleItemForm } from '@/features/clients/forms/ClientScheduleItemForm';
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
 import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
 import { UniversalImportForm } from '@/features/imports';
@@ -173,6 +174,17 @@ export function initializeModalRegistry(): void {
     mapDataToProps: (data) => ({
       clientRole: data?.clientRole,
       mode: data?.clientRole ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
+  registerModal('client-schedule-item', ClientScheduleItemForm as any, {
+    ...financeConfig,
+    size: 'md',
+    mapDataToProps: (data) => ({
+      scheduleId: data?.scheduleId,
+      projectId: data?.projectId,
+      organizationId: data?.organizationId,
+      commitmentId: data?.commitmentId,
+      mode: data?.scheduleId ? (data?.mode || 'edit') : (data?.mode || 'create')
     })
   });
   
