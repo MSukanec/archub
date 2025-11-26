@@ -346,9 +346,9 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
   const isEditing = mode === 'edit';
   const isViewMode = mode === 'view';
 
-  // Query to get available contacts
+  // Query to get available contacts - use LIGHT mode for fast loading
   const { data: allContacts = [], isLoading: contactsLoading } = useQuery<any[]>({
-    queryKey: [`/api/contacts?organization_id=${organizationId}`],
+    queryKey: [`/api/contacts?organization_id=${organizationId}&mode=light`],
     enabled: !!organizationId,
     staleTime: 5 * 60 * 1000,
   });
