@@ -530,21 +530,6 @@ interface ClientPaymentFormProps {
   mode?: 'create' | 'edit' | 'view';
 }
 
-// Subcomponente: Panel de lectura con vista de archivos
-function ViewPanelWithFiles({
-  existingPayment,
-  attachments,
-}: {
-  existingPayment: any;
-  attachments: any[];
-}) {
-  return (
-    <div className="space-y-6">
-      <ViewPanel existingPayment={existingPayment} attachments={attachments} />
-    </div>
-  )
-}
-
 export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: ClientPaymentFormProps) {
   const { projectId, organizationId, paymentId } = modalData || {}
   const { data: userData } = useCurrentUser()
