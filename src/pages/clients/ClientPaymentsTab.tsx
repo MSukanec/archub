@@ -545,9 +545,14 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
 
           // Obtener billeteras
           const walletsMap = new Map<string, string>();
+          let defaultWalletId: string | null = null;
+          
           allPayments.forEach(payment => {
             if (payment.wallet?.wallets?.name && payment.wallet_id) {
               walletsMap.set(payment.wallet.wallets.name.toLowerCase(), payment.wallet_id);
+              if (!defaultWalletId) {
+                defaultWalletId = payment.wallet_id;
+              }
             }
           });
 
@@ -629,6 +634,16 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             throw new Error(`Validación fallida: ${invalidRows.length} filas inválidas`);
           }
 
+          // Si no hay billetera, mostrar error
+          if (!defaultWalletId) {
+            toast({
+              title: 'Error de validación',
+              description: 'No hay billeteras disponibles en el proyecto. Crea al menos una billetera antes de importar pagos.',
+              variant: 'destructive',
+            });
+            throw new Error('No hay billeteras disponibles');
+          }
+
           // Importar solo las filas válidas
           let successCount = 0;
           for (const row of validRowsToImport) {
@@ -640,7 +655,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
                 exchange_rate: parseFloat(row.exchange_rate) || null,
                 payment_date: row.payment_date || new Date().toISOString().split('T')[0],
                 status: row.status || 'pending',
-                wallet_id: (row.wallet_name && walletsMap.get(row.wallet_name.toLowerCase())) || null,
+                wallet_id: (row.wallet_name && walletsMap.get(row.wallet_name.toLowerCase())) || defaultWalletId,
                 reference: row.reference || null,
                 notes: row.notes || null,
                 commitment_id: null,
