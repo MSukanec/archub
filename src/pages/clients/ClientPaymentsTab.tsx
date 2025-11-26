@@ -1065,6 +1065,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         data={clientPayments}
         isLoading={isLoading}
         showDoubleHeader={false}
+        selectable={true}
+        selectedItems={selectedPayments}
+        onSelectionChange={setSelectedPayments}
+        getItemId={(payment) => payment.id}
         emptyStateConfig={{
           icon: <DollarSign className="h-12 w-12 text-muted-foreground" />,
           title: 'No hay pagos registrados',
