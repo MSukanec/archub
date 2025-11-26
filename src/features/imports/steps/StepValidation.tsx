@@ -153,7 +153,7 @@ export function StepValidation({
                           <div className="text-left">
                             <p className="font-medium">{fieldLabel}</p>
                             <p className="text-sm text-muted-foreground">
-                              {fieldErrors.length} {fieldErrors.length === 1 ? 'problema' : 'problemas'}
+                              {fieldErrors.length} {fieldErrors.length === 1 ? 'fila afectada' : 'filas afectadas'}
                             </p>
                           </div>
                         </div>
@@ -193,7 +193,10 @@ export function StepValidation({
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-2">
-                          {fieldErrors[0].message}
+                          {hasWarnings && !hasErrors 
+                            ? "Podrás asignar estos valores en el siguiente paso"
+                            : fieldErrors[0].message
+                          }
                         </p>
                       </div>
                     </CardContent>
