@@ -193,13 +193,9 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
           itemName: clientRole.name,
           mode: 'delete' as const,
           consequences: ['El rol será eliminado permanentemente'],
-          onDelete: () => {
-            deleteRoleMutation.mutate(clientRole.id, {
-              onSuccess: () => {
-                popModal();
-                handleClose();
-              },
-            });
+          onDelete: async () => {
+            await deleteRoleMutation.mutateAsync(clientRole.id);
+            handleClose();
           },
         });
       } else {
@@ -238,27 +234,16 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
               label: r.name,
               value: r.id,
             })),
-          onDelete: () => {
-            deleteRoleMutation.mutate(clientRole.id, {
-              onSuccess: () => {
-                popModal();
-                handleClose();
-              },
-            });
+          onDelete: async () => {
+            await deleteRoleMutation.mutateAsync(clientRole.id);
+            handleClose();
           },
-          onReplace: (newRoleId: string) => {
-            replaceRoleMutation.mutate(
-              {
-                oldRoleId: clientRole.id,
-                newRoleId,
-              },
-              {
-                onSuccess: () => {
-                  popModal();
-                  handleClose();
-                },
-              }
-            );
+          onReplace: async (newRoleId: string) => {
+            await replaceRoleMutation.mutateAsync({
+              oldRoleId: clientRole.id,
+              newRoleId,
+            });
+            handleClose();
           },
         });
       }
