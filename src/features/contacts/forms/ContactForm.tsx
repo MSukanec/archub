@@ -605,11 +605,11 @@ function ViewPanel({
 export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormProps) {
   const { openModal, popModal } = useGlobalModalStore();
   const { data: userData } = useCurrentUser();
-  const { data: contactTypes } = useContactTypes(userData?.organization?.id);
   const { toast } = useToast();
   
   const contactId = modalData?.contactId;
   const contact = modalData?.contact;
+  const organizationId = userData?.organization?.id;
 
   // Auto-detect mode
   const mode = modeProp || (contactId ? 'view' : 'create');
@@ -620,11 +620,14 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
   const [contactAvatarUrl, setContactAvatarUrl] = useState<string>('');
   const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
 
-  // Fetch contact if editing - use REST API backend instead of direct Supabase
+  // Fetch contact if editing - use REST API backend
   const { data: fetchedContact, isLoading: contactLoading } = useQuery({
-    queryKey: [`/api/contacts/${contactId}?organization_id=${userData?.organization?.id}`],
-    enabled: !!contactId && mode !== 'create' && !!userData?.organization?.id,
+    queryKey: [`/api/contacts/${contactId}?organization_id=${organizationId}`],
+    enabled: !!contactId && mode !== 'create' && !!organizationId,
   });
+
+  // Get contact types after organizationId is available
+  const { data: contactTypes } = useContactTypes(organizationId);
 
   const editingContact = contact || fetchedContact;
 
@@ -649,19 +652,35 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
   const form = useForm<CreateContactForm>({
     resolver: zodResolver(createContactSchema),
     defaultValues: {
-      first_name: editingContact?.first_name || '',
-      last_name: editingContact?.last_name || '',
-      email: editingContact?.email || '',
-      phone: editingContact?.phone || '',
-      contact_type_ids: editingContact?.contact_types?.map((ct: any) => ct.id) || [],
-      company_name: editingContact?.company_name || '',
-      location: editingContact?.location || '',
-      notes: editingContact?.notes || '',
-      linked_user_id: editingContact?.linked_user_id || '',
+      first_name: '',
+      last_name: '',
+      email: '',
+      phone: '',
+      contact_type_ids: [],
+      company_name: '',
+      location: '',
+      notes: '',
+      linked_user_id: '',
     }
   });
 
-  const organizationId = userData?.organization?.id;
+  // Update form when editingContact data arrives
+  useEffect(() => {
+    if (editingContact) {
+      form.reset({
+        first_name: editingContact.first_name || '',
+        last_name: editingContact.last_name || '',
+        email: editingContact.email || '',
+        phone: editingContact.phone || '',
+        contact_type_ids: editingContact.contact_types?.map((ct: any) => ct.id) || [],
+        company_name: editingContact.company_name || '',
+        location: editingContact.location || '',
+        notes: editingContact.notes || '',
+        linked_user_id: editingContact.linked_user_id || '',
+      });
+    }
+  }, [editingContact, form]);
+
   const linkedUserId = editingContact?.linked_user_id || form.watch('linked_user_id');
 
   const { data: roles = [] } = useQuery({
@@ -975,10 +994,12 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
 
   const header = getHeader();
 
-  if (contactLoading) {
+
+  // Show loading while fetching contact data
+  if ((mode === "edit" || mode === "view") && contactLoading) {
     return (
       <ModalLayout onClose={onClose} size="lg">
-        <ModalHeader title="Cargando..." />
+        <ModalHeader title="Cargando contacto..." />
         <ModalBody>
           <div className="space-y-4">
             <div className="h-8 bg-muted rounded animate-pulse" />
