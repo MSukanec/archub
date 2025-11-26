@@ -394,9 +394,18 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     return conflictGroups;
   }, [parsedData, extendedSchema, columnMapping, config.valueMapConfig]);
 
-  // Calculate successful mappings (values that were auto-matched correctly)
+  // Calculate successful mappings - values that are NOT in conflicts
+  // This ensures mutual exclusivity: a value is either successful OR a conflict, never both
   const successfulMappings = useMemo(() => {
     if (!parsedData) return [];
+    
+    // Build a set of all conflict values for quick lookup
+    const conflictValues = new Set<string>();
+    for (const conflict of conflicts) {
+      for (const value of conflict.originalValues) {
+        conflictValues.add(`${conflict.field}_${value}`);
+      }
+    }
     
     const mappingGroups: Array<{
       field: string;
@@ -423,51 +432,52 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       const matchedMappings: Array<{ originalValue: string; mappedTo: string; mappedLabel: string }> = [];
       const valueMap = config.valueMapConfig?.[field.field] || {};
       const valueMapKeys = Object.keys(valueMap);
-      
       const foreignKeyOptions = field.foreignKeyConfig?.options || [];
 
       uniqueValues.forEach(value => {
-        const normalized = value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-        
-        // Check in valueMap first
-        let matchedKey: string | null = null;
-        let matchedValue: string | null = null;
-        let matchedLabel: string | null = null;
-        
-        // Exact match in valueMap
-        if (valueMapKeys.includes(normalized)) {
-          matchedKey = normalized;
-          matchedValue = valueMap[normalized];
-          matchedLabel = matchedKey.charAt(0).toUpperCase() + matchedKey.slice(1);
+        // Skip if this value is in conflicts - it's NOT a successful mapping
+        const conflictKey = `${field.field}_${value}`;
+        if (conflictValues.has(conflictKey)) {
+          return;
         }
         
-        // Partial match in valueMap
-        if (!matchedKey) {
+        const normalized = value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+        
+        let mappedValue: string | null = null;
+        let mappedLabel: string | null = null;
+        
+        // 1. Check valueMap first (exact or partial match)
+        if (valueMapKeys.includes(normalized)) {
+          mappedValue = valueMap[normalized];
+        } else {
           for (const key of valueMapKeys) {
             if (key.includes(normalized) || normalized.includes(key)) {
-              matchedKey = key;
-              matchedValue = valueMap[key];
-              matchedLabel = matchedKey.charAt(0).toUpperCase() + matchedKey.slice(1);
+              mappedValue = valueMap[key];
               break;
             }
           }
         }
         
-        // Check in foreignKeyConfig options
-        if (!matchedKey) {
+        // 2. If found in valueMap, get display label from foreignKeyOptions
+        if (mappedValue) {
+          const matchingOption = foreignKeyOptions.find(opt => opt.value === mappedValue);
+          mappedLabel = matchingOption?.label || normalized.charAt(0).toUpperCase() + normalized.slice(1);
+        }
+        
+        // 3. Check foreignKeyConfig options if not found in valueMap
+        if (!mappedValue) {
           for (const opt of foreignKeyOptions) {
             const optLabel = opt.label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
             if (optLabel === normalized || optLabel.includes(normalized) || normalized.includes(optLabel)) {
-              matchedKey = opt.value;
-              matchedValue = opt.value;
-              matchedLabel = opt.label;
+              mappedValue = opt.value;
+              mappedLabel = opt.label;
               break;
             }
           }
         }
         
-        // Fuzzy match (80% threshold)
-        if (!matchedKey && normalized.length > 3) {
+        // 4. Fuzzy match (80% threshold) - these also count as successful since they pass conflicts check
+        if (!mappedValue && normalized.length > 3) {
           for (const key of valueMapKeys) {
             if (key.length > 3) {
               const longer = normalized.length > key.length ? normalized : key;
@@ -478,17 +488,17 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
               }
               const similarity = matches / longer.length;
               if (similarity > 0.8) {
-                matchedKey = key;
-                matchedValue = valueMap[key];
-                matchedLabel = matchedKey.charAt(0).toUpperCase() + matchedKey.slice(1);
+                mappedValue = valueMap[key];
+                const matchingOption = foreignKeyOptions.find(opt => opt.value === mappedValue);
+                mappedLabel = matchingOption?.label || key.charAt(0).toUpperCase() + key.slice(1);
                 break;
               }
             }
           }
         }
         
-        // Fuzzy match in foreignKeyConfig
-        if (!matchedKey && normalized.length > 3) {
+        // 5. Fuzzy match in foreignKeyConfig
+        if (!mappedValue && normalized.length > 3) {
           for (const opt of foreignKeyOptions) {
             const optLabel = opt.label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
             if (optLabel.length > 3) {
@@ -500,20 +510,20 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
               }
               const similarity = matches / longer.length;
               if (similarity > 0.8) {
-                matchedKey = opt.value;
-                matchedValue = opt.value;
-                matchedLabel = opt.label;
+                mappedValue = opt.value;
+                mappedLabel = opt.label;
                 break;
               }
             }
           }
         }
         
-        if (matchedKey && matchedValue && matchedLabel) {
+        // If we found a match (and it's not in conflicts), add to successful mappings
+        if (mappedValue && mappedLabel) {
           matchedMappings.push({
             originalValue: value,
-            mappedTo: matchedValue,
-            mappedLabel: matchedLabel,
+            mappedTo: mappedValue,
+            mappedLabel: mappedLabel,
           });
         }
       });
@@ -528,7 +538,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     }
 
     return mappingGroups;
-  }, [parsedData, extendedSchema, columnMapping, config.valueMapConfig]);
+  }, [parsedData, extendedSchema, columnMapping, config.valueMapConfig, conflicts]);
 
   const handleMappingChange = useCallback((columnIndex: number, field: string | null) => {
     setColumnMapping(prev => {
@@ -820,6 +830,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
         return (
           <StepConflicts
             conflicts={conflicts}
+            successfulMappings={successfulMappings}
             manualMappings={manualMappings}
             onManualMappingChange={handleManualMappingChange}
             targetSchema={extendedSchema}
