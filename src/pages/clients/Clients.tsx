@@ -123,7 +123,7 @@ export function Clients() {
     },
     {
       id: "schedule",
-      label: "Cronograma",
+      label: "Cronograma de Pagos",
       isActive: activeTab === "schedule"
     },
     {
