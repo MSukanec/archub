@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { format, isValid } from 'date-fns';
+import { es } from 'date-fns/locale';
 import type { ParsedData } from '../types';
 
 interface StepPreviewProps {
@@ -41,6 +43,37 @@ export function StepPreview({
     maxFiles: 1,
     maxSize: 50 * 1024 * 1024,
   });
+
+  // Formatear el valor de la celda
+  const formatCellValue = (cell: any): string => {
+    if (cell === null || cell === undefined) return '-';
+    
+    // Si es una fecha (Date object o timestamp)
+    if (cell instanceof Date) {
+      return isValid(cell) ? format(cell, 'dd/MM/yyyy', { locale: es }) : String(cell);
+    }
+    
+    // Si es un número que podría ser timestamp
+    if (typeof cell === 'number' && cell > 1000000000 && cell < 2000000000000) {
+      const date = new Date(cell);
+      return isValid(date) ? format(date, 'dd/MM/yyyy', { locale: es }) : String(cell);
+    }
+    
+    // Si es string que parece fecha ISO
+    if (typeof cell === 'string') {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}(T|$)/;
+      if (dateRegex.test(cell)) {
+        try {
+          const date = new Date(cell);
+          return isValid(date) ? format(date, 'dd/MM/yyyy', { locale: es }) : cell;
+        } catch {
+          return cell;
+        }
+      }
+    }
+    
+    return String(cell);
+  };
 
   if (isLoading) {
     return (
@@ -152,7 +185,7 @@ export function StepPreview({
                   </TableCell>
                   {row.map((cell, cellIndex) => (
                     <TableCell key={cellIndex} className="max-w-[200px] truncate">
-                      {cell !== null && cell !== undefined ? String(cell) : '-'}
+                      {formatCellValue(cell)}
                     </TableCell>
                   ))}
                 </TableRow>
