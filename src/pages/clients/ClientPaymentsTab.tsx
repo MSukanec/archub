@@ -20,9 +20,11 @@ import {
   useDeleteClientPayment,
   useCreateClientPayment,
   useClientCommitments,
+  useProjectClients,
   type ClientPaymentWithRelations,
 } from '@/features/clients'
 import { useProject } from '@/features/projects/hooks/use-project'
+import { useProjects } from '@/features/projects/hooks/use-projects'
 import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge'
 import type { TargetField, ImportConfig, ProjectContext } from '@/features/imports/types'
 
@@ -61,6 +63,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   
   const { data: projectData } = useProject(activeProjectId || undefined);
   const projectName = projectData?.name
+  
+  // Get all projects for organization-level import
+  const { data: projectsData } = useProjects(organizationId);
 
   // Filter states
   const [filterWallet, setFilterWallet] = useState<string>('all');
@@ -71,9 +76,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const [filterUnit, setFilterUnit] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  // Use feature hooks to get client payments and commitments
+  // Use feature hooks to get client payments, commitments, and all project clients
   const { data: paymentsData, isLoading } = useClientPayments(activeProjectId || undefined, organizationId);
   const { data: commitmentsData } = useClientCommitments(activeProjectId || undefined, organizationId);
+  const { data: projectClientsData } = useProjectClients(activeProjectId || undefined, organizationId);
 
   // Use payments data directly
   const allPayments = useMemo(() => {
@@ -427,18 +433,45 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         targetSchema,
         valueMapConfig,
         projectContext,
+        availableProjects: projectsData?.map(p => ({ id: p.id, name: p.name })) || [],
         onImport: async (rows: any[]) => {
-          // Obtener los clientes desde TODOS los clientes del proyecto, no solo los pagos
-          // Esto incluye clientes sin pagos previos
           const clientsData: Record<string, string> = {};
           
-          // Primero, agregamos los clientes de los pagos existentes
+          const getClientDisplayName = (contact: { company_name?: string | null; full_name?: string | null; first_name?: string | null; last_name?: string | null } | null): string => {
+            if (!contact) return '';
+            return String(contact.company_name || 
+                   contact.full_name || 
+                   `${contact.first_name || ''} ${contact.last_name || ''}`.trim());
+          };
+          
+          if (projectClientsData && projectClientsData.length > 0) {
+            projectClientsData.forEach(client => {
+              if (client.contact && client.id) {
+                const clientName = getClientDisplayName(client.contact);
+                if (clientName) {
+                  clientsData[clientName.toLowerCase()] = client.id;
+                }
+              }
+            });
+          }
+          
+          if (commitmentsData && commitmentsData.length > 0) {
+            commitmentsData.forEach(commitment => {
+              if (commitment.project_client?.contact && commitment.client_id) {
+                const clientName = getClientDisplayName(commitment.project_client.contact);
+                if (clientName) {
+                  clientsData[clientName.toLowerCase()] = commitment.client_id;
+                }
+              }
+            });
+          }
+          
           allPayments.forEach(payment => {
             if (payment.client?.contact && payment.client_id) {
-              const clientName = String(payment.client.contact.company_name || 
-                               payment.client.contact.full_name || 
-                               `${payment.client.contact.first_name || ''} ${payment.client.contact.last_name || ''}`.trim());
-              clientsData[clientName.toLowerCase()] = payment.client_id;
+              const clientName = getClientDisplayName(payment.client.contact);
+              if (clientName) {
+                clientsData[clientName.toLowerCase()] = payment.client_id;
+              }
             }
           });
 
@@ -463,19 +496,50 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           const validRowsToImport: typeof rows = [];
 
           rows.forEach((row, idx) => {
+            const errors: string[] = [];
+            
+            // Validar proyecto (para importación a nivel organización)
+            const projectId = row._projectId;
+            if (!projectId && !activeProjectId) {
+              errors.push('Proyecto no especificado');
+            }
+            
+            // Validar cliente
             const clientNameInput = (row.client_id || row.client_name || '') as string;
-            const clientName = clientNameInput.toLowerCase();
+            const clientName = clientNameInput.toLowerCase().trim();
             const clientId = clientsData[clientName];
+            
+            if (!clientNameInput.trim()) {
+              errors.push('Nombre de cliente vacío');
+            } else if (!clientId) {
+              errors.push(`Cliente "${clientNameInput}" no encontrado. Clientes disponibles: ${Object.keys(clientsData).slice(0, 3).join(', ')}${Object.keys(clientsData).length > 3 ? '...' : ''}`);
+            }
+            
+            // Validar moneda
             const currencyCode = (row.currency_id || row.currency_code || '') as string;
             const currencyId = currenciesMap.get(currencyCode.toLowerCase());
-
-            if (!clientId) {
-              invalidRows.push({ index: idx + 1, reason: `Cliente "${row.client_id || row.client_name}" no encontrado en el sistema` });
-              return;
+            
+            if (!currencyCode.trim()) {
+              errors.push('Código de moneda vacío');
+            } else if (!currencyId) {
+              const availableCurrencies = Array.from(currenciesMap.keys()).map(c => c.toUpperCase());
+              errors.push(`Moneda "${currencyCode}" no encontrada. Monedas disponibles: ${availableCurrencies.join(', ')}`);
+            }
+            
+            // Validar monto
+            const amount = parseFloat(row.amount);
+            if (isNaN(amount) || amount <= 0) {
+              errors.push(`Monto inválido: "${row.amount}" (debe ser un número mayor a 0)`);
+            }
+            
+            // Validar fecha
+            const paymentDate = row.payment_date;
+            if (!paymentDate) {
+              errors.push('Fecha de pago vacía');
             }
 
-            if (!currencyId) {
-              invalidRows.push({ index: idx + 1, reason: `Moneda "${currencyCode}" no encontrada` });
+            if (errors.length > 0) {
+              invalidRows.push({ index: idx + 1, reason: errors.join(' | ') });
               return;
             }
 

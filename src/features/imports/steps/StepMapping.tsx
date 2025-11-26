@@ -24,6 +24,12 @@ interface StepMappingProps {
   hasProjectColumn?: boolean;
   /** Índice de la columna de proyecto detectada */
   projectColumnIndex?: number;
+  /** Lista de proyectos disponibles para selección (contexto organización) */
+  availableProjects?: Array<{ id: string; name: string }>;
+  /** Proyecto seleccionado cuando no hay columna de proyecto */
+  selectedProjectId?: string | null;
+  /** Callback cuando se selecciona un proyecto */
+  onProjectSelect?: (projectId: string) => void;
 }
 
 function getAIBadge(confidence: number) {
@@ -47,6 +53,9 @@ export function StepMapping({
   projectContext,
   hasProjectColumn,
   projectColumnIndex,
+  availableProjects,
+  selectedProjectId,
+  onProjectSelect,
 }: StepMappingProps) {
   const contextName = projectContext?.type === 'project' 
     ? projectContext.projectName 
@@ -129,7 +138,7 @@ export function StepMapping({
               ) : (
                 <Building2 className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
               )}
-              <div className="flex-1 space-y-1">
+              <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-2">
                   <p className={cn(
                     "font-medium",
@@ -144,9 +153,47 @@ export function StepMapping({
                 <p className="text-xs text-muted-foreground">
                   {projectContext.type === 'project' 
                     ? 'Todos los registros serán asignados a este proyecto.'
-                    : 'Se requiere una columna "Proyecto" para asignar cada registro.'
+                    : hasProjectColumn
+                      ? 'Mapea la columna "Proyecto" al campo correspondiente para asignar cada registro.'
+                      : 'Selecciona el proyecto al que se asignarán todos los registros.'
                   }
                 </p>
+                
+                {/* Project selector for organization context without project column */}
+                {projectContext.type === 'organization' && !hasProjectColumn && availableProjects && availableProjects.length > 0 && (
+                  <div className="pt-2">
+                    <Select
+                      value={selectedProjectId || ''}
+                      onValueChange={(value) => onProjectSelect?.(value)}
+                    >
+                      <SelectTrigger 
+                        className={cn(
+                          "w-full",
+                          selectedProjectId && "border-green-500/50"
+                        )}
+                        data-testid="select-project-for-import"
+                      >
+                        <SelectValue placeholder="Selecciona el proyecto para estos registros" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableProjects.map(project => (
+                          <SelectItem key={project.id} value={project.id}>
+                            <div className="flex items-center gap-2">
+                              <FolderKanban className="h-4 w-4 text-muted-foreground" />
+                              <span>{project.name}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {selectedProjectId && (
+                      <p className="text-xs text-green-600 mt-1.5 flex items-center gap-1">
+                        <Check className="h-3 w-3" />
+                        Todos los registros se asignarán a este proyecto
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
