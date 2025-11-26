@@ -417,18 +417,21 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         targetSchema,
         valueMapConfig,
         onImport: async (rows: any[]) => {
-          // Obtener los clientes y monedas para mapear nombres a IDs
-          const clientsData = allPayments.reduce((acc: any, payment) => {
+          // Obtener los clientes desde TODOS los clientes del proyecto, no solo los pagos
+          // Esto incluye clientes sin pagos previos
+          const clientsData: Record<string, string> = {};
+          
+          // Primero, agregamos los clientes de los pagos existentes
+          allPayments.forEach(payment => {
             if (payment.client?.contact) {
               const clientName = payment.client.contact.company_name || 
                                payment.client.contact.full_name || 
                                `${payment.client.contact.first_name || ''} ${payment.client.contact.last_name || ''}`.trim();
-              acc[clientName.toLowerCase()] = payment.client_id;
+              clientsData[clientName.toLowerCase()] = payment.client_id;
             }
-            return acc;
-          }, {});
+          });
 
-          // Obtener IDs de monedas reales desde los pagos existentes
+          // Obtener IDs de monedas
           const currenciesMap = new Map<string, string>();
           allPayments.forEach(payment => {
             if (payment.currency) {
@@ -444,29 +447,52 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             }
           });
 
-          // Procesar e importar cada fila
-          for (const row of rows) {
+          // Validar que TODOS los clientes existan ANTES de importar
+          const invalidRows: Array<{ index: number; reason: string }> = [];
+          const validRowsToImport: typeof rows = [];
+
+          rows.forEach((row, idx) => {
+            const clientName = row.client_id?.toLowerCase() || row.client_name?.toLowerCase() || '';
+            const clientId = clientsData[clientName];
+            const currencyCode = row.currency_id?.toUpperCase() || row.currency_code?.toUpperCase() || '';
+            const currencyId = currenciesMap.get(currencyCode.toLowerCase());
+
+            if (!clientId) {
+              invalidRows.push({ index: idx + 1, reason: `Cliente "${row.client_id || row.client_name}" no encontrado en el sistema` });
+              return;
+            }
+
+            if (!currencyId) {
+              invalidRows.push({ index: idx + 1, reason: `Moneda "${currencyCode}" no encontrada` });
+              return;
+            }
+
+            validRowsToImport.push({ ...row, _clientId: clientId, _currencyId: currencyId });
+          });
+
+          // Si hay filas inválidas, mostrar error y detener
+          if (invalidRows.length > 0) {
+            const errorMsg = invalidRows.map(e => `Fila ${e.index}: ${e.reason}`).join('\n');
+            toast({
+              title: 'Error de validación',
+              description: `No se puede importar. Problemas encontrados:\n${errorMsg}`,
+              variant: 'destructive',
+            });
+            throw new Error(`Validación fallida: ${invalidRows.length} filas inválidas`);
+          }
+
+          // Importar solo las filas válidas
+          let successCount = 0;
+          for (const row of validRowsToImport) {
             try {
-              const clientName = row.client_name?.toLowerCase() || '';
-              const clientId = clientsData[clientName];
-              const currencyCode = row.currency_code?.toUpperCase() || '';
-              const currencyId = currenciesMap.get(currencyCode.toLowerCase());
-              const walletName = row.wallet_name?.toLowerCase() || '';
-              const walletId = walletName ? walletsMap.get(walletName) : null;
-
-              if (!clientId || !currencyId) {
-                console.warn(`Saltando fila: Cliente o Moneda no encontrados`, row);
-                continue;
-              }
-
               const paymentData = {
-                client_id: clientId,
+                client_id: row._clientId,
                 amount: parseFloat(row.amount) || 0,
-                currency_id: currencyId,
+                currency_id: row._currencyId,
                 exchange_rate: parseFloat(row.exchange_rate) || null,
                 payment_date: row.payment_date || new Date().toISOString().split('T')[0],
                 status: row.status || 'pending',
-                wallet_id: walletId || null,
+                wallet_id: (row.wallet_name && walletsMap.get(row.wallet_name.toLowerCase())) || null,
                 reference: row.reference || null,
                 notes: row.notes || null,
                 commitment_id: null,
@@ -479,14 +505,21 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
                 organizationId,
                 createdBy: userData.user.id,
               });
+              
+              successCount++;
             } catch (error) {
               console.error('Error importando pago:', error);
+              toast({
+                title: 'Error al guardar pago',
+                description: `No se pudo guardar un pago: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+                variant: 'destructive',
+              });
             }
           }
 
           toast({
             title: 'Importación completada',
-            description: `Se procesaron ${rows.length} pagos`,
+            description: `Se importaron ${successCount} de ${rows.length} pagos correctamente`,
           });
         },
       },

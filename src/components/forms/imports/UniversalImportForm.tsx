@@ -282,7 +282,9 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       case 2:
         return validationSummary.missingRequiredFields.length === 0;
       case 3:
-        return validationSummary.errors === 0;
+        // BLOQUEAR si hay CUALQUIER error (no solo errores críticos)
+        // Las advertencias de clientes/valores inexistentes DEBEN validarse manualmente en step 4
+        return validationSummary.errors === 0 && validationSummary.warnings === 0;
       case 4:
         return conflicts.every(c => 
           c.originalValues.every(v => manualMappings[`${c.field}_${v}`] !== undefined)
