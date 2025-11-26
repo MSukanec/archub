@@ -7,6 +7,7 @@ import ClientDashboardTab from './ClientDashboardTab'
 import ClientListTab from './ClientListTab'
 import ClientObligationsTab from './ClientObligationsTab'
 import ClientPaymentsTab from './ClientPaymentsTab'
+import ClientScheduleTab from './ClientScheduleTab'
 import ClientSettingsTab from './ClientSettingsTab'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useActionBarMobile } from '@/layouts'
@@ -121,6 +122,11 @@ export function Clients() {
       isActive: activeTab === "obligations"
     },
     {
+      id: "schedule",
+      label: "Cronograma",
+      isActive: activeTab === "schedule"
+    },
+    {
       id: "settings",
       label: "Ajustes",
       isActive: activeTab === "settings"
@@ -189,6 +195,17 @@ export function Clients() {
           organizationId
         })
       }
+    }),
+    ...(activeTab === "schedule" && {
+      actionButton: {
+        label: "Nueva Cuota",
+        icon: Plus,
+        onClick: () => openModal('client-schedule-item', {
+          projectId,
+          organizationId,
+          mode: 'create'
+        })
+      }
     })
   }
 
@@ -219,6 +236,12 @@ export function Clients() {
 
         {activeTab === "details" && (
           <ClientPaymentsTab 
+            projectId={projectId || undefined}
+          />
+        )}
+
+        {activeTab === "schedule" && (
+          <ClientScheduleTab 
             projectId={projectId || undefined}
           />
         )}

@@ -133,7 +133,7 @@ export async function getClientPaymentSchedule(
     ...schedule,
     commitment: schedule.commitment?.[0] ? {
       ...schedule.commitment[0],
-      client: schedule.commitment[0].client?.[0] ? {
+      project_client: schedule.commitment[0].client?.[0] ? {
         ...schedule.commitment[0].client[0],
         contact: schedule.commitment[0].client[0].contact?.[0] || null,
         role: schedule.commitment[0].client[0].role?.[0] || null,
@@ -263,7 +263,7 @@ export async function getClientPaymentScheduleById(
     ...typedData,
     commitment: typedData.commitment?.[0] ? {
       ...typedData.commitment[0],
-      client: typedData.commitment[0].client?.[0] ? {
+      project_client: typedData.commitment[0].client?.[0] ? {
         ...typedData.commitment[0].client[0],
         contact: typedData.commitment[0].client[0].contact?.[0] || null,
         role: typedData.commitment[0].client[0].role?.[0] || null,
@@ -381,7 +381,7 @@ export async function createClientPaymentSchedule(
     ...typedData,
     commitment: typedData.commitment?.[0] ? {
       ...typedData.commitment[0],
-      client: typedData.commitment[0].client?.[0] ? {
+      project_client: typedData.commitment[0].client?.[0] ? {
         ...typedData.commitment[0].client[0],
         contact: typedData.commitment[0].client[0].contact?.[0] || null,
         role: typedData.commitment[0].client[0].role?.[0] || null,
@@ -503,7 +503,7 @@ export async function updateClientPaymentSchedule(
     ...typedData,
     commitment: typedData.commitment?.[0] ? {
       ...typedData.commitment[0],
-      client: typedData.commitment[0].client?.[0] ? {
+      project_client: typedData.commitment[0].client?.[0] ? {
         ...typedData.commitment[0].client[0],
         contact: typedData.commitment[0].client[0].contact?.[0] || null,
         role: typedData.commitment[0].client[0].role?.[0] || null,
