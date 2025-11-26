@@ -75,6 +75,15 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
 
   const deleteCommitmentMutation = useDeleteClientCommitment();
 
+  const handleEditCommitment = (commitment: NonNullable<typeof commitmentsData>[0]) => {
+    openModal('client-commitment', {
+      projectId: activeProjectId,
+      organizationId,
+      commitmentId: commitment.id,
+      mode: 'edit',
+    });
+  };
+
   const handleDeleteCommitment = async (commitmentId: string, clientName: string) => {
     if (!activeProjectId || !organizationId) {
       toast({
@@ -335,6 +344,14 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
         <CommitmentAccordion
           commitments={commitmentsData}
           payments={paymentsData || []}
+          onEdit={handleEditCommitment}
+          onDelete={(commitment) => {
+            const clientName = commitment.project_client?.contact?.full_name ||
+              `${commitment.project_client?.contact?.first_name || ''} ${commitment.project_client?.contact?.last_name || ''}`.trim() ||
+              commitment.project_client?.contact?.company_name ||
+              'Cliente';
+            handleDeleteCommitment(commitment.id, clientName);
+          }}
         />
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">

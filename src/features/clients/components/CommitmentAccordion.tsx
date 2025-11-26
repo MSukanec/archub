@@ -1,7 +1,15 @@
 import { useState, useMemo } from 'react';
-import { ChevronDown, Building2 } from 'lucide-react';
+import { ChevronDown, Building2, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { ClientCommitmentWithRelations, ClientPaymentWithRelations } from '../types';
 
 interface CommitmentAccordionProps {
@@ -89,6 +97,8 @@ function CommitmentItem({
   payments,
   isOpen, 
   onToggle,
+  onEdit,
+  onDelete,
 }: CommitmentItemProps) {
   const clientName = getClientDisplayName(commitment);
   const initials = getClientInitials(commitment);
@@ -152,6 +162,44 @@ function CommitmentItem({
             </div>
           )}
         </div>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 flex-shrink-0"
+              onClick={(e) => e.stopPropagation()}
+              data-testid={`commitment-actions-${commitment.id}`}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.(commitment);
+              }}
+              data-testid={`commitment-edit-${commitment.id}`}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Editar
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(commitment);
+              }}
+              className="text-destructive focus:text-destructive"
+              data-testid={`commitment-delete-${commitment.id}`}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Eliminar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         
         <ChevronDown 
           className={cn(
