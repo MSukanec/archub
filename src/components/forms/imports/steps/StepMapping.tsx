@@ -154,10 +154,10 @@ export function StepMapping({
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div className="flex-shrink-0">
-                            <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                            <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent side="left" className="max-w-[250px]">
+                        <TooltipContent side="left" className="max-w-[250px] bg-popover border border-border text-popover-foreground">
                           {mappedField ? (
                             <p>Esta columna se importará como "{getFieldLabel(mappedField)}"</p>
                           ) : (
