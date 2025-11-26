@@ -110,8 +110,10 @@ export function initializeModalRegistry(): void {
     ...generalConfig, 
     size: 'lg',
     mapDataToProps: (data) => ({
-      contactId: data?.contactId || data?.contact?.id,
-      contact: data?.contact,
+      modalData: {
+        contactId: data?.contactId || data?.contact?.id,
+        contact: data?.contact,
+      },
       mode: data?.mode || 'create',
     }),
   });
