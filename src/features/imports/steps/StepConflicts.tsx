@@ -169,6 +169,8 @@ export function StepConflicts({
                         const mappingKey = `${conflict.field}_${originalValue}`;
                         const currentMapping = manualMappings[mappingKey];
                         const isResolved = currentMapping !== undefined;
+                        // When mapping is empty string, it means 'skip' was selected
+                        const displayValue = currentMapping === '' ? 'skip' : (currentMapping ?? 'unresolved');
 
                         return (
                           <div 
@@ -189,7 +191,7 @@ export function StepConflicts({
 
                             <div className="w-[200px] flex-shrink-0">
                               <Select
-                                value={currentMapping ?? 'unresolved'}
+                                value={displayValue}
                                 onValueChange={(value) => {
                                   if (value === 'unresolved') {
                                     onManualMappingChange(conflict.field, originalValue, null);
