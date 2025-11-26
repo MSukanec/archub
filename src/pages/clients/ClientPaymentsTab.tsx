@@ -22,6 +22,7 @@ import {
   useClientCommitments,
   type ClientPaymentWithRelations,
 } from '@/features/clients'
+import { useProject } from '@/features/projects/hooks/use-project'
 import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge'
 import type { TargetField, ImportConfig, ProjectContext } from '@/features/imports/types'
 
@@ -55,7 +56,11 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const { toast } = useToast();
   
   const organizationId = userData?.organization?.id
+  const organizationName = userData?.organization?.name
   const activeProjectId = projectId || selectedProjectId
+  
+  const { data: projectData } = useProject(activeProjectId || undefined);
+  const projectName = projectData?.name
 
   // Filter states
   const [filterWallet, setFilterWallet] = useState<string>('all');
@@ -297,7 +302,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const createPaymentMutation = useCreateClientPayment();
 
   const handleImport = () => {
-    if (!organizationId || !activeProjectId || !userData?.user?.id) {
+    if (!organizationId || !userData?.user?.id) {
       toast({
         title: 'Error',
         description: 'No se pudo cargar la información requerida',
@@ -409,11 +414,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       },
     };
 
-    // Contexto de proyecto para la importación
-    const projectContext: ProjectContext = {
-      type: 'project',
-      projectId: activeProjectId!,
-    };
+    // Contexto de proyecto para la importación - always pass project context with name
+    const projectContext: ProjectContext = activeProjectId 
+      ? { type: 'project', projectId: activeProjectId, projectName: projectName || undefined }
+      : { type: 'organization', organizationId: organizationId!, organizationName: organizationName || undefined };
 
     // Abrir modal de importación universal
     openModal('universal-import', {

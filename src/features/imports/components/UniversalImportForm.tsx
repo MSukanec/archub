@@ -95,41 +95,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
     customMapping: config.smartColumnMapping,
   });
 
-  useEffect(() => {
-    if (parsedData && Object.keys(columnMapping).length === 0 && Object.keys(autoMapping).length > 0) {
-      setColumnMapping(autoMapping);
-      
-      if (organizationId && parsedData.headers.length > 0) {
-        suggestMapping({
-          headers: parsedData.headers,
-          sampleRows: parsedData.rows.slice(0, 5).map(row => 
-            Object.fromEntries(parsedData.headers.map((h, i) => [h, row[i]]))
-          ),
-          targetSchema: config.targetSchema,
-          entity: config.entityName.toLowerCase().replace(/\s+/g, '_'),
-          organizationId
-        }).then(result => {
-          if (Object.keys(result.mapping).length > 0) {
-            const updatedMapping = { ...autoMapping };
-            const updatedConfidence: Record<string, number> = {};
-            
-            for (const [header, field] of Object.entries(result.mapping)) {
-              const headerIndex = parsedData.headers.findIndex(h => h === header);
-              if (headerIndex !== -1 && !autoMapping[headerIndex]) {
-                updatedMapping[headerIndex] = field;
-                updatedConfidence[header] = result.confidence[header] || 0.8;
-              }
-            }
-            
-            setColumnMapping(updatedMapping);
-            setAIConfidence(updatedConfidence);
-          }
-        });
-      }
-    }
-  }, [parsedData, autoMapping, columnMapping, organizationId, config.targetSchema, config.entityName, suggestMapping]);
-
-  // Detectar si hay columna de proyecto en el archivo
+  // Detectar si hay columna de proyecto en el archivo (must be before useEffect that uses it)
   const projectColumnDetection = useMemo(() => {
     if (!parsedData) return { hasProjectColumn: false, projectColumnIndex: -1 };
     
@@ -149,6 +115,65 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
       projectColumnIndex,
     };
   }, [parsedData]);
+
+  useEffect(() => {
+    if (parsedData && Object.keys(columnMapping).length === 0 && Object.keys(autoMapping).length > 0) {
+      // When importing to a specific project, exclude the project column from auto-mapping
+      let filteredAutoMapping = { ...autoMapping };
+      if (config.projectContext?.type === 'project' && projectColumnDetection.hasProjectColumn) {
+        const { projectColumnIndex } = projectColumnDetection;
+        if (projectColumnIndex !== -1) {
+          delete filteredAutoMapping[projectColumnIndex];
+        }
+      }
+      
+      setColumnMapping(filteredAutoMapping);
+      
+      if (organizationId && parsedData.headers.length > 0) {
+        // Filter headers and schema for AI suggestion when in project context
+        const headersForAI = config.projectContext?.type === 'project' && projectColumnDetection.hasProjectColumn
+          ? parsedData.headers.filter((_, i) => i !== projectColumnDetection.projectColumnIndex)
+          : parsedData.headers;
+        
+        const schemaForAI = config.projectContext?.type === 'project'
+          ? config.targetSchema.filter(f => f.field !== 'project_id' && f.field !== 'project_name' && f.field !== 'project')
+          : config.targetSchema;
+        
+        suggestMapping({
+          headers: headersForAI,
+          sampleRows: parsedData.rows.slice(0, 5).map(row => 
+            Object.fromEntries(headersForAI.map((h) => {
+              const originalIndex = parsedData.headers.indexOf(h);
+              return [h, row[originalIndex]];
+            }))
+          ),
+          targetSchema: schemaForAI,
+          entity: config.entityName.toLowerCase().replace(/\s+/g, '_'),
+          organizationId
+        }).then(result => {
+          if (Object.keys(result.mapping).length > 0) {
+            const updatedMapping = { ...filteredAutoMapping };
+            const updatedConfidence: Record<string, number> = {};
+            
+            for (const [header, field] of Object.entries(result.mapping)) {
+              const headerIndex = parsedData.headers.findIndex(h => h === header);
+              // Skip project column when in project context
+              if (config.projectContext?.type === 'project' && headerIndex === projectColumnDetection.projectColumnIndex) {
+                continue;
+              }
+              if (headerIndex !== -1 && !filteredAutoMapping[headerIndex]) {
+                updatedMapping[headerIndex] = field;
+                updatedConfidence[header] = result.confidence[header] || 0.8;
+              }
+            }
+            
+            setColumnMapping(updatedMapping);
+            setAIConfidence(updatedConfidence);
+          }
+        });
+      }
+    }
+  }, [parsedData, autoMapping, columnMapping, organizationId, config.targetSchema, config.entityName, suggestMapping, config.projectContext, projectColumnDetection]);
 
   const { 
     errors: validationErrors, 

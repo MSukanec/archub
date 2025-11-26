@@ -20,8 +20,6 @@ interface StepMappingProps {
   isLoadingAI?: boolean;
   /** Contexto de proyecto/organización */
   projectContext?: ProjectContext;
-  /** Nombre del proyecto activo (si aplica) */
-  projectName?: string;
   /** Se detectó columna de proyecto en el archivo */
   hasProjectColumn?: boolean;
   /** Índice de la columna de proyecto detectada */
@@ -47,10 +45,14 @@ export function StepMapping({
   aiConfidence,
   isLoadingAI,
   projectContext,
-  projectName,
   hasProjectColumn,
   projectColumnIndex,
 }: StepMappingProps) {
+  const contextName = projectContext?.type === 'project' 
+    ? projectContext.projectName 
+    : projectContext?.type === 'organization' 
+      ? projectContext.organizationName 
+      : undefined;
   const mappedFields = useMemo(() => {
     return new Set(Object.values(columnMapping).filter(Boolean) as string[]);
   }, [columnMapping]);
@@ -134,8 +136,8 @@ export function StepMapping({
                     projectContext.type === 'project' ? "text-primary" : "text-purple-500"
                   )}>
                     {projectContext.type === 'project' 
-                      ? `Importando al proyecto${projectName ? `: ${projectName}` : ' activo'}`
-                      : 'Importando a nivel organización'
+                      ? `Importando al proyecto${contextName ? `: ${contextName}` : ' activo'}`
+                      : `Importando a nivel organización${contextName ? `: ${contextName}` : ''}`
                     }
                   </p>
                 </div>

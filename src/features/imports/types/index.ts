@@ -16,7 +16,7 @@ export interface TargetField {
 
 export type ProjectContext = 
   | { type: 'project'; projectId: string; projectName?: string }
-  | { type: 'organization'; organizationId: string };
+  | { type: 'organization'; organizationId: string; organizationName?: string };
 
 export interface ImportConfig {
   entityName: string;
