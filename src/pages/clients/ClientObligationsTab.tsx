@@ -1,57 +1,35 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast'
-import { Users, Plus, Edit, Trash2, User, FileText, Calendar, DollarSign, CheckCircle2, AlertCircle, ListChecks } from 'lucide-react'
+import { Users, Plus, DollarSign, CheckCircle2, AlertCircle, ListChecks } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
-import { useNavigationStore } from '@/stores/navigationStore'
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
-import { Link, useLocation } from 'wouter'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard'
+import CommitmentAccordion from '@/features/clients/components/CommitmentAccordion'
 import {
   useClientDashboard,
   useClientCommitments,
   useClientPayments,
-  useDeleteProjectClient,
   useDeleteClientCommitment,
   mapToClientSummaries,
-  type ProjectClientSummary,
   type CurrencyFinancial,
 } from '@/features/clients'
-
-// Extended type for table with computed clientName field
-type EnrichedClient = ProjectClientSummary & { clientName: string };
 
 interface ClientListTabProps {
   projectId?: string;
 }
 
-export default function ClientListTab({ projectId }: ClientListTabProps) {
+export default function ClientObligationsTab({ projectId }: ClientListTabProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
-  const { setSidebarLevel } = useNavigationStore();
-  const [, navigate] = useLocation();
   
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
 
-  // Debug: log values
-  console.log('[ClientObligationsTab] organizationId:', organizationId);
-  console.log('[ClientObligationsTab] activeProjectId:', activeProjectId);
-  console.log('[ClientObligationsTab] enabled:', !!activeProjectId && !!organizationId);
-
-  // Use feature hooks to get dashboard data, commitments, and payments
   const { data: dashboardData, isLoading } = useClientDashboard(activeProjectId || undefined, organizationId);
-
-  // Debug: log dashboard data
-  console.log('[ClientObligationsTab] dashboardData:', dashboardData);
-  console.log('[ClientObligationsTab] isLoading:', isLoading);
   const { data: commitmentsData } = useClientCommitments(activeProjectId || undefined, organizationId);
   const { data: paymentsData } = useClientPayments(activeProjectId || undefined, organizationId);
 
@@ -95,82 +73,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     return mostCommon.currency;
   }, [commitmentsData]);
 
-  // Delete mutations using feature hooks
-  const deleteClientMutation = useDeleteProjectClient();
   const deleteCommitmentMutation = useDeleteClientCommitment();
-
-  const handleDelete = async (client: ProjectClientSummary) => {
-    if (!activeProjectId || !organizationId) {
-      toast({
-        title: 'No disponible',
-        description: 'Para eliminar un cliente, selecciona un proyecto específico',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const clientName = client.contacts 
-      ? `${client.contacts.first_name} ${client.contacts.last_name}`.trim()
-      : 'Cliente';
-    
-    openModal('delete-confirmation', {
-      mode: 'dangerous',
-      title: 'Eliminar Cliente',
-      description: 'Se eliminará este cliente del proyecto. Esta acción no se puede deshacer.',
-      itemName: clientName,
-      itemType: 'cliente',
-      onConfirm: async () => {
-        try {
-          await deleteClientMutation.mutateAsync({
-            clientId: client.id,
-            organizationId,
-            projectId: activeProjectId!,
-          });
-          toast({
-            title: 'Cliente eliminado',
-            description: 'El cliente ha sido eliminado del proyecto correctamente',
-          });
-        } catch (error: any) {
-          toast({
-            title: 'Error al eliminar cliente',
-            description: error.message,
-            variant: 'destructive',
-          });
-        }
-      },
-    });
-  };
-
-  const handleEdit = (client: ProjectClientSummary) => {
-    openModal('project-client', {
-      projectId: activeProjectId,
-      clientId: client.id,
-    });
-  };
-
-  const handleEditContact = (client: ProjectClientSummary) => {
-    if (!client.contacts) {
-      toast({
-        title: 'Error',
-        description: 'Este cliente no tiene un contacto asociado',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    openModal('contact', {
-      isEditing: true,
-      editingContact: {
-        id: client.contacts.id,
-        organization_id: organizationId,
-        first_name: client.contacts.first_name,
-        last_name: client.contacts.last_name,
-        email: client.contacts.email,
-        phone: client.contacts.phone,
-        created_at: new Date().toISOString(),
-      },
-    });
-  };
 
   const handleDeleteCommitment = async (commitmentId: string, clientName: string) => {
     if (!activeProjectId || !organizationId) {
@@ -225,12 +128,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     )
   }
 
-  // Helper function to format currency
-  const formatCurrency = (amount: number, currency: CurrencyFinancial['currency']) => {
-    if (!currency) return `$${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    return `${currency.symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
-
   // Format currency for KPIs (integers only, no decimals)
   const formatCurrencyKPI = (amount: number) => {
     if (!commitmentCurrency) return null;
@@ -249,166 +146,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       return `${symbol} ${formattedAmount}`;
     }).join(' + ');
   };
-
-  // Helper function to calculate client-specific totals with percentages
-  const renderClientFinancial = (client: ProjectClientSummary, type: 'committed' | 'paid' | 'balance') => {
-    if (!commitmentCurrency) return <span>-</span>;
-
-    let total = 0;
-    let percentage = 0;
-
-    // Build exchange rate map from commitments
-    const exchangeRateMap = new Map<string, number>();
-    commitmentsData?.forEach(commitment => {
-      if (commitment.currency && commitment.exchange_rate) {
-        exchangeRateMap.set(commitment.currency.id, commitment.exchange_rate);
-      }
-    });
-
-    if (type === 'committed') {
-      // Calculate committed amount from financialByCurrency (using commitment exchange rates)
-      client.financialByCurrency.forEach(financial => {
-        if (!financial.currency) return;
-        
-        if (financial.currency.id === commitmentCurrency.id) {
-          total += financial.total_committed_amount;
-        } else {
-          const exchangeRate = exchangeRateMap.get(financial.currency.id);
-          if (exchangeRate && exchangeRate > 0) {
-            total += financial.total_committed_amount / exchangeRate;
-          }
-        }
-      });
-      percentage = 100; // Committed is always 100%
-    } 
-    else if (type === 'paid') {
-      // Calculate paid amount from actual payments (using payment.exchange_rate)
-      const clientPayments = (paymentsData || []).filter(p => 
-        p.client?.id === client.id && p.status === 'confirmed'
-      );
-
-      clientPayments.forEach(payment => {
-        if (!payment.currency) return;
-
-        if (payment.currency.id === commitmentCurrency.id) {
-          total += payment.amount;
-        } else if (payment.exchange_rate && payment.exchange_rate > 0) {
-          total += payment.amount / payment.exchange_rate;
-        }
-      });
-
-      // Calculate committed total for percentage
-      let committedTotal = 0;
-      client.financialByCurrency.forEach(financial => {
-        if (!financial.currency) return;
-        if (financial.currency.id === commitmentCurrency.id) {
-          committedTotal += financial.total_committed_amount;
-        } else {
-          const exchangeRate = exchangeRateMap.get(financial.currency.id);
-          if (exchangeRate && exchangeRate > 0) {
-            committedTotal += financial.total_committed_amount / exchangeRate;
-          }
-        }
-      });
-
-      percentage = committedTotal > 0 ? (total / committedTotal) * 100 : 0;
-    }
-    else if (type === 'balance') {
-      // Calculate committed
-      let committedTotal = 0;
-      client.financialByCurrency.forEach(financial => {
-        if (!financial.currency) return;
-        if (financial.currency.id === commitmentCurrency.id) {
-          committedTotal += financial.total_committed_amount;
-        } else {
-          const exchangeRate = exchangeRateMap.get(financial.currency.id);
-          if (exchangeRate && exchangeRate > 0) {
-            committedTotal += financial.total_committed_amount / exchangeRate;
-          }
-        }
-      });
-
-      // Calculate paid from actual payments
-      let paidTotal = 0;
-      const clientPayments = (paymentsData || []).filter(p => 
-        p.client?.id === client.id && p.status === 'confirmed'
-      );
-
-      clientPayments.forEach(payment => {
-        if (!payment.currency) return;
-        if (payment.currency.id === commitmentCurrency.id) {
-          paidTotal += payment.amount;
-        } else if (payment.exchange_rate && payment.exchange_rate > 0) {
-          paidTotal += payment.amount / payment.exchange_rate;
-        }
-      });
-
-      total = committedTotal - paidTotal;
-      percentage = committedTotal > 0 ? (total / committedTotal) * 100 : 0;
-    }
-
-    const formattedAmount = Math.round(total).toLocaleString('es-AR');
-
-    return (
-      <div className="flex flex-col items-end text-right">
-        <span className="font-semibold text-sm">
-          {commitmentCurrency.symbol} {formattedAmount}
-        </span>
-        <span className="text-muted-foreground text-xs font-normal">
-          {percentage.toFixed(1)}%
-        </span>
-      </div>
-    );
-  };
-
-  // Table columns
-  const columns = [
-    {
-      key: 'clientName',
-      label: 'Cliente',
-      width: '220px',
-      sortable: true,
-      render: (client: EnrichedClient) => {
-        const avatarUrl = client.contacts?.linked_user?.avatar_url;
-        const initials = client.contacts?.first_name?.[0] && client.contacts?.last_name?.[0]
-          ? `${client.contacts.first_name[0]}${client.contacts.last_name[0]}`
-          : client.contacts?.first_name?.[0] || '?';
-        
-        return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
-              <AvatarFallback>
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <span className="font-semibold">{client.clientName}</span>
-          </div>
-        );
-      },
-    },
-    {
-      key: 'total_committed_amount',
-      label: 'Compromiso total',
-      sortable: true,
-      align: 'right' as const,
-      render: (client: EnrichedClient) => renderClientFinancial(client, 'committed'),
-    },
-    {
-      key: 'total_paid_amount',
-      label: 'Pagado',
-      sortable: true,
-      align: 'right' as const,
-      render: (client: EnrichedClient) => renderClientFinancial(client, 'paid'),
-    },
-    {
-      key: 'balance_due',
-      label: 'Saldo pendiente',
-      sortable: true,
-      align: 'right' as const,
-      render: (client: EnrichedClient) => renderClientFinancial(client, 'balance'),
-    },
-  ];
 
   // Calculate KPIs with currency conversion
   const kpis = useMemo(() => {
@@ -531,27 +268,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     };
   }, [projectClients, dashboardData, commitmentCurrency, commitmentsData, paymentsData]);
 
-  // Enrich projectClients with computed clientName field for sorting
-  // FILTER: Only show clients that have commitments assigned
-  const enrichedClients = useMemo<EnrichedClient[]>(() => {
-    if (!commitmentsData) return [];
-    
-    // Get client IDs that have commitments
-    const clientIdsWithCommitments = new Set(
-      commitmentsData.map(commitment => commitment.client_id)
-    );
-    
-    // Filter and enrich only clients with commitments
-    return projectClients
-      .filter(client => clientIdsWithCommitments.has(client.id))
-      .map(client => ({
-        ...client,
-        clientName: client.contacts?.company_name || 
-                    client.contacts?.full_name || 
-                    `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim() || '-'
-      }));
-  }, [projectClients, commitmentsData]);
-
   return (
     <div className="space-y-6">
       {/* KPIs Grid - 4 columnas, 2 por fila en mobile */}
@@ -611,92 +327,34 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
         </StatCard>
       </div>
 
-      <Table
-        columns={columns}
-        data={enrichedClients}
-        isLoading={isLoading}
-        defaultSort={{ key: 'clientName', direction: 'asc' }}
-        showDoubleHeader={false}
-        emptyStateConfig={{
-          icon: <Users className="h-12 w-12 text-muted-foreground" />,
-          title: 'No hay clientes en este proyecto',
-          description: (
-            <>
-              Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{' '}
-              <button
-                onClick={() => {
-                  setSidebarLevel('organization');
-                  navigate('/contacts');
-                }}
-                className="hover:underline font-bold cursor-pointer"
-                style={{ color: 'var(--accent)' }}
-              >
-                contacto
-              </button>
-              .
-            </>
-          ),
-          action: (
-            <Button
-              onClick={handleAddClient}
-              size="sm"
-              data-testid="button-add-client-empty"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Agregar Cliente
-            </Button>
-          ),
-        }}
-        rowActions={(client: EnrichedClient) => {
-          // Buscar el compromiso del cliente
-          const clientCommitment = commitmentsData?.find(
-            (commitment) => commitment.client_id === client.id
-          );
-          
-          return [
-            {
-              label: 'Editar',
-              icon: Edit,
-              onClick: () => {
-                if (clientCommitment) {
-                  // Si existe compromiso, abrir modal en modo edición
-                  openModal('client-commitment', {
-                    projectId: activeProjectId,
-                    organizationId,
-                    commitmentId: clientCommitment.id,
-                    mode: 'edit',
-                  });
-                } else {
-                  // Si no existe compromiso, crear uno nuevo
-                  openModal('client-commitment', {
-                    projectId: activeProjectId,
-                    organizationId,
-                    mode: 'create',
-                  });
-                }
-              },
-            },
-            {
-              label: 'Eliminar',
-              icon: Trash2,
-              onClick: () => {
-                if (clientCommitment) {
-                  // Eliminar el compromiso, no el cliente
-                  handleDeleteCommitment(clientCommitment.id, client.clientName);
-                } else {
-                  // Si no hay compromiso, no hay nada que eliminar
-                  toast({
-                    title: 'No hay compromiso',
-                    description: 'Este cliente no tiene un compromiso de pago asignado',
-                    variant: 'destructive',
-                  });
-                }
-              },
-              variant: 'destructive',
-            },
-          ];
-        }}
-      />
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-muted-foreground">Cargando compromisos...</div>
+        </div>
+      ) : commitmentsData && commitmentsData.length > 0 ? (
+        <CommitmentAccordion
+          commitments={commitmentsData}
+          payments={paymentsData || []}
+        />
+      ) : (
+        <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
+          <Users className="h-12 w-12 text-muted-foreground" />
+          <div>
+            <h3 className="font-semibold text-lg">No hay compromisos de pago</h3>
+            <p className="text-muted-foreground text-sm mt-1">
+              Agrega compromisos de pago a tus clientes para ver la información aquí.
+            </p>
+          </div>
+          <Button
+            onClick={() => openModal('client-commitment', { projectId: activeProjectId, organizationId })}
+            size="sm"
+            data-testid="button-add-commitment-empty"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Compromiso
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
