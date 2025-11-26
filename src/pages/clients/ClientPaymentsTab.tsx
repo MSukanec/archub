@@ -812,7 +812,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
                 currency_id: row._currencyId,
                 exchange_rate: parseFloat(row.exchange_rate) || null,
                 payment_date: row.payment_date || new Date().toISOString().split('T')[0],
-                status: row.status || 'pending',
+                status: row.status || 'confirmed',
                 wallet_id: resolvedWalletId,
                 reference: row.reference || null,
                 notes: row.notes || null,
