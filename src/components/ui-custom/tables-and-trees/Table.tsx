@@ -644,21 +644,16 @@ export function Table<T = any>({
 
             {/* Botón de importar */}
             {topBar?.showImport && (
-              <PlanRestricted 
-                functionName="Importación de Excel"
-                reason="general_mode"
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={topBar.onImport}
+                disabled={topBar.isImporting}
+                className="gap-2"
               >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={topBar.onImport}
-                  disabled={topBar.isImporting}
-                  className="gap-2"
-                >
-                  <Upload className="h-4 w-4" />
-                  <span className="text-xs">Importar</span>
-                </Button>
-              </PlanRestricted>
+                <Upload className="h-4 w-4" />
+                <span className="text-xs">Importar</span>
+              </Button>
             )}
 
             {/* Botón de exportar - Solo visible si showExport está habilitado */}
