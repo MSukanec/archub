@@ -84,7 +84,8 @@ export function StepValidation({
   const hasEditableErrors = Object.keys(rowsWithEmptyCells).length > 0;
 
   const handleStartEdit = (rowIndex: number, field: string) => {
-    const key = `${rowIndex}_${field}`;
+    // Use || as separator since field names contain underscores
+    const key = `${rowIndex}||${field}`;
     const currentValue = cellCorrections[key] || '';
     setEditValue(currentValue);
     setEditingCell({ row: rowIndex, field });
@@ -104,7 +105,8 @@ export function StepValidation({
   };
 
   const getCorrectedValue = (rowIndex: number, field: string): string | null => {
-    const key = `${rowIndex}_${field}`;
+    // Use || as separator since field names contain underscores
+    const key = `${rowIndex}||${field}`;
     return cellCorrections[key] || null;
   };
 
@@ -194,115 +196,144 @@ export function StepValidation({
         </Card>
       )}
 
-      {/* Editor de celdas vacías */}
-      {hasEditableErrors && parsedData && columnMapping && onCellCorrectionChange && (
-        <Card className="border-blue-500/30 bg-blue-500/5">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-blue-500 text-base">
-              <Edit3 className="h-5 w-5" />
-              Completar datos faltantes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Algunas filas tienen celdas vacías en campos obligatorios. Hacé clic para completarlas:
-            </p>
-            <ScrollArea className="max-h-[250px]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">#</TableHead>
-                    {Object.keys(rowsWithEmptyCells).length > 0 && 
-                      rowsWithEmptyCells[parseInt(Object.keys(rowsWithEmptyCells)[0])].map(error => (
-                        <TableHead key={error.field}>{getFieldLabel(error.field)}</TableHead>
-                      ))
-                    }
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {Object.entries(rowsWithEmptyCells).map(([rowIndexStr, rowErrors]) => {
-                    const rowIndex = parseInt(rowIndexStr);
-                    return (
-                      <TableRow key={rowIndex}>
-                        <TableCell className="font-medium text-muted-foreground">
-                          {rowIndex + 1}
-                        </TableCell>
-                        {rowErrors.map(error => {
-                          const correctedValue = getCorrectedValue(rowIndex, error.field);
-                          const isEditing = editingCell?.row === rowIndex && editingCell?.field === error.field;
-                          const colIndex = getColumnIndexForField(error.field);
-                          const originalValue = colIndex >= 0 ? getOriginalValue(rowIndex, colIndex) : '';
-
-                          if (isEditing) {
+      {/* Editor de celdas vacías - muestra todas las columnas para contexto */}
+      {hasEditableErrors && parsedData && columnMapping && onCellCorrectionChange && (() => {
+        // Obtener todas las columnas mapeadas para mostrar contexto
+        const mappedColumns = Object.entries(columnMapping)
+          .filter(([_, field]) => field)
+          .map(([colIndex, field]) => ({ colIndex: parseInt(colIndex), field: field! }))
+          .sort((a, b) => a.colIndex - b.colIndex);
+        
+        // Obtener los campos que tienen errores para esta fila
+        const errorFields = new Set(emptyCellErrors.map(e => e.field));
+        
+        return (
+          <Card className="border-blue-500/30 bg-blue-500/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-blue-500 text-base">
+                <Edit3 className="h-5 w-5" />
+                Completar datos faltantes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Algunas filas tienen celdas vacías en campos obligatorios. Hacé clic en las celdas rojas para completarlas:
+              </p>
+              <ScrollArea className="max-h-[300px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12 sticky left-0 bg-background">#</TableHead>
+                      {mappedColumns.map(({ field }) => (
+                        <TableHead 
+                          key={field} 
+                          className={cn(
+                            errorFields.has(field) && "text-destructive font-medium"
+                          )}
+                        >
+                          {getFieldLabel(field)}
+                          {errorFields.has(field) && <span className="ml-1 text-xs">*</span>}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Object.entries(rowsWithEmptyCells).map(([rowIndexStr, rowErrors]) => {
+                      const rowIndex = parseInt(rowIndexStr);
+                      const rowErrorFields = new Set(rowErrors.map(e => e.field));
+                      
+                      return (
+                        <TableRow key={rowIndex}>
+                          <TableCell className="font-medium text-muted-foreground sticky left-0 bg-background">
+                            {rowIndex + 1}
+                          </TableCell>
+                          {mappedColumns.map(({ colIndex, field }) => {
+                            const hasError = rowErrorFields.has(field);
+                            const correctedValue = getCorrectedValue(rowIndex, field);
+                            const isEditing = editingCell?.row === rowIndex && editingCell?.field === field;
+                            const originalValue = getOriginalValue(rowIndex, colIndex);
+                            
+                            // Si es celda con error, mostrar editor
+                            if (hasError) {
+                              if (isEditing) {
+                                return (
+                                  <TableCell key={field} className="p-1">
+                                    <div className="flex items-center gap-1">
+                                      <Input
+                                        value={editValue}
+                                        onChange={(e) => setEditValue(e.target.value)}
+                                        className="h-8 text-sm min-w-[100px]"
+                                        autoFocus
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') handleSaveEdit();
+                                          if (e.key === 'Escape') handleCancelEdit();
+                                        }}
+                                        data-testid={`input-cell-${rowIndex}-${field}`}
+                                      />
+                                      <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="h-8 w-8 text-green-500 hover:text-green-600 shrink-0"
+                                        onClick={handleSaveEdit}
+                                      >
+                                        <Check className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                                        onClick={handleCancelEdit}
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                );
+                              }
+                              
+                              return (
+                                <TableCell 
+                                  key={field}
+                                  className={cn(
+                                    "cursor-pointer transition-colors",
+                                    correctedValue 
+                                      ? "bg-green-500/10 hover:bg-green-500/20" 
+                                      : "bg-destructive/10 hover:bg-destructive/20"
+                                  )}
+                                  onClick={() => handleStartEdit(rowIndex, field)}
+                                  data-testid={`cell-${rowIndex}-${field}`}
+                                >
+                                  {correctedValue ? (
+                                    <span className="text-green-600 font-medium">{correctedValue}</span>
+                                  ) : (
+                                    <span className="text-destructive/60 italic text-sm">
+                                      (vacío)
+                                    </span>
+                                  )}
+                                </TableCell>
+                              );
+                            }
+                            
+                            // Celda normal sin error - solo mostrar el valor
                             return (
-                              <TableCell key={error.field} className="p-1">
-                                <div className="flex items-center gap-1">
-                                  <Input
-                                    value={editValue}
-                                    onChange={(e) => setEditValue(e.target.value)}
-                                    className="h-8 text-sm"
-                                    autoFocus
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') handleSaveEdit();
-                                      if (e.key === 'Escape') handleCancelEdit();
-                                    }}
-                                    data-testid={`input-cell-${rowIndex}-${error.field}`}
-                                  />
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8 text-green-500 hover:text-green-600"
-                                    onClick={handleSaveEdit}
-                                  >
-                                    <Check className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                    onClick={handleCancelEdit}
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
+                              <TableCell key={field} className="text-muted-foreground">
+                                {originalValue || '-'}
                               </TableCell>
                             );
-                          }
-
-                          return (
-                            <TableCell 
-                              key={error.field}
-                              className={cn(
-                                "cursor-pointer transition-colors",
-                                correctedValue 
-                                  ? "bg-green-500/10 hover:bg-green-500/20" 
-                                  : "bg-destructive/10 hover:bg-destructive/20"
-                              )}
-                              onClick={() => handleStartEdit(rowIndex, error.field)}
-                              data-testid={`cell-${rowIndex}-${error.field}`}
-                            >
-                              {correctedValue ? (
-                                <span className="text-green-600 font-medium">{correctedValue}</span>
-                              ) : (
-                                <span className="text-destructive/60 italic text-sm">
-                                  {originalValue || '(vacío) - clic para completar'}
-                                </span>
-                              )}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </ScrollArea>
-            <p className="text-xs text-muted-foreground mt-3">
-              Las celdas en verde ya fueron completadas. Las rojas aún necesitan un valor.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+                          })}
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+              <p className="text-xs text-muted-foreground mt-3">
+                Las celdas en verde ya fueron completadas. Las rojas aún necesitan un valor. Las demás columnas muestran contexto.
+              </p>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       <ScrollArea className="h-[300px]">
         <div className="space-y-3 pr-4">
@@ -313,7 +344,8 @@ export function StepValidation({
             
             // Filtrar errores que ya fueron corregidos con cellCorrections
             const uncorrectedErrors = fieldErrors.filter(e => {
-              const key = `${e.row}_${e.field}`;
+              // Use || as separator since field names contain underscores
+              const key = `${e.row}||${e.field}`;
               return !cellCorrections[key];
             });
 

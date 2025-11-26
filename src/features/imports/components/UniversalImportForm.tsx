@@ -606,7 +606,8 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
   }, []);
 
   const handleCellCorrectionChange = useCallback((rowIndex: number, field: string, value: string) => {
-    const key = `${rowIndex}_${field}`;
+    // Use || as separator since field names contain underscores
+    const key = `${rowIndex}||${field}`;
     setCellCorrections(prev => {
       if (!value || value.trim() === '') {
         const next = { ...prev };
@@ -649,7 +650,11 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
 
         // Apply cell corrections for empty cells that user filled in
         for (const [correctionKey, correctionValue] of Object.entries(cellCorrections)) {
-          const [rowIndexStr, fieldName] = correctionKey.split('_');
+          // Use || as separator since field names contain underscores
+          const separatorIndex = correctionKey.indexOf('||');
+          if (separatorIndex === -1) continue;
+          const rowIndexStr = correctionKey.substring(0, separatorIndex);
+          const fieldName = correctionKey.substring(separatorIndex + 2);
           const correctionRowIndex = parseInt(rowIndexStr);
           if (correctionRowIndex === i && correctionValue) {
             // Override the value with the user correction

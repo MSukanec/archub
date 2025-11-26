@@ -172,8 +172,8 @@ export function useValidationEngine({
     for (const [colIndexStr, field] of Object.entries(columnMapping)) {
       if (!field) continue;
       
-      // Check if this cell has a correction
-      const correctionKey = `${rowIndex}_${field}`;
+      // Check if this cell has a correction (using || separator)
+      const correctionKey = `${rowIndex}||${field}`;
       if (cellCorrections[correctionKey]) {
         // Cell has been corrected, skip validation for this field
         continue;
@@ -191,7 +191,9 @@ export function useValidationEngine({
       // Skip if field is mapped from file OR has a default value OR has a cell correction
       const isMapped = mappedFields.has(requiredField);
       const hasDefaultValue = defaultFieldValues[requiredField] !== undefined && defaultFieldValues[requiredField] !== '';
-      const hasCellCorrection = cellCorrections[`${rowIndex}_${requiredField}`] !== undefined && cellCorrections[`${rowIndex}_${requiredField}`] !== '';
+      // Use || as separator for cell corrections
+      const correctionKey = `${rowIndex}||${requiredField}`;
+      const hasCellCorrection = cellCorrections[correctionKey] !== undefined && cellCorrections[correctionKey] !== '';
       
       if (!isMapped && !hasDefaultValue && !hasCellCorrection) {
         const fieldConfig = targetSchema.find(f => f.field === requiredField);
