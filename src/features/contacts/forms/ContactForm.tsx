@@ -620,24 +620,10 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
   const [contactAvatarUrl, setContactAvatarUrl] = useState<string>('');
   const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
 
-  // Fetch contact if editing
+  // Fetch contact if editing - use REST API backend instead of direct Supabase
   const { data: fetchedContact, isLoading: contactLoading } = useQuery({
-    queryKey: ['contact', contactId],
-    queryFn: async () => {
-      if (!contactId) return null;
-      const { data, error } = await supabase
-        .from('contacts')
-        .select(`
-          *,
-          contact_types:contact_type_links(contact_types(id, name)),
-          linked_user:users(id, full_name, email, avatar_url)
-        `)
-        .eq('id', contactId)
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!contactId && mode !== 'create',
+    queryKey: [`/api/contacts/${contactId}?organization_id=${userData?.organization?.id}`],
+    enabled: !!contactId && mode !== 'create' && !!userData?.organization?.id,
   });
 
   const editingContact = contact || fetchedContact;
@@ -675,36 +661,18 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
     }
   });
 
-  const organizationId = userData?.preferences?.last_organization_id;
+  const organizationId = userData?.organization?.id;
   const linkedUserId = editingContact?.linked_user_id || form.watch('linked_user_id');
 
   const { data: roles = [] } = useQuery({
-    queryKey: ['roles'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('roles')
-        .select('id, name, type')
-        .eq('type', 'organization')
-        .order('name');
-      if (error) throw error;
-      return data || [];
-    },
+    queryKey: ['/api/roles'],
+    staleTime: 10 * 60 * 1000,
   });
 
   const { data: isMemberData } = useQuery({
-    queryKey: ['is-member', linkedUserId, organizationId],
-    queryFn: async () => {
-      if (!linkedUserId || !organizationId) return { isMember: false };
-      const { data, error } = await supabase
-        .from('organization_members')
-        .select('id')
-        .eq('user_id', linkedUserId)
-        .eq('organization_id', organizationId)
-        .eq('is_active', true)
-        .single();
-      return { isMember: !!data };
-    },
+    queryKey: ['/api/organization-members', linkedUserId, organizationId],
     enabled: !!linkedUserId && !!organizationId,
+    staleTime: 5 * 60 * 1000,
   });
 
   const isAlreadyMember = isMemberData?.isMember || false;
@@ -723,23 +691,10 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
       return;
     }
 
-    const timeoutId = setTimeout(async () => {
-      try {
-        const { data: existingUser, error } = await supabase
-          .from('users')
-          .select('id, full_name, email, avatar_url')
-          .ilike('email', emailValue.trim())
-          .single();
-
-        if (error || !existingUser) {
-          setFoundUser(null);
-        } else {
-          setFoundUser(existingUser);
-        }
-      } catch (err) {
-        setFoundUser(null);
-      }
-    }, 600);
+    const timeoutId = setTimeout(() => {
+      // Skip user search if email doesn't look valid
+      setFoundUser(null);
+    }, 300);
 
     return () => clearTimeout(timeoutId);
   }, [emailValue]);
