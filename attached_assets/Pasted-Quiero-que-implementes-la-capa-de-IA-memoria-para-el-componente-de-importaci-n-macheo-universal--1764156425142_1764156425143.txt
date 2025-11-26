@@ -1,0 +1,166 @@
+Quiero que implementes la capa de IA + “memoria” para el componente de importación/macheo universal que estamos construyendo.
+
+### 1) Punto de integración en el front
+
+Tenemos un componente `UniversalMatcher` que recibe una prop opcional:
+
+```ts
+aiSuggestMapping?: (params: {
+  headers: string[];
+  sampleRows: any[];
+  targetSchema: {
+    field: string;
+    label: string;
+    type: 'string' | 'number' | 'date' | 'currency' | 'foreign-key';
+    required?: boolean;
+    description?: string;
+  }[];
+  entity: string;             // por ejemplo 'client_payments'
+  organizationId?: string | null;
+}) => Promise<{
+  mapping: Record<string, string>;
+  confidence: Record<string, number>;
+}>;
+Quiero que implementes esta función aiSuggestMapping en el front como un wrapper que llama a un endpoint backend (ver punto 2).
+
+Ubicación sugerida:
+
+src/features/import/ai/useAISuggestMapping.ts
+
+Este hook debe:
+
+Recibir headers, sampleRows, targetSchema, entity, organizationId.
+
+Hacer una llamada POST a /api/import/ai-suggest-mapping.
+
+Devolver mapping y confidence tipados.
+
+Manejar loading y error.
+
+2) Endpoint backend: /api/import/ai-suggest-mapping
+Crea un endpoint en el backend (Express/Node en Replit, dentro de /server o donde lo tengamos):
+
+Ruta: POST /api/import/ai-suggest-mapping
+
+Payload esperado:
+
+json
+Copiar código
+{
+  "headers": ["Fecha de Pago", "Cliente", "Monto Total", ...],
+  "sampleRows": [ { ... }, ... ],
+  "targetSchema": [ { "field": "payment_date", "label": "Fecha de pago", ... }, ... ],
+  "entity": "client_payments",
+  "organizationId": "..."   // opcional
+}
+El endpoint debe hacer 3 cosas en este orden:
+
+(a) Revisar “memoria” en Supabase
+Usar la tabla import_mapping_patterns (crearla si aún no existe) con esta estructura:
+
+sql
+Copiar código
+create table if not exists public.import_mapping_patterns (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid null,
+  entity text not null,
+  source_header text not null,
+  target_field text not null,
+  usage_count int not null default 1,
+  last_used_at timestamptz not null default now()
+);
+Por cada header recibido:
+
+Buscar si ya existe un registro para esa organization_id (o global si organizacion_id es null) y esa entity y ese source_header.
+
+Si existe, usar ese target_field como sugerencia con confidence = 1.0.
+
+(b) Llamar a OpenAI SOLO para headers sin patrón previo
+Para los headers que NO tienen patrón en la tabla anterior:
+
+Llamar a la API de OpenAI usando el modelo adecuado ya configurado en el proyecto (por ejemplo gpt-4.1-mini o similar).
+
+El prompt debe explicar claramente:
+
+Qué es Seencel.
+
+Qué hace este endpoint: “sugerir el mapeo entre headers de un archivo de importación y campos internos de un schema”.
+
+Incluir targetSchema (field, label, type, description).
+
+Dar ejemplos de headers complicados (“$ Cobrado”, “FX”, “Cliente Final”) y cómo deberían mapearse.
+
+Pedir respuesta SIEMPRE en JSON estricto:
+
+json
+Copiar código
+{
+  "mapping": {
+    "Header 1": "field_name",
+    "Header 2": "other_field"
+  },
+  "confidence": {
+    "Header 1": 0.92,
+    "Header 2": 0.75
+  }
+}
+Parsear la respuesta de OpenAI con JSON.parse y manejar errores con try/catch.
+
+Nunca dejar que una falla de IA rompa el endpoint: si falla, devolver mapping vacío para esos headers.
+
+(c) Unir memoria + IA y devolver resultado al front
+Combinar:
+
+mappings encontrados en import_mapping_patterns
+
+mappings sugeridos por IA
+
+en una sola estructura:
+
+ts
+Copiar código
+{
+  mapping: Record<string, string>;
+  confidence: Record<string, number>;
+}
+Para los mappings provenientes de memoria, confidence debe ser 1.0.
+
+Guardar o actualizar los patrones nuevos en import_mapping_patterns:
+
+Si no existía registro → INSERT con usage_count = 1.
+
+Si ya existía → UPDATE sumando usage_count y actualizando last_used_at.
+
+3) Integración con UniversalMatcher
+En el componente UniversalMatcher:
+
+Usar el hook useAISuggestMapping.
+
+En el STEP de “Auto-mapeo de columnas”:
+
+Primero aplicar reglas locales (igualdades exactas / similitud simple).
+
+Para los headers sin asignar, llamar a aiSuggestMapping.
+
+Mostrar en la UI la sugerencia de IA con algún indicativo de confianza (ej. etiqueta pequeña “IA 92%”).
+
+Permitir que el usuario cambie manualmente el campo sugerido.
+
+Cuando el usuario confirma el macheo y pasa al siguiente step, enviar al backend los patrones finales para que se guarden en import_mapping_patterns (para esto puedes usar el mismo endpoint u otro como /api/import/save-mappings si lo ves más ordenado).
+
+4) Requisitos de calidad
+Código en TypeScript con tipos claros.
+
+Manejar bien errores de red y de IA (consola + mensaje opcional en UI).
+
+No bloquear el flujo si la IA falla: el usuario siempre debe poder machear todo de forma manual.
+
+No introducir dependencias nuevas innecesarias.
+
+No romper el sistema de modales existente.
+
+El objetivo es que, con esta implementación:
+
+La primera vez que una organización importa un Excel feo, la IA la ayuda.
+
+A partir de las siguientes veces, el sistema aprende los mapeos y responde instantáneamente desde import_mapping_patterns.
