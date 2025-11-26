@@ -319,6 +319,56 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     });
   };
 
+  // Bulk delete handler
+  const handleBulkDelete = () => {
+    if (!organizationId || !activeProjectId || selectedPayments.length === 0) return;
+
+    const count = selectedPayments.length;
+    
+    showDeleteConfirmation({
+      mode: 'simple',
+      title: `Eliminar ${count} ${count === 1 ? 'pago' : 'pagos'}`,
+      description: `¿Estás seguro de que querés eliminar ${count === 1 ? 'este pago' : `estos ${count} pagos`}? Esta acción no se puede deshacer.`,
+      itemName: `${count} ${count === 1 ? 'pago seleccionado' : 'pagos seleccionados'}`,
+      destructiveActionText: `Eliminar ${count === 1 ? 'pago' : 'pagos'}`,
+      onDelete: async () => {
+        let successCount = 0;
+        let failCount = 0;
+        
+        for (const payment of selectedPayments) {
+          try {
+            await deletePaymentMutation.mutateAsync({
+              paymentId: payment.id,
+              organizationId,
+              projectId: activeProjectId,
+            });
+            successCount++;
+          } catch (error) {
+            console.error('Error deleting payment:', error);
+            failCount++;
+          }
+        }
+        
+        // Clear selection after bulk delete
+        setSelectedPayments([]);
+        
+        if (failCount > 0) {
+          toast({
+            title: 'Eliminación parcial',
+            description: `Se eliminaron ${successCount} de ${count} pagos. ${failCount} fallaron.`,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Pagos eliminados',
+            description: `Se eliminaron ${successCount} pagos correctamente.`,
+          });
+        }
+      },
+      isLoading: deletePaymentMutation.isPending
+    });
+  };
+
   const createPaymentMutation = useCreateClientPayment();
 
   const handleImport = () => {
@@ -1090,6 +1140,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           onClearFilters: handleClearFilters,
           showImport: true,
           onImport: handleImport,
+          bulkActions: {
+            onDelete: handleBulkDelete,
+          },
           renderFilterContent: () => (
             <div className="space-y-3 p-2 min-w-[200px]">
               <div>

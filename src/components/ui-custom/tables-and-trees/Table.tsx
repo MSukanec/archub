@@ -1,4 +1,5 @@
 import React, { useState, useMemo, Fragment, ReactNode } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronUp,
   ChevronDown,
@@ -14,7 +15,9 @@ import {
   Upload,
   MoreHorizontal,
   Eye,
-  ArrowRight
+  ArrowRight,
+  Trash2,
+  CheckSquare
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -204,6 +207,12 @@ interface TableProps<T = any> {
       options: { key: string; label: string }[];
       activeMode?: string;
       onModeChange?: (mode: string) => void;
+    };
+    // 🆕 BULK ACTIONS - Acciones que aparecen cuando hay items seleccionados
+    bulkActions?: {
+      onDelete?: () => void;
+      onExport?: () => void;
+      customActions?: ReactNode;
     };
   };
   // 🆕 DOBLE ENCABEZADO LEGACY (será reemplazado por topBar)
@@ -459,67 +468,136 @@ export function Table<T = any>({
     const showFilter = topBar?.showFilter ?? true;
     const showSort = topBar?.showSort ?? false;
     const showClearFilters = topBar?.showClearFilters ?? true;
+    const hasBulkSelection = selectable && selectedItems.length > 0;
     
     const hasContent = tabs.length > 0 || showSearch || showFilter || showSort || showClearFilters || topBar?.leftModeButtons?.options.length || true; // Siempre true porque los botones de agrupación y exportación siempre están presentes
     
     if (!hasContent) return null;
 
     return (
-      <div className="hidden lg:block border-b border-[var(--card-border)] bg-[var(--card-bg)]">
-        <div className="flex items-center justify-between px-4 py-3">
-          {/* Lado izquierdo - Tabs y Botones de modo */}
-          <div className="flex items-center gap-3">
-            {/* Tabs usando el componente Tabs.tsx */}
-            {topBar?.tabsConfig && (
-              <Tabs
-                tabs={topBar.tabsConfig.tabs}
-                value={topBar.tabsConfig.value}
-                onValueChange={topBar.tabsConfig.onValueChange}
-              />
-            )}
+      <div className="hidden lg:block border-b border-[var(--card-border)] bg-[var(--card-bg)] relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          {hasBulkSelection ? (
+            // 🆕 BULK MODE HEADER
+            <motion.div
+              key="bulk-mode"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="flex items-center justify-between px-4 py-3"
+            >
+              {/* Lado izquierdo - Contador de seleccionados */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <CheckSquare className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">
+                    {selectedItems.length} {selectedItems.length === 1 ? 'seleccionado' : 'seleccionados'}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onSelectionChange?.([])}
+                  className="h-8 px-3 text-xs gap-1.5"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Deseleccionar
+                </Button>
+              </div>
 
-            {/* LEGACY: Botones de modo - mantener por compatibilidad */}
-            {!topBar?.tabsConfig && topBar?.leftModeButtons && (
+              {/* Lado derecho - Bulk Actions */}
               <div className="flex items-center gap-1">
-                {topBar.leftModeButtons.options.map((option) => (
+                {topBar?.bulkActions?.customActions}
+                
+                {topBar?.bulkActions?.onExport && (
                   <Button
-                    key={option.key}
                     variant="ghost"
                     size="sm"
-                    onClick={() => topBar.leftModeButtons?.onModeChange?.(option.key)}
-                    className={cn(
-                      "text-xs h-8 px-3",
-                      topBar.leftModeButtons?.activeMode === option.key
-                        ? "button-secondary-pressed hover:bg-secondary"
-                        : ""
-                    )}
+                    onClick={topBar.bulkActions.onExport}
+                    className="gap-2"
                   >
-                    {option.label}
+                    <Download className="h-4 w-4" />
+                    <span className="text-xs">Exportar</span>
                   </Button>
-                ))}
-              </div>
-            )}
-            
-            {/* LEGACY: Tabs antiguos - mantener por compatibilidad */}
-            {!topBar?.tabsConfig && tabs.length > 0 && (
-              <div className="flex items-center gap-1">
-                {tabs.map((tab) => (
+                )}
+                
+                {topBar?.bulkActions?.onDelete && (
                   <Button
-                    key={tab}
-                    variant={topBar?.activeTab === tab ? "secondary" : "ghost"}
+                    variant="ghost"
                     size="sm"
-                    onClick={() => topBar?.onTabChange?.(tab)}
-                    className={cn(
-                      "h-8 px-3 text-xs font-normal",
-                      topBar?.activeTab === tab ? "button-secondary-pressed hover:bg-secondary" : ""
-                    )}
+                    onClick={topBar.bulkActions.onDelete}
+                    className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
-                    {tab}
+                    <Trash2 className="h-4 w-4" />
+                    <span className="text-xs">Eliminar</span>
                   </Button>
-                ))}
+                )}
               </div>
-            )}
-          </div>
+            </motion.div>
+          ) : (
+            // NORMAL MODE HEADER
+            <motion.div
+              key="normal-mode"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="flex items-center justify-between px-4 py-3"
+            >
+              {/* Lado izquierdo - Tabs y Botones de modo */}
+              <div className="flex items-center gap-3">
+                {/* Tabs usando el componente Tabs.tsx */}
+                {topBar?.tabsConfig && (
+                  <Tabs
+                    tabs={topBar.tabsConfig.tabs}
+                    value={topBar.tabsConfig.value}
+                    onValueChange={topBar.tabsConfig.onValueChange}
+                  />
+                )}
+
+                {/* LEGACY: Botones de modo - mantener por compatibilidad */}
+                {!topBar?.tabsConfig && topBar?.leftModeButtons && (
+                  <div className="flex items-center gap-1">
+                    {topBar.leftModeButtons.options.map((option) => (
+                      <Button
+                        key={option.key}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => topBar.leftModeButtons?.onModeChange?.(option.key)}
+                        className={cn(
+                          "text-xs h-8 px-3",
+                          topBar.leftModeButtons?.activeMode === option.key
+                            ? "button-secondary-pressed hover:bg-secondary"
+                            : ""
+                        )}
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+                
+                {/* LEGACY: Tabs antiguos - mantener por compatibilidad */}
+                {!topBar?.tabsConfig && tabs.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    {tabs.map((tab) => (
+                      <Button
+                        key={tab}
+                        variant={topBar?.activeTab === tab ? "secondary" : "ghost"}
+                        size="sm"
+                        onClick={() => topBar?.onTabChange?.(tab)}
+                        className={cn(
+                          "h-8 px-3 text-xs font-normal",
+                          topBar?.activeTab === tab ? "button-secondary-pressed hover:bg-secondary" : ""
+                        )}
+                      >
+                        {tab}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
           {/* Lado derecho - Búsqueda, Orden, Filtros */}
           <div className="flex items-center gap-1">
@@ -678,7 +756,9 @@ export function Table<T = any>({
             {/* Acciones personalizadas */}
             {topBar?.customActions}
           </div>
-        </div>
+        </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   };
