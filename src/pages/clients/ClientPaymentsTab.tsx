@@ -535,6 +535,13 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
               currenciesMap.set(payment.currency.code.toLowerCase(), payment.currency.id);
             }
           });
+          
+          // Agregar valueMapConfig como fallback (en caso de que no haya pagos existentes)
+          if (currenciesMap.size === 0) {
+            for (const [code, id] of Object.entries(valueMapConfig.currency_code || {})) {
+              currenciesMap.set(code, id);
+            }
+          }
 
           // Obtener billeteras
           const walletsMap = new Map<string, string>();
@@ -579,7 +586,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             
             // Validar moneda
             const currencyCode = (row.currency_id || row.currency_code || '') as string;
-            const currencyId = currenciesMap.get(currencyCode.toLowerCase());
+            const currencyCodeLower = currencyCode.toLowerCase();
+            // Try direct lookup first, then apply valueMapConfig
+            let currencyId = currenciesMap.get(currencyCodeLower) || 
+                            valueMapConfig.currency_code?.[currencyCodeLower];
             
             if (!currencyCode.trim()) {
               errors.push('Código de moneda vacío');
