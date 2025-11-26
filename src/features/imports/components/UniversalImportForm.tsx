@@ -448,6 +448,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
 
         const row = parsedData.rows[i];
         const mappedRow: Record<string, any> = {};
+        let shouldSkipRow = false;
 
         for (const [colIndexStr, field] of Object.entries(columnMapping)) {
           if (!field) continue;
@@ -456,10 +457,26 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
 
           const mappingKey = `${field}_${String(value).trim()}`;
           if (manualMappings[mappingKey] !== undefined) {
-            value = manualMappings[mappingKey] || null;
+            const mappedValue = manualMappings[mappingKey];
+            // If mapped to empty string (skip), mark row for skipping if field is required
+            if (mappedValue === '') {
+              const fieldConfig = extendedSchema.find(f => f.field === field);
+              if (fieldConfig?.required) {
+                shouldSkipRow = true;
+              }
+              value = null;
+            } else {
+              value = mappedValue;
+            }
           }
 
           mappedRow[field] = value;
+        }
+
+        // Skip rows that have omitted required fields
+        if (shouldSkipRow) {
+          setImportProgress(Math.round(((i + 1) / parsedData.rows.length) * 100));
+          continue;
         }
 
         // Inject _projectId based on context
