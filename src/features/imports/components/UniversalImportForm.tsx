@@ -444,6 +444,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
           total: 5,
           showNumbers: true,
         }}
+        onClose={onClose}
       />
 
       <ModalBody>
