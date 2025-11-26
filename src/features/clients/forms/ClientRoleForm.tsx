@@ -1,16 +1,20 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Users } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Users, Pencil, Trash2 } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { createClientRole, updateClientRole } from '@/features/clients/services/clientRoles';
+import { createClientRole, updateClientRole, getClientRoleUsageCount, getClientRoles } from '@/features/clients/services/clientRoles';
 import { CLIENT_QUERY_KEYS } from '@/features/clients/constants';
+import { useDeleteClientRole } from '@/features/clients/hooks/use-delete-client-role';
+import { useReplaceClientRole } from '@/features/clients/hooks/use-replace-client-role';
+import { useGlobalModalStore } from '@/stores/globalModalStore';
 import type { ClientRole } from '@/features/clients/types';
 
 const clientRoleSchema = z.object({
@@ -57,8 +61,12 @@ function FormPanel({
 // Subcomponente: Vista de lectura
 function ViewPanel({
   clientRole,
+  onEdit,
+  onDelete,
 }: {
   clientRole: ClientRole;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   return (
     <div className="space-y-6">
@@ -90,6 +98,27 @@ function ViewPanel({
           )}
         </div>
       </div>
+
+      <div className="flex gap-2 pt-4 border-t border-border">
+        <Button 
+          size="sm" 
+          variant="outline" 
+          onClick={onEdit}
+          data-testid="button-edit-role"
+        >
+          <Pencil className="w-4 h-4 mr-2" />
+          Editar
+        </Button>
+        <Button 
+          size="sm" 
+          variant="outline" 
+          onClick={onDelete}
+          data-testid="button-delete-role"
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Eliminar
+        </Button>
+      </div>
     </div>
   );
 }
@@ -107,6 +136,10 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
+  const { pushModal, popModal } = useGlobalModalStore();
+  const deleteRoleMutation = useDeleteClientRole(userData?.organization?.id || null);
+  const replaceRoleMutation = useReplaceClientRole(userData?.organization?.id || null);
+  const [currentMode, setCurrentMode] = useState<'create' | 'edit' | 'view'>(mode);
 
   const form = useForm<ClientRoleFormData>({
     resolver: zodResolver(clientRoleSchema),
@@ -130,6 +163,113 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
   const handleClose = () => {
     form.reset();
     onClose();
+  };
+
+  const handleEditClick = () => {
+    setCurrentMode('edit');
+  };
+
+  const handleDeleteClick = async () => {
+    if (!clientRole) return;
+
+    try {
+      const count = await getClientRoleUsageCount(clientRole.id);
+      const organizationId = userData?.organization?.id;
+
+      if (!organizationId) {
+        toast({
+          title: 'Error',
+          description: 'No se pudo obtener la información de la organización',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (count === 0) {
+        // No hay clientes asociados, mostrar delete directo
+        pushModal('delete-confirmation', {
+          title: '¿Eliminar rol de cliente?',
+          description: 'Esta acción no se puede deshacer',
+          itemName: clientRole.name,
+          mode: 'delete' as const,
+          consequences: ['El rol será eliminado permanentemente'],
+          onDelete: () => {
+            deleteRoleMutation.mutate(clientRole.id, {
+              onSuccess: () => {
+                popModal();
+                handleClose();
+              },
+            });
+          },
+        });
+      } else {
+        // Hay clientes asociados, mostrar replace
+        const rolesData = await queryClient.fetchQuery({
+          queryKey: CLIENT_QUERY_KEYS.roles(organizationId),
+          queryFn: () => getClientRoles(organizationId),
+        });
+
+        const otherRoles = rolesData.filter((r) => r.id !== clientRole.id);
+
+        if (otherRoles.length === 0) {
+          toast({
+            title: 'No se puede eliminar',
+            description:
+              'Este rol tiene clientes asociados pero no hay otros roles disponibles para reemplazarlo',
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        pushModal('delete-confirmation', {
+          title: '¿Eliminar rol de cliente?',
+          description: 'Este rol tiene clientes asociados',
+          itemName: clientRole.name,
+          mode: 'replace' as const,
+          consequences: [
+            `${count} cliente${count === 1 ? '' : 's'} será${count === 1 ? 'á' : 'n'} afectado${count === 1 ? '' : 's'}`,
+            'Puedes reemplazarlos con otro rol o eliminarlos sin referencia',
+          ],
+          replacementOptions: otherRoles
+            .sort((a, b) =>
+              a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+            )
+            .map((r) => ({
+              label: r.name,
+              value: r.id,
+            })),
+          onDelete: () => {
+            deleteRoleMutation.mutate(clientRole.id, {
+              onSuccess: () => {
+                popModal();
+                handleClose();
+              },
+            });
+          },
+          onReplace: (newRoleId: string) => {
+            replaceRoleMutation.mutate(
+              {
+                oldRoleId: clientRole.id,
+                newRoleId,
+              },
+              {
+                onSuccess: () => {
+                  popModal();
+                  handleClose();
+                },
+              }
+            );
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error preparing delete:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo preparar la eliminación',
+        variant: 'destructive',
+      });
+    }
   };
 
   const createMutation = useMutation({
@@ -196,7 +336,7 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
       return;
     }
 
-    if (mode === 'edit' && clientRole) {
+    if (currentMode === 'edit' && clientRole) {
       updateMutation.mutate({
         roleId: clientRole.id,
         updates: {
@@ -219,7 +359,7 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
   };
 
   const getHeader = () => {
-    switch (mode) {
+    switch (currentMode) {
       case 'view':
         return {
           title: 'Ver Rol de Cliente',
@@ -250,8 +390,14 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
       />
 
       <ModalBody>
-        {mode === 'view' ? (
-          clientRole && <ViewPanel clientRole={clientRole} />
+        {currentMode === 'view' ? (
+          clientRole && (
+            <ViewPanel
+              clientRole={clientRole}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
+            />
+          )
         ) : (
           <FormPanel
             form={form}
@@ -260,17 +406,17 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
         )}
       </ModalBody>
 
-      {mode !== 'view' && (
+      {currentMode !== 'view' && (
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={handleClose}
-          rightLabel={mode === 'edit' ? 'Guardar Cambios' : 'Crear Rol'}
+          rightLabel={currentMode === 'edit' ? 'Guardar Cambios' : 'Crear Rol'}
           onRightClick={form.handleSubmit(onSubmit)}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
         />
       )}
       
-      {mode === 'view' && (
+      {currentMode === 'view' && (
         <ModalFooter
           leftLabel="Cerrar"
           onLeftClick={handleClose}

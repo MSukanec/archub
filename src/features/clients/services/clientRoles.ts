@@ -157,3 +157,66 @@ export async function deleteClientRole(
 
   return true;
 }
+
+/**
+ * Cuenta cuántos project_clients tienen asignado un rol específico.
+ * 
+ * @param roleId - ID del rol a verificar
+ * @returns Número de clients que usan este rol
+ * @throws {Error} Si falla la query
+ */
+export async function getClientRoleUsageCount(roleId: string): Promise<number> {
+  if (!supabase || !roleId) {
+    return 0;
+  }
+
+  const { count, error } = await supabase
+    .from('project_clients')
+    .select('*', { count: 'exact', head: true })
+    .eq('role_id', roleId);
+
+  if (error) {
+    throw error;
+  }
+
+  return count || 0;
+}
+
+/**
+ * Reemplaza un rol con otro en todos los project_clients.
+ * Luego elimina el rol antiguo (soft delete).
+ * 
+ * @param oldRoleId - ID del rol a reemplazar
+ * @param newRoleId - ID del nuevo rol
+ * @returns Confirmación del reemplazo
+ * @throws {Error} Si falla la actualización
+ */
+export async function replaceClientRole(
+  oldRoleId: string,
+  newRoleId: string
+): Promise<{ oldRoleId: string; newRoleId: string }> {
+  // Actualizar todos los project_clients que usaban el rol antiguo
+  const { error: updateError } = await supabase
+    .from('project_clients')
+    .update({ role_id: newRoleId })
+    .eq('role_id', oldRoleId);
+
+  if (updateError) {
+    throw updateError;
+  }
+
+  // Soft delete del rol antiguo
+  const { error: deleteError } = await supabase
+    .from('client_roles')
+    .update({
+      is_deleted: true,
+      deleted_at: new Date().toISOString()
+    })
+    .eq('id', oldRoleId);
+
+  if (deleteError) {
+    throw deleteError;
+  }
+
+  return { oldRoleId, newRoleId };
+}
