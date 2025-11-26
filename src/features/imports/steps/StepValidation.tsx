@@ -295,7 +295,8 @@ export function StepValidation({
       )}
 
       {/* Editor de celdas vacías - muestra todas las columnas para contexto */}
-      {hasEditableErrors && parsedData && columnMapping && onCellCorrectionChange && (() => {
+      {/* Mostrar mientras haya filas que originalmente tenían errores, aunque ya estén corregidas */}
+      {originalRowsWithErrors.length > 0 && parsedData && columnMapping && onCellCorrectionChange && (() => {
         const mappedColumns = Object.entries(columnMapping)
           .filter(([_, field]) => field)
           .map(([colIndex, field]) => ({ colIndex: parseInt(colIndex), field: field! }))
@@ -303,17 +304,49 @@ export function StepValidation({
         
         const errorFields = new Set(originalEmptyCellErrors.map(e => e.field));
         
+        // Contar cuántas correcciones se han hecho
+        const totalErrorCells = originalEmptyCellErrors.length;
+        const correctedCount = originalEmptyCellErrors.filter(e => {
+          const key = `${e.row}||${e.field}`;
+          return cellCorrections[key];
+        }).length;
+        const allCorrected = correctedCount === totalErrorCells;
+        
         return (
-          <Card className="border-blue-500/30 bg-blue-500/5">
+          <Card className={cn(
+            "border-blue-500/30 bg-blue-500/5",
+            allCorrected && "border-green-500/30 bg-green-500/5"
+          )}>
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-blue-500 text-base">
-                <Edit3 className="h-5 w-5" />
-                Completar datos faltantes
+              <CardTitle className={cn(
+                "flex items-center gap-2 text-base",
+                allCorrected ? "text-green-500" : "text-blue-500"
+              )}>
+                {allCorrected ? (
+                  <>
+                    <CheckCircle className="h-5 w-5" />
+                    Datos completados
+                  </>
+                ) : (
+                  <>
+                    <Edit3 className="h-5 w-5" />
+                    Completar datos faltantes
+                  </>
+                )}
+                <Badge variant="outline" className={cn(
+                  "ml-auto",
+                  allCorrected ? "border-green-500/50 text-green-500" : "border-blue-500/50 text-blue-500"
+                )}>
+                  {correctedCount} / {totalErrorCells}
+                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Algunas filas tienen celdas vacías en campos obligatorios. Hacé clic en las celdas marcadas para completarlas:
+                {allCorrected 
+                  ? "Todos los datos faltantes han sido completados. Podés continuar o editar los valores:"
+                  : "Algunas filas tienen celdas vacías en campos obligatorios. Hacé clic en las celdas marcadas para completarlas:"
+                }
               </p>
               <ScrollArea className="max-h-[300px]">
                 <Table>
