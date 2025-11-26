@@ -342,7 +342,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const createPaymentMutation = useCreateClientPayment();
 
   const handleImport = () => {
-    if (!organizationId || !activeProjectId || !userData?.id) {
+    if (!organizationId || !activeProjectId || !userData?.user?.id) {
       toast({
         title: 'Error',
         description: 'No se pudo cargar la información requerida',
@@ -358,29 +358,32 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         label: 'Fecha de Pago',
         type: 'date',
         required: true,
-        example: '2024-01-15',
+        description: 'Ej: 2024-01-15',
       },
       {
         field: 'client_name',
         label: 'Cliente (Nombre)',
-        type: 'text',
+        type: 'string',
         required: true,
-        example: 'Juan García',
+        description: 'Ej: Juan García',
       },
       {
         field: 'amount',
         label: 'Monto',
         type: 'number',
         required: true,
-        example: '5000',
+        description: 'Ej: 5000',
       },
       {
         field: 'currency_code',
         label: 'Moneda (Código)',
         type: 'foreign-key',
         required: true,
-        example: 'USD, ARS',
+        description: 'Ej: USD, ARS, EUR',
         foreignKeyConfig: {
+          entityName: 'currency',
+          labelKey: 'label',
+          valueKey: 'value',
           options: [
             { label: 'USD', value: 'USD' },
             { label: 'ARS', value: 'ARS' },
@@ -393,22 +396,25 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         label: 'Cotización (opcional)',
         type: 'number',
         required: false,
-        example: '1000',
+        description: 'Ej: 1000',
       },
       {
         field: 'wallet_name',
         label: 'Billetera (opcional)',
-        type: 'text',
+        type: 'string',
         required: false,
-        example: 'Efectivo, Banco, Tarjeta',
+        description: 'Ej: Efectivo, Banco, Tarjeta',
       },
       {
         field: 'status',
         label: 'Estado (opcional)',
         type: 'foreign-key',
         required: false,
-        example: 'Confirmado, Pendiente',
+        description: 'Ej: Confirmado, Pendiente',
         foreignKeyConfig: {
+          entityName: 'status',
+          labelKey: 'label',
+          valueKey: 'value',
           options: [
             { label: 'Confirmado', value: 'confirmed' },
             { label: 'Pendiente', value: 'pending' },
@@ -420,16 +426,16 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       {
         field: 'reference',
         label: 'Referencia (opcional)',
-        type: 'text',
+        type: 'string',
         required: false,
-        example: 'Cheque #123, Transferencia ABC',
+        description: 'Ej: Cheque #123, Transferencia ABC',
       },
       {
         field: 'notes',
         label: 'Notas (opcional)',
-        type: 'text',
+        type: 'string',
         required: false,
-        example: 'Observaciones adicionales',
+        description: 'Observaciones adicionales',
       },
     ];
 
@@ -478,7 +484,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           // Obtener billeteras
           const walletsMap = new Map<string, string>();
           allPayments.forEach(payment => {
-            if (payment.wallet?.wallets?.name) {
+            if (payment.wallet?.wallets?.name && payment.wallet_id) {
               walletsMap.set(payment.wallet.wallets.name.toLowerCase(), payment.wallet_id);
             }
           });
@@ -516,7 +522,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
                 payment: paymentData,
                 projectId: activeProjectId,
                 organizationId,
-                createdBy: userData.id,
+                createdBy: userData.user.id,
               });
             } catch (error) {
               console.error('Error importando pago:', error);
