@@ -10,17 +10,19 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { DollarSign, FileText, CalendarIcon } from 'lucide-react'
+import { DollarSign, FileText, CalendarIcon, Paperclip } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
+import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { supabase } from '@/lib/supabase'
 import { formatContactName } from '@/utils/contacts'
-import { uploadMediaFileV2 } from '@/features/media/services/uploadMediaFileV2'
-import { UploadSingleFileField } from '@/components/ui-custom/fields/UploadSingleFileField'
+import { uploadFile, deleteFile } from '@/lib/storage'
+import { UploadMultiFileField } from '@/components/ui-custom/fields/UploadMultiFileField'
+import { useQueryClient } from '@tanstack/react-query'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { 
   useProjectClients, 
@@ -350,9 +352,9 @@ function FormPanel({
           )}
         />
 
-        {/* Row 6: Archivo Adjunto */}
+        {/* Row 6: Archivos Adjuntos */}
         <div>
-          <UploadSingleFileField
+          <UploadMultiFileField
             filesToUpload={filesToUpload}
             existingFiles={existingFiles}
             onFilesChange={setFilesToUpload}
@@ -365,8 +367,9 @@ function FormPanel({
               'application/vnd.ms-excel': ['.xls'],
               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
             }}
-            emptyStateTitle="Sin archivo adjunto"
-            emptyStateDescription="Arrastra un archivo o haz clic para seleccionar"
+            imageCompressionPreset="document"
+            emptyStateTitle="Sin archivos adjuntos"
+            emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
             newFileBadgeText="Nuevo"
           />
         </div>
