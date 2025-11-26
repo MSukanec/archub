@@ -694,7 +694,7 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
 
       onClose();
     } catch (error) {
-      console.error('Import error:', error);
+      console.error('Import error:', error instanceof Error ? error.message : error, error);
       toast({
         title: "Error en la importación",
         description: error instanceof Error ? error.message : "Ocurrió un error durante la importación",

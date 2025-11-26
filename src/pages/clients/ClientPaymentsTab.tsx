@@ -596,6 +596,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           const walletsMap = new Map<string, string>();
           let defaultWalletId: string | null = null;
           
+          // First try to get from existing payments
           allPayments.forEach(payment => {
             if (payment.wallet?.wallets?.name && payment.wallet_id) {
               walletsMap.set(payment.wallet.wallets.name.toLowerCase(), payment.wallet_id);
@@ -604,6 +605,23 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
               }
             }
           });
+          
+          // Fallback to organization wallets if no payments exist
+          if (walletsMap.size === 0 && organizationWallets && organizationWallets.length > 0) {
+            organizationWallets.forEach(ow => {
+              if (ow.wallets?.name && ow.wallet_id) {
+                const normalizedName = ow.wallets.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+                walletsMap.set(normalizedName, ow.wallet_id);
+                if (!defaultWalletId && ow.is_default) {
+                  defaultWalletId = ow.wallet_id;
+                }
+              }
+            });
+            // If no default wallet, use the first one
+            if (!defaultWalletId && organizationWallets.length > 0) {
+              defaultWalletId = organizationWallets[0].wallet_id;
+            }
+          }
 
           // Validar que TODOS los clientes existan ANTES de importar
           const invalidRows: Array<{ index: number; reason: string }> = [];
@@ -639,17 +657,27 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             // Si clientNameInput está vacío o es null, clientId queda como null (permitido)
             
             // Validar moneda
-            const currencyCode = (row.currency_id || row.currency_code || '') as string;
-            const currencyCodeLower = currencyCode.toLowerCase();
-            // Try direct lookup first, then apply valueMapConfig
-            let currencyId = currenciesMap.get(currencyCodeLower) || 
-                            valueMapConfig.currency_code?.[currencyCodeLower];
+            const currencyInput = (row.currency_id || row.currency_code || '') as string;
+            let currencyId: string | null = null;
             
-            if (!currencyCode.trim()) {
+            if (!currencyInput.trim()) {
               errors.push('Código de moneda vacío');
-            } else if (!currencyId) {
-              const availableCurrencies = Array.from(currenciesMap.keys()).map(c => c.toUpperCase());
-              errors.push(`Moneda "${currencyCode}" no encontrada. Monedas disponibles: ${availableCurrencies.join(', ')}`);
+            } else {
+              // Check if it's already a UUID (from conflict resolution step)
+              const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currencyInput.trim());
+              if (isUUID) {
+                currencyId = currencyInput.trim();
+              } else {
+                // Try to resolve by code/name
+                const currencyCodeLower = currencyInput.toLowerCase().trim();
+                currencyId = currenciesMap.get(currencyCodeLower) || 
+                            valueMapConfig.currency_code?.[currencyCodeLower] || null;
+                
+                if (!currencyId) {
+                  const availableCurrencies = Array.from(currenciesMap.keys()).map(c => c.toUpperCase());
+                  errors.push(`Moneda "${currencyInput}" no encontrada. Monedas disponibles: ${availableCurrencies.join(', ')}`);
+                }
+              }
             }
             
             // Validar monto
@@ -697,6 +725,18 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           let successCount = 0;
           for (const row of validRowsToImport) {
             try {
+              // Resolve wallet_id - check if it's already a UUID from conflict resolution
+              let resolvedWalletId: string | null = defaultWalletId;
+              if (row.wallet_name) {
+                const walletInput = String(row.wallet_name).trim();
+                const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(walletInput);
+                if (isUUID) {
+                  resolvedWalletId = walletInput;
+                } else {
+                  resolvedWalletId = walletsMap.get(walletInput.toLowerCase()) || defaultWalletId;
+                }
+              }
+
               const paymentData = {
                 client_id: row._clientId,
                 amount: parseFloat(row.amount) || 0,
@@ -704,7 +744,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
                 exchange_rate: parseFloat(row.exchange_rate) || null,
                 payment_date: row.payment_date || new Date().toISOString().split('T')[0],
                 status: row.status || 'pending',
-                wallet_id: (row.wallet_name && walletsMap.get(row.wallet_name.toLowerCase())) || defaultWalletId,
+                wallet_id: resolvedWalletId,
                 reference: row.reference || null,
                 notes: row.notes || null,
                 commitment_id: null,
