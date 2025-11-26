@@ -196,17 +196,17 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       return;
     }
 
+    // Prefetch contact data before opening modal
+    if (organizationId && client.contacts.id) {
+      queryClient.prefetchQuery({
+        queryKey: [`/api/contacts/${client.contacts.id}?organization_id=${organizationId}`],
+        staleTime: 2 * 60 * 1000,
+      });
+    }
+
     openModal('contact', {
-      isEditing: true,
-      editingContact: {
-        id: client.contacts.id,
-        organization_id: organizationId,
-        first_name: client.contacts.first_name,
-        last_name: client.contacts.last_name,
-        email: client.contacts.email,
-        phone: client.contacts.phone,
-        created_at: new Date().toISOString(),
-      },
+      contactId: client.contacts.id,
+      mode: 'edit',
     });
   };
 
