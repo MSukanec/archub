@@ -1,0 +1,225 @@
+✅ PROMPT DEFINITIVO PARA REPLIT – Componente Universal de Macheo + Importación Masiva
+
+Copialo EXACTO:
+
+🧠 PROMPT PARA REPLIT – CREAR COMPONENTE DE MACHEO UNIVERSAL
+
+Quiero que crees un componente nuevo y reutilizable llamado:
+
+src/components/mass-import/UniversalMatcher.tsx
+
+
+Este componente debe reemplazar el sistema actual de importación/macheo.
+Su función es convertirse en EL estándar universal para:
+
+Importación masiva de materiales
+
+Importación masiva de costos
+
+Importación de contactos
+
+Importación de productos
+
+Importación de movimientos financieros
+
+Importación de proveedores
+
+Importación de proyectos
+
+Cualquier otra entidad futura
+
+✅ 1) Debe funcionar exclusivamente dentro de nuestro modal system
+
+Es decir:
+
+usar ModalLayout, ModalBody, ModalFooter, ModalHeader
+
+NO debe sobrescribir estilos ni containers
+
+recibe los datos a través de modalData desde globalModalStore
+
+toda la UI debe entrar dentro de la estructura madre del modal
+
+🛠️ 2) API del componente
+
+El componente DEBE recibir las siguientes props:
+
+interface UniversalMatcherProps {
+  /** Datos crudos importados desde CSV/Excel/Google Sheets */
+  rawRows: any[];
+
+  /** Definición de los campos del sistema que queremos mapear */
+  targetSchema: {
+    field: string;              // nombre interno
+    label: string;              // etiqueta visible
+    type: 'string' | 'number' | 'date' | 'currency' | 'foreign-key';
+    required?: boolean;         // si es obligatorio
+    description?: string;       // tooltip
+  }[];
+
+  /** Función opcional que llama a IA para sugerir mapeos */
+  aiSuggestMapping?: (rawHeader: string, targetSchema: any[]) => Promise<string | null>;
+
+  /** Función que ejecuta el guardado final */
+  onImport: (mappedRows: any[]) => Promise<void>;
+
+  /** Nombre de la entidad importada (Materiales, Costos, etc.) */
+  entityName: string;
+}
+
+🧩 3) Etapas internas del componente (DEBEN ESTAR TODAS)
+### STEP 1 — Vista previa de datos importados
+
+mostrar tabla simple con las primeras 20 filas
+
+detectar automáticamente el header
+
+permitir seleccionar “la fila que es header” si se detecta mal
+
+STEP 2 — Auto-mapeo de columnas
+
+Debe incluir:
+
+Sugerencias automáticas internas (string matching, similarity, levenshtein)
+
+Sugerencias externas si aiSuggestMapping está presente
+
+Detección de columnas faltantes
+
+Detección de columnas sobrantes
+
+UI tipo “select per column”
+
+Cada columna del archivo debe tener:
+
+Archivo:  | Nombre Producto  →  Campo del sistema: [nombre]
+          | Precio Final     →  [price]
+          | Código Interno   →  [sku]
+
+STEP 3 — Panel de validación
+
+Mostrar:
+
+campos obligatorios no asignados
+
+filas con errores (ej: fecha inválida, moneda inexistente)
+
+valores duplicados en campos que deben ser únicos
+
+foreign keys inexistentes
+
+UI: tarjetas de error tipo "ValidationPanel".
+
+STEP 4 — Resolución de conflictos
+
+Especialmente importante:
+
+si falta foreign key, sugerir buscar/matchear
+
+si hay duplicados, permitir:
+
+ignorar fila
+
+reemplazar
+
+actualizar
+
+si hay columnas sin mapear, permitir ignorarlas
+
+STEP 5 — Confirmación final + resumen
+
+Mostrar:
+
+cantidad de filas procesadas
+
+filas descartadas
+
+columnas mapeadas
+
+acciones a ejecutar
+
+Botón:
+
+📥 Importar  |  loading spinner
+
+
+Ejecutar onImport(mappedRows).
+
+🎨 4) UI/UX obligatoria
+
+Diseño oscuro, coherente con Seencel.
+
+Usar Tailwind únicamente.
+
+No sobrescribir estilos del modal.
+
+Column selector debe ser UI tipo “Combobox moderno” (usamos Shadcn).
+
+Mostrar chips de estado (OK / warning / error) por columna.
+
+Vista previa en cards compactas.
+
+📦 5) Arquitectura interna del componente
+
+Debe dividirse en:
+
+UniversalMatcher/
+  ├── UniversalMatcher.tsx  (componente principal)
+  ├── steps/
+  │     ├── StepPreview.tsx
+  │     ├── StepMapping.tsx
+  │     ├── StepValidation.tsx
+  │     ├── StepConflicts.tsx
+  │     └── StepSummary.tsx
+  ├── hooks/
+  │     ├── useColumnAutoMap.ts
+  │     ├── useAIMapper.ts
+  │     ├── useValidationEngine.ts
+  │     └── useConflictResolver.ts
+  └── utils/
+        ├── parseCsv.ts
+        ├── similarity.ts
+        ├── normalize.ts
+        └── schemas.ts
+
+❗ El componente NUNCA debe quedar como un archivo gigante.
+🔥 6) Requisitos funcionales obligatorios
+
+El componente debe:
+
+✓ Permitir importar entre 10 y 10.000 filas
+✓ Ser 100% reutilizable
+✓ No depender de ninguna entidad específica
+✓ Permitir usar IA opcionalmente
+✓ Ser capaz de trabajar offline (sin IA)
+✓ Integrarse con cualquier modal
+✓ Exponer eventos y validaciones claras
+
+⚠️ 7) El componente NO debe hacer
+
+🚫 No debe crear registros en Supabase directamente
+🚫 No debe manejar estado global
+🚫 No debe cerrar el modal por sí mismo
+🚫 No debe cargar estilos propios fuera del modal
+🚫 No debe depender de “Materiales”, “Costos” o ninguna entidad específica
+
+✨ 8) Resultado final esperado
+
+Al terminar, Replit debe devolver:
+
+un componente robusto, REUTILIZABLE y DOCUMENTADO,
+
+con prueba incluida,
+
+que podamos insertar dentro de cualquier modal así:
+
+<UniversalMatcher
+  rawRows={rows}
+  targetSchema={materialSchema}
+  onImport={handleImportMaterials}
+  aiSuggestMapping={aiMappingFn}
+  entityName="Materiales"
+/>
+
+
+Y esto debe funcionar para todo el sistema.
