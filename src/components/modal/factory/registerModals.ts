@@ -112,7 +112,7 @@ export function initializeModalRegistry(): void {
     mapDataToProps: (data) => ({
       contactId: data?.contactId || data?.contact?.id,
       contact: data?.contact,
-      mode: data?.mode || (data?.contactId || data?.contact?.id ? 'view' : 'create'),
+      mode: data?.mode || 'create',
     }),
   });
   registerModal('contactType', ContactTypeForm as any, { 
