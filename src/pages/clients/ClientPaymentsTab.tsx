@@ -424,9 +424,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           // Primero, agregamos los clientes de los pagos existentes
           allPayments.forEach(payment => {
             if (payment.client?.contact) {
-              const clientName = payment.client.contact.company_name || 
+              const clientName = String(payment.client.contact.company_name || 
                                payment.client.contact.full_name || 
-                               `${payment.client.contact.first_name || ''} ${payment.client.contact.last_name || ''}`.trim();
+                               `${payment.client.contact.first_name || ''} ${payment.client.contact.last_name || ''}`.trim());
               clientsData[clientName.toLowerCase()] = payment.client_id;
             }
           });
@@ -452,9 +452,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           const validRowsToImport: typeof rows = [];
 
           rows.forEach((row, idx) => {
-            const clientName = row.client_id?.toLowerCase() || row.client_name?.toLowerCase() || '';
+            const clientNameInput = (row.client_id || row.client_name || '') as string;
+            const clientName = clientNameInput.toLowerCase();
             const clientId = clientsData[clientName];
-            const currencyCode = row.currency_id?.toUpperCase() || row.currency_code?.toUpperCase() || '';
+            const currencyCode = (row.currency_id || row.currency_code || '') as string;
             const currencyId = currenciesMap.get(currencyCode.toLowerCase());
 
             if (!clientId) {

@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { format, isValid } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import type { ParsedData, ColumnMapping, TargetField } from '../types';
 
@@ -55,6 +57,33 @@ export function StepMapping({
       if (columnMapping[currentColumnIndex] === field.field) return true;
       return !mappedFields.has(field.field);
     });
+  };
+
+  const formatCellValue = (cell: any): string => {
+    if (cell === null || cell === undefined) return '-';
+    
+    if (cell instanceof Date) {
+      return isValid(cell) ? format(cell, 'dd/MM/yyyy', { locale: es }) : String(cell);
+    }
+    
+    if (typeof cell === 'number' && cell > 1000000000 && cell < 2000000000000) {
+      const date = new Date(cell);
+      return isValid(date) ? format(date, 'dd/MM/yyyy', { locale: es }) : String(cell);
+    }
+    
+    if (typeof cell === 'string') {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}(T|$)/;
+      if (dateRegex.test(cell)) {
+        try {
+          const date = new Date(cell);
+          return isValid(date) ? format(date, 'dd/MM/yyyy', { locale: es }) : cell;
+        } catch {
+          return cell;
+        }
+      }
+    }
+    
+    return String(cell);
   };
 
   return (
@@ -110,7 +139,13 @@ export function StepMapping({
                       </div>
                       {sampleValues.length > 0 && (
                         <p className="text-xs text-muted-foreground mt-1 truncate">
-                          Ej: {sampleValues.join(', ')}
+                          Ej: {parsedData.rows
+                            .slice(0, 3)
+                            .map(row => row[index])
+                            .filter(v => v !== null && v !== undefined && String(v).trim() !== '')
+                            .map(v => formatCellValue(v))
+                            .slice(0, 3)
+                            .join(', ')}
                         </p>
                       )}
                     </div>
