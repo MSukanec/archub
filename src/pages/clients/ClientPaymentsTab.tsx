@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, CheckCircle2, AlertCircle, Calendar } from 'lucide-react'
+import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, CheckCircle2, AlertCircle, Calendar, Upload } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
@@ -18,10 +18,12 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/componen
 import {
   useClientPayments,
   useDeleteClientPayment,
+  useCreateClientPayment,
   useClientCommitments,
   type ClientPaymentWithRelations,
 } from '@/features/clients'
 import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge'
+import type { TargetField, ImportConfig } from '@/components/forms/imports/types'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
@@ -337,6 +339,199 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     });
   };
 
+  const createPaymentMutation = useCreateClientPayment();
+
+  const handleImport = () => {
+    if (!organizationId || !activeProjectId || !userData?.id) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo cargar la información requerida',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Definir el schema de importación para pagos de cliente
+    const targetSchema: TargetField[] = [
+      {
+        field: 'payment_date',
+        label: 'Fecha de Pago',
+        type: 'date',
+        required: true,
+        example: '2024-01-15',
+      },
+      {
+        field: 'client_name',
+        label: 'Cliente (Nombre)',
+        type: 'text',
+        required: true,
+        example: 'Juan García',
+      },
+      {
+        field: 'amount',
+        label: 'Monto',
+        type: 'number',
+        required: true,
+        example: '5000',
+      },
+      {
+        field: 'currency_code',
+        label: 'Moneda (Código)',
+        type: 'foreign-key',
+        required: true,
+        example: 'USD, ARS',
+        foreignKeyConfig: {
+          options: [
+            { label: 'USD', value: 'USD' },
+            { label: 'ARS', value: 'ARS' },
+            { label: 'EUR', value: 'EUR' },
+          ],
+        },
+      },
+      {
+        field: 'exchange_rate',
+        label: 'Cotización (opcional)',
+        type: 'number',
+        required: false,
+        example: '1000',
+      },
+      {
+        field: 'wallet_name',
+        label: 'Billetera (opcional)',
+        type: 'text',
+        required: false,
+        example: 'Efectivo, Banco, Tarjeta',
+      },
+      {
+        field: 'status',
+        label: 'Estado (opcional)',
+        type: 'foreign-key',
+        required: false,
+        example: 'Confirmado, Pendiente',
+        foreignKeyConfig: {
+          options: [
+            { label: 'Confirmado', value: 'confirmed' },
+            { label: 'Pendiente', value: 'pending' },
+            { label: 'Rechazado', value: 'rejected' },
+            { label: 'Anulado', value: 'void' },
+          ],
+        },
+      },
+      {
+        field: 'reference',
+        label: 'Referencia (opcional)',
+        type: 'text',
+        required: false,
+        example: 'Cheque #123, Transferencia ABC',
+      },
+      {
+        field: 'notes',
+        label: 'Notas (opcional)',
+        type: 'text',
+        required: false,
+        example: 'Observaciones adicionales',
+      },
+    ];
+
+    // Value map para traducir valores del CSV a IDs reales
+    const valueMapConfig: Record<string, Record<string, string>> = {
+      currency_code: {
+        'usd': 'currency-usd-id',
+        'ars': 'currency-ars-id',
+        'eur': 'currency-eur-id',
+      },
+      status: {
+        'confirmado': 'confirmed',
+        'pendiente': 'pending',
+        'rechazado': 'rejected',
+        'anulado': 'void',
+      },
+    };
+
+    // Abrir modal de importación universal
+    openModal('universal-import', {
+      config: {
+        entityName: 'Pago de Cliente',
+        entityNamePlural: 'Pagos de Clientes',
+        targetSchema,
+        valueMapConfig,
+        onImport: async (rows: any[]) => {
+          // Obtener los clientes y monedas para mapear nombres a IDs
+          const clientsData = allPayments.reduce((acc: any, payment) => {
+            if (payment.client?.contact) {
+              const clientName = payment.client.contact.company_name || 
+                               payment.client.contact.full_name || 
+                               `${payment.client.contact.first_name || ''} ${payment.client.contact.last_name || ''}`.trim();
+              acc[clientName.toLowerCase()] = payment.client_id;
+            }
+            return acc;
+          }, {});
+
+          // Obtener IDs de monedas reales desde los pagos existentes
+          const currenciesMap = new Map<string, string>();
+          allPayments.forEach(payment => {
+            if (payment.currency) {
+              currenciesMap.set(payment.currency.code.toLowerCase(), payment.currency.id);
+            }
+          });
+
+          // Obtener billeteras
+          const walletsMap = new Map<string, string>();
+          allPayments.forEach(payment => {
+            if (payment.wallet?.wallets?.name) {
+              walletsMap.set(payment.wallet.wallets.name.toLowerCase(), payment.wallet_id);
+            }
+          });
+
+          // Procesar e importar cada fila
+          for (const row of rows) {
+            try {
+              const clientName = row.client_name?.toLowerCase() || '';
+              const clientId = clientsData[clientName];
+              const currencyCode = row.currency_code?.toUpperCase() || '';
+              const currencyId = currenciesMap.get(currencyCode.toLowerCase());
+              const walletName = row.wallet_name?.toLowerCase() || '';
+              const walletId = walletName ? walletsMap.get(walletName) : null;
+
+              if (!clientId || !currencyId) {
+                console.warn(`Saltando fila: Cliente o Moneda no encontrados`, row);
+                continue;
+              }
+
+              const paymentData = {
+                client_id: clientId,
+                amount: parseFloat(row.amount) || 0,
+                currency_id: currencyId,
+                exchange_rate: parseFloat(row.exchange_rate) || null,
+                payment_date: row.payment_date || new Date().toISOString().split('T')[0],
+                status: row.status || 'pending',
+                wallet_id: walletId || null,
+                reference: row.reference || null,
+                notes: row.notes || null,
+                commitment_id: null,
+                schedule_id: null,
+              };
+
+              await createPaymentMutation.mutateAsync({
+                payment: paymentData,
+                projectId: activeProjectId,
+                organizationId,
+                createdBy: userData.id,
+              });
+            } catch (error) {
+              console.error('Error importando pago:', error);
+            }
+          }
+
+          toast({
+            title: 'Importación completada',
+            description: `Se procesaron ${rows.length} pagos`,
+          });
+        },
+      },
+    });
+  };
+
   if (!organizationId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -616,6 +811,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           showFilter: true,
           isFilterActive,
           onClearFilters: handleClearFilters,
+          showImport: true,
+          onImport: handleImport,
           renderFilterContent: () => (
             <div className="space-y-3 p-2 min-w-[200px]">
               <div>
