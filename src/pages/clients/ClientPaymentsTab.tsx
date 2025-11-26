@@ -27,6 +27,7 @@ import { useProject } from '@/features/projects/hooks/use-project'
 import { useProjects } from '@/features/projects/hooks/use-projects'
 import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge'
 import { useOrganizationWallets } from '@/features/organization/hooks'
+import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import type { TargetField, ImportConfig, ProjectContext } from '@/features/imports/types'
 
 interface ClientPaymentsTabProps {
@@ -70,6 +71,9 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   
   // Get organization wallets for import
   const { data: organizationWallets } = useOrganizationWallets(organizationId);
+  
+  // Get organization currencies for import
+  const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId);
 
   // Filter states
   const [filterWallet, setFilterWallet] = useState<string>('all');
@@ -360,11 +364,10 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           entityName: 'currency',
           labelKey: 'label',
           valueKey: 'value',
-          options: [
-            { label: 'USD', value: 'USD' },
-            { label: 'ARS', value: 'ARS' },
-            { label: 'EUR', value: 'EUR' },
-          ],
+          options: (organizationCurrencies || []).map(oc => ({
+            label: `${oc.currency?.code || ''} - ${oc.currency?.name || 'Sin nombre'}`,
+            value: oc.currency_id,
+          })),
         },
       },
       {
@@ -433,13 +436,24 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       }
     });
 
+    // Build currency value map from organization currencies
+    const currencyValueMap: Record<string, string> = {};
+    (organizationCurrencies || []).forEach(oc => {
+      if (oc.currency?.code && oc.currency_id) {
+        // Map by code (lowercase)
+        const normalizedCode = oc.currency.code.toLowerCase().trim();
+        currencyValueMap[normalizedCode] = oc.currency_id;
+        // Also map by name (lowercase, without accents)
+        if (oc.currency.name) {
+          const normalizedName = oc.currency.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+          currencyValueMap[normalizedName] = oc.currency_id;
+        }
+      }
+    });
+
     // Value map para traducir valores del CSV a IDs reales
     const valueMapConfig: Record<string, Record<string, string>> = {
-      currency_code: {
-        'usd': 'currency-usd-id',
-        'ars': 'currency-ars-id',
-        'eur': 'currency-eur-id',
-      },
+      currency_code: currencyValueMap,
       status: {
         'confirmado': 'confirmed',
         'pendiente': 'pending',
@@ -513,6 +527,11 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         fieldHelpMessages: {
           wallet_name: {
             message: 'Las billeteras que no se encuentran deben agregarse primero en la configuración de tu organización.',
+            linkText: 'Ir a Configuración de Finanzas',
+            linkPath: '/settings/finances',
+          },
+          currency_code: {
+            message: 'Las monedas que no se encuentran deben agregarse primero en la configuración de tu organización.',
             linkText: 'Ir a Configuración de Finanzas',
             linkPath: '/settings/finances',
           },
