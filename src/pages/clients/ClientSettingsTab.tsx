@@ -14,7 +14,7 @@ export default function ClientSettingsTab() {
   const { openModal } = useGlobalModalStore();
   
   const { data: clientRoles = [], isLoading } = useClientRoles(organizationId);
-  const deleteMutation = useDeleteClientRole();
+  const deleteMutation = useDeleteClientRole(organizationId);
 
   const systemRoles = clientRoles.filter(role => role.is_default === true);
   const customRoles = clientRoles.filter(role => role.is_default === false);
@@ -42,10 +42,7 @@ export default function ClientSettingsTab() {
         if (!organizationId) return;
 
         try {
-          await deleteMutation.mutateAsync({
-            roleId: role.id,
-            organizationId
-          });
+          await deleteMutation.mutateAsync(role.id);
 
           toast({
             title: 'Rol eliminado',
