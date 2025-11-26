@@ -428,30 +428,32 @@ export function ModalLayout({
           </div>
         )}
 
-        {headerContent && (
-          <div className="shrink-0 relative">
-            {isValidElement(headerContent) ? (
-              cloneElement(headerContent, {
-                ...(effectivePanel === 'subform' && {
-                  showBackButton: (headerContent.props as any).showBackButton ?? true,
-                  onBackClick: (headerContent.props as any).onBackClick ?? (() => setPanel('edit')),
-                }),
-              } as any)
-            ) : (
-              headerContent
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClose}
-              className="absolute top-3 right-3 h-8 w-8 p-0 flex items-center justify-center"
-              data-testid={`modal-close-button-${modalId}`}
-              aria-label="Cerrar modal"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
+        <div className="shrink-0 relative">
+          {headerContent && (
+            <>
+              {isValidElement(headerContent) ? (
+                cloneElement(headerContent, {
+                  ...(effectivePanel === 'subform' && {
+                    showBackButton: (headerContent.props as any).showBackButton ?? true,
+                    onBackClick: (headerContent.props as any).onBackClick ?? (() => setPanel('edit')),
+                  }),
+                } as any)
+              ) : (
+                headerContent
+              )}
+            </>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClose}
+            className="absolute top-3 right-3 h-8 w-8 p-0 flex items-center justify-center"
+            data-testid={`modal-close-button-${modalId}`}
+            aria-label="Cerrar modal"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
 
         <div className="flex-1 overflow-auto">
           {readinessState && !readinessState.isReady ? (
