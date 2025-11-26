@@ -261,7 +261,7 @@ export function ModalFooter({
               type="button"
               variant="secondary"
               onClick={finalOnLeftClick}
-              className={middleLabel && onMiddleClick ? "w-1/4" : "w-1/4"}
+              className={middleLabel && onMiddleClick ? "w-1/4" : finalRightLabel ? "w-1/4" : "w-full"}
               disabled={isLoading && readinessState?.isLoading}
             >
               {finalLeftLabel}
@@ -279,24 +279,26 @@ export function ModalFooter({
               </Button>
             )}
             
-            <Button
-              ref={submitButtonRef}
-              type="button"
-              variant={submitVariant}
-              onClick={handleSubmitClick}
-              className={middleLabel && onMiddleClick ? "w-1/4" : "w-3/4"}
-              disabled={!currentCanSubmit}
-              data-testid="modal-submit-button"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  {loadingDisplay}
-                </>
-              ) : (
-                loadingDisplay
-              )}
-            </Button>
+            {finalRightLabel && (
+              <Button
+                ref={submitButtonRef}
+                type="button"
+                variant={submitVariant}
+                onClick={handleSubmitClick}
+                className={middleLabel && onMiddleClick ? "w-1/4" : "w-3/4"}
+                disabled={!currentCanSubmit}
+                data-testid="modal-submit-button"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    {loadingDisplay}
+                  </>
+                ) : (
+                  loadingDisplay
+                )}
+              </Button>
+            )}
           </>
         ) : (
           <Button
