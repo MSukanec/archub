@@ -511,9 +511,16 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
                 schedule_id: null,
               };
 
+              // El projectId puede venir del row._projectId (importación org) o activeProjectId
+              const targetProjectId = row._projectId || activeProjectId;
+              
+              if (!targetProjectId) {
+                throw new Error('No se pudo determinar el proyecto para este pago');
+              }
+              
               await createPaymentMutation.mutateAsync({
                 payment: paymentData,
-                projectId: activeProjectId,
+                projectId: targetProjectId,
                 organizationId,
                 createdBy: userData.user.id,
               });
