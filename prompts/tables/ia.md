@@ -119,3 +119,18 @@ create table public.ia_user_greetings (
     )
   )
 ) TABLESPACE pg_default;
+
+--------------- TABLA IA_IMPORT_MAPPING_PATTERNS:
+
+create table public.ia_import_mapping_patterns (
+  id uuid not null default gen_random_uuid (),
+  organization_id uuid not null,
+  entity text not null,
+  source_header text not null,
+  target_field text not null,
+  usage_count integer not null default 1,
+  last_used_at timestamp with time zone not null default now(),
+  created_at timestamp with time zone not null default now(),
+  constraint ia_import_mapping_patterns_pkey primary key (id),
+  constraint ia_import_mapping_patterns_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
+) TABLESPACE pg_default;
