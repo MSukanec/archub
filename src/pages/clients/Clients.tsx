@@ -112,14 +112,14 @@ export function Clients() {
       isActive: activeTab === "list"
     },
     {
-      id: "details",
-      label: "Pagos",
-      isActive: activeTab === "details"
-    },
-    {
       id: "obligations",
       label: "Compromisos de Pago",
       isActive: activeTab === "obligations"
+    },
+    {
+      id: "details",
+      label: "Pagos",
+      isActive: activeTab === "details"
     },
     {
       id: "schedule",
