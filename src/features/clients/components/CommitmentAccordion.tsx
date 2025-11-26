@@ -108,12 +108,7 @@ function CommitmentItem({
   
   const totalPaid = useMemo(() => {
     return payments
-      .filter(p => {
-        if (p.status !== 'confirmed') return false;
-        if (p.commitment_id === commitment.id) return true;
-        if (!p.commitment_id && p.client_id === commitment.client_id) return true;
-        return false;
-      })
+      .filter(p => p.commitment_id === commitment.id && p.status === 'confirmed')
       .reduce((sum, p) => {
         if (!p.currency || !commitment.currency) return sum + p.amount;
         
@@ -124,7 +119,7 @@ function CommitmentItem({
         }
         return sum + p.amount;
       }, 0);
-  }, [payments, commitment.id, commitment.client_id, commitment.currency]);
+  }, [payments, commitment.id, commitment.currency]);
   
   const remainingAmount = totalCommitted - totalPaid;
   const paymentPercentage = totalCommitted > 0 ? (totalPaid / totalCommitted) * 100 : 0;
