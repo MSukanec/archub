@@ -611,8 +611,8 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
   const contact = modalData?.contact;
   const organizationId = userData?.organization?.id;
 
-  // Auto-detect mode
-  const mode = modeProp || (contactId ? 'view' : 'create');
+  // Use mode directly from prop
+  const mode = modeProp || 'create';
 
   // State
   const [foundUser, setFoundUser] = useState<any>(null);
@@ -620,11 +620,22 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
   const [contactAvatarUrl, setContactAvatarUrl] = useState<string>('');
   const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('[ContactForm] Props:', { contactId, mode, modalData });
+    console.log('[ContactForm] organizationId:', organizationId);
+  }, [contactId, mode, organizationId, modalData]);
+
   // Fetch contact if editing - use REST API backend
   const { data: fetchedContact, isLoading: contactLoading } = useQuery({
     queryKey: [`/api/contacts/${contactId}?organization_id=${organizationId}`],
-    enabled: !!contactId && mode !== 'create' && !!organizationId,
+    enabled: !!contactId && !!organizationId,
   });
+
+  useEffect(() => {
+    console.log('[ContactForm] fetchedContact:', fetchedContact);
+    console.log('[ContactForm] contactLoading:', contactLoading);
+  }, [fetchedContact, contactLoading]);
 
   // Get contact types after organizationId is available
   const { data: contactTypes } = useContactTypes(organizationId);
@@ -666,20 +677,23 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
 
   // Update form when editingContact data arrives
   useEffect(() => {
-    if (editingContact) {
-      form.reset({
-        first_name: editingContact.first_name || '',
-        last_name: editingContact.last_name || '',
-        email: editingContact.email || '',
-        phone: editingContact.phone || '',
-        contact_type_ids: editingContact.contact_types?.map((ct: any) => ct.id) || [],
-        company_name: editingContact.company_name || '',
-        location: editingContact.location || '',
-        notes: editingContact.notes || '',
-        linked_user_id: editingContact.linked_user_id || '',
-      });
+    if (editingContact?.id) {
+      console.log('[ContactForm] Updating form with editingContact:', editingContact);
+      setTimeout(() => {
+        form.reset({
+          first_name: editingContact.first_name || '',
+          last_name: editingContact.last_name || '',
+          email: editingContact.email || '',
+          phone: editingContact.phone || '',
+          contact_type_ids: editingContact.contact_types?.map((ct: any) => ct.id) || [],
+          company_name: editingContact.company_name || '',
+          location: editingContact.location || '',
+          notes: editingContact.notes || '',
+          linked_user_id: editingContact.linked_user_id || '',
+        });
+      }, 0);
     }
-  }, [editingContact, form]);
+  }, [editingContact?.id]);
 
   const linkedUserId = editingContact?.linked_user_id || form.watch('linked_user_id');
 
@@ -1027,7 +1041,7 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
   }
 
   return (
-    <ModalLayout onClose={onClose} size="lg">
+    <ModalLayout onClose={onClose} size="xl">
       <ModalHeader 
         title={header.title}
         description={header.description}
@@ -1035,7 +1049,7 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
       />
       
       <ModalBody>
-        {mode === "view" && editingContact ? (
+        {mode === "view" && editingContact && contactId && !contactLoading ? (
           <ViewPanel
             contact={editingContact}
             contactAvatarUrl={currentAvatarUrl}

@@ -108,14 +108,19 @@ export function initializeModalRegistry(): void {
   
   registerModal('contact', ContactForm as any, { 
     ...generalConfig, 
-    size: 'lg',
-    mapDataToProps: (data) => ({
-      modalData: {
-        contactId: data?.contactId || data?.contact?.id,
-        contact: data?.contact,
-      },
-      mode: data?.mode || 'create',
-    }),
+    size: 'xl',
+    mapDataToProps: (data) => {
+      console.log('[registerModal:contact] mapDataToProps input:', data);
+      const mapped = {
+        modalData: {
+          contactId: data?.contactId || data?.contact?.id,
+          contact: data?.contact,
+        },
+        mode: data?.mode || 'create',
+      };
+      console.log('[registerModal:contact] mapDataToProps output:', mapped);
+      return mapped;
+    },
   });
   registerModal('contactType', ContactTypeForm as any, { 
     ...generalConfig, 
