@@ -30,9 +30,11 @@ export function registerContactRoutes(app: Express, deps: RouteDeps) {
       }
 
       const ctx = { supabase: userAuth.supabase };
+      const { mode } = req.query;
       const params = {
         organizationId: organization_id as string,
-        userId: userAuth.userId
+        userId: userAuth.userId,
+        mode: (mode === 'light' ? 'light' : 'full') as 'full' | 'light'
       };
 
       const result = await getContacts(ctx, params);

@@ -23,7 +23,6 @@ export interface CreateClientParams {
   organizationId: string;
   clientData: {
     contact_id: string;
-    unit?: string | null;
     client_role_id?: string | null;
     status?: string;
     is_primary?: boolean;
@@ -36,7 +35,6 @@ export interface UpdateClientParams {
   clientId: string;
   organizationId: string;
   clientData: {
-    unit?: string | null;
     client_role_id?: string | null;
     status?: string;
     is_primary?: boolean;
@@ -384,7 +382,6 @@ export async function getClientsSummary(
         client_id: client.contact_id,
         contact_id: client.contact_id,
         organization_id: client.organization_id,
-        unit: client.unit,
         notes: client.notes,
         is_primary: client.is_primary,
         status: client.status,
@@ -525,6 +522,7 @@ export async function createClient(
 
     // CRITICAL: Manually construct insert payload with only safe fields
     // FORCE project_id, organization_id, and created_by - never trust client input for these
+    // NOTE: 'unit' column was removed from project_clients - unit info is now in client_commitments
     const { data: projectClient, error } = await supabase
       .from('project_clients')
       .insert({
@@ -532,7 +530,6 @@ export async function createClient(
         organization_id: params.organizationId,
         created_by: orgAccessResult.memberId,
         contact_id: params.clientData.contact_id,
-        unit: params.clientData.unit || null,
         client_role_id: params.clientData.client_role_id || null,
         status: params.clientData.status || 'active',
         is_primary: params.clientData.is_primary || false,
@@ -632,13 +629,11 @@ export async function updateClient(
     }
 
     // Build update object with only provided fields
+    // NOTE: 'unit' column was removed from project_clients - unit info is now in client_commitments
     const updates: any = {
       updated_at: new Date().toISOString()
     };
 
-    if (params.clientData.hasOwnProperty('unit')) {
-      updates.unit = params.clientData.unit || null;
-    }
     if (params.clientData.hasOwnProperty('client_role_id')) {
       updates.client_role_id = params.clientData.client_role_id || null;
     }

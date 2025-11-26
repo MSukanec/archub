@@ -535,7 +535,7 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
   const isLoadingData = existingClientLoading || contactsLoading || clientRolesLoading;
 
   return (
-    <ModalLayout onClose={handleClose} size="md">
+    <ModalLayout onClose={handleClose} size="xl">
       <ModalHeader
         title={header.title}
         description={header.description}

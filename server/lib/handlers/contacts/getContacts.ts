@@ -4,6 +4,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 export interface GetContactsParams {
   organizationId: string;
   userId: string;
+  mode?: 'full' | 'light'; // 'light' = only basic fields for selectors, 'full' = all enrichment
 }
 
 export interface GetContactsResult {
@@ -17,9 +18,34 @@ export async function getContacts(
   params: GetContactsParams
 ): Promise<GetContactsResult> {
   try {
-    const { organizationId, userId } = params;
+    const { organizationId, userId, mode = 'full' } = params;
     
-    // Query 1: Get all contacts for organization
+    // LIGHT MODE: Fast query for selectors - only basic fields, no enrichment
+    if (mode === 'light') {
+      const { data: contacts, error: contactsError } = await ctx.supabase
+        .from('contacts')
+        .select('id, first_name, last_name, full_name, email, phone')
+        .eq('organization_id', organizationId)
+        .order('first_name', { ascending: true });
+      
+      if (contactsError) {
+        console.error('Error fetching contacts (light):', contactsError);
+        return {
+          success: false,
+          error: contactsError.message || "Failed to fetch contacts"
+        };
+      }
+      
+      // Filter out current user
+      const filteredContacts = (contacts || []).filter((c: any) => c.linked_user_id !== userId);
+      
+      return {
+        success: true,
+        data: filteredContacts
+      };
+    }
+    
+    // FULL MODE: Complete enrichment with linked users, types, attachments, and signed URLs
     const { data: contacts, error: contactsError } = await ctx.supabase
       .from('contacts')
       .select('*')
@@ -45,29 +71,24 @@ export async function getContacts(
     const linkedUserIds = Array.from(new Set(contacts.map((c: any) => c.linked_user_id).filter(Boolean)));
     const contactIds = contacts.map((c: any) => c.id);
     
-    // Query 2: Get linked users info (if any)
-    let linkedUsersMap = new Map();
-    if (linkedUserIds.length > 0) {
-      const { data: linkedUsers } = await ctx.supabase
-        .from('users')
-        .select('id, full_name, email, avatar_url')
-        .in('id', linkedUserIds);
-      
-      if (linkedUsers) {
-        linkedUsersMap = new Map(linkedUsers.map((u: any) => [u.id, u]));
-      }
-    }
+    // Parallel queries for enrichment
+    const [linkedUsersResult, contactTypeLinksResult, attachmentCountsResult] = await Promise.all([
+      // Query 2: Get linked users info (if any)
+      linkedUserIds.length > 0 
+        ? ctx.supabase.from('users').select('id, full_name, email, avatar_url').in('id', linkedUserIds)
+        : Promise.resolve({ data: [] }),
+      // Query 3: Get contact type links
+      ctx.supabase.from('contact_type_links').select('contact_id, contact_type_id').in('contact_id', contactIds),
+      // Query 5: Get attachments count for each contact
+      ctx.supabase.from('contact_attachments').select('contact_id').in('contact_id', contactIds)
+    ]);
     
-    // Query 3: Get contact type links
-    const { data: contactTypeLinks } = await ctx.supabase
-      .from('contact_type_links')
-      .select('contact_id, contact_type_id')
-      .in('contact_id', contactIds);
+    const linkedUsersMap = new Map((linkedUsersResult.data || []).map((u: any) => [u.id, u]));
     
     // Group contact type IDs by contact ID
     const contactTypesByContact = new Map<string, string[]>();
-    if (contactTypeLinks) {
-      for (const link of contactTypeLinks as any[]) {
+    if (contactTypeLinksResult.data) {
+      for (const link of contactTypeLinksResult.data as any[]) {
         if (!contactTypesByContact.has(link.contact_id)) {
           contactTypesByContact.set(link.contact_id, []);
         }
@@ -76,7 +97,7 @@ export async function getContacts(
     }
     
     // Query 4: Get contact types details
-    const uniqueContactTypeIds = Array.from(new Set(contactTypeLinks?.map((l: any) => l.contact_type_id) || []));
+    const uniqueContactTypeIds = Array.from(new Set(contactTypeLinksResult.data?.map((l: any) => l.contact_type_id) || []));
     let contactTypesMap = new Map();
     if (uniqueContactTypeIds.length > 0) {
       const { data: contactTypes } = await ctx.supabase
@@ -89,37 +110,38 @@ export async function getContacts(
       }
     }
     
-    // Query 5: Get attachments count for each contact
-    const { data: attachmentCounts } = await ctx.supabase
-      .from('contact_attachments')
-      .select('contact_id')
-      .in('contact_id', contactIds);
-    
     // Count attachments per contact
     const attachmentCountsByContact = new Map<string, number>();
-    if (attachmentCounts) {
-      for (const att of attachmentCounts as any[]) {
+    if (attachmentCountsResult.data) {
+      for (const att of attachmentCountsResult.data as any[]) {
         const currentCount = attachmentCountsByContact.get(att.contact_id) || 0;
         attachmentCountsByContact.set(att.contact_id, currentCount + 1);
       }
     }
     
-    // Generate signed URLs for contact avatars (if they exist)
+    // Generate signed URLs for contact avatars in parallel (batch of 5 at a time)
     const avatarUrlsByContactId = new Map<string, string>();
-    for (const contact of contacts) {
-      if (contact.image_bucket && contact.image_path) {
+    const contactsWithAvatars = contacts.filter((c: any) => c.image_bucket && c.image_path);
+    const batchSize = 5;
+    for (let i = 0; i < contactsWithAvatars.length; i += batchSize) {
+      const batch = contactsWithAvatars.slice(i, i + batchSize);
+      const signedUrlPromises = batch.map(async (contact: any) => {
         try {
           const { data, error } = await ctx.supabase.storage
             .from(contact.image_bucket)
             .createSignedUrl(contact.image_path, 3600);
           
           if (data?.signedUrl && !error) {
-            avatarUrlsByContactId.set(contact.id, data.signedUrl);
+            return { id: contact.id, url: data.signedUrl };
           }
         } catch (err) {
-          // Silently skip if signed URL generation fails
+          // Silently skip
         }
-      }
+        return null;
+      });
+      
+      const results = await Promise.all(signedUrlPromises);
+      results.filter(Boolean).forEach((r: any) => avatarUrlsByContactId.set(r.id, r.url));
     }
     
     // Combine all data
