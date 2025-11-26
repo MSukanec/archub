@@ -423,7 +423,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           
           // Primero, agregamos los clientes de los pagos existentes
           allPayments.forEach(payment => {
-            if (payment.client?.contact) {
+            if (payment.client?.contact && payment.client_id) {
               const clientName = String(payment.client.contact.company_name || 
                                payment.client.contact.full_name || 
                                `${payment.client.contact.first_name || ''} ${payment.client.contact.last_name || ''}`.trim());
