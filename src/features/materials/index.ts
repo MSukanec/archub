@@ -49,6 +49,7 @@ export * from './utils/statusBadge';
 
 // ============ FORMS ============
 export { MaterialPaymentForm } from './forms/MaterialPaymentForm';
+export { PurchaseOrderForm } from './forms/PurchaseOrderForm';
 
 // ============ MODALS ============
 export { MaterialModal } from './modals/MaterialModal';
