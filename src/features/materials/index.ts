@@ -19,6 +19,7 @@ export * from './services/createMaterial';
 export * from './services/updateMaterial';
 export * from './services/deleteMaterial';
 export * from './services/getConstructionMaterials';
+export * from './services/materialPayments';
 
 // ============ HOOKS ============
 export * from './hooks/use-materials';
@@ -29,6 +30,7 @@ export * from './hooks/use-delete-material';
 export * from './hooks/use-construction-materials';
 export * from './hooks/use-products';
 export * from './hooks/use-provider-products';
+export * from './hooks/use-material-payments';
 
 // ============ TYPES ============
 export * from './types';

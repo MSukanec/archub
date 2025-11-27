@@ -38,3 +38,21 @@ export const MaterialStatus = {
   COMPLETED: true,
   INCOMPLETE: false,
 } as const;
+
+// ============ MATERIAL PAYMENT QUERY KEYS ============
+
+export const MATERIAL_PAYMENT_QUERY_KEYS = {
+  payments: (projectId?: string) => ['materials', 'payments', projectId] as const,
+  payment: (paymentId?: string) => ['materials', 'payment', paymentId] as const,
+} as const;
+
+// ============ PAYMENT STATUS OPTIONS ============
+
+export const MATERIAL_PAYMENT_STATUS = {
+  confirmed: { value: 'confirmed', label: 'Confirmado', color: 'green' },
+  pending: { value: 'pending', label: 'Pendiente', color: 'yellow' },
+  rejected: { value: 'rejected', label: 'Rechazado', color: 'red' },
+  void: { value: 'void', label: 'Anulado', color: 'gray' },
+} as const;
+
+export const MATERIAL_PAYMENT_STATUS_OPTIONS = Object.values(MATERIAL_PAYMENT_STATUS);

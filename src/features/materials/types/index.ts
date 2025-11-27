@@ -100,3 +100,64 @@ export interface NewMaterialCategoryData {
 }
 
 export interface UpdateMaterialCategoryData extends Partial<NewMaterialCategoryData> {}
+
+// ============ MATERIAL PAYMENT TYPES ============
+
+export interface MaterialPayment {
+  id: string;
+  project_id: string;
+  organization_id: string;
+  purchase_id: string | null;
+  amount: number;
+  currency_id: string;
+  exchange_rate: number | null;
+  payment_date: string;
+  notes: string | null;
+  reference: string | null;
+  wallet_id: string | null;
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MaterialPaymentWithRelations extends MaterialPayment {
+  currency: {
+    id: string;
+    code: string;
+    symbol: string;
+    name: string;
+  } | null;
+  wallet: {
+    id: string;
+    organization_id: string;
+    wallet_id: string;
+    is_active: boolean;
+    is_default: boolean;
+    wallets: {
+      id: string;
+      name: string;
+      is_active: boolean;
+      created_at: string;
+      updated_at: string;
+    } | null;
+  } | null;
+  creator: {
+    id: string;
+    email: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
+  project: {
+    id: string;
+    name: string;
+    code: string | null;
+    color: string;
+  } | null;
+  attachments?: Array<{
+    id: string;
+    file_url: string;
+    file_name: string;
+    file_type: string;
+  }>;
+}
