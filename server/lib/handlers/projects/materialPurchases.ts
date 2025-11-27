@@ -117,6 +117,33 @@ export type DeleteMaterialPurchaseResult =
   | { success: true }
   | { success: false; error: string };
 
+export interface GetMaterialPurchaseAttachmentsParams {
+  projectId: string;
+  purchaseId: string;
+  organizationId: string;
+}
+
+export interface PurchaseAttachment {
+  id: string;
+  description: string | null;
+  category: string | null;
+  created_at: string;
+  media_file: {
+    id: string;
+    file_url: string | null;
+    file_name: string | null;
+    file_type: string;
+    file_size: number | null;
+    bucket: string;
+    file_path: string;
+  } | null;
+  signedUrl?: string | null;
+}
+
+export type GetMaterialPurchaseAttachmentsResult =
+  | { success: true; data: PurchaseAttachment[] }
+  | { success: false; error: string };
+
 const VALID_STATUSES = ['pending', 'partially_paid', 'paid', 'cancelled'] as const;
 const VALID_DOCUMENT_TYPES = ['invoice', 'receipt', 'ticket', 'other'] as const;
 
@@ -537,5 +564,138 @@ export async function deleteMaterialPurchase(
   } catch (error: any) {
     console.error('Error in deleteMaterialPurchase handler:', error);
     return { success: false, error: error.message || 'Failed to delete material purchase' };
+  }
+}
+
+interface RawPurchaseAttachment {
+  id: string;
+  description: string | null;
+  category: string | null;
+  created_at: string;
+  media_file: Array<{
+    id: string;
+    file_url: string | null;
+    file_name: string | null;
+    file_type: string;
+    file_size: number | null;
+    bucket: string;
+    file_path: string;
+  }> | {
+    id: string;
+    file_url: string | null;
+    file_name: string | null;
+    file_type: string;
+    file_size: number | null;
+    bucket: string;
+    file_path: string;
+  } | null;
+}
+
+export async function getMaterialPurchaseAttachments(
+  ctx: ProjectsContext,
+  params: GetMaterialPurchaseAttachmentsParams
+): Promise<GetMaterialPurchaseAttachmentsResult> {
+  try {
+    const { supabase } = ctx;
+
+    if (!params.projectId || !params.purchaseId || !params.organizationId) {
+      return { success: false, error: 'projectId, purchaseId, and organizationId are required' };
+    }
+
+    const authResult = await ensureAuth(ctx);
+    if (!authResult.success) {
+      return authResult;
+    }
+
+    const orgAccessResult = await ensureOrganizationAccess(ctx, params.organizationId);
+    if (!orgAccessResult.success) {
+      return orgAccessResult;
+    }
+
+    const projectResult = await getProjectById(ctx, params.projectId);
+    if (!projectResult.success) {
+      return projectResult;
+    }
+
+    if (projectResult.data.organization_id !== params.organizationId) {
+      return { success: false, error: 'Forbidden: Project does not belong to organization' };
+    }
+
+    const { data: existingPurchase, error: purchaseError } = await supabase
+      .from('material_purchases')
+      .select('id')
+      .eq('id', params.purchaseId)
+      .eq('project_id', params.projectId)
+      .eq('organization_id', params.organizationId)
+      .single();
+
+    if (purchaseError || !existingPurchase) {
+      return { success: false, error: 'Purchase not found' };
+    }
+
+    const { data, error } = await supabase
+      .from('media_links')
+      .select(`
+        id,
+        description,
+        category,
+        created_at,
+        media_file:media_files (
+          id,
+          file_url,
+          file_name,
+          file_type,
+          file_size,
+          bucket,
+          file_path
+        )
+      `)
+      .eq('material_purchase_id', params.purchaseId)
+      .eq('organization_id', params.organizationId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching purchase attachments:', error);
+      return { success: false, error: 'Failed to fetch purchase attachments' };
+    }
+
+    const transformedData: PurchaseAttachment[] = await Promise.all(
+      ((data || []) as RawPurchaseAttachment[]).map(async (item) => {
+        const mediaFile = Array.isArray(item.media_file) && item.media_file.length > 0
+          ? item.media_file[0]
+          : (item.media_file && !Array.isArray(item.media_file) ? item.media_file : null);
+
+        let signedUrl: string | null = null;
+
+        if (mediaFile) {
+          if (mediaFile.bucket === 'public-assets') {
+            const { data: publicUrlData } = supabase.storage
+              .from(mediaFile.bucket)
+              .getPublicUrl(mediaFile.file_path);
+            signedUrl = publicUrlData?.publicUrl || null;
+          } else {
+            const { data: signedData } = await supabase.storage
+              .from(mediaFile.bucket)
+              .createSignedUrl(mediaFile.file_path, 3600);
+            signedUrl = signedData?.signedUrl || null;
+          }
+        }
+
+        return {
+          id: item.id,
+          description: item.description,
+          category: item.category,
+          created_at: item.created_at,
+          media_file: mediaFile,
+          signedUrl
+        };
+      })
+    );
+
+    return { success: true, data: transformedData };
+
+  } catch (error: any) {
+    console.error('Error in getMaterialPurchaseAttachments handler:', error);
+    return { success: false, error: error.message || 'Failed to get purchase attachments' };
   }
 }

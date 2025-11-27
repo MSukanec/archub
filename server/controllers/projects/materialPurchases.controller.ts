@@ -6,11 +6,13 @@ import {
   createMaterialPurchase,
   updateMaterialPurchase,
   deleteMaterialPurchase,
+  getMaterialPurchaseAttachments,
   type ListMaterialPurchasesParams,
   type GetMaterialPurchaseByIdParams,
   type CreateMaterialPurchaseParams,
   type UpdateMaterialPurchaseParams,
-  type DeleteMaterialPurchaseParams
+  type DeleteMaterialPurchaseParams,
+  type GetMaterialPurchaseAttachmentsParams
 } from '../../lib/handlers/projects/materialPurchases.js';
 import type { ProjectsContext } from '../../lib/handlers/projects/shared.js';
 import { supabaseUrl, supabaseAnonKey } from '../../routes/_base.js';
@@ -243,5 +245,35 @@ export async function handleDeleteMaterialPurchase(req: Request, res: Response) 
   } catch (error: any) {
     console.error('Error in deleteMaterialPurchase controller:', error);
     return res.status(500).json({ error: error.message || 'Failed to delete material purchase' });
+  }
+}
+
+export async function handleGetMaterialPurchaseAttachments(req: Request, res: Response) {
+  try {
+    const token = extractToken(req.headers.authorization);
+    if (!token) {
+      return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    const supabase = createAuthenticatedClient(token);
+    const ctx: ProjectsContext = { supabase };
+
+    const params: GetMaterialPurchaseAttachmentsParams = {
+      projectId: req.params.projectId,
+      purchaseId: req.params.purchaseId,
+      organizationId: req.query.organization_id as string
+    };
+
+    const result = await getMaterialPurchaseAttachments(ctx, params);
+
+    if (result.success) {
+      return res.status(200).json({ data: result.data });
+    } else {
+      const statusCode = getErrorStatusCode(result.error);
+      return res.status(statusCode).json({ error: result.error });
+    }
+  } catch (error: any) {
+    console.error('Error in getMaterialPurchaseAttachments controller:', error);
+    return res.status(500).json({ error: error.message || 'Failed to get purchase attachments' });
   }
 }

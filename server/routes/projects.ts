@@ -61,7 +61,8 @@ import {
   handleGetMaterialPurchase,
   handleCreateMaterialPurchase,
   handleUpdateMaterialPurchase,
-  handleDeleteMaterialPurchase
+  handleDeleteMaterialPurchase,
+  handleGetMaterialPurchaseAttachments
 } from '../controllers/projects/materialPurchases.controller.js';
 
 /**
@@ -175,6 +176,9 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
 
   // DELETE /api/projects/:projectId/material-purchases/:purchaseId - Delete a material purchase
   app.delete("/api/projects/:projectId/material-purchases/:purchaseId", handleDeleteMaterialPurchase);
+
+  // GET /api/projects/:projectId/material-purchases/:purchaseId/attachments - Get purchase attachments
+  app.get("/api/projects/:projectId/material-purchases/:purchaseId/attachments", handleGetMaterialPurchaseAttachments);
 
   // ========== CLIENT COMMITMENTS ENDPOINTS ==========
   
