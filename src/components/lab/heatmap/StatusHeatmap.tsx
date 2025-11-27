@@ -2,12 +2,11 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Grid3X3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { HeatmapCell, CellStatus, DEFAULT_STATUS_COLORS, StatusColors } from './types';
+import { HeatmapCell, CellStatus } from './types';
 
 export interface StatusHeatmapProps {
   cells: HeatmapCell[];
   onCellClick?: (cell: HeatmapCell) => void;
-  statusColors?: Record<CellStatus, StatusColors>;
   formatValue?: (value: number) => string;
   emptyMessage?: string;
   emptyIcon?: React.ReactNode;
@@ -16,10 +15,33 @@ export interface StatusHeatmapProps {
   sortBy?: 'status' | 'value' | 'none';
 }
 
+const statusClasses: Record<CellStatus, { card: string; bar: string; indicator: string }> = {
+  critical: {
+    card: 'bg-[var(--lab-critical-bg)] border-[var(--lab-critical)]/50 hover:bg-[var(--lab-critical)]/25',
+    bar: 'bg-[var(--lab-critical)]',
+    indicator: 'bg-[var(--lab-critical)]',
+  },
+  warning: {
+    card: 'bg-[var(--lab-warning-bg)] border-[var(--lab-warning)]/50 hover:bg-[var(--lab-warning)]/25',
+    bar: 'bg-[var(--lab-warning)]',
+    indicator: 'bg-[var(--lab-warning)]',
+  },
+  healthy: {
+    card: 'bg-[var(--lab-success-bg)] border-[var(--lab-success)]/50 hover:bg-[var(--lab-success)]/25',
+    bar: 'bg-[var(--lab-success)]',
+    indicator: 'bg-[var(--lab-success)]',
+  },
+};
+
+const statusTextClasses: Record<CellStatus, string> = {
+  critical: 'text-[var(--lab-critical)]',
+  warning: 'text-[var(--lab-warning)]',
+  healthy: 'text-[var(--lab-success)]',
+};
+
 export function StatusHeatmap({
   cells,
   onCellClick,
-  statusColors = DEFAULT_STATUS_COLORS,
   formatValue = (v) => v.toLocaleString(),
   emptyMessage = 'No hay elementos para mostrar',
   emptyIcon,
@@ -43,15 +65,15 @@ export function StatusHeatmap({
 
   if (cells.length === 0) {
     return (
-      <div className={cn("flex flex-col items-center justify-center h-64 text-center", className)}>
-        {emptyIcon || <Grid3X3 className="w-16 h-16 text-white/20 mb-4" />}
-        <p className="text-white/50">{emptyMessage}</p>
+      <div className={cn("lab-theme flex flex-col items-center justify-center h-64 text-center", className)}>
+        {emptyIcon || <Grid3X3 className="w-16 h-16 text-[var(--lab-text-subtle)] mb-4" />}
+        <p className="text-[var(--lab-text-muted)]">{emptyMessage}</p>
       </div>
     );
   }
 
   return (
-    <div className={cn("absolute inset-0 overflow-auto p-8 pt-24", className)}>
+    <div className={cn("lab-theme absolute inset-0 overflow-auto p-8 pt-24", className)}>
       <div className="max-w-6xl mx-auto">
         <div className={cn(
           "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3",
@@ -61,7 +83,7 @@ export function StatusHeatmap({
             const percent = cell.maxValue > 0 
               ? Math.round((cell.currentValue / cell.maxValue) * 100) 
               : 100;
-            const colors = statusColors[cell.status];
+            const classes = statusClasses[cell.status];
             
             return (
               <motion.div
@@ -72,48 +94,41 @@ export function StatusHeatmap({
                 onClick={() => onCellClick?.(cell)}
                 className={cn(
                   "relative p-4 rounded-xl cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl border",
-                  cell.status === 'critical' && "bg-red-500/20 border-red-500/50 hover:bg-red-500/30",
-                  cell.status === 'warning' && "bg-yellow-500/20 border-yellow-500/50 hover:bg-yellow-500/30",
-                  cell.status === 'healthy' && "bg-green-500/20 border-green-500/50 hover:bg-green-500/30",
+                  classes.card
                 )}
                 data-testid={`heatmap-cell-${cell.id}`}
               >
                 {cell.status === 'critical' && (
                   <div className="absolute top-2 right-2">
-                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    <div className={cn("w-2 h-2 rounded-full animate-pulse", classes.indicator)} />
                   </div>
                 )}
                 
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-white truncate" title={cell.label}>
+                  <p className="text-sm font-medium text-[var(--lab-text)] truncate" title={cell.label}>
                     {cell.label.split(' ')[0]}
                   </p>
                   {cell.sublabel && (
-                    <p className="text-xs text-white/50">{cell.sublabel}</p>
+                    <p className="text-xs text-[var(--lab-text-muted)]">{cell.sublabel}</p>
                   )}
                   
                   <div className="mt-3">
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="text-white/50">Progreso</span>
-                      <span className={colors.text}>{percent}%</span>
+                      <span className="text-[var(--lab-text-muted)]">Progreso</span>
+                      <span className={statusTextClasses[cell.status]}>{percent}%</span>
                     </div>
-                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-[var(--lab-border)] rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${percent}%` }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className={cn(
-                          "h-full rounded-full",
-                          cell.status === 'critical' && "bg-red-500",
-                          cell.status === 'warning' && "bg-yellow-500",
-                          cell.status === 'healthy' && "bg-green-500",
-                        )}
+                        className={cn("h-full rounded-full", classes.bar)}
                       />
                     </div>
                   </div>
                   
                   {cell.value > 0 && (
-                    <p className="text-xs text-white/70 mt-2">
+                    <p className="text-xs text-[var(--lab-text-muted)] mt-2">
                       {formatValue(cell.value)}
                     </p>
                   )}
