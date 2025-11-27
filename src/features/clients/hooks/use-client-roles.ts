@@ -43,6 +43,9 @@ export function useCreateClientRole() {
       queryClient.invalidateQueries({
         queryKey: CLIENT_QUERY_KEYS.roles(data.organization_id),
       });
+      queryClient.invalidateQueries({
+        queryKey: ['/api/client-roles'],
+      });
     },
   });
 }
@@ -66,6 +69,9 @@ export function useUpdateClientRole() {
       });
       queryClient.invalidateQueries({
         queryKey: CLIENT_QUERY_KEYS.role(data.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['/api/client-roles'],
       });
     },
   });
