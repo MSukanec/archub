@@ -57,7 +57,7 @@ export interface MediaLinkRecord {
   movement_id: string | null;
   contact_id: string | null;
   course_lesson_id: string | null;
-  general_cost_id: string | null;
+  general_cost_payment_id: string | null;
   client_payment_id: string | null;
   course_id: string | null;
   course_module_id: string | null;
@@ -93,7 +93,7 @@ export interface MediaFileWithLink {
   movement_id?: string | null;
   contact_id?: string | null;
   course_lesson_id?: string | null;
-  general_cost_id?: string | null;
+  general_cost_payment_id?: string | null;
   client_payment_id?: string | null;
   course_id?: string | null;
   course_module_id?: string | null;
