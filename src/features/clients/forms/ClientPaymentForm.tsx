@@ -814,7 +814,21 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
 
         for (const fileInput of filesToUpload) {
           try {
-            await uploadFile(fileInput.file, {
+            console.log('[ClientPaymentForm] Uploading file:', {
+              fileName: fileInput.file?.name,
+              fileSize: fileInput.file?.size,
+              organizationId,
+              projectId,
+              createdPaymentId,
+              createdByMemberId: currentMember?.id,
+            })
+            
+            if (!fileInput.file) {
+              console.error('[ClientPaymentForm] No file object in fileInput:', fileInput)
+              continue
+            }
+            
+            const uploadResult = await uploadFile(fileInput.file, {
               entity: 'client_payment_attachment',
               organization_id: organizationId,
               project_id: projectId,
@@ -825,12 +839,21 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
               category: 'document',
               description: fileInput.description || fileInput.file.name,
             })
+            
+            console.log('[ClientPaymentForm] Upload successful:', uploadResult)
           } catch (uploadError: any) {
-            console.error('Error uploading file:', uploadError)
+            console.error('[ClientPaymentForm] Error uploading file:', {
+              error: uploadError,
+              message: uploadError?.message,
+              code: uploadError?.code,
+              details: uploadError?.details,
+              hint: uploadError?.hint,
+              stack: uploadError?.stack,
+            })
             toast({
               variant: 'destructive',
               title: 'Error al subir archivo',
-              description: uploadError.message || 'Error desconocido',
+              description: uploadError?.message || String(uploadError) || 'Error desconocido',
               duration: 8000,
             })
           }

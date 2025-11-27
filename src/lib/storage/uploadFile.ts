@@ -9,10 +9,33 @@ export async function uploadFile(
   context: UploadContext
 ): Promise<UploadResult> {
   try {
+    console.log('[uploadFile] Starting upload:', {
+      fileName: file?.name,
+      fileSize: file?.size,
+      fileType: file?.type,
+      entity: context.entity,
+      organization_id: context.organization_id,
+      project_id: context.project_id,
+    });
+    
+    // Verify active session before upload
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session) {
+      console.error('[uploadFile] No active session:', sessionError);
+      throw new Error('No hay sesión activa - por favor inicia sesión nuevamente');
+    }
+    console.log('[uploadFile] Session verified, user:', session.user.id);
+    
+    if (!file || !(file instanceof File)) {
+      throw new Error(`Invalid file object: ${typeof file}`);
+    }
+    
     validateContext(context);
 
     const config = getEntityConfig(context.entity);
     const compressionPreset = getCompressionPreset(context.entity);
+    
+    console.log('[uploadFile] Entity config:', { bucket: config.bucket, basePath: config.basePath });
     
     // Guardar tamaño original para stats de compresión
     const originalSize = file.size;
@@ -24,16 +47,34 @@ export async function uploadFile(
 
     const storagePath = buildStoragePath(processedFile, context);
 
-    const { error: uploadError } = await supabase.storage
+    console.log('[uploadFile] Uploading to storage:', {
+      bucket: storagePath.bucket,
+      path: storagePath.path,
+      fileSize: processedFile.size,
+    });
+
+    const uploadResponse = await supabase.storage
       .from(storagePath.bucket)
       .upload(storagePath.path, processedFile, {
         cacheControl: '3600',
         upsert: true
       });
 
-    if (uploadError) {
-      throw new Error(`Error al subir archivo: ${uploadError.message}`);
+    console.log('[uploadFile] Raw storage response:', JSON.stringify(uploadResponse));
+
+    if (uploadResponse.error) {
+      console.error('[uploadFile] Storage upload error:', {
+        error: uploadResponse.error,
+        message: uploadResponse.error.message,
+        name: uploadResponse.error.name,
+        cause: uploadResponse.error.cause,
+        statusCode: (uploadResponse.error as any).statusCode,
+        status: (uploadResponse.error as any).status,
+      });
+      throw new Error(`Error al subir archivo al storage: ${uploadResponse.error.message || 'Verifica los permisos del bucket'}`);
     }
+    
+    console.log('[uploadFile] Storage upload successful, path:', uploadResponse.data?.path);
 
     const isPublicBucket = storagePath.bucket === 'public-assets';
     let fileUrl: string | null = null;
