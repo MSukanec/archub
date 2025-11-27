@@ -157,12 +157,18 @@ async function fetchPurchaseWithRelations(
   // Get provider contact if provider_id exists
   let provider = null;
   if (purchase.provider_id) {
-    const { data: contactData } = await supabase
+    console.log('🔍 Looking for provider_id:', purchase.provider_id);
+    const { data: contactData, error: contactError } = await supabase
       .from('contacts')
       .select('id, full_name, company_name')
       .eq('id', purchase.provider_id)
       .single();
     
+    if (contactError) {
+      console.error('❌ Error fetching provider:', contactError);
+    } else {
+      console.log('✅ Found provider:', contactData);
+    }
     provider = contactData || null;
   }
 
