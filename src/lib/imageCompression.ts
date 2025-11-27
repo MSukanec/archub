@@ -71,7 +71,7 @@ export async function compressImage(
   const originalSizeMB = originalSizeKB / 1024;
 
   try {
-    const compressedFile = await imageCompression(file, {
+    const compressedBlob = await imageCompression(file, {
       maxSizeMB: presetConfig.maxSizeMB,
       maxWidthOrHeight: presetConfig.maxWidthOrHeight,
       useWebWorker: true,
@@ -79,8 +79,17 @@ export async function compressImage(
       preserveExif: presetConfig.preserveExif
     });
 
+    // Ensure the compressed result is a File with the original name preserved
+    // browser-image-compression may return a Blob without the name property
+    const compressedFile = new File(
+      [compressedBlob], 
+      file.name, 
+      { type: compressedBlob.type || file.type }
+    );
+
     return compressedFile;
   } catch (error) {
+    console.error('[compressImage] Error compressing image:', error);
     return file;
   }
 }
