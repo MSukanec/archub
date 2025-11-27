@@ -227,18 +227,6 @@ export function Clients() {
     )
   }
 
-  if (activeTab === "lab") {
-    return (
-      <Layout headerProps={headerProps} wide hideHeader>
-        <PlanRestricted reason="coming_soon">
-          <div className="h-full w-full">
-            <ClientLabTab projectId={projectId || undefined} />
-          </div>
-        </PlanRestricted>
-      </Layout>
-    )
-  }
-
   return (
     <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-4">
@@ -268,6 +256,14 @@ export function Clients() {
 
         {activeTab === "settings" && (
           <ClientSettingsTab />
+        )}
+
+        {activeTab === "lab" && (
+          <PlanRestricted reason="coming_soon">
+            <div className="relative h-[calc(100vh-180px)]">
+              <ClientLabTab projectId={projectId || undefined} />
+            </div>
+          </PlanRestricted>
         )}
       </div>
     </Layout>
