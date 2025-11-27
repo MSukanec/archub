@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Receipt, Plus, Users, Home, Bell, Search, Filter, FlaskConical } from 'lucide-react'
+import { Receipt, Plus, Users, Home, Bell, Search, Filter } from 'lucide-react'
 import { DashboardLayout as Layout } from "@/layouts"
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal'
@@ -9,13 +9,11 @@ import ClientObligationsTab from './ClientObligationsTab'
 import ClientPaymentsTab from './ClientPaymentsTab'
 import ClientScheduleTab from './ClientScheduleTab'
 import ClientSettingsTab from './ClientSettingsTab'
-import ClientLabTab from './ClientLabTab'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
 import { useLocation, useSearch } from 'wouter'
 import { useProjectContext } from '@/stores/projectContext'
-import { PlanRestricted } from '@/features/users'
 
 export function Clients() {
   const searchParams = useSearch();
@@ -132,12 +130,6 @@ export function Clients() {
       id: "settings",
       label: "Ajustes",
       isActive: activeTab === "settings"
-    },
-    {
-      id: "lab",
-      label: "Lab",
-      icon: FlaskConical,
-      isActive: activeTab === "lab"
     }
   ]
 
@@ -256,14 +248,6 @@ export function Clients() {
 
         {activeTab === "settings" && (
           <ClientSettingsTab />
-        )}
-
-        {activeTab === "lab" && (
-          <PlanRestricted reason="coming_soon">
-            <div className="relative h-[calc(100vh-180px)]">
-              <ClientLabTab projectId={projectId || undefined} />
-            </div>
-          </PlanRestricted>
         )}
       </div>
     </Layout>

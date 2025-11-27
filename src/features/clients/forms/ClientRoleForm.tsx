@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { createClientRole, updateClientRole, getClientRoleUsageCount, getClientRoles } from '@/features/clients/services/clientRoles';
 import { CLIENT_QUERY_KEYS } from '@/features/clients/constants';
-import { useDeleteClientRole } from '@/features/clients/hooks/use-delete-client-role';
+import { useDeleteClientRole } from '@/features/clients';
 import { useReplaceClientRole } from '@/features/clients/hooks/use-replace-client-role';
 import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
 import type { ClientRole } from '@/features/clients/types';
@@ -137,7 +137,7 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const { pushModal, popModal } = useGlobalModalStore();
-  const deleteRoleMutation = useDeleteClientRole(userData?.organization?.id || null);
+  const deleteRoleMutation = useDeleteClientRole();
   const replaceRoleMutation = useReplaceClientRole(userData?.organization?.id || null);
   const [currentMode, setCurrentMode] = useState<'create' | 'edit' | 'view'>(mode);
 
@@ -194,7 +194,7 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
           mode: 'delete' as const,
           consequences: ['El rol será eliminado permanentemente'],
           onDelete: async () => {
-            await deleteRoleMutation.mutateAsync(clientRole.id);
+            await deleteRoleMutation.mutateAsync({ roleId: clientRole.id, organizationId });
             handleClose();
           },
         });
@@ -235,7 +235,7 @@ export function ClientRoleForm({ modalData, onClose, mode = 'create' }: ClientRo
               value: r.id,
             })),
           onDelete: async () => {
-            await deleteRoleMutation.mutateAsync(clientRole.id);
+            await deleteRoleMutation.mutateAsync({ roleId: clientRole.id, organizationId });
             handleClose();
           },
           onReplace: async (newRoleId: string) => {
