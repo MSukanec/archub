@@ -449,107 +449,88 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create' }: Purch
 
                     <div className="space-y-2">
                       {fields.map((field, index) => (
-                        <div key={field.id}>
-                          <div 
-                            className="grid grid-cols-1 md:grid-cols-4 gap-3"
-                            data-testid={`item-row-${index}`}
-                          >
-                            <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3 md:col-span-4">
-                              <FormField
-                                control={form.control}
-                                name={`items.${index}.description`}
-                                render={({ field }) => (
-                                  <FormItem className="md:col-span-2">
-                                    <FormControl>
-                                      <Input
-                                        placeholder="Descripción del ítem"
-                                        {...field}
-                                        data-testid={`input-item-description-${index}`}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+                        <div 
+                          key={field.id}
+                          className="grid grid-cols-1 md:grid-cols-4 gap-3"
+                          data-testid={`item-row-${index}`}
+                        >
+                          <FormField
+                            control={form.control}
+                            name={`items.${index}.description`}
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-2">
+                                <FormControl>
+                                  <Input
+                                    placeholder="Descripción del ítem"
+                                    {...field}
+                                    data-testid={`input-item-description-${index}`}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                              <FormField
-                                control={form.control}
-                                name={`items.${index}.quantity`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="Cantidad"
-                                        {...field}
-                                        value={field.value || ''}
-                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                        data-testid={`input-item-quantity-${index}`}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+                          <FormField
+                            control={form.control}
+                            name={`items.${index}.quantity`}
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-1">
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="Cantidad"
+                                    {...field}
+                                    value={field.value || ''}
+                                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                    data-testid={`input-item-quantity-${index}`}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                              <FormField
-                                control={form.control}
-                                name={`items.${index}.unit_id`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Select 
-                                        value={field.value || ''} 
-                                        onValueChange={(value) => field.onChange(value || null)}
-                                      >
-                                        <SelectTrigger data-testid={`select-item-unit-${index}`}>
-                                          <SelectValue placeholder="Unidad" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {units.map((unit: any) => (
-                                            <SelectItem key={unit.id} value={unit.id}>
-                                              {unit.abbreviation || unit.name}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="flex gap-2">
-                            <Button
-                              type="button"
-                              variant={fields.length > 1 ? 'destructive' : 'outline'}
-                              size={fields.length > 1 ? 'sm' : 'default'}
-                              onClick={() => fields.length > 1 ? remove(index) : append({ description: '', quantity: 1, unit_id: null, notes: '' })}
-                              className={fields.length > 1 ? 'flex-1' : 'w-full'}
-                              data-testid={fields.length > 1 ? `button-remove-item-${index}` : `button-add-item-${index}`}
-                            >
-                              {fields.length > 1 ? (
-                                <>
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Eliminar
-                                </>
-                              ) : null}
-                            </Button>
+                          <div className="flex gap-2 items-start">
+                            <FormField
+                              control={form.control}
+                              name={`items.${index}.unit_id`}
+                              render={({ field }) => (
+                                <FormItem className="flex-1">
+                                  <FormControl>
+                                    <Select 
+                                      value={field.value || ''} 
+                                      onValueChange={(value) => field.onChange(value || null)}
+                                    >
+                                      <SelectTrigger data-testid={`select-item-unit-${index}`}>
+                                        <SelectValue placeholder="Unidad" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {units.map((unit: any) => (
+                                          <SelectItem key={unit.id} value={unit.id}>
+                                            {unit.abbreviation || unit.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                             
-                            {fields.length === 1 && (
+                            {fields.length > 1 && (
                               <Button
                                 type="button"
-                                variant="outline"
-                                onClick={() => append({ description: '', quantity: 1, unit_id: null, notes: '' })}
-                                className="w-full"
-                                data-testid="button-add-item"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => remove(index)}
+                                className="text-destructive hover:text-destructive/80 mt-2"
+                                data-testid={`button-remove-item-${index}`}
                               >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Agregar ítem
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             )}
                           </div>
@@ -561,7 +542,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create' }: Purch
                         variant="outline"
                         onClick={() => append({ description: '', quantity: 1, unit_id: null, notes: '' })}
                         className="w-full"
-                        data-testid="button-add-item-footer"
+                        data-testid="button-add-item"
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Agregar ítem
