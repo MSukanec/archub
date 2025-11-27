@@ -2,17 +2,18 @@ import type { Express } from "express";
 import type { RouteDeps } from './_base';
 import { deleteMediaFile } from '../lib/handlers/media/deleteMediaFile.js';
 import { getGalleryFiles } from '../lib/handlers/media/getGalleryFiles.js';
+import { extractToken, createAuthenticatedClient } from '../lib/auth/helpers.js';
 
 export function registerMediaRoutes(app: Express, deps: RouteDeps) {
   
   app.get("/api/media/gallery", async (req, res) => {
     try {
-      const token = deps.extractToken(req.headers.authorization);
+      const token = extractToken(req.headers.authorization);
       if (!token) {
         return res.status(401).json({ error: "No authorization token provided" });
       }
       
-      const supabase = deps.createAuthenticatedClient(token);
+      const supabase = createAuthenticatedClient(token);
 
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
@@ -29,14 +30,27 @@ export function registerMediaRoutes(app: Express, deps: RouteDeps) {
         return res.status(401).json({ error: "User not found" });
       }
 
-      const { data: preferences, error: prefError } = await supabase
+      const adminClient = deps.getAdminClient();
+      
+      const { data: preferences, error: prefError } = await adminClient
         .from('user_preferences')
         .select('last_organization_id, last_project_id')
         .eq('user_id', dbUser.id)
-        .single();
+        .maybeSingle();
 
-      if (prefError || !preferences?.last_organization_id) {
-        return res.status(400).json({ error: 'User must belong to an organization' });
+      console.log('[media/gallery] User preferences result:', { 
+        dbUserId: dbUser.id, 
+        preferences, 
+        prefError: prefError?.message 
+      });
+
+      if (prefError) {
+        console.error('[media/gallery] Preferences error:', prefError);
+        return res.status(400).json({ error: 'Error fetching user preferences', details: prefError.message });
+      }
+      
+      if (!preferences?.last_organization_id) {
+        return res.status(400).json({ error: 'User must belong to an organization', details: 'No organization found in preferences' });
       }
 
       const organizationId = preferences.last_organization_id;
@@ -74,12 +88,12 @@ export function registerMediaRoutes(app: Express, deps: RouteDeps) {
 
   app.post("/api/media/delete", async (req, res) => {
     try {
-      const token = deps.extractToken(req.headers.authorization);
+      const token = extractToken(req.headers.authorization);
       if (!token) {
         return res.status(401).json({ error: "No authorization token provided" });
       }
 
-      const supabase = deps.createAuthenticatedClient(token);
+      const supabase = createAuthenticatedClient(token);
 
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
@@ -96,11 +110,13 @@ export function registerMediaRoutes(app: Express, deps: RouteDeps) {
         return res.status(401).json({ error: "User not found" });
       }
 
-      const { data: preferences, error: prefError } = await supabase
+      const adminClient = deps.getAdminClient();
+      
+      const { data: preferences, error: prefError } = await adminClient
         .from('user_preferences')
         .select('last_organization_id')
         .eq('user_id', dbUser.id)
-        .single();
+        .maybeSingle();
 
       if (prefError || !preferences?.last_organization_id) {
         return res.status(400).json({ error: 'User must belong to an organization' });
@@ -108,7 +124,7 @@ export function registerMediaRoutes(app: Express, deps: RouteDeps) {
 
       const organizationId = preferences.last_organization_id;
 
-      const { data: membership, error: memberError } = await supabase
+      const { data: membership, error: memberError } = await adminClient
         .from('organization_members')
         .select('id, is_active')
         .eq('organization_id', organizationId)
