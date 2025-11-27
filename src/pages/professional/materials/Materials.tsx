@@ -28,15 +28,14 @@ export default function Materials() {
       isActive: activeTab === "purchase-orders"
     },
     {
+      id: "purchases",
+      label: "Compras",
+      isActive: activeTab === "purchases"
+    },
+    {
       id: "payments",
       label: "Pagos",
       isActive: activeTab === "payments"
-    },
-    {
-      id: "purchases",
-      label: "Compras",
-      isActive: activeTab === "purchases",
-      disabled: true
     },
     {
       id: "settings",
@@ -70,6 +69,17 @@ export default function Materials() {
         label: "Nuevo Pago",
         icon: Plus,
         onClick: () => openModal('material-payment', {
+          projectId: selectedProjectId,
+          organizationId: currentOrganizationId,
+          mode: 'create'
+        })
+      }
+    }),
+    ...(activeTab === "purchases" && {
+      actionButton: {
+        label: "Nueva Compra",
+        icon: Plus,
+        onClick: () => openModal('material-purchase', {
           projectId: selectedProjectId,
           organizationId: currentOrganizationId,
           mode: 'create'
