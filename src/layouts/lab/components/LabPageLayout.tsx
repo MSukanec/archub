@@ -1,14 +1,27 @@
+import { LabProvider } from '../context/LabContext';
+import { LabToolbar } from './topbar/LabToolbar';
+
 interface LabPageLayoutProps {
   children: React.ReactNode;
-  noPadding?: boolean;
   className?: string;
+  showToolbar?: boolean;
+  toolbarProps?: {
+    searchPlaceholder?: string;
+    searchValue?: string;
+    onSearchChange?: (value: string) => void;
+    rightSlot?: React.ReactNode;
+    showOrgProjectSelectors?: boolean;
+  };
 }
 
 /**
  * LabPageLayout - Layout para páginas experimentales del Lab
  * 
+ * Estructura:
+ * - Header (LabToolbar): Search 50% + controles dinámicos
+ * - Content: Área principal fullwidth
+ * 
  * Se usa DENTRO de DashboardLayout con hideHeader={true}.
- * Proporciona contenido fullwidth para visualizaciones inmersivas.
  * 
  * Uso:
  * ```tsx
@@ -19,19 +32,23 @@ interface LabPageLayoutProps {
  * </DashboardLayout>
  * ```
  */
-export function LabPageLayout({ children, noPadding = true, className = '' }: LabPageLayoutProps) {
-  if (noPadding) {
-    return (
-      <div className={`h-full w-full overflow-hidden ${className}`}>
-        {children}
-      </div>
-    );
-  }
-  
+export function LabPageLayout({ 
+  children, 
+  className = '',
+  showToolbar = true,
+  toolbarProps = {},
+}: LabPageLayoutProps) {
   return (
-    <div className={`h-full w-full overflow-auto p-6 ${className}`}>
-      {children}
-    </div>
+    <LabProvider>
+      <div className={`h-full w-full flex flex-col overflow-hidden ${className}`}>
+        {showToolbar && (
+          <LabToolbar {...toolbarProps} />
+        )}
+        <div className="flex-1 overflow-hidden">
+          {children}
+        </div>
+      </div>
+    </LabProvider>
   );
 }
 

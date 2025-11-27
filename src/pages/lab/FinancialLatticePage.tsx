@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ForceGraphMethods } from 'react-force-graph-2d';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Phone, Mail, AlertTriangle, Clock, DollarSign, Building2, FolderOpen, Users, Loader2, Network, Grid3X3 } from 'lucide-react';
+import { X, Phone, Mail, AlertTriangle, Clock, DollarSign, Users, Loader2, Network, Grid3X3 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { useCurrentUser } from '@/hooks/use-current-user';
-import { getProjectsLite } from '@/features/projects/services/getProjectsLite';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { DashboardLayout } from '@/layouts';
 import { LabPageLayout } from '@/layouts/lab/components/LabPageLayout';
+import { useLab } from '@/layouts/lab/context/LabContext';
 import { 
   NeuralNetworkGraph, 
   SatelliteNode, 
@@ -102,24 +100,13 @@ async function fetchClientsSummary(projectId: string, organizationId: string): P
   return response.json();
 }
 
-export default function FinancialLatticePage() {
+function FinancialLatticeContent() {
   const graphRef = useRef<ForceGraphMethods | undefined>();
   const [selectedNode, setSelectedNode] = useState<ClientNodeData | null>(null);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
-  
-  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('network');
   
-  const { data: userData, isLoading: userLoading } = useCurrentUser();
-  const organizations = userData?.organizations || [];
-  
-  const { data: projects = [], isLoading: projectsLoading } = useQuery({
-    queryKey: ['lattice-projects', selectedOrgId],
-    queryFn: () => getProjectsLite(selectedOrgId!),
-    enabled: !!selectedOrgId,
-    staleTime: 0,
-  });
+  const { selectedOrgId, selectedProjectId, selectedProject, isLoading: contextLoading } = useLab();
   
   const { data: clientsSummary, isLoading: clientsLoading } = useQuery({
     queryKey: ['clients-summary-lattice', selectedProjectId, selectedOrgId],
@@ -128,30 +115,12 @@ export default function FinancialLatticePage() {
   });
   
   useEffect(() => {
-    if (organizations.length > 0 && !selectedOrgId) {
-      setSelectedOrgId(organizations[0].id);
-    }
-  }, [organizations, selectedOrgId]);
-  
-  useEffect(() => {
-    if (projects.length > 0 && !selectedProjectId) {
-      setSelectedProjectId(projects[0].id);
-    }
-  }, [projects, selectedProjectId]);
-  
-  useEffect(() => {
-    setSelectedProjectId(null);
-  }, [selectedOrgId]);
-  
-  useEffect(() => {
     const handleResize = () => {
       setDimensions({ width: window.innerWidth, height: window.innerHeight });
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
-  const selectedProject = projects.find(p => p.id === selectedProjectId);
   
   const clientNodes: ClientNodeData[] = useMemo(() => {
     if (!clientsSummary?.clients) return [];
@@ -257,14 +226,12 @@ export default function FinancialLatticePage() {
     };
   }, [clientNodes]);
 
-  const isLoading = userLoading || projectsLoading || clientsLoading;
+  const isLoading = contextLoading || clientsLoading;
   const hasNoClients = !isLoading && clientNodes.length === 0 && selectedProjectId;
 
   return (
-    <DashboardLayout hideHeader wide>
-      <LabPageLayout>
-        <div className="relative h-full w-full bg-[#0a0a0f] overflow-hidden">
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
+    <div className="relative h-full w-full bg-[#0a0a0f] overflow-hidden">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
         <div className="bg-black/80 backdrop-blur-md rounded-full border border-white/20 p-1 flex gap-1">
           <button
             onClick={() => setViewMode('network')}
@@ -299,56 +266,6 @@ export default function FinancialLatticePage() {
         <div className="bg-black/60 backdrop-blur-md rounded-lg border border-white/10 p-4">
           <h1 className="text-xl font-bold text-white mb-1">Financial Neural Lattice</h1>
           <p className="text-sm text-white/50">Visualización orgánica del estado financiero</p>
-        </div>
-        
-        <div className="bg-black/60 backdrop-blur-md rounded-lg border border-white/10 p-4 space-y-3">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs text-white/50">
-              <Building2 className="w-3 h-3" />
-              <span>Organización</span>
-            </div>
-            <Select value={selectedOrgId || ''} onValueChange={setSelectedOrgId}>
-              <SelectTrigger className="bg-white/5 border-white/20 text-white text-sm">
-                <SelectValue placeholder="Seleccionar..." />
-              </SelectTrigger>
-              <SelectContent>
-                {organizations.map(org => (
-                  <SelectItem key={org.id} value={org.id}>
-                    {org.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs text-white/50">
-              <FolderOpen className="w-3 h-3" />
-              <span>Proyecto</span>
-            </div>
-            <Select 
-              value={selectedProjectId || ''} 
-              onValueChange={setSelectedProjectId}
-              disabled={!selectedOrgId || projects.length === 0}
-            >
-              <SelectTrigger className="bg-white/5 border-white/20 text-white text-sm">
-                <SelectValue placeholder={projectsLoading ? 'Cargando...' : 'Seleccionar...'} />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map(project => (
-                  <SelectItem key={project.id} value={project.id}>
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: project.color || 'hsl(var(--accent))' }}
-                      />
-                      {project.name}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
         
         <div className="bg-black/60 backdrop-blur-md rounded-lg border border-white/10 p-4 space-y-3">
@@ -539,7 +456,15 @@ export default function FinancialLatticePage() {
           </motion.div>
         )}
       </AnimatePresence>
-        </div>
+    </div>
+  );
+}
+
+export default function FinancialLatticePage() {
+  return (
+    <DashboardLayout hideHeader wide>
+      <LabPageLayout>
+        <FinancialLatticeContent />
       </LabPageLayout>
     </DashboardLayout>
   );
