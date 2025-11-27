@@ -156,7 +156,7 @@ function HeroLayoutContent({
                 <div className={`flex-1 flex min-h-0 relative ${isDocked ? 'gap-3' : ''}`}>
                   <div className="flex-1 py-1 overflow-x-hidden">
                     <main
-                      className={`h-full flex flex-col rounded-lg overflow-hidden ${!isDocked ? 'w-full' : ''}`}
+                      className={`h-full flex flex-col rounded-lg overflow-y-auto ${!isDocked ? 'w-full' : ''}`}
                       style={{ background: contentBackground }}
                     >
                       {/* Hero Section - First child in rounded box, no padding top/sides */}
@@ -166,7 +166,7 @@ function HeroLayoutContent({
                         </div>
                       )}
                       
-                      <div className="flex-1 overflow-y-auto px-24 py-12">
+                      <div className="px-24 py-12">
                         {mainContent || children}
                       </div>
                     </main>
