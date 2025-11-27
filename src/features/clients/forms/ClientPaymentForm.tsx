@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { parseLocalDate, formatDateForDB } from '@/lib/utils'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -638,7 +639,7 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
   // Load existing payment data
   React.useEffect(() => {
     if (existingPayment && (mode === 'edit' || mode === 'view')) {
-      const paymentDate = existingPayment.payment_date ? new Date(existingPayment.payment_date) : new Date()
+      const paymentDate = parseLocalDate(existingPayment.payment_date)
       
       form.reset({
         payment_date: paymentDate,
@@ -770,7 +771,7 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
             amount: data.amount,
             currency_id: data.currency_id,
             exchange_rate: data.exchange_rate || null,
-            payment_date: format(data.payment_date, 'yyyy-MM-dd'),
+            payment_date: formatDateForDB(data.payment_date),
             status: data.status,
             reference: data.reference || null,
             notes: data.notes || null,
@@ -785,7 +786,7 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
             amount: data.amount,
             currency_id: data.currency_id,
             exchange_rate: data.exchange_rate || null,
-            payment_date: format(data.payment_date, 'yyyy-MM-dd'),
+            payment_date: formatDateForDB(data.payment_date),
             status: data.status,
             reference: data.reference || null,
             notes: data.notes || null,
