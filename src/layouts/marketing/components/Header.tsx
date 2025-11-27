@@ -112,7 +112,7 @@ export function Header({ navigation }: HeaderProps) {
           </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="cursor-pointer transition-all duration-200 hover:scale-105" data-testid="avatar-user">
+              <button className="cursor-pointer transition-all duration-200 hover:scale-105 outline-none focus:outline-none ring-0 focus:ring-0" data-testid="avatar-user">
                 <Avatar className="h-8 w-8 border-2 border-white/20">
                   <AvatarImage src={user.user_metadata?.avatar_url} />
                   <AvatarFallback className="text-xs bg-white/10 text-white">
@@ -126,6 +126,7 @@ export function Header({ navigation }: HeaderProps) {
               align="end"
               className="w-[200px]"
               sideOffset={8}
+              forceMount
             >
               {/* User Info */}
               <div className="px-4 py-3 border-b border-border">
