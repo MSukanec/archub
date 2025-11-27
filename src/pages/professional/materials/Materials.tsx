@@ -50,6 +50,7 @@ export default function Materials() {
   const headerProps = {
     icon: Package,
     title: "Materiales",
+    description: "Gestiona los pagos de materiales del proyecto, órdenes de compra, compras y ajustes de inventario.",
     organizationId: currentOrganizationId || undefined,
     showMembers: true,
     tabs: headerTabs,
