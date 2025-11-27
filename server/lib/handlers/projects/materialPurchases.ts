@@ -205,11 +205,6 @@ export async function listMaterialPurchases(
       .from('material_purchases')
       .select(`
         *,
-        provider:contacts!provider_id (
-          id,
-          full_name,
-          company_name
-        ),
         currency:currencies!currency_id (
           id,
           code,
@@ -238,9 +233,27 @@ export async function listMaterialPurchases(
       return { success: false, error: 'Failed to fetch material purchases' };
     }
 
+    // Get all contacts for provider lookup
+    const providerIds = (purchases || [])
+      .map((p: any) => p.provider_id)
+      .filter((id: any): id is string => id !== null && id !== undefined);
+    
+    let contactsMap = new Map<string, any>();
+    if (providerIds.length > 0) {
+      const { data: contacts } = await supabase
+        .from('contacts')
+        .select('id, full_name, company_name')
+        .in('id', Array.from(new Set(providerIds)))
+        .eq('organization_id', params.organizationId);
+      
+      if (contacts) {
+        contactsMap = new Map(contacts.map(c => [c.id, c]));
+      }
+    }
+
     const mappedPurchases = (purchases || []).map((purchase: any) => ({
       ...purchase,
-      provider: purchase.provider || null,
+      provider: purchase.provider_id ? (contactsMap.get(purchase.provider_id) || null) : null,
       currency: purchase.currency || null,
       creator: purchase.creator ? {
         id: purchase.creator.id,
