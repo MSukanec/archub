@@ -97,9 +97,6 @@ const SubscriptionCheckout = lazy(() => import("@/pages/checkout/SubscriptionChe
 // Notifications
 import Notifications from "@/pages/settings/Notifications";
 
-// Home
-import Home from "@/pages/Home";
-
 // Finances Pages
 import FinancesPage from "@/pages/finances/Finances";
 
@@ -151,9 +148,6 @@ function Router() {
         {/* Onboarding and Mode Selection Routes */}
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/select-mode" component={SelectMode} />
-
-        {/* Home - Main landing page after onboarding */}
-        <Route path="/home" component={Home} />
 
         {/* Main Dashboard - Independent dashboard */}
         <Route path="/dashboard" component={OrganizationDashboard} />
