@@ -122,7 +122,7 @@ export function useCreatePurchaseOrder() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['/api/projects', variables.projectId, 'purchase-orders'] 
+        queryKey: ['/api/projects', variables.projectId, 'purchase-orders', { organization_id: variables.organizationId }] 
       });
     },
   });
@@ -167,7 +167,7 @@ export function useUpdatePurchaseOrder() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['/api/projects', variables.projectId, 'purchase-orders'] 
+        queryKey: ['/api/projects', variables.projectId, 'purchase-orders', { organization_id: variables.organizationId }] 
       });
     },
   });
@@ -194,7 +194,7 @@ export function useDeletePurchaseOrder() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['/api/projects', variables.projectId, 'purchase-orders'] 
+        queryKey: ['/api/projects', variables.projectId, 'purchase-orders', { organization_id: variables.organizationId }] 
       });
     },
   });
