@@ -77,31 +77,20 @@ export function useDeleteClientRole() {
   return useMutation({
     mutationFn: async ({
       roleId,
-      organizationId,
     }: {
       roleId: string;
       organizationId: string;
     }) => {
-      console.log('[useDeleteClientRole] Starting delete for role:', roleId);
-      try {
-        const response = await apiRequest('DELETE', `/api/client-roles/${roleId}`);
-        console.log('[useDeleteClientRole] Response:', response);
-        const result = await response.json();
-        console.log('[useDeleteClientRole] Result:', result);
-        return result;
-      } catch (error) {
-        console.error('[useDeleteClientRole] Error:', error);
-        throw error;
-      }
+      const response = await apiRequest('DELETE', `/api/client-roles/${roleId}`);
+      return response.json();
     },
     onSuccess: (_, variables) => {
-      console.log('[useDeleteClientRole] onSuccess called');
       queryClient.invalidateQueries({
         queryKey: CLIENT_QUERY_KEYS.roles(variables.organizationId),
       });
-    },
-    onError: (error) => {
-      console.error('[useDeleteClientRole] onError called:', error);
+      queryClient.invalidateQueries({
+        queryKey: ['/api/client-roles'],
+      });
     },
   });
 }
