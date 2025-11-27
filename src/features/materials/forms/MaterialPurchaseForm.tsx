@@ -1,5 +1,6 @@
-import { useMemo, useEffect } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useQueryClient } from '@tanstack/react-query'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { format } from 'date-fns'
@@ -12,12 +13,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { Badge } from '@/components/ui/badge'
-import { ShoppingCart, CalendarIcon } from 'lucide-react'
+import { ShoppingCart, CalendarIcon, FileText } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
+import { useOrganizationMembers } from '@/features/organization/hooks/use-organization-members'
 import { useContacts } from '@/features/contacts'
 import { 
   useMaterialPurchase, 
@@ -26,6 +28,8 @@ import {
   getMaterialPurchaseStatusBadgeConfig,
   DOCUMENT_TYPES,
 } from '@/features/materials/hooks/use-material-purchases'
+import { UploadMultiFileField } from '@/components/ui-custom/fields/UploadMultiFileField'
+import { uploadFile, deleteFile } from '@/lib/storage'
 
 const materialPurchaseSchema = z.object({
   purchase_date: z.date({
@@ -47,9 +51,11 @@ type MaterialPurchaseFormData = z.infer<typeof materialPurchaseSchema>
 function ViewPanel({
   existingPurchase,
   currencies,
+  attachments,
 }: {
   existingPurchase: any;
   currencies: any[];
+  attachments: any[];
 }) {
   const statusInfo = getMaterialPurchaseStatusBadgeConfig(existingPurchase.status)
   const docType = DOCUMENT_TYPES[existingPurchase.document_type as keyof typeof DOCUMENT_TYPES]
@@ -129,6 +135,30 @@ function ViewPanel({
         </div>
       )}
 
+      {attachments.length > 0 && (
+        <div>
+          <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Archivos Adjuntos</h4>
+          <div className="space-y-2">
+            {attachments.map((attachment: any) => (
+              <a
+                key={attachment.id}
+                href={attachment.media_file?.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                data-testid={`link-material-purchase-attachment-${attachment.id}`}
+              >
+                <FileText className="h-4 w-4" />
+                {attachment.media_file?.file_name || 'Archivo adjunto'}
+                {attachment.description && (
+                  <span className="text-xs text-muted-foreground">({attachment.description})</span>
+                )}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="pt-4 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
           <div data-testid="text-material-purchase-created-at">
@@ -159,6 +189,9 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create' }: Ma
   const { projectId, organizationId, purchaseId } = modalData || {}
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const [filesToUpload, setFilesToUpload] = useState<any[]>([])
+  const [attachments, setAttachments] = useState<any[]>([])
 
   const { data: existingPurchase, isLoading: loadingPurchase } = useMaterialPurchase(
     projectId,
@@ -168,6 +201,11 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create' }: Ma
 
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId)
   const { data: currencies = [], isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
+  const { data: members = [] } = useOrganizationMembers(organizationId || '')
+
+  const currentMember = useMemo(() => {
+    return members.find(m => m.user_id === userData?.user?.id) || null
+  }, [members, userData?.user?.id])
 
   const providerOptions = useMemo(() => {
     if (!contacts) return []
@@ -228,8 +266,78 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create' }: Ma
     }
   }, [defaultCurrencyId, mode, form])
 
+  useEffect(() => {
+    const fetchAttachments = async () => {
+      if (!purchaseId || !organizationId || !projectId) return
+      
+      try {
+        const { supabase } = await import('@/lib/supabase')
+        const { data: sessionData } = await supabase.auth.getSession()
+        const token = sessionData?.session?.access_token
+        
+        if (!token) {
+          console.error('No auth token available for fetching attachments')
+          return
+        }
+        
+        const response = await fetch(
+          `/api/projects/${projectId}/material-purchases/${purchaseId}/attachments?organization_id=${organizationId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        )
+        
+        if (response.ok) {
+          const result = await response.json()
+          if (result.data) {
+            setAttachments(result.data)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching material purchase attachments:', error)
+      }
+    }
+    
+    if (mode === 'edit' || mode === 'view') {
+      fetchAttachments()
+    }
+  }, [purchaseId, organizationId, projectId, mode])
+  
+  const existingFiles = useMemo(() => {
+    if (!attachments || attachments.length === 0) return []
+    
+    return attachments.map((attachment: any) => ({
+      id: attachment.id,
+      file_name: attachment.media_file?.file_name || 'Archivo adjunto',
+      file_type: attachment.media_file?.file_type || 'document',
+      file_size: attachment.media_file?.file_size || 0,
+      file_url: attachment.media_file?.file_url || '',
+      isExisting: true,
+    }))
+  }, [attachments])
+
   const createPurchaseMutation = useCreateMaterialPurchase()
   const updatePurchaseMutation = useUpdateMaterialPurchase()
+
+  const handleExistingFileDelete = async (fileId: string) => {
+    try {
+      await deleteFile(fileId, false)
+      setAttachments(prev => prev.filter(a => a.id !== fileId))
+      queryClient.invalidateQueries({ queryKey: ['material-purchase-media', purchaseId] })
+      toast({
+        title: 'Archivo eliminado',
+        description: 'El archivo ha sido eliminado correctamente',
+      })
+    } catch (error: any) {
+      toast({
+        title: 'Error al eliminar archivo',
+        description: error.message,
+        variant: 'destructive',
+      })
+    }
+  }
 
   const onSubmit = async (data: MaterialPurchaseFormData) => {
     try {
@@ -246,39 +354,88 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create' }: Ma
         notes: data.notes || null,
       }
 
+      let purchaseResult;
+
       if (mode === 'create') {
         if (!projectId || !organizationId) {
           throw new Error('Missing required parameters')
         }
 
-        await createPurchaseMutation.mutateAsync({
+        purchaseResult = await createPurchaseMutation.mutateAsync({
           purchaseData,
           projectId,
           organizationId,
-        })
-
-        toast({
-          title: 'Compra creada',
-          description: 'La compra de materiales se ha registrado correctamente.',
         })
       } else if (mode === 'edit') {
         if (!projectId || !purchaseId || !organizationId) {
           throw new Error('Missing required parameters')
         }
 
-        await updatePurchaseMutation.mutateAsync({
+        purchaseResult = await updatePurchaseMutation.mutateAsync({
           projectId,
           purchaseId,
           updates: purchaseData,
           organizationId,
         })
-
-        toast({
-          title: 'Compra actualizada',
-          description: 'La compra de materiales se ha actualizado correctamente.',
-        })
       }
 
+      const createdPurchaseId = purchaseResult?.id || purchaseId
+
+      if (filesToUpload.length > 0 && createdPurchaseId) {
+        if (!organizationId) {
+          toast({
+            variant: 'destructive',
+            title: 'Error al subir archivos',
+            description: 'No se encontró el ID de la organización.',
+          })
+          return
+        }
+
+        for (const fileInput of filesToUpload) {
+          try {
+            console.log('[MaterialPurchaseForm] Uploading file:', {
+              fileName: fileInput.file?.name,
+              organizationId,
+              projectId,
+              createdPurchaseId,
+              createdByMemberId: currentMember?.id,
+            })
+            
+            if (!fileInput.file) {
+              console.error('[MaterialPurchaseForm] No file object in fileInput:', fileInput)
+              continue
+            }
+            
+            await uploadFile(fileInput.file, {
+              entity: 'material_purchase_attachment',
+              organization_id: organizationId,
+              project_id: projectId,
+              created_by_member_id: currentMember?.id,
+              link_to: {
+                material_purchase_id: createdPurchaseId,
+              },
+              category: 'document',
+              description: fileInput.description || fileInput.file.name,
+            })
+          } catch (uploadError: any) {
+            console.error('[MaterialPurchaseForm] Error uploading file:', uploadError)
+            toast({
+              variant: 'destructive',
+              title: 'Error al subir archivo',
+              description: uploadError?.message || 'Error desconocido',
+            })
+          }
+        }
+        queryClient.invalidateQueries({ queryKey: ['material-purchase-media', createdPurchaseId] })
+        setFilesToUpload([])
+      }
+
+      toast({
+        title: mode === 'edit' ? 'Compra actualizada' : 'Compra creada',
+        description: mode === 'edit'
+          ? 'La compra de materiales se ha actualizado correctamente.'
+          : 'La compra de materiales se ha registrado correctamente.',
+      })
       onClose()
     } catch (error: any) {
       console.error('Error saving material purchase:', error)
@@ -334,7 +491,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create' }: Ma
             </div>
           </div>
         ) : mode === 'view' && existingPurchase ? (
-          <ViewPanel existingPurchase={existingPurchase} currencies={currencies} />
+          <ViewPanel existingPurchase={existingPurchase} currencies={currencies} attachments={attachments} />
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -594,6 +751,28 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create' }: Ma
                   </FormItem>
                 )}
               />
+
+              <div>
+                <UploadMultiFileField
+                  filesToUpload={filesToUpload}
+                  existingFiles={existingFiles}
+                  onFilesChange={setFilesToUpload}
+                  maxSize={10 * 1024 * 1024}
+                  acceptedTypes={{
+                    'image/*': ['.png', '.jpg', '.jpeg'],
+                    'application/pdf': ['.pdf'],
+                    'application/msword': ['.doc'],
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+                    'application/vnd.ms-excel': ['.xls'],
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+                  }}
+                  imageCompressionPreset="document"
+                  onExistingFileDelete={handleExistingFileDelete}
+                  emptyStateTitle="Sin archivos adjuntos"
+                  emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
+                  newFileBadgeText="Nuevo"
+                />
+              </div>
             </form>
           </Form>
         )}
