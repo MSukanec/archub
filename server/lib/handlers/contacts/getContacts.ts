@@ -28,6 +28,7 @@ export async function getContacts(
         .from('contacts')
         .select('id, first_name, last_name, full_name, email, phone, linked_user_id')
         .eq('organization_id', organizationId)
+        .eq('is_deleted', false)
         .order('first_name', { ascending: true });
       
       if (contactsError) {
@@ -54,6 +55,7 @@ export async function getContacts(
       .from('contacts')
       .select('*')
       .eq('organization_id', organizationId)
+      .eq('is_deleted', false)
       .order('first_name', { ascending: true });
     
     if (contactsError) {
