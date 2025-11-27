@@ -157,18 +157,12 @@ async function fetchPurchaseWithRelations(
   // Get provider contact if provider_id exists
   let provider = null;
   if (purchase.provider_id) {
-    console.log('🔍 Looking for provider_id:', purchase.provider_id);
-    const { data: contactData, error: contactError } = await supabase
+    const { data: contactData } = await supabase
       .from('contacts')
-      .select('id, full_name, company_name')
+      .select('id, full_name, company_name, first_name, last_name')
       .eq('id', purchase.provider_id)
       .single();
     
-    if (contactError) {
-      console.error('❌ Error fetching provider:', contactError);
-    } else {
-      console.log('✅ Found provider:', contactData);
-    }
     provider = contactData || null;
   }
 
@@ -255,7 +249,7 @@ export async function listMaterialPurchases(
     if (providerIds.length > 0) {
       const { data: contacts } = await supabase
         .from('contacts')
-        .select('id, full_name, company_name')
+        .select('id, full_name, company_name, first_name, last_name')
         .in('id', Array.from(new Set(providerIds)));
       
       if (contacts) {
