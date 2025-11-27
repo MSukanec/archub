@@ -684,6 +684,18 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
       },
     }]),
     {
+      key: 'notes',
+      label: 'Descripción',
+      sortable: true,
+      render: (payment: MaterialPaymentWithRelations) => payment.notes || '-',
+    },
+    {
+      key: 'wallet',
+      label: 'Billetera',
+      sortable: true,
+      render: (payment: MaterialPaymentWithRelations) => payment.wallet?.wallets?.name || '-',
+    },
+    {
       key: 'amount',
       label: 'Monto',
       sortable: true,
@@ -700,12 +712,6 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
       ),
     },
     {
-      key: 'wallet',
-      label: 'Billetera',
-      sortable: true,
-      render: (payment: MaterialPaymentWithRelations) => payment.wallet?.wallets?.name || '-',
-    },
-    {
       key: 'status',
       label: 'Estado',
       sortable: true,
@@ -717,12 +723,6 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
           </Badge>
         );
       },
-    },
-    {
-      key: 'reference',
-      label: 'Referencia',
-      sortable: true,
-      render: (payment: MaterialPaymentWithRelations) => payment.reference || '-',
     },
   ] as const;
 
