@@ -1,45 +1,38 @@
-import { type WidthProp, resolveWidthMode, getContainerClasses, getContentPaddingClasses } from "./layoutWidth";
-
-interface HeroLayoutProps {
+interface LabPageLayoutProps {
   children: React.ReactNode;
-  wide?: WidthProp;
   noPadding?: boolean;
+  className?: string;
 }
 
 /**
- * HeroLayout - Layout para páginas SIN header, 100% contenido
+ * LabPageLayout - Layout para páginas experimentales del Lab
  * 
- * Es un "hermano" de PageLayout, ambos se usan DENTRO de DashboardLayout.
- * - PageLayout: con header, tabs, acciones
- * - HeroLayout: sin header, contenido fullwidth
+ * Se usa DENTRO de DashboardLayout con hideHeader={true}.
+ * Proporciona contenido fullwidth para visualizaciones inmersivas.
  * 
  * Uso:
  * ```tsx
- * <Layout hideHeader wide>
- *   <HeroLayout noPadding>
- *     {contenido fullwidth}
- *   </HeroLayout>
- * </Layout>
+ * <DashboardLayout hideHeader wide>
+ *   <LabPageLayout>
+ *     {contenido del lab}
+ *   </LabPageLayout>
+ * </DashboardLayout>
  * ```
- * 
- * O directamente dentro de Layout cuando hideHeader={true}
  */
-export function HeroLayout({ children, wide = true, noPadding = false }: HeroLayoutProps) {
-  const mode = resolveWidthMode(wide);
-  
+export function LabPageLayout({ children, noPadding = true, className = '' }: LabPageLayoutProps) {
   if (noPadding) {
     return (
-      <div className="h-full w-full overflow-auto">
+      <div className={`h-full w-full overflow-hidden ${className}`}>
         {children}
       </div>
     );
   }
   
   return (
-    <div className={`h-full w-full overflow-auto ${getContainerClasses(mode)} ${getContentPaddingClasses(mode)}`}>
+    <div className={`h-full w-full overflow-auto p-6 ${className}`}>
       {children}
     </div>
   );
 }
 
-export default HeroLayout;
+export default LabPageLayout;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ForceGraphMethods, NodeObject } from 'react-force-graph-2d';
+import { ForceGraphMethods } from 'react-force-graph-2d';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Phone, Mail, AlertTriangle, Clock, DollarSign, Building2, FolderOpen, Users, Loader2, Network, Grid3X3 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -8,12 +8,13 @@ import { getProjectsLite } from '@/features/projects/services/getProjectsLite';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
+import { DashboardLayout } from '@/layouts';
+import { LabPageLayout } from '@/layouts/lab/components/LabPageLayout';
 import { 
   NeuralNetworkGraph, 
   SatelliteNode, 
   GraphData, 
   NodeStatus,
-  DEFAULT_STATUS_COLORS 
 } from '@/components/lab/neural-network';
 import { StatusHeatmap, HeatmapCell } from '@/components/lab/heatmap';
 
@@ -260,8 +261,10 @@ export default function FinancialLatticePage() {
   const hasNoClients = !isLoading && clientNodes.length === 0 && selectedProjectId;
 
   return (
-    <div className="fixed inset-0 bg-[#0a0a0f] overflow-hidden">
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
+    <DashboardLayout hideHeader wide>
+      <LabPageLayout>
+        <div className="relative h-full w-full bg-[#0a0a0f] overflow-hidden">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
         <div className="bg-black/80 backdrop-blur-md rounded-full border border-white/20 p-1 flex gap-1">
           <button
             onClick={() => setViewMode('network')}
@@ -536,6 +539,8 @@ export default function FinancialLatticePage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+        </div>
+      </LabPageLayout>
+    </DashboardLayout>
   );
 }
