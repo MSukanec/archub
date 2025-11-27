@@ -42,10 +42,6 @@ export function MediaGallery() {
   const deleteFileMutation = useDeleteMediaFile();
 
   // Handlers
-  const handleEdit = (file: GalleryFile) => {
-    openModal('gallery', { editingFile: file });
-  };
-
   const handleDownload = async (file: GalleryFile) => {
     if (!file.file_url) return;
 
@@ -75,7 +71,7 @@ export function MediaGallery() {
       description: `¿Estás seguro de que deseas eliminar "${file.file_name}"? Esta acción no se puede deshacer.`,
       destructiveActionText: 'Eliminar archivo',
       onConfirm: () => {
-        deleteFileMutation.mutate(file.id, {
+        deleteFileMutation.mutate(file.link_id!, {
           onSuccess: () => {
             toast({
               title: 'Éxito',
@@ -155,7 +151,6 @@ export function MediaGallery() {
           ...file,
           file_size: file.file_size ?? undefined
         })) as any}
-        onEdit={handleEdit as any}
         onDownload={handleDownload as any}
         onDelete={handleDelete as any}
         galleryStyle={galleryStyle}

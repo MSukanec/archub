@@ -17,7 +17,6 @@ import {
   Filter, 
   X, 
   FilterX, 
-  Edit, 
   Download, 
   Trash2, 
   PlayCircle, 
@@ -93,7 +92,6 @@ function getSourceInfo(file: GalleryFile): { icon: any; label: string; color: st
 
 interface GalleryProps {
   files: GalleryFile[];
-  onEdit?: (file: GalleryFile) => void;
   onDelete?: (file: GalleryFile) => void;
   onDownload?: (file: GalleryFile) => void;
   showProjectName?: boolean;
@@ -103,7 +101,6 @@ interface GalleryProps {
 
 export function Gallery({ 
   files, 
-  onEdit, 
   onDelete, 
   onDownload, 
   showProjectName = false,
@@ -413,7 +410,7 @@ export function Gallery({
                   </div>
                   
                   {/* Botón de opciones arriba a la derecha */}
-                  {(onEdit || onDownload || onDelete) && (
+                  {(onDownload || onDelete) && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                         <button
@@ -423,18 +420,6 @@ export function Gallery({
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        {onEdit && (
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onEdit(file);
-                            }}
-                            className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
-                          >
-                            <Edit className="h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
-                        )}
                         {onDownload && (
                           <DropdownMenuItem
                             onClick={(e) => {
@@ -449,7 +434,7 @@ export function Gallery({
                         )}
                         {onDelete && (
                           <>
-                            {(onEdit || onDownload) && <DropdownMenuSeparator className="bg-border" />}
+                            {onDownload && <DropdownMenuSeparator className="bg-border" />}
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -554,7 +539,7 @@ export function Gallery({
                     </div>
                     
                     {/* Botón de opciones arriba a la derecha */}
-                    {(onEdit || onDownload || onDelete) && (
+                    {(onDownload || onDelete) && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                           <button
@@ -564,18 +549,6 @@ export function Gallery({
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {onEdit && (
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onEdit(file);
-                              }}
-                              className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
-                            >
-                              <Edit className="h-4 w-4" />
-                              Editar
-                            </DropdownMenuItem>
-                          )}
                           {onDownload && (
                             <DropdownMenuItem
                               onClick={(e) => {
@@ -590,7 +563,7 @@ export function Gallery({
                           )}
                           {onDelete && (
                             <>
-                              {(onEdit || onDownload) && <DropdownMenuSeparator className="bg-border" />}
+                              {onDownload && <DropdownMenuSeparator className="bg-border" />}
                               <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
