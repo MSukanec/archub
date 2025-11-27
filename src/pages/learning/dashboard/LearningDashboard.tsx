@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { HeroLayout } from "@/layouts"
+import { DashboardLayout as Layout } from "@/layouts"
 import { useNavigationStore } from '@/stores/navigationStore'
 import { GraduationCap, ArrowRight, BookOpen } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -24,15 +24,11 @@ export default function LearningDashboard() {
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
-  // Usar hook del feature para obtener dashboard optimizado
   const { data: dashboardData, isLoading } = useLearningDashboardFast();
 
   const { global, courses = [], featured_course, currentStreak = 0 } = dashboardData || {}
   
-  // User has enrollments if they have courses (even if not started yet)
   const hasEnrollments = courses && courses.length > 0;
-  
-  // Use featured course (latest added) for hero, or fallback to first enrolled course
   const heroCurso = featured_course || (courses.length > 0 ? courses[0] : null);
 
   const coursesSorted = courses
@@ -40,18 +36,11 @@ export default function LearningDashboard() {
     .sort((a: any, b: any) => b.progress_pct - a.progress_pct)
     .slice(0, 3);
 
-  const headerProps = {
-    title: "Dashboard de Capacitaciones",
-    icon: GraduationCap,
-  }
-
-  // Hero section component
   const heroSection = heroCurso && (
     <div 
       className="relative h-[200px] sm:h-[250px] md:h-96 overflow-hidden w-full"
       data-testid="hero-featured-course"
     >
-      {/* Background Image */}
       {heroCurso.cover_url ? (
         <>
           <div 
@@ -67,10 +56,8 @@ export default function LearningDashboard() {
         <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
       )}
 
-      {/* Content */}
       <div className="relative h-full flex flex-col justify-end px-4 sm:px-6 md:px-12 py-4 sm:py-6 md:py-12">
         <div className="max-w-3xl">
-          {/* Badge */}
           <div className="mb-3 sm:mb-6">
             <Badge 
               style={{ 
@@ -85,7 +72,6 @@ export default function LearningDashboard() {
             </Badge>
           </div>
           
-          {/* Title */}
           <h1 
             className="text-lg sm:text-2xl md:text-5xl font-bold mb-2 sm:mb-4 md:mb-6 tracking-tight !text-white line-clamp-2" 
             data-testid="text-hero-title"
@@ -93,14 +79,12 @@ export default function LearningDashboard() {
             {heroCurso.course_title}
           </h1>
           
-          {/* Progress/Description */}
           <p className="text-xs sm:text-sm md:text-base max-w-2xl mb-4 sm:mb-8 text-[rgb(220,220,220)] line-clamp-1 sm:line-clamp-2">
             {heroCurso.done_lessons !== undefined 
               ? `${heroCurso.done_lessons} de ${heroCurso.total_lessons} lecciones completadas • ${heroCurso.progress_pct}% completado`
               : heroCurso.short_description || 'Descubre este curso y desarrolla nuevas habilidades'}
           </p>
           
-          {/* CTA Button */}
           <div className="flex gap-3">
             <Button
               size="sm"
@@ -120,10 +104,8 @@ export default function LearningDashboard() {
     </div>
   );
 
-  // Main content
   const mainContent = (
-    <div className="space-y-6">
-      {/* Continue Where You Left Off Section */}
+    <div className="space-y-6 px-4 sm:px-6 md:px-12 py-6 md:py-12">
       <StatCard className="p-6">
         <div className="mb-4 flex items-center gap-2">
           <BookOpen className="h-5 w-5" />
@@ -142,7 +124,6 @@ export default function LearningDashboard() {
                     onClick={() => navigate(`/learning/courses/${course.course_slug}`)}
                     data-testid={`continue-course-${course.course_id}`}
                   >
-                    {/* Imagen - arriba en mobile, izquierda en desktop */}
                     <div className="w-full md:w-24 h-40 md:h-24 rounded-lg overflow-hidden md:flex-shrink-0 bg-muted">
                       {course.cover_url ? (
                         <img 
@@ -157,7 +138,6 @@ export default function LearningDashboard() {
                       )}
                     </div>
                     
-                    {/* Contenido - stack vertical en mobile y desktop */}
                     <div className="flex-1 min-w-0 space-y-3">
                       <h4 className="font-semibold truncate" data-testid="text-continue-course-title">
                         {course.course_title}
@@ -166,7 +146,6 @@ export default function LearningDashboard() {
                         {course.done_lessons} de {course.total_lessons} lecciones completadas
                       </p>
                       
-                      {/* Barra y porcentaje juntos */}
                       <div className="flex items-center gap-3">
                         <Progress value={course.progress_pct} className="h-2 flex-1" />
                         <span className="text-xl md:text-2xl font-bold flex-shrink-0" style={{ color: 'var(--accent)' }}>
@@ -174,7 +153,6 @@ export default function LearningDashboard() {
                         </span>
                       </div>
                       
-                      {/* Botón - full width en mobile, auto en desktop */}
                       <Button 
                         className="w-full md:w-auto"
                         size="sm" 
@@ -211,26 +189,27 @@ export default function LearningDashboard() {
 
   if (isLoading) {
     return (
-      <HeroLayout 
-        heroContent={<Skeleton className="h-[200px] sm:h-[250px] md:h-96 w-full" />}
-        mainContent={
-          <div className="space-y-6">
+      <Layout hideHeader wide>
+        <div className="h-full overflow-auto">
+          <Skeleton className="h-[200px] sm:h-[250px] md:h-96 w-full" />
+          <div className="space-y-6 px-4 sm:px-6 md:px-12 py-6 md:py-12">
             <Skeleton className="h-24 rounded-xl" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Skeleton className="h-64 col-span-3" />
               <Skeleton className="h-64" />
             </div>
           </div>
-        }
-      />
+        </div>
+      </Layout>
     )
   }
 
   return (
-    <HeroLayout 
-      heroContent={heroSection}
-      mainContent={mainContent}
-      hideAIChat={true}
-    />
+    <Layout hideHeader wide>
+      <div className="h-full overflow-auto">
+        {heroSection}
+        {mainContent}
+      </div>
+    </Layout>
   )
 }

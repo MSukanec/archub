@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { HeroLayout } from "@/layouts";
+import { DashboardLayout as Layout } from "@/layouts";
 import { 
   Building2,
   FileText,
@@ -27,13 +27,10 @@ export default function Project() {
   const { data: userData } = useCurrentUser();
   const organizationId = currentOrganizationId || userData?.organization?.id;
   
-  // Get current project by ID (fetches only this specific project)
   const { data: currentProject, isLoading: projectLoading } = useProject(selectedProjectId || undefined);
 
-  // Get site logs (bitácoras)
   const { data: siteLogs = [] } = useSiteLogs(selectedProjectId || undefined, organizationId || undefined);
 
-  // Generate project image URL on-demand with React Query
   const { data: projectImageUrl } = useQuery({
     queryKey: ['project-image', currentProject?.id, currentProject?.project_data?.image_bucket, currentProject?.project_data?.image_path],
     queryFn: () => getProjectImageUrlFromData(currentProject!.project_data!),
@@ -42,7 +39,6 @@ export default function Project() {
     staleTime: 25 * 60 * 1000,
   });
 
-  // Set sidebar context
   useEffect(() => {
     setSidebarContext('project');
     if (sidebarLevel !== 'general') {
@@ -50,16 +46,13 @@ export default function Project() {
     }
   }, [setSidebarContext, setSidebarLevel, sidebarLevel]);
 
-  // Project color
   const projectColor = currentProject?.color || 'var(--accent)';
 
-  // Hero section
   const heroSection = currentProject && (
     <div 
       className="relative h-[65vh] md:h-[48vh] overflow-hidden w-full"
       data-testid="hero-project"
     >
-      {/* Background Image */}
       {projectImageUrl ? (
         <>
           <div 
@@ -85,10 +78,8 @@ export default function Project() {
         />
       )}
 
-      {/* Content */}
       <div className="relative h-full flex flex-col justify-end px-4 sm:px-6 md:px-12 py-4 sm:py-6 md:py-8">
         <div className="max-w-3xl">
-          {/* Project Name */}
           <h1 
             className="text-xl sm:text-3xl md:text-5xl font-bold mb-2 sm:mb-3 md:mb-3 tracking-tight !text-white line-clamp-2" 
             data-testid="text-project-name"
@@ -96,7 +87,6 @@ export default function Project() {
             {currentProject.name}
           </h1>
           
-          {/* Badges - Type, Modality, Status */}
           <div className="flex flex-wrap gap-2">
             {currentProject.project_data?.project_type?.name && (
               <Badge 
@@ -148,10 +138,8 @@ export default function Project() {
     </div>
   );
 
-  // Main content - KPIs
   const mainContent = (
-    <div className="space-y-6 project-breathing-bg">
-      {/* Bitácoras Card - Full Width */}
+    <div className="space-y-6 project-breathing-bg px-4 sm:px-6 md:px-12 py-6 md:py-12">
       <div>
         <StatCard 
           data-testid="stat-card-bitacoras"
@@ -220,39 +208,26 @@ export default function Project() {
         </StatCard>
       </div>
 
-      {/* KPIs Grid - 4 columnas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* 1. Mano de Obra */}
-        <StatCard 
-          data-testid="stat-card-mano-obra"
-        >
+        <StatCard data-testid="stat-card-mano-obra">
           <StatCardTitle showArrow={false}>Mano de Obra</StatCardTitle>
           <StatCardValue>-</StatCardValue>
           <StatCardMeta>Próximamente</StatCardMeta>
         </StatCard>
 
-        {/* 2. Materiales */}
-        <StatCard 
-          data-testid="stat-card-materiales"
-        >
+        <StatCard data-testid="stat-card-materiales">
           <StatCardTitle showArrow={false}>Materiales</StatCardTitle>
           <StatCardValue>-</StatCardValue>
           <StatCardMeta>Próximamente</StatCardMeta>
         </StatCard>
 
-        {/* 3. Indirectos */}
-        <StatCard 
-          data-testid="stat-card-indirectos"
-        >
+        <StatCard data-testid="stat-card-indirectos">
           <StatCardTitle showArrow={false}>Indirectos</StatCardTitle>
           <StatCardValue>-</StatCardValue>
           <StatCardMeta>Próximamente</StatCardMeta>
         </StatCard>
 
-        {/* 4. Subcontratos */}
-        <StatCard 
-          data-testid="stat-card-subcontratos"
-        >
+        <StatCard data-testid="stat-card-subcontratos">
           <StatCardTitle showArrow={false}>Subcontratos</StatCardTitle>
           <StatCardValue>-</StatCardValue>
           <StatCardMeta>Próximamente</StatCardMeta>
@@ -261,10 +236,9 @@ export default function Project() {
     </div>
   );
 
-  // Empty state if no project selected
   if (!selectedProjectId) {
     return (
-      <HeroLayout hideAIChat>
+      <Layout hideHeader wide>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <Building2 className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
@@ -274,35 +248,36 @@ export default function Project() {
             </p>
           </div>
         </div>
-      </HeroLayout>
+      </Layout>
     );
   }
 
   if (projectLoading) {
     return (
-      <HeroLayout hideAIChat>
+      <Layout hideHeader wide>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Cargando proyecto...</div>
         </div>
-      </HeroLayout>
+      </Layout>
     );
   }
 
   if (!currentProject) {
     return (
-      <HeroLayout hideAIChat>
+      <Layout hideHeader wide>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Proyecto no encontrado</div>
         </div>
-      </HeroLayout>
+      </Layout>
     );
   }
 
   return (
-    <HeroLayout 
-      heroContent={heroSection}
-      mainContent={mainContent}
-      hideAIChat={true}
-    />
+    <Layout hideHeader wide>
+      <div className="h-full overflow-auto">
+        {heroSection}
+        {mainContent}
+      </div>
+    </Layout>
   );
 }
