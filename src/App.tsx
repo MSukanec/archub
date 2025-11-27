@@ -59,6 +59,9 @@ import Onboarding from "@/pages/public/Onboarding";
 import SelectMode from "@/pages/public/SelectMode";
 import Activity from "@/pages/activity/Activity";
 
+// Lab Pages (Lazy Loaded - experimental POCs)
+const FinancialLatticePage = lazy(() => import("@/pages/lab/FinancialLatticePage"));
+
 // Admin Pages (Lazy Loaded - solo admins las usan)
 const AdminAdmin = lazy(() => import("@/pages/admin/administration/AdminAdmin"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
@@ -398,6 +401,13 @@ function Router() {
 
 
 
+
+        {/* Lab Routes - Experimental POCs */}
+        <Route path="/lab/financial-lattice">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <FinancialLatticePage />
+          </Suspense>
+        </Route>
 
         {/* 404 Route - Must be last */}
         <Route path="*" component={NotFound} />
