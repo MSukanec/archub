@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { createClientRole, updateClientRole, getClientRoleUsageCount, getClientRoles } from '@/features/clients/services/clientRoles';
 import { CLIENT_QUERY_KEYS } from '@/features/clients/constants';
-import { useDeleteClientRole } from '@/features/clients';
+import { useDeleteClientRole } from '@/features/clients/hooks/use-client-roles';
 import { useReplaceClientRole } from '@/features/clients/hooks/use-replace-client-role';
 import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
 import type { ClientRole } from '@/features/clients/types';
