@@ -435,6 +435,7 @@ export async function createPurchaseOrder(
     const itemsToInsert = params.items.map(item => ({
       purchase_order_id: newOrder.id,
       organization_id: params.organizationId,
+      project_id: params.projectId,
       description: item.description,
       quantity: item.quantity,
       unit_id: item.unit_id || null,
@@ -539,6 +540,7 @@ export async function updatePurchaseOrder(
       const itemsToInsert = params.items.map(item => ({
         purchase_order_id: params.orderId,
         organization_id: params.organizationId,
+        project_id: params.projectId,
         description: item.description,
         quantity: item.quantity,
         unit_id: item.unit_id || null,

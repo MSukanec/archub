@@ -64,8 +64,12 @@ create table public.material_purchase_order_items (
   notes text null,
   created_at timestamp with time zone not null default now(),
   created_by uuid null,
+  organization_id uuid null,
+  project_id uuid null,
   constraint mpo_items_pkey primary key (id),
   constraint mpo_items_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
   constraint mpo_items_order_fkey foreign KEY (purchase_order_id) references material_purchase_orders (id) on delete CASCADE,
+  constraint mpo_items_org_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint mpo_items_project_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
   constraint mpo_items_unit_fkey foreign KEY (unit_id) references units (id) on delete set null
 ) TABLESPACE pg_default;
