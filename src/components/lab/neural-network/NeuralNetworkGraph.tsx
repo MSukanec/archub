@@ -3,11 +3,13 @@ import ForceGraph2D, { ForceGraphMethods, NodeObject, LinkObject } from 'react-f
 import { 
   GraphData, 
   GraphNode, 
-  SatelliteNode, 
+  SatelliteNode,
+  CoreNode,
   getStatusColorsFromCSS,
   getCoreColorFromCSS,
   StatusColors 
 } from './types';
+import { NodeRenderer, SphereNodeRenderer } from './renderers';
 
 export interface NeuralNetworkGraphProps {
   data: GraphData;
@@ -20,6 +22,7 @@ export interface NeuralNetworkGraphProps {
   onNodeClick?: (node: SatelliteNode) => void;
   onCoreClick?: () => void;
   graphRef?: React.MutableRefObject<ForceGraphMethods | undefined>;
+  nodeRenderer?: NodeRenderer;
 }
 
 export function NeuralNetworkGraph({
@@ -33,10 +36,12 @@ export function NeuralNetworkGraph({
   onNodeClick,
   onCoreClick,
   graphRef: externalRef,
+  nodeRenderer = SphereNodeRenderer,
 }: NeuralNetworkGraphProps) {
   const internalRef = useRef<ForceGraphMethods | undefined>();
   const graphRef = externalRef || internalRef;
   const animationFrameRef = useRef<number>(0);
+  const imageCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
 
   const resolvedStatusColors = useMemo(() => statusColors || getStatusColorsFromCSS(), [statusColors]);
   const resolvedCoreColor = useMemo(() => coreColor || getCoreColorFromCSS(), [coreColor]);
@@ -68,85 +73,21 @@ export function NeuralNetworkGraph({
 
   const nodeCanvasObject = useCallback((node: NodeObject, ctx: CanvasRenderingContext2D, globalScale: number) => {
     const graphNode = node as GraphNode;
-    const x = node.x ?? 0;
-    const y = node.y ?? 0;
+    
+    const rendererContext = {
+      statusColors: resolvedStatusColors,
+      coreColor: resolvedCoreColor,
+      maxNodeValue,
+      globalScale,
+      imageCache: imageCacheRef.current,
+    };
     
     if (graphNode.type === 'core') {
-      const baseSize = 35;
-      const pulseIntensity = 0.15;
-      const pulseSpeed = 0.002;
-      const pulse = 1 + Math.sin(Date.now() * pulseSpeed) * pulseIntensity;
-      const size = baseSize * pulse;
-      
-      const gradient = ctx.createRadialGradient(x, y, 0, x, y, size * 2);
-      gradient.addColorStop(0, resolvedCoreColor.glow);
-      gradient.addColorStop(0.5, 'hsla(76, 100%, 40%, 0.2)');
-      gradient.addColorStop(1, 'hsla(76, 100%, 40%, 0)');
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(x, y, size * 2, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      ctx.fillStyle = resolvedCoreColor.main;
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-      ctx.beginPath();
-      ctx.arc(x - size * 0.3, y - size * 0.3, size * 0.25, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      ctx.fillStyle = '#fff';
-      ctx.font = `bold ${10 / globalScale}px Inter, system-ui, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      
-      const coreLabel = graphNode.label.substring(0, 10);
-      ctx.fillText(coreLabel, x, y);
-      
+      nodeRenderer.renderCore(graphNode as CoreNode & NodeObject, ctx, rendererContext);
     } else {
-      const satelliteNode = graphNode as SatelliteNode;
-      const colors = resolvedStatusColors[satelliteNode.status] || resolvedStatusColors.healthy;
-      
-      const baseSize = 8 + (Math.min(satelliteNode.value, maxNodeValue) / maxNodeValue) * 12;
-      
-      let size = baseSize;
-      if (satelliteNode.status === 'critical') {
-        const pulseSpeed = 0.004;
-        const pulseIntensity = 0.2;
-        const pulse = 1 + Math.sin(Date.now() * pulseSpeed) * pulseIntensity;
-        size = baseSize * pulse;
-      }
-      
-      const gradient = ctx.createRadialGradient(x, y, 0, x, y, size * 2);
-      gradient.addColorStop(0, colors.glow);
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(x, y, size * 2, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      ctx.fillStyle = colors.main;
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-      ctx.beginPath();
-      ctx.arc(x - size * 0.25, y - size * 0.25, size * 0.3, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      if (globalScale > 1.5) {
-        ctx.fillStyle = '#333';
-        ctx.font = `${10 / globalScale}px Inter, system-ui, sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        const shortLabel = satelliteNode.label.split(' ')[0].substring(0, 8);
-        ctx.fillText(shortLabel, x, y + size + 4);
-      }
+      nodeRenderer.renderSatellite(graphNode as SatelliteNode & NodeObject, ctx, rendererContext);
     }
-  }, [resolvedCoreColor, resolvedStatusColors, maxNodeValue]);
+  }, [resolvedCoreColor, resolvedStatusColors, maxNodeValue, nodeRenderer]);
   
   const linkCanvasObject = useCallback((link: LinkObject, ctx: CanvasRenderingContext2D) => {
     const source = link.source as NodeObject;
