@@ -287,7 +287,7 @@ export async function listPurchaseOrders(
           unit:units!unit_id (
             id,
             name,
-            abbreviation
+            description
           )
         `)
         .in('purchase_order_id', orderIds)
