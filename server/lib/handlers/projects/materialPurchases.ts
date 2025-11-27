@@ -129,11 +129,6 @@ async function fetchPurchaseWithRelations(
     .from('material_purchases')
     .select(`
       *,
-      provider:contacts!provider_id (
-        id,
-        full_name,
-        company_name
-      ),
       currency:currencies!currency_id (
         id,
         code,
@@ -159,9 +154,21 @@ async function fetchPurchaseWithRelations(
 
   if (error || !purchase) return null;
 
+  // Get provider contact if provider_id exists
+  let provider = null;
+  if (purchase.provider_id) {
+    const { data: contactData } = await supabase
+      .from('contacts')
+      .select('id, full_name, company_name')
+      .eq('id', purchase.provider_id)
+      .single();
+    
+    provider = contactData || null;
+  }
+
   return {
     ...purchase,
-    provider: purchase.provider || null,
+    provider,
     currency: purchase.currency || null,
     creator: purchase.creator ? {
       id: purchase.creator.id,
