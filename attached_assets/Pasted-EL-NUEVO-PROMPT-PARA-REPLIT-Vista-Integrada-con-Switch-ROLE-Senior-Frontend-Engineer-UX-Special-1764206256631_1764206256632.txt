@@ -1,0 +1,62 @@
+EL NUEVO PROMPT PARA REPLIT (Vista Integrada con Switch)
+ROLE: Senior Frontend Engineer & UX Specialist.
+
+OBJECTIVE: Create an integrated Proof of Concept (POC) page that combines two different visualizations of the same financial data, switchable via a UI toggle on the same screen.
+
+THE VISION: A single dashboard page with a "View Switcher" at the top (e.g., tabs or segmented control: "Vista Física" vs "Vista Relacional").
+
+State A (Vista Relacional / Network): Shows the organic, floating node visualization we previously discussed (using react-force-graph-2d).
+
+State B (Vista Física / Heatmap): Shows the structured grid visualization (using CSS Grid/Tailwind colors) in the exact same container space.
+
+Switching: Clicking the toggle should smoothly transition the view from one state to the other in-place.
+
+TECHNICAL STACK & REQUIREMENTS:
+
+Framework: Vite + React + TypeScript + Tailwind CSS.
+
+Libraries: react-force-graph-2d, framer-motion (crucial for handling the state transition smoothly).
+
+Data: Use ONE SINGLE SHARED MOCK DATASET for both views. This is vital. The same 100 clients should be rendered in both modes.
+
+STEP-BY-STEP INSTRUCTIONS:
+
+1. Create the Main Container Page:
+
+Create src/pages/lab/IntegratedDashboardPage.tsx. Add the route /lab/dashboard-poc.
+
+Define the shared mock data array at the top of this file.
+
+Create a React state variable: const [viewMode, setViewMode] = useState<'network' | 'heatmap'>('network');
+
+2. Build the "View Switcher" UI:
+
+At the top of the page, create a stylish segmented control or tab group using Tailwind.
+
+It should have two options: "Red Neuronal" (Network) and "Mapa de Calor" (Heatmap).
+
+Clicking them should update the viewMode state.
+
+3. Implement the "Network View" Component (Sub-component):
+
+Create a component that takes the mock data as a prop and renders the ForceGraph2D visualization (organic nodes, central core, red/green status colors).
+
+4. Implement the "Heatmap View" Component (Sub-component):
+
+Create a component that takes the same mock data and renders a CSS Grid.
+
+Map the client status to Tailwind background colors (bg-red-500, bg-green-500).
+
+Make the cells look clean and modern.
+
+5. Integrate and Animate (The Magic):
+
+In the main page body, below the switcher, use conditional rendering based on viewMode.
+
+CRITICAL: Wrap the content area with <AnimatePresence mode="wait"> from framer-motion.
+
+Wrap each view component (<NetworkView /> and <HeatmapView />) inside a motion.div.
+
+Add entry/exit animations to the motion.div (e.g., simple fade-in/fade-out for now: initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}).
+
+DELIVERABLE: When I navigate to /lab/dashboard-poc, I want to see the Network view by default. I want to click a tab at the top labeled "Mapa de Calor" and watch the Network view fade out and the Heatmap grid fade in in its place, displaying the exact same underlying data.
