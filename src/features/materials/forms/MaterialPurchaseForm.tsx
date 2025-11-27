@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { Badge } from '@/components/ui/badge'
 import { ShoppingCart, CalendarIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -168,9 +169,14 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create' }: Ma
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId)
   const { data: currencies = [], isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
 
-  const providers = useMemo(() => {
+  const providerOptions = useMemo(() => {
     if (!contacts) return []
     return contacts
+      .map((contact: any) => ({
+        value: contact.id,
+        label: contact.company_name || contact.full_name || contact.first_name || 'Sin nombre'
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
   }, [contacts])
 
   const defaultCurrencyId = useMemo(() => {
@@ -406,22 +412,15 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create' }: Ma
                   <FormItem>
                     <FormLabel>Proveedor</FormLabel>
                     <FormControl>
-                      <Select 
-                        value={field.value || ''} 
+                      <ComboBox
+                        value={field.value || ''}
                         onValueChange={(value) => field.onChange(value || null)}
+                        options={providerOptions}
+                        placeholder="Seleccionar proveedor (opcional)"
+                        searchPlaceholder="Buscar proveedor..."
+                        emptyMessage="No se encontraron proveedores"
                         disabled={contactsLoading}
-                      >
-                        <SelectTrigger data-testid="select-material-purchase-provider">
-                          <SelectValue placeholder="Seleccionar proveedor (opcional)" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {providers.map((contact: any) => (
-                            <SelectItem key={contact.id} value={contact.id}>
-                              {contact.company_name || contact.full_name || contact.first_name || 'Sin nombre'}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
