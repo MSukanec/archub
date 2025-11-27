@@ -431,19 +431,19 @@ export default function PurchaseOrdersTab({ projectId }: PurchaseOrdersTabProps)
         rowActions={(order) => [
           {
             label: 'Ver detalle',
-            icon: <FileText className="h-4 w-4" />,
+            icon: FileText,
             onClick: () => handleViewOrder(order),
             testId: `view-order-${order.id}`,
           },
           {
             label: 'Editar',
-            icon: <Edit className="h-4 w-4" />,
+            icon: Edit,
             onClick: () => handleEdit(order),
             testId: `edit-order-${order.id}`,
           },
           {
             label: 'Eliminar',
-            icon: <Trash2 className="h-4 w-4" />,
+            icon: Trash2,
             onClick: () => handleDeleteOrder(order),
             variant: 'destructive',
             testId: `delete-order-${order.id}`,
