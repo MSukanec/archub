@@ -50,6 +50,7 @@ export * from './utils/statusBadge';
 // ============ FORMS ============
 export { MaterialPaymentForm } from './forms/MaterialPaymentForm';
 export { PurchaseOrderForm } from './forms/PurchaseOrderForm';
+export { MaterialPurchaseForm } from './forms/MaterialPurchaseForm';
 
 // ============ MODALS ============
 export { MaterialModal } from './modals/MaterialModal';

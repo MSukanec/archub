@@ -56,6 +56,13 @@ import {
   handleUpdatePurchaseOrder,
   handleDeletePurchaseOrder
 } from '../controllers/projects/purchaseOrders.controller.js';
+import {
+  handleListMaterialPurchases,
+  handleGetMaterialPurchase,
+  handleCreateMaterialPurchase,
+  handleUpdateMaterialPurchase,
+  handleDeleteMaterialPurchase
+} from '../controllers/projects/materialPurchases.controller.js';
 
 /**
  * Register project-related endpoints (projects, budgets, budget items, project clients)
@@ -151,6 +158,23 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
 
   // DELETE /api/projects/:projectId/purchase-orders/:orderId - Delete a purchase order
   app.delete("/api/projects/:projectId/purchase-orders/:orderId", handleDeletePurchaseOrder);
+
+  // ========== MATERIAL PURCHASES ENDPOINTS ==========
+
+  // GET /api/projects/:projectId/material-purchases - Get all material purchases for a project
+  app.get("/api/projects/:projectId/material-purchases", handleListMaterialPurchases);
+
+  // GET /api/projects/:projectId/material-purchases/:purchaseId - Get a single material purchase
+  app.get("/api/projects/:projectId/material-purchases/:purchaseId", handleGetMaterialPurchase);
+
+  // POST /api/projects/:projectId/material-purchases - Create a new material purchase
+  app.post("/api/projects/:projectId/material-purchases", handleCreateMaterialPurchase);
+
+  // PATCH /api/projects/:projectId/material-purchases/:purchaseId - Update a material purchase
+  app.patch("/api/projects/:projectId/material-purchases/:purchaseId", handleUpdateMaterialPurchase);
+
+  // DELETE /api/projects/:projectId/material-purchases/:purchaseId - Delete a material purchase
+  app.delete("/api/projects/:projectId/material-purchases/:purchaseId", handleDeleteMaterialPurchase);
 
   // ========== CLIENT COMMITMENTS ENDPOINTS ==========
   
