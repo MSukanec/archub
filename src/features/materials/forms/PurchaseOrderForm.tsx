@@ -294,10 +294,23 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create' }: Purch
 
   const isMutating = createOrderMutation.isPending || updateOrderMutation.isPending
 
+  const getHeaderDescription = () => {
+    switch (mode) {
+      case 'view':
+        return 'Visualiza los detalles de la orden de compra';
+      case 'edit':
+        return 'Modifica los datos de la orden de compra';
+      case 'create':
+      default:
+        return 'Crea una nueva orden de compra para solicitar materiales a tus proveedores';
+    }
+  };
+
   return (
     <ModalLayout onClose={onClose}>
       <ModalHeader 
         title={modalTitle}
+        description={getHeaderDescription()}
         icon={ShoppingCart}
       />
       <ModalBody>
@@ -409,121 +422,6 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create' }: Purch
                     )}
                   />
 
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <FormLabel>
-                        Ítems <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => append({ description: '', quantity: 1, unit_id: null, notes: '' })}
-                        data-testid="button-add-item"
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Agregar ítem
-                      </Button>
-                    </div>
-
-                    <div className="space-y-3">
-                      {fields.map((field, index) => (
-                        <div 
-                          key={field.id} 
-                          className="flex gap-3 items-start p-3 bg-muted/30 rounded-md"
-                          data-testid={`item-row-${index}`}
-                        >
-                          <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
-                            <FormField
-                              control={form.control}
-                              name={`items.${index}.description`}
-                              render={({ field }) => (
-                                <FormItem className="md:col-span-2">
-                                  <FormControl>
-                                    <Input
-                                      placeholder="Descripción del ítem"
-                                      {...field}
-                                      data-testid={`input-item-description-${index}`}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={form.control}
-                              name={`items.${index}.quantity`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      step="0.01"
-                                      min="0"
-                                      placeholder="Cantidad"
-                                      {...field}
-                                      value={field.value || ''}
-                                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                      data-testid={`input-item-quantity-${index}`}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={form.control}
-                              name={`items.${index}.unit_id`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Select 
-                                      value={field.value || ''} 
-                                      onValueChange={(value) => field.onChange(value || null)}
-                                    >
-                                      <SelectTrigger data-testid={`select-item-unit-${index}`}>
-                                        <SelectValue placeholder="Unidad" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        {units.map((unit: any) => (
-                                          <SelectItem key={unit.id} value={unit.id}>
-                                            {unit.abbreviation || unit.name}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
-                          {fields.length > 1 && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => remove(index)}
-                              className="text-destructive hover:text-destructive/80"
-                              data-testid={`button-remove-item-${index}`}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-
-                    {form.formState.errors.items?.root && (
-                      <p className="text-sm text-destructive">
-                        {form.formState.errors.items.root.message}
-                      </p>
-                    )}
-                  </div>
-
                   <FormField
                     control={form.control}
                     name="notes"
@@ -543,6 +441,139 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create' }: Purch
                       </FormItem>
                     )}
                   />
+
+                  <div className="space-y-3">
+                    <FormLabel>
+                      Ítems <span className="text-red-500">*</span>
+                    </FormLabel>
+
+                    <div className="space-y-2">
+                      {fields.map((field, index) => (
+                        <div key={field.id}>
+                          <div 
+                            className="grid grid-cols-1 md:grid-cols-4 gap-3"
+                            data-testid={`item-row-${index}`}
+                          >
+                            <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3 md:col-span-4">
+                              <FormField
+                                control={form.control}
+                                name={`items.${index}.description`}
+                                render={({ field }) => (
+                                  <FormItem className="md:col-span-2">
+                                    <FormControl>
+                                      <Input
+                                        placeholder="Descripción del ítem"
+                                        {...field}
+                                        data-testid={`input-item-description-${index}`}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name={`items.${index}.quantity`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="Cantidad"
+                                        {...field}
+                                        value={field.value || ''}
+                                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                        data-testid={`input-item-quantity-${index}`}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name={`items.${index}.unit_id`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Select 
+                                        value={field.value || ''} 
+                                        onValueChange={(value) => field.onChange(value || null)}
+                                      >
+                                        <SelectTrigger data-testid={`select-item-unit-${index}`}>
+                                          <SelectValue placeholder="Unidad" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {units.map((unit: any) => (
+                                            <SelectItem key={unit.id} value={unit.id}>
+                                              {unit.abbreviation || unit.name}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant={fields.length > 1 ? 'destructive' : 'outline'}
+                              size={fields.length > 1 ? 'sm' : 'default'}
+                              onClick={() => fields.length > 1 ? remove(index) : append({ description: '', quantity: 1, unit_id: null, notes: '' })}
+                              className={fields.length > 1 ? 'flex-1' : 'w-full'}
+                              data-testid={fields.length > 1 ? `button-remove-item-${index}` : `button-add-item-${index}`}
+                            >
+                              {fields.length > 1 ? (
+                                <>
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Eliminar
+                                </>
+                              ) : null}
+                            </Button>
+                            
+                            {fields.length === 1 && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => append({ description: '', quantity: 1, unit_id: null, notes: '' })}
+                                className="w-full"
+                                data-testid="button-add-item"
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Agregar ítem
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => append({ description: '', quantity: 1, unit_id: null, notes: '' })}
+                        className="w-full"
+                        data-testid="button-add-item-footer"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Agregar ítem
+                      </Button>
+                    </div>
+
+                    {form.formState.errors.items?.root && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.items.root.message}
+                      </p>
+                    )}
+                  </div>
                 </>
               )}
             </form>
