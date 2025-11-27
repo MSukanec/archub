@@ -460,10 +460,18 @@ function FormPanel({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="fixed">Monto fijo</SelectItem>
-                    <SelectItem value="installments_fixed">Cuotas fijas</SelectItem>
-                    <SelectItem value="installments_indexed">Cuotas indexadas</SelectItem>
-                    <SelectItem value="milestones">Por hitos</SelectItem>
-                    <SelectItem value="custom">Personalizado</SelectItem>
+                    <SelectItem value="installments_fixed" disabled className="opacity-50">
+                      Cuotas fijas <span className="ml-2 text-xs text-muted-foreground">(Próximamente)</span>
+                    </SelectItem>
+                    <SelectItem value="installments_indexed" disabled className="opacity-50">
+                      Cuotas indexadas <span className="ml-2 text-xs text-muted-foreground">(Próximamente)</span>
+                    </SelectItem>
+                    <SelectItem value="milestones" disabled className="opacity-50">
+                      Por hitos <span className="ml-2 text-xs text-muted-foreground">(Próximamente)</span>
+                    </SelectItem>
+                    <SelectItem value="custom" disabled className="opacity-50">
+                      Personalizado <span className="ml-2 text-xs text-muted-foreground">(Próximamente)</span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
