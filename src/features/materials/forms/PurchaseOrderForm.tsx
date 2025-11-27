@@ -180,6 +180,12 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create' }: Purch
     return contacts
   }, [contacts])
 
+  const defaultUnitId = useMemo(() => {
+    if (units.length === 0) return null
+    const unitOption = units.find((u: any) => u.name?.toLowerCase() === 'unidad')
+    return unitOption?.id || null
+  }, [units])
+
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
   }, [members, userData?.user?.id])
@@ -191,7 +197,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create' }: Purch
       provider_id: null,
       status: 'draft',
       notes: '',
-      items: [{ description: '', quantity: 1, unit_id: null, notes: '' }],
+      items: [{ description: '', quantity: 1, unit_id: defaultUnitId, notes: '' }],
     }
   })
 
@@ -536,7 +542,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create' }: Purch
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => append({ description: '', quantity: 1, unit_id: null, notes: '' })}
+                        onClick={() => append({ description: '', quantity: 1, unit_id: defaultUnitId, notes: '' })}
                         className="w-full"
                         data-testid="button-add-item"
                       >
