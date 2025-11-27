@@ -243,8 +243,7 @@ export async function listMaterialPurchases(
       const { data: contacts } = await supabase
         .from('contacts')
         .select('id, full_name, company_name')
-        .in('id', Array.from(new Set(providerIds)))
-        .eq('organization_id', params.organizationId);
+        .in('id', Array.from(new Set(providerIds)));
       
       if (contacts) {
         contactsMap = new Map(contacts.map(c => [c.id, c]));
