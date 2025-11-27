@@ -175,7 +175,7 @@ async function fetchOrderWithRelations(
 
   if (error || !order) return null;
 
-  const { data: items } = await supabase
+  const { data: items, error: itemsError } = await supabase
     .from('material_purchase_order_items')
     .select(`
       *,
@@ -187,6 +187,8 @@ async function fetchOrderWithRelations(
     `)
     .eq('purchase_order_id', orderId)
     .order('created_at', { ascending: true });
+
+  console.log('[fetchOrderWithRelations] Items query result:', { orderId, items, itemsError });
 
   return {
     ...order,
