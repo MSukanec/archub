@@ -49,6 +49,13 @@ import {
   handleDeleteMaterialPayment,
   handleGetMaterialPaymentAttachments
 } from '../controllers/projects/materialPayments.controller.js';
+import {
+  handleListPurchaseOrders,
+  handleGetPurchaseOrder,
+  handleCreatePurchaseOrder,
+  handleUpdatePurchaseOrder,
+  handleDeletePurchaseOrder
+} from '../controllers/projects/purchaseOrders.controller.js';
 
 /**
  * Register project-related endpoints (projects, budgets, budget items, project clients)
