@@ -141,7 +141,7 @@ export function ComboBox({
                   key={option.value}
                   value={option.label}
                   onSelect={() => handleSelect(option.value)}
-                  className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 transition-colors flex items-center hover:text-accent-foreground focus:text-accent-foreground"
+                  className="cursor-pointer text-sm px-3 py-2 hover:bg-accent focus:bg-accent hover:text-accent-foreground focus:text-accent-foreground transition-colors flex items-center"
                 >
                   {value === option.value && (
                     <Check className="mr-2 h-3 w-3 flex-shrink-0 text-accent" />
@@ -170,7 +170,7 @@ export function ComboBox({
                 <CommandItem
                   value={`create-${searchValue}`}
                   onSelect={handleCreateNew}
-                  className="cursor-pointer text-sm px-3 py-2 hover:bg-muted/50 transition-colors border-t border-border hover:text-accent-foreground focus:text-accent-foreground"
+                  className="cursor-pointer text-sm px-3 py-2 hover:bg-accent focus:bg-accent hover:text-accent-foreground focus:text-accent-foreground transition-colors border-t border-border"
                   disabled={isCreating}
                 >
                   {createIcon && <span className="mr-2 text-accent">{createIcon}</span>}
