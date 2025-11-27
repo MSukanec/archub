@@ -1,11 +1,15 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
+import { ForceGraphMethods } from 'react-force-graph-2d';
 import { DashboardLayout } from '@/layouts';
 import { LabPageLayout } from '@/layouts/lab/components/LabPageLayout';
 import { useLab } from '@/layouts/lab/context/LabContext';
-import { NeuralNetworkGraph, AvatarNodeRenderer, GraphData, SatelliteNode } from '@/components/lab/neural-network';
+import { NeuralNetworkGraph, GraphData, SatelliteNode } from '@/components/lab/neural-network';
+import { NodeRenderer, NodeRendererContext } from '@/components/lab/neural-network/renderers/types';
 import { useContacts, ContactWithRelations } from '@/features/contacts';
 import { getContactAvatarUrl } from '@/lib/storage/uploadHelpers';
 import { Loader2 } from 'lucide-react';
+import { NodeObject } from 'react-force-graph-2d';
+import { CoreNode } from '@/components/lab/neural-network/types';
 
 const GROUP_COLORS: Record<string, string> = {
   'albañil': 'hsl(220, 70%, 50%)',
@@ -17,6 +21,8 @@ const GROUP_COLORS: Record<string, string> = {
   'plomero': 'hsl(190, 70%, 45%)',
   'pintor': 'hsl(320, 70%, 50%)',
   'carpintero': 'hsl(25, 80%, 45%)',
+  'otro': 'hsl(270, 60%, 55%)',
+  'sin tipo': 'hsl(210, 15%, 50%)',
   'default': 'hsl(210, 15%, 50%)',
 };
 
@@ -26,12 +32,170 @@ function getGroupColor(typeName?: string): string {
   return GROUP_COLORS[normalized] || GROUP_COLORS.default;
 }
 
+function getInitials(label: string): string {
+  const words = label.trim().split(/\s+/);
+  if (words.length >= 2) {
+    return (words[0][0] + words[1][0]).toUpperCase();
+  }
+  return label.substring(0, 2).toUpperCase();
+}
+
+const ContactsNodeRenderer: NodeRenderer = {
+  renderCore: (
+    node: CoreNode & NodeObject,
+    ctx: CanvasRenderingContext2D,
+    context: NodeRendererContext
+  ) => {
+    const x = node.x ?? 0;
+    const y = node.y ?? 0;
+    const { globalScale } = context;
+
+    const size = 50;
+
+    const isDark = document.documentElement.classList.contains('dark');
+    const bgColor = isDark ? 'hsl(210, 20%, 25%)' : 'hsl(210, 20%, 85%)';
+    const borderColor = isDark ? 'hsl(210, 30%, 45%)' : 'hsl(210, 30%, 65%)';
+
+    ctx.shadowColor = isDark ? 'rgba(100, 150, 200, 0.3)' : 'rgba(50, 100, 150, 0.2)';
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = bgColor;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    const textColor = isDark ? 'hsl(210, 20%, 90%)' : 'hsl(210, 20%, 20%)';
+    ctx.fillStyle = textColor;
+    ctx.font = `bold ${14 / globalScale}px Inter, system-ui, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(node.label.substring(0, 12), x, y);
+  },
+
+  renderSatellite: (
+    node: SatelliteNode & NodeObject,
+    ctx: CanvasRenderingContext2D,
+    context: NodeRendererContext
+  ) => {
+    const x = node.x ?? 0;
+    const y = node.y ?? 0;
+    const { globalScale, imageCache } = context;
+
+    const isTypeNode = node.metadata?.isTypeNode as boolean;
+    const groupColor = (node.metadata?.groupColor as string) || getGroupColor(node.metadata?.groupType as string);
+    const avatarUrl = node.metadata?.avatarUrl as string | undefined;
+
+    if (isTypeNode) {
+      const size = 30;
+      const isDark = document.documentElement.classList.contains('dark');
+
+      ctx.shadowColor = groupColor;
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = groupColor;
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${11 / globalScale}px Inter, system-ui, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      const label = node.label.length > 10 ? node.label.substring(0, 8) + '...' : node.label;
+      ctx.fillText(label, x, y);
+
+      const count = node.metadata?.count as number;
+      if (count && globalScale > 0.8) {
+        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)';
+        ctx.font = `${9 / globalScale}px Inter, system-ui, sans-serif`;
+        ctx.fillText(`(${count})`, x, y + size + 10);
+      }
+    } else {
+      const size = 18;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, 2 * Math.PI);
+      ctx.clip();
+
+      let imageLoaded = false;
+      if (avatarUrl && imageCache) {
+        const cachedImage = imageCache.get(avatarUrl);
+        if (cachedImage && cachedImage.complete && cachedImage.naturalWidth > 0) {
+          ctx.drawImage(cachedImage, x - size, y - size, size * 2, size * 2);
+          imageLoaded = true;
+        } else if (!cachedImage) {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.src = avatarUrl;
+          imageCache.set(avatarUrl, img);
+        }
+      }
+
+      if (!imageLoaded) {
+        const isDark = document.documentElement.classList.contains('dark');
+        const bgColor = isDark ? 'hsl(220, 15%, 30%)' : 'hsl(220, 15%, 92%)';
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(x - size, y - size, size * 2, size * 2);
+
+        const initials = getInitials(node.label);
+        ctx.fillStyle = groupColor;
+        ctx.font = `bold ${size * 0.8}px Inter, system-ui, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(initials, x, y);
+      }
+
+      ctx.restore();
+
+      ctx.strokeStyle = groupColor;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      if (globalScale > 1.5) {
+        const isDark = document.documentElement.classList.contains('dark');
+        const textColor = isDark ? 'hsl(0, 0%, 85%)' : 'hsl(0, 0%, 25%)';
+        ctx.fillStyle = textColor;
+        ctx.font = `${10 / globalScale}px Inter, system-ui, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        const shortLabel = node.label.split(' ')[0].substring(0, 10);
+        ctx.fillText(shortLabel, x, y + size + 6);
+
+        const groupType = node.metadata?.groupType as string;
+        if (groupType) {
+          ctx.fillStyle = groupColor;
+          ctx.font = `${8 / globalScale}px Inter, system-ui, sans-serif`;
+          ctx.fillText(groupType, x, y + size + 18);
+        }
+      }
+    }
+  },
+};
+
 function ContactsLabContent() {
   const { selectedOrgId } = useLab();
   const containerRef = useRef<HTMLDivElement>(null);
+  const graphRef = useRef<ForceGraphMethods | undefined>();
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [selectedContact, setSelectedContact] = useState<SatelliteNode | null>(null);
   const [avatarUrls, setAvatarUrls] = useState<Record<string, string>>({});
+  const [avatarsLoaded, setAvatarsLoaded] = useState(false);
 
   const { data: contacts = [], isLoading } = useContacts(selectedOrgId ?? undefined);
 
@@ -54,24 +218,36 @@ function ContactsLabContent() {
   }, []);
 
   useEffect(() => {
+    setAvatarUrls({});
+    setAvatarsLoaded(false);
+  }, [selectedOrgId]);
+
+  useEffect(() => {
     const loadAvatars = async () => {
       const urls: Record<string, string> = {};
-      for (const contact of contacts) {
+      
+      const promises = contacts.map(async (contact) => {
         if (contact.image_bucket && contact.image_path) {
           try {
             const url = await getContactAvatarUrl(contact.id);
             if (url) {
               urls[contact.id] = url;
             }
-          } catch {
+          } catch (e) {
+            console.warn('Failed to load avatar for', contact.id, e);
           }
         }
-      }
+      });
+      
+      await Promise.all(promises);
       setAvatarUrls(urls);
+      setAvatarsLoaded(true);
     };
 
     if (contacts.length > 0) {
       loadAvatars();
+    } else {
+      setAvatarsLoaded(true);
     }
   }, [contacts]);
 
@@ -80,9 +256,8 @@ function ContactsLabContent() {
     contacts.forEach((contact: ContactWithRelations) => {
       const types = contact.contact_types || [];
       if (types.length > 0) {
-        types.forEach(t => {
-          countMap[t.name] = (countMap[t.name] || 0) + 1;
-        });
+        const primaryType = types[0].name;
+        countMap[primaryType] = (countMap[primaryType] || 0) + 1;
       } else {
         countMap['Sin tipo'] = (countMap['Sin tipo'] || 0) + 1;
       }
@@ -91,49 +266,77 @@ function ContactsLabContent() {
   }, [contacts]);
 
   const graphData: GraphData = useMemo(() => {
-    const nodes: GraphData['nodes'] = [
-      {
-        id: 'core',
-        label: 'CONTACTOS',
-        type: 'core',
-      },
-    ];
-
+    const nodes: GraphData['nodes'] = [];
     const links: GraphData['links'] = [];
 
-    const typeAngles: Record<string, number> = {};
-    const uniqueTypes = Array.from(new Set(
-      contacts.flatMap((c: ContactWithRelations) => 
-        (c.contact_types || []).map(t => t.name)
-      ).concat(['Sin tipo'])
-    ));
-    
-    uniqueTypes.forEach((typeName, idx) => {
-      typeAngles[typeName] = (idx / uniqueTypes.length) * 2 * Math.PI;
-    });
-
-    const typeCounters: Record<string, number> = {};
     const centerX = dimensions.width / 2;
     const centerY = dimensions.height / 2;
-    const baseRadius = Math.min(dimensions.width, dimensions.height) * 0.3;
+    
+    nodes.push({
+      id: 'core',
+      label: 'CONTACTOS',
+      type: 'core',
+      fx: centerX,
+      fy: centerY,
+    });
+
+    const uniqueTypes = Object.keys(typeCountMap);
+    const typeRadius = Math.min(dimensions.width, dimensions.height) * 0.22;
+
+    uniqueTypes.forEach((typeName, idx) => {
+      const angle = (idx / uniqueTypes.length) * 2 * Math.PI - Math.PI / 2;
+      const typeX = centerX + Math.cos(angle) * typeRadius;
+      const typeY = centerY + Math.sin(angle) * typeRadius;
+
+      nodes.push({
+        id: `type-${typeName}`,
+        label: typeName,
+        type: 'satellite',
+        status: 'healthy',
+        value: 100,
+        maxValue: 100,
+        currentValue: 100,
+        fx: typeX,
+        fy: typeY,
+        metadata: {
+          isTypeNode: true,
+          groupType: typeName,
+          groupColor: getGroupColor(typeName),
+          count: typeCountMap[typeName],
+        },
+      });
+
+      links.push({
+        source: 'core',
+        target: `type-${typeName}`,
+      });
+    });
+
+    const contactRadius = Math.min(dimensions.width, dimensions.height) * 0.38;
+    const typeCounters: Record<string, number> = {};
 
     contacts.forEach((contact: ContactWithRelations) => {
       const types = contact.contact_types || [];
       const primaryType = types.length > 0 ? types[0].name : 'Sin tipo';
       
-      typeCounters[primaryType] = (typeCounters[primaryType] || 0) + 1;
+      typeCounters[primaryType] = (typeCounters[primaryType] || 0);
       const countInType = typeCounters[primaryType];
+      typeCounters[primaryType]++;
+      
       const totalInType = typeCountMap[primaryType] || 1;
+      const typeIndex = uniqueTypes.indexOf(primaryType);
+      const typeAngle = (typeIndex / uniqueTypes.length) * 2 * Math.PI - Math.PI / 2;
       
-      const angle = typeAngles[primaryType] || 0;
-      const spreadAngle = (Math.PI / 4) / Math.max(totalInType, 1);
-      const nodeAngle = angle + (countInType - totalInType / 2) * spreadAngle;
+      const spreadAngle = Math.PI / 3;
+      const startAngle = typeAngle - spreadAngle / 2;
+      const angleStep = totalInType > 1 ? spreadAngle / (totalInType - 1) : 0;
+      const contactAngle = startAngle + countInType * angleStep;
       
-      const radiusVariation = 0.7 + Math.random() * 0.6;
-      const radius = baseRadius * radiusVariation;
+      const radiusVariation = 0.85 + (countInType % 3) * 0.15;
+      const radius = contactRadius * radiusVariation;
       
-      const x = centerX + Math.cos(nodeAngle) * radius;
-      const y = centerY + Math.sin(nodeAngle) * radius;
+      const contactX = centerX + Math.cos(contactAngle) * radius;
+      const contactY = centerY + Math.sin(contactAngle) * radius;
 
       const displayName = contact.display_name_override || 
         `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 
@@ -148,10 +351,12 @@ function ContactsLabContent() {
         value: 100,
         maxValue: 100,
         currentValue: 100,
-        x,
-        y,
+        x: contactX,
+        y: contactY,
         metadata: {
+          isTypeNode: false,
           groupType: primaryType,
+          groupColor: getGroupColor(primaryType),
           avatarUrl: avatarUrls[contact.id] || undefined,
           allTypes: types.map(t => t.name),
           email: contact.email,
@@ -161,7 +366,7 @@ function ContactsLabContent() {
       });
 
       links.push({
-        source: 'core',
+        source: `type-${primaryType}`,
         target: contact.id,
       });
     });
@@ -170,6 +375,9 @@ function ContactsLabContent() {
   }, [contacts, avatarUrls, dimensions, typeCountMap]);
 
   const handleNodeClick = useCallback((node: SatelliteNode) => {
+    if (node.metadata?.isTypeNode) {
+      return;
+    }
     setSelectedContact(node);
   }, []);
 
@@ -202,8 +410,9 @@ function ContactsLabContent() {
         data={graphData}
         width={dimensions.width}
         height={dimensions.height}
-        nodeRenderer={AvatarNodeRenderer}
+        nodeRenderer={ContactsNodeRenderer}
         onNodeClick={handleNodeClick}
+        graphRef={graphRef}
       />
 
       {selectedContact && (() => {
