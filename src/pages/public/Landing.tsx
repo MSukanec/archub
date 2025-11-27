@@ -130,6 +130,37 @@ const capabilities = [
   }
 ];
 
+// Hero Section Component
+function HeroSectionComponent() {
+  return (
+    <section className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 -mx-6">
+      <div className="text-center max-w-5xl mx-auto">
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight">
+          La plataforma integral para{" "}
+          <span className="text-primary">
+            arquitectura y construcción
+          </span>
+        </h1>
+        
+        <p className="text-xl mb-12 max-w-4xl mx-auto leading-relaxed text-muted-foreground">
+          Gestiona todo el ciclo de vida de tus proyectos: desde diseño y planificación, 
+          pasando por ventas y marketing, hasta construcción y entrega. Con IA integrada, 
+          capacitación continua y conexión con las herramientas que ya usas.
+        </p>
+        
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link href="/register">
+            <Button size="lg" className="px-8 py-4 text-lg font-medium">
+              Comenzar Gratis
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Landing() {
   return (
     <MarketingLayout
@@ -138,56 +169,31 @@ export default function Landing() {
         { label: "Características", href: "#features" },
         { label: "Capacidades", href: "#capabilities" }
       ]}
+      heroSlot={<HeroSectionComponent />}
     >
-
-      {/* Hero Section */}
-      <section className="pt-20 pb-16 -mx-6">
+      {/* Real Benefits Section - Now after hero */}
+      <section className="py-20 -mx-6 border-t">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-5xl mx-auto">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight">
-              La plataforma integral para{" "}
-              <span className="text-primary">
-                arquitectura y construcción
-              </span>
-            </h1>
-            
-            <p className="text-xl mb-12 max-w-4xl mx-auto leading-relaxed text-muted-foreground">
-              Gestiona todo el ciclo de vida de tus proyectos: desde diseño y planificación, 
-              pasando por ventas y marketing, hasta construcción y entrega. Con IA integrada, 
-              capacitación continua y conexión con las herramientas que ya usas.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-              <Link href="/register">
-                <Button size="lg" className="px-8 py-4 text-lg font-medium">
-                  Comenzar Gratis
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <CheckCircle className="h-8 w-8 mx-auto mb-3 text-primary" />
+              <div className="font-semibold">Setup en minutos</div>
+              <div className="text-sm text-muted-foreground">
+                Onboarding guiado para empezar rápidamente
+              </div>
             </div>
-
-            {/* Real Benefits */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12 border-t">
-              <div className="text-center">
-                <CheckCircle className="h-8 w-8 mx-auto mb-3 text-primary" />
-                <div className="font-semibold">Setup en minutos</div>
-                <div className="text-sm text-muted-foreground">
-                  Onboarding guiado para empezar rápidamente
-                </div>
+            <div className="text-center">
+              <Shield className="h-8 w-8 mx-auto mb-3 text-primary" />
+              <div className="font-semibold">Datos seguros</div>
+              <div className="text-sm text-muted-foreground">
+                Respaldos automáticos y acceso controlado
               </div>
-              <div className="text-center">
-                <Shield className="h-8 w-8 mx-auto mb-3 text-primary" />
-                <div className="font-semibold">Datos seguros</div>
-                <div className="text-sm text-muted-foreground">
-                  Respaldos automáticos y acceso controlado
-                </div>
-              </div>
-              <div className="text-center">
-                <Users className="h-8 w-8 mx-auto mb-3 text-primary" />
-                <div className="font-semibold">Multi-organización</div>
-                <div className="text-sm text-muted-foreground">
-                  Gestiona múltiples empresas desde una cuenta
-                </div>
+            </div>
+            <div className="text-center">
+              <Users className="h-8 w-8 mx-auto mb-3 text-primary" />
+              <div className="font-semibold">Multi-organización</div>
+              <div className="text-sm text-muted-foreground">
+                Gestiona múltiples empresas desde una cuenta
               </div>
             </div>
           </div>
