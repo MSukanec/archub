@@ -211,7 +211,6 @@ export function LeftSidebar() {
       return [];
     } else if (sidebarLevel === 'organization') {
       return [
-        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard' },
         { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects' },
         { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
         { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
@@ -500,8 +499,8 @@ export function LeftSidebar() {
                         icon: <Home className="h-5 w-5" />,
                         testId: 'button-sidebar-home',
                         onClick: () => {
-                          setSidebarLevel('general');
-                          navigate('/home');
+                          setSidebarLevel('organization');
+                          navigate('/organization/dashboard');
                         },
                         shouldRender: () => true, // Siempre visible
                       },

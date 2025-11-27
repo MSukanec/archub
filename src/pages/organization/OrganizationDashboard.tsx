@@ -204,9 +204,12 @@ export default function OrganizationDashboard() {
               )}
             </div>
             <div>
-              <h2 className="text-3xl font-semibold text-foreground">
-                ¡Bienvenido a {organization?.name || 'tu organización'}!
+              <h2 className="text-4xl font-bold text-foreground">
+                Hola, {userData?.user_data?.first_name || userData?.user?.full_name || 'Usuario'}
               </h2>
+              <p className="text-lg text-muted-foreground mt-1">
+                Estás en {organization?.name || 'tu organización'}
+              </p>
             </div>
           </div>
         </div>
