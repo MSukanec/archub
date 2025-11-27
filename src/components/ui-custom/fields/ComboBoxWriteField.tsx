@@ -147,7 +147,7 @@ export function ComboBox({
                     <Check className="mr-2 h-3 w-3 flex-shrink-0 text-accent" />
                   )}
                   <span className={cn(
-                    "text-foreground truncate",
+                    "text-foreground group-hover:text-accent-foreground group-focus:text-accent-foreground truncate",
                     value !== option.value && "ml-5" // Add left margin when check is not visible
                   )}>
                     {option.label && option.label.includes(' - ') ? (
