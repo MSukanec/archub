@@ -14,7 +14,6 @@ import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
 import { useLocation, useSearch } from 'wouter'
 import { useProjectContext } from '@/stores/projectContext'
-import { PlanRestricted } from '@/features/users/components/plans/PlanRestricted'
 
 export function Clients() {
   const searchParams = useSearch();
@@ -125,7 +124,8 @@ export function Clients() {
     {
       id: "schedule",
       label: "Cronograma de Pagos",
-      isActive: activeTab === "schedule"
+      isActive: activeTab === "schedule",
+      disabled: true
     },
     {
       id: "settings",
@@ -242,11 +242,9 @@ export function Clients() {
         )}
 
         {activeTab === "schedule" && (
-          <PlanRestricted reason="coming_soon">
-            <ClientScheduleTab 
-              projectId={projectId || undefined}
-            />
-          </PlanRestricted>
+          <ClientScheduleTab 
+            projectId={projectId || undefined}
+          />
         )}
 
         {activeTab === "settings" && (

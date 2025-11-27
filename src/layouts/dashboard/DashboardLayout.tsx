@@ -34,6 +34,7 @@ interface Tab {
   label: string;
   isActive: boolean;
   badgeCount?: number; // Opcional: contador para mostrar en la tab
+  disabled?: boolean; // Opcional: deshabilitar la tab
 }
 
 interface LayoutProps {
@@ -272,6 +273,7 @@ function LayoutContent({
                       isActive: tab.isActive,
                       onClick: () => headerProps.onTabChange?.(tab.id),
                       badgeCount: tab.badgeCount, // ✅ Agregar badge count a las tabs
+                      isDisabled: tab.disabled, // ✅ Pasar disabled como isDisabled
                     }))}
                     onTabChange={headerProps.onTabChange}
                     showHeaderSearch={headerProps.showHeaderSearch}
