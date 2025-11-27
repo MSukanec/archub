@@ -102,8 +102,9 @@ async function fetchClientsSummary(projectId: string, organizationId: string): P
 
 function FinancialLatticeContent() {
   const graphRef = useRef<ForceGraphMethods | undefined>();
+  const containerRef = useRef<HTMLDivElement>(null);
   const [selectedNode, setSelectedNode] = useState<ClientNodeData | null>(null);
-  const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
+  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [viewMode, setViewMode] = useState<ViewMode>('network');
   
   const { selectedOrgId, selectedProjectId, selectedProject, isLoading: contextLoading } = useLab();
@@ -115,11 +116,25 @@ function FinancialLatticeContent() {
   });
   
   useEffect(() => {
-    const handleResize = () => {
-      setDimensions({ width: window.innerWidth, height: window.innerHeight });
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateDimensions = () => {
+      const rect = container.getBoundingClientRect();
+      setDimensions({ width: rect.width, height: rect.height });
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    updateDimensions();
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateDimensions();
+    });
+    
+    resizeObserver.observe(container);
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
   }, []);
   
   const clientNodes: ClientNodeData[] = useMemo(() => {
@@ -230,7 +245,7 @@ function FinancialLatticeContent() {
   const hasNoClients = !isLoading && clientNodes.length === 0 && selectedProjectId;
 
   return (
-    <div className="relative h-full w-full bg-[var(--content-bg)] overflow-hidden">
+    <div ref={containerRef} className="relative h-full w-full bg-[var(--content-bg)] overflow-hidden">
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
         <div className="bg-[var(--card-bg)]/80 backdrop-blur-md rounded-full border border-[var(--border)] p-1 flex gap-1">
           <button
@@ -303,7 +318,7 @@ function FinancialLatticeContent() {
         </div>
       </div>
 
-      {viewMode === 'network' ? (
+      {viewMode === 'network' && dimensions.width > 0 && dimensions.height > 0 && (
         <NeuralNetworkGraph
           data={graphData}
           width={dimensions.width}
@@ -311,7 +326,9 @@ function FinancialLatticeContent() {
           onNodeClick={handleNodeClick}
           graphRef={graphRef}
         />
-      ) : (
+      )}
+      
+      {viewMode === 'heatmap' && (
         <StatusHeatmap
           cells={heatmapCells}
           onCellClick={handleCellClick}
