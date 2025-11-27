@@ -45,9 +45,9 @@ export function NeuralNetworkGraph({
     if (backgroundColor) return backgroundColor;
     if (typeof window !== 'undefined') {
       const root = getComputedStyle(document.documentElement);
-      return root.getPropertyValue('--main-sidebar-bg').trim() || 'hsl(0, 0%, 10%)';
+      return root.getPropertyValue('--content-bg').trim() || 'hsl(0, 0%, 95%)';
     }
-    return 'hsl(0, 0%, 10%)';
+    return 'hsl(0, 0%, 95%)';
   }, [backgroundColor]);
 
   useEffect(() => {
@@ -138,7 +138,7 @@ export function NeuralNetworkGraph({
       ctx.fill();
       
       if (globalScale > 1.5) {
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = '#333';
         ctx.font = `${10 / globalScale}px Inter, system-ui, sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';

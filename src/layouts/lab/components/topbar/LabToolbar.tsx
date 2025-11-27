@@ -30,8 +30,8 @@ export function LabToolbar({
   const selectedProject = projects.find(p => p.id === selectedProjectId);
 
   return (
-    <div className="dark h-14 w-full flex bg-[var(--main-sidebar-bg)] border-b border-[var(--border)]">
-      <div className="flex-1 flex items-center border-r border-[var(--border)]">
+    <div className="h-14 w-full flex bg-[var(--header-bg)] border-b border-[var(--header-border)]">
+      <div className="flex-1 flex items-center border-r border-[var(--header-border)]">
         <div className="flex items-center gap-3 px-4 w-full">
           <Search className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
           <input
@@ -47,7 +47,7 @@ export function LabToolbar({
       
       {showOrgProjectSelectors && (
         <>
-          <div className="w-48 flex flex-col justify-center px-4 border-r border-[var(--border)] hover:bg-[var(--card-hover-bg)] transition-colors cursor-pointer">
+          <div className="w-48 flex flex-col justify-center px-4 border-r border-[var(--header-border)] hover:bg-[var(--card-hover-bg)] transition-colors cursor-pointer">
             <Select value={selectedOrgId || ''} onValueChange={setSelectedOrgId}>
               <SelectTrigger 
                 className="h-full w-full border-0 bg-transparent p-0 shadow-none focus:ring-0 [&>svg]:hidden"
@@ -72,7 +72,7 @@ export function LabToolbar({
             </Select>
           </div>
           
-          <div className="w-48 flex flex-col justify-center px-4 border-r border-[var(--border)] hover:bg-[var(--card-hover-bg)] transition-colors cursor-pointer">
+          <div className="w-48 flex flex-col justify-center px-4 border-r border-[var(--header-border)] hover:bg-[var(--card-hover-bg)] transition-colors cursor-pointer">
             <Select 
               value={selectedProjectId || ''} 
               onValueChange={setSelectedProjectId}

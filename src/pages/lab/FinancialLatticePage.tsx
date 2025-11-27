@@ -230,7 +230,7 @@ function FinancialLatticeContent() {
   const hasNoClients = !isLoading && clientNodes.length === 0 && selectedProjectId;
 
   return (
-    <div className="dark relative h-full w-full bg-[var(--main-sidebar-bg)] overflow-hidden">
+    <div className="relative h-full w-full bg-[var(--content-bg)] overflow-hidden">
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
         <div className="bg-[var(--card-bg)]/80 backdrop-blur-md rounded-full border border-[var(--border)] p-1 flex gap-1">
           <button

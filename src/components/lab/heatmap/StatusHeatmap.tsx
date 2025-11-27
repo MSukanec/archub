@@ -17,19 +17,19 @@ export interface StatusHeatmapProps {
 
 const statusClasses: Record<CellStatus, { card: string; bar: string; indicator: string; text: string }> = {
   critical: {
-    card: 'bg-[hsl(var(--destructive)/0.15)] border-[hsl(var(--destructive)/0.5)] hover:bg-[hsl(var(--destructive)/0.25)]',
+    card: 'bg-[var(--destructive)]/15 border-[var(--destructive)]/50 hover:bg-[var(--destructive)]/25',
     bar: 'bg-[var(--destructive)]',
     indicator: 'bg-[var(--destructive)]',
     text: 'text-[var(--destructive)]',
   },
   warning: {
-    card: 'bg-[hsl(var(--warning)/0.15)] border-[hsl(var(--warning)/0.5)] hover:bg-[hsl(var(--warning)/0.25)]',
+    card: 'bg-[var(--warning)]/15 border-[var(--warning)]/50 hover:bg-[var(--warning)]/25',
     bar: 'bg-[var(--warning)]',
     indicator: 'bg-[var(--warning)]',
     text: 'text-[var(--warning)]',
   },
   healthy: {
-    card: 'bg-[hsl(var(--success)/0.15)] border-[hsl(var(--success)/0.5)] hover:bg-[hsl(var(--success)/0.25)]',
+    card: 'bg-[var(--success)]/15 border-[var(--success)]/50 hover:bg-[var(--success)]/25',
     bar: 'bg-[var(--success)]',
     indicator: 'bg-[var(--success)]',
     text: 'text-[var(--success)]',
@@ -62,7 +62,7 @@ export function StatusHeatmap({
 
   if (cells.length === 0) {
     return (
-      <div className={cn("dark flex flex-col items-center justify-center h-64 text-center", className)}>
+      <div className={cn("flex flex-col items-center justify-center h-64 text-center", className)}>
         {emptyIcon || <Grid3X3 className="w-16 h-16 text-[var(--text-subtle)] mb-4" />}
         <p className="text-[var(--text-muted)]">{emptyMessage}</p>
       </div>
@@ -70,7 +70,7 @@ export function StatusHeatmap({
   }
 
   return (
-    <div className={cn("dark absolute inset-0 overflow-auto p-8 pt-24", className)}>
+    <div className={cn("absolute inset-0 overflow-auto p-8 pt-24", className)}>
       <div className="max-w-6xl mx-auto">
         <div className={cn(
           "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3",
