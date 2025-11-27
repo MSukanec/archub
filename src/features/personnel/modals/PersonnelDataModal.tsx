@@ -4,11 +4,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { UserCog, Trash2 } from 'lucide-react'
+import { parseLocalDate } from '@/lib/date-utils'
 
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { format } from 'date-fns'
@@ -75,8 +77,8 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
   React.useEffect(() => {
     if (personnelRecord) {
       form.reset({
-        start_date: personnelRecord.start_date ? new Date(personnelRecord.start_date) : null,
-        end_date: personnelRecord.end_date ? new Date(personnelRecord.end_date) : null,
+        start_date: personnelRecord.start_date ? parseLocalDate(personnelRecord.start_date) : null,
+        end_date: personnelRecord.end_date ? parseLocalDate(personnelRecord.end_date) : null,
         status: personnelRecord.status || 'active',
         labor_type_id: personnelRecord.labor_type_id || null,
         notes: personnelRecord.notes || ''

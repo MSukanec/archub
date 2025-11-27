@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { parseLocalDate, formatDateForDB } from '@/lib/date-utils';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -156,7 +157,7 @@ function FormPanel({
                       <div className="relative">
                         <Input
                           placeholder="Seleccionar fecha"
-                          value={field.value ? format(new Date(field.value), 'dd/MM/yyyy', { locale: es }) : ''}
+                          value={field.value ? format(parseLocalDate(field.value) || new Date(), 'dd/MM/yyyy', { locale: es }) : ''}
                           className="pr-10 cursor-pointer"
                           readOnly
                           data-testid="input-schedule-due-date"
@@ -167,8 +168,8 @@ function FormPanel({
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
-                        selected={field.value ? new Date(field.value) : undefined}
-                        onSelect={(date: Date | undefined) => field.onChange(date?.toISOString().split('T')[0])}
+                        selected={field.value ? parseLocalDate(field.value) ?? undefined : undefined}
+                        onSelect={(date: Date | undefined) => field.onChange(date ? formatDateForDB(date) : undefined)}
                         locale={es}
                         initialFocus
                       />

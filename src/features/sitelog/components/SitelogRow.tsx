@@ -3,6 +3,7 @@ import DataRowCard from '@/components/ui-custom/general/DataRowCard';
 import { SwipeableCard } from '@/layouts';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { parseLocalDate } from '@/lib/date-utils';
 import { 
   Star, 
   Edit, 
@@ -141,7 +142,7 @@ export default function SitelogRow({
         {/* Fecha y clima */}
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
           <span>
-            {format(new Date(siteLog.log_date + 'T00:00:00'), 'dd/MM/yyyy', { locale: es })}
+            {format(parseLocalDate(siteLog.log_date) || new Date(), 'dd/MM/yyyy', { locale: es })}
           </span>
           {weatherConfig && (
             <>

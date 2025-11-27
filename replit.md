@@ -37,6 +37,11 @@ Preferred communication style: Simple, everyday language.
 - **Cost System**: Three-tier cost system (Seencel Cost, Organization Cost, Independent Cost).
 - **Media Uploads**: Unified component for image and multi-file uploads using a scalable `MEDIA_FILES` + `MEDIA_LINKS` architecture.
 - **Image Compression System**: Client-side automatic image compression with predefined presets.
+- **Date Utilities (CRITICAL)**: All date handling MUST use `src/lib/date-utils.ts` to avoid timezone issues:
+  - `parseLocalDate(input)`: Convert database date strings to Date objects (prevents day shift)
+  - `formatDateForDB(date)`: Convert Date objects to YYYY-MM-DD for database storage
+  - `formatDate/formatDateShort/formatDateCompact`: Display dates to users
+  - **NEVER use** `new Date("YYYY-MM-DD")` directly - it causes timezone shift issues!
 - **3-Bucket Storage Architecture**: Organized file storage across three Supabase buckets (public-assets, private-assets, social-assets) with automatic routing and metadata persistence.
 - **Public Media Access**: `is_public` flag in `media_links` for controlled public accessibility.
 - **Project Selector Filtering**: Header project selector displays only `active` projects.

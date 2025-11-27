@@ -639,7 +639,7 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
   // Load existing payment data
   React.useEffect(() => {
     if (existingPayment && (mode === 'edit' || mode === 'view')) {
-      const paymentDate = parseLocalDate(existingPayment.payment_date)
+      const paymentDate = parseLocalDate(existingPayment.payment_date) || new Date()
       
       form.reset({
         payment_date: paymentDate,

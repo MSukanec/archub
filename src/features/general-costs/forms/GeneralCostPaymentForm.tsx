@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { DollarSign, CalendarIcon, Paperclip } from 'lucide-react'
+import { parseLocalDate } from '@/lib/date-utils'
 
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -319,7 +320,7 @@ function ViewPanel({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground" data-testid="text-payment-date">
               <CalendarIcon className="h-4 w-4 text-accent" />
-              {payment?.payment_date ? format(new Date(payment.payment_date), 'dd/MM/yyyy', { locale: es }) : '-'}
+              {payment?.payment_date ? format(parseLocalDate(payment.payment_date) || new Date(), 'dd/MM/yyyy', { locale: es }) : '-'}
             </div>
 
             {payment?.creator?.users && (
@@ -695,7 +696,7 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
       <ModalLayout onClose={handleClose} size="lg">
         <ModalHeader
           title={`Pago de ${existingPayment?.general_cost?.name || 'Gasto General'}`}
-          description={existingPayment?.payment_date ? format(new Date(existingPayment.payment_date), 'dd MMMM yyyy', { locale: es }) : 'Sin fecha'}
+          description={existingPayment?.payment_date ? format(parseLocalDate(existingPayment.payment_date) || new Date(), 'dd MMMM yyyy', { locale: es }) : 'Sin fecha'}
           icon={DollarSign}
         />
         <ModalBody>
