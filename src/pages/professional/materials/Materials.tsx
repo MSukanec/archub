@@ -96,7 +96,7 @@ export default function Materials() {
         )}
 
         {activeTab === 'purchase-orders' && (
-          <PurchaseOrdersTab projectId={selectedProjectId || undefined} />
+          <PurchaseOrdersTab projectId={selectedProjectId || undefined} organizationId={currentOrganizationId || undefined} />
         )}
 
         {activeTab === 'purchases' && (

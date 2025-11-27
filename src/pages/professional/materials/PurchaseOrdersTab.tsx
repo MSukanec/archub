@@ -51,6 +51,11 @@ export default function PurchaseOrdersTab({ projectId }: PurchaseOrdersTabProps)
 
   const [selectedOrders, setSelectedOrders] = useState<PurchaseOrder[]>([]);
 
+  // Debug logging
+  if (activeProjectId && organizationId) {
+    console.log('[PurchaseOrdersTab] Fetching orders for:', { projectId: activeProjectId, organizationId });
+  }
+
   const { data: ordersData, isLoading } = usePurchaseOrders(activeProjectId || undefined, organizationId);
 
   const allOrders = useMemo(() => {
