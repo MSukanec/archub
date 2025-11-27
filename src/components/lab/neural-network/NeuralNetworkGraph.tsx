@@ -1,11 +1,11 @@
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useMemo } from 'react';
 import ForceGraph2D, { ForceGraphMethods, NodeObject, LinkObject } from 'react-force-graph-2d';
 import { 
   GraphData, 
   GraphNode, 
   SatelliteNode, 
-  DEFAULT_STATUS_COLORS, 
-  DEFAULT_CORE_COLOR,
+  getStatusColorsFromCSS,
+  getCoreColorFromCSS,
   StatusColors 
 } from './types';
 
@@ -26,9 +26,9 @@ export function NeuralNetworkGraph({
   data,
   width,
   height,
-  backgroundColor = '#0a0a0f',
-  coreColor = DEFAULT_CORE_COLOR,
-  statusColors = DEFAULT_STATUS_COLORS,
+  backgroundColor,
+  coreColor,
+  statusColors,
   maxNodeValue = 500000,
   onNodeClick,
   onCoreClick,
@@ -37,6 +37,18 @@ export function NeuralNetworkGraph({
   const internalRef = useRef<ForceGraphMethods | undefined>();
   const graphRef = externalRef || internalRef;
   const animationFrameRef = useRef<number>(0);
+
+  const resolvedStatusColors = useMemo(() => statusColors || getStatusColorsFromCSS(), [statusColors]);
+  const resolvedCoreColor = useMemo(() => coreColor || getCoreColorFromCSS(), [coreColor]);
+  
+  const resolvedBgColor = useMemo(() => {
+    if (backgroundColor) return backgroundColor;
+    if (typeof window !== 'undefined') {
+      const root = getComputedStyle(document.documentElement);
+      return root.getPropertyValue('--main-sidebar-bg').trim() || 'hsl(0, 0%, 10%)';
+    }
+    return 'hsl(0, 0%, 10%)';
+  }, [backgroundColor]);
 
   useEffect(() => {
     return () => {
@@ -67,15 +79,15 @@ export function NeuralNetworkGraph({
       const size = baseSize * pulse;
       
       const gradient = ctx.createRadialGradient(x, y, 0, x, y, size * 2);
-      gradient.addColorStop(0, coreColor.glow);
-      gradient.addColorStop(0.5, 'rgba(59, 130, 246, 0.2)');
-      gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+      gradient.addColorStop(0, resolvedCoreColor.glow);
+      gradient.addColorStop(0.5, 'hsla(76, 100%, 40%, 0.2)');
+      gradient.addColorStop(1, 'hsla(76, 100%, 40%, 0)');
       ctx.fillStyle = gradient;
       ctx.beginPath();
       ctx.arc(x, y, size * 2, 0, 2 * Math.PI);
       ctx.fill();
       
-      ctx.fillStyle = coreColor.main;
+      ctx.fillStyle = resolvedCoreColor.main;
       ctx.beginPath();
       ctx.arc(x, y, size, 0, 2 * Math.PI);
       ctx.fill();
@@ -95,7 +107,7 @@ export function NeuralNetworkGraph({
       
     } else {
       const satelliteNode = graphNode as SatelliteNode;
-      const colors = statusColors[satelliteNode.status] || DEFAULT_STATUS_COLORS.healthy;
+      const colors = resolvedStatusColors[satelliteNode.status] || resolvedStatusColors.healthy;
       
       const baseSize = 8 + (Math.min(satelliteNode.value, maxNodeValue) / maxNodeValue) * 12;
       
@@ -134,7 +146,7 @@ export function NeuralNetworkGraph({
         ctx.fillText(shortLabel, x, y + size + 4);
       }
     }
-  }, [coreColor, statusColors, maxNodeValue]);
+  }, [resolvedCoreColor, resolvedStatusColors, maxNodeValue]);
   
   const linkCanvasObject = useCallback((link: LinkObject, ctx: CanvasRenderingContext2D) => {
     const source = link.source as NodeObject;
@@ -146,10 +158,10 @@ export function NeuralNetworkGraph({
     if (!targetNode || targetNode.type === 'core') return;
     
     const satelliteNode = targetNode as SatelliteNode;
-    const colors = statusColors[satelliteNode.status] || DEFAULT_STATUS_COLORS.healthy;
+    const colors = resolvedStatusColors[satelliteNode.status] || resolvedStatusColors.healthy;
     
     const gradient = ctx.createLinearGradient(source.x, source.y, target.x, target.y);
-    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.1)');
+    gradient.addColorStop(0, 'hsla(76, 100%, 40%, 0.1)');
     gradient.addColorStop(1, colors.glow);
     
     ctx.strokeStyle = gradient;
@@ -158,7 +170,7 @@ export function NeuralNetworkGraph({
     ctx.moveTo(source.x, source.y);
     ctx.lineTo(target.x, target.y);
     ctx.stroke();
-  }, [data.nodes, statusColors]);
+  }, [data.nodes, resolvedStatusColors]);
 
   const handleNodeClick = useCallback((node: NodeObject) => {
     const graphNode = node as GraphNode;
@@ -182,7 +194,7 @@ export function NeuralNetworkGraph({
       linkCanvasObject={linkCanvasObject}
       nodeRelSize={15}
       onNodeClick={handleNodeClick}
-      backgroundColor={backgroundColor}
+      backgroundColor={resolvedBgColor}
       width={width}
       height={height}
       d3AlphaDecay={0.02}

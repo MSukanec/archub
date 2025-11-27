@@ -230,16 +230,16 @@ function FinancialLatticeContent() {
   const hasNoClients = !isLoading && clientNodes.length === 0 && selectedProjectId;
 
   return (
-    <div className="relative h-full w-full bg-[#0a0a0f] overflow-hidden">
+    <div className="dark relative h-full w-full bg-[var(--main-sidebar-bg)] overflow-hidden">
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
-        <div className="bg-black/80 backdrop-blur-md rounded-full border border-white/20 p-1 flex gap-1">
+        <div className="bg-[var(--card-bg)]/80 backdrop-blur-md rounded-full border border-[var(--border)] p-1 flex gap-1">
           <button
             onClick={() => setViewMode('network')}
             className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
               viewMode === 'network' 
-                ? "bg-blue-500 text-white" 
-                : "text-white/60 hover:text-white hover:bg-white/10"
+                ? "bg-[var(--accent)] text-[var(--accent-foreground)]" 
+                : "text-[var(--text-muted)] hover:text-[var(--foreground)] hover:bg-[var(--card-hover-bg)]"
             )}
             data-testid="button-view-network"
           >
@@ -251,8 +251,8 @@ function FinancialLatticeContent() {
             className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
               viewMode === 'heatmap' 
-                ? "bg-blue-500 text-white" 
-                : "text-white/60 hover:text-white hover:bg-white/10"
+                ? "bg-[var(--accent)] text-[var(--accent-foreground)]" 
+                : "text-[var(--text-muted)] hover:text-[var(--foreground)] hover:bg-[var(--card-hover-bg)]"
             )}
             data-testid="button-view-heatmap"
           >
@@ -263,41 +263,41 @@ function FinancialLatticeContent() {
       </div>
       
       <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-        <div className="bg-black/60 backdrop-blur-md rounded-lg border border-white/10 p-4">
-          <h1 className="text-xl font-bold text-white mb-1">Financial Neural Lattice</h1>
-          <p className="text-sm text-white/50">Visualización orgánica del estado financiero</p>
+        <div className="bg-[var(--card-bg)]/60 backdrop-blur-md rounded-lg border border-[var(--border)] p-4">
+          <h1 className="text-xl font-bold text-[var(--foreground)] mb-1">Financial Neural Lattice</h1>
+          <p className="text-sm text-[var(--text-muted)]">Visualización orgánica del estado financiero</p>
         </div>
         
-        <div className="bg-black/60 backdrop-blur-md rounded-lg border border-white/10 p-4 space-y-3">
-          <div className="flex items-center gap-2 text-xs text-white/50 mb-2">
+        <div className="bg-[var(--card-bg)]/60 backdrop-blur-md rounded-lg border border-[var(--border)] p-4 space-y-3">
+          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-2">
             <Users className="w-3 h-3" />
             <span>Clientes: {stats.totalClients}</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-sm text-white/80">Críticos: {stats.critical}</span>
+            <div className="w-3 h-3 rounded-full bg-[var(--destructive)] animate-pulse" />
+            <span className="text-sm text-[var(--foreground)]">Críticos: {stats.critical}</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-yellow-500" />
-            <span className="text-sm text-white/80">Alerta: {stats.warning}</span>
+            <div className="w-3 h-3 rounded-full bg-[var(--warning)]" />
+            <span className="text-sm text-[var(--foreground)]">Alerta: {stats.warning}</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-green-500" />
-            <span className="text-sm text-white/80">Saludables: {stats.healthy}</span>
+            <div className="w-3 h-3 rounded-full bg-[var(--success)]" />
+            <span className="text-sm text-[var(--foreground)]">Saludables: {stats.healthy}</span>
           </div>
           
-          <div className="border-t border-white/10 pt-3 mt-3 space-y-2">
+          <div className="border-t border-[var(--border)] pt-3 mt-3 space-y-2">
             <div className="flex justify-between text-xs">
-              <span className="text-white/50">Deuda Total:</span>
-              <span className="text-red-400 font-medium">{formatCurrency(stats.totalDebt)}</span>
+              <span className="text-[var(--text-muted)]">Deuda Total:</span>
+              <span className="text-[var(--destructive)] font-medium">{formatCurrency(stats.totalDebt)}</span>
             </div>
             <div className="flex justify-between text-xs">
-              <span className="text-white/50">Comprometido:</span>
-              <span className="text-white/80">{formatCurrency(stats.totalCommitted)}</span>
+              <span className="text-[var(--text-muted)]">Comprometido:</span>
+              <span className="text-[var(--foreground)]">{formatCurrency(stats.totalCommitted)}</span>
             </div>
             <div className="flex justify-between text-xs">
-              <span className="text-white/50">Pagado:</span>
-              <span className="text-green-400">{formatCurrency(stats.totalPaid)}</span>
+              <span className="text-[var(--text-muted)]">Pagado:</span>
+              <span className="text-[var(--success)]">{formatCurrency(stats.totalPaid)}</span>
             </div>
           </div>
         </div>
@@ -321,20 +321,20 @@ function FinancialLatticeContent() {
       )}
 
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-30">
+        <div className="absolute inset-0 flex items-center justify-center bg-[var(--card-bg)]/50 backdrop-blur-sm z-30">
           <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
-            <p className="text-white/70 text-sm">Cargando datos...</p>
+            <Loader2 className="w-12 h-12 text-[var(--accent)] animate-spin" />
+            <p className="text-[var(--text-muted)] text-sm">Cargando datos...</p>
           </div>
         </div>
       )}
       
       {hasNoClients && (
         <div className="absolute inset-0 flex items-center justify-center z-30">
-          <div className="bg-black/60 backdrop-blur-md rounded-xl border border-white/10 p-8 text-center max-w-md">
-            <Users className="w-16 h-16 text-white/20 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">Sin Clientes</h3>
-            <p className="text-white/50 text-sm">
+          <div className="bg-[var(--card-bg)]/60 backdrop-blur-md rounded-xl border border-[var(--border)] p-8 text-center max-w-md">
+            <Users className="w-16 h-16 text-[var(--text-subtle)] mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-[var(--foreground)] mb-2">Sin Clientes</h3>
+            <p className="text-[var(--text-muted)] text-sm">
               Este proyecto no tiene clientes registrados. Agrega clientes para visualizar la red financiera.
             </p>
           </div>
@@ -347,17 +347,17 @@ function FinancialLatticeContent() {
             initial={{ opacity: 0, x: 100 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 100 }}
-            className="absolute top-4 right-4 w-80 bg-black/80 backdrop-blur-md rounded-xl border border-white/20 overflow-hidden z-20"
+            className="absolute top-4 right-4 w-80 bg-[var(--card-bg)]/80 backdrop-blur-md rounded-xl border border-[var(--border)] overflow-hidden z-20"
             data-testid="panel-client-detail"
           >
-            <div className="p-4 border-b border-white/10 flex items-center justify-between">
-              <h3 className="font-semibold text-white">Detalle del Cliente</h3>
+            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
+              <h3 className="font-semibold text-[var(--foreground)]">Detalle del Cliente</h3>
               <button 
                 onClick={handleCloseDetail}
-                className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+                className="p-1 hover:bg-[var(--card-hover-bg)] rounded-lg transition-colors"
                 data-testid="button-close-detail"
               >
-                <X className="w-4 h-4 text-white/60" />
+                <X className="w-4 h-4 text-[var(--text-muted)]" />
               </button>
             </div>
             
@@ -365,78 +365,78 @@ function FinancialLatticeContent() {
               <div className="flex items-center gap-3">
                 <div 
                   className={cn(
-                    "w-12 h-12 rounded-full flex items-center justify-center text-white font-bold",
-                    selectedNode.status === 'critical' && "bg-red-500/30",
-                    selectedNode.status === 'warning' && "bg-yellow-500/30",
-                    selectedNode.status === 'healthy' && "bg-green-500/30",
+                    "w-12 h-12 rounded-full flex items-center justify-center text-[var(--foreground)] font-bold",
+                    selectedNode.status === 'critical' && "bg-[var(--destructive)]/30",
+                    selectedNode.status === 'warning' && "bg-[var(--warning)]/30",
+                    selectedNode.status === 'healthy' && "bg-[var(--success)]/30",
                   )}
                 >
                   {selectedNode.label.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-semibold text-white">{selectedNode.label}</p>
-                  <p className="text-sm text-white/50">{selectedNode.sublabel}</p>
+                  <p className="font-semibold text-[var(--foreground)]">{selectedNode.label}</p>
+                  <p className="text-sm text-[var(--text-muted)]">{selectedNode.sublabel}</p>
                 </div>
               </div>
               
               <div className={cn(
                 "px-3 py-2 rounded-lg flex items-center gap-2",
-                selectedNode.status === 'critical' && "bg-red-500/20",
-                selectedNode.status === 'warning' && "bg-yellow-500/20",
-                selectedNode.status === 'healthy' && "bg-green-500/20",
+                selectedNode.status === 'critical' && "bg-[var(--destructive)]/20",
+                selectedNode.status === 'warning' && "bg-[var(--warning)]/20",
+                selectedNode.status === 'healthy' && "bg-[var(--success)]/20",
               )}>
                 <AlertTriangle className={cn(
                   "w-4 h-4",
-                  selectedNode.status === 'critical' && "text-red-400",
-                  selectedNode.status === 'warning' && "text-yellow-400",
-                  selectedNode.status === 'healthy' && "text-green-400",
+                  selectedNode.status === 'critical' && "text-[var(--destructive)]",
+                  selectedNode.status === 'warning' && "text-[var(--warning)]",
+                  selectedNode.status === 'healthy' && "text-[var(--success)]",
                 )} />
-                <span className="text-sm text-white">
+                <span className="text-sm text-[var(--foreground)]">
                   Estado: {selectedNode.status === 'critical' ? 'Crítico' : selectedNode.status === 'warning' ? 'Alerta' : 'Saludable'}
                 </span>
               </div>
               
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-white/50">
+                  <div className="flex items-center gap-2 text-[var(--text-muted)]">
                     <DollarSign className="w-4 h-4" />
                     <span className="text-sm">Deuda</span>
                   </div>
-                  <span className="font-semibold text-red-400">{formatCurrency(selectedNode.debtAmount)}</span>
+                  <span className="font-semibold text-[var(--destructive)]">{formatCurrency(selectedNode.debtAmount)}</span>
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-white/50">
+                  <div className="flex items-center gap-2 text-[var(--text-muted)]">
                     <DollarSign className="w-4 h-4" />
                     <span className="text-sm">Comprometido</span>
                   </div>
-                  <span className="font-medium text-white">{formatCurrency(selectedNode.totalCommitted)}</span>
+                  <span className="font-medium text-[var(--foreground)]">{formatCurrency(selectedNode.totalCommitted)}</span>
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-white/50">
+                  <div className="flex items-center gap-2 text-[var(--text-muted)]">
                     <DollarSign className="w-4 h-4" />
                     <span className="text-sm">Pagado</span>
                   </div>
-                  <span className="font-medium text-green-400">{formatCurrency(selectedNode.totalPaid)}</span>
+                  <span className="font-medium text-[var(--success)]">{formatCurrency(selectedNode.totalPaid)}</span>
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-white/50">
+                  <div className="flex items-center gap-2 text-[var(--text-muted)]">
                     <Clock className="w-4 h-4" />
                     <span className="text-sm">Última interacción</span>
                   </div>
-                  <span className="text-sm text-white/80">
+                  <span className="text-sm text-[var(--foreground)]">
                     {formatDate(selectedNode.lastInteraction)} ({getDaysSince(selectedNode.lastInteraction)} días)
                   </span>
                 </div>
               </div>
               
-              <div className="border-t border-white/10 pt-4 space-y-2">
+              <div className="border-t border-[var(--border)] pt-4 space-y-2">
                 {selectedNode.email && (
                   <a 
                     href={`mailto:${selectedNode.email}`}
-                    className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                    className="flex items-center gap-2 text-sm text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
                   >
                     <Mail className="w-4 h-4" />
                     {selectedNode.email}
@@ -445,7 +445,7 @@ function FinancialLatticeContent() {
                 {selectedNode.phone && (
                   <a 
                     href={`tel:${selectedNode.phone}`}
-                    className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                    className="flex items-center gap-2 text-sm text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
                   >
                     <Phone className="w-4 h-4" />
                     {selectedNode.phone}

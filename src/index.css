@@ -475,38 +475,6 @@
   --radius-lg: 8px;
 }
 
-/* Lab Theme - Always dark/immersive */
-.lab-theme {
-  /* Lab Background */
-  --lab-bg: hsl(230, 15%, 6%);
-  --lab-surface: hsl(230, 12%, 10%);
-  --lab-surface-hover: hsl(230, 12%, 14%);
-  --lab-border: hsl(230, 10%, 18%);
-  --lab-border-strong: hsl(230, 10%, 25%);
-  
-  /* Lab Text */
-  --lab-text: hsl(0, 0%, 95%);
-  --lab-text-muted: hsl(0, 0%, 60%);
-  --lab-text-subtle: hsl(0, 0%, 45%);
-  
-  /* Lab Status Colors */
-  --lab-critical: hsl(0, 72%, 51%);
-  --lab-critical-glow: hsla(0, 72%, 51%, 0.4);
-  --lab-critical-bg: hsla(0, 72%, 51%, 0.15);
-  
-  --lab-warning: hsl(45, 93%, 47%);
-  --lab-warning-glow: hsla(45, 93%, 47%, 0.4);
-  --lab-warning-bg: hsla(45, 93%, 47%, 0.15);
-  
-  --lab-success: hsl(142, 71%, 45%);
-  --lab-success-glow: hsla(142, 71%, 45%, 0.4);
-  --lab-success-bg: hsla(142, 71%, 45%, 0.15);
-  
-  /* Lab Accent (blue for core/primary) */
-  --lab-accent: hsl(217, 91%, 60%);
-  --lab-accent-glow: hsla(217, 91%, 60%, 0.5);
-}
-
 /* Movement row solid color classes */
 .movement-row-income {
   background-color: rgba(34, 197, 94, 0.08) !important;

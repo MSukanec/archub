@@ -15,28 +15,25 @@ export interface StatusHeatmapProps {
   sortBy?: 'status' | 'value' | 'none';
 }
 
-const statusClasses: Record<CellStatus, { card: string; bar: string; indicator: string }> = {
+const statusClasses: Record<CellStatus, { card: string; bar: string; indicator: string; text: string }> = {
   critical: {
-    card: 'bg-[var(--lab-critical-bg)] border-[var(--lab-critical)]/50 hover:bg-[var(--lab-critical)]/25',
-    bar: 'bg-[var(--lab-critical)]',
-    indicator: 'bg-[var(--lab-critical)]',
+    card: 'bg-[hsl(var(--destructive)/0.15)] border-[hsl(var(--destructive)/0.5)] hover:bg-[hsl(var(--destructive)/0.25)]',
+    bar: 'bg-[var(--destructive)]',
+    indicator: 'bg-[var(--destructive)]',
+    text: 'text-[var(--destructive)]',
   },
   warning: {
-    card: 'bg-[var(--lab-warning-bg)] border-[var(--lab-warning)]/50 hover:bg-[var(--lab-warning)]/25',
-    bar: 'bg-[var(--lab-warning)]',
-    indicator: 'bg-[var(--lab-warning)]',
+    card: 'bg-[hsl(var(--warning)/0.15)] border-[hsl(var(--warning)/0.5)] hover:bg-[hsl(var(--warning)/0.25)]',
+    bar: 'bg-[var(--warning)]',
+    indicator: 'bg-[var(--warning)]',
+    text: 'text-[var(--warning)]',
   },
   healthy: {
-    card: 'bg-[var(--lab-success-bg)] border-[var(--lab-success)]/50 hover:bg-[var(--lab-success)]/25',
-    bar: 'bg-[var(--lab-success)]',
-    indicator: 'bg-[var(--lab-success)]',
+    card: 'bg-[hsl(var(--success)/0.15)] border-[hsl(var(--success)/0.5)] hover:bg-[hsl(var(--success)/0.25)]',
+    bar: 'bg-[var(--success)]',
+    indicator: 'bg-[var(--success)]',
+    text: 'text-[var(--success)]',
   },
-};
-
-const statusTextClasses: Record<CellStatus, string> = {
-  critical: 'text-[var(--lab-critical)]',
-  warning: 'text-[var(--lab-warning)]',
-  healthy: 'text-[var(--lab-success)]',
 };
 
 export function StatusHeatmap({
@@ -65,15 +62,15 @@ export function StatusHeatmap({
 
   if (cells.length === 0) {
     return (
-      <div className={cn("lab-theme flex flex-col items-center justify-center h-64 text-center", className)}>
-        {emptyIcon || <Grid3X3 className="w-16 h-16 text-[var(--lab-text-subtle)] mb-4" />}
-        <p className="text-[var(--lab-text-muted)]">{emptyMessage}</p>
+      <div className={cn("dark flex flex-col items-center justify-center h-64 text-center", className)}>
+        {emptyIcon || <Grid3X3 className="w-16 h-16 text-[var(--text-subtle)] mb-4" />}
+        <p className="text-[var(--text-muted)]">{emptyMessage}</p>
       </div>
     );
   }
 
   return (
-    <div className={cn("lab-theme absolute inset-0 overflow-auto p-8 pt-24", className)}>
+    <div className={cn("dark absolute inset-0 overflow-auto p-8 pt-24", className)}>
       <div className="max-w-6xl mx-auto">
         <div className={cn(
           "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3",
@@ -105,19 +102,19 @@ export function StatusHeatmap({
                 )}
                 
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-[var(--lab-text)] truncate" title={cell.label}>
+                  <p className="text-sm font-medium text-[var(--foreground)] truncate" title={cell.label}>
                     {cell.label.split(' ')[0]}
                   </p>
                   {cell.sublabel && (
-                    <p className="text-xs text-[var(--lab-text-muted)]">{cell.sublabel}</p>
+                    <p className="text-xs text-[var(--text-muted)]">{cell.sublabel}</p>
                   )}
                   
                   <div className="mt-3">
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="text-[var(--lab-text-muted)]">Progreso</span>
-                      <span className={statusTextClasses[cell.status]}>{percent}%</span>
+                      <span className="text-[var(--text-muted)]">Progreso</span>
+                      <span className={classes.text}>{percent}%</span>
                     </div>
-                    <div className="h-1.5 bg-[var(--lab-border)] rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${percent}%` }}
@@ -128,7 +125,7 @@ export function StatusHeatmap({
                   </div>
                   
                   {cell.value > 0 && (
-                    <p className="text-xs text-[var(--lab-text-muted)] mt-2">
+                    <p className="text-xs text-[var(--text-muted)] mt-2">
                       {formatValue(cell.value)}
                     </p>
                   )}

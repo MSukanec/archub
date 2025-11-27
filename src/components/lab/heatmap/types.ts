@@ -19,7 +19,7 @@ export interface StatusColors {
 }
 
 export const DEFAULT_STATUS_COLORS: Record<CellStatus, StatusColors> = {
-  healthy: { main: '#22c55e', glow: 'rgba(34, 197, 94, 0.4)', bg: 'bg-green-500', text: 'text-green-500' },
-  warning: { main: '#eab308', glow: 'rgba(234, 179, 8, 0.4)', bg: 'bg-yellow-500', text: 'text-yellow-500' },
-  critical: { main: '#ef4444', glow: 'rgba(239, 68, 68, 0.5)', bg: 'bg-red-500', text: 'text-red-500' },
+  healthy: { main: 'hsl(76, 100%, 40%)', glow: 'hsla(76, 100%, 40%, 0.4)', bg: 'bg-[var(--success)]', text: 'text-[var(--success)]' },
+  warning: { main: 'hsl(45, 90%, 50%)', glow: 'hsla(45, 90%, 50%, 0.4)', bg: 'bg-[var(--warning)]', text: 'text-[var(--warning)]' },
+  critical: { main: 'hsl(0, 84%, 60%)', glow: 'hsla(0, 84%, 60%, 0.5)', bg: 'bg-[var(--destructive)]', text: 'text-[var(--destructive)]' },
 };
