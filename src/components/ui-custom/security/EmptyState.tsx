@@ -8,6 +8,7 @@ interface EmptyStateProps {
   action?: React.ReactNode;
   customContent?: React.ReactNode;
   className?: string;
+  buttonSize?: 'sm' | 'md' | 'lg';
 }
 
 export function EmptyState({
@@ -16,7 +17,8 @@ export function EmptyState({
   description,
   action,
   customContent,
-  className
+  className,
+  buttonSize = 'md'
 }: EmptyStateProps) {
   return (
     <div className="w-full flex items-center justify-center min-h-[calc(100vh-200px)] md:min-h-0 md:h-full">
@@ -131,7 +133,12 @@ export function EmptyState({
           
           {action && (
             <div className="pt-4 flex justify-center relative z-20">
-              {action}
+              {React.isValidElement(action)
+                ? React.cloneElement(action as React.ReactElement<any>, {
+                    size: action.props?.size || buttonSize
+                  })
+                : action
+              }
             </div>
           )}
         </div>
