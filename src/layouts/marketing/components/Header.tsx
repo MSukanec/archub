@@ -6,6 +6,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from "@/stores/authStore";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface HeaderProps {
   navigation?: Array<{ label: string; href: string }>;
@@ -98,29 +105,60 @@ export function Header({ navigation }: HeaderProps) {
     if (user) {
       return (
         <div className="hidden md:flex items-center space-x-3">
-          <Link href="/home">
+          <Link href="/organization/dashboard">
             <Button variant="default" size="sm" className="h-8 px-3" data-testid="button-dashboard">
               Ingresar
             </Button>
           </Link>
-          <div className="flex items-center space-x-2 group relative">
-            <Avatar className="h-8 w-8 cursor-pointer border-2 border-white/20" data-testid="avatar-user">
-              <AvatarImage src={user.user_metadata?.avatar_url} />
-              <AvatarFallback className="text-xs bg-white/10 text-white">
-                {getUserInitials(user)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="hidden group-hover:block absolute top-full right-0 mt-2 w-48 py-2 rounded-md shadow-lg z-50 bg-popover border">
-              <button
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="cursor-pointer transition-all duration-200 hover:scale-105" data-testid="avatar-user">
+                <Avatar className="h-8 w-8 border-2 border-white/20">
+                  <AvatarImage src={user.user_metadata?.avatar_url} />
+                  <AvatarFallback className="text-xs bg-white/10 text-white">
+                    {getUserInitials(user)}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              side="bottom" 
+              align="end"
+              className="w-[200px]"
+              sideOffset={8}
+            >
+              {/* User Info */}
+              <div className="px-4 py-3 border-b border-border">
+                <div className="font-medium text-sm text-foreground">
+                  {user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario'}
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {user.email}
+                </div>
+              </div>
+
+              {/* Dashboard Link */}
+              <DropdownMenuItem asChild>
+                <Link href="/organization/dashboard" className="cursor-pointer">
+                  <Home className="h-4 w-4 mr-2" />
+                  <span>Dashboard</span>
+                </Link>
+              </DropdownMenuItem>
+
+              {/* Separator */}
+              <DropdownMenuSeparator className="bg-border" />
+
+              {/* Logout */}
+              <DropdownMenuItem
                 onClick={logout}
-                className="flex items-center w-full px-4 py-2 text-sm hover:opacity-80"
+                className="cursor-pointer"
                 data-testid="button-logout"
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                Cerrar sesión
-              </button>
-            </div>
-          </div>
+                <span>Cerrar sesión</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       );
     }
