@@ -594,7 +594,7 @@ export function MaterialPaymentForm({ modalData, onClose, mode = 'create' }: Mat
             wallet_id: data.wallet_id,
             amount: data.amount,
             currency_id: data.currency_id,
-            exchange_rate: data.exchange_rate || null,
+            exchange_rate: data.exchange_rate ?? undefined,
             payment_date: formatDateForDB(data.payment_date),
             status: data.status,
             reference: data.reference || null,
