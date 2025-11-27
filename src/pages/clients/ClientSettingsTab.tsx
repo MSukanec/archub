@@ -1,7 +1,8 @@
 import { Users, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useClientRoles, useDeleteClientRole } from '@/features/clients';
+import { useClientRoles } from '@/features/clients/hooks/use-client-roles';
+import { useDeleteClientRole } from '@/features/clients/hooks/use-client-roles';
 import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
@@ -32,13 +33,13 @@ export default function ClientSettingsTab() {
 
   const handleDeleteRole = (role: ClientRole) => {
     openModal('delete-confirmation', {
-      mode: 'simple',
+      mode: 'delete',
       title: '¿Eliminar rol de cliente?',
       description: `Esta acción eliminará permanentemente el rol "${role.name}". Los clientes existentes con este rol no se verán afectados.`,
       itemName: role.name,
       itemType: 'rol',
       destructiveActionText: 'Eliminar Rol',
-      onConfirm: async () => {
+      onDelete: async () => {
         if (!organizationId) return;
 
         try {
