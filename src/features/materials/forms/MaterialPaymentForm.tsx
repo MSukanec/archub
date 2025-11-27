@@ -90,7 +90,7 @@ function FormPanel({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Fecha de Pago <span className="text-red-500">*</span>
+                  Fecha <span className="text-red-500">*</span>
                 </FormLabel>
                 <FormControl>
                   <Popover>
@@ -125,6 +125,34 @@ function FormPanel({
 
           <FormField
             control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Estado <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger data-testid="select-material-payment-status">
+                      <SelectValue placeholder="Seleccionar estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="confirmed">Confirmado</SelectItem>
+                      <SelectItem value="pending">Pendiente</SelectItem>
+                      <SelectItem value="rejected">Rechazado</SelectItem>
+                      <SelectItem value="void">Anulado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
             name="wallet_id"
             render={({ field }) => (
               <FormItem>
@@ -152,9 +180,7 @@ function FormPanel({
               </FormItem>
             )}
           />
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="amount"
@@ -179,7 +205,9 @@ function FormPanel({
               </FormItem>
             )}
           />
+        </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="currency_id"
@@ -209,15 +237,13 @@ function FormPanel({
               </FormItem>
             )}
           />
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="exchange_rate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo de Cambio (opcional)</FormLabel>
+                <FormLabel>Cotización (opcional)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -228,32 +254,6 @@ function FormPanel({
                     onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
                     data-testid="input-material-payment-exchange-rate"
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Estado <span className="text-red-500">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger data-testid="select-material-payment-status">
-                      <SelectValue placeholder="Seleccionar estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="confirmed">Confirmado</SelectItem>
-                      <SelectItem value="pending">Pendiente</SelectItem>
-                      <SelectItem value="rejected">Rechazado</SelectItem>
-                      <SelectItem value="void">Anulado</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
