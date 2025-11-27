@@ -1,5 +1,6 @@
 import { useCallback, useRef, useEffect, useMemo } from 'react';
 import ForceGraph2D, { ForceGraphMethods, NodeObject, LinkObject } from 'react-force-graph-2d';
+import { forceCollide } from 'd3-force';
 import { 
   GraphData, 
   GraphNode, 
@@ -62,6 +63,37 @@ export function NeuralNetworkGraph({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (graphRef.current) {
+      const fg = graphRef.current;
+      
+      const chargeForce = fg.d3Force('charge');
+      if (chargeForce) {
+        (chargeForce as any).strength(-500);
+        (chargeForce as any).distanceMax(600);
+      }
+      
+      const linkForce = fg.d3Force('link');
+      if (linkForce) {
+        (linkForce as any).distance((link: any) => {
+          const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+          if (sourceId === 'core') return 120;
+          if (typeof sourceId === 'string' && sourceId.startsWith('type-')) return 100;
+          return 80;
+        });
+        (linkForce as any).strength((link: any) => {
+          const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+          if (sourceId === 'core') return 0.5;
+          return 0.3;
+        });
+      }
+      
+      fg.d3Force('collision', forceCollide().radius(25).strength(0.8));
+      
+      fg.d3ReheatSimulation();
+    }
+  }, [data, graphRef]);
 
   const animate = useCallback(() => {
     animationFrameRef.current = requestAnimationFrame(animate);
@@ -133,14 +165,15 @@ export function NeuralNetworkGraph({
       graphData={data}
       nodeCanvasObject={nodeCanvasObject}
       linkCanvasObject={linkCanvasObject}
+      nodeId="id"
       nodeRelSize={15}
       onNodeClick={handleNodeClick}
       backgroundColor={resolvedBgColor}
       width={width}
       height={height}
-      d3AlphaDecay={0.02}
-      d3VelocityDecay={0.3}
-      warmupTicks={100}
+      d3AlphaDecay={0.015}
+      d3VelocityDecay={0.25}
+      warmupTicks={150}
       cooldownTicks={0}
       onEngineStop={onEngineStop}
       enableNodeDrag={true}

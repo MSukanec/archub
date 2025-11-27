@@ -44,7 +44,7 @@ export function LabPageLayout({
         {showToolbar && (
           <LabToolbar {...toolbarProps} />
         )}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden min-h-0">
           {children}
         </div>
       </div>

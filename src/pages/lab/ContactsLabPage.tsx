@@ -312,31 +312,9 @@ function ContactsLabContent() {
       });
     });
 
-    const contactRadius = Math.min(dimensions.width, dimensions.height) * 0.38;
-    const typeCounters: Record<string, number> = {};
-
     contacts.forEach((contact: ContactWithRelations) => {
       const types = contact.contact_types || [];
       const primaryType = types.length > 0 ? types[0].name : 'Sin tipo';
-      
-      typeCounters[primaryType] = (typeCounters[primaryType] || 0);
-      const countInType = typeCounters[primaryType];
-      typeCounters[primaryType]++;
-      
-      const totalInType = typeCountMap[primaryType] || 1;
-      const typeIndex = uniqueTypes.indexOf(primaryType);
-      const typeAngle = (typeIndex / uniqueTypes.length) * 2 * Math.PI - Math.PI / 2;
-      
-      const spreadAngle = Math.PI / 3;
-      const startAngle = typeAngle - spreadAngle / 2;
-      const angleStep = totalInType > 1 ? spreadAngle / (totalInType - 1) : 0;
-      const contactAngle = startAngle + countInType * angleStep;
-      
-      const radiusVariation = 0.85 + (countInType % 3) * 0.15;
-      const radius = contactRadius * radiusVariation;
-      
-      const contactX = centerX + Math.cos(contactAngle) * radius;
-      const contactY = centerY + Math.sin(contactAngle) * radius;
 
       const displayName = contact.display_name_override || 
         `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 
@@ -351,8 +329,6 @@ function ContactsLabContent() {
         value: 100,
         maxValue: 100,
         currentValue: 100,
-        x: contactX,
-        y: contactY,
         metadata: {
           isTypeNode: false,
           groupType: primaryType,
