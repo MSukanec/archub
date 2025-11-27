@@ -135,6 +135,23 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
   // GET /api/projects/:projectId/material-payments/:paymentId/attachments - Get payment attachments
   app.get("/api/projects/:projectId/material-payments/:paymentId/attachments", handleGetMaterialPaymentAttachments);
 
+  // ========== PURCHASE ORDERS ENDPOINTS ==========
+
+  // GET /api/projects/:projectId/purchase-orders - Get all purchase orders for a project
+  app.get("/api/projects/:projectId/purchase-orders", handleListPurchaseOrders);
+
+  // GET /api/projects/:projectId/purchase-orders/:orderId - Get a single purchase order
+  app.get("/api/projects/:projectId/purchase-orders/:orderId", handleGetPurchaseOrder);
+
+  // POST /api/projects/:projectId/purchase-orders - Create a new purchase order
+  app.post("/api/projects/:projectId/purchase-orders", handleCreatePurchaseOrder);
+
+  // PATCH /api/projects/:projectId/purchase-orders/:orderId - Update a purchase order
+  app.patch("/api/projects/:projectId/purchase-orders/:orderId", handleUpdatePurchaseOrder);
+
+  // DELETE /api/projects/:projectId/purchase-orders/:orderId - Delete a purchase order
+  app.delete("/api/projects/:projectId/purchase-orders/:orderId", handleDeletePurchaseOrder);
+
   // ========== CLIENT COMMITMENTS ENDPOINTS ==========
   
   // GET /api/projects/:projectId/client-commitments - Get all client commitments for a project

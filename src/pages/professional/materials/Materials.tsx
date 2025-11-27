@@ -11,7 +11,7 @@ import PurchasesTab from './PurchasesTab'
 import MaterialSettingsTab from './MaterialSettingsTab'
 
 export default function Materials() {
-  const [activeTab, setActiveTab] = useState('payments')
+  const [activeTab, setActiveTab] = useState('purchase-orders')
   const { data: userData, isLoading } = useCurrentUser()
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const { setSidebarContext } = useNavigationStore()
@@ -23,15 +23,14 @@ export default function Materials() {
 
   const headerTabs = [
     {
+      id: "purchase-orders",
+      label: "Órdenes de Compra",
+      isActive: activeTab === "purchase-orders"
+    },
+    {
       id: "payments",
       label: "Pagos",
       isActive: activeTab === "payments"
-    },
-    {
-      id: "purchase-orders",
-      label: "Órdenes de Compra",
-      isActive: activeTab === "purchase-orders",
-      disabled: true
     },
     {
       id: "purchases",
@@ -55,6 +54,17 @@ export default function Materials() {
     showMembers: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
+    ...(activeTab === "purchase-orders" && {
+      actionButton: {
+        label: "Nueva Orden",
+        icon: Plus,
+        onClick: () => openModal('purchase-order', {
+          projectId: selectedProjectId,
+          organizationId: currentOrganizationId,
+          mode: 'create'
+        })
+      }
+    }),
     ...(activeTab === "payments" && {
       actionButton: {
         label: "Nuevo Pago",
