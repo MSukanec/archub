@@ -292,12 +292,7 @@ function LayoutContent({
                     {children}
                   </PageLayout>
                 ) : (
-                  <div
-                    className={(() => {
-                      const mode = resolveWidthMode(wide);
-                      return `${getContainerClasses(mode)} ${getContentPaddingClasses(mode)} pt-1 pb-2 min-h-0`;
-                    })()}
-                  >
+                  <div className="h-full w-full overflow-auto">
                     {children}
                   </div>
                 )}
