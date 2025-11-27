@@ -5,10 +5,12 @@ import {
   createClientPayment,
   updateClientPayment,
   deleteClientPayment,
+  getClientPaymentAttachments,
   type ListClientPaymentsParams,
   type CreateClientPaymentParams,
   type UpdateClientPaymentParams,
-  type DeleteClientPaymentParams
+  type DeleteClientPaymentParams,
+  type GetClientPaymentAttachmentsParams
 } from '../../lib/handlers/projects/clientPayments.js';
 import { getProjectPaymentMetrics } from '../../lib/services/paymentsMetrics.js';
 import type { ProjectsContext } from '../../lib/handlers/projects/shared.js';
@@ -173,5 +175,34 @@ export async function handleGetClientPaymentsMetrics(req: Request, res: Response
   } catch (error: any) {
     console.error('Error in getClientPaymentsMetrics controller:', error);
     return res.status(500).json({ error: error.message || 'Failed to get payment metrics' });
+  }
+}
+
+export async function handleGetClientPaymentAttachments(req: Request, res: Response) {
+  try {
+    const token = extractToken(req.headers.authorization);
+    if (!token) {
+      return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    const supabase = createAuthenticatedClient(token);
+    const ctx: ProjectsContext = { supabase };
+
+    const params: GetClientPaymentAttachmentsParams = {
+      projectId: req.params.projectId,
+      paymentId: req.params.paymentId,
+      organizationId: req.query.organization_id as string
+    };
+
+    const result = await getClientPaymentAttachments(ctx, params);
+
+    if (result.success) {
+      return res.status(200).json({ data: result.data });
+    } else {
+      return res.status(400).json({ error: result.error });
+    }
+  } catch (error: any) {
+    console.error('Error in getClientPaymentAttachments controller:', error);
+    return res.status(500).json({ error: error.message || 'Failed to get payment attachments' });
   }
 }

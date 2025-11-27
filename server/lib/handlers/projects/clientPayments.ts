@@ -82,6 +82,44 @@ export type DeleteClientPaymentResult =
   | { success: true }
   | { success: false; error: string };
 
+export interface GetClientPaymentAttachmentsParams {
+  projectId: string;
+  paymentId: string;
+  organizationId: string;
+}
+
+export interface PaymentAttachment {
+  id: string;
+  description: string | null;
+  category: string | null;
+  created_at: string;
+  media_file: {
+    id: string;
+    file_url: string;
+    file_name: string;
+    file_type: string;
+    file_size: number;
+  } | null;
+}
+
+interface RawPaymentAttachment {
+  id: string;
+  description: string | null;
+  category: string | null;
+  created_at: string;
+  media_file: {
+    id: string;
+    file_url: string;
+    file_name: string;
+    file_type: string;
+    file_size: number;
+  }[] | null;
+}
+
+export type GetClientPaymentAttachmentsResult =
+  | { success: true; data: PaymentAttachment[] }
+  | { success: false; error: string };
+
 export interface CreateClientPaymentParams {
   projectId: string;
   organizationId: string;
@@ -625,5 +663,93 @@ export async function deleteClientPayment(
   } catch (error: any) {
     console.error('Error in deleteClientPayment handler:', error);
     return { success: false, error: error.message || 'Failed to delete client payment' };
+  }
+}
+
+export async function getClientPaymentAttachments(
+  ctx: ProjectsContext,
+  params: GetClientPaymentAttachmentsParams
+): Promise<GetClientPaymentAttachmentsResult> {
+  try {
+    const { supabase } = ctx;
+
+    if (!params.projectId || !params.paymentId || !params.organizationId) {
+      return { success: false, error: 'projectId, paymentId, and organizationId are required' };
+    }
+
+    const authResult = await ensureAuth(ctx);
+    if (!authResult.success) {
+      return authResult;
+    }
+
+    const orgAccessResult = await ensureOrganizationAccess(ctx, params.organizationId);
+    if (!orgAccessResult.success) {
+      return orgAccessResult;
+    }
+
+    // Verify project belongs to organization
+    const projectResult = await getProjectById(ctx, params.projectId);
+    if (!projectResult.success) {
+      return projectResult;
+    }
+
+    if (projectResult.data.organization_id !== params.organizationId) {
+      return { success: false, error: 'Forbidden: Project does not belong to organization' };
+    }
+
+    // Verify payment exists and belongs to this project
+    const { data: existingPayment, error: paymentError } = await supabase
+      .from('client_payments')
+      .select('id')
+      .eq('id', params.paymentId)
+      .eq('project_id', params.projectId)
+      .eq('organization_id', params.organizationId)
+      .single();
+
+    if (paymentError || !existingPayment) {
+      return { success: false, error: 'Payment not found' };
+    }
+
+    // Fetch attachments from media_links
+    const { data, error } = await supabase
+      .from('media_links')
+      .select(`
+        id,
+        description,
+        category,
+        created_at,
+        media_file:media_files (
+          id,
+          file_url,
+          file_name,
+          file_type,
+          file_size
+        )
+      `)
+      .eq('client_payment_id', params.paymentId)
+      .eq('organization_id', params.organizationId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching payment attachments:', error);
+      return { success: false, error: 'Failed to fetch payment attachments' };
+    }
+
+    // Transform the data to handle Supabase's array response for relations
+    const transformedData: PaymentAttachment[] = ((data || []) as RawPaymentAttachment[]).map(item => ({
+      id: item.id,
+      description: item.description,
+      category: item.category,
+      created_at: item.created_at,
+      media_file: Array.isArray(item.media_file) && item.media_file.length > 0
+        ? item.media_file[0]
+        : null
+    }));
+
+    return { success: true, data: transformedData };
+
+  } catch (error: any) {
+    console.error('Error in getClientPaymentAttachments handler:', error);
+    return { success: false, error: error.message || 'Failed to get payment attachments' };
   }
 }

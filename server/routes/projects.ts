@@ -32,7 +32,8 @@ import {
   handleCreateClientPayment,
   handleUpdateClientPayment,
   handleDeleteClientPayment,
-  handleGetClientPaymentsMetrics
+  handleGetClientPaymentsMetrics,
+  handleGetClientPaymentAttachments
 } from '../controllers/projects/clientPayments.controller.js';
 import {
   handleListClientCommitments,
@@ -95,6 +96,9 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
 
   // DELETE /api/projects/:projectId/client-payments/:paymentId - Delete a client payment
   app.delete("/api/projects/:projectId/client-payments/:paymentId", handleDeleteClientPayment);
+  
+  // GET /api/projects/:projectId/client-payments/:paymentId/attachments - Get payment attachments
+  app.get("/api/projects/:projectId/client-payments/:paymentId/attachments", handleGetClientPaymentAttachments);
 
   // ========== CLIENT COMMITMENTS ENDPOINTS ==========
   

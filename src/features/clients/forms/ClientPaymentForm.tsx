@@ -18,7 +18,6 @@ import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
-import { supabase } from '@/lib/supabase'
 import { formatContactName } from '@/utils/contacts'
 import { uploadFile, deleteFile } from '@/lib/storage'
 import { UploadMultiFileField } from '@/components/ui-custom/fields/UploadMultiFileField'
@@ -657,39 +656,45 @@ export function ClientPaymentForm({ modalData, onClose, mode = 'create' }: Clien
     }
   }, [existingPayment, mode, form, currentMember?.id])
 
-  // Fetch attachments from media_links
+  // Fetch attachments from backend API
   React.useEffect(() => {
     const fetchAttachments = async () => {
-      if (!paymentId || !organizationId) return
+      if (!paymentId || !organizationId || !projectId) return
       
-      const { data, error } = await supabase
-        .from('media_links')
-        .select(`
-          id,
-          description,
-          category,
-          created_at,
-          media_file:media_files (
-            id,
-            file_url,
-            file_name,
-            file_type,
-            file_size
-          )
-        `)
-        .eq('client_payment_id', paymentId)
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: true })
-      
-      if (!error && data) {
-        setAttachments(data)
+      try {
+        const { supabase } = await import('@/lib/supabase')
+        const { data: sessionData } = await supabase.auth.getSession()
+        const token = sessionData?.session?.access_token
+        
+        if (!token) {
+          console.error('No auth token available for fetching attachments')
+          return
+        }
+        
+        const response = await fetch(
+          `/api/projects/${projectId}/client-payments/${paymentId}/attachments?organization_id=${organizationId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        )
+        
+        if (response.ok) {
+          const result = await response.json()
+          if (result.data) {
+            setAttachments(result.data)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching payment attachments:', error)
       }
     }
     
     if (mode === 'edit' || mode === 'view') {
       fetchAttachments()
     }
-  }, [paymentId, organizationId, mode])
+  }, [paymentId, organizationId, projectId, mode])
   
   // Build existing files array from media_links attachments
   const existingFiles = useMemo(() => {
