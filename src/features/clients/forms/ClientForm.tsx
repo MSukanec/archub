@@ -124,7 +124,7 @@ function FormPanel({
                   <SelectContent>
                     <SelectItem value="">Sin rol</SelectItem>
                     {clientRoles && clientRoles.length > 0 ? (
-                      clientRoles.map((role: any) => (
+                      [...clientRoles].sort((a: any, b: any) => a.name.localeCompare(b.name, 'es')).map((role: any) => (
                         <SelectItem key={role.id} value={role.id}>
                           {role.name}
                         </SelectItem>
@@ -364,7 +364,7 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
   const { data: clientRoles = [], isLoading: clientRolesLoading } = useQuery<any[]>({
     queryKey: [`/api/client-roles`],
     enabled: !!organizationId,
-    staleTime: 0,
+    staleTime: 60 * 1000, // 1 minute
   });
 
   // Query to get existing client data when editing
