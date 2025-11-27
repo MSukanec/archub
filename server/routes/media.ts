@@ -34,15 +34,9 @@ export function registerMediaRoutes(app: Express, deps: RouteDeps) {
       
       const { data: preferences, error: prefError } = await adminClient
         .from('user_preferences')
-        .select('last_organization_id, last_project_id')
+        .select('last_organization_id')
         .eq('user_id', dbUser.id)
         .maybeSingle();
-
-      console.log('[media/gallery] User preferences result:', { 
-        dbUserId: dbUser.id, 
-        preferences, 
-        prefError: prefError?.message 
-      });
 
       if (prefError) {
         console.error('[media/gallery] Preferences error:', prefError);
@@ -50,11 +44,11 @@ export function registerMediaRoutes(app: Express, deps: RouteDeps) {
       }
       
       if (!preferences?.last_organization_id) {
-        return res.status(400).json({ error: 'User must belong to an organization', details: 'No organization found in preferences' });
+        return res.status(400).json({ error: 'User must belong to an organization' });
       }
 
       const organizationId = preferences.last_organization_id;
-      const projectId = (req.query.projectId as string) || preferences.last_project_id || null;
+      const projectId = (req.query.projectId as string) || null;
       const category = req.query.category as 'photo' | 'video' | 'document' | undefined;
 
       const { data: membership, error: memberError } = await supabase
