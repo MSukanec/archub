@@ -11,6 +11,7 @@ import { parseLocalDate } from '@/lib/date-utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
 import {
@@ -238,16 +239,20 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
       render: (order: PurchaseOrder) => formatDate(order.order_date, 'dd/MM/yyyy'),
     },
     {
-      key: 'items_count',
-      label: 'Items',
+      key: 'requester',
+      label: 'Solicitante',
       sortable: true,
-      sortType: 'number' as const,
       render: (order: PurchaseOrder) => {
-        const count = order.items?.length || 0;
+        if (!order.requester?.user) return '-';
+        const initials = (order.requester.user.full_name || '').split(' ').map(n => n[0]).join('').toUpperCase();
         return (
-          <Badge variant="outline" className="font-medium">
-            {count} {count === 1 ? 'ítem' : 'ítems'}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={order.requester.user.avatar_url || undefined} />
+              <AvatarFallback className="text-xs">{initials || '?'}</AvatarFallback>
+            </Avatar>
+            <span className="text-sm">{order.requester.user.full_name || '-'}</span>
+          </div>
         );
       },
     },
@@ -261,15 +266,6 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
       },
     },
     {
-      key: 'requester',
-      label: 'Solicitante',
-      sortable: true,
-      render: (order: PurchaseOrder) => {
-        if (!order.requester?.user) return '-';
-        return order.requester.user.full_name || '-';
-      },
-    },
-    {
       key: 'notes',
       label: 'Notas',
       sortable: false,
@@ -279,6 +275,20 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
           <span className="text-sm text-muted-foreground truncate max-w-[200px] block">
             {order.notes}
           </span>
+        );
+      },
+    },
+    {
+      key: 'items_count',
+      label: 'Items',
+      sortable: true,
+      sortType: 'number' as const,
+      render: (order: PurchaseOrder) => {
+        const count = order.items?.length || 0;
+        return (
+          <Badge variant="outline" className="font-medium">
+            {count} {count === 1 ? 'ítem' : 'ítems'}
+          </Badge>
         );
       },
     },
