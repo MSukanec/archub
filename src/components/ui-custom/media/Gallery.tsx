@@ -54,7 +54,7 @@ interface GalleryFile {
   movement_id?: string | null;
   contact_id?: string | null;
   course_lesson_id?: string | null;
-  general_cost_id?: string | null;
+  general_cost_payment_id?: string | null;
   client_payment_id?: string | null;
 }
 
@@ -85,7 +85,7 @@ function getSourceInfo(file: GalleryFile): { icon: any; label: string; color: st
   if (file.course_lesson_id) {
     return { icon: GraduationCap, label: 'Cursos', color: 'bg-indigo-500' };
   }
-  if (file.general_cost_id) {
+  if (file.general_cost_payment_id) {
     return { icon: DollarSign, label: 'Costos', color: 'bg-yellow-500' };
   }
   return null;
