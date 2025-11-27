@@ -87,8 +87,8 @@ export async function uploadFile(
 
     const fileType = getFileType(file.type);
     
-    const { data: { session } } = await supabase.auth.getSession();
     // Usar created_by_member_id si se proporciona (organization_member.id), sino usar auth user_id
+    // Nota: session ya fue verificada al inicio de la función
     const createdById = context.created_by_member_id || session?.user?.id || context.user_id;
 
     const { data: mediaFile, error: mediaFileError } = await supabase
