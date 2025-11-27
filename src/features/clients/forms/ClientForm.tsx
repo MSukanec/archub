@@ -364,7 +364,7 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
   const { data: clientRoles = [], isLoading: clientRolesLoading } = useQuery<any[]>({
     queryKey: [`/api/client-roles`],
     enabled: !!organizationId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
 
   // Query to get existing client data when editing
