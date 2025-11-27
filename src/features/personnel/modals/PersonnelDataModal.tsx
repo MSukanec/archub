@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { UserCog, Trash2 } from 'lucide-react'
-import { parseLocalDate } from '@/lib/date-utils'
+import { parseLocalDate, formatDateForDB } from '@/lib/date-utils'
 
 import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
@@ -94,8 +94,8 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
         personnelId: personnelRecord.id,
         data: {
           organization_id: organizationId,
-          start_date: data.start_date ? data.start_date.toISOString().split('T')[0] : null,
-          end_date: data.end_date ? data.end_date.toISOString().split('T')[0] : null,
+          start_date: data.start_date ? formatDateForDB(data.start_date) : null,
+          end_date: data.end_date ? formatDateForDB(data.end_date) : null,
           status: data.status,
           labor_type_id: data.labor_type_id,
           notes: data.notes || '',
