@@ -61,6 +61,7 @@ import Activity from "@/pages/activity/Activity";
 
 // Lab Pages (Lazy Loaded - experimental POCs)
 const FinancialLatticePage = lazy(() => import("@/pages/lab/FinancialLatticePage"));
+const ContactsLabPage = lazy(() => import("@/pages/lab/ContactsLabPage"));
 
 // Admin Pages (Lazy Loaded - solo admins las usan)
 const AdminAdmin = lazy(() => import("@/pages/admin/administration/AdminAdmin"));
@@ -406,6 +407,12 @@ function Router() {
         <Route path="/lab/financial-lattice">
           <Suspense fallback={<LazyLoadFallback />}>
             <FinancialLatticePage />
+          </Suspense>
+        </Route>
+        
+        <Route path="/lab/contacts">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <ContactsLabPage />
           </Suspense>
         </Route>
 

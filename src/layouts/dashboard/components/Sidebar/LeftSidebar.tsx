@@ -246,7 +246,8 @@ export function LeftSidebar() {
         { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
         { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },
         { id: 'products', label: 'Productos', icon: Package, href: '/providers/products' },
-        { id: 'lab', label: 'Lab', icon: FlaskConical, href: '/lab/financial-lattice' },
+        { id: 'lab-clients', label: 'Lab - Clientes', icon: FlaskConical, href: '/lab/financial-lattice' },
+        { id: 'lab-contacts', label: 'Lab - Contactos', icon: FlaskConical, href: '/lab/contacts' },
       ];
     } else if (sidebarLevel === 'community') {
       return [
