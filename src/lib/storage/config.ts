@@ -99,6 +99,12 @@ export const ENTITY_CONFIG: Record<EntityType, EntityConfig> = {
     compressionPreset: 'document',
     visibility: 'organization'
   },
+  'material_purchase_attachment': {
+    bucket: 'private-assets',
+    basePath: 'organizations/{org_id}/finance/material-purchases',
+    compressionPreset: 'document',
+    visibility: 'organization'
+  },
   'sitelog_attachment': {
     bucket: 'private-assets',
     basePath: 'organizations/{org_id}/sitelogs/{project_id}',

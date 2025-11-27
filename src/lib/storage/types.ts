@@ -14,6 +14,7 @@ export type EntityType =
   | 'general_cost_payment_attachment'
   | 'client_payment_attachment'
   | 'material_payment_attachment'
+  | 'material_purchase_attachment'
   | 'sitelog_attachment'
   | 'project_photo'
   | 'sitelog_photo'
@@ -39,6 +40,7 @@ export interface UploadContext {
     course_lesson_id?: string;
     client_payment_id?: string;
     material_payment_id?: string;
+    material_purchase_id?: string;
   };
   category?: string;
   description?: string;
