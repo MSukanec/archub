@@ -37,7 +37,6 @@ export interface UploadContext {
     course_id?: string;
     course_module_id?: string;
     course_lesson_id?: string;
-    movement_id?: string;
     client_payment_id?: string;
     material_payment_id?: string;
   };

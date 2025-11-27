@@ -149,15 +149,11 @@ export async function uploadProjectDocument(
 
 export async function uploadInvoice(
   file: File,
-  organizationId: string,
-  movementId?: string
+  organizationId: string
 ): Promise<UploadResult> {
   const context: UploadContext = {
     entity: 'invoice',
     organization_id: organizationId,
-    link_to: movementId ? {
-      movement_id: movementId
-    } : undefined,
     category: 'invoice',
     description: 'Invoice document'
   };
