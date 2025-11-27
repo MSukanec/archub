@@ -54,7 +54,7 @@ export interface PurchaseOrderItem {
   unit?: {
     id: string;
     name: string;
-    abbreviation: string | null;
+    description: string | null;
   } | null;
 }
 
@@ -181,7 +181,8 @@ async function fetchOrderWithRelations(
       *,
       unit:units!unit_id (
         id,
-        name
+        name,
+        description
       )
     `)
     .eq('purchase_order_id', orderId)
