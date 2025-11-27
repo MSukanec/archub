@@ -295,7 +295,7 @@ function ViewPanel({
 }: {
   scheduleItem: any;
 }) {
-  const isPastDue = scheduleItem.status === 'pending' && new Date(scheduleItem.due_date) < new Date();
+  const isPastDue = scheduleItem.status === 'pending' && parseLocalDate(scheduleItem.due_date)! < new Date();
   const effectiveStatus: ScheduleStatus = isPastDue ? 'overdue' : (scheduleItem.status as ScheduleStatus);
   const statusConfig = STATUS_CONFIG[effectiveStatus];
   const StatusIcon = statusConfig.icon;
@@ -345,11 +345,11 @@ function ViewPanel({
             )} 
             data-testid="text-schedule-due-date"
           >
-            {format(new Date(scheduleItem.due_date), "dd 'de' MMMM, yyyy", { locale: es })}
+            {format(parseLocalDate(scheduleItem.due_date)!, "dd 'de' MMMM, yyyy", { locale: es })}
           </span>
           {isPastDue && (
             <p className="text-sm text-destructive mt-0.5">
-              Vencida hace {Math.floor((Date.now() - new Date(scheduleItem.due_date).getTime()) / (1000 * 60 * 60 * 24))} días
+              Vencida hace {Math.floor((Date.now() - parseLocalDate(scheduleItem.due_date)!.getTime()) / (1000 * 60 * 60 * 24))} días
             </p>
           )}
         </div>

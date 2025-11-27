@@ -2,6 +2,7 @@ import { getClientPayments } from '@/features/clients/services/clientPayments';
 import { getPartnerContributions } from './getPartnerContributions';
 import { getPartnerWithdrawals } from './getPartnerWithdrawals';
 import { supabase } from '@/lib/supabase';
+import { parseLocalDate } from '@/lib/date-utils';
 import type { FinancialMovementWithRelations } from '../types';
 import { 
   mapClientPaymentsToFinancialMovements,
@@ -213,7 +214,7 @@ export async function getAllFinancialMovements(
 
     // Sort by payment date (most recent first)
     allMovements.sort((a, b) => {
-      return new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
+      return parseLocalDate(b.payment_date)!.getTime() - parseLocalDate(a.payment_date)!.getTime();
     });
 
     return allMovements;

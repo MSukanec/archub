@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { useGlobalModalStore } from '@/components/modal';
 import { format, isPast, isToday, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { parseLocalDate } from '@/lib/date-utils';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
 import {
   useClientPaymentSchedule,
@@ -78,7 +79,7 @@ export default function ClientScheduleTab({ projectId }: ClientScheduleTabProps)
       const clientName = contact ? formatContactName(contact) : 'Cliente desconocido';
       
       let effectiveStatus = item.status as ScheduleStatus;
-      if (effectiveStatus === 'pending' && isPast(new Date(item.due_date)) && !isToday(new Date(item.due_date))) {
+      if (effectiveStatus === 'pending' && isPast(parseLocalDate(item.due_date)!) && !isToday(parseLocalDate(item.due_date)!)) {
         effectiveStatus = 'overdue';
       }
       
@@ -136,8 +137,8 @@ export default function ClientScheduleTab({ projectId }: ClientScheduleTabProps)
         totalPending += amount;
         countPending++;
         
-        const dueDate = new Date(item.due_date);
-        if (!nextDueDate || dueDate < new Date(nextDueDate)) {
+        const dueDate = parseLocalDate(item.due_date)!;
+        if (!nextDueDate || dueDate < parseLocalDate(nextDueDate)!) {
           nextDueDate = item.due_date;
           nextDueAmount = amount;
         }
@@ -171,7 +172,7 @@ export default function ClientScheduleTab({ projectId }: ClientScheduleTabProps)
       mode: 'dangerous',
       title: 'Eliminar Cuota',
       description: 'Se eliminará esta cuota del cronograma. Esta acción no se puede deshacer.',
-      itemName: `Cuota ${format(new Date(item.due_date), 'dd/MM/yyyy')}`,
+      itemName: `Cuota ${format(parseLocalDate(item.due_date)!, 'dd/MM/yyyy')}`,
       itemType: 'cuota de pago',
       onConfirm: async () => {
         try {
@@ -263,7 +264,7 @@ export default function ClientScheduleTab({ projectId }: ClientScheduleTabProps)
       label: 'Fecha de Vencimiento',
       sortable: true,
       render: (item: typeof scheduleItems[0]) => {
-        const dueDate = new Date(item.due_date);
+        const dueDate = parseLocalDate(item.due_date)!;
         const isOverdue = item.effectiveStatus === 'overdue';
         const isDueToday = isToday(dueDate);
         const isDueSoon = !isOverdue && !isDueToday && dueDate <= addDays(new Date(), 7);

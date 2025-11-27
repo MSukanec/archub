@@ -17,6 +17,7 @@ import GeneralCostPaymentRow from '@/features/finances/components/GeneralCostPay
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
+import { parseLocalDate } from '@/lib/date-utils';
 
 export default function GeneralCostsPaymentsTab() {
   const { data: userData } = useCurrentUser();
@@ -79,7 +80,7 @@ export default function GeneralCostsPaymentsTab() {
   const sortedPayments = useMemo(() => {
     return [...filteredPayments].sort((a, b) => {
       // Primero por payment_date (más reciente primero)
-      const dateComparison = new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
+      const dateComparison = parseLocalDate(b.payment_date)!.getTime() - parseLocalDate(a.payment_date)!.getTime();
       if (dateComparison !== 0) return dateComparison;
       
       // Si tienen la misma fecha de pago, por created_at (más nuevo primero)

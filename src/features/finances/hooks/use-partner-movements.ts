@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getPartnerContributions } from '../services/getPartnerContributions';
 import { getPartnerWithdrawals } from '../services/getPartnerWithdrawals';
+import { parseLocalDate } from '@/lib/date-utils';
 import { 
   mapPartnerContributionsToFinancialMovements,
   mapPartnerWithdrawalsToFinancialMovements 
@@ -38,7 +39,7 @@ export function usePartnerMovements(
       // Combine and sort by payment_date descending
       const allMovements = [...contributionMovements, ...withdrawalMovements];
       allMovements.sort((a, b) => {
-        return new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
+        return parseLocalDate(b.payment_date)!.getTime() - parseLocalDate(a.payment_date)!.getTime();
       });
 
       return allMovements;

@@ -1,6 +1,7 @@
 import DataRowCard from '@/components/ui-custom/general/DataRowCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { parseLocalDate } from '@/lib/date-utils';
 import type { ClientPaymentWithRelations } from '@/features/clients';
 
 interface ClientPaymentRowProps {
@@ -98,10 +99,11 @@ export default function ClientPaymentRow({
     return undefined;
   };
 
-  // Formatear fecha de pago
+  // Formatear fecha de pago - uses parseLocalDate to avoid timezone issues
   const formatPaymentDate = (dateString: string): string => {
     try {
-      return format(new Date(dateString), 'dd/MM/yyyy', { locale: es });
+      const date = parseLocalDate(dateString);
+      return date ? format(date, 'dd/MM/yyyy', { locale: es }) : '-';
     } catch {
       return '-';
     }

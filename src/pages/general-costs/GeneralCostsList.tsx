@@ -17,6 +17,7 @@ import GeneralCostRow from "@/features/finances/components/GeneralCostRow";
 import type { GeneralCost } from "@/features/general-costs/types";
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
+import { parseLocalDate } from '@/lib/date-utils';
 
 interface GeneralCostsListProps {
   onNewGeneralCost?: () => void;
@@ -109,7 +110,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
     oneMonthAgo.setMonth(now.getMonth() - 1);
 
     const recentPayments = payments.filter(payment => {
-      const paymentDate = new Date(payment.payment_date);
+      const paymentDate = parseLocalDate(payment.payment_date)!;
       return paymentDate >= oneMonthAgo && paymentDate <= now;
     });
 

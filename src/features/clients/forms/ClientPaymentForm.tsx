@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { parseLocalDate, formatDateForDB } from '@/lib/utils'
+import { parseLocalDate, formatDateForDB } from '@/lib/date-utils'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -482,7 +482,7 @@ function ViewPanel({
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Fecha de Pago</h4>
           <span className="text-sm font-medium" data-testid="text-payment-date">
-            {existingPayment.payment_date ? format(new Date(existingPayment.payment_date), 'dd/MM/yyyy', { locale: es }) : '-'}
+            {existingPayment.payment_date ? format(parseLocalDate(existingPayment.payment_date)!, 'dd/MM/yyyy', { locale: es }) : '-'}
           </span>
         </div>
         <div>
@@ -525,7 +525,7 @@ function ViewPanel({
             <div>
               <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Cuota</h4>
               <span className="text-sm" data-testid="text-payment-schedule">
-                Vencimiento: {format(new Date(existingPayment.schedule.due_date), 'dd/MM/yyyy', { locale: es })}
+                Vencimiento: {format(parseLocalDate(existingPayment.schedule.due_date)!, 'dd/MM/yyyy', { locale: es })}
               </span>
             </div>
           )}

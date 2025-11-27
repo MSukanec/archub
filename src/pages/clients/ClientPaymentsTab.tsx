@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
 import { format } from 'date-fns'
+import { parseLocalDate } from '@/lib/date-utils'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -877,10 +878,11 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     )
   }
 
-  // Format date helper
+  // Format date helper - uses parseLocalDate to avoid timezone issues
   const formatDate = (dateString: string, formatString: string) => {
     try {
-      return format(new Date(dateString), formatString);
+      const date = parseLocalDate(dateString);
+      return date ? format(date, formatString) : '-';
     } catch {
       return '-';
     }
@@ -1111,7 +1113,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           </StatCardTitle>
           <StatCardValue>
             {metricsData?.latest_payment_date 
-              ? format(new Date(metricsData.latest_payment_date), 'd/M/yyyy')
+              ? format(parseLocalDate(metricsData.latest_payment_date)!, 'd/M/yyyy')
               : '-'
             }
           </StatCardValue>

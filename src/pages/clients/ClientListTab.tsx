@@ -13,6 +13,7 @@ import { useGlobalModalStore } from '@/components/modal'
 import { Link, useLocation } from 'wouter'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { parseLocalDate } from '@/lib/date-utils'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMobile } from '@/hooks/use-mobile'
 import ClientRow from '@/features/clients/components/ClientRow'
@@ -99,7 +100,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     oneMonthAgo.setMonth(now.getMonth() - 1);
 
     const recentPayments = dashboardData.payments.filter(payment => {
-      const paymentDate = new Date(payment.payment_date);
+      const paymentDate = parseLocalDate(payment.payment_date)!;
       return paymentDate >= oneMonthAgo && paymentDate <= now;
     });
 
