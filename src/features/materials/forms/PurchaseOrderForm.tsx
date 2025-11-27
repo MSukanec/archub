@@ -171,6 +171,8 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create' }: Purch
     organizationId
   )
 
+  console.log('[PurchaseOrderForm] Order data:', { projectId, orderId, organizationId, existingOrder, loadingOrder });
+
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId)
   const { data: units = [], isLoading: unitsLoading } = useUnits()
