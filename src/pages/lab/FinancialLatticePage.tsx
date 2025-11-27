@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Phone, Mail, AlertTriangle, Clock, DollarSign, Building2, FolderOpen, Users, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useProjectsLite } from '@/features/projects/hooks/use-projects-lite';
+import { getProjectsLite } from '@/features/projects/services/getProjectsLite';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 
@@ -133,7 +133,12 @@ export default function FinancialLatticePage() {
   const { data: userData, isLoading: userLoading } = useCurrentUser();
   const organizations = userData?.organizations || [];
   
-  const { data: projects = [], isLoading: projectsLoading } = useProjectsLite(selectedOrgId || undefined);
+  const { data: projects = [], isLoading: projectsLoading } = useQuery({
+    queryKey: ['lattice-projects', selectedOrgId],
+    queryFn: () => getProjectsLite(selectedOrgId!),
+    enabled: !!selectedOrgId,
+    staleTime: 0,
+  });
   
   const { data: clientsSummary, isLoading: clientsLoading } = useQuery({
     queryKey: ['clients-summary-lattice', selectedProjectId, selectedOrgId],
