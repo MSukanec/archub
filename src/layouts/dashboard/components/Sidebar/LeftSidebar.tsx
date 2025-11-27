@@ -66,7 +66,8 @@ import {
   Bell,
   CircleHelp,
   Globe,
-  HandHeart
+  HandHeart,
+  FlaskConical
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -245,6 +246,7 @@ export function LeftSidebar() {
         { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
         { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },
         { id: 'products', label: 'Productos', icon: Package, href: '/providers/products' },
+        { id: 'lab', label: 'Lab', icon: FlaskConical, href: '/lab/financial-lattice' },
       ];
     } else if (sidebarLevel === 'community') {
       return [
