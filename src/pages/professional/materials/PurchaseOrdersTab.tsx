@@ -22,6 +22,7 @@ import {
 
 interface PurchaseOrdersTabProps {
   projectId?: string;
+  organizationId?: string;
 }
 
 interface OrderMetrics {
@@ -36,25 +37,20 @@ interface OrderMetrics {
   total_items: number;
 }
 
-export default function PurchaseOrdersTab({ projectId }: PurchaseOrdersTabProps) {
+export default function PurchaseOrdersTab({ projectId, organizationId: propOrganizationId }: PurchaseOrdersTabProps) {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
   const { toast } = useToast();
   
-  const organizationId = userData?.organization?.id;
+  const organizationId = propOrganizationId || userData?.organization?.id;
   const activeProjectId = projectId || selectedProjectId;
   
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterProvider, setFilterProvider] = useState<string>('all');
 
   const [selectedOrders, setSelectedOrders] = useState<PurchaseOrder[]>([]);
-
-  // Debug logging
-  if (activeProjectId && organizationId) {
-    console.log('[PurchaseOrdersTab] Fetching orders for:', { projectId: activeProjectId, organizationId });
-  }
 
   const { data: ordersData, isLoading } = usePurchaseOrders(activeProjectId || undefined, organizationId);
 

@@ -71,9 +71,10 @@ export function getPurchaseOrderStatusBadgeConfig(status: PurchaseOrder['status'
 }
 
 export function usePurchaseOrders(projectId: string | undefined, organizationId: string | undefined) {
-  return useQuery<PurchaseOrder[]>({
-    queryKey: ['/api/projects', projectId, 'purchase-orders', { organization_id: organizationId }],
+  return useQuery<{ data: PurchaseOrder[] }, Error, PurchaseOrder[]>({
+    queryKey: [`/api/projects/${projectId}/purchase-orders?organization_id=${organizationId}`],
     enabled: !!projectId && !!organizationId,
+    select: (response) => response?.data || [],
   });
 }
 
@@ -82,9 +83,10 @@ export function usePurchaseOrder(
   orderId: string | undefined,
   organizationId: string | undefined
 ) {
-  return useQuery<PurchaseOrder>({
-    queryKey: ['/api/projects', projectId, 'purchase-orders', orderId, { organization_id: organizationId }],
+  return useQuery<{ data: PurchaseOrder }, Error, PurchaseOrder | null>({
+    queryKey: [`/api/projects/${projectId}/purchase-orders/${orderId}?organization_id=${organizationId}`],
     enabled: !!projectId && !!orderId && !!organizationId,
+    select: (response) => response?.data || null,
   });
 }
 
@@ -122,7 +124,7 @@ export function useCreatePurchaseOrder() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['/api/projects', variables.projectId, 'purchase-orders', { organization_id: variables.organizationId }] 
+        queryKey: [`/api/projects/${variables.projectId}/purchase-orders?organization_id=${variables.organizationId}`] 
       });
     },
   });
@@ -167,7 +169,7 @@ export function useUpdatePurchaseOrder() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['/api/projects', variables.projectId, 'purchase-orders', { organization_id: variables.organizationId }] 
+        queryKey: [`/api/projects/${variables.projectId}/purchase-orders?organization_id=${variables.organizationId}`] 
       });
     },
   });
@@ -194,7 +196,7 @@ export function useDeletePurchaseOrder() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ 
-        queryKey: ['/api/projects', variables.projectId, 'purchase-orders', { organization_id: variables.organizationId }] 
+        queryKey: [`/api/projects/${variables.projectId}/purchase-orders?organization_id=${variables.organizationId}`] 
       });
     },
   });
