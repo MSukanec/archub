@@ -1,158 +1,77 @@
-import { supabase } from '@/lib/supabase';
+import { apiRequest } from '@/lib/queryClient';
 import type { MediaFileWithLink } from '../types';
 
-/**
- * Genera una signed URL para acceder a archivos en buckets privados.
- */
-async function getSignedUrl(bucket: string, path: string): Promise<string | null> {
-  if (!supabase) return null;
-  
-  try {
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .createSignedUrl(path, 3600); // 1 hora de validez
-    
-    if (error) {
-      console.error('Error creating signed URL:', error);
-      return null;
-    }
-    
-    return data?.signedUrl || null;
-  } catch (error) {
-    console.error('Error in getSignedUrl:', error);
-    return null;
-  }
-}
-
-/**
- * Obtiene archivos de galería usando la nueva arquitectura (media_files + media_links).
- * 
- * Combina archivos con dos niveles de visibilidad:
- * - Archivos de nivel organización (visibility = 'organization')
- * - Archivos de nivel proyecto (visibility = 'project') si hay proyecto actual
- * 
- * Realiza JOIN entre media_links y media_files para obtener datos completos.
- * 
- * @param organizationId - ID de la organización
- * @param projectId - ID del proyecto actual (opcional)
- * @returns Array de archivos ordenados por fecha (más recientes primero)
- * @throws {Error} Si falla la query de Supabase
- */
 export async function getGalleryFilesV2(
   organizationId: string | undefined,
   projectId: string | undefined
 ): Promise<MediaFileWithLink[]> {
-  if (!organizationId || !supabase) {
+  if (!organizationId) {
     return [];
   }
 
-  try {
-    // Base query: JOIN entre media_links, media_files y projects
-    let query = supabase
-      .from('media_links')
-      .select(`
-        id,
-        media_file_id,
-        organization_id,
-        project_id,
-        site_log_id,
-        movement_id,
-        contact_id,
-        course_lesson_id,
-        general_cost_payment_id,
-        client_payment_id,
-        visibility,
-        description,
-        category,
-        is_cover,
-        position,
-        created_by,
-        created_at,
-        media_files!inner (
-          id,
-          file_url,
-          file_name,
-          file_type,
-          file_size,
-          file_path,
-          bucket,
-          is_deleted
-        ),
-        projects (
-          name
-        )
-      `)
-      .eq('organization_id', organizationId)
-      .eq('media_files.is_deleted', false);
-
-    // Filtrar por visibilidad
-    if (projectId) {
-      // Si hay proyecto: organización + proyecto
-      query = query.or(`visibility.eq.organization,and(visibility.eq.project,project_id.eq.${projectId})`);
-    } else {
-      // Si no hay proyecto: solo organización
-      query = query.eq('visibility', 'organization');
-    }
-
-    const { data, error } = await query;
-
-    if (error) throw error;
-
-    if (!data) return [];
-
-    // DEBUG: Ver datos antes del mapeo
-    console.log('[getGalleryFilesV2] Primeros 2 items raw:', data.slice(0, 2));
-    
-    // Mapear a estructura MediaFileWithLink con signed URLs para buckets privados
-    const files: MediaFileWithLink[] = await Promise.all(
-      data.map(async (item: any) => {
-        const mediaFile = item.media_files;
-        
-        // Generar signed URL para buckets privados (private-assets, social-assets)
-        let displayUrl = mediaFile.file_url;
-        if ((mediaFile.bucket === 'private-assets' || mediaFile.bucket === 'social-assets') && mediaFile.file_path) {
-          const signedUrl = await getSignedUrl(mediaFile.bucket, mediaFile.file_path);
-          displayUrl = signedUrl || mediaFile.file_url;
-        }
-        
-        return {
-          // Datos del archivo (media_files)
-          id: mediaFile.id,
-          file_url: displayUrl,
-          file_name: mediaFile.file_name,
-          file_type: mediaFile.file_type,
-          file_size: mediaFile.file_size,
-          file_path: mediaFile.file_path,
-          bucket: mediaFile.bucket,
-          is_deleted: mediaFile.is_deleted,
-          
-          // Datos del link (media_links)
-          link_id: item.id,
-          project_id: item.project_id,
-          project_name: item.projects?.name || 'Sin proyecto',
-          site_log_id: item.site_log_id,
-          movement_id: item.movement_id,
-          contact_id: item.contact_id,
-          course_lesson_id: item.course_lesson_id,
-          general_cost_payment_id: item.general_cost_payment_id,
-          client_payment_id: item.client_payment_id,
-          organization_id: item.organization_id,
-          visibility: item.visibility,
-          description: item.description,
-          category: item.category,
-          is_cover: item.is_cover,
-          position: item.position,
-          created_at: item.created_at,
-          created_by: item.created_by || 'Desconocido'
-        };
-      })
-    );
-
-    // Ordenar por fecha (más recientes primero)
-    return files.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-  } catch (error) {
-    console.error('Error fetching gallery files V2:', error);
-    throw error;
+  const queryParams = new URLSearchParams();
+  
+  if (projectId) {
+    queryParams.append('projectId', projectId);
   }
+  
+  const url = `/api/media/gallery${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+  
+  console.log('[getGalleryFilesV2] Calling backend endpoint:', url);
+  
+  const response = await apiRequest('GET', url);
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to fetch gallery files');
+  }
+  
+  const data = await response.json();
+
+  console.log('[getGalleryFilesV2] Primeros 2 items raw:', data?.slice?.(0, 2));
+  
+  if (!data || !Array.isArray(data)) {
+    return [];
+  }
+
+  const files: MediaFileWithLink[] = data.map((item: any) => {
+    const mediaFile = item.media_files;
+    
+    if (!mediaFile) {
+      return null;
+    }
+    
+    const displayUrl = item.signedUrl || mediaFile.file_url;
+    
+    return {
+      id: mediaFile.id,
+      file_url: displayUrl,
+      file_name: mediaFile.file_name,
+      file_type: mediaFile.file_type,
+      file_size: mediaFile.file_size,
+      file_path: mediaFile.file_path,
+      bucket: mediaFile.bucket,
+      is_deleted: mediaFile.is_deleted,
+      
+      link_id: item.id,
+      project_id: item.project_id,
+      project_name: item.projects?.name || 'Sin proyecto',
+      site_log_id: item.site_log_id,
+      movement_id: item.movement_id,
+      contact_id: item.contact_id,
+      course_lesson_id: item.course_lesson_id,
+      general_cost_payment_id: item.general_cost_payment_id,
+      client_payment_id: item.client_payment_id,
+      organization_id: item.organization_id,
+      visibility: item.visibility,
+      description: item.description,
+      category: item.category,
+      is_cover: item.is_cover,
+      position: item.position,
+      created_at: item.created_at,
+      created_by: item.created_by || 'Desconocido'
+    };
+  }).filter(Boolean) as MediaFileWithLink[];
+
+  return files.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 }

@@ -22,6 +22,7 @@ import { registerLearningRoutes } from './routes/learning';
 import { registerOrganizationRoutes } from './routes/organization';
 import { registerCommunityRoutes } from './routes/community';
 import { registerImportRoutes } from './routes/import';
+import { registerMediaRoutes } from './routes/media';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
@@ -83,6 +84,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register import routes (AI suggest mapping, save mappings)
   registerImportRoutes(app, deps);
+
+  // Register media routes (gallery, upload, delete)
+  registerMediaRoutes(app, deps);
 
   // Diagnostic endpoints for payments
   app.get("/api/diag/last-payment-events", async (req, res) => {
