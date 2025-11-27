@@ -169,10 +169,13 @@
   --gradient-to-light: var(--content-gradient-to);
   
   --destructive: hsl(0, 84%, 60%);
+  --destructive-l: hsl(0, 84%, 60%);
   --destructive-text: hsl(0, 0%, 100%);
-  --success: hsl(76, 100%, 40%);
+  --success: hsl(120, 18%, 35%);
+  --success-l: hsl(76, 100%, 40%);
   --success-text: hsl(0, 0%, 100%);
   --warning: hsl(45, 90%, 50%);
+  --warning-l: hsl(45, 90%, 50%);
   --warning-text: hsl(240, 10%, 4%);
 
   /* Charts */
