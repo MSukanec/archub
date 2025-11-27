@@ -5,9 +5,10 @@ import {
   createMaterialPayment,
   updateMaterialPayment,
   deleteMaterialPayment,
+  type CreateMaterialPaymentData,
+  type UpdateMaterialPaymentData,
 } from '../services/materialPayments';
 import { MATERIAL_PAYMENT_QUERY_KEYS } from '../constants';
-import type { MaterialPayment } from '../types';
 
 export function useMaterialPayments(
   projectId: string | undefined,
@@ -21,13 +22,14 @@ export function useMaterialPayments(
 }
 
 export function useMaterialPayment(
+  projectId: string | undefined,
   paymentId: string | undefined,
   organizationId: string | undefined
 ) {
   return useQuery({
     queryKey: MATERIAL_PAYMENT_QUERY_KEYS.payment(paymentId),
-    queryFn: () => getMaterialPaymentById(paymentId!, organizationId!),
-    enabled: !!paymentId && !!organizationId,
+    queryFn: () => getMaterialPaymentById(projectId!, paymentId!, organizationId!),
+    enabled: !!projectId && !!paymentId && !!organizationId,
   });
 }
 
@@ -39,16 +41,14 @@ export function useCreateMaterialPayment() {
       payment,
       projectId,
       organizationId,
-      createdBy,
     }: {
-      payment: Omit<MaterialPayment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>;
+      payment: CreateMaterialPaymentData;
       projectId: string;
       organizationId: string;
-      createdBy: string;
-    }) => createMaterialPayment(payment, projectId, organizationId, createdBy),
-    onSuccess: (data) => {
+    }) => createMaterialPayment(projectId, organizationId, payment),
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: MATERIAL_PAYMENT_QUERY_KEYS.payments(data.project_id),
+        queryKey: MATERIAL_PAYMENT_QUERY_KEYS.payments(variables.projectId),
       });
     },
   });
@@ -59,20 +59,22 @@ export function useUpdateMaterialPayment() {
 
   return useMutation({
     mutationFn: ({
+      projectId,
       paymentId,
       updates,
       organizationId,
     }: {
+      projectId: string;
       paymentId: string;
-      updates: Partial<Omit<MaterialPayment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>>;
+      updates: UpdateMaterialPaymentData;
       organizationId: string;
-    }) => updateMaterialPayment(paymentId, updates, organizationId),
-    onSuccess: (data) => {
+    }) => updateMaterialPayment(projectId, paymentId, organizationId, updates),
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: MATERIAL_PAYMENT_QUERY_KEYS.payments(data.project_id),
+        queryKey: MATERIAL_PAYMENT_QUERY_KEYS.payments(variables.projectId),
       });
       queryClient.invalidateQueries({
-        queryKey: MATERIAL_PAYMENT_QUERY_KEYS.payment(data.id),
+        queryKey: MATERIAL_PAYMENT_QUERY_KEYS.payment(variables.paymentId),
       });
     },
   });
@@ -83,14 +85,14 @@ export function useDeleteMaterialPayment() {
 
   return useMutation({
     mutationFn: ({
+      projectId,
       paymentId,
       organizationId,
-      projectId,
     }: {
+      projectId: string;
       paymentId: string;
       organizationId: string;
-      projectId: string;
-    }) => deleteMaterialPayment(paymentId, organizationId),
+    }) => deleteMaterialPayment(projectId, paymentId, organizationId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: MATERIAL_PAYMENT_QUERY_KEYS.payments(variables.projectId),

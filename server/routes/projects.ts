@@ -41,6 +41,14 @@ import {
   handleUpdateClientCommitment,
   handleDeleteClientCommitment
 } from '../controllers/projects/clientCommitments.controller.js';
+import {
+  handleListMaterialPayments,
+  handleGetMaterialPayment,
+  handleCreateMaterialPayment,
+  handleUpdateMaterialPayment,
+  handleDeleteMaterialPayment,
+  handleGetMaterialPaymentAttachments
+} from '../controllers/projects/materialPayments.controller.js';
 
 /**
  * Register project-related endpoints (projects, budgets, budget items, project clients)
@@ -99,6 +107,26 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
   
   // GET /api/projects/:projectId/client-payments/:paymentId/attachments - Get payment attachments
   app.get("/api/projects/:projectId/client-payments/:paymentId/attachments", handleGetClientPaymentAttachments);
+
+  // ========== MATERIAL PAYMENTS ENDPOINTS ==========
+
+  // GET /api/projects/:projectId/material-payments - Get all material payments for a project
+  app.get("/api/projects/:projectId/material-payments", handleListMaterialPayments);
+
+  // GET /api/projects/:projectId/material-payments/:paymentId - Get a single material payment
+  app.get("/api/projects/:projectId/material-payments/:paymentId", handleGetMaterialPayment);
+
+  // POST /api/projects/:projectId/material-payments - Create a new material payment
+  app.post("/api/projects/:projectId/material-payments", handleCreateMaterialPayment);
+
+  // PATCH /api/projects/:projectId/material-payments/:paymentId - Update a material payment
+  app.patch("/api/projects/:projectId/material-payments/:paymentId", handleUpdateMaterialPayment);
+
+  // DELETE /api/projects/:projectId/material-payments/:paymentId - Delete a material payment
+  app.delete("/api/projects/:projectId/material-payments/:paymentId", handleDeleteMaterialPayment);
+
+  // GET /api/projects/:projectId/material-payments/:paymentId/attachments - Get payment attachments
+  app.get("/api/projects/:projectId/material-payments/:paymentId/attachments", handleGetMaterialPaymentAttachments);
 
   // ========== CLIENT COMMITMENTS ENDPOINTS ==========
   

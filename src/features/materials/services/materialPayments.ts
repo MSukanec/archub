@@ -1,429 +1,169 @@
-import { supabase } from '@/lib/supabase';
-import type { MaterialPayment, MaterialPaymentWithRelations } from '../types';
+import { apiRequest } from '@/lib/queryClient';
+import type { MaterialPaymentWithRelations } from '../types';
 
-/**
- * Obtiene todos los pagos de materiales de un proyecto con sus relaciones.
- * 
- * Incluye:
- * - Moneda (currencies)
- * - Billetera (organization_wallets)
- * - Creador (organization_members -> users)
- * - Proyecto (projects)
- * - Adjuntos (media_links -> media_files)
- * 
- * @param projectId - ID del proyecto
- * @param organizationId - ID de la organización
- * @returns Array de pagos con relaciones, o array vacío si no hay datos
- * @throws {Error} Si falla la query principal de Supabase
- */
+const BASE_URL = '/api/projects';
+
 export async function getMaterialPayments(
   projectId: string,
   organizationId: string
 ): Promise<MaterialPaymentWithRelations[]> {
-  if (!supabase || !organizationId || !projectId) {
+  if (!organizationId || !projectId) {
     return [];
   }
 
-  const { data: paymentsData, error } = await supabase
-    .from('material_payments')
-    .select(`
-      *,
-      currency:currencies(
-        id,
-        code,
-        symbol,
-        name
-      ),
-      wallet:organization_wallets(
-        id,
-        organization_id,
-        wallet_id,
-        is_active,
-        is_default,
-        wallets:wallet_id(
-          id,
-          name,
-          is_active,
-          created_at,
-          updated_at
-        )
-      ),
-      creator:organization_members!created_by(
-        id,
-        user:users(
-          id,
-          email,
-          full_name,
-          avatar_url
-        )
-      ),
-      project:projects(
-        id,
-        name,
-        code,
-        color
-      ),
-      media_links!material_payment_id(
-        id,
-        media_file_id,
-        visibility,
-        description,
-        category,
-        position,
-        created_at,
-        media_file:media_files(
-          id,
-          file_url,
-          file_name,
-          file_type,
-          file_size
-        )
-      )
-    `)
-    .eq('organization_id', organizationId)
-    .eq('project_id', projectId)
-    .order('payment_date', { ascending: false });
+  const response = await apiRequest(
+    'GET',
+    `${BASE_URL}/${projectId}/material-payments?organization_id=${organizationId}`
+  );
 
-  if (error) {
-    throw error;
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to fetch material payments');
   }
 
-  if (!paymentsData || paymentsData.length === 0) {
-    return [];
-  }
-
-  const data = paymentsData.map(payment => ({
-    ...payment,
-    currency: payment.currency || null,
-    wallet: payment.wallet || null,
-    creator: payment.creator?.user ? {
-      id: payment.creator.user.id,
-      email: payment.creator.user.email,
-      full_name: payment.creator.user.full_name,
-      avatar_url: payment.creator.user.avatar_url,
-    } : null,
-    project: payment.project || null,
-    attachments: payment.media_links?.map((link: any) => ({
-      id: link.id,
-      media_file_id: link.media_file_id,
-      visibility: link.visibility,
-      description: link.description,
-      category: link.category,
-      position: link.position,
-      created_at: link.created_at,
-      media_file: link.media_file,
-      file_url: link.media_file?.file_url || '',
-      file_name: link.media_file?.file_name || '',
-      file_type: link.media_file?.file_type || '',
-    })) || [],
-  }));
-
-  return data;
+  const result = await response.json();
+  return result.data || [];
 }
 
-/**
- * Obtiene un pago de materiales específico por su ID.
- * 
- * Incluye:
- * - Moneda (currencies)
- * - Billetera (organization_wallets)
- * - Creador (organization_members -> users)
- * - Proyecto (projects)
- * - Adjuntos (media_links -> media_files)
- * 
- * @param paymentId - ID del pago
- * @param organizationId - ID de la organización
- * @returns Pago con relaciones, o null si no existe
- * @throws {Error} Si falla la query de Supabase
- */
 export async function getMaterialPaymentById(
+  projectId: string,
   paymentId: string,
   organizationId: string
 ): Promise<MaterialPaymentWithRelations | null> {
-  if (!supabase || !organizationId || !paymentId) {
+  if (!organizationId || !paymentId || !projectId) {
     return null;
   }
 
-  const { data, error } = await supabase
-    .from('material_payments')
-    .select(`
-      *,
-      currency:currencies(
-        id,
-        code,
-        symbol,
-        name
-      ),
-      wallet:organization_wallets(
-        id,
-        organization_id,
-        wallet_id,
-        is_active,
-        is_default,
-        wallets:wallet_id(
-          id,
-          name,
-          is_active,
-          created_at,
-          updated_at
-        )
-      ),
-      creator:organization_members!created_by(
-        id,
-        user:users(
-          id,
-          email,
-          full_name,
-          avatar_url
-        )
-      ),
-      project:projects(
-        id,
-        name,
-        code,
-        color
-      ),
-      media_links!material_payment_id(
-        id,
-        media_file_id,
-        visibility,
-        description,
-        category,
-        position,
-        created_at,
-        media_file:media_files(
-          id,
-          file_url,
-          file_name,
-          file_type,
-          file_size
-        )
-      )
-    `)
-    .eq('id', paymentId)
-    .eq('organization_id', organizationId)
-    .single();
+  const response = await apiRequest(
+    'GET',
+    `${BASE_URL}/${projectId}/material-payments/${paymentId}?organization_id=${organizationId}`
+  );
 
-  if (error) {
-    throw error;
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to fetch material payment');
   }
 
-  if (!data) {
-    return null;
-  }
-
-  return {
-    ...data,
-    currency: data.currency || null,
-    wallet: data.wallet || null,
-    creator: data.creator?.user ? {
-      id: data.creator.user.id,
-      email: data.creator.user.email,
-      full_name: data.creator.user.full_name,
-      avatar_url: data.creator.user.avatar_url,
-    } : null,
-    project: data.project || null,
-    attachments: data.media_links?.map((link: any) => ({
-      id: link.id,
-      media_file_id: link.media_file_id,
-      visibility: link.visibility,
-      description: link.description,
-      category: link.category,
-      position: link.position,
-      created_at: link.created_at,
-      media_file: link.media_file,
-      file_url: link.media_file?.file_url || '',
-      file_name: link.media_file?.file_name || '',
-      file_type: link.media_file?.file_type || '',
-    })) || [],
-  };
+  const result = await response.json();
+  return result.data || null;
 }
 
-/**
- * Crea un nuevo pago de materiales.
- * 
- * @param payment - Datos del pago a crear
- * @param projectId - ID del proyecto
- * @param organizationId - ID de la organización
- * @param createdBy - ID del miembro de organización que crea el registro
- * @returns Pago creado con sus relaciones
- * @throws {Error} Si falla la creación
- */
+export interface CreateMaterialPaymentData {
+  amount: number;
+  currency_id: string;
+  exchange_rate?: number;
+  payment_date: string;
+  wallet_id?: string | null;
+  notes?: string | null;
+  reference?: string | null;
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
+  purchase_id?: string | null;
+}
+
 export async function createMaterialPayment(
-  payment: Omit<MaterialPayment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>,
   projectId: string,
   organizationId: string,
-  createdBy: string
+  paymentData: CreateMaterialPaymentData
 ): Promise<MaterialPaymentWithRelations> {
-  const { data, error } = await supabase
-    .from('material_payments')
-    .insert({
-      ...payment,
-      project_id: projectId,
-      organization_id: organizationId,
-      created_by: createdBy,
-    })
-    .select(`
-      *,
-      currency:currencies(
-        id,
-        code,
-        symbol,
-        name
-      ),
-      wallet:organization_wallets(
-        id,
-        organization_id,
-        wallet_id,
-        is_active,
-        is_default,
-        wallets:wallet_id(
-          id,
-          name,
-          is_active,
-          created_at,
-          updated_at
-        )
-      ),
-      creator:organization_members!created_by(
-        id,
-        user:users(
-          id,
-          email,
-          full_name,
-          avatar_url
-        )
-      ),
-      project:projects(
-        id,
-        name,
-        code,
-        color
-      )
-    `)
-    .single();
+  const response = await apiRequest(
+    'POST',
+    `${BASE_URL}/${projectId}/material-payments?organization_id=${organizationId}`,
+    paymentData
+  );
 
-  if (error) {
-    throw error;
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to create material payment');
   }
 
-  return {
-    ...data,
-    currency: data.currency || null,
-    wallet: data.wallet || null,
-    creator: data.creator?.user ? {
-      id: data.creator.user.id,
-      email: data.creator.user.email,
-      full_name: data.creator.user.full_name,
-      avatar_url: data.creator.user.avatar_url,
-    } : null,
-    project: data.project || null,
-    attachments: [],
-  };
+  const result = await response.json();
+  return result.data;
 }
 
-/**
- * Actualiza un pago de materiales existente.
- * 
- * @param paymentId - ID del pago a actualizar
- * @param updates - Campos a actualizar
- * @param organizationId - ID de la organización
- * @returns Pago actualizado con sus relaciones
- * @throws {Error} Si falla la actualización
- */
+export interface UpdateMaterialPaymentData {
+  amount?: number;
+  currency_id?: string;
+  exchange_rate?: number;
+  payment_date?: string;
+  wallet_id?: string | null;
+  notes?: string | null;
+  reference?: string | null;
+  status?: 'confirmed' | 'pending' | 'rejected' | 'void';
+  purchase_id?: string | null;
+}
+
 export async function updateMaterialPayment(
+  projectId: string,
   paymentId: string,
-  updates: Partial<Omit<MaterialPayment, 'id' | 'created_at' | 'updated_at' | 'project_id' | 'organization_id' | 'created_by'>>,
-  organizationId: string
+  organizationId: string,
+  updates: UpdateMaterialPaymentData
 ): Promise<MaterialPaymentWithRelations> {
-  const { data, error } = await supabase
-    .from('material_payments')
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', paymentId)
-    .eq('organization_id', organizationId)
-    .select(`
-      *,
-      currency:currencies(
-        id,
-        code,
-        symbol,
-        name
-      ),
-      wallet:organization_wallets(
-        id,
-        organization_id,
-        wallet_id,
-        is_active,
-        is_default,
-        wallets:wallet_id(
-          id,
-          name,
-          is_active,
-          created_at,
-          updated_at
-        )
-      ),
-      creator:organization_members!created_by(
-        id,
-        user:users(
-          id,
-          email,
-          full_name,
-          avatar_url
-        )
-      ),
-      project:projects(
-        id,
-        name,
-        code,
-        color
-      )
-    `)
-    .single();
+  const response = await apiRequest(
+    'PATCH',
+    `${BASE_URL}/${projectId}/material-payments/${paymentId}?organization_id=${organizationId}`,
+    updates
+  );
 
-  if (error) {
-    throw error;
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to update material payment');
   }
 
-  return {
-    ...data,
-    currency: data.currency || null,
-    wallet: data.wallet || null,
-    creator: data.creator?.user ? {
-      id: data.creator.user.id,
-      email: data.creator.user.email,
-      full_name: data.creator.user.full_name,
-      avatar_url: data.creator.user.avatar_url,
-    } : null,
-    project: data.project || null,
-    attachments: [],
-  };
+  const result = await response.json();
+  return result.data;
 }
 
-/**
- * Elimina un pago de materiales.
- * 
- * @param paymentId - ID del pago a eliminar
- * @param organizationId - ID de la organización
- * @returns true si se eliminó correctamente
- * @throws {Error} Si falla la eliminación
- */
 export async function deleteMaterialPayment(
+  projectId: string,
   paymentId: string,
   organizationId: string
 ): Promise<boolean> {
-  const { error } = await supabase
-    .from('material_payments')
-    .delete()
-    .eq('id', paymentId)
-    .eq('organization_id', organizationId);
+  const response = await apiRequest(
+    'DELETE',
+    `${BASE_URL}/${projectId}/material-payments/${paymentId}?organization_id=${organizationId}`
+  );
 
-  if (error) {
-    throw error;
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to delete material payment');
   }
 
   return true;
+}
+
+export interface PaymentAttachment {
+  id: string;
+  description: string | null;
+  category: string | null;
+  created_at: string;
+  media_file: {
+    id: string;
+    file_url: string;
+    file_name: string;
+    file_type: string;
+    file_size: number;
+  } | null;
+}
+
+export async function getMaterialPaymentAttachments(
+  projectId: string,
+  paymentId: string,
+  organizationId: string
+): Promise<PaymentAttachment[]> {
+  if (!organizationId || !paymentId || !projectId) {
+    return [];
+  }
+
+  const response = await apiRequest(
+    'GET',
+    `${BASE_URL}/${projectId}/material-payments/${paymentId}/attachments?organization_id=${organizationId}`
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to fetch payment attachments');
+  }
+
+  const result = await response.json();
+  return result.data || [];
 }

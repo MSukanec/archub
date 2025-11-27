@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { DashboardLayout as Layout } from "@/layouts"
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
@@ -8,11 +8,11 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useConstructionMaterials } from '@/features/materials'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { useEffect } from 'react'
-import { Package, ShoppingCart } from 'lucide-react'
+import { Package, ShoppingCart, DollarSign } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { CommercialCalculationPopover } from '@/components/construction/CommercialCalculationPopover'
+import MaterialPaymentsTab from './MaterialPaymentsTab'
 
 export default function Materials() {
   const [activeTab, setActiveTab] = useState('materials')
@@ -80,6 +80,11 @@ export default function Materials() {
       id: "materials",
       label: "Lista de Materiales",
       isActive: activeTab === "materials"
+    },
+    {
+      id: "payments",
+      label: "Pagos",
+      isActive: activeTab === "payments"
     },
     {
       id: "purchase-orders", 
@@ -268,6 +273,10 @@ export default function Materials() {
             />
           )}
         </>
+      )}
+
+      {activeTab === 'payments' && (
+        <MaterialPaymentsTab projectId={selectedProjectId || undefined} />
       )}
 
       {activeTab === 'purchase-orders' && (

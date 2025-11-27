@@ -13,7 +13,7 @@ import { ClientScheduleItemForm } from '@/features/clients/forms/ClientScheduleI
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
 import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
 import { UniversalImportForm } from '@/features/imports';
-import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal } from '@/features/materials';
+import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal, MaterialPaymentForm } from '@/features/materials';
 import { UserFormModal, ChangelogFormModal, NotificationFormModal, AnnouncementFormModal, SupportConversationStartModal, PlanFormModal, PlanPriceFormModal, DowngradeModal } from '@/features/users';
 import SiteLogForm from '@/features/sitelog/forms/SiteLogForm';
 import { SiteLogTypeForm } from '@/features/sitelog/forms/SiteLogTypeForm';
@@ -228,6 +228,15 @@ export function initializeModalRegistry(): void {
   registerModal('unit-presentation-form', UnitPresentationFormModal as any, { ...projectConfig, size: 'md' });
   registerModal('provider-product', ProviderProductModal as any, projectConfig);
   registerModal('custom-product', ProductModal as any, projectConfig);
+  registerModal('material-payment', MaterialPaymentForm as any, {
+    ...financeConfig,
+    mapDataToProps: (data) => ({
+      projectId: data?.projectId,
+      organizationId: data?.organizationId,
+      paymentId: data?.paymentId,
+      mode: data?.paymentId ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
   
   registerModal('attendance', PersonnelAttendanceModal as any, projectConfig);
   registerModal('personnel', PersonnelAddModal as any, projectConfig);

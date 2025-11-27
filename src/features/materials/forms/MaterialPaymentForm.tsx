@@ -33,7 +33,6 @@ const materialPaymentSchema = z.object({
   payment_date: z.date({
     required_error: "Fecha de pago es requerida",
   }),
-  created_by: z.string().min(1, 'Creador es requerido'),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
   amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
   currency_id: z.string().min(1, 'Moneda es requerida'),
@@ -444,6 +443,7 @@ export function MaterialPaymentForm({ modalData, onClose, mode = 'create' }: Mat
   const [attachments, setAttachments] = useState<any[]>([])
 
   const { data: existingPayment, isLoading: loadingPayment } = useMaterialPayment(
+    projectId,
     paymentId,
     organizationId
   )
@@ -460,7 +460,6 @@ export function MaterialPaymentForm({ modalData, onClose, mode = 'create' }: Mat
     resolver: zodResolver(materialPaymentSchema),
     defaultValues: {
       payment_date: new Date(),
-      created_by: '',
       wallet_id: '',
       amount: 0,
       currency_id: '',
@@ -479,7 +478,6 @@ export function MaterialPaymentForm({ modalData, onClose, mode = 'create' }: Mat
       
       form.reset({
         payment_date: paymentDate,
-        created_by: existingPayment.created_by || currentMember?.id || '',
         wallet_id: existingPayment.wallet_id || '',
         amount: existingPayment.amount || 0,
         currency_id: existingPayment.currency_id || '',
@@ -489,7 +487,7 @@ export function MaterialPaymentForm({ modalData, onClose, mode = 'create' }: Mat
         notes: existingPayment.notes || '',
       })
     }
-  }, [existingPayment, mode, form, currentMember?.id])
+  }, [existingPayment, mode, form])
 
   useEffect(() => {
     const fetchAttachments = async () => {
@@ -544,9 +542,7 @@ export function MaterialPaymentForm({ modalData, onClose, mode = 'create' }: Mat
   }, [attachments])
 
   useEffect(() => {
-    if (mode === 'create' && !paymentId && currentMember?.id) {
-      form.setValue('created_by', currentMember.id)
-      
+    if (mode === 'create' && !paymentId) {
       if (currencies && currencies.length > 0) {
         const defaultCurrency = currencies.find(c => c.is_default)
         const currencyId = defaultCurrency?.currency?.id || currencies[0].currency?.id
@@ -563,7 +559,7 @@ export function MaterialPaymentForm({ modalData, onClose, mode = 'create' }: Mat
         }
       }
     }
-  }, [currencies, wallets, mode, paymentId, currentMember?.id, form])
+  }, [currencies, wallets, mode, paymentId, form])
 
   const createPaymentMutation = useCreateMaterialPayment()
   const updatePaymentMutation = useUpdateMaterialPayment()
@@ -592,6 +588,7 @@ export function MaterialPaymentForm({ modalData, onClose, mode = 'create' }: Mat
       
       if (mode === 'edit' && paymentId) {
         paymentResult = await updatePaymentMutation.mutateAsync({
+          projectId: projectId || '',
           paymentId,
           updates: {
             wallet_id: data.wallet_id,
@@ -611,7 +608,7 @@ export function MaterialPaymentForm({ modalData, onClose, mode = 'create' }: Mat
             wallet_id: data.wallet_id,
             amount: data.amount,
             currency_id: data.currency_id,
-            exchange_rate: data.exchange_rate || null,
+            exchange_rate: data.exchange_rate ?? undefined,
             payment_date: formatDateForDB(data.payment_date),
             status: data.status,
             reference: data.reference || null,
@@ -620,7 +617,6 @@ export function MaterialPaymentForm({ modalData, onClose, mode = 'create' }: Mat
           },
           projectId: projectId || '',
           organizationId: organizationId || '',
-          createdBy: data.created_by,
         })
       }
 
