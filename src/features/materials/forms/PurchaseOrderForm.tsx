@@ -177,11 +177,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create' }: Purch
 
   const providers = useMemo(() => {
     if (!contacts) return []
-    return contacts.filter((contact: any) => 
-      contact.contact_type_assignments?.some((cta: any) => 
-        cta.contact_type?.name?.toLowerCase() === 'proveedor'
-      )
-    )
+    return contacts
   }, [contacts])
 
   const currentMember = useMemo(() => {
