@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ForceGraph2D, { ForceGraphMethods, NodeObject, LinkObject } from 'react-force-graph-2d';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Phone, Mail, AlertTriangle, Clock, DollarSign } from 'lucide-react';
+import { X, Phone, Mail, AlertTriangle, Clock, DollarSign, Building2, FolderOpen, Users, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useProjectsLite } from '@/features/projects/hooks/use-projects-lite';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/lib/supabase';
 
 type ClientStatus = 'healthy' | 'warning' | 'critical';
 
@@ -11,14 +16,19 @@ interface ClientNode {
   unitNumber: string;
   status: ClientStatus;
   debtAmount: number;
+  totalCommitted: number;
+  totalPaid: number;
   lastInteraction: Date;
   type: 'client';
+  email?: string;
+  phone?: string;
 }
 
 interface CoreNode {
   id: string;
   name: string;
   type: 'core';
+  projectName?: string;
 }
 
 type GraphNode = (ClientNode | CoreNode) & NodeObject;
@@ -35,51 +45,6 @@ const STATUS_COLORS: Record<ClientStatus, { main: string; glow: string }> = {
 };
 
 const CORE_COLOR = { main: '#3b82f6', glow: 'rgba(59, 130, 246, 0.6)' };
-
-function generateMockClients(count: number): ClientNode[] {
-  const firstNames = ['Carlos', 'María', 'Juan', 'Ana', 'Pedro', 'Laura', 'Diego', 'Sofía', 'Miguel', 'Valentina', 'Andrés', 'Camila', 'Roberto', 'Lucía', 'Fernando'];
-  const lastNames = ['García', 'Rodríguez', 'Martínez', 'López', 'González', 'Hernández', 'Pérez', 'Sánchez', 'Ramírez', 'Torres', 'Flores', 'Rivera', 'Gómez', 'Díaz', 'Cruz'];
-  
-  const clients: ClientNode[] = [];
-  
-  for (let i = 0; i < count; i++) {
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-    
-    const statusRoll = Math.random();
-    let status: ClientStatus;
-    let debtAmount: number;
-    
-    if (statusRoll < 0.15) {
-      status = 'critical';
-      debtAmount = 50000 + Math.random() * 150000;
-    } else if (statusRoll < 0.35) {
-      status = 'warning';
-      debtAmount = 10000 + Math.random() * 40000;
-    } else {
-      status = 'healthy';
-      debtAmount = Math.random() * 5000;
-    }
-    
-    const daysAgo = status === 'critical' 
-      ? 30 + Math.floor(Math.random() * 60) 
-      : status === 'warning' 
-        ? 7 + Math.floor(Math.random() * 23) 
-        : Math.floor(Math.random() * 7);
-    
-    clients.push({
-      id: `client-${i}`,
-      name: `${firstName} ${lastName}`,
-      unitNumber: `${String.fromCharCode(65 + Math.floor(i / 10))}-${(i % 10) + 1}${String(Math.floor(Math.random() * 10))}`,
-      status,
-      debtAmount,
-      lastInteraction: new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000),
-      type: 'client',
-    });
-  }
-  
-  return clients;
-}
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('es-AR', {
@@ -101,11 +66,96 @@ function getDaysSince(date: Date): number {
   return Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
 }
 
+function determineClientStatus(balanceDue: number, totalCommitted: number): ClientStatus {
+  if (totalCommitted === 0) return 'healthy';
+  const percentOwed = (balanceDue / totalCommitted) * 100;
+  
+  if (balanceDue <= 0 || percentOwed < 5) return 'healthy';
+  if (percentOwed < 30) return 'warning';
+  return 'critical';
+}
+
+interface ClientSummaryData {
+  id: string;
+  contacts: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    full_name: string;
+    email?: string;
+    phone?: string;
+  };
+  total_committed_amount: number;
+  total_paid_amount: number;
+  balance_due: number;
+  financialByCurrency: Array<{
+    currency: { code: string; symbol: string };
+    total_committed_amount: number;
+    total_paid_amount: number;
+    balance_due: number;
+    last_payment_date: string | null;
+  }>;
+}
+
+interface ClientsSummaryResponse {
+  plan: { slug: string; isMultiCurrency: boolean };
+  clients: ClientSummaryData[];
+}
+
+async function fetchClientsSummary(projectId: string, organizationId: string): Promise<ClientsSummaryResponse | null> {
+  if (!projectId || !organizationId) return null;
+  
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData?.session?.access_token;
+  
+  if (!token) return null;
+  
+  const response = await fetch(`/api/projects/${projectId}/clients/summary?organization_id=${organizationId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  
+  if (!response.ok) return null;
+  return response.json();
+}
+
 export default function FinancialLatticePage() {
   const graphRef = useRef<ForceGraphMethods | undefined>();
   const [selectedNode, setSelectedNode] = useState<ClientNode | null>(null);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const animationFrameRef = useRef<number>(0);
+  
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  
+  const { data: userData, isLoading: userLoading } = useCurrentUser();
+  const organizations = userData?.organizations || [];
+  
+  const { data: projects = [], isLoading: projectsLoading } = useProjectsLite(selectedOrgId || undefined);
+  
+  const { data: clientsSummary, isLoading: clientsLoading } = useQuery({
+    queryKey: ['clients-summary-lattice', selectedProjectId, selectedOrgId],
+    queryFn: () => fetchClientsSummary(selectedProjectId!, selectedOrgId!),
+    enabled: !!selectedProjectId && !!selectedOrgId,
+  });
+  
+  useEffect(() => {
+    if (organizations.length > 0 && !selectedOrgId) {
+      setSelectedOrgId(organizations[0].id);
+    }
+  }, [organizations, selectedOrgId]);
+  
+  useEffect(() => {
+    if (projects.length > 0 && !selectedProjectId) {
+      setSelectedProjectId(projects[0].id);
+    }
+  }, [projects, selectedProjectId]);
+  
+  useEffect(() => {
+    setSelectedProjectId(null);
+  }, [selectedOrgId]);
   
   useEffect(() => {
     const handleResize = () => {
@@ -123,26 +173,49 @@ export default function FinancialLatticePage() {
     };
   }, []);
   
-  const mockClients = useMemo(() => generateMockClients(70), []);
+  const selectedProject = projects.find(p => p.id === selectedProjectId);
+  
+  const clientNodes: ClientNode[] = useMemo(() => {
+    if (!clientsSummary?.clients) return [];
+    
+    return clientsSummary.clients.map((client, index) => {
+      const lastPaymentDate = client.financialByCurrency?.[0]?.last_payment_date;
+      
+      return {
+        id: `client-${client.id}`,
+        name: client.contacts?.full_name || 'Sin nombre',
+        unitNumber: `C-${String(index + 1).padStart(2, '0')}`,
+        status: determineClientStatus(client.balance_due, client.total_committed_amount),
+        debtAmount: Math.max(0, client.balance_due),
+        totalCommitted: client.total_committed_amount,
+        totalPaid: client.total_paid_amount,
+        lastInteraction: lastPaymentDate ? new Date(lastPaymentDate) : new Date(),
+        type: 'client' as const,
+        email: client.contacts?.email,
+        phone: client.contacts?.phone,
+      };
+    });
+  }, [clientsSummary]);
   
   const graphData = useMemo(() => {
     const coreNode: CoreNode & NodeObject = {
       id: 'core',
       name: 'Proyecto Central',
+      projectName: selectedProject?.name,
       type: 'core',
       fx: 0,
       fy: 0,
     };
     
-    const nodes: GraphNode[] = [coreNode, ...mockClients];
+    const nodes: GraphNode[] = [coreNode, ...clientNodes];
     
-    const links: GraphLink[] = mockClients.map(client => ({
+    const links: GraphLink[] = clientNodes.map(client => ({
       source: 'core',
       target: client.id,
     }));
     
     return { nodes, links };
-  }, [mockClients]);
+  }, [clientNodes, selectedProject]);
   
   const handleNodeClick = useCallback((node: NodeObject) => {
     const graphNode = node as GraphNode;
@@ -197,16 +270,19 @@ export default function FinancialLatticePage() {
       ctx.fill();
       
       ctx.fillStyle = '#fff';
-      ctx.font = `bold ${12 / globalScale}px Inter, system-ui, sans-serif`;
+      ctx.font = `bold ${10 / globalScale}px Inter, system-ui, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('CORE', x, y);
+      
+      const coreLabel = graphNode.projectName ? graphNode.projectName.substring(0, 10) : 'CORE';
+      ctx.fillText(coreLabel, x, y);
       
     } else {
       const clientNode = graphNode as ClientNode;
       const colors = STATUS_COLORS[clientNode.status];
       
-      const baseSize = 8 + (clientNode.debtAmount / 200000) * 12;
+      const maxDebt = 500000;
+      const baseSize = 8 + (Math.min(clientNode.debtAmount, maxDebt) / maxDebt) * 12;
       
       let size = baseSize;
       if (clientNode.status === 'critical') {
@@ -239,7 +315,8 @@ export default function FinancialLatticePage() {
         ctx.font = `${10 / globalScale}px Inter, system-ui, sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillText(clientNode.unitNumber, x, y + size + 4);
+        const shortName = clientNode.name.split(' ')[0].substring(0, 8);
+        ctx.fillText(shortName, x, y + size + 4);
       }
     }
   }, []);
@@ -268,34 +345,6 @@ export default function FinancialLatticePage() {
     ctx.stroke();
   }, [graphData.nodes]);
   
-  const d3Force = useCallback((forceName: string) => {
-    if (forceName === 'charge') {
-      return {
-        strength: (node: NodeObject) => {
-          const graphNode = node as GraphNode;
-          if (graphNode.type === 'core') return -500;
-          const clientNode = graphNode as ClientNode;
-          if (clientNode.status === 'critical') return -80;
-          if (clientNode.status === 'warning') return -60;
-          return -40;
-        },
-      };
-    }
-    if (forceName === 'link') {
-      return {
-        distance: (link: LinkObject) => {
-          const target = link.target as GraphNode;
-          if (!target || target.type === 'core') return 150;
-          const clientNode = target as ClientNode;
-          if (clientNode.status === 'critical') return 100;
-          if (clientNode.status === 'warning') return 180;
-          return 280;
-        },
-      };
-    }
-    return null;
-  }, []);
-  
   const animate = useCallback(() => {
     animationFrameRef.current = requestAnimationFrame(animate);
   }, []);
@@ -305,13 +354,26 @@ export default function FinancialLatticePage() {
   }, [animate]);
   
   const stats = useMemo(() => {
-    const critical = mockClients.filter(c => c.status === 'critical');
-    const warning = mockClients.filter(c => c.status === 'warning');
-    const healthy = mockClients.filter(c => c.status === 'healthy');
-    const totalDebt = mockClients.reduce((sum, c) => sum + c.debtAmount, 0);
+    const critical = clientNodes.filter(c => c.status === 'critical');
+    const warning = clientNodes.filter(c => c.status === 'warning');
+    const healthy = clientNodes.filter(c => c.status === 'healthy');
+    const totalDebt = clientNodes.reduce((sum, c) => sum + c.debtAmount, 0);
+    const totalCommitted = clientNodes.reduce((sum, c) => sum + c.totalCommitted, 0);
+    const totalPaid = clientNodes.reduce((sum, c) => sum + c.totalPaid, 0);
     
-    return { critical: critical.length, warning: warning.length, healthy: healthy.length, totalDebt };
-  }, [mockClients]);
+    return { 
+      critical: critical.length, 
+      warning: warning.length, 
+      healthy: healthy.length, 
+      totalDebt,
+      totalCommitted,
+      totalPaid,
+      totalClients: clientNodes.length,
+    };
+  }, [clientNodes]);
+
+  const isLoading = userLoading || projectsLoading || clientsLoading;
+  const hasNoClients = !isLoading && clientNodes.length === 0 && selectedProjectId;
 
   return (
     <div className="fixed inset-0 bg-[#0a0a0f] overflow-hidden">
@@ -322,6 +384,60 @@ export default function FinancialLatticePage() {
         </div>
         
         <div className="bg-black/60 backdrop-blur-md rounded-lg border border-white/10 p-4 space-y-3">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs text-white/50">
+              <Building2 className="w-3 h-3" />
+              <span>Organización</span>
+            </div>
+            <Select value={selectedOrgId || ''} onValueChange={setSelectedOrgId}>
+              <SelectTrigger className="bg-white/5 border-white/20 text-white text-sm">
+                <SelectValue placeholder="Seleccionar..." />
+              </SelectTrigger>
+              <SelectContent>
+                {organizations.map(org => (
+                  <SelectItem key={org.id} value={org.id}>
+                    {org.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs text-white/50">
+              <FolderOpen className="w-3 h-3" />
+              <span>Proyecto</span>
+            </div>
+            <Select 
+              value={selectedProjectId || ''} 
+              onValueChange={setSelectedProjectId}
+              disabled={!selectedOrgId || projects.length === 0}
+            >
+              <SelectTrigger className="bg-white/5 border-white/20 text-white text-sm">
+                <SelectValue placeholder={projectsLoading ? 'Cargando...' : 'Seleccionar...'} />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map(project => (
+                  <SelectItem key={project.id} value={project.id}>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: project.color || 'hsl(var(--accent))' }}
+                      />
+                      {project.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <div className="bg-black/60 backdrop-blur-md rounded-lg border border-white/10 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-xs text-white/50 mb-2">
+            <Users className="w-3 h-3" />
+            <span>Clientes: {stats.totalClients}</span>
+          </div>
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
             <span className="text-sm text-white/80">Críticos: {stats.critical}</span>
@@ -334,34 +450,65 @@ export default function FinancialLatticePage() {
             <div className="w-3 h-3 rounded-full bg-green-500" />
             <span className="text-sm text-white/80">Saludables: {stats.healthy}</span>
           </div>
-          <div className="border-t border-white/10 pt-3 mt-3">
-            <span className="text-xs text-white/50">Deuda Total</span>
-            <p className="text-lg font-semibold text-white">{formatCurrency(stats.totalDebt)}</p>
+          <div className="border-t border-white/10 pt-3 mt-3 space-y-2">
+            <div>
+              <span className="text-xs text-white/50">Comprometido</span>
+              <p className="text-sm font-medium text-white">{formatCurrency(stats.totalCommitted)}</p>
+            </div>
+            <div>
+              <span className="text-xs text-white/50">Cobrado</span>
+              <p className="text-sm font-medium text-green-400">{formatCurrency(stats.totalPaid)}</p>
+            </div>
+            <div>
+              <span className="text-xs text-white/50">Por Cobrar</span>
+              <p className="text-lg font-semibold text-white">{formatCurrency(stats.totalDebt)}</p>
+            </div>
           </div>
         </div>
       </div>
       
-      <ForceGraph2D
-        ref={graphRef}
-        graphData={graphData}
-        nodeCanvasObject={nodeCanvasObject}
-        linkCanvasObject={linkCanvasObject}
-        nodeRelSize={15}
-        onNodeClick={handleNodeClick}
-        backgroundColor="#0a0a0f"
-        width={dimensions.width}
-        height={dimensions.height}
-        d3AlphaDecay={0.02}
-        d3VelocityDecay={0.3}
-        warmupTicks={100}
-        cooldownTicks={0}
-        onEngineStop={onEngineStop}
-        enableNodeDrag={true}
-        enableZoomInteraction={true}
-        enablePanInteraction={true}
-        minZoom={0.3}
-        maxZoom={8}
-      />
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center z-20">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+            <p className="text-white/70">Cargando datos...</p>
+          </div>
+        </div>
+      )}
+      
+      {hasNoClients && (
+        <div className="absolute inset-0 flex items-center justify-center z-20">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <Users className="w-16 h-16 text-white/30" />
+            <p className="text-white/70 text-lg">No hay clientes en este proyecto</p>
+            <p className="text-white/40 text-sm">Agrega clientes para ver la visualización</p>
+          </div>
+        </div>
+      )}
+      
+      {!isLoading && clientNodes.length > 0 && (
+        <ForceGraph2D
+          ref={graphRef}
+          graphData={graphData}
+          nodeCanvasObject={nodeCanvasObject}
+          linkCanvasObject={linkCanvasObject}
+          nodeRelSize={15}
+          onNodeClick={handleNodeClick}
+          backgroundColor="#0a0a0f"
+          width={dimensions.width}
+          height={dimensions.height}
+          d3AlphaDecay={0.02}
+          d3VelocityDecay={0.3}
+          warmupTicks={100}
+          cooldownTicks={0}
+          onEngineStop={onEngineStop}
+          enableNodeDrag={true}
+          enableZoomInteraction={true}
+          enablePanInteraction={true}
+          minZoom={0.3}
+          maxZoom={8}
+        />
+      )}
       
       <AnimatePresence>
         {selectedNode && (
@@ -406,7 +553,7 @@ export default function FinancialLatticePage() {
                         {selectedNode.status === 'critical' ? 'Crítico' : selectedNode.status === 'warning' ? 'Alerta' : 'Saludable'}
                       </div>
                       <h2 className="text-2xl font-bold text-white">{selectedNode.name}</h2>
-                      <p className="text-white/50 mt-1">Unidad {selectedNode.unitNumber}</p>
+                      <p className="text-white/50 mt-1">{selectedNode.unitNumber}</p>
                     </div>
                     <button
                       onClick={handleCloseDetail}
@@ -418,12 +565,23 @@ export default function FinancialLatticePage() {
                   </div>
                   
                   <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                        <p className="text-xs text-white/50">Comprometido</p>
+                        <p className="text-lg font-bold text-white">{formatCurrency(selectedNode.totalCommitted)}</p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                        <p className="text-xs text-white/50">Pagado</p>
+                        <p className="text-lg font-bold text-green-400">{formatCurrency(selectedNode.totalPaid)}</p>
+                      </div>
+                    </div>
+                    
                     <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10">
                       <div className="p-3 rounded-lg" style={{ backgroundColor: `${STATUS_COLORS[selectedNode.status].main}20` }}>
                         <DollarSign className="w-6 h-6" style={{ color: STATUS_COLORS[selectedNode.status].main }} />
                       </div>
                       <div>
-                        <p className="text-sm text-white/50">Deuda Pendiente</p>
+                        <p className="text-sm text-white/50">Saldo Pendiente</p>
                         <p className="text-xl font-bold text-white">{formatCurrency(selectedNode.debtAmount)}</p>
                       </div>
                     </div>
@@ -433,7 +591,7 @@ export default function FinancialLatticePage() {
                         <Clock className="w-6 h-6 text-white/70" />
                       </div>
                       <div>
-                        <p className="text-sm text-white/50">Última Interacción</p>
+                        <p className="text-sm text-white/50">Último Pago</p>
                         <p className="text-lg font-medium text-white">
                           {formatDate(selectedNode.lastInteraction)}
                           <span className="text-sm text-white/40 ml-2">
@@ -452,23 +610,34 @@ export default function FinancialLatticePage() {
                   </div>
                   
                   <div className="flex gap-3 mt-6">
-                    <button 
-                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-white font-medium"
-                      data-testid="button-call-client"
-                    >
-                      <Phone className="w-4 h-4" />
-                      Llamar
-                    </button>
-                    <button 
-                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-white font-medium transition-colors"
-                      style={{ 
-                        backgroundColor: STATUS_COLORS[selectedNode.status].main,
-                      }}
-                      data-testid="button-email-client"
-                    >
-                      <Mail className="w-4 h-4" />
-                      Contactar
-                    </button>
+                    {selectedNode.phone && (
+                      <a 
+                        href={`tel:${selectedNode.phone}`}
+                        className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-white font-medium"
+                        data-testid="button-call-client"
+                      >
+                        <Phone className="w-4 h-4" />
+                        Llamar
+                      </a>
+                    )}
+                    {selectedNode.email && (
+                      <a 
+                        href={`mailto:${selectedNode.email}`}
+                        className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-white font-medium transition-colors"
+                        style={{ 
+                          backgroundColor: STATUS_COLORS[selectedNode.status].main,
+                        }}
+                        data-testid="button-email-client"
+                      >
+                        <Mail className="w-4 h-4" />
+                        Contactar
+                      </a>
+                    )}
+                    {!selectedNode.phone && !selectedNode.email && (
+                      <div className="flex-1 text-center text-white/40 text-sm py-3">
+                        Sin datos de contacto
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
