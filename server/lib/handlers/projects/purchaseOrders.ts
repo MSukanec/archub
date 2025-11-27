@@ -181,14 +181,11 @@ async function fetchOrderWithRelations(
       *,
       unit:units!unit_id (
         id,
-        name,
-        abbreviation
+        name
       )
     `)
     .eq('purchase_order_id', orderId)
     .order('created_at', { ascending: true });
-
-  console.log('[fetchOrderWithRelations] Items query result:', { orderId, items, itemsError });
 
   return {
     ...order,
