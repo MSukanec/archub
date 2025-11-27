@@ -129,7 +129,10 @@ export async function uploadFile(
 
       // Add optional fields ONLY if they are defined
       if (context.organization_id) mediaLinkData.organization_id = context.organization_id;
-      if (context.link_to.project_id) mediaLinkData.project_id = context.link_to.project_id;
+      // Use project_id from link_to if available, otherwise from context
+      if (context.link_to.project_id || context.project_id) {
+        mediaLinkData.project_id = context.link_to.project_id || context.project_id;
+      }
       if (context.link_to.contact_id) mediaLinkData.contact_id = context.link_to.contact_id;
       if (context.link_to.general_cost_id) mediaLinkData.general_cost_id = context.link_to.general_cost_id;
       if (context.link_to.general_cost_payment_id) mediaLinkData.general_cost_payment_id = context.link_to.general_cost_payment_id;
