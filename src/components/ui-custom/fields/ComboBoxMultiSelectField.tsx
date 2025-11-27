@@ -97,7 +97,7 @@ export function ComboBoxMultiSelectField({
                   key={option.value}
                   value={option.label}
                   onSelect={() => handleSelect(option.value)}
-                  className="cursor-pointer"
+                  className="cursor-pointer hover:text-accent-foreground focus:text-accent-foreground"
                 >
                   <Check
                     className={cn(
