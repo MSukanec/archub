@@ -124,7 +124,7 @@ function ViewPanel({
             >
               <span className="flex-1 text-sm font-medium">{item.description}</span>
               <span className="text-sm text-muted-foreground">
-                {item.quantity} {item.unit?.abbreviation || item.unit?.name || ''}
+                {item.quantity} {item.unit?.description || item.unit?.name || ''}
               </span>
               {item.notes && (
                 <span className="text-xs text-muted-foreground italic">{item.notes}</span>
@@ -170,8 +170,6 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create' }: Purch
     orderId,
     organizationId
   )
-
-  console.log('[PurchaseOrderForm] Order data:', { projectId, orderId, organizationId, existingOrder, loadingOrder });
 
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId)
