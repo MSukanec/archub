@@ -318,7 +318,7 @@ export function PurchaseOrderForm({ modalData, onClose, mode = 'create' }: Purch
           <ViewPanel existingOrder={existingOrder} />
         ) : (
           <Form {...form}>
-            <form id="purchase-order-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form id="purchase-order-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {isLoading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
