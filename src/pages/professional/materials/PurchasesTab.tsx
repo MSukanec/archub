@@ -102,7 +102,7 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
     const providers = new Set<string>();
 
     allPurchases.forEach(purchase => {
-      const providerName = purchase.provider?.company_name || purchase.provider?.full_name;
+      const providerName = purchase.provider?.company_name || purchase.provider?.full_name || [purchase.provider?.first_name, purchase.provider?.last_name].filter(Boolean).join(' ');
       if (providerName) providers.add(providerName);
     });
 
@@ -116,7 +116,7 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
       if (filterStatus !== 'all' && purchase.status !== filterStatus) return false;
       if (filterDocType !== 'all' && purchase.document_type !== filterDocType) return false;
       if (filterProvider !== 'all') {
-        const providerName = purchase.provider?.company_name || purchase.provider?.full_name;
+        const providerName = purchase.provider?.company_name || purchase.provider?.full_name || [purchase.provider?.first_name, purchase.provider?.last_name].filter(Boolean).join(' ');
         if (providerName !== filterProvider) return false;
       }
       
@@ -250,7 +250,8 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
       sortable: true,
       render: (purchase: MaterialPurchase) => {
         if (!purchase.provider) return <span className="text-muted-foreground">Sin proveedor</span>;
-        return purchase.provider.company_name || purchase.provider.full_name || '-';
+        const p = purchase.provider as any;
+        return p.company_name || p.full_name || [p.first_name, p.last_name].filter(Boolean).join(' ') || '-';
       },
     },
     {

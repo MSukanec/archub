@@ -84,7 +84,7 @@ function ViewPanel({
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Proveedor</h4>
           <span className="text-sm font-medium" data-testid="text-material-purchase-provider">
-            {existingPurchase.provider.company_name || existingPurchase.provider.full_name || '-'}
+            {existingPurchase.provider.company_name || existingPurchase.provider.full_name || [existingPurchase.provider.first_name, existingPurchase.provider.last_name].filter(Boolean).join(' ') || '-'}
           </span>
         </div>
       )}

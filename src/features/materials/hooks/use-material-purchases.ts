@@ -23,6 +23,8 @@ export interface MaterialPurchase {
     id: string;
     full_name: string | null;
     company_name: string | null;
+    first_name: string | null;
+    last_name: string | null;
   } | null;
   currency?: {
     id: string;
