@@ -44,6 +44,12 @@ export * from './constants';
 // ============ MAPPERS ============
 export * from './mappers/materialMapper';
 
+// ============ UTILS ============
+export * from './utils/statusBadge';
+
+// ============ FORMS ============
+export { MaterialPaymentForm } from './forms/MaterialPaymentForm';
+
 // ============ MODALS ============
 export { MaterialModal } from './modals/MaterialModal';
 export { ProviderProductModal } from './modals/ProviderProductModal';

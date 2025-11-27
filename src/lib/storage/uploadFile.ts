@@ -142,6 +142,7 @@ export async function uploadFile(
       if (context.link_to.course_lesson_id) mediaLinkData.course_lesson_id = context.link_to.course_lesson_id;
       if (context.link_to.movement_id) mediaLinkData.movement_id = context.link_to.movement_id;
       if (context.link_to.client_payment_id) mediaLinkData.client_payment_id = context.link_to.client_payment_id;
+      if (context.link_to.material_payment_id) mediaLinkData.material_payment_id = context.link_to.material_payment_id;
       if (context.category) mediaLinkData.category = context.category;
       if (context.description) mediaLinkData.description = context.description;
       if (context.position !== undefined) mediaLinkData.position = context.position;
