@@ -54,7 +54,6 @@ create table public.media_links (
   organization_id uuid null,
   project_id uuid null,
   site_log_id uuid null,
-  movement_id uuid null,
   contact_id uuid null,
   course_lesson_id uuid null,
   general_cost_payment_id uuid null,
@@ -70,6 +69,7 @@ create table public.media_links (
   course_id uuid null,
   course_module_id uuid null,
   is_public boolean null default false,
+  material_payment_id uuid null,
   constraint media_links_pkey primary key (id),
   constraint media_links_client_payment_fkey foreign KEY (client_payment_id) references client_payments (id) on delete CASCADE,
   constraint media_links_contact_fkey foreign KEY (contact_id) references contacts (id) on delete CASCADE,
@@ -77,8 +77,8 @@ create table public.media_links (
   constraint media_links_course_lesson_fkey foreign KEY (course_lesson_id) references course_lessons (id) on delete set null,
   constraint media_links_course_module_fkey foreign KEY (course_module_id) references course_modules (id) on delete CASCADE,
   constraint media_links_general_cost_payment_id_fkey foreign KEY (general_cost_payment_id) references general_costs_payments (id) on delete CASCADE,
+  constraint media_links_material_payment_id_fkey foreign KEY (material_payment_id) references material_payments (id) on delete set null,
   constraint media_links_media_fkey foreign KEY (media_file_id) references media_files (id) on delete CASCADE,
-  constraint media_links_movement_fkey foreign KEY (movement_id) references movements (id) on delete CASCADE,
   constraint media_links_org_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint media_links_project_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
   constraint media_links_sitelog_fkey foreign KEY (site_log_id) references site_logs (id) on delete CASCADE,
@@ -129,13 +129,6 @@ create index IF not exists idx_media_links_contact on public.media_links using b
 where
   (
     (contact_id is not null)
-    and (organization_id is not null)
-  );
-
-create index IF not exists idx_media_links_movement on public.media_links using btree (movement_id) TABLESPACE pg_default
-where
-  (
-    (movement_id is not null)
     and (organization_id is not null)
   );
 
