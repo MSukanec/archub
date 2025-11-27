@@ -4,9 +4,9 @@ import {
   getClientRoleById,
   createClientRole,
   updateClientRole,
-  deleteClientRole,
 } from '../services/clientRoles';
 import { CLIENT_QUERY_KEYS } from '../constants';
+import { apiRequest } from '@/lib/queryClient';
 import type { ClientRole } from '../types';
 
 export function useClientRoles(organizationId: string | undefined) {
@@ -75,13 +75,20 @@ export function useDeleteClientRole() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       roleId,
       organizationId,
     }: {
       roleId: string;
       organizationId: string;
-    }) => deleteClientRole(roleId, organizationId),
+    }) => {
+      const response = await apiRequest('DELETE', `/api/client-roles/${roleId}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete client role');
+      }
+      return response.json();
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: CLIENT_QUERY_KEYS.roles(variables.organizationId),

@@ -173,7 +173,7 @@ export async function getClientRoleUsageCount(roleId: string): Promise<number> {
   const { count, error } = await supabase
     .from('project_clients')
     .select('*', { count: 'exact', head: true })
-    .eq('role_id', roleId);
+    .eq('client_role_id', roleId);
 
   if (error) {
     throw error;
@@ -198,8 +198,8 @@ export async function replaceClientRole(
   // Actualizar todos los project_clients que usaban el rol antiguo
   const { error: updateError } = await supabase
     .from('project_clients')
-    .update({ role_id: newRoleId })
-    .eq('role_id', oldRoleId);
+    .update({ client_role_id: newRoleId })
+    .eq('client_role_id', oldRoleId);
 
   if (updateError) {
     throw updateError;
