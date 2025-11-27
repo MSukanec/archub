@@ -1,25 +1,70 @@
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { DashboardLayout as Layout } from "@/layouts"
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { DollarSign } from 'lucide-react'
+import { useGlobalModalStore } from '@/components/modal'
+import { Package, Plus } from 'lucide-react'
 import MaterialPaymentsTab from './MaterialPaymentsTab'
+import PurchaseOrdersTab from './PurchaseOrdersTab'
+import PurchasesTab from './PurchasesTab'
+import MaterialSettingsTab from './MaterialSettingsTab'
 
 export default function Materials() {
+  const [activeTab, setActiveTab] = useState('payments')
   const { data: userData, isLoading } = useCurrentUser()
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const { setSidebarContext } = useNavigationStore()
+  const { openModal } = useGlobalModalStore()
 
   useEffect(() => {
     setSidebarContext('construction')
   }, [])
 
+  const headerTabs = [
+    {
+      id: "payments",
+      label: "Pagos",
+      isActive: activeTab === "payments"
+    },
+    {
+      id: "purchase-orders",
+      label: "Órdenes de Compra",
+      isActive: activeTab === "purchase-orders",
+      disabled: true
+    },
+    {
+      id: "purchases",
+      label: "Compras",
+      isActive: activeTab === "purchases",
+      disabled: true
+    },
+    {
+      id: "settings",
+      label: "Ajustes",
+      isActive: activeTab === "settings",
+      disabled: true
+    }
+  ]
+
   const headerProps = {
-    icon: DollarSign,
-    title: "Pagos de Materiales",
-    organizationId: currentOrganizationId,
-    showMembers: true
+    icon: Package,
+    title: "Materiales",
+    organizationId: currentOrganizationId || undefined,
+    showMembers: true,
+    tabs: headerTabs,
+    onTabChange: setActiveTab,
+    ...(activeTab === "payments" && {
+      actionButton: {
+        label: "Nuevo Pago",
+        icon: Plus,
+        onClick: () => openModal('material-payment', {
+          projectId: selectedProjectId,
+          organizationId: currentOrganizationId,
+          mode: 'create'
+        })
+      }
+    })
   }
 
   if (isLoading) {
@@ -34,7 +79,23 @@ export default function Materials() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      <MaterialPaymentsTab projectId={selectedProjectId || undefined} />
+      <div className="space-y-4">
+        {activeTab === 'payments' && (
+          <MaterialPaymentsTab projectId={selectedProjectId || undefined} />
+        )}
+
+        {activeTab === 'purchase-orders' && (
+          <PurchaseOrdersTab projectId={selectedProjectId || undefined} />
+        )}
+
+        {activeTab === 'purchases' && (
+          <PurchasesTab projectId={selectedProjectId || undefined} />
+        )}
+
+        {activeTab === 'settings' && (
+          <MaterialSettingsTab projectId={selectedProjectId || undefined} />
+        )}
+      </div>
     </Layout>
   )
 }
