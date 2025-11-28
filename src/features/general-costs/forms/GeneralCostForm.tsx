@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Receipt } from 'lucide-react'
@@ -11,9 +11,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { useOrganizationMembers } from '@/features/organization'
-import { useCreateGeneralCost } from '@/features/general-costs/hooks/use-create-general-cost'
-import { useUpdateGeneralCost } from '@/features/general-costs/hooks/use-update-general-cost'
-import { useGeneralCost } from '@/features/general-costs/hooks/use-general-cost'
+import { useCreateGeneralCost } from '../hooks/use-create-general-cost'
+import { useUpdateGeneralCost } from '../hooks/use-update-general-cost'
+import { useGeneralCost } from '../hooks/use-general-cost'
 import { generalCostSchema, type GeneralCostFormData } from '../schemas'
 
 interface GeneralCostFormProps {
@@ -22,79 +22,7 @@ interface GeneralCostFormProps {
     generalCostId?: string
   }
   onClose: () => void
-  mode?: 'create' | 'edit' | 'view'
-}
-
-function FormPanel({
-  form,
-  onSubmit,
-}: {
-  form: ReturnType<typeof useForm<GeneralCostFormData>>
-  onSubmit: (data: GeneralCostFormData) => void
-}) {
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nombre *</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ej: Servicios administrativos, Gastos de oficina..."
-                  {...field}
-                  data-testid="input-general-cost-name"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Descripción detallada del gasto general..."
-                  rows={3}
-                  {...field}
-                  data-testid="textarea-general-cost-description"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </form>
-    </Form>
-  )
-}
-
-function ViewPanel({ generalCost }: { generalCost: any }) {
-  return (
-    <div className="space-y-4">
-      <div>
-        <p className="text-sm text-muted-foreground mb-1">Nombre</p>
-        <p className="font-medium" data-testid="text-general-cost-name">
-          {generalCost?.name}
-        </p>
-      </div>
-      {generalCost?.description && (
-        <div>
-          <p className="text-sm text-muted-foreground mb-1">Descripción</p>
-          <p className="text-sm whitespace-pre-wrap" data-testid="text-general-cost-description">
-            {generalCost.description}
-          </p>
-        </div>
-      )}
-    </div>
-  )
+  mode?: 'create' | 'edit'
 }
 
 export default function GeneralCostForm({ modalData, onClose, mode = 'create' }: GeneralCostFormProps) {
@@ -105,7 +33,7 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
 
   const { data: members = [] } = useOrganizationMembers(organizationId || undefined)
   const { data: existingGeneralCost, isLoading } = useGeneralCost(
-    mode !== 'create' ? modalData?.generalCostId || null : null
+    mode === 'edit' ? modalData?.generalCostId || null : null
   )
 
   const form = useForm<GeneralCostFormData>({
@@ -173,24 +101,7 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
     }
   }
 
-  const headerConfig = {
-    create: {
-      title: 'Nuevo Gasto General',
-      description: 'Agrega un nuevo concepto de gasto para tu organización'
-    },
-    edit: {
-      title: 'Editar Gasto General',
-      description: 'Modifica los datos del gasto general'
-    },
-    view: {
-      title: 'Detalle de Gasto General',
-      description: 'Información del concepto de gasto'
-    }
-  }
-
-  const header = headerConfig[mode as keyof typeof headerConfig] || headerConfig.create
-
-  if (mode !== 'create' && isLoading) {
+  if (mode === 'edit' && isLoading) {
     return (
       <ModalLayout onClose={onClose} size="md">
         <ModalBody>
@@ -205,28 +116,61 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
   return (
     <ModalLayout onClose={onClose} size="md">
       <ModalHeader
-        title={header.title}
-        description={header.description}
+        title={mode === 'edit' ? 'Editar Gasto General' : 'Nuevo Gasto General'}
+        description={mode === 'edit' ? 'Modifica los datos del gasto general' : 'Agrega un nuevo concepto de gasto para tu organización'}
         icon={Receipt}
       />
 
       <ModalBody>
-        {mode === 'view' && existingGeneralCost ? (
-          <ViewPanel generalCost={existingGeneralCost} />
-        ) : (
-          <FormPanel form={form} onSubmit={onSubmit} />
-        )}
+        <Form {...form}>
+          <form className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre *</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ej: Servicios administrativos, Gastos de oficina..."
+                      {...field}
+                      data-testid="input-general-cost-name"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Descripción detallada del gasto general..."
+                      rows={3}
+                      {...field}
+                      data-testid="textarea-general-cost-description"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
       </ModalBody>
 
-      {mode !== 'view' && (
-        <ModalFooter
-          leftLabel="Cancelar"
-          onLeftClick={onClose}
-          submitText={mode === 'create' ? 'Crear' : 'Actualizar'}
-          onSubmit={form.handleSubmit(onSubmit)}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-        />
-      )}
+      <ModalFooter
+        leftLabel="Cancelar"
+        onLeftClick={onClose}
+        submitText={mode === 'create' ? 'Crear' : 'Actualizar'}
+        onSubmit={form.handleSubmit(onSubmit)}
+        isSubmitting={createMutation.isPending || updateMutation.isPending}
+      />
     </ModalLayout>
   )
 }
