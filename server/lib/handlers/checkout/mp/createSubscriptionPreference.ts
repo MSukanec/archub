@@ -225,7 +225,7 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
       ],
       external_reference: custom_id,
       payer: { 
-        email: isTestMode ? "payer_checkout@example.com" : userData.email,
+        email: userData.email,
         first_name: userData.firstName, 
         last_name: userData.lastName 
       },
