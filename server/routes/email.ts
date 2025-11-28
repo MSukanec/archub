@@ -1,6 +1,9 @@
 import type { Express } from 'express';
 import { Resend } from 'resend';
+import { render } from '@react-email/render';
 import type { RouteDeps } from './_base';
+import WelcomeEmail from '../../emails/WelcomeEmail';
+import PurchaseEmail from '../../emails/PurchaseEmail';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
@@ -83,6 +86,69 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         ok: false,
         error: error.message || 'Failed to send email'
       });
+    }
+  });
+
+  // POST /api/admin/email-preview/registration - Preview registration email
+  app.post('/api/admin/email-preview/registration', async (req, res) => {
+    try {
+      const { userName = 'Jorge Benitest', userEmail = 'jorge@example.com' } = req.body;
+      
+      const emailHtml = render(
+        WelcomeEmail({
+          userName,
+          userEmail,
+        }) as any
+      );
+
+      return res.json({
+        ok: true,
+        type: 'registration',
+        html: emailHtml,
+        preview: {
+          subject: '¡Bienvenido a Seencel! 🏗️',
+          from: 'sistema@seencel.com',
+          to: userEmail,
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ Preview error:', error);
+      return res.status(500).json({ error: error.message });
+    }
+  });
+
+  // POST /api/admin/email-preview/purchase - Preview purchase email
+  app.post('/api/admin/email-preview/purchase', async (req, res) => {
+    try {
+      const {
+        userName = 'Jorge Benitest',
+        courseName = 'Curso Avanzado de Construcción',
+        amount = '$99.99',
+        transactionId = 'TXN-20241128-001'
+      } = req.body;
+      
+      const emailHtml = render(
+        PurchaseEmail({
+          userName,
+          courseName,
+          amount,
+          transactionId,
+        }) as any
+      );
+
+      return res.json({
+        ok: true,
+        type: 'purchase',
+        html: emailHtml,
+        preview: {
+          subject: `Confirmación de Compra: ${courseName}`,
+          from: 'sistema@seencel.com',
+          to: 'student@example.com',
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ Preview error:', error);
+      return res.status(500).json({ error: error.message });
     }
   });
 
