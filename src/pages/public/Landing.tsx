@@ -143,9 +143,9 @@ function HeroSectionComponent() {
       }}
     >
       {/* Overlay oscuro para legibilidad */}
-      <div className="absolute inset-0 bg-black/40 z-0" />
+      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
       
-      <div className="text-center max-w-5xl mx-auto relative z-10">
+      <div className="text-center max-w-5xl mx-auto relative">
         <h1 
           className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight"
           style={{ color: '#ffffff !important' } as any}
