@@ -15,6 +15,7 @@ interface GlobalModalState {
   openModal: (type: string, data?: Record<string, any> | null) => void;
   pushModal: (type: string, data?: Record<string, any> | null) => void;
   popModal: () => void;
+  closeModal: () => void;
   closeAll: () => void;
   updateModalData: (data: Record<string, any>) => void;
   
@@ -41,6 +42,14 @@ export const useGlobalModalStore = create<GlobalModalState>()(
     },
 
     popModal: () => {
+      const { blockCloseForDirtyForms } = get();
+      if (blockCloseForDirtyForms) {
+        return;
+      }
+      set((state) => ({ stack: state.stack.slice(0, -1) }));
+    },
+
+    closeModal: () => {
       const { blockCloseForDirtyForms } = get();
       if (blockCloseForDirtyForms) {
         return;

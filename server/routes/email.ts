@@ -17,7 +17,8 @@ const TOKEN_MAX_AGE_MS = 15 * 60 * 1000;
 
 function cleanupExpiredNonces() {
   const now = Date.now();
-  for (const [nonce, timestamp] of usedNonces.entries()) {
+  const entries = Array.from(usedNonces.entries());
+  for (const [nonce, timestamp] of entries) {
     if (now - timestamp > NONCE_EXPIRY_MS) {
       usedNonces.delete(nonce);
     }
