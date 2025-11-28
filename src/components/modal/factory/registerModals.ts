@@ -27,6 +27,7 @@ import GeneralCostView from '@/features/general-costs/forms/GeneralCostView';
 import GeneralCostPaymentForm from '@/features/general-costs/forms/GeneralCostPaymentForm';
 import GeneralCostPaymentView from '@/features/general-costs/forms/GeneralCostPaymentView';
 import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal } from '@/features/learning';
+import { HeroSectionForm } from '@/features/layout';
 
 const organizationConfig: ModalConfig = { category: 'organization', size: 'md' };
 const projectConfig: ModalConfig = { category: 'project', size: 'lg' };
@@ -326,5 +327,16 @@ export function initializeModalRegistry(): void {
     ...generalConfig, 
     size: 'sm',
     preventCloseOnBackdrop: true,
+  });
+  
+  registerModal('hero-section-form', HeroSectionForm as any, {
+    ...adminConfig,
+    size: 'lg',
+    mapDataToProps: (data) => ({
+      modalData: {
+        mode: data?.mode || 'create',
+        section: data?.section,
+      }
+    }),
   });
 }

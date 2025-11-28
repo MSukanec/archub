@@ -1693,3 +1693,33 @@ export const insertMediaLinkSchema = createInsertSchema(media_links).omit({
 
 export type MediaLink = typeof media_links.$inferSelect;
 export type InsertMediaLink = z.infer<typeof insertMediaLinkSchema>;
+
+// Hero Sections Table (for dynamic carousel hero content)
+export const hero_sections = pgTable("hero_sections", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id"),
+  section_type: text("section_type").notNull().default("learning_dashboard"),
+  order_index: integer("order_index").notNull().default(0),
+  title: text("title").notNull(),
+  description: text("description"),
+  media_url: text("media_url"),
+  media_type: text("media_type", { enum: ["image", "video"] }).default("image"),
+  primary_button_text: text("primary_button_text"),
+  primary_button_action: text("primary_button_action"),
+  primary_button_action_type: text("primary_button_action_type", { enum: ["url", "internal_route", "external"] }).default("url"),
+  secondary_button_text: text("secondary_button_text"),
+  secondary_button_action: text("secondary_button_action"),
+  secondary_button_action_type: text("secondary_button_action_type", { enum: ["url", "internal_route", "external"] }).default("url"),
+  is_active: boolean("is_active").default(true).notNull(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const insertHeroSectionSchema = createInsertSchema(hero_sections).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export type HeroSection = typeof hero_sections.$inferSelect;
+export type InsertHeroSection = z.infer<typeof insertHeroSectionSchema>;

@@ -1,6 +1,5 @@
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { queryClient } from '@/lib/queryClient'
-import { apiRequest } from '@/lib/queryClient'
+import { queryClient, apiRequest } from '@/lib/queryClient'
 
 export interface HeroSection {
   id: string
@@ -38,12 +37,9 @@ export function useHeroSections(sectionType: string = 'learning_dashboard') {
 export function useCreateHeroSection() {
   return useMutation({
     mutationFn: async (data: Partial<HeroSection>) => {
-      return apiRequest('/api/layout/hero-sections', {
-        method: 'POST',
-        body: JSON.stringify(data)
-      })
+      return apiRequest('POST', '/api/layout/hero-sections', data)
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/layout/hero-sections'] })
     }
   })
@@ -52,12 +48,9 @@ export function useCreateHeroSection() {
 export function useUpdateHeroSection() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<HeroSection> }) => {
-      return apiRequest(`/api/layout/hero-sections/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(data)
-      })
+      return apiRequest('PATCH', `/api/layout/hero-sections/${id}`, data)
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/layout/hero-sections'] })
     }
   })
@@ -66,9 +59,7 @@ export function useUpdateHeroSection() {
 export function useDeleteHeroSection() {
   return useMutation({
     mutationFn: async (id: string) => {
-      return apiRequest(`/api/layout/hero-sections/${id}`, {
-        method: 'DELETE'
-      })
+      return apiRequest('DELETE', `/api/layout/hero-sections/${id}`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/layout/hero-sections'] })
@@ -79,10 +70,7 @@ export function useDeleteHeroSection() {
 export function useReorderHeroSections() {
   return useMutation({
     mutationFn: async (sections: Array<{ id: string; order_index: number }>) => {
-      return apiRequest('/api/layout/hero-sections/reorder', {
-        method: 'POST',
-        body: JSON.stringify({ sections })
-      })
+      return apiRequest('POST', '/api/layout/hero-sections/reorder', { sections })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/layout/hero-sections'] })

@@ -24,6 +24,7 @@ import { registerCommunityRoutes } from './routes/community';
 import { registerImportRoutes } from './routes/import';
 import { registerMediaRoutes } from './routes/media';
 import { registerEmailRoutes } from './routes/email';
+import { registerLayoutRoutes } from './routes/layout';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
@@ -91,6 +92,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register media routes (gallery, upload, delete)
   registerMediaRoutes(app, deps);
+
+  // Register layout routes (hero sections for carousels)
+  registerLayoutRoutes(app, deps);
 
   // Diagnostic endpoints for payments
   app.get("/api/diag/last-payment-events", async (req, res) => {

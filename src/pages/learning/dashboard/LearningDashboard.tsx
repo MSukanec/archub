@@ -10,9 +10,9 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { useLocation } from 'wouter'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
 import { useLearningDashboardFast } from '@/features/learning'
+import CarouselHero from '@/components/shared/CarouselHero'
+import { useHeroSections } from '@/features/layout'
 
 export default function LearningDashboard() {
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore()
@@ -27,21 +27,9 @@ export default function LearningDashboard() {
   }, [setSidebarContext, setSidebarLevel, sidebarLevel])
 
   const { data: dashboardData, isLoading } = useLearningDashboardFast();
-
-  // Get the latest course for hero background when user has no enrollments
-  const { data: allCoursesData } = useQuery({
-    queryKey: ['/api/learning/courses-full'],
-    queryFn: async () => {
-      const res = await fetch('/api/learning/courses-full', {
-        credentials: 'include'
-      });
-      
-      if (!res.ok) return { courses: [] };
-      return res.json();
-    },
-    staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false
-  });
+  
+  // Get hero sections from database for carousel
+  const { data: heroSections = [] } = useHeroSections('learning_dashboard');
 
   const { global, courses = [], featured_course, currentStreak = 0 } = dashboardData || {}
   
@@ -53,14 +41,27 @@ export default function LearningDashboard() {
     .sort((a: any, b: any) => b.progress_pct - a.progress_pct)
     .slice(0, 3);
 
-  // Get the latest course from all courses for the hero background
-  const latestCourse = allCoursesData?.courses?.[0];
+  // Convert hero sections to carousel format
+  const carouselSections = heroSections.map((section: any) => ({
+    id: section.id,
+    title: section.title,
+    description: section.description,
+    media_url: section.media_url,
+    media_type: section.media_type,
+    primary_button_text: section.primary_button_text,
+    primary_button_action: section.primary_button_action,
+    primary_button_action_type: section.primary_button_action_type,
+    secondary_button_text: section.secondary_button_text,
+    secondary_button_action: section.secondary_button_action,
+    secondary_button_action_type: section.secondary_button_action_type,
+    badge_text: undefined,
+  }));
 
-  // Default hero course for users with no enrollments (uses latest course image if available)
+  // Default hero course for users with no enrollments
   const defaultHeroCourse = {
     course_title: 'Explora nuestros Cursos',
     short_description: 'Desarrolla tus habilidades profesionales con nuestros cursos especializados',
-    cover_url: latestCourse?.cover_url || null,
+    cover_url: null,
     course_slug: null,
     done_lessons: undefined,
     total_lessons: 0,
@@ -69,7 +70,22 @@ export default function LearningDashboard() {
 
   const currentHero = heroCurso || (!hasEnrollments && defaultHeroCourse);
   
-  const heroSection = currentHero && (
+  // Use CarouselHero if there are sections configured, otherwise use legacy hero
+  const heroSection = carouselSections.length > 0 ? (
+    <CarouselHero
+      sections={carouselSections}
+      height="h-[200px] sm:h-[250px] md:h-96"
+      autoplay={true}
+      autoplayInterval={6000}
+      onButtonClick={(buttonType, action, actionType) => {
+        if (actionType === 'internal_route') {
+          navigate(action);
+        } else {
+          window.open(action, '_blank');
+        }
+      }}
+    />
+  ) : currentHero && (
     <div 
       className="relative h-[200px] sm:h-[250px] md:h-96 overflow-hidden w-full"
       data-testid="hero-featured-course"
