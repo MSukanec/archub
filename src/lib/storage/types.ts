@@ -18,7 +18,8 @@ export type EntityType =
   | 'sitelog_attachment'
   | 'project_photo'
   | 'sitelog_photo'
-  | 'project_document';
+  | 'project_document'
+  | 'course_purchase_receipt';
 
 export type BucketName = 'public-assets' | 'private-assets' | 'social-assets';
 
