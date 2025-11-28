@@ -145,7 +145,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-all-payments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/payments/all'] });
       toast({
         title: 'Pago creado exitosamente',
         description: 'El pago se registró correctamente en el sistema.'
@@ -181,7 +181,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-all-payments'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/payments/all'] });
       toast({
         title: 'Pago actualizado exitosamente',
         description: 'Los cambios se guardaron correctamente.'
