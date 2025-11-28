@@ -23,10 +23,14 @@ import { registerOrganizationRoutes } from './routes/organization';
 import { registerCommunityRoutes } from './routes/community';
 import { registerImportRoutes } from './routes/import';
 import { registerMediaRoutes } from './routes/media';
+import { registerEmailRoutes } from './routes/email';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
   const deps = getRouteDeps();
+  
+  // Register email routes (Resend integration)
+  registerEmailRoutes(app, deps);
   
   // Register reference data routes (countries, task parameters, test endpoint)
   registerReferenceRoutes(app, deps);
