@@ -2003,8 +2003,7 @@ Titular: Matias Esteban Sukanec`;
                         loading || 
                         priceLoading || 
                         !acceptTerms || 
-                        !acceptCommunications ||
-                        (!!appliedCoupon && selectedMethod === "mercadopago")
+                        !acceptCommunications
                       }
                       className="w-full h-12 text-base font-medium mt-6"
                       data-testid="button-continue-payment"
