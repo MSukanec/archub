@@ -229,7 +229,7 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
         first_name: userData.firstName, 
         last_name: userData.lastName 
       },
-      notification_url: `${urlContext.webhookBase}/api/mp/webhook?secret=${MP_WEBHOOK_SECRET}`,
+      notification_url: `${urlContext.webhookBase}/api/checkout/mp/webhook?secret=${MP_WEBHOOK_SECRET}`,
       back_urls: backUrls,
       auto_return: "approved",
       binary_mode: true,

@@ -10,6 +10,8 @@ export type PaymentData = {
   productType?: string | null;
   organizationId?: string | null;
   productId?: string | null;
+  couponCode?: string | null;
+  couponId?: string | null;
 };
 
 export async function insertPayment(
