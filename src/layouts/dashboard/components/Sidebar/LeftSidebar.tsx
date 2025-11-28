@@ -238,6 +238,7 @@ export function LeftSidebar() {
         { id: 'subscriptions', label: 'Suscripciones', icon: CreditCard, href: '/admin/subscriptions' },
         { id: 'payments', label: 'Pagos', icon: Wallet, href: '/admin/payments' },
         { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses' },
+        { id: 'email-templates', label: 'Plantillas de Email', icon: Mail, href: '/admin/email-templates' },
         { id: 'layout', label: 'Layout', icon: Layers, href: '/admin/layout' },
         { id: 'general', label: 'General', icon: Settings, href: '/admin/general' },
         { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },

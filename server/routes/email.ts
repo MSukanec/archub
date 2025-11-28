@@ -9,6 +9,7 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
   // POST /api/email/send - Send email via Resend
+  // Supports: template="welcome"|"purchase" OR raw html
   app.post('/api/email/send', async (req, res) => {
     try {
       if (!RESEND_API_KEY) {
@@ -19,24 +20,66 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         });
       }
 
-      const { to, subject, html, from = 'sistema@seencel.com', notifyAdmin = false } = req.body;
+      const { 
+        to, 
+        subject, 
+        html, 
+        template,
+        userName,
+        courseName,
+        amount,
+        transactionId,
+        from = 'Seencel <sistema@seencel.com>', 
+        notifyAdmin = false 
+      } = req.body;
 
-      if (!to || !subject || !html) {
+      if (!to || !subject) {
         return res.status(400).json({
           ok: false,
-          error: 'Missing required fields: to, subject, html'
+          error: 'Missing required fields: to, subject'
         });
       }
 
       const resend = new Resend(RESEND_API_KEY);
       const adminEmail = 'matusukanec@gmail.com';
 
+      // Determine email HTML based on template or raw html
+      let emailHtml: string;
+      
+      if (template === 'welcome') {
+        emailHtml = render(
+          WelcomeEmail({
+            userName: userName || 'Arquitecto',
+            userEmail: to,
+          }) as any
+        );
+        console.log('📧 Using WelcomeEmail template');
+      } else if (template === 'purchase') {
+        emailHtml = render(
+          PurchaseEmail({
+            userName: userName || 'Estudiante',
+            courseName: courseName || 'Curso',
+            amount: amount || '$0',
+            transactionId: transactionId || 'N/A',
+          }) as any
+        );
+        console.log('📧 Using PurchaseEmail template');
+      } else if (html) {
+        emailHtml = html;
+        console.log('📧 Using raw HTML');
+      } else {
+        return res.status(400).json({
+          ok: false,
+          error: 'Either template or html must be provided'
+        });
+      }
+
       // 1️⃣ Send email to user
       const userEmailResult = await resend.emails.send({
         from,
         to,
         subject,
-        html
+        html: emailHtml
       });
 
       if (userEmailResult.error) {
@@ -53,23 +96,27 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
       let adminEmailResult = null;
       if (notifyAdmin && adminEmail !== to) {
         const adminHtml = `
-          <h2>📧 Nueva Notificación de Seencel</h2>
-          <p><strong>Usuario:</strong> ${to}</p>
-          <p><strong>Asunto:</strong> ${subject}</p>
-          <hr />
-          <p>${html}</p>
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #333;">📧 Nueva Notificación de Seencel</h2>
+            <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 5px 0;"><strong>Usuario:</strong> ${to}</p>
+              <p style="margin: 5px 0;"><strong>Asunto:</strong> ${subject}</p>
+              <p style="margin: 5px 0;"><strong>Tipo:</strong> ${template || 'Custom HTML'}</p>
+            </div>
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;" />
+            ${emailHtml}
+          </div>
         `;
 
         adminEmailResult = await resend.emails.send({
           from,
           to: adminEmail,
-          subject: `[Admin Alert] ${subject}`,
+          subject: `[Admin] ${subject}`,
           html: adminHtml
         });
 
         if (adminEmailResult.error) {
           console.error('❌ Resend error (admin email):', adminEmailResult.error);
-          // Don't fail the request, just log the error
         } else {
           console.log('✅ Admin notification sent:', adminEmailResult.data);
         }

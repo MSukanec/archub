@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Mail, RefreshCw } from 'lucide-react';
+import { AdminLayout } from '@/layouts/admin/AdminLayout';
 
 interface EmailPreview {
   type: 'registration' | 'purchase';
@@ -14,7 +15,7 @@ interface EmailPreview {
   };
 }
 
-export function EmailTemplatesAdmin() {
+function EmailTemplatesContent() {
   const [registrationEmail, setRegistrationEmail] = useState<EmailPreview | null>(null);
   const [purchaseEmail, setPurchaseEmail] = useState<EmailPreview | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,7 +27,6 @@ export function EmailTemplatesAdmin() {
   const loadEmails = async () => {
     setLoading(true);
     try {
-      // Load registration email
       const regRes = await fetch('/api/admin/email-preview/registration', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -39,7 +39,6 @@ export function EmailTemplatesAdmin() {
         setRegistrationEmail(await regRes.json());
       }
 
-      // Load purchase email
       const purRes = await fetch('/api/admin/email-preview/purchase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -61,7 +60,7 @@ export function EmailTemplatesAdmin() {
   };
 
   const EmailPreviewCard = ({ email }: { email: EmailPreview | null }) => {
-    if (!email) return <div className="text-center py-8 text-gray-500">Cargando...</div>;
+    if (!email) return <div className="text-center py-8 text-muted-foreground">Cargando...</div>;
 
     return (
       <div className="space-y-4">
@@ -75,15 +74,15 @@ export function EmailTemplatesAdmin() {
           <CardContent className="space-y-3">
             <div>
               <label className="text-sm font-medium">Asunto</label>
-              <p className="text-sm text-gray-600 mt-1">{email.preview.subject}</p>
+              <p className="text-sm text-muted-foreground mt-1">{email.preview.subject}</p>
             </div>
             <div>
               <label className="text-sm font-medium">De</label>
-              <p className="text-sm text-gray-600 mt-1">{email.preview.from}</p>
+              <p className="text-sm text-muted-foreground mt-1">{email.preview.from}</p>
             </div>
             <div>
               <label className="text-sm font-medium">Para</label>
-              <p className="text-sm text-gray-600 mt-1">{email.preview.to}</p>
+              <p className="text-sm text-muted-foreground mt-1">{email.preview.to}</p>
             </div>
           </CardContent>
         </Card>
@@ -112,13 +111,14 @@ export function EmailTemplatesAdmin() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Plantillas de Email</h1>
-          <p className="text-gray-500 mt-1">Previsualiza y gestiona tus plantillas de correo electrónico</p>
+          <p className="text-muted-foreground mt-1">Previsualiza y gestiona tus plantillas de correo electrónico</p>
         </div>
         <Button
           onClick={loadEmails}
           disabled={loading}
           variant="outline"
           size="sm"
+          data-testid="button-refresh-emails"
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
           Recargar
@@ -127,8 +127,8 @@ export function EmailTemplatesAdmin() {
 
       <Tabs defaultValue="registration" className="w-full">
         <TabsList>
-          <TabsTrigger value="registration">📝 Email de Registro</TabsTrigger>
-          <TabsTrigger value="purchase">💳 Email de Compra</TabsTrigger>
+          <TabsTrigger value="registration" data-testid="tab-registration-email">Email de Registro</TabsTrigger>
+          <TabsTrigger value="purchase" data-testid="tab-purchase-email">Email de Compra</TabsTrigger>
         </TabsList>
 
         <TabsContent value="registration" className="mt-6">
@@ -142,3 +142,13 @@ export function EmailTemplatesAdmin() {
     </div>
   );
 }
+
+export function EmailTemplatesAdmin() {
+  return (
+    <AdminLayout>
+      <EmailTemplatesContent />
+    </AdminLayout>
+  );
+}
+
+export default EmailTemplatesAdmin;
