@@ -59,10 +59,6 @@ export async function getGeneralCostPayment(
         id,
         name,
         description
-      ),
-      creator:organization_members!general_costs_payments_created_by_fkey(
-        id,
-        users(id, full_name, avatar_url)
       )
     `)
     .eq('id', id)
@@ -79,7 +75,6 @@ export async function getGeneralCostPayment(
   if (!data) return null;
 
   const walletData = Array.isArray(data.wallet) ? data.wallet[0] : data.wallet;
-  const creatorData = Array.isArray(data.creator) ? data.creator[0] : data.creator;
   
   return {
     ...data,
@@ -89,9 +84,6 @@ export async function getGeneralCostPayment(
       ...walletData,
       wallets: Array.isArray(walletData.wallets) ? walletData.wallets[0] : walletData.wallets
     } : null,
-    creator: creatorData ? {
-      ...creatorData,
-      users: Array.isArray(creatorData.users) ? creatorData.users[0] : creatorData.users
-    } : null,
+    creator: null,
   } as unknown as GeneralCostPayment;
 }

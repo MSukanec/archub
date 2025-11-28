@@ -33,21 +33,7 @@ export default function GeneralCostPaymentView({
   const organizationId = orgIdProp || modalData?.organizationId
   const paymentId = paymentIdProp || modalData?.paymentId
 
-  console.log('[GeneralCostPaymentView] Props received:', {
-    orgIdProp,
-    paymentIdProp,
-    modalData,
-    resolvedOrganizationId: organizationId,
-    resolvedPaymentId: paymentId,
-  })
-
-  const { data: payment, isLoading, error } = useGeneralCostPayment(paymentId, organizationId)
-  
-  console.log('[GeneralCostPaymentView] Hook result:', {
-    payment,
-    isLoading,
-    error,
-  })
+  const { data: payment, isLoading } = useGeneralCostPayment(paymentId, organizationId)
   const { data: mediaFiles = [] } = useGeneralCostPaymentMedia(paymentId)
 
   if (isLoading) {
