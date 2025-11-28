@@ -183,7 +183,7 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
       ],
       external_reference: custom_id,
       payer: { 
-        email: isTestMode ? "test_user_12345@test.com" : userData.email,
+        email: isTestMode ? "payer_checkout@example.com" : userData.email,
         first_name: userData.firstName, 
         last_name: userData.lastName 
       },
