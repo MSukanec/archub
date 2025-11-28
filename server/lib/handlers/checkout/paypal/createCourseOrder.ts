@@ -54,22 +54,55 @@ export async function createCourseOrder(
     }
 
     // Look up actual user ID from auth_id in users table
-    const { data: userRecord, error: userLookupError } = await supabase
+    let { data: userRecord, error: userLookupError } = await supabase
       .from('users')
       .select('id')
       .eq('auth_id', user.id)
       .single();
     
-    if (userLookupError || !userRecord) {
-      console.error("[PayPal create-course-order] User lookup failed:", userLookupError);
+    let user_id: string;
+    
+    if (userLookupError) {
+      if (userLookupError.code === 'PGRST116') {
+        // User not found, create one
+        console.log("[PayPal create-course-order] User not in table, creating...", { auth_id: user.id });
+        const { data: newUser, error: createError } = await supabase
+          .from('users')
+          .insert({
+            auth_id: user.id,
+            email: user.email || 'unknown@seencel.com',
+          })
+          .select('id')
+          .single();
+        
+        if (createError || !newUser) {
+          console.error("[PayPal create-course-order] Failed to create user:", createError);
+          return {
+            success: false,
+            error: "Failed to create user record",
+            status: 500,
+          };
+        }
+        user_id = newUser.id;
+        console.log("[PayPal create-course-order] User created:", user_id);
+      } else {
+        console.error("[PayPal create-course-order] User lookup error:", userLookupError);
+        return {
+          success: false,
+          error: "User lookup failed",
+          status: 500,
+        };
+      }
+    } else if (!userRecord) {
+      console.error("[PayPal create-course-order] User not found");
       return {
         success: false,
         error: "User not found",
         status: 404,
       };
+    } else {
+      user_id = userRecord.id;
     }
-
-    const user_id = userRecord.id;
 
     console.log("[PayPal create-course-order] Request received:", {
       user_id,
