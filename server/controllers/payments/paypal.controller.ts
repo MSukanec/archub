@@ -9,6 +9,7 @@ import { capturePayPalOrder, getPayPalOrder } from "../../lib/handlers/checkout/
 import { createServiceSupabaseClient } from "../../lib/handlers/checkout/shared/auth.js";
 import { insertPayment } from "../../lib/handlers/checkout/shared/payments.js";
 import { upsertEnrollment } from "../../lib/handlers/checkout/shared/enrollments.js";
+import { logPaymentEvent } from "../../lib/handlers/checkout/shared/events.js";
 
 export async function createCourse(req: Request, res: Response) {
   try {
@@ -218,7 +219,19 @@ export async function captureAndRedirect(req: Request, res: Response) {
     
     console.log('[PayPal capture-and-redirect] Payment captured:', { amount, currency, providerPaymentId });
     
-    // 3. Insert payment record using service role (bypasses RLS)
+    // 3. Log payment event
+    await logPaymentEvent(supabase, 'paypal', {
+      providerEventType: 'PAYMENT.CAPTURE.COMPLETED',
+      status: 'completed',
+      orderId: orderDetails.id,
+      customId,
+      providerPaymentId,
+      amount,
+      currency,
+      rawPayload: captureResult,
+    });
+    
+    // 4. Insert payment record using service role (bypasses RLS)
     const paymentResult = await insertPayment(supabase, 'paypal', {
       providerPaymentId,
       userId,
@@ -238,7 +251,7 @@ export async function captureAndRedirect(req: Request, res: Response) {
       console.log('[PayPal capture-and-redirect] Payment inserted:', paymentResult.paymentId);
     }
     
-    // 4. Enroll user in course (12 months access)
+    // 5. Enroll user in course (12 months access)
     const enrollmentResult = await upsertEnrollment(supabase, userId, courseId, 12);
     if (!enrollmentResult.success) {
       console.error('[PayPal capture-and-redirect] Enrollment failed:', enrollmentResult.error);
@@ -246,13 +259,81 @@ export async function captureAndRedirect(req: Request, res: Response) {
     }
     console.log('[PayPal capture-and-redirect] ✅ User enrolled successfully');
     
-    // 5. Redirect to course page
+    // 6. Return HTML with loader and client-side redirect
     const redirectUrl = courseSlug 
       ? `/learning/courses/${courseSlug}?payment=success`
       : `/learning/courses?payment=success`;
     
     console.log('[PayPal capture-and-redirect] Redirecting to:', redirectUrl);
-    return res.redirect(302, redirectUrl);
+    
+    const loaderHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Procesando pago...</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              min-height: 100vh;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+            .container {
+              text-align: center;
+              background: white;
+              padding: 40px;
+              border-radius: 12px;
+              box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+              max-width: 400px;
+              width: 90%;
+            }
+            .spinner {
+              display: inline-block;
+              width: 48px;
+              height: 48px;
+              border: 4px solid #f3f3f3;
+              border-top: 4px solid #667eea;
+              border-radius: 50%;
+              animation: spin 1s linear infinite;
+              margin-bottom: 20px;
+            }
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+            h2 {
+              color: #333;
+              margin-bottom: 10px;
+              font-size: 24px;
+            }
+            p {
+              color: #666;
+              font-size: 16px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="spinner"></div>
+            <h2>¡Pago procesado!</h2>
+            <p>Cargando tu curso...</p>
+          </div>
+          <script>
+            // Redirect after 1 second to allow user to see the success message
+            setTimeout(() => {
+              window.location.href = '${redirectUrl}';
+            }, 1000);
+          </script>
+        </body>
+      </html>
+    `;
+    
+    return res.send(loaderHtml);
     
   } catch (error: any) {
     console.error('[PayPal capture-and-redirect] Error:', error);
