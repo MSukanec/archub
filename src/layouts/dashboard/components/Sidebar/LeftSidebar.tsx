@@ -207,10 +207,7 @@ export function LeftSidebar() {
 
   // Navegación según el nivel del sidebar
   const getNavigationItems = (): NavigationItem[] => {
-    if (sidebarLevel === 'general') {
-      // Sidebar general - hub central
-      return [];
-    } else if (sidebarLevel === 'organization') {
+    if (sidebarLevel === 'general' || sidebarLevel === 'organization') {
       return [
         { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects' },
         { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
@@ -502,7 +499,7 @@ export function LeftSidebar() {
                         icon: <Home className="h-5 w-5" />,
                         testId: 'button-sidebar-home',
                         onClick: () => {
-                          setSidebarLevel('organization');
+                          setSidebarLevel('general');
                           navigate('/organization/dashboard');
                         },
                         shouldRender: () => true, // Siempre visible
