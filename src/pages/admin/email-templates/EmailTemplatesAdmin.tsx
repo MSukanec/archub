@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
+import { Mail, RefreshCw } from 'lucide-react';
+import { DashboardLayout as Layout } from "@/layouts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mail, RefreshCw } from 'lucide-react';
-import { AdminLayout } from '@/layouts/admin/AdminLayout';
 
 interface EmailPreview {
   type: 'registration' | 'purchase';
@@ -93,7 +93,7 @@ function EmailTemplatesContent() {
             <CardDescription>Así se verá el email en cliente de correo</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="border rounded-lg p-4 bg-white overflow-auto max-h-[600px]">
+            <div className="border rounded-lg overflow-hidden bg-white">
               <iframe
                 srcDoc={email.html}
                 title="Email Preview"
@@ -109,10 +109,6 @@ function EmailTemplatesContent() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Plantillas de Email</h1>
-          <p className="text-muted-foreground mt-1">Previsualiza y gestiona tus plantillas de correo electrónico</p>
-        </div>
         <Button
           onClick={loadEmails}
           disabled={loading}
@@ -143,12 +139,19 @@ function EmailTemplatesContent() {
   );
 }
 
-export function EmailTemplatesAdmin() {
+const EmailTemplatesAdmin = () => {
+  const headerProps = {
+    title: 'Plantillas de Email',
+    icon: Mail,
+    showSearch: false,
+    showFilters: false,
+  };
+
   return (
-    <AdminLayout>
+    <Layout wide headerProps={headerProps}>
       <EmailTemplatesContent />
-    </AdminLayout>
+    </Layout>
   );
-}
+};
 
 export default EmailTemplatesAdmin;
