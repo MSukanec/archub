@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -66,27 +65,7 @@ const AdminPaymentsTab = () => {
   }, [mobileSearchValue, isMobile]);
 
   const { data: payments = [], isLoading } = useQuery<Payment[]>({
-    queryKey: ['admin-all-payments'],
-    queryFn: async () => {
-      const session = await supabase?.auth.getSession();
-      const token = session?.data.session?.access_token;
-      
-      if (!token) throw new Error('No authorization token');
-
-      const response = await fetch('/api/admin/payments/all', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch payments');
-      }
-
-      const data = await response.json();
-      return data as Payment[];
-    },
+    queryKey: ['/api/admin/payments/all'],
   });
 
   const stats = useMemo(() => {
