@@ -1,23 +1,23 @@
-import { useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useGlobalModalStore } from "@/components/modal";
 import { useModalPanelStore } from "@/components/modal";
 import { FormModalLayout } from "@/components/modal";
 import { FormModalHeader } from "@/components/modal";
 import { FormModalFooter } from "@/components/modal";
 import { FormModalBody } from "@/components/modal";
-import { Receipt } from 'lucide-react';
+import { Receipt, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
 interface BankTransferReceiptModalProps {
-  receiptUrl: string | null;
+  btpId: string;
   paymentId: string;
 }
 
 export default function BankTransferReceiptModal({
-  receiptUrl,
+  btpId,
   paymentId,
 }: BankTransferReceiptModalProps) {
   const { closeModal } = useGlobalModalStore();
@@ -27,6 +27,27 @@ export default function BankTransferReceiptModal({
   useEffect(() => {
     setPanel('edit');
   }, [setPanel]);
+
+  const { data: signedUrlData, isLoading: loadingUrl, error: urlError } = useQuery({
+    queryKey: ['/api/admin/bank-transfer/receipt', btpId],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch(`/api/admin/bank-transfer/receipt/${btpId}`, {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to fetch receipt');
+      }
+      return response.json() as Promise<{ signed_url: string }>;
+    },
+    enabled: !!btpId,
+    staleTime: 30 * 60 * 1000,
+  });
+
+  const receiptUrl = signedUrlData?.signed_url || null;
 
   const approvePaymentMutation = useMutation({
     mutationFn: async (paymentId: string) => {
@@ -81,7 +102,18 @@ export default function BankTransferReceiptModal({
   const editPanel = (
     <FormModalBody columns={1} className="p-0">
       <div className="w-full px-6 py-4" style={{ height: 'calc(100vh - 250px)', minHeight: '500px' }}>
-        {receiptUrl ? (
+        {loadingUrl ? (
+          <div className="w-full h-full border rounded-lg flex items-center justify-center bg-muted">
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <p className="text-muted-foreground">Cargando comprobante...</p>
+            </div>
+          </div>
+        ) : urlError ? (
+          <div className="w-full h-full border rounded-lg flex items-center justify-center bg-muted">
+            <p className="text-red-500">Error al cargar el comprobante</p>
+          </div>
+        ) : receiptUrl ? (
           isPDF ? (
             <iframe
               src={receiptUrl}
@@ -110,7 +142,7 @@ export default function BankTransferReceiptModal({
       onLeftClick={handleCancel}
       submitText="Aprobar Pago"
       onSubmit={handleSubmit}
-      submitDisabled={approvePaymentMutation.isPending || !receiptUrl}
+      submitDisabled={approvePaymentMutation.isPending || loadingUrl || !receiptUrl}
       showLoadingSpinner={approvePaymentMutation.isPending}
     />
   );

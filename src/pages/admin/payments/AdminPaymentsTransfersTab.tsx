@@ -120,7 +120,7 @@ const AdminPaymentsTransfersTab = () => {
     }
     
     openModal('bank-transfer-receipt', {
-      receiptUrl: payment.receipt_url,
+      btpId: payment.id,
       paymentId: payment.id,
     });
   };
