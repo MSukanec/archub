@@ -53,7 +53,23 @@ export async function createCourseOrder(
       };
     }
 
-    const user_id = user.id;
+    // Look up actual user ID from auth_id in users table
+    const { data: userRecord, error: userLookupError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('auth_id', user.id)
+      .single();
+    
+    if (userLookupError || !userRecord) {
+      console.error("[PayPal create-course-order] User lookup failed:", userLookupError);
+      return {
+        success: false,
+        error: "User not found",
+        status: 404,
+      };
+    }
+
+    const user_id = userRecord.id;
 
     console.log("[PayPal create-course-order] Request received:", {
       user_id,
