@@ -151,7 +151,7 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
       }
 
       const resend = new Resend(RESEND_API_KEY);
-      const adminEmail = 'matusukanec@gmail.com';
+      const adminEmail = 'contacto@seencel.com';
 
       // Determine email HTML based on template or raw html
       let emailHtml: string;
@@ -517,7 +517,7 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
 
       const data = await resend.emails.send({
         from: 'Seencel System <sistema@seencel.com>',
-        to: ['matusukanec@gmail.com'],
+        to: ['contacto@seencel.com'],
         subject: 'Prueba de conexión Express + Resend 🚀',
         html: '<p>¡Funciona! Tu backend Express en Replit puede enviar correos.</p>'
       });
