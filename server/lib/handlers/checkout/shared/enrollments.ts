@@ -11,7 +11,7 @@ export async function upsertEnrollment(
   userId: string,
   courseId: string,
   months?: number | null
-): Promise<void> {
+): Promise<{ success: boolean; error?: string }> {
   const startedAt = new Date();
   const expiresAt = months && months > 0 ? addMonths(startedAt, months) : null;
 
@@ -29,7 +29,9 @@ export async function upsertEnrollment(
   
   if (error) {
     console.error("[enrollments] upsertEnrollment error:", error);
+    return { success: false, error: error.message };
   } else {
     console.log("[enrollments] ✅ Enrollment created/updated");
+    return { success: true };
   }
 }

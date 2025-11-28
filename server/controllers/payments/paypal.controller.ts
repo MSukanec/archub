@@ -237,7 +237,11 @@ export async function captureAndRedirect(req: Request, res: Response) {
     }
     
     // 4. Enroll user in course (12 months access)
-    await upsertEnrollment(supabase, userId, courseId, 12);
+    const enrollmentResult = await upsertEnrollment(supabase, userId, courseId, 12);
+    if (!enrollmentResult.success) {
+      console.error('[PayPal capture-and-redirect] Enrollment failed:', enrollmentResult.error);
+      return res.status(400).send(errorHtml(`No se pudo inscribir al usuario en el curso: ${enrollmentResult.error}`));
+    }
     console.log('[PayPal capture-and-redirect] ✅ User enrolled successfully');
     
     // 5. Redirect to course page
