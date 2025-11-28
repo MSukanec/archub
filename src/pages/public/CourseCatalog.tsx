@@ -4,11 +4,6 @@ import { CourseCatalogContent } from '@/features/learning/pages';
 export default function CourseCatalog() {
   return (
     <MarketingLayout
-      headerNavigation={[
-        { label: "Cursos", href: "/cursos" },
-        { label: "Características", href: "/#features" },
-        { label: "Capacidades", href: "/#capabilities" }
-      ]}
       seo={{
         title: "Cursos Online | Seencel",
         description: "Explora nuestro catálogo de cursos profesionales. Aprende a tu ritmo con los mejores instructores.",
