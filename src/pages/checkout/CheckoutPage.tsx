@@ -1585,7 +1585,7 @@ Titular: Matias Esteban Sukanec`;
                                     Pago en ARS
                                   </Badge>
                                   <Badge className="text-xs font-semibold bg-accent hover:bg-accent/90 text-white border-0">
-                                    💸 -5% Extra
+                                    5% descuento extra
                                   </Badge>
                                 </Label>
                                 <p className="text-sm text-muted-foreground mt-1">
