@@ -54,10 +54,10 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
   });
 
   try {
-    // 5. Obtener curso y precio en USD
+    // 5. Obtener curso y precio en USD (con student_price si disponible)
     const { data: course, error: courseError } = await supabase
       .from("courses")
-      .select("id, title, slug, short_description, is_active, price")
+      .select("id, title, slug, short_description, is_active, price, student_price")
       .eq("slug", course_slug)
       .single();
 
@@ -66,14 +66,56 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
     }
 
     // 6. Obtener precio base en USD y convertir a ARS
-    let unit_price = Number(course.price);
+    // --- NUEVA LÓGICA: Si hay cupón, usar student_price ---
+    let basePriceUsd = Number(course.price);
     
-    if (!Number.isFinite(unit_price) || unit_price <= 0) {
+    if (!Number.isFinite(basePriceUsd) || basePriceUsd <= 0) {
       console.error('[MP create-course-preference] Invalid price:', course.price);
       return { success: false, error: "Precio inválido", status: 500 };
     }
 
-    // Si la moneda es ARS, convertir usando exchange_rates
+    let unit_price = basePriceUsd;
+    let couponData: any = null;
+
+    // 7. Validar cupón si se proporcionó - SOLO PARA VALIDAR, no para calcular descuento
+    if (code && code.trim()) {
+      const { data: validationResult, error: couponError } = await supabase.rpc('validate_coupon', {
+        p_code: code.trim(),
+        p_course_id: course.id,
+        p_price: basePriceUsd,
+        p_currency: currency
+      });
+
+      if (couponError || !validationResult?.ok) {
+        console.error('[MP create-course-preference] Cupón inválido:', validationResult?.reason || couponError?.message);
+        return { 
+          success: false, 
+          error: validationResult?.reason || "Cupón inválido", 
+          status: 400
+        };
+      }
+
+      // ✅ Cupón válido. Ahora usamos student_price si existe
+      if (course.student_price && Number(course.student_price) > 0) {
+        unit_price = Number(course.student_price);
+        couponData = validationResult;
+        console.log('[MP create-course-preference] ✅ Cupón válido - Usando student_price:', {
+          code: code.trim(),
+          student_price_usd: unit_price,
+          original_price_usd: basePriceUsd
+        });
+      } else {
+        // Si no hay student_price, usar el cálculo original del RPC
+        unit_price = Number(validationResult.final_price);
+        couponData = validationResult;
+        console.log('[MP create-course-preference] ✅ Cupón válido - Usando RPC final_price:', {
+          code: code.trim(),
+          final_price_usd: unit_price
+        });
+      }
+    }
+
+    // Convertir a ARS si es necesario
     if (currency === 'ARS') {
       const { data: exchangeRate, error: exchangeError } = await supabase
         .from("exchange_rates")
@@ -88,23 +130,16 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
         return { success: false, error: "Tasa de cambio no disponible", status: 500 };
       }
 
-      // --- INICIO CORRECCIÓN MERCADO PAGO ARS ---
+      // Convertir a ARS y redondear
       const rawArsPrice = unit_price * Number(exchangeRate.rate);
-
-      // Mercado Pago Argentina (ARS) NO acepta decimales.
-      // Redondeamos al entero más cercano para evitar errores en la API.
       unit_price = Math.round(rawArsPrice);
 
-      console.log('[MP create-course-preference] Price converted & rounded for ARS:', {
-        usd_price: course.price,
+      console.log('[MP create-course-preference] Price converted to ARS:', {
+        usd_price: unit_price,
         exchange_rate: exchangeRate.rate,
         raw_ars_price: rawArsPrice,
-        final_rounded_ars_price: unit_price
+        final_ars_price: unit_price
       });
-      
-      // 🔍 DEBUG 1
-      console.log('🔍 DEBUG 1 - Precio ARS Base:', unit_price, 'Tipo:', typeof unit_price, 'Es entero:', Number.isInteger(unit_price));
-      // --- FIN CORRECCIÓN ---
     }
 
     const productId = course.id;
@@ -112,48 +147,6 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
     const productSlug = course.slug;
     const productDescription = course.short_description || course.title;
     const accessMonths = months;
-    let couponData: any = null;
-
-    // 7. Validar cupón si se proporcionó
-    if (code && code.trim()) {
-      const couponResult = await validateAndApplyCoupon(
-        supabase,
-        code.trim(),
-        course.id,
-        unit_price,
-        currency,
-        user_id
-      );
-
-      if (!couponResult.success) {
-        if (couponResult.freeEnrollment) {
-          return { 
-            success: false,
-            error: "Este cupón otorga acceso gratuito. Usa el flujo de inscripción gratuita.",
-            status: 400,
-            freeEnrollment: true,
-            couponCode: code.trim()
-          };
-        }
-        return { 
-          success: false, 
-          error: couponResult.error, 
-          status: 400,
-          reason: couponResult.reason
-        };
-      }
-
-      couponData = couponResult.couponData;
-      unit_price = couponResult.finalPrice;
-      console.log('[MP create-course-preference] Cupón aplicado:', {
-        code: code.trim(),
-        discount: couponData.discount,
-        final_price: unit_price
-      });
-      
-      // 🔍 DEBUG 2
-      console.log('🔍 DEBUG 2 - Precio tras cupón:', unit_price, 'Tipo:', typeof unit_price, 'Es entero:', Number.isInteger(unit_price));
-    }
 
     // 8. Obtener datos del usuario
     const userData = await getUserData(supabase, user_id);
@@ -183,34 +176,13 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
     const urlContext = buildURLContext(req);
     const backUrls = buildCourseBackUrls(urlContext.returnBase, productSlug, "mp");
 
-    // --- INICIO CORRECCIÓN DEFINITIVA ARS ---
-    // Mercado Pago Argentina NO acepta centavos.
-    // Aunque hayamos redondeado antes, el cálculo del cupón pudo reintroducir decimales.
-    // Este es el redondeo de seguridad final justo antes de enviar.
-    
-    // FORZAR EL TIPO A NÚMERO por si acaso
+    // --- VALIDACIÓN FINAL DEL PRECIO ---
     unit_price = Number(unit_price);
     
-    if (currency === 'ARS') {
-      console.log(`[MP Safety Check] Precio ARS antes del redondeo final: ${unit_price}`);
-      unit_price = Math.round(unit_price);
-      console.log(`[MP Safety Check] Precio ARS final enviado a MP: ${unit_price}`);
-      
-      // 🔍 DEBUG 3
-      console.log('🔍 DEBUG 3 - Precio ARS Redondeado:', unit_price, 'Tipo:', typeof unit_price, 'Es entero:', Number.isInteger(unit_price));
+    if (!Number.isFinite(unit_price) || unit_price <= 0) {
+      console.error('🚨 ERROR: El precio final es inválido:', unit_price);
+      return { success: false, error: "Error al calcular el precio final.", status: 400 };
     }
-    
-    // LA PRUEBA DEFINITIVA: ¿Es un entero de verdad?
-    console.log('🔍 DEBUG FINAL - ¿Es entero?:', Number.isInteger(unit_price));
-    console.log('🔍 DEBUG FINAL - Valor exacto a enviar:', unit_price);
-    
-    // --- VALIDACIÓN DE PRECIO CERO O NEGATIVO ---
-    if (unit_price <= 0) {
-      console.error('🚨 ERROR FATAL: El precio final calculado es 0 o negativo:', unit_price);
-      return { success: false, error: "Error en el cálculo del descuento: el precio final es inválido.", status: 400 };
-    }
-    
-    // --- FIN CORRECCIÓN DEFINITIVA ARS ---
 
     const prefBody: any = {
       items: [
