@@ -263,7 +263,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
             });
 
             // IDEMPOTENT: Only mark coupon as used if payment was NEWLY inserted (not duplicate)
-            if (paymentResult.inserted && couponId && couponCode) {
+            if (paymentResult.inserted && paymentResult.paymentId && couponId && couponCode) {
               console.log(`[MP webhook] 🎟️ Redeeming coupon: ${couponCode} (${couponId})`);
               // Calculate amount saved (we need to store original price in metadata for this)
               // For now, use 0 as placeholder - ideally we'd store original_price in metadata
@@ -273,7 +273,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
                 couponId,
                 publicUserId,
                 course_id,
-                providerPaymentId,
+                paymentResult.paymentId, // ✅ Usar UUID de payments table, no el ID de MP
                 amountSaved,
                 currency
               );
@@ -487,7 +487,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
               });
 
               // IDEMPOTENT: Only mark coupon as used if payment was NEWLY inserted
-              if (paymentResult.inserted && couponId && couponCode) {
+              if (paymentResult.inserted && paymentResult.paymentId && couponId && couponCode) {
                 console.log(`[MP webhook] 🎟️ Redeeming coupon (MO): ${couponCode} (${couponId})`);
                 const amountSaved = 0; // TODO: Store original_price in metadata to calculate discount
                 const couponResult = await markCouponAsUsed(
@@ -495,7 +495,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
                   couponId,
                   moPublicUserId,
                   course_id,
-                  providerPaymentId,
+                  paymentResult.paymentId, // ✅ Usar UUID de payments table, no el ID de MP
                   amountSaved,
                   "ARS"
                 );
