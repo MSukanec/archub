@@ -18,6 +18,14 @@ interface HeaderProps {
   navigation?: Array<{ label: string; href: string }>;
 }
 
+// Navegación por defecto agnóstica (siempre igual en todas las páginas públicas)
+const DEFAULT_NAVIGATION: Array<{ label: string; href: string }> = [
+  { label: "Cursos", href: "/cursos" },
+  { label: "Características", href: "#features" },
+  { label: "Capacidades", href: "#capabilities" },
+  { label: "Contacto", href: "/contact" }
+];
+
 // Componente de botón estilo dashboard mobile
 function MarketingMobileMenuButton({
   icon: Icon,
@@ -55,6 +63,9 @@ function MarketingMobileMenuButton({
 export function Header({ navigation }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, loading, initialized, initialize, logout } = useAuthStore();
+  
+  // Usar navegación por defecto agnóstica (siempre consistente)
+  const navItems = navigation || DEFAULT_NAVIGATION;
 
   useEffect(() => {
     if (!initialized && !loading) {
@@ -266,7 +277,7 @@ export function Header({ navigation }: HeaderProps) {
                 <div className="h-12" />
 
                 {/* Links de navegación */}
-                {navigation && navigation.length > 0 && navigation.map((item) => {
+                {navItems && navItems.length > 0 && navItems.map((item) => {
                   const isSamePageAnchor = item.href.startsWith('#') && !item.href.includes('/');
                   const ItemIcon = getIconForNavItem(item.label);
                   
@@ -330,9 +341,9 @@ export function Header({ navigation }: HeaderProps) {
             </Link>
             
             {/* Desktop Navigation */}
-            {navigation && navigation.length > 0 && (
+            {navItems && navItems.length > 0 && (
               <nav className="hidden md:flex items-center space-x-6">
-                {navigation.map((item) => {
+                {navItems.map((item) => {
                   const isSamePageAnchor = item.href.startsWith('#') && !item.href.includes('/');
                   
                   if (isSamePageAnchor) {
