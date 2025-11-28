@@ -184,8 +184,8 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
       external_reference: custom_id,
       payer: { 
         email: userData.email,
-        first_name: userData.firstName, 
-        last_name: userData.lastName 
+        first_name: userData.firstName || "Comprador", 
+        last_name: userData.lastName || "Curso" 
       },
       notification_url: `${urlContext.webhookBase}/api/checkout/mp/webhook?secret=${MP_WEBHOOK_SECRET}`,
       back_urls: backUrls,
