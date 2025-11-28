@@ -6,6 +6,7 @@ import type { RouteDeps } from './_base';
 import WelcomeEmail from '../../emails/WelcomeEmail';
 import PurchaseEmail from '../../emails/PurchaseEmail';
 import ContactEmail from '../../emails/ContactEmail';
+import AdminBankTransferAlert from '../../emails/AdminBankTransferAlert';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
@@ -307,6 +308,120 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
     } catch (error: any) {
       console.error('❌ Preview error:', error);
       return res.status(500).json({ error: error.message });
+    }
+  });
+
+  // POST /api/admin/email-preview/bank-transfer-admin - Preview admin bank transfer alert
+  app.post('/api/admin/email-preview/bank-transfer-admin', async (req, res) => {
+    try {
+      const {
+        userName = 'Juan Pérez',
+        userEmail = 'juan.perez@example.com',
+        courseName = 'Curso de Gestión de Proyectos',
+        amount = '85000',
+        currency = 'ARS',
+        transferId = 'btp-abc123',
+      } = req.body;
+      
+      const emailHtml = await render(
+        AdminBankTransferAlert({
+          userName,
+          userEmail,
+          courseName,
+          amount,
+          currency,
+          transferId,
+        }) as any
+      );
+
+      return res.json({
+        ok: true,
+        type: 'bank-transfer-admin',
+        html: emailHtml,
+        preview: {
+          subject: `🏦 Nueva Transferencia Pendiente - ${userName}`,
+          from: 'Seencel <sistema@seencel.com>',
+          to: 'contacto@seencel.com',
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ Preview error:', error);
+      return res.status(500).json({ error: error.message });
+    }
+  });
+
+  // POST /api/email/admin-bank-transfer-alert - Send admin notification for bank transfer
+  // This endpoint is called from Supabase Edge Function when a new bank transfer is created
+  // It ONLY sends to admin, never to the user
+  app.post('/api/email/admin-bank-transfer-alert', async (req, res) => {
+    try {
+      if (!RESEND_API_KEY) {
+        console.error('❌ RESEND_API_KEY not configured');
+        return res.status(500).json({
+          ok: false,
+          error: 'Email service not configured'
+        });
+      }
+
+      const { 
+        userName,
+        userEmail,
+        courseName,
+        amount,
+        currency = 'ARS',
+        transferId,
+      } = req.body;
+
+      if (!transferId) {
+        return res.status(400).json({
+          ok: false,
+          error: 'Missing required field: transferId'
+        });
+      }
+
+      const resend = new Resend(RESEND_API_KEY);
+      const adminEmail = 'contacto@seencel.com';
+
+      const emailHtml = await render(
+        AdminBankTransferAlert({
+          userName: userName || 'Cliente',
+          userEmail: userEmail || 'N/A',
+          courseName: courseName || 'Curso',
+          amount: amount || '0',
+          currency,
+          transferId,
+        }) as any
+      );
+
+      console.log('📧 Sending admin bank transfer alert for transfer:', transferId);
+
+      const result = await resend.emails.send({
+        from: 'Seencel <sistema@seencel.com>',
+        to: adminEmail,
+        subject: `🏦 Nueva Transferencia Pendiente - ${userName || 'Cliente'}`,
+        html: emailHtml
+      });
+
+      if (result.error) {
+        console.error('❌ Resend error (admin bank transfer alert):', result.error);
+        return res.status(500).json({
+          ok: false,
+          error: result.error.message
+        });
+      }
+
+      console.log('✅ Admin bank transfer alert sent:', result.data);
+
+      return res.json({
+        ok: true,
+        emailId: result.data?.id
+      });
+    } catch (error: any) {
+      console.error('❌ Admin bank transfer alert error:', error);
+      return res.status(500).json({
+        ok: false,
+        error: error.message || 'Failed to send admin notification'
+      });
     }
   });
 
