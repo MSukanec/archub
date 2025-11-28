@@ -177,6 +177,17 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
     const urlContext = buildURLContext(req);
     const backUrls = buildCourseBackUrls(urlContext.returnBase, productSlug, "mp");
 
+    // --- INICIO CORRECCIÓN DEFINITIVA ARS ---
+    // Mercado Pago Argentina NO acepta centavos.
+    // Aunque hayamos redondeado antes, el cálculo del cupón pudo reintroducir decimales.
+    // Este es el redondeo de seguridad final justo antes de enviar.
+    if (currency === 'ARS') {
+      console.log(`[MP Safety Check] Precio ARS antes del redondeo final: ${unit_price}`);
+      unit_price = Math.round(unit_price);
+      console.log(`[MP Safety Check] Precio ARS final enviado a MP: ${unit_price}`);
+    }
+    // --- FIN CORRECCIÓN DEFINITIVA ARS ---
+
     const prefBody: any = {
       items: [
         {
