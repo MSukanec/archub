@@ -264,6 +264,19 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
       couponCode: couponData ? code.trim() : null
     });
 
+    // 🔍 LOG DEL JSON COMPLETO PARA MP (sin tokens sensibles)
+    const debugPrefBody = {
+      items: prefBody.items,
+      external_reference: prefBody.external_reference,
+      payer: prefBody.payer,
+      back_urls: prefBody.back_urls,
+      auto_return: prefBody.auto_return,
+      binary_mode: prefBody.binary_mode,
+      statement_descriptor: prefBody.statement_descriptor,
+      metadata: prefBody.metadata
+    };
+    console.log("[MP DEBUG] JSON Preferencia a enviar:", JSON.stringify(debugPrefBody, null, 2));
+
     // 12. Create MP preference
     const result = await createMPPreference(prefBody);
 
