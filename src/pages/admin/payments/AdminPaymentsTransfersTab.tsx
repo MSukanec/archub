@@ -389,12 +389,8 @@ const AdminPaymentsTransfersTab = () => {
         columns={columns}
         data={filteredPayments}
         isLoading={isLoading}
+        onRowClick={(payment) => handleViewReceipt(payment)}
         rowActions={(payment) => [
-          {
-            icon: Eye,
-            label: 'Ver',
-            onClick: () => handleViewReceipt(payment)
-          },
           {
             icon: Trash2,
             label: 'Eliminar',

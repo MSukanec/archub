@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { CheckCircle2, XCircle, AlertCircle, Eye, FileText, User } from 'lucide-react'
+import { CheckCircle2, XCircle, AlertCircle, FileText, User } from 'lucide-react'
 
 interface BankTransferPayment {
   id: string;
@@ -86,6 +86,8 @@ export default function AdminPaymentTransferRow({
       avatarFallback={getInitials(payment.users?.full_name)}
       density={density}
       data-testid={`payment-transfer-row-${payment.id}`}
+      onClick={() => onViewReceipt(payment)}
+      className="cursor-pointer hover:bg-accent/50"
     >
       <div className="flex flex-col w-full gap-2">
         {/* Usuario: valor */}
@@ -127,18 +129,6 @@ export default function AdminPaymentTransferRow({
           {getStatusBadge()}
         </div>
       </div>
-
-      {/* Botón Ver - ancho completo fuera del contenedor */}
-      {payment.image_bucket && payment.image_path && (
-        <Button
-          className="w-full mt-3"
-          onClick={() => onViewReceipt(payment)}
-          data-testid={`button-view-receipt-${payment.id}`}
-        >
-          <Eye className="h-4 w-4 mr-2" />
-          Ver Comprobante
-        </Button>
-      )}
     </DataRowCard>
   );
 }
