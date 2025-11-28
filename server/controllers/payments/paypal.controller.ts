@@ -241,8 +241,6 @@ export async function captureAndRedirect(req: Request, res: Response) {
       currency,
       status: 'completed',
       productType: 'course',
-      couponCode,
-      couponId,
     });
     
     if (paymentResult.error) {

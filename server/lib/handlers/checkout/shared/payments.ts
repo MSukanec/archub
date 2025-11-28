@@ -10,8 +10,6 @@ export type PaymentData = {
   productType?: string | null;
   organizationId?: string | null;
   productId?: string | null;
-  couponCode?: string | null;
-  couponId?: string | null;
 };
 
 export async function insertPayment(
@@ -38,14 +36,6 @@ export async function insertPayment(
     paymentData.user_id = data.userId; // ✅ CRITICAL: user_id is required even for subscriptions
     paymentData.organization_id = data.organizationId;
     paymentData.product_id = data.productId;
-  }
-
-  // Add coupon info if present (for both courses and subscriptions)
-  if (data.couponCode) {
-    paymentData.coupon_code = data.couponCode;
-  }
-  if (data.couponId) {
-    paymentData.coupon_id = data.couponId;
   }
 
   const { data: insertedPayment, error } = await supabase
