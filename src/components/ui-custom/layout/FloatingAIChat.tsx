@@ -32,8 +32,8 @@ export function FloatingAIChat() {
           className={cn(
             "fixed bottom-6 right-6 z-40",
             "h-14 w-14 rounded-full",
-            "bg-gradient-to-br from-purple-500 to-blue-500",
-            "hover:from-purple-600 hover:to-blue-600",
+            "bg-gradient-to-br from-[#96cc00] to-[#64a339]",
+            "hover:from-[#a8e000] hover:to-[#73b541]",
             "shadow-lg hover:shadow-xl",
             "transition-all duration-200",
             "flex items-center justify-center",
@@ -62,7 +62,7 @@ export function FloatingAIChat() {
           }}
         >
           {/* Header del Chat */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--main-sidebar-border)] bg-gradient-to-br from-purple-500 to-blue-500">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--main-sidebar-border)] bg-gradient-to-br from-[#96cc00] to-[#64a339]">
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
                 <Sparkles className="h-4 w-4 text-white" />
