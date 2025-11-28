@@ -453,6 +453,19 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
   const [filesToUpload, setFilesToUpload] = React.useState<any[]>([])
   const [existingFiles, setExistingFiles] = React.useState<any[]>([])
   const hasInitializedRef = React.useRef(false)
+  const lastPaymentIdRef = React.useRef<string | undefined>(undefined)
+
+  // Reset initialization flag when paymentId changes (e.g., opening modal for a different payment)
+  React.useEffect(() => {
+    if (paymentId !== lastPaymentIdRef.current) {
+      console.log('[GeneralCostPaymentForm] PaymentId changed, resetting initialization flag', {
+        oldId: lastPaymentIdRef.current,
+        newId: paymentId
+      });
+      hasInitializedRef.current = false;
+      lastPaymentIdRef.current = paymentId;
+    }
+  }, [paymentId]);
 
   // Fetch existing payment data for edit/view mode
   const { data: existingPayment, isLoading: loadingPayment } = useGeneralCostPayment(
@@ -488,6 +501,13 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
 
   // Initialize form with existing payment data for EDIT/VIEW mode (runs once)
   React.useEffect(() => {
+    console.log('[GeneralCostPaymentForm] useEffect triggered:', { 
+      mode, 
+      hasPayment: !!existingPayment, 
+      hasInitialized: hasInitializedRef.current,
+      paymentId: existingPayment?.id
+    });
+    
     if (mode === 'create' || !existingPayment || hasInitializedRef.current) {
       return;
     }
@@ -501,6 +521,15 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
     } else {
       paymentDate = new Date();
     }
+    
+    console.log('[GeneralCostPaymentForm] Populating form with:', {
+      payment_date: paymentDate,
+      general_cost_id: existingPayment.general_cost?.id,
+      currency_id: existingPayment.currency?.id,
+      wallet_id: existingPayment.wallet?.id,
+      amount: existingPayment.amount,
+      status: existingPayment.status,
+    });
     
     form.reset({
       payment_date: paymentDate,
