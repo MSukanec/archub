@@ -16,7 +16,7 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         });
       }
 
-      const { to, subject, html, from = 'sistema@seencel.com' } = req.body;
+      const { to, subject, html, from = 'sistema@seencel.com', notifyAdmin = false } = req.body;
 
       if (!to || !subject || !html) {
         return res.status(400).json({
@@ -26,26 +26,56 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
       }
 
       const resend = new Resend(RESEND_API_KEY);
+      const adminEmail = 'matusukanec@gmail.com';
 
-      const result = await resend.emails.send({
+      // 1️⃣ Send email to user
+      const userEmailResult = await resend.emails.send({
         from,
         to,
         subject,
         html
       });
 
-      if (result.error) {
-        console.error('❌ Resend error:', result.error);
+      if (userEmailResult.error) {
+        console.error('❌ Resend error (user email):', userEmailResult.error);
         return res.status(500).json({
           ok: false,
-          error: result.error.message
+          error: userEmailResult.error.message
         });
       }
 
-      console.log('✅ Email sent successfully:', result.data);
+      console.log('✅ User email sent successfully:', userEmailResult.data);
+
+      // 2️⃣ Send admin notification if requested
+      let adminEmailResult = null;
+      if (notifyAdmin && adminEmail !== to) {
+        const adminHtml = `
+          <h2>📧 Nueva Notificación de Seencel</h2>
+          <p><strong>Usuario:</strong> ${to}</p>
+          <p><strong>Asunto:</strong> ${subject}</p>
+          <hr />
+          <p>${html}</p>
+        `;
+
+        adminEmailResult = await resend.emails.send({
+          from,
+          to: adminEmail,
+          subject: `[Admin Alert] ${subject}`,
+          html: adminHtml
+        });
+
+        if (adminEmailResult.error) {
+          console.error('❌ Resend error (admin email):', adminEmailResult.error);
+          // Don't fail the request, just log the error
+        } else {
+          console.log('✅ Admin notification sent:', adminEmailResult.data);
+        }
+      }
+
       return res.json({
         ok: true,
-        data: result.data
+        userEmail: userEmailResult.data,
+        adminEmail: adminEmailResult?.data || null
       });
     } catch (error: any) {
       console.error('❌ Email route error:', error);
