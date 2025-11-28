@@ -197,6 +197,9 @@ export async function captureAndRedirect(req: Request, res: Response) {
       return res.status(400).send(errorHtml('Formato de orden inválido'));
     }
     
+    // Create service client for database operations
+    const supabase = createServiceSupabaseClient();
+    
     // 2. Capture the payment
     console.log('[PayPal capture-and-redirect] Capturing order...');
     const captureResult = await capturePayPalOrder(token);
