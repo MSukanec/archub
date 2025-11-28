@@ -4,7 +4,7 @@ import { verifyAdminRoleForOrganization } from "../shared/permissions.js";
 import { getPlanPrice } from "../shared/pricing.js";
 import { getUserData } from "../shared/user.js";
 import { buildURLContext, buildSubscriptionBackUrls } from "../shared/urls.js";
-import { validateMPToken, logMPMode, MP_WEBHOOK_SECRET } from "./config.js";
+import { validateMPToken, logMPMode, MP_WEBHOOK_SECRET, isTestMode } from "./config.js";
 import { encodeCustomData } from "./encoding.js";
 import { createMPPreference } from "./api.js";
 
@@ -225,7 +225,7 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
       ],
       external_reference: custom_id,
       payer: { 
-        email: userData.email, 
+        email: isTestMode ? "test_user_12345@test.com" : userData.email,
         first_name: userData.firstName, 
         last_name: userData.lastName 
       },
