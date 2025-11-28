@@ -139,12 +139,13 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
   // POST /api/admin/email-preview/registration - Preview registration email
   app.post('/api/admin/email-preview/registration', async (req, res) => {
     try {
-      const { userName = 'Jorge Benitest', userEmail = 'jorge@example.com' } = req.body;
+      const { userName = 'Jorge Benitest', userEmail = 'jorge@example.com', adminName = 'El Equipo de Seencel' } = req.body;
       
       const emailHtml = render(
         WelcomeEmail({
           userName,
           userEmail,
+          adminName,
         }) as any
       );
 
@@ -153,8 +154,8 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         type: 'registration',
         html: emailHtml,
         preview: {
-          subject: '¡Bienvenido a Seencel! 🏗️',
-          from: 'sistema@seencel.com',
+          subject: `¡Bienvenido a Seencel, ${userName}!`,
+          from: 'Seencel <sistema@seencel.com>',
           to: userEmail,
         }
       });

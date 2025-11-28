@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Mail, RefreshCw } from 'lucide-react';
+import { Mail, RefreshCw, Copy, Check } from 'lucide-react';
 import { DashboardLayout as Layout } from "@/layouts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface EmailPreview {
   type: 'registration' | 'purchase';
@@ -19,6 +21,16 @@ function EmailTemplatesContent() {
   const [registrationEmail, setRegistrationEmail] = useState<EmailPreview | null>(null);
   const [purchaseEmail, setPurchaseEmail] = useState<EmailPreview | null>(null);
   const [loading, setLoading] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  // Editable fields for registration email
+  const [regUserName, setRegUserName] = useState('Jorge Benitest');
+  const [regAdminName, setRegAdminName] = useState('El Equipo de Seencel');
+
+  // Editable fields for purchase email
+  const [purUserName, setPurUserName] = useState('Jorge Benitest');
+  const [purCourseName, setPurCourseName] = useState('Curso Avanzado de Construcción');
+  const [purAmount, setPurAmount] = useState('$99.99');
 
   useEffect(() => {
     loadEmails();
@@ -31,8 +43,9 @@ function EmailTemplatesContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userName: 'Jorge Benitest',
-          userEmail: 'jorge@example.com'
+          userName: regUserName,
+          userEmail: 'jorge@example.com',
+          adminName: regAdminName,
         })
       });
       if (regRes.ok) {
@@ -43,9 +56,9 @@ function EmailTemplatesContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userName: 'Jorge Benitest',
-          courseName: 'Curso Avanzado de Construcción',
-          amount: '$99.99',
+          userName: purUserName,
+          courseName: purCourseName,
+          amount: purAmount,
           transactionId: 'TXN-20241128-001'
         })
       });
@@ -59,80 +72,193 @@ function EmailTemplatesContent() {
     }
   };
 
-  const EmailPreviewCard = ({ email }: { email: EmailPreview | null }) => {
-    if (!email) return <div className="text-center py-8 text-muted-foreground">Cargando...</div>;
-
-    return (
-      <div className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              Información del Email
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <label className="text-sm font-medium">Asunto</label>
-              <p className="text-sm text-muted-foreground mt-1">{email.preview.subject}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium">De</label>
-              <p className="text-sm text-muted-foreground mt-1">{email.preview.from}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Para</label>
-              <p className="text-sm text-muted-foreground mt-1">{email.preview.to}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Vista Previa</CardTitle>
-            <CardDescription>Así se verá el email en cliente de correo</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="border rounded-lg overflow-hidden bg-white">
-              <iframe
-                srcDoc={email.html}
-                title="Email Preview"
-                className="w-full h-[600px] border-0"
-              />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedCode(id);
+    setTimeout(() => setCopiedCode(null), 2000);
   };
+
+  const RegistrationEmailEditor = () => (
+    <div className="space-y-6">
+      <Card className="border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30">
+        <CardHeader>
+          <CardTitle className="text-base">Personalizar Email de Registro</CardTitle>
+          <CardDescription>Edita los campos para ver cómo se verá el email</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label className="text-sm font-medium">Nombre del Usuario</label>
+            <Input 
+              value={regUserName} 
+              onChange={(e) => setRegUserName(e.target.value)}
+              placeholder="Ej: Jorge Benitest"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Tu Nombre / Equipo</label>
+            <Input 
+              value={regAdminName} 
+              onChange={(e) => setRegAdminName(e.target.value)}
+              placeholder="Ej: Matías - Seencel"
+              className="mt-1"
+            />
+          </div>
+          <Button 
+            onClick={loadEmails} 
+            disabled={loading}
+            className="w-full"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Actualizar Vista Previa
+          </Button>
+        </CardContent>
+      </Card>
+
+      {registrationEmail && (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Asunto
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(registrationEmail.preview.subject, 'reg-subject')}
+                >
+                  {copiedCode === 'reg-subject' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground font-mono">{registrationEmail.preview.subject}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Vista Previa</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-lg overflow-hidden bg-white">
+                <iframe
+                  srcDoc={registrationEmail.html}
+                  title="Email Preview"
+                  className="w-full h-[500px] border-0"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+
+  const PurchaseEmailEditor = () => (
+    <div className="space-y-6">
+      <Card className="border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30">
+        <CardHeader>
+          <CardTitle className="text-base">Personalizar Email de Compra</CardTitle>
+          <CardDescription>Edita los campos para ver cómo se verá el email</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label className="text-sm font-medium">Nombre del Cliente</label>
+            <Input 
+              value={purUserName} 
+              onChange={(e) => setPurUserName(e.target.value)}
+              placeholder="Ej: Jorge Benitest"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Nombre del Curso</label>
+            <Input 
+              value={purCourseName} 
+              onChange={(e) => setPurCourseName(e.target.value)}
+              placeholder="Ej: Curso Avanzado de Construcción"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Monto</label>
+            <Input 
+              value={purAmount} 
+              onChange={(e) => setPurAmount(e.target.value)}
+              placeholder="Ej: $99.99"
+              className="mt-1"
+            />
+          </div>
+          <Button 
+            onClick={loadEmails} 
+            disabled={loading}
+            className="w-full"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Actualizar Vista Previa
+          </Button>
+        </CardContent>
+      </Card>
+
+      {purchaseEmail && (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Asunto
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(purchaseEmail.preview.subject, 'pur-subject')}
+                >
+                  {copiedCode === 'pur-subject' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground font-mono">{purchaseEmail.preview.subject}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Vista Previa</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-lg overflow-hidden bg-white">
+                <iframe
+                  srcDoc={purchaseEmail.html}
+                  title="Email Preview"
+                  className="w-full h-[500px] border-0"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button
-          onClick={loadEmails}
-          disabled={loading}
-          variant="outline"
-          size="sm"
-          data-testid="button-refresh-emails"
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Recargar
-        </Button>
-      </div>
-
       <Tabs defaultValue="registration" className="w-full">
-        <TabsList>
-          <TabsTrigger value="registration" data-testid="tab-registration-email">Email de Registro</TabsTrigger>
-          <TabsTrigger value="purchase" data-testid="tab-purchase-email">Email de Compra</TabsTrigger>
+        <TabsList className="w-full justify-start">
+          <TabsTrigger value="registration" data-testid="tab-registration-email">✉️ Email de Registro</TabsTrigger>
+          <TabsTrigger value="purchase" data-testid="tab-purchase-email">💳 Email de Compra</TabsTrigger>
         </TabsList>
 
         <TabsContent value="registration" className="mt-6">
-          <EmailPreviewCard email={registrationEmail} />
+          <RegistrationEmailEditor />
         </TabsContent>
 
         <TabsContent value="purchase" className="mt-6">
-          <EmailPreviewCard email={purchaseEmail} />
+          <PurchaseEmailEditor />
         </TabsContent>
       </Tabs>
     </div>
