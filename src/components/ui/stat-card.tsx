@@ -68,9 +68,9 @@ interface StatCardTitleProps {
 const StatCardTitle = ({ children, className, showArrow = true }: StatCardTitleProps) => {
   return (
     <div className="flex items-center justify-between gap-2">
-      <p className={cn("text-xs font-normal text-muted-foreground uppercase tracking-wide", className)}>
+      <span className={cn("text-xs font-normal text-muted-foreground uppercase tracking-wide", className)}>
         {children}
-      </p>
+      </span>
       {showArrow && (
         <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-xs text-muted-foreground">
           <span>Ver más</span>
@@ -98,9 +98,9 @@ interface StatCardMetaProps {
 }
 
 const StatCardMeta = ({ children, className }: StatCardMetaProps) => (
-  <p className={cn("text-sm text-muted-foreground mt-2", className)}>
+  <span className={cn("block text-sm text-muted-foreground mt-2", className)}>
     {children}
-  </p>
+  </span>
 )
 
 interface StatCardContentProps {
