@@ -130,8 +130,8 @@ export const ENTITY_CONFIG: Record<EntityType, EntityConfig> = {
     visibility: 'organization'
   },
   'course_purchase_receipt': {
-    bucket: 'private-assets',
-    basePath: 'marketplace/receipts/{course_id}/{user_id}',
+    bucket: 'bank-transfer-receipts' as any,
+    basePath: 'receipts/{course_id}/{user_id}',
     compressionPreset: 'document',
     visibility: 'private'
   }

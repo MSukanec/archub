@@ -243,10 +243,10 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
       const base64Data = file_data.replace(/^data:.+;base64,/, '');
       const buffer = Buffer.from(base64Data, 'base64');
 
-      // Upload to private-assets with scalable structure:
-      // marketplace/receipts/{course_id}/{user_id}/{btp_id}{extension}
-      const filePath = `marketplace/receipts/${courseId}/${profile.id}/${btp_id}${fileExtension}`;
-      const bucket = 'private-assets';
+      // Upload to bank-transfer-receipts with scalable structure:
+      // receipts/{course_id}/{user_id}/{btp_id}{extension}
+      const filePath = `receipts/${courseId}/${profile.id}/${btp_id}${fileExtension}`;
+      const bucket = 'bank-transfer-receipts';
       
       const { data: uploadData, error: uploadError } = await adminClient.storage
         .from(bucket)
@@ -389,10 +389,10 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
       // Parse the receipt_url (format: bucket:path or legacy public URL)
       let signedUrl = payment.receipt_url;
       
-      if (payment.receipt_url.startsWith('private-assets:')) {
-        const filePath = payment.receipt_url.replace('private-assets:', '');
+      if (payment.receipt_url.startsWith('bank-transfer-receipts:')) {
+        const filePath = payment.receipt_url.replace('bank-transfer-receipts:', '');
         const { data: signedUrlData, error: signError } = await adminClient.storage
-          .from('private-assets')
+          .from('bank-transfer-receipts')
           .createSignedUrl(filePath, 3600); // 1 hour expiry
         
         if (signError) {
@@ -400,8 +400,10 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
           return res.status(500).json({ error: "Failed to generate signed URL" });
         }
         signedUrl = signedUrlData.signedUrl;
+      } else if (payment.receipt_url.startsWith('http')) {
+        // Legacy public URL - use as-is
+        signedUrl = payment.receipt_url;
       }
-      // If it's a legacy public URL (from bank-transfer-receipts bucket), use as-is
 
       return res.json({ signed_url: signedUrl });
     } catch (error: any) {

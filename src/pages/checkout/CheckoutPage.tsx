@@ -18,6 +18,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCountries } from "@/hooks/use-countries";
 import { PhoneField } from "@/components/ui-custom/fields/PhoneField";
+import { Uploader } from "@/components/shared/Uploader";
 import {
   ShoppingCart,
   ArrowLeft,
@@ -83,10 +84,12 @@ export default function CheckoutPage() {
 
   // Bank transfer payment states
   const [bankTransferPaymentId, setBankTransferPaymentId] = useState<string | null>(null);
-  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
   const [receiptUploading, setReceiptUploading] = useState(false);
   const [receiptUploaded, setReceiptUploaded] = useState(false);
   const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
+  
+  const receiptFile = filesToUpload[0]?.file || null;
 
   // Set navigation context for sidebar and restore on unmount
   useEffect(() => {
@@ -763,37 +766,6 @@ Titular: Matias Esteban Sukanec`;
         variant: "destructive",
       });
     }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file extension
-    const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png'];
-    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-    
-    if (!allowedExtensions.includes(fileExtension)) {
-      toast({
-        title: "Archivo no válido",
-        description: `Solo se permiten archivos ${allowedExtensions.join(', ')}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate file size (10MB max)
-    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
-    if (file.size > maxSize) {
-      toast({
-        title: "Archivo muy grande",
-        description: "El archivo debe ser menor a 10MB",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setReceiptFile(file);
   };
 
   const handleUploadReceipt = async () => {
@@ -1702,32 +1674,32 @@ Titular: Matias Esteban Sukanec`;
                       </div>
                     )}
 
-                    {!receiptFile && !receiptUploaded ? (
-                      /* No file selected */
-                      <div className="space-y-3">
-                        <Input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          onChange={handleFileSelect}
-                          className="cursor-pointer"
-                          data-testid="input-receipt-file"
+                    {!receiptUploaded ? (
+                      /* File selection and upload */
+                      <div className="space-y-4">
+                        <Uploader
+                          mode="single"
+                          filesToUpload={filesToUpload}
+                          onFilesChange={setFilesToUpload}
+                          accept={{
+                            'application/pdf': ['.pdf'],
+                            'image/*': ['.png', '.jpg', '.jpeg']
+                          }}
+                          maxSize={10 * 1024 * 1024}
+                          compressionPreset="document"
+                          compressOnDrop={true}
+                          variant="compact"
+                          showLightbox={true}
+                          emptyStateTitle="Sin archivo"
+                          emptyStateDescription="Arrastra tu comprobante o haz clic para seleccionar"
+                          disabled={receiptUploading}
                         />
-                        <p className="text-xs text-muted-foreground">
-                          Formatos aceptados: PDF, JPG, JPEG, PNG (máx. 10MB)
-                        </p>
-                      </div>
-                    ) : receiptFile && !receiptUploaded ? (
-                      /* File selected but not uploaded */
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
-                          <FileCheck className="h-5 w-5 text-accent" />
-                          <span className="text-sm font-medium flex-1">{receiptFile.name}</span>
-                        </div>
-                        <div className="flex gap-3">
+                        
+                        {receiptFile && (
                           <Button
                             onClick={handleUploadReceipt}
                             disabled={receiptUploading}
-                            className="flex-1"
+                            className="w-full"
                             data-testid="button-upload-receipt"
                           >
                             {receiptUploading ? (
@@ -1742,19 +1714,7 @@ Titular: Matias Esteban Sukanec`;
                               </>
                             )}
                           </Button>
-                          <Button
-                            variant="secondary"
-                            onClick={() => {
-                              setReceiptFile(null);
-                              const input = document.querySelector<HTMLInputElement>('[data-testid="input-receipt-file"]');
-                              if (input) input.value = '';
-                            }}
-                            disabled={receiptUploading}
-                            data-testid="button-change-file"
-                          >
-                            Cambiar archivo
-                          </Button>
-                        </div>
+                        )}
                       </div>
                     ) : (
                       /* File uploaded */
@@ -1790,7 +1750,7 @@ Titular: Matias Esteban Sukanec`;
                         onClick={() => {
                           setShowBankInfo(false);
                           setBankTransferPaymentId(null);
-                          setReceiptFile(null);
+                          setFilesToUpload([]);
                           setReceiptUploading(false);
                           setReceiptUploaded(false);
                           setReceiptUrl(null);
