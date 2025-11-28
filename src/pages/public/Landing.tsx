@@ -136,7 +136,7 @@ function HeroSectionComponent() {
     <section 
       className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 -mx-6 relative"
       style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(/hero-landing-1080.jpg)`,
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.08)), url(/hero-landing-1080.jpg)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
@@ -145,12 +145,15 @@ function HeroSectionComponent() {
       <div className="text-center max-w-5xl mx-auto relative">
         <h1 
           className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight"
-          style={{ color: '#ffffff !important' } as any}
+          style={{ 
+            color: '#ffffff !important',
+            textShadow: '0 2px 10px rgba(0, 0, 0, 0.7), 0 4px 20px rgba(0, 0, 0, 0.6), 0 8px 30px rgba(0, 0, 0, 0.5)'
+          } as any}
         >
           La plataforma integral para arquitectura y construcción
         </h1>
         
-        <p className="text-xl mb-12 max-w-4xl mx-auto leading-relaxed" style={{ color: '#b3b3b3 !important' } as any}>
+        <p className="text-xl mb-12 max-w-4xl mx-auto leading-relaxed" style={{ color: '#ffffff !important', textShadow: '0 2px 8px rgba(0, 0, 0, 0.6)' } as any}>
           Gestiona todo el ciclo de vida de tus proyectos: desde diseño y planificación, 
           pasando por ventas y marketing, hasta construcción y entrega. Con IA integrada, 
           capacitación continua y conexión con las herramientas que ya usas.
