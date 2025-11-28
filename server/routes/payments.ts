@@ -187,10 +187,14 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
       
       const adminClient = getAdminClient();
       
-      // Step 1: Fetch payments (without relations first)
+      // Fetch payments with user and course relations
       const { data: payments, error: fetchError } = await adminClient
         .from('payments')
-        .select('*')
+        .select(`
+          *,
+          users:user_id (id, auth_id, full_name, email),
+          courses:course_id (id, title, slug)
+        `)
         .eq('status', 'completed')
         .order('created_at', { ascending: false });
       
@@ -203,34 +207,8 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         return res.json([]);
       }
 
-      // Step 2: Fetch users
-      const userIds = [...new Set(payments.map(p => p.user_id))];
-      const { data: users, error: usersError } = await adminClient
-        .from('users')
-        .select('id, auth_id, full_name, email')
-        .in('id', userIds);
-      
-      if (usersError) {
-        console.error("Error fetching users:", usersError);
-        return res.status(500).json({ error: "Failed to fetch users" });
-      }
-
-      // Step 3: Fetch courses
-      const courseIds = [...new Set(payments.map(p => p.course_id).filter(Boolean))];
-      let coursesMap = new Map();
-      if (courseIds.length > 0) {
-        const { data: courses, error: coursesError } = await adminClient
-          .from('courses')
-          .select('id, title, slug')
-          .in('id', courseIds);
-        
-        if (!coursesError && courses) {
-          coursesMap = new Map(courses.map(c => [c.id, c]));
-        }
-      }
-
-      // Step 4: Fetch coupon redemptions
-      const paymentIds = payments.map(p => p.id);
+      // Fetch coupon redemptions for these payments
+      const paymentIds = payments.map((p: any) => p.id);
       let redemptionsMap = new Map();
       const { data: redemptions, error: redemptionsError } = await adminClient
         .from('coupon_redemptions')
@@ -249,12 +227,9 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         );
       }
 
-      // Step 5: Enrich payments with all data
-      const usersMap = new Map(users?.map(u => [u.id, u]) || []);
-      const enrichedPayments = payments.map(payment => ({
+      // Enrich payments with coupon data
+      const enrichedPayments = payments.map((payment: any) => ({
         ...payment,
-        users: usersMap.get(payment.user_id) || { id: payment.user_id, auth_id: '', full_name: null, email: 'Unknown' },
-        courses: payment.course_id ? (coursesMap.get(payment.course_id) || null) : null,
         coupon_redemptions: redemptionsMap.get(payment.id) || null
       }));
       
