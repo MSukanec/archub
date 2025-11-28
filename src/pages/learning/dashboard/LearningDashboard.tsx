@@ -36,24 +36,37 @@ export default function LearningDashboard() {
     .sort((a: any, b: any) => b.progress_pct - a.progress_pct)
     .slice(0, 3);
 
-  const heroSection = heroCurso && (
+  // Default hero course for users with no enrollments
+  const defaultHeroCourse = {
+    course_title: 'Explora nuestros Cursos',
+    short_description: 'Desarrolla tus habilidades profesionales con nuestros cursos especializados',
+    cover_url: null,
+    course_slug: null,
+    done_lessons: undefined,
+    total_lessons: 0,
+    progress_pct: 0,
+  };
+
+  const currentHero = heroCurso || (!hasEnrollments && defaultHeroCourse);
+  
+  const heroSection = currentHero && (
     <div 
       className="relative h-[200px] sm:h-[250px] md:h-96 overflow-hidden w-full"
       data-testid="hero-featured-course"
     >
-      {heroCurso.cover_url ? (
+      {currentHero.cover_url ? (
         <>
           <div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat motion-reduce:bg-scroll"
             style={{
-              backgroundImage: `url(${heroCurso.cover_url})`,
+              backgroundImage: `url(${currentHero.cover_url})`,
               backgroundPosition: 'center center'
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black/100 dark:from-black/30 dark:via-black/70 dark:to-black/100" />
         </>
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-accent/5 dark:from-accent/20 dark:to-accent/10" />
       )}
 
       <div className="relative h-full flex flex-col justify-end px-4 sm:px-6 md:px-12 py-4 sm:py-6 md:py-12">
@@ -68,7 +81,7 @@ export default function LearningDashboard() {
               className="text-[9px] sm:text-[10px] md:text-xs font-medium uppercase px-3 sm:px-4 py-1.5 sm:py-2"
               data-testid="badge-featured"
             >
-              Destacado
+              {heroCurso ? 'Destacado' : 'Explora'}
             </Badge>
           </div>
           
@@ -76,28 +89,40 @@ export default function LearningDashboard() {
             className="text-lg sm:text-2xl md:text-5xl font-bold mb-2 sm:mb-4 md:mb-6 tracking-tight !text-white line-clamp-2" 
             data-testid="text-hero-title"
           >
-            {heroCurso.course_title}
+            {currentHero.course_title}
           </h1>
           
           <p className="text-xs sm:text-sm md:text-base max-w-2xl mb-4 sm:mb-8 text-[rgb(220,220,220)] line-clamp-1 sm:line-clamp-2">
-            {heroCurso.done_lessons !== undefined 
-              ? `${heroCurso.done_lessons} de ${heroCurso.total_lessons} lecciones completadas • ${heroCurso.progress_pct}% completado`
-              : heroCurso.short_description || 'Descubre este curso y desarrolla nuevas habilidades'}
+            {currentHero.done_lessons !== undefined 
+              ? `${currentHero.done_lessons} de ${currentHero.total_lessons} lecciones completadas • ${currentHero.progress_pct}% completado`
+              : currentHero.short_description || 'Descubre este curso y desarrolla nuevas habilidades'}
           </p>
           
           <div className="flex gap-3">
-            <Button
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/learning/courses/${heroCurso.course_slug}`);
-              }}
-              className="group/btn text-xs sm:text-sm md:text-base"
-              data-testid="button-continue-course"
-            >
-              <span>{heroCurso.done_lessons !== undefined ? 'Continuar' : 'Ver'}</span>
-              <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 transition-transform group-hover/btn:translate-x-1" />
-            </Button>
+            {currentHero.course_slug ? (
+              <Button
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/learning/courses/${currentHero.course_slug}`);
+                }}
+                className="group/btn text-xs sm:text-sm md:text-base"
+                data-testid="button-continue-course"
+              >
+                <span>{currentHero.done_lessons !== undefined ? 'Continuar' : 'Ver'}</span>
+                <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 transition-transform group-hover/btn:translate-x-1" />
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={() => navigate('/learning/courses')}
+                className="group/btn text-xs sm:text-sm md:text-base"
+                data-testid="button-explore-courses-hero"
+              >
+                <span>Explorar Cursos</span>
+                <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 transition-transform group-hover/btn:translate-x-1" />
+              </Button>
+            )}
           </div>
         </div>
       </div>
