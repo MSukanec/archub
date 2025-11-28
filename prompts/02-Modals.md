@@ -6,42 +6,57 @@ Este documento es LA LEY para crear o refactorizar cualquier modal en Seencel.
 
 ## 1. NOMBRE Y ESTRUCTURA DEL ARCHIVO
 
-El modal debe existir como un único archivo con la convención internacional:
+### Archivos Separados: Form vs View
+
+Para mejor escalabilidad y rendimiento, **SEPARAMOS** la lógica de formulario de la vista:
 
 ```
-<Entidad>Form.tsx
+<Entidad>Form.tsx   → Para CREATE y EDIT (lógica pesada: useForm, validación, hooks)
+<Entidad>View.tsx   → Para VIEW (componente liviano: solo renderiza datos)
 ```
 
-**UBICACIÓN: La carpeta DEBE ser `forms`, NO `modals`**
+**UBICACIÓN: La carpeta DEBE ser `forms`**
 
 Ejemplos correctos:
-- `src/features/clients/forms/ClientPaymentForm.tsx`
-- `src/features/general-costs/forms/GeneralCostForm.tsx`
-- `src/features/projects/forms/TaskForm.tsx`
-- `src/features/contacts/forms/ContactForm.tsx`
+- `src/features/clients/forms/ClientPaymentForm.tsx` (create/edit)
+- `src/features/clients/forms/ClientPaymentView.tsx` (view)
+- `src/features/general-costs/forms/GeneralCostPaymentForm.tsx`
+- `src/features/general-costs/forms/GeneralCostPaymentView.tsx`
+
+### ¿Cuándo usar UN solo archivo vs DOS archivos?
+
+| Caso | Solución |
+|------|----------|
+| Modal simple (< 150 líneas total) | Un solo `*Form.tsx` con `FormPanel` y `ViewPanel` internos |
+| Modal complejo (> 150 líneas, muchos campos) | Dos archivos: `*Form.tsx` + `*View.tsx` |
+| View tiene lógica especial (tabs, acordeones) | Definitivamente separar en `*View.tsx` |
+
+### Migración de archivos antiguos
 
 Si existen archivos duplicados como:
 - `ClientPaymentModal.tsx`
 - `ClientPaymentEditModal.tsx`
 - `ClientPaymentViewModal.tsx`
 
-**Debes eliminarlos y unificarlos en uno solo:** `ClientPaymentForm.tsx` EN LA CARPETA `forms`
-
-**IMPORTANTE:** Al refactorizar, siempre:
-1. Crea la carpeta `forms` si no existe
-2. Renombra el archivo a `<Entidad>Form.tsx`
-3. Elimina la carpeta `modals` (o los archivos viejos)
-4. Actualiza las importaciones en `registerModals.ts`
+**Elimínalos y crea:**
+- `ClientPaymentForm.tsx` (para create/edit)
+- `ClientPaymentView.tsx` (para view, si es complejo)
 
 ---
 
 ## 2. PROPS OBLIGATORIOS
 
 ```typescript
-interface ModalProps {
+interface ModalFormProps {
   modalData?: any;
   onClose: () => void;
-  mode?: "create" | "edit" | "view";
+  mode?: "create" | "edit";  // Solo create/edit en Form
+}
+
+interface ModalViewProps {
+  modalData?: any;
+  onClose: () => void;
+  // mode siempre es "view" implícito
 }
 ```
 
@@ -49,14 +64,12 @@ El componente debe comportarse según `mode`:
 
 ```typescript
 // ✅ CORRECTO: Usar mode directamente en condiciones
-if (mode === "view") { ... }
 if (mode === "edit") { ... }
 if (mode === "create") { ... }
 
 // ❌ EVITAR: Crear variables booleanas intermedias
 // const isCreate = mode === "create";
 // const isEdit = mode === "edit";
-// const isView = mode === "view";
 ```
 
 **¿POR QUÉ?** Una única fuente de verdad evita duplicaciones y hace el código más claro.
@@ -78,18 +91,16 @@ import {
 
 ### ModalLayout
 - Contenedor principal con portal, animaciones, focus trap
-- Recibe `onClose`, `size`, y opcionalmente `columns`
-- **IMPORTANTE:** Si pasas `children`, el contenido DEBE incluir `<ModalHeader>`, `<ModalBody>`, `<ModalFooter>` (sin `ModalLayout` que las envuelva de nuevo)
+- Recibe `onClose`, `size`
+- **IMPORTANTE:** Si pasas `children`, el contenido DEBE incluir `<ModalHeader>`, `<ModalBody>`, `<ModalFooter>`
 
 ### ModalHeader
 - Título, subtítulo, ícono, actions
-- No estilos extras
+- **OBLIGATORIO:** Siempre incluir `description`
 
 ### ModalBody
 - Contenido scrolleable
 - No paddings manuales, no scroll manual
-- **CRÍTICO:** Cuando usas la nueva API (children), el `ModalBody` debe estar DENTRO del JSX. El `ModalLayout` NO lo añade automáticamente si hay children.
-- **Columnas:** Por defecto 1 columna. Mobile SIEMPRE 1 columna.
 
 ### ModalFooter
 - Botones de acción
@@ -97,43 +108,102 @@ import {
 
 ---
 
-## 3.1 COLUMNAS EN EL BODY - CONTROL GRANULAR
+## 3.1 LAYOUT FLUIDO - GRID RESPONSIVE (Container-Aware)
 
-**IMPORTANTE:** El sistema de columnas funciona en DOS NIVELES:
-
-### Nivel 1: ModalLayout `columns` (Macro - Rara vez usado)
-```tsx
-<ModalLayout onClose={onClose} size="lg" columns={2}>
-```
-→ Esto hace que TODO el contenido en desktop se muestre en 2 columnas.
-
-**⚠️ CASI NUNCA** usarás esto porque queremos control granular.
-
-### Nivel 2: Grid interno en el Form (Micro - Control granular - LO NORMAL)
-Para que **CIERTOS CAMPOS ESPECÍFICOS** estén inline en desktop y otros no:
+### EL PROBLEMA con el enfoque anterior
 
 ```tsx
-<ModalLayout onClose={onClose} size="lg">  {/* columns no especificado = default 1 */}
-  <ModalBody>
-    {/* Estos DOS campos inline en desktop, 1 columna en mobile */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <FormField name="amount" />
-      <FormField name="date" />
-    </div>
-    
-    {/* Este campo ocupa TODO el ancho */}
-    <FormField name="description" />
-    
-    {/* Otros dos inline */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <FormField name="category" />
-      <FormField name="status" />
-    </div>
-  </ModalBody>
-</ModalLayout>
+// ❌ MALO: Usa viewport breakpoints, NO container size
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 ```
 
-**REGLA DE ORO:** Nunca te pediré "2 columnas en todo". Solo te pediré "estos campos inline".
+`md:grid-cols-2` se basa en el **viewport** (pantalla completa). Si el modal está en un side-panel estrecho en desktop, sigue intentando poner 2 columnas porque "md" ve que la pantalla es grande. **Esto rompe el layout.**
+
+### LA SOLUCIÓN: CSS Grid Fluido
+
+Usamos CSS Grid moderno con `auto-fit` y `minmax` para que el grid sea **container-aware**:
+
+```tsx
+// ✅ BUENO: Se adapta al CONTENEDOR, no al viewport
+<div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
+```
+
+Esto dice: "pon tantas columnas como quepan, pero cada una mínimo 250px". Si el contenedor es angosto → 1 columna. Si es ancho → 2 o más.
+
+---
+
+### REGLA A: Grupo "Multi-Columna Fluida"
+
+**Cuándo usar:** Grupos de DOS O MÁS campos que deben estar lado a lado si hay espacio, pero apilarse en contenedores angostos.
+
+```tsx
+// Dos campos que fluyen según el espacio disponible
+<div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
+  <FormField name="amount" />
+  <FormField name="date" />
+</div>
+
+// Tres campos (se acomodan en 1, 2 o 3 columnas según espacio)
+<div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+  <FormField name="currency" />
+  <FormField name="wallet" />
+  <FormField name="status" />
+</div>
+```
+
+**Valores de minmax recomendados:**
+
+| Tipo de campo | minmax |
+|---------------|--------|
+| Input numérico corto | `180px` |
+| Select/Dropdown | `220px` |
+| Input texto normal | `250px` |
+| DatePicker | `200px` |
+
+---
+
+### REGLA B: Grupo "Ancho Completo"
+
+**Cuándo usar:** Campos que SIEMPRE ocupan todo el ancho (Textarea, títulos, secciones).
+
+```tsx
+// Textarea siempre full width
+<div className="grid grid-cols-1 gap-4">
+  <FormField name="description" />
+</div>
+
+// O simplemente sin wrapper si es un solo campo
+<FormField name="notes" />
+```
+
+---
+
+### EJEMPLO COMPLETO DE LAYOUT FLUIDO
+
+```tsx
+<ModalBody>
+  {/* Fila 1: Fecha y Monto - fluyen juntos si hay espacio */}
+  <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+    <FormField name="payment_date" />
+    <FormField name="amount" />
+  </div>
+
+  {/* Fila 2: Moneda, Billetera, Estado - 3 campos fluidos */}
+  <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
+    <FormField name="currency_id" />
+    <FormField name="wallet_id" />
+    <FormField name="status" />
+  </div>
+
+  {/* Fila 3: Referencia sola (ancho completo) */}
+  <FormField name="reference" />
+
+  {/* Fila 4: Notas - Textarea siempre full width */}
+  <div className="grid grid-cols-1">
+    <FormField name="notes" />
+  </div>
+</ModalBody>
+```
 
 ---
 
@@ -150,107 +220,193 @@ El modal **NO PUEDE**:
 
 ---
 
-## 5. SUBCOMPONENTES INTERNOS PARA ORGANIZAR EL JSX
+## 5. ARQUITECTURA: SEPARACIÓN DE CONCERNS
 
-**NOVEDAD (Nov 25, 2024):** Usar subcomponentes internos para separar la lógica de edición/creación de la vista, mejorando legibilidad y mantenibilidad.
+### EL PROBLEMA con componentes monolíticos
 
-### Estructura recomendada
+Mezclar lógica pesada de formularios (hooks, validación, state) con lógica de vista en el mismo cuerpo del componente:
+- Carga hooks innecesarios en modo VIEW
+- Hace el componente difícil de mantener
+- No escala bien
+
+### LA SOLUCIÓN: Componentes especializados
+
+#### Opción A: Subcomponentes internos (modal simple)
 
 ```tsx
-// Subcomponente: Formulario para create/edit
+// Subcomponente PESADO: Formulario para create/edit
 function FormPanel({
   form,
   onSubmit,
+  currencies,
+  wallets,
 }: {
   form: ReturnType<typeof useForm<MyFormData>>;
   onSubmit: (data: MyFormData) => void;
+  currencies: Currency[];
+  wallets: Wallet[];
 }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Campos del formulario */}
+        {/* Todos los FormFields aquí */}
       </form>
     </Form>
   );
 }
 
-// Subcomponente: Vista de lectura
-function ViewPanel({ data }: { data: any }) {
+// Subcomponente LIVIANO: Vista de lectura (SIN hooks, SIN state)
+function ViewPanel({ payment }: { payment: Payment }) {
   return (
     <div className="space-y-4">
-      {/* Mostrar datos sin inputs */}
+      <div>
+        <p className="text-sm text-muted-foreground">Monto</p>
+        <p className="font-medium">${payment.amount}</p>
+      </div>
+      {/* Solo renderiza datos, sin lógica */}
     </div>
   );
 }
 
-export function MyEntityForm({ modalData, onClose, mode = "create" }: MyEntityFormProps) {
+// Componente ORQUESTADOR: Solo decide qué renderizar
+export function PaymentForm({ modalData, onClose, mode = "create" }: Props) {
+  // Hooks SOLO si es necesario
   const form = useForm<MyFormData>({ ... });
   
-  return (
-    <ModalLayout onClose={onClose} size="md">
-      <ModalHeader title={getTitle(mode)} description={getDescription(mode)} />
-      
-      <ModalBody>
-        {mode === "view" ? (
-          <ViewPanel data={modalData} />
-        ) : (
-          <FormPanel form={form} onSubmit={onSubmit} />
-        )}
-      </ModalBody>
+  if (mode === "view") {
+    return (
+      <ModalLayout onClose={onClose}>
+        <ModalHeader title="Detalle del Pago" />
+        <ModalBody>
+          <ViewPanel payment={modalData.payment} />
+        </ModalBody>
+      </ModalLayout>
+    );
+  }
 
-      {mode !== "view" && (
-        <ModalFooter
-          leftLabel="Cancelar"
-          onLeftClick={onClose}
-          rightLabel={mode === "create" ? "Crear" : "Actualizar"}
-          onRightClick={form.handleSubmit(onSubmit)}
-        />
-      )}
+  return (
+    <ModalLayout onClose={onClose}>
+      <ModalHeader title={mode === "edit" ? "Editar" : "Nuevo"} />
+      <ModalBody>
+        <FormPanel form={form} onSubmit={onSubmit} ... />
+      </ModalBody>
+      <ModalFooter ... />
     </ModalLayout>
   );
 }
 ```
 
-**VENTAJAS:**
-- ✅ Separación clara entre lógica de formulario y visualización
-- ✅ Mejor lectura del componente principal
-- ✅ Reutilizable en otros lugares si es necesario
-- ✅ No necesita Zustand ni state externo
+#### Opción B: Archivos separados (modal complejo)
 
----
+```
+forms/
+├── PaymentForm.tsx    → Solo CREATE/EDIT, toda la lógica de form
+└── PaymentView.tsx    → Solo VIEW, componente liviano
+```
 
-## 6. UN ÚNICO COMPONENTE PARA CREATE, EDIT Y VIEW
-
-### CREATE
-- Campos vacíos
-- Inputs habilitados
-- Botón "Crear"
-
-### EDIT
-- Campos precargados
-- Inputs habilitados
-- Botón "Guardar cambios"
-
-### VIEW
-**IMPORTANTE:** NO usar inputs disabled porque se ven mal.
-
-En modo VIEW:
-- No hay form
-- No hay inputs
-- No hay submit
-- Se muestra una vista estética (ViewPanel)
-
+**PaymentForm.tsx:**
 ```tsx
-if (mode === "view") {
+export default function PaymentForm({ modalData, onClose, mode = "create" }: Props) {
+  const form = useForm<PaymentFormData>({ ... });
+  const { data: currencies } = useCurrencies();
+  const { data: wallets } = useWallets();
+  const createMutation = useCreatePayment();
+  const updateMutation = useUpdatePayment();
+  
+  // Toda la lógica pesada aquí
+  
   return (
     <ModalLayout onClose={onClose} size="lg">
-      <ModalHeader title={data.name} />
+      <ModalHeader 
+        title={mode === "edit" ? "Editar Pago" : "Nuevo Pago"}
+        description="Gestiona los detalles del pago"
+      />
       <ModalBody>
-        <ViewPanel data={modalData} />
+        <Form {...form}>
+          {/* Layout fluido con todos los campos */}
+        </Form>
       </ModalBody>
+      <ModalFooter ... />
     </ModalLayout>
   );
 }
+```
+
+**PaymentView.tsx:**
+```tsx
+export default function PaymentView({ modalData, onClose }: Props) {
+  // SOLO fetch del payment, nada más
+  const { data: payment, isLoading } = usePayment(modalData?.paymentId);
+  
+  if (isLoading) {
+    return <LoadingState />;
+  }
+  
+  return (
+    <ModalLayout onClose={onClose} size="lg">
+      <ModalHeader 
+        title={`Pago - ${payment?.reference || 'Sin ref'}`}
+        description={formatDate(payment?.payment_date)}
+      />
+      <ModalBody>
+        {/* Vista estética, sin inputs */}
+        <div className="space-y-6">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4">
+            <InfoItem label="Monto" value={formatCurrency(payment.amount)} />
+            <InfoItem label="Fecha" value={formatDate(payment.date)} />
+          </div>
+          {/* etc */}
+        </div>
+      </ModalBody>
+      <ModalFooter leftLabel="Cerrar" onLeftClick={onClose} />
+    </ModalLayout>
+  );
+}
+```
+
+---
+
+## 6. REGISTRO EN registerModals.ts
+
+### Con archivos separados (Form + View)
+
+```typescript
+// src/components/modal/factory/registerModals.ts
+import PaymentForm from '@/features/payments/forms/PaymentForm';
+import PaymentView from '@/features/payments/forms/PaymentView';
+
+// Para CREATE y EDIT
+registerModal('payment', PaymentForm, {
+  category: 'finance',
+  size: 'lg',
+  mapDataToProps: (data) => ({
+    organizationId: data?.organizationId,
+    paymentId: data?.paymentId,
+    mode: data?.paymentId ? (data?.mode || 'edit') : 'create'
+  })
+});
+
+// Para VIEW (modal separado)
+registerModal('payment-view', PaymentView, {
+  category: 'finance',
+  size: 'lg',
+  mapDataToProps: (data) => ({
+    paymentId: data?.paymentId,
+  })
+});
+```
+
+### Abrir los modales
+
+```typescript
+// Para crear
+openModal('payment', { organizationId });
+
+// Para editar
+openModal('payment', { paymentId: '123', mode: 'edit' });
+
+// Para ver
+openModal('payment-view', { paymentId: '123' });
 ```
 
 ---
@@ -271,56 +427,7 @@ if (mode === "view") {
 
 ---
 
-## 8. REGISTRAR EN EL REGISTRY
-
-Después de crear/modificar el modal, registrarlo en `registerModals.ts`:
-
-```typescript
-// src/components/modal/factory/registerModals.ts
-import { MyEntityForm } from '@/features/my-feature/forms/MyEntityForm';
-
-registerModal('my-entity', MyEntityForm, {
-  category: 'project',      // admin | project | finance | organization | learning | general
-  size: 'lg',               // sm | md | lg | xl | full
-  drawerOnMobile: true,     // Usar DrawerBase en mobile
-  preventCloseOnBackdrop: false,
-  preventCloseOnEsc: false,
-  mapDataToProps: (data) => ({ entityId: data?.entityId }),
-});
-```
-
----
-
-## 9. ABRIR EL MODAL
-
-```typescript
-import { useGlobalModalStore } from '@/components/modal';
-
-function MyComponent() {
-  const { openModal } = useGlobalModalStore();
-  
-  return (
-    <Button onClick={() => openModal('my-entity', { entityId: '123', mode: 'edit' })}>
-      Editar
-    </Button>
-  );
-}
-```
-
-### API del Store
-
-```typescript
-const { openModal, pushModal, popModal, closeAll } = useGlobalModalStore();
-
-openModal('project', { projectId: '123' });           // Reemplaza todo el stack
-pushModal('delete-confirmation', { onConfirm: fn }); // Apila encima
-popModal();                                           // Cierra solo el superior
-closeAll();                                           // Cierra todos
-```
-
----
-
-## 10. DIRTY FORM BLOCKING
+## 8. DIRTY FORM BLOCKING
 
 Para formularios con cambios sin guardar:
 
@@ -336,7 +443,7 @@ clearBlockClose();
 
 ---
 
-## 11. MOBILE (DrawerBase)
+## 9. MOBILE (DrawerBase)
 
 El sistema detecta automáticamente mobile y usa `DrawerBase`:
 
@@ -354,207 +461,256 @@ El sistema detecta automáticamente mobile y usa `DrawerBase`:
 
 ---
 
-## 12. ARQUITECTURA DE CARPETAS
+## 10. CHECKLIST DE REFACTORIZACIÓN
 
-```
-src/components/modal/
-├── foundation/          # Componentes base (UI primitivos)
-│   ├── ModalLayout.tsx
-│   ├── ModalHeader.tsx
-│   ├── ModalBody.tsx
-│   ├── ModalFooter.tsx
-│   ├── DrawerBase.tsx
-│   └── index.ts
-├── state/               # Estado global (Zustand)
-│   ├── globalModalStore.ts    # Stack, pushModal, popModal
-│   └── index.ts
-├── factory/             # Registry pattern
-│   ├── registry.ts
-│   ├── registerModals.ts
-│   └── index.ts
-├── ModalProvider.tsx    # Renderiza el stack
-├── ModalContainer.tsx   # Aplica config del registry
-└── index.ts
-```
+Cuando refactorices un modal existente:
 
----
+**ARQUITECTURA:**
+- [ ] ¿Es un modal complejo (> 150 líneas)? → Separar en `*Form.tsx` + `*View.tsx`
+- [ ] ¿Usas variables booleanas (`isCreate`, `isEdit`)? → Elimínalas, usa `mode` directo
+- [ ] ¿El modo VIEW carga hooks de formulario? → Separar en ViewPanel o archivo aparte
+- [ ] ¿Pasas `children` a `ModalLayout`? → Asegúrate de incluir `<ModalBody>` explícitamente
 
-## 13. REFACTORIZACIÓN DE MODALS EXISTENTES
+**LAYOUT FLUIDO:**
+- [ ] ¿Usas `md:grid-cols-2` o breakpoints similares? → Reemplaza con `grid-cols-[repeat(auto-fit,minmax(Xpx,1fr))]`
+- [ ] ¿Campos que deberían estar inline usan grid fluido? → Aplica REGLA A
+- [ ] ¿Textareas y campos grandes usan ancho completo? → Aplica REGLA B
 
-Cuando refactorices un modal existente (consolidar múltiples archivos en uno):
+**HEADERS:**
+- [ ] ¿ModalHeader tiene `description`? → OBLIGATORIO, agrega una descripción clara
+- [ ] ¿Cada modo (create/edit/view) tiene título apropiado?
 
-**CHECKLIST PREVIO:**
-- [ ] ¿El ModalHeader tiene `description`? **OBLIGATORIO**
-  - Ejemplo: `<ModalHeader title="Editar Pago" description="Actualiza los detalles del pago" />`
-  - Si no existe, **agrega una descripción clara** que explique qué hace el modal
-- [ ] Revisar que todos los modos (CREATE, EDIT, VIEW) tengan titulo y descripción apropiados
-- [ ] Verificar que VIEW mode NO use inputs disabled (usa ViewPanel en su lugar)
-- [ ] Revisar control de columnas: ¿Necesita campos inline? (grid interno, NO `columns={2}`)
-
-**CHECKLIST DE ARQUITECTURA NUEVA (Nov 25, 2024):**
-- [ ] ¿Usas variables booleanas (`isCreate`, `isEdit`, `isView`)? **ELIMÍNALAS**, usa `mode` directamente
-- [ ] ¿Tiene subcomponentes internos (`FormPanel`, `ViewPanel`)? **AGREGA SI NO EXISTEN** para separar lógica
-- [ ] ¿Pasas `children` a `ModalLayout`? **ASEGÚRATE** de que incluyen `<ModalBody>` explícitamente
-- [ ] ¿Usas props legacy (`editPanel`, `headerContent`, `footerContent`)? **MIGRA** a la nueva API (children JSX)
-- [ ] ¿El componente tiene lógica de múltiples paneles? **REFACTORIZA** en `FormPanel` y `ViewPanel` internos
+**LIMPIEZA:**
+- [ ] ¿Existen archivos viejos (*Modal.tsx, *EditModal.tsx)? → Elimínalos
+- [ ] ¿Se actualizó `registerModals.ts`?
+- [ ] ¿Se eliminaron console.logs y código muerto?
 
 ---
 
-## 14. CHECKLIST QA
+## 11. CHECKLIST QA
 
 Después de crear/refactorizar:
 
 - [ ] Probar CREATE
-- [ ] Probar EDIT
-- [ ] Probar VIEW
-- [ ] Probar pushModal desde adentro (si aplica)
-- [ ] Verificar que funciona en Drawer (mobile)
+- [ ] Probar EDIT (campos precargados correctamente)
+- [ ] Probar VIEW (sin inputs, vista estética)
+- [ ] Probar en contenedor angosto (side panel)
+- [ ] Probar en mobile (drawer)
 - [ ] Confirmar que no hay errores de import
-- [ ] Confirmar que los botones están en ModalFooter
-- [ ] ModalHeader tiene descripción clara
-- [ ] Borrar archivos viejos (edit-modal, view-modal, etc.)
-- [ ] Quitar código muerto y console.logs
-- [ ] Actualizar registerModals.ts
-- [ ] Verificar padding correcto (no duplicado)
+- [ ] Confirmar que ModalHeader tiene descripción
 
 ---
 
-## 15. EJEMPLO COMPLETO (NUEVO PATRÓN)
+## 12. EJEMPLO COMPLETO: ARCHIVOS SEPARADOS
+
+### PaymentForm.tsx (CREATE/EDIT)
 
 ```tsx
-// src/features/clients/forms/ClientPaymentForm.tsx
-import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CreditCard } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { clientPaymentSchema, type ClientPaymentFormData } from '../schemas';
+import { Textarea } from '@/components/ui/textarea';
+import { paymentSchema, type PaymentFormData } from '../schemas';
 
-// Subcomponente: Formulario para create/edit
-function FormPanel({
-  form,
-  onSubmit,
-}: {
-  form: ReturnType<typeof useForm<ClientPaymentFormData>>;
-  onSubmit: (data: ClientPaymentFormData) => void;
-}) {
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Monto</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="0.00" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fecha</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </form>
-    </Form>
-  );
-}
-
-// Subcomponente: Vista de lectura
-function ViewPanel({ data }: { data: any }) {
-  return (
-    <div className="space-y-4">
-      <div>
-        <p className="text-sm text-muted-foreground">Monto</p>
-        <p className="font-medium">${data.amount}</p>
-      </div>
-      <div>
-        <p className="text-sm text-muted-foreground">Fecha</p>
-        <p className="font-medium">{new Date(data.date).toLocaleDateString()}</p>
-      </div>
-    </div>
-  );
-}
-
-interface ClientPaymentFormProps {
-  modalData?: { paymentId?: string; clientId?: string };
+interface PaymentFormProps {
+  modalData?: { paymentId?: string; organizationId?: string };
   onClose: () => void;
-  mode?: "create" | "edit" | "view";
+  mode?: "create" | "edit";
 }
 
-export function ClientPaymentForm({ 
-  modalData, 
-  onClose, 
-  mode = "create" 
-}: ClientPaymentFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const form = useForm<ClientPaymentFormData>({
-    resolver: zodResolver(clientPaymentSchema),
-    defaultValues: { amount: '', date: '' }
+export default function PaymentForm({ modalData, onClose, mode = "create" }: PaymentFormProps) {
+  const { data: existingPayment } = usePayment(mode === "edit" ? modalData?.paymentId : undefined);
+  const { data: currencies } = useCurrencies();
+  const { data: wallets } = useWallets();
+  
+  const form = useForm<PaymentFormData>({
+    resolver: zodResolver(paymentSchema),
+    defaultValues: { amount: 0, date: new Date(), notes: '' }
   });
 
-  const onSubmit = async (data: ClientPaymentFormData) => {
-    setIsSubmitting(true);
-    try {
-      // Lógica de submit
-      onClose();
-    } finally {
-      setIsSubmitting(false);
+  // Populate form for edit mode
+  React.useEffect(() => {
+    if (mode === "edit" && existingPayment) {
+      form.reset({
+        amount: existingPayment.amount,
+        date: parseLocalDate(existingPayment.date),
+        notes: existingPayment.notes || '',
+      });
     }
-  };
+  }, [existingPayment, mode]);
 
-  const getHeader = () => {
-    switch (mode) {
-      case "view":
-        return { title: "Detalle del Pago", description: "Información del pago realizado" };
-      case "edit":
-        return { title: "Editar Pago", description: "Actualiza los detalles del pago" };
-      case "create":
-      default:
-        return { title: "Nuevo Pago", description: "Registra un nuevo pago de cliente" };
+  const createMutation = useCreatePayment();
+  const updateMutation = useUpdatePayment();
+
+  const onSubmit = async (data: PaymentFormData) => {
+    if (mode === "edit") {
+      await updateMutation.mutateAsync({ id: modalData?.paymentId, ...data });
+    } else {
+      await createMutation.mutateAsync(data);
     }
+    onClose();
   };
-
-  const header = getHeader();
 
   return (
-    <ModalLayout onClose={onClose} size="md">
+    <ModalLayout onClose={onClose} size="lg">
       <ModalHeader 
-        title={header.title}
-        description={header.description}
-        icon={CreditCard}
+        title={mode === "edit" ? "Editar Pago" : "Nuevo Pago"}
+        description={mode === "edit" ? "Actualiza los detalles del pago" : "Registra un nuevo pago"}
+        icon={DollarSign}
       />
       
       <ModalBody>
-        {mode === "view" ? (
-          <ViewPanel data={modalData} />
-        ) : (
-          <FormPanel form={form} onSubmit={onSubmit} />
-        )}
+        <Form {...form}>
+          <form className="space-y-4">
+            {/* Fila 1: Fecha y Monto - Grid fluido */}
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha</FormLabel>
+                    <FormControl>
+                      <DatePicker value={field.value} onChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Monto</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Fila 2: Moneda y Billetera - Grid fluido */}
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+              <FormField name="currency_id" ... />
+              <FormField name="wallet_id" ... />
+            </div>
+
+            {/* Fila 3: Notas - Ancho completo */}
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notas</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} rows={3} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
       </ModalBody>
 
-      {mode !== "view" && (
-        <ModalFooter
-          leftLabel="Cancelar"
-          onLeftClick={onClose}
-          rightLabel={mode === "create" ? "Crear" : "Guardar cambios"}
-          onRightClick={form.handleSubmit(onSubmit)}
-          isSubmitting={isSubmitting}
-        />
-      )}
+      <ModalFooter
+        leftLabel="Cancelar"
+        onLeftClick={onClose}
+        submitText={mode === "edit" ? "Guardar Cambios" : "Crear Pago"}
+        onSubmit={form.handleSubmit(onSubmit)}
+        isSubmitting={createMutation.isPending || updateMutation.isPending}
+      />
+    </ModalLayout>
+  );
+}
+```
+
+### PaymentView.tsx (VIEW)
+
+```tsx
+import { DollarSign, Calendar, Wallet } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+
+import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
+import { Separator } from '@/components/ui/separator';
+import { parseLocalDate } from '@/lib/date-utils';
+
+interface PaymentViewProps {
+  modalData?: { paymentId?: string };
+  onClose: () => void;
+}
+
+export default function PaymentView({ modalData, onClose }: PaymentViewProps) {
+  const { data: payment, isLoading } = usePayment(modalData?.paymentId);
+
+  if (isLoading) {
+    return (
+      <ModalLayout onClose={onClose} size="lg">
+        <ModalBody>
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" />
+          </div>
+        </ModalBody>
+      </ModalLayout>
+    );
+  }
+
+  return (
+    <ModalLayout onClose={onClose} size="lg">
+      <ModalHeader 
+        title={`Pago - ${payment?.reference || 'Sin referencia'}`}
+        description={payment?.payment_date ? format(parseLocalDate(payment.payment_date), 'dd MMMM yyyy', { locale: es }) : ''}
+        icon={DollarSign}
+      />
+      
+      <ModalBody>
+        <div className="space-y-6">
+          {/* Info principal - Grid fluido */}
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4">
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground flex items-center gap-2">
+                <DollarSign className="h-4 w-4" /> Monto
+              </p>
+              <p className="font-semibold text-lg">
+                {payment?.currency?.symbol} {payment?.amount?.toLocaleString('es-AR')}
+              </p>
+            </div>
+            
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground flex items-center gap-2">
+                <Calendar className="h-4 w-4" /> Fecha
+              </p>
+              <p className="font-medium">
+                {format(parseLocalDate(payment?.payment_date), 'dd/MM/yyyy')}
+              </p>
+            </div>
+            
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground flex items-center gap-2">
+                <Wallet className="h-4 w-4" /> Billetera
+              </p>
+              <p className="font-medium">{payment?.wallet?.name}</p>
+            </div>
+          </div>
+
+          {payment?.notes && (
+            <>
+              <Separator />
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Notas</p>
+                <p className="text-sm whitespace-pre-wrap">{payment.notes}</p>
+              </div>
+            </>
+          )}
+        </div>
+      </ModalBody>
+
+      <ModalFooter leftLabel="Cerrar" onLeftClick={onClose} />
     </ModalLayout>
   );
 }
@@ -562,13 +718,11 @@ export function ClientPaymentForm({
 
 ---
 
-## 16. MODALES ESPECIALES - PATRONES
+## 13. MODALES ESPECIALES - PATRONES
 
-Algunos modales necesitan comportamientos o estilos especiales. Sigue el mismo estándar pero con ajustes mínimos:
+### Modal de Eliminación / Confirmación Destructiva
 
-### Modal de Eliminación / Confirmación Destructiva (SaaS Premium)
-
-El `DeleteConfirmationForm` es un modal **universal y reutilizable** para eliminar elementos en toda la aplicación.
+El `DeleteConfirmationForm` es un modal **universal y reutilizable** para eliminar elementos.
 
 **Principios clave:**
 - ✅ NO tiene lógica de negocio
@@ -576,86 +730,20 @@ El `DeleteConfirmationForm` es un modal **universal y reutilizable** para elimin
 - ✅ Soporta eliminación simple o reemplazo
 - ✅ Recibe todos los datos desde afuera
 
-**Props del Modal:**
-
+**Props:**
 ```tsx
 modalData: {
   mode: 'delete' | 'replace'
-  title: string                          // Ej: "Eliminar tipo de gasto"
-  description: string                    // Ej: "Esta acción no se puede deshacer"
-  itemName: string                       // Ej: "Servicios administrativos"
-  consequences?: string[]                // Ej: ['5 pagos perderán referencia', '...']
-  replacementOptions?: { label, value }[] // Opciones para reemplazo
-  currentId?: string                     // ID actual (para filtrar en ComboBox)
-  onDelete: () => void                   // Callback de feature (ejecuta mutación)
-  onReplace?: (newId: string) => void    // Callback de feature (reemplaza + elimina)
+  title: string
+  description: string
+  itemName: string
+  consequences?: string[]
+  replacementOptions?: { label, value }[]
+  currentId?: string
+  onDelete: () => void
+  onReplace?: (newId: string) => void
 }
 ```
-
-**Uso desde un TAB (GeneralCostsTab):**
-
-```tsx
-const handleDeleteGeneralCostType = () => {
-  const availableReplacements = allTypes.filter(t => t.id !== typeId)
-  
-  openModal('delete-confirmation', {
-    mode: availableReplacements.length > 0 ? 'replace' : 'delete',
-    title: 'Eliminar tipo de gasto',
-    description: 'Esta acción no se puede deshacer',
-    itemName: type.name,
-    consequences: [
-      '5 pagos están asociados a este concepto',
-      'Si lo eliminas, los pagos quedarán sin referencia',
-      'Opcionalmente puedes reemplazarlos con otro tipo'
-    ],
-    replacementOptions: availableReplacements.map(t => ({
-      label: t.name,
-      value: t.id
-    })),
-    currentId: typeId,
-    onDelete: () => deleteGeneralCostType(typeId),
-    onReplace: (newId) => replaceGeneralCostType(typeId, newId)
-  })
-}
-```
-
-**En el feature (useDeleteGeneralCostType hook):**
-
-```tsx
-const deleteGeneralCostType = useMutation({
-  mutationFn: async (id: string) => {
-    // Backend hace: DELETE FROM general_cost_types WHERE id = ?
-    return apiRequest('DELETE', `/api/general-costs/types/${id}`)
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['/api/general-costs/types'] })
-  }
-})
-
-const replaceGeneralCostType = useMutation({
-  mutationFn: async ({ oldId, newId }: { oldId: string; newId: string }) => {
-    // Backend hace en ORDEN:
-    // 1. UPDATE payments SET type_id = newId WHERE type_id = oldId
-    // 2. DELETE FROM general_cost_types WHERE id = oldId
-    return apiRequest('POST', '/api/general-costs/types/replace', { oldId, newId })
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['/api/general-costs/types'] })
-    queryClient.invalidateQueries({ queryKey: ['/api/general-costs/payments'] })
-  }
-})
-```
-
-**Flujo:**
-1. Usuario abre modal desde el TAB
-2. Si hay elementos relacionados → ve opción de "reemplazar"
-3. Elige "Eliminar" o "Reemplazar por otro"
-4. Presiona botón rojo
-5. Feature ejecuta callback (mutación)
-6. Backend hace la lógica transaccional
-7. Modal cierra
-
-**El modal es transparente** - no sabe qué elimina, solo orquesta UI.
 
 ---
 
@@ -664,6 +752,11 @@ const replaceGeneralCostType = useMutation({
 Cuando pidas crear o refactorizar un modal:
 
 ```
-Replit, lee prompts/Modal-Standard.md y aplícalo a:
+Replit, lee prompts/02-Modals.md y refactoriza:
 src/features/clients/forms/ClientPaymentForm.tsx
+
+Quiero:
+- Fila 1: fecha y monto
+- Fila 2: moneda, billetera y estado
+- Fila 3: notas (ancho completo)
 ```
