@@ -111,8 +111,8 @@ export default function PaymentMethodModal({
 
       const { data: courseData, error: courseError } = await supabase
         .from("courses")
-        .eq("is_deleted", false)
         .select("id")
+        .eq("is_deleted", false)
         .eq("slug", courseSlug)
         .single();
 
