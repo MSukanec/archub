@@ -148,12 +148,12 @@ function HeroSectionComponent() {
       <div className="text-center max-w-5xl mx-auto relative z-10">
         <h1 
           className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight"
-          style={{ color: '#ffffff' }}
+          style={{ color: '#ffffff !important' } as any}
         >
           La plataforma integral para arquitectura y construcción
         </h1>
         
-        <p className="text-xl mb-12 max-w-4xl mx-auto leading-relaxed" style={{ color: '#b3b3b3' }}>
+        <p className="text-xl mb-12 max-w-4xl mx-auto leading-relaxed" style={{ color: '#b3b3b3 !important' } as any}>
           Gestiona todo el ciclo de vida de tus proyectos: desde diseño y planificación, 
           pasando por ventas y marketing, hasta construcción y entrega. Con IA integrada, 
           capacitación continua y conexión con las herramientas que ya usas.
@@ -176,9 +176,9 @@ export default function Landing() {
   return (
     <MarketingLayout
       headerNavigation={[
-        { label: "Cursos", href: "/cursos" },
         { label: "Características", href: "#features" },
         { label: "Capacidades", href: "#capabilities" },
+        { label: "Cursos", href: "/cursos" },
         { label: "Contacto", href: "/contact" }
       ]}
       heroSlot={<HeroSectionComponent />}

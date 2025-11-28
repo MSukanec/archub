@@ -620,7 +620,6 @@ label[data-required="true"]::after,
 
 /* Important text styling - for titles and important content */
 .text-important,
-h1, h2, h3, h4, h5, h6,
 .card-title,
 .page-title,
 .section-title,
@@ -629,6 +628,11 @@ h1, h2, h3, h4, h5, h6,
 .project-name {
   color: var(--text-important) !important;
   font-weight: 500 !important;
+}
+
+/* Allow h1-h6 to be customized without global color override */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 500;
 }
 
 /* Override for pricing plan Pro card title */
