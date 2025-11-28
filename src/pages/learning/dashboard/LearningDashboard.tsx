@@ -10,6 +10,8 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { useLocation } from 'wouter'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
 import { useLearningDashboardFast } from '@/features/learning'
 
 export default function LearningDashboard() {
@@ -26,6 +28,21 @@ export default function LearningDashboard() {
 
   const { data: dashboardData, isLoading } = useLearningDashboardFast();
 
+  // Get the latest course for hero background when user has no enrollments
+  const { data: allCoursesData } = useQuery({
+    queryKey: ['/api/learning/courses-full'],
+    queryFn: async () => {
+      const res = await fetch('/api/learning/courses-full', {
+        credentials: 'include'
+      });
+      
+      if (!res.ok) return { courses: [] };
+      return res.json();
+    },
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false
+  });
+
   const { global, courses = [], featured_course, currentStreak = 0 } = dashboardData || {}
   
   const hasEnrollments = courses && courses.length > 0;
@@ -36,11 +53,14 @@ export default function LearningDashboard() {
     .sort((a: any, b: any) => b.progress_pct - a.progress_pct)
     .slice(0, 3);
 
-  // Default hero course for users with no enrollments
+  // Get the latest course from all courses for the hero background
+  const latestCourse = allCoursesData?.courses?.[0];
+
+  // Default hero course for users with no enrollments (uses latest course image if available)
   const defaultHeroCourse = {
     course_title: 'Explora nuestros Cursos',
     short_description: 'Desarrolla tus habilidades profesionales con nuestros cursos especializados',
-    cover_url: null,
+    cover_url: latestCourse?.cover_url || null,
     course_slug: null,
     done_lessons: undefined,
     total_lessons: 0,
