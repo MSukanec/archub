@@ -452,30 +452,7 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
 
   const [filesToUpload, setFilesToUpload] = React.useState<any[]>([])
   const [existingFiles, setExistingFiles] = React.useState<any[]>([])
-  const hasInitializedRef = React.useRef(false)
-  const lastPaymentIdRef = React.useRef<string | undefined>(undefined)
-
-  // Reset initialization flag when paymentId changes (e.g., opening modal for a different payment)
-  React.useEffect(() => {
-    if (paymentId !== lastPaymentIdRef.current) {
-      console.log('[GeneralCostPaymentForm] PaymentId changed, resetting initialization flag', {
-        oldId: lastPaymentIdRef.current,
-        newId: paymentId
-      });
-      hasInitializedRef.current = false;
-      lastPaymentIdRef.current = paymentId;
-    }
-  }, [paymentId]);
-
-  // Fetch existing payment data for edit/view mode
-  const { data: existingPayment, isLoading: loadingPayment } = useGeneralCostPayment(
-    mode !== 'create' ? paymentId : undefined,
-    organizationId
-  )
-
-  // Fetch existing media files
-  const { data: mediaFiles = [] } = useGeneralCostPaymentMedia(mode !== 'create' ? paymentId : undefined)
-
+  
   const form = useForm<GeneralCostPaymentFormData>({
     resolver: zodResolver(generalCostPaymentSchema),
     defaultValues: {
@@ -491,6 +468,15 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
     },
   })
 
+  // Fetch existing payment data for edit/view mode
+  const { data: existingPayment, isLoading: loadingPayment, isSuccess: paymentLoaded } = useGeneralCostPayment(
+    mode !== 'create' ? paymentId : undefined,
+    organizationId
+  )
+
+  // Fetch existing media files
+  const { data: mediaFiles = [] } = useGeneralCostPaymentMedia(mode !== 'create' ? paymentId : undefined)
+
   // Fetch data
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId)
   const { data: generalCosts, isLoading: generalCostsLoading } = useGeneralCosts(organizationId || null)
@@ -499,20 +485,12 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
 
   const isLoading = currenciesLoading || generalCostsLoading || walletsLoading || (mode !== 'create' && loadingPayment)
 
-  // Initialize form with existing payment data for EDIT/VIEW mode (runs once)
+  // Initialize form with existing payment data for EDIT/VIEW mode
+  // Uses paymentId as key dependency to ensure reset when different payment is opened
+  const formReset = form.reset;
   React.useEffect(() => {
-    console.log('[GeneralCostPaymentForm] useEffect triggered:', { 
-      mode, 
-      hasPayment: !!existingPayment, 
-      hasInitialized: hasInitializedRef.current,
-      paymentId: existingPayment?.id
-    });
-    
-    if (mode === 'create' || !existingPayment || hasInitializedRef.current) {
-      return;
-    }
-    
-    hasInitializedRef.current = true;
+    if (mode === 'create') return;
+    if (!paymentLoaded || !existingPayment) return;
     
     let paymentDate: Date;
     if (existingPayment.payment_date) {
@@ -522,16 +500,7 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
       paymentDate = new Date();
     }
     
-    console.log('[GeneralCostPaymentForm] Populating form with:', {
-      payment_date: paymentDate,
-      general_cost_id: existingPayment.general_cost?.id,
-      currency_id: existingPayment.currency?.id,
-      wallet_id: existingPayment.wallet?.id,
-      amount: existingPayment.amount,
-      status: existingPayment.status,
-    });
-    
-    form.reset({
+    formReset({
       payment_date: paymentDate,
       general_cost_id: existingPayment.general_cost?.id || '',
       currency_id: existingPayment.currency?.id || '',
@@ -542,7 +511,7 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
       reference: existingPayment.reference || '',
       status: (existingPayment.status || 'confirmed') as 'confirmed' | 'pending' | 'rejected' | 'void',
     });
-  }, [existingPayment, mode]);
+  }, [paymentId, paymentLoaded, existingPayment, mode, formReset]);
 
   // Load existing files
   React.useEffect(() => {
@@ -554,6 +523,7 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
   }, [mediaFiles])
 
   // Initialize defaults for create mode (runs once when data is available)
+  const formSetValue = form.setValue;
   const hasSetDefaultsRef = React.useRef(false)
   React.useEffect(() => {
     if (mode !== 'create' || paymentId || hasSetDefaultsRef.current) {
@@ -566,19 +536,19 @@ export default function GeneralCostPaymentForm({ modalData, organizationId: orgI
       
       const defaultCurrency = currencies.find((c) => c.is_default)?.currency?.id
       if (defaultCurrency) {
-        form.setValue('currency_id', defaultCurrency)
+        formSetValue('currency_id', defaultCurrency)
       } else if (currencies[0].currency?.id) {
-        form.setValue('currency_id', currencies[0].currency?.id)
+        formSetValue('currency_id', currencies[0].currency?.id)
       }
       
       const defaultWallet = wallets.find((w) => w.is_default)
       if (defaultWallet && defaultWallet.id) {
-        form.setValue('wallet_id', defaultWallet.id)
+        formSetValue('wallet_id', defaultWallet.id)
       } else if (wallets[0].id) {
-        form.setValue('wallet_id', wallets[0].id)
+        formSetValue('wallet_id', wallets[0].id)
       }
     }
-  }, [currencies, wallets, mode, paymentId])
+  }, [currencies, wallets, mode, paymentId, formSetValue])
 
   // Mutations
   const createPaymentMutation = useCreateGeneralCostPayment()
