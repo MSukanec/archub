@@ -24,6 +24,7 @@ import { SubcontractFormModal, SubcontractBidFormModal, SubcontractAwardModal, S
 import { PDFExporterModal } from '@/features/pdf';
 import { GeneralCostForm } from '@/features/general-costs/forms/GeneralCostForm';
 import GeneralCostPaymentForm from '@/features/general-costs/forms/GeneralCostPaymentForm';
+import GeneralCostPaymentView from '@/features/general-costs/forms/GeneralCostPaymentView';
 import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal } from '@/features/learning';
 
 const organizationConfig: ModalConfig = { category: 'organization', size: 'md' };
@@ -217,7 +218,14 @@ export function initializeModalRegistry(): void {
     mapDataToProps: (data) => ({
       organizationId: data?.organizationId,
       paymentId: data?.paymentId,
-      mode: data?.paymentId ? (data?.mode || 'edit') : (data?.mode || 'create')
+      mode: data?.paymentId ? 'edit' : 'create'
+    })
+  });
+  registerModal('general-costs-payment-view', GeneralCostPaymentView as any, {
+    ...financeConfig,
+    mapDataToProps: (data) => ({
+      organizationId: data?.organizationId,
+      paymentId: data?.paymentId,
     })
   });
   

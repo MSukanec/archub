@@ -8,7 +8,7 @@ interface GeneralCostPayment {
   organization_id: string;
   amount: number;
   currency_id: string;
-  exchange_rate: number;
+  exchange_rate: number | null;
   payment_date: string;
   notes: string | null;
   reference: string | null;
@@ -18,7 +18,7 @@ interface GeneralCostPayment {
   general_cost_id: string | null;
   status: 'confirmed' | 'pending' | 'rejected' | 'void';
   created_by: string | null;
-  file_url: string | null;
+  file_url?: string | null;
   
   // Datos expandidos
   general_cost?: {

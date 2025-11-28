@@ -126,13 +126,10 @@ export default function GeneralCostsPaymentsTab() {
 
   const handleEdit = (payment: GeneralCostPayment) => {
     if (!organizationId) return;
-    console.log('[DEBUG] Opening EDIT modal for payment:', payment.id);
-    // Explicitly ensure we're opening the EDIT modal, not the VIEW modal
     openModal('general-costs-payment', {
       organizationId,
       paymentId: payment.id,
       mode: 'edit',
-      isEditing: true,
     });
   };
 
@@ -160,10 +157,9 @@ export default function GeneralCostsPaymentsTab() {
 
   const handleView = (payment: GeneralCostPayment) => {
     if (!organizationId) return;
-    openModal('general-costs-payment', {
+    openModal('general-costs-payment-view', {
       organizationId,
       paymentId: payment.id,
-      mode: 'view',
     });
   };
 
