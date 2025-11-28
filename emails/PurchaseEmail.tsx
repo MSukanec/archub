@@ -33,7 +33,7 @@ export const PurchaseEmail = ({
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
-            <Text style={logo}>🏗️ Seencel</Text>
+            <Text style={logo}>Seencel</Text>
           </Section>
           
           <Heading style={h1}>¡Compra Confirmada!</Heading>
