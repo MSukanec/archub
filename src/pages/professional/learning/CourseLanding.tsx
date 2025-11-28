@@ -1,6 +1,7 @@
 import { useParams } from 'wouter';
 import { useEffect } from 'react';
 import { DashboardLayout } from '@/layouts';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { 
   useCourseLanding,
   useCourseEnrollment,
@@ -16,8 +17,9 @@ import {
 
 export default function CourseLanding() {
   const { slug } = useParams<{ slug: string }>();
+  const { data: userData } = useCurrentUser();
   const { data, isLoading, error } = useCourseLanding(slug || '');
-  const { data: enrollmentData } = useCourseEnrollment(data?.course?.id || '');
+  const { data: enrollmentData } = useCourseEnrollment(data?.course?.id, userData?.user?.id);
   const { data: progressData } = useCourseProgress(data?.course?.id);
 
   if (isLoading) {
