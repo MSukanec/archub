@@ -662,6 +662,19 @@ export function LeftSidebar() {
                   alignOffset={0}
                 >
                   <div className="flex flex-col gap-1">
+                    {/* Botón Contacto */}
+                    <button
+                      onClick={() => {
+                        navigate('/contact');
+                        setHelpPopoverOpen(false);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
+                      data-testid="button-contact-help"
+                    >
+                      <Mail className="h-4 w-4" />
+                      <span>Contacto</span>
+                    </button>
+
                     {/* Botón Comunidad Discord */}
                     <button
                       onClick={() => {
@@ -778,6 +791,16 @@ export function LeftSidebar() {
                   >
                     <Home className="h-4 w-4" />
                     Página de Inicio
+                  </DropdownMenuItem>
+
+                  {/* Contacto */}
+                  <DropdownMenuItem
+                    onClick={() => navigate('/contact')}
+                    className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
+                    data-testid="button-contact"
+                  >
+                    <Mail className="h-4 w-4" />
+                    Contacto
                   </DropdownMenuItem>
                   
                   {/* Cambiar Modo */}
