@@ -230,12 +230,12 @@ export default function AdminCourseUsersTab() {
 
   const handleDeleteEnrollment = (enrollment: any) => {
     openModal('delete-confirmation', {
-      mode: 'simple',
+      mode: 'delete',
       title: 'Eliminar Suscripción',
       description: '¿Estás seguro de que querés eliminar esta suscripción? El alumno perderá acceso al curso.',
       itemName: `${enrollment.users?.full_name || 'Usuario'} - ${enrollment.courses?.title || 'Curso'}`,
-      destructiveActionText: 'Eliminar Suscripción',
-      onConfirm: () => deleteEnrollmentMutation.mutate(enrollment.id),
+      destructiveActionText: 'Eliminar',
+      onDelete: () => deleteEnrollmentMutation.mutate(enrollment.id),
       isLoading: deleteEnrollmentMutation.isPending
     });
   };
