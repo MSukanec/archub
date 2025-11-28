@@ -47,7 +47,7 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
       let emailHtml: string;
       
       if (template === 'welcome') {
-        emailHtml = render(
+        emailHtml = await render(
           WelcomeEmail({
             userName: userName || 'Arquitecto',
             userEmail: to,
@@ -55,7 +55,7 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         );
         console.log('📧 Using WelcomeEmail template');
       } else if (template === 'purchase') {
-        emailHtml = render(
+        emailHtml = await render(
           PurchaseEmail({
             userName: userName || 'Estudiante',
             courseName: courseName || 'Curso',
@@ -141,7 +141,7 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
     try {
       const { userName = 'Jorge Benitest', userEmail = 'jorge@example.com', adminName = 'El Equipo de Seencel' } = req.body;
       
-      const emailHtml = render(
+      const emailHtml = await render(
         WelcomeEmail({
           userName,
           userEmail,
@@ -165,6 +165,20 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // GET /api/admin/courses-for-preview - Get courses for email preview
+  app.get('/api/admin/courses-for-preview', async (req, res) => {
+    try {
+      const courses = await deps.storage.getCourses?.() || [];
+      return res.json({
+        ok: true,
+        data: courses.slice(0, 5) // Get last 5 courses
+      });
+    } catch (error: any) {
+      console.error('❌ Error fetching courses:', error);
+      return res.json({ ok: true, data: [] });
+    }
+  });
+
   // POST /api/admin/email-preview/purchase - Preview purchase email
   app.post('/api/admin/email-preview/purchase', async (req, res) => {
     try {
@@ -172,14 +186,27 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         userName = 'Jorge Benitest',
         courseName = 'Curso Avanzado de Construcción',
         amount = '$99.99',
-        transactionId = 'TXN-20241128-001'
+        transactionId = 'TXN-20241128-001',
+        courseId = null
       } = req.body;
       
-      const emailHtml = render(
+      // If courseId is provided, fetch actual course data
+      let finalCourseName = courseName;
+      let finalAmount = amount;
+      
+      if (courseId && deps.storage.getCourseById) {
+        const course = await deps.storage.getCourseById(courseId);
+        if (course) {
+          finalCourseName = course.title || courseName;
+          finalAmount = course.price ? `$${course.price}` : amount;
+        }
+      }
+      
+      const emailHtml = await render(
         PurchaseEmail({
           userName,
-          courseName,
-          amount,
+          courseName: finalCourseName,
+          amount: finalAmount,
           transactionId,
         }) as any
       );
@@ -189,8 +216,8 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         type: 'purchase',
         html: emailHtml,
         preview: {
-          subject: `Confirmación de Compra: ${courseName}`,
-          from: 'sistema@seencel.com',
+          subject: `Confirmación de Compra: ${finalCourseName}`,
+          from: 'Seencel <sistema@seencel.com>',
           to: 'student@example.com',
         }
       });
