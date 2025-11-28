@@ -338,7 +338,7 @@ export default function GeneralCostPaymentForm({
               />
             </div>
 
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="wallet_id"
@@ -386,7 +386,9 @@ export default function GeneralCostPaymentForm({
                   </FormItem>
                 )}
               />
+            </div>
 
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="currency_id"
