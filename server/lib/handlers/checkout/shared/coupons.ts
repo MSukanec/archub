@@ -6,38 +6,41 @@ export type CouponValidationResult =
 
 export async function markCouponAsUsed(
   supabase: SupabaseClient,
-  couponCode: string,
+  couponId: string,
+  userId: string,
   courseId: string,
   orderId: string,
   amount: number,
   currency: string
 ): Promise<{ success: boolean; error?: string }> {
-  console.log('[coupons] Redeeming coupon via RPC:', {
-    coupon_code: couponCode,
+  console.log('[coupons] Inserting coupon redemption directly:', {
+    coupon_id: couponId,
+    user_id: userId,
     course_id: courseId,
     order_id: orderId,
-    amount,
+    amount_saved: amount,
     currency
   });
 
-  // Use the existing redeem_coupon RPC function which:
-  // 1. Inserts into coupon_redemptions (audit trail)
-  // 2. Increments used_count
-  // This is idempotent-safe because we only call it when payment is NEWLY inserted
-  const { data, error } = await supabase.rpc('redeem_coupon', {
-    p_code: couponCode,
-    p_course_id: courseId,
-    p_currency: currency,
-    p_order_id: orderId,
-    p_price: amount
-  });
+  // Instead of using RPC (which fails with auth.uid() when called from backend),
+  // directly insert into coupon_redemptions table using service role
+  const { error: insertError } = await supabase
+    .from('coupon_redemptions')
+    .insert({
+      coupon_id: couponId,
+      user_id: userId,
+      course_id: courseId,
+      order_id: orderId,
+      amount_saved: amount,
+      currency: currency
+    });
 
-  if (error) {
-    console.error('[coupons] Error redeeming coupon:', error);
-    return { success: false, error: error.message };
+  if (insertError) {
+    console.error('[coupons] Error inserting coupon redemption:', insertError);
+    return { success: false, error: insertError.message };
   }
 
-  console.log('[coupons] ✅ Coupon redeemed successfully');
+  console.log('[coupons] ✅ Coupon redemption inserted successfully');
   return { success: true };
 }
 

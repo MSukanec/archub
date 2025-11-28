@@ -251,12 +251,13 @@ export async function captureAndRedirect(req: Request, res: Response) {
     }
     
     // 5. Redeem coupon if one was used
-    if (couponCode && paymentResult.paymentId) {
-      console.log('[PayPal capture-and-redirect] Redeeming coupon:', { couponCode });
+    if (couponId && paymentResult.paymentId) {
+      console.log('[PayPal capture-and-redirect] Redeeming coupon:', { couponCode, couponId });
       
       const couponResult = await markCouponAsUsed(
         supabase,
-        couponCode,
+        couponId,
+        userId,
         courseId,
         paymentResult.paymentId,
         amount,
