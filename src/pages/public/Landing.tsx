@@ -133,16 +133,27 @@ const capabilities = [
 // Hero Section Component
 function HeroSectionComponent() {
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 -mx-6">
-      <div className="text-center max-w-5xl mx-auto">
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight">
+    <section 
+      className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 -mx-6 relative"
+      style={{
+        backgroundImage: 'url(/hero-landing-1080.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Overlay oscuro para legibilidad */}
+      <div className="absolute inset-0 bg-black/60" />
+      
+      <div className="text-center max-w-5xl mx-auto relative z-10">
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight text-white">
           La plataforma integral para{" "}
           <span className="text-primary">
             arquitectura y construcción
           </span>
         </h1>
         
-        <p className="text-xl mb-12 max-w-4xl mx-auto leading-relaxed text-muted-foreground">
+        <p className="text-xl mb-12 max-w-4xl mx-auto leading-relaxed text-white/90">
           Gestiona todo el ciclo de vida de tus proyectos: desde diseño y planificación, 
           pasando por ventas y marketing, hasta construcción y entrega. Con IA integrada, 
           capacitación continua y conexión con las herramientas que ya usas.
