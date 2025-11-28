@@ -9,7 +9,9 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ImageIcon, Palette, Settings } from 'lucide-react'
-import UploadImageAndShowField from '@/components/ui-custom/fields/UploadImageAndShowField'
+import { Uploader } from '@/components/shared/Uploader'
+import { uploadProjectImage, deleteProjectImage } from '@/features/projects'
+import { compressImage, formatCompressionStats } from '@/lib/imageCompression'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useProjectTypes, useProjectModalities, ProjectColorAdvanced } from '@/features/projects'
@@ -97,6 +99,107 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     },
     enabled: !!activeProjectId && !!supabase
   });
+
+  // Image upload state
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+
+  // Mutation to upload project image
+  const uploadImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      if (!activeProjectId || !organizationId) {
+        throw new Error('Project ID and Organization ID are required');
+      }
+      
+      setIsUploadingImage(true);
+      
+      // Compress image before uploading
+      const originalSize = file.size;
+      let compressedFile = file;
+      try {
+        compressedFile = await compressImage(file, 'project-cover');
+        if (originalSize !== compressedFile.size) {
+          toast({
+            title: "Imagen optimizada",
+            description: formatCompressionStats(originalSize, compressedFile.size),
+          });
+        }
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        toast({
+          title: "Advertencia",
+          description: "No se pudo comprimir la imagen, se usará el archivo original",
+          variant: "default"
+        });
+      }
+      
+      // Upload image to storage
+      const uploadResult = await uploadProjectImage(compressedFile, activeProjectId, organizationId);
+      return uploadResult.file_url;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Éxito",
+        description: "Imagen principal actualizada correctamente"
+      });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
+      queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
+      queryClient.invalidateQueries({ queryKey: ['project-image-url', activeProjectId] });
+      setIsUploadingImage(false);
+    },
+    onError: (error: any) => {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo subir la imagen",
+        variant: "destructive"
+      });
+      setIsUploadingImage(false);
+    }
+  });
+
+  // Mutation to delete project image
+  const deleteImageMutation = useMutation({
+    mutationFn: async () => {
+      if (!activeProjectId || !organizationId) {
+        throw new Error('Project ID and Organization ID are required');
+      }
+      
+      if (projectData?.image_bucket && projectData?.image_path) {
+        await deleteProjectImage(activeProjectId, organizationId, projectData.image_bucket, projectData.image_path);
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Éxito",
+        description: "Imagen principal eliminada correctamente"
+      });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
+      queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
+      queryClient.invalidateQueries({ queryKey: ['project-image-url', activeProjectId] });
+    },
+    onError: (error: any) => {
+      console.error('Error deleting image:', error);
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo eliminar la imagen",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Handler for image file selection
+  const handleImageFilesChange = useCallback((files: any[]) => {
+    if (files.length > 0 && files[0].file) {
+      uploadImageMutation.mutate(files[0].file);
+    }
+  }, [uploadImageMutation]);
+
+  // Handler for image removal
+  const handleImageRemove = useCallback(() => {
+    deleteImageMutation.mutate();
+  }, [deleteImageMutation]);
 
   // Mutation to save project color
   const saveProjectColorMutation = useMutation({
@@ -309,16 +412,22 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         {/* Right Column - Imagen Principal Content */}
         <div>
           {activeProjectId && organizationId && (
-            <UploadImageAndShowField
-              projectId={activeProjectId}
-              organizationId={organizationId}
-              currentImageUrl={projectImageUrl ?? null}
-              imageBucket={projectData?.image_bucket}
-              imagePath={projectData?.image_path}
-              onImageUpdate={(url) => {
-                // Invalidate the image URL query to trigger refresh
-                queryClient.invalidateQueries({ queryKey: ['project-image-url', activeProjectId] });
+            <Uploader
+              variant="hero"
+              mode="single"
+              accept="images"
+              heroImageUrl={projectImageUrl ?? null}
+              filesToUpload={[]}
+              onFilesChange={handleImageFilesChange}
+              onHeroImageChange={(url) => {
+                if (!url) {
+                  handleImageRemove();
+                }
               }}
+              isUploading={isUploadingImage}
+              disabled={isUploadingImage || deleteImageMutation.isPending}
+              emptyStateDescription="Arrastra una imagen o haz clic para seleccionar"
+              maxSizeLabel="Formatos: JPG, PNG, WebP • Tamaño máximo: 2MB"
             />
           )}
         </div>

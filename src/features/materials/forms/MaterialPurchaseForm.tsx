@@ -28,7 +28,7 @@ import {
   getMaterialPurchaseStatusBadgeConfig,
   DOCUMENT_TYPES,
 } from '@/features/materials/hooks/use-material-purchases'
-import { UploadMultiFileField } from '@/components/ui-custom/fields/UploadMultiFileField'
+import { Uploader } from '@/components/shared/Uploader'
 import { uploadFile, deleteFile } from '@/lib/storage'
 
 const materialPurchaseSchema = z.object({
@@ -753,24 +753,16 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create' }: Ma
               />
 
               <div>
-                <UploadMultiFileField
-                  filesToUpload={filesToUpload}
+                <Uploader
+                  mode="multiple"
                   existingFiles={existingFiles}
+                  filesToUpload={filesToUpload}
                   onFilesChange={setFilesToUpload}
-                  maxSize={10 * 1024 * 1024}
-                  acceptedTypes={{
-                    'image/*': ['.png', '.jpg', '.jpeg'],
-                    'application/pdf': ['.pdf'],
-                    'application/msword': ['.doc'],
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-                    'application/vnd.ms-excel': ['.xls'],
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
-                  }}
-                  imageCompressionPreset="document"
                   onExistingFileDelete={handleExistingFileDelete}
-                  emptyStateTitle="Sin archivos adjuntos"
+                  accept="all"
+                  maxSize={10 * 1024 * 1024}
+                  compressionPreset="document"
                   emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
-                  newFileBadgeText="Nuevo"
                 />
               </div>
             </form>

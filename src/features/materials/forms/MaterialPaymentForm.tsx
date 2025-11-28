@@ -19,7 +19,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { uploadFile, deleteFile } from '@/lib/storage'
-import { UploadMultiFileField } from '@/components/ui-custom/fields/UploadMultiFileField'
+import { Uploader } from '@/components/shared/Uploader'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { 
@@ -299,12 +299,13 @@ function FormPanel({
         />
 
         <div>
-          <UploadMultiFileField
+          <Uploader
+            mode="multiple"
             filesToUpload={filesToUpload}
             existingFiles={existingFiles}
             onFilesChange={setFilesToUpload}
             maxSize={10 * 1024 * 1024}
-            acceptedTypes={{
+            accept={{
               'image/*': ['.png', '.jpg', '.jpeg'],
               'application/pdf': ['.pdf'],
               'application/msword': ['.doc'],
@@ -312,9 +313,8 @@ function FormPanel({
               'application/vnd.ms-excel': ['.xls'],
               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
             }}
-            imageCompressionPreset="document"
+            compressionPreset="document"
             onExistingFileDelete={onExistingFileDelete}
-            emptyStateTitle="Sin archivos adjuntos"
             emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
             newFileBadgeText="Nuevo"
           />

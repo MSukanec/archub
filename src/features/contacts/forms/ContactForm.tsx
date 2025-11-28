@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ComboBoxMultiSelectField } from "@/components/ui-custom/fields/ComboBoxMultiSelectField";
-import { UploadMultiFileField } from "@/components/ui-custom/fields/UploadMultiFileField";
+import { Uploader } from "@/components/shared/Uploader";
 import { PhoneField } from "@/components/ui-custom/fields/PhoneField";
 import { AvatarUploader } from "@/components/ui-custom/AvatarUploader";
 
@@ -365,15 +365,15 @@ function FormPanel({
           <p className="text-xs text-muted-foreground">
             Gestiona los archivos adjuntos del contacto
           </p>
-          <UploadMultiFileField
+          <Uploader
+            mode="multiple"
             existingFiles={[]}
             filesToUpload={filesToUpload}
             onFilesChange={setFilesToUpload}
-            emptyStateTitle="Sin archivos adjuntos"
             emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
             newFileBadgeText="Nuevo"
             maxSize={10 * 1024 * 1024}
-            acceptedTypes={{
+            accept={{
               'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
               'application/pdf': ['.pdf'],
             }}

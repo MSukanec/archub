@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
@@ -10,7 +10,7 @@ import { FormModalFooter } from '@/components/modal';
 import { useModalPanelStore } from '@/components/modal';
 import { Images } from 'lucide-react';
 import { useProjectContext } from '@/stores/projectContext';
-import { UploadMediaField } from '@/components/ui-custom/fields/UploadMediaField';
+import { Uploader } from '@/components/shared/Uploader';
 import { supabase } from '@/lib/supabase';
 
 interface GalleryFormModalProps {
@@ -154,15 +154,15 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
 
   const editPanel = (
     <div className="space-y-4">
-      <UploadMediaField
+      <Uploader
+        mode="multiple"
         existingFiles={existingFiles}
         filesToUpload={filesToUpload}
         onFilesChange={setFilesToUpload}
         onExistingFileDelete={handleExistingFileDelete}
-        acceptedTypes={{
-          'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
-          'video/*': ['.mp4', '.mov', '.avi', '.mkv']
-        }}
+        accept="media"
+        compressOnDrop={true}
+        maxSize={50 * 1024 * 1024}
         emptyStateDescription="Haz clic aquí para seleccionar archivos"
       />
     </div>

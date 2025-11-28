@@ -21,7 +21,7 @@ import { useGeneralCostPayment } from '../hooks/use-general-cost-payment'
 import { useCreateGeneralCostPayment } from '../hooks/use-create-general-cost-payment'
 import { useUpdateGeneralCostPayment } from '../hooks/use-update-general-cost-payment'
 import { generalCostPaymentSchema, type GeneralCostPaymentFormData } from '../schemas'
-import { UploadMultiFileField } from '@/components/ui-custom/fields/UploadMultiFileField'
+import { Uploader } from '@/components/shared/Uploader'
 import { uploadFile, deleteFile } from '@/lib/storage'
 import { useQueryClient } from '@tanstack/react-query'
 import { useGeneralCostPaymentMedia } from '../hooks/use-general-cost-payment-media'
@@ -466,14 +466,13 @@ export default function GeneralCostPaymentForm({
 
             <div className="space-y-2">
               <FormLabel>Adjuntos (opcional)</FormLabel>
-              <UploadMultiFileField
+              <Uploader
+                mode="multiple"
                 existingFiles={existingFiles}
                 filesToUpload={filesToUpload}
                 onFilesChange={setFilesToUpload}
                 onExistingFileDelete={handleExistingFileDelete}
-                emptyStateTitle="Sin archivos adjuntos"
                 emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
-                newFileBadgeText="Nuevo"
                 maxSize={2 * 1024 * 1024}
               />
             </div>

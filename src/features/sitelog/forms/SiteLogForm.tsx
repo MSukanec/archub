@@ -27,7 +27,7 @@ import { siteLogSchema, type SiteLogFormData } from "../schemas";
 import type { SiteLogFileInput } from "../types";
 import { useSiteLogTypes } from "../hooks/use-sitelog-types";
 import { useSiteLogFiles } from "../hooks/use-sitelog-files";
-import { UploadMediaField } from "@/components/ui-custom/fields/UploadMediaField";
+import { Uploader } from "@/components/shared/Uploader";
 import { deleteMediaFileV2 } from "@/features/media/services/deleteMediaFileV2";
 
 interface SiteLogFormProps {
@@ -402,21 +402,19 @@ function FormPanel({
 
         <div className="space-y-2">
           <FormLabel>Fotos y Videos</FormLabel>
-          <UploadMediaField
+          <Uploader
+            mode="multiple"
+            accept="media"
+            compressOnDrop={true}
+            compressionPreset="sitelog-photo"
             existingFiles={siteLogFiles}
             filesToUpload={filesToUpload}
             onFilesChange={setFilesToUpload}
             onExistingFileDelete={handleExistingFileDelete}
-            imageCompressionPreset="sitelog-photo"
             emptyStateTitle="No hay archivos adjuntos"
             emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
-            uploadButtonText="Subir Archivos"
             newFileBadgeText="Nuevo"
             maxSize={50 * 1024 * 1024}
-            acceptedTypes={{
-              'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
-              'video/*': ['.mp4', '.mov', '.avi', '.mkv']
-            }}
           />
         </div>
 

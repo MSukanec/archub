@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import UploadImageAndShowField from "@/components/ui-custom/fields/UploadImageAndShowField";
+import { Uploader } from "@/components/shared/Uploader";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/features/organization";
@@ -211,13 +211,28 @@ function FormPanel({
 
         <div className="space-y-2">
           <FormLabel>Imagen Principal (opcional)</FormLabel>
-          <UploadImageAndShowField
-            projectId={undefined}
-            organizationId={organizationId}
-            currentImageUrl={currentImageUrl || null}
-            previewMode={true}
-            previewUrl={imagePreviewUrl}
-            onFileSelect={onFileSelect}
+          <Uploader
+            variant="hero"
+            mode="single"
+            accept="images"
+            heroImageUrl={imagePreviewUrl || currentImageUrl || null}
+            filesToUpload={[]}
+            onFilesChange={(files) => {
+              if (files.length > 0 && files[0].file) {
+                onFileSelect(files[0].file);
+              } else {
+                onFileSelect(null);
+              }
+            }}
+            onHeroImageChange={(url) => {
+              if (!url) {
+                onFileSelect(null);
+              }
+            }}
+            emptyStateDescription="Arrastra una imagen o haz clic para seleccionar"
+            maxSizeLabel="Formatos: JPG, PNG, WebP • Tamaño máximo: 2MB"
+            compressionPreset="project-cover"
+            compressOnDrop={true}
           />
         </div>
 

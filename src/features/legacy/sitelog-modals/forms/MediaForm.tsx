@@ -1,7 +1,6 @@
-import React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { UploadMediaField } from "@/components/ui-custom/fields/UploadMediaField";
+import { Uploader } from "@/components/shared/Uploader";
 import { deleteMediaFileV2 } from "@/features/media/services/deleteMediaFileV2";
 import type { SiteLogFileInput } from '../../types';
 
@@ -65,21 +64,19 @@ export function MediaForm({
   };
 
   return (
-    <UploadMediaField
+    <Uploader
+      mode="multiple"
       existingFiles={siteLogFiles}
       filesToUpload={filesToUpload}
       onFilesChange={setFilesToUpload}
       onExistingFileDelete={handleExistingFileDelete}
-      imageCompressionPreset="sitelog-photo"
+      accept="media"
+      compressOnDrop={true}
+      compressionPreset="sitelog-photo"
       emptyStateTitle="No hay archivos adjuntos"
       emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
-      uploadButtonText="Subir Archivos"
       newFileBadgeText="Nuevo"
-      maxSize={50 * 1024 * 1024} // 50MB
-      acceptedTypes={{
-        'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
-        'video/*': ['.mp4', '.mov', '.avi', '.mkv']
-      }}
+      maxSize={50 * 1024 * 1024}
     />
   );
 }

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { DollarSign, FileText, CalendarIcon, Paperclip } from 'lucide-react'
+import { DollarSign, FileText, CalendarIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Separator } from '@/components/ui/separator'
@@ -21,7 +21,7 @@ import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { formatContactName } from '@/utils/contacts'
 import { uploadFile, deleteFile } from '@/lib/storage'
-import { UploadMultiFileField } from '@/components/ui-custom/fields/UploadMultiFileField'
+import { Uploader } from '@/components/shared/Uploader'
 import { useQueryClient } from '@tanstack/react-query'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { 
@@ -421,12 +421,13 @@ function FormPanel({
 
         {/* Row 6: Archivos Adjuntos */}
         <div>
-          <UploadMultiFileField
+          <Uploader
+            mode="multiple"
             filesToUpload={filesToUpload}
             existingFiles={existingFiles}
             onFilesChange={setFilesToUpload}
             maxSize={10 * 1024 * 1024}
-            acceptedTypes={{
+            accept={{
               'image/*': ['.png', '.jpg', '.jpeg'],
               'application/pdf': ['.pdf'],
               'application/msword': ['.doc'],
@@ -434,7 +435,7 @@ function FormPanel({
               'application/vnd.ms-excel': ['.xls'],
               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
             }}
-            imageCompressionPreset="document"
+            compressionPreset="document"
             onExistingFileDelete={onExistingFileDelete}
             emptyStateTitle="Sin archivos adjuntos"
             emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
