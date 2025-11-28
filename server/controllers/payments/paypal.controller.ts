@@ -251,36 +251,23 @@ export async function captureAndRedirect(req: Request, res: Response) {
     }
     
     // 5. Redeem coupon if one was used
-    if (couponId && paymentResult.paymentId) {
-      console.log('[PayPal capture-and-redirect] Redeeming coupon:', { couponId, couponCode });
+    if (couponCode && paymentResult.paymentId) {
+      console.log('[PayPal capture-and-redirect] Redeeming coupon:', { couponCode });
       
-      // Get original course price to calculate amount saved
-      const { data: course } = await supabase
-        .from('courses')
-        .select('price')
-        .eq('id', courseId)
-        .single();
+      const couponResult = await markCouponAsUsed(
+        supabase,
+        couponCode,
+        courseId,
+        paymentResult.paymentId,
+        amount,
+        currency
+      );
       
-      const originalPrice = course?.price ? parseFloat(course.price) : 0;
-      const amountSaved = originalPrice - amount;
-      
-      if (amountSaved > 0) {
-        const couponResult = await markCouponAsUsed(
-          supabase,
-          couponId,
-          userId,
-          courseId,
-          paymentResult.paymentId,
-          amountSaved,
-          currency
-        );
-        
-        if (couponResult.success) {
-          console.log('[PayPal capture-and-redirect] ✅ Coupon redeemed:', { amountSaved, currency });
-        } else {
-          console.error('[PayPal capture-and-redirect] Coupon redemption failed:', couponResult.error);
-          // Don't fail the payment - just log the error
-        }
+      if (couponResult.success) {
+        console.log('[PayPal capture-and-redirect] ✅ Coupon redeemed:', { couponCode, amount, currency });
+      } else {
+        console.error('[PayPal capture-and-redirect] Coupon redemption failed:', couponResult.error);
+        // Don't fail the payment - just log the error
       }
     }
     

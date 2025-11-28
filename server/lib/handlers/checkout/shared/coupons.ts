@@ -6,18 +6,18 @@ export type CouponValidationResult =
 
 export async function markCouponAsUsed(
   supabase: SupabaseClient,
-  couponId: string,
-  userId: string,
+  couponCode: string,
   courseId: string,
   orderId: string,
-  amountSaved: number,
+  amount: number,
   currency: string
 ): Promise<{ success: boolean; error?: string }> {
   console.log('[coupons] Redeeming coupon via RPC:', {
-    coupon_id: couponId,
-    user_id: userId,
+    coupon_code: couponCode,
     course_id: courseId,
-    order_id: orderId
+    order_id: orderId,
+    amount,
+    currency
   });
 
   // Use the existing redeem_coupon RPC function which:
@@ -25,12 +25,11 @@ export async function markCouponAsUsed(
   // 2. Increments used_count
   // This is idempotent-safe because we only call it when payment is NEWLY inserted
   const { data, error } = await supabase.rpc('redeem_coupon', {
-    p_coupon_id: couponId,
-    p_user_id: userId,
+    p_code: couponCode,
     p_course_id: courseId,
+    p_currency: currency,
     p_order_id: orderId,
-    p_amount_saved: amountSaved,
-    p_currency: currency
+    p_price: amount
   });
 
   if (error) {
