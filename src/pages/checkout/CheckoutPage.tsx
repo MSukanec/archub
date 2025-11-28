@@ -462,7 +462,7 @@ export default function CheckoutPage() {
       console.log("[MP] Creando preferencia…", requestBody);
 
       const API_BASE = getApiBase();
-      const mpUrl = `${API_BASE}/api/mp/create-course-preference`;
+      const mpUrl = `${API_BASE}/api/checkout/mp/create-course`;
 
       const res = await fetchWithTimeout(
         mpUrl,

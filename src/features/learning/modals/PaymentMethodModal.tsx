@@ -265,9 +265,7 @@ export default function PaymentMethodModal({
       console.log("[MP] API_BASE:", API_BASE);
       console.log("[MP] VITE_API_BASE:", import.meta.env.VITE_API_BASE);
       
-      // DIAGNÓSTICO: Para probar con endpoint fake, descomentar esta línea y comentar la de abajo:
-      // const mpUrl = `${API_BASE}/api/diag/fake-mp`;
-      const mpUrl = `${API_BASE}/api/mp/create-course-preference`;
+      const mpUrl = `${API_BASE}/api/checkout/mp/create-course`;
       
       console.log("[MP] URL completa:", mpUrl);
       
