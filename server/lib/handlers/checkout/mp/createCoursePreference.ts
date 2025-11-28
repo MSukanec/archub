@@ -88,12 +88,20 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
         return { success: false, error: "Tasa de cambio no disponible", status: 500 };
       }
 
-      unit_price = unit_price * Number(exchangeRate.rate);
-      console.log('[MP create-course-preference] Price converted:', {
+      // --- INICIO CORRECCIÓN MERCADO PAGO ARS ---
+      const rawArsPrice = unit_price * Number(exchangeRate.rate);
+
+      // Mercado Pago Argentina (ARS) NO acepta decimales.
+      // Redondeamos al entero más cercano para evitar errores en la API.
+      unit_price = Math.round(rawArsPrice);
+
+      console.log('[MP create-course-preference] Price converted & rounded for ARS:', {
         usd_price: course.price,
         exchange_rate: exchangeRate.rate,
-        ars_price: unit_price
+        raw_ars_price: rawArsPrice,
+        final_rounded_ars_price: unit_price
       });
+      // --- FIN CORRECCIÓN ---
     }
 
     const productId = course.id;
