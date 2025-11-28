@@ -101,6 +101,9 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
         raw_ars_price: rawArsPrice,
         final_rounded_ars_price: unit_price
       });
+      
+      // 🔍 DEBUG 1
+      console.log('🔍 DEBUG 1 - Precio ARS Base:', unit_price, 'Tipo:', typeof unit_price, 'Es entero:', Number.isInteger(unit_price));
       // --- FIN CORRECCIÓN ---
     }
 
@@ -147,6 +150,9 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
         discount: couponData.discount,
         final_price: unit_price
       });
+      
+      // 🔍 DEBUG 2
+      console.log('🔍 DEBUG 2 - Precio tras cupón:', unit_price, 'Tipo:', typeof unit_price, 'Es entero:', Number.isInteger(unit_price));
     }
 
     // 8. Obtener datos del usuario
@@ -181,11 +187,29 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
     // Mercado Pago Argentina NO acepta centavos.
     // Aunque hayamos redondeado antes, el cálculo del cupón pudo reintroducir decimales.
     // Este es el redondeo de seguridad final justo antes de enviar.
+    
+    // FORZAR EL TIPO A NÚMERO por si acaso
+    unit_price = Number(unit_price);
+    
     if (currency === 'ARS') {
       console.log(`[MP Safety Check] Precio ARS antes del redondeo final: ${unit_price}`);
       unit_price = Math.round(unit_price);
       console.log(`[MP Safety Check] Precio ARS final enviado a MP: ${unit_price}`);
+      
+      // 🔍 DEBUG 3
+      console.log('🔍 DEBUG 3 - Precio ARS Redondeado:', unit_price, 'Tipo:', typeof unit_price, 'Es entero:', Number.isInteger(unit_price));
     }
+    
+    // LA PRUEBA DEFINITIVA: ¿Es un entero de verdad?
+    console.log('🔍 DEBUG FINAL - ¿Es entero?:', Number.isInteger(unit_price));
+    console.log('🔍 DEBUG FINAL - Valor exacto a enviar:', unit_price);
+    
+    // --- VALIDACIÓN DE PRECIO CERO O NEGATIVO ---
+    if (unit_price <= 0) {
+      console.error('🚨 ERROR FATAL: El precio final calculado es 0 o negativo:', unit_price);
+      return { success: false, error: "Error en el cálculo del descuento: el precio final es inválido.", status: 400 };
+    }
+    
     // --- FIN CORRECCIÓN DEFINITIVA ARS ---
 
     const prefBody: any = {
