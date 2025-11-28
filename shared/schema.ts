@@ -1724,3 +1724,26 @@ export const insertHeroSectionSchema = createInsertSchema(hero_sections).omit({
 
 export type HeroSection = typeof hero_sections.$inferSelect;
 export type InsertHeroSection = z.infer<typeof insertHeroSectionSchema>;
+
+// MP Course Preferences (corto external_reference, datos guardados en BD)
+export const mp_course_preferences = pgTable("mp_course_preferences", {
+  id: varchar("id", { length: 64 }).primaryKey(), // mp_pref_xxxxx
+  preference_id: text("preference_id"), // Mercado Pago preference ID
+  user_id: uuid("user_id").notNull(),
+  course_id: uuid("course_id").notNull(),
+  coupon_id: uuid("coupon_id"),
+  coupon_code: text("coupon_code"),
+  student_price_usd: numeric("student_price_usd", { precision: 10, scale: 2 }),
+  original_price_usd: numeric("original_price_usd", { precision: 10, scale: 2 }),
+  currency: text("currency").notNull(),
+  access_months: integer("access_months").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+export const insertMpCoursePreferenceSchema = createInsertSchema(mp_course_preferences).omit({
+  id: true,
+  created_at: true,
+});
+
+export type MpCoursePreference = typeof mp_course_preferences.$inferSelect;
+export type InsertMpCoursePreference = z.infer<typeof insertMpCoursePreferenceSchema>;

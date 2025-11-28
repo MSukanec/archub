@@ -1,4 +1,5 @@
 import type { Request } from "express";
+import { nanoid } from "nanoid";
 import { getAuthenticatedClient } from "../shared/auth.js";
 import { validateAndApplyCoupon } from "../shared/coupons.js";
 import { getUserData } from "../shared/user.js";
