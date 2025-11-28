@@ -136,15 +136,12 @@ function HeroSectionComponent() {
     <section 
       className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 -mx-6 relative"
       style={{
-        backgroundImage: 'url(/hero-landing-1080.jpg)',
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(/hero-landing-1080.jpg)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
       }}
     >
-      {/* Overlay oscuro para legibilidad */}
-      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
-      
       <div className="text-center max-w-5xl mx-auto relative">
         <h1 
           className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight"
