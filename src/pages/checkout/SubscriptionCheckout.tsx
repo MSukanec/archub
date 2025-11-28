@@ -458,7 +458,7 @@ export default function SubscriptionCheckout() {
       console.log("[PayPal] Creando orden de suscripción…", requestBody);
 
       const API_BASE = getApiBase();
-      const paypalUrl = `${API_BASE}/api/paypal/create-subscription-order`;
+      const paypalUrl = `${API_BASE}/api/checkout/paypal/create-subscription`;
 
       const res = await fetchWithTimeout(
         paypalUrl,

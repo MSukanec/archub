@@ -589,7 +589,7 @@ export default function CheckoutPage() {
       console.log("[PayPal] Creando orden…", requestBody);
 
       const API_BASE = getApiBase();
-      const paypalUrl = `${API_BASE}/api/paypal/create-course-order`;
+      const paypalUrl = `${API_BASE}/api/checkout/paypal/create-course`;
 
       const res = await fetchWithTimeout(
         paypalUrl,

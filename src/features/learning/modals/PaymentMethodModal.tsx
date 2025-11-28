@@ -360,7 +360,7 @@ export default function PaymentMethodModal({
       console.log("[PayPal] API_BASE:", API_BASE);
       console.log("[PayPal] VITE_API_BASE:", import.meta.env.VITE_API_BASE);
       
-      const paypalUrl = `${API_BASE}/api/paypal/create-course-order`;
+      const paypalUrl = `${API_BASE}/api/checkout/paypal/create-course`;
       console.log("[PayPal] URL completa:", paypalUrl);
       
       const res = await fetchWithTimeout(
