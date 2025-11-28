@@ -66,7 +66,8 @@ export default function Privacy() {
       headerNavigation={[
         { label: "Cursos", href: "/cursos" },
         { label: "Características", href: "/#features" },
-        { label: "Capacidades", href: "/#capabilities" }
+        { label: "Capacidades", href: "/#capabilities" },
+        { label: "Contacto", href: "/contact" }
       ]}
       seo={{
         title: "Política de Privacidad - Seencel",

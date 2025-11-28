@@ -167,7 +167,8 @@ export default function Landing() {
       headerNavigation={[
         { label: "Cursos", href: "/cursos" },
         { label: "Características", href: "#features" },
-        { label: "Capacidades", href: "#capabilities" }
+        { label: "Capacidades", href: "#capabilities" },
+        { label: "Contacto", href: "/contact" }
       ]}
       heroSlot={<HeroSectionComponent />}
     >

@@ -1,11 +1,121 @@
 import type { Express } from 'express';
 import { Resend } from 'resend';
 import { render } from '@react-email/render';
+import crypto from 'crypto';
 import type { RouteDeps } from './_base';
 import WelcomeEmail from '../../emails/WelcomeEmail';
 import PurchaseEmail from '../../emails/PurchaseEmail';
+import ContactEmail from '../../emails/ContactEmail';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
+
+const usedNonces = new Map<string, number>();
+const NONCE_EXPIRY_MS = 15 * 60 * 1000;
+const TOKEN_MIN_AGE_MS = 3000;
+const TOKEN_MAX_AGE_MS = 15 * 60 * 1000;
+
+function cleanupExpiredNonces() {
+  const now = Date.now();
+  for (const [nonce, timestamp] of usedNonces.entries()) {
+    if (now - timestamp > NONCE_EXPIRY_MS) {
+      usedNonces.delete(nonce);
+    }
+  }
+}
+
+setInterval(cleanupExpiredNonces, 60000);
+
+function generateNonce(): string {
+  return crypto.randomBytes(16).toString('hex');
+}
+
+function normalizeIP(ip: string | string[] | undefined): string {
+  if (!ip) return 'unknown';
+  const ipString = Array.isArray(ip) ? ip[0] : ip;
+  const normalized = ipString.split(',')[0].trim();
+  return normalized || 'unknown';
+}
+
+function hashIP(ip: string): string {
+  return crypto.createHash('sha256').update(ip).digest('hex').substring(0, 16);
+}
+
+function signToken(payload: string, secret: string): string {
+  return crypto.createHmac('sha256', secret).update(payload).digest('base64');
+}
+
+function createContactToken(ip: string): { token: string; expiresIn: number } {
+  if (!RESEND_API_KEY) {
+    throw new Error('Token signing key not configured');
+  }
+  
+  const issuedAt = Date.now();
+  const nonce = generateNonce();
+  const ipHash = hashIP(ip);
+  
+  const payload = JSON.stringify({ issuedAt, nonce, ipHash });
+  const payloadBase64 = Buffer.from(payload).toString('base64');
+  const signature = signToken(payload, RESEND_API_KEY);
+  
+  return {
+    token: `${payloadBase64}|${signature}`,
+    expiresIn: 900
+  };
+}
+
+function verifyContactToken(token: string, clientIP: string): { valid: boolean; error?: string; nonce?: string } {
+  if (!RESEND_API_KEY) {
+    return { valid: false, error: 'Token verification not configured' };
+  }
+  
+  if (!token || typeof token !== 'string') {
+    return { valid: false, error: 'Token de seguridad requerido' };
+  }
+  
+  const parts = token.split('|');
+  if (parts.length !== 2) {
+    return { valid: false, error: 'Token de seguridad inválido' };
+  }
+  
+  const [payloadBase64, providedSignature] = parts;
+  
+  let payload: string;
+  let parsed: { issuedAt: number; nonce: string; ipHash: string };
+  
+  try {
+    payload = Buffer.from(payloadBase64, 'base64').toString('utf8');
+    parsed = JSON.parse(payload);
+  } catch {
+    return { valid: false, error: 'Token de seguridad malformado' };
+  }
+  
+  const expectedSignature = signToken(payload, RESEND_API_KEY);
+  if (providedSignature !== expectedSignature) {
+    return { valid: false, error: 'Token de seguridad inválido' };
+  }
+  
+  const now = Date.now();
+  const tokenAge = now - parsed.issuedAt;
+  
+  if (tokenAge < TOKEN_MIN_AGE_MS) {
+    return { valid: false, error: 'Por favor, espera unos segundos antes de enviar' };
+  }
+  
+  if (tokenAge > TOKEN_MAX_AGE_MS) {
+    return { valid: false, error: 'Token expirado. Por favor, recarga la página' };
+  }
+  
+  const clientIPHash = hashIP(clientIP);
+  if (parsed.ipHash !== clientIPHash) {
+    return { valid: false, error: 'Token de seguridad inválido para esta sesión' };
+  }
+  
+  if (usedNonces.has(parsed.nonce)) {
+    return { valid: false, error: 'Este formulario ya fue enviado. Por favor, recarga la página' };
+  }
+  
+  return { valid: true, nonce: parsed.nonce };
+}
 
 export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
   // POST /api/email/send - Send email via Resend
@@ -165,20 +275,6 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
-  // GET /api/admin/courses-for-preview - Get courses for email preview
-  app.get('/api/admin/courses-for-preview', async (req, res) => {
-    try {
-      const courses = await deps.storage.getCourses?.() || [];
-      return res.json({
-        ok: true,
-        data: courses.slice(0, 5) // Get last 5 courses
-      });
-    } catch (error: any) {
-      console.error('❌ Error fetching courses:', error);
-      return res.json({ ok: true, data: [] });
-    }
-  });
-
   // POST /api/admin/email-preview/purchase - Preview purchase email
   app.post('/api/admin/email-preview/purchase', async (req, res) => {
     try {
@@ -187,26 +283,13 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         courseName = 'Curso Avanzado de Construcción',
         amount = '$99.99',
         transactionId = 'TXN-20241128-001',
-        courseId = null
       } = req.body;
-      
-      // If courseId is provided, fetch actual course data
-      let finalCourseName = courseName;
-      let finalAmount = amount;
-      
-      if (courseId && deps.storage.getCourseById) {
-        const course = await deps.storage.getCourseById(courseId);
-        if (course) {
-          finalCourseName = course.title || courseName;
-          finalAmount = course.price ? `$${course.price}` : amount;
-        }
-      }
       
       const emailHtml = await render(
         PurchaseEmail({
           userName,
-          courseName: finalCourseName,
-          amount: finalAmount,
+          courseName,
+          amount,
           transactionId,
         }) as any
       );
@@ -216,7 +299,7 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         type: 'purchase',
         html: emailHtml,
         preview: {
-          subject: `Confirmación de Compra: ${finalCourseName}`,
+          subject: `Confirmación de Compra: ${courseName}`,
           from: 'Seencel <sistema@seencel.com>',
           to: 'student@example.com',
         }
@@ -224,6 +307,197 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
     } catch (error: any) {
       console.error('❌ Preview error:', error);
       return res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Simple in-memory rate limiting for contact form
+  const contactRateLimit = new Map<string, number[]>();
+  const RATE_LIMIT_WINDOW = 60000; // 1 minute
+  const RATE_LIMIT_MAX = 3; // Max 3 submissions per minute per IP
+
+  // GET /api/contact/token - Generate signed submission token
+  app.get('/api/contact/token', (req, res) => {
+    try {
+      const clientIP = normalizeIP(req.ip || req.headers['x-forwarded-for']);
+      const tokenData = createContactToken(clientIP);
+      
+      console.log('🔐 Contact token generated for IP:', clientIP.substring(0, 10) + '...');
+      
+      return res.json(tokenData);
+    } catch (error: any) {
+      console.error('❌ Token generation error:', error);
+      return res.status(500).json({
+        ok: false,
+        error: 'Error al generar token de seguridad'
+      });
+    }
+  });
+
+  // POST /api/contact - Public contact form endpoint
+  app.post('/api/contact', async (req, res) => {
+    console.log('📬 Contact form submission received');
+
+    try {
+      const { firstName, lastName, email, company, phone, country, message, formStartTime, submittedAt, honeypot, contactToken } = req.body;
+
+      // Anti-spam: Honeypot must be present and empty
+      if (typeof honeypot !== 'string' || honeypot.length > 0) {
+        console.warn('⚠️ Honeypot validation failed - likely bot');
+        return res.status(400).json({
+          ok: false,
+          error: 'Validación de seguridad fallida'
+        });
+      }
+
+      // Rate limiting by IP (normalize to handle proxy forwarding consistently)
+      const clientIP = normalizeIP(req.ip || req.headers['x-forwarded-for']);
+      const ipKey = clientIP;
+
+      // Verify signed submission token (but don't consume yet - wait for validation to pass)
+      const tokenResult = verifyContactToken(contactToken, ipKey);
+      if (!tokenResult.valid) {
+        console.warn('⚠️ Token validation failed:', tokenResult.error);
+        return res.status(400).json({
+          ok: false,
+          error: tokenResult.error
+        });
+      }
+
+      const now = Date.now();
+      
+      if (!contactRateLimit.has(ipKey)) {
+        contactRateLimit.set(ipKey, []);
+      }
+      
+      const timestamps = contactRateLimit.get(ipKey)!;
+      const recentTimestamps = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW);
+      
+      if (recentTimestamps.length >= RATE_LIMIT_MAX) {
+        console.warn('⚠️ Rate limit exceeded for IP:', ipKey);
+        return res.status(429).json({
+          ok: false,
+          error: 'Demasiados intentos. Por favor, espera un momento.'
+        });
+      }
+      
+      recentTimestamps.push(now);
+      contactRateLimit.set(ipKey, recentTimestamps);
+
+      // Anti-spam: Time-based validation - timestamps optional but checked if present
+      // This is a soft defense layer - rate limiting and honeypot are the primary protections
+      if (typeof formStartTime === 'number' && typeof submittedAt === 'number') {
+        const clientTimeTaken = submittedAt - formStartTime;
+        // Reject if form was submitted too quickly (less than 3 seconds)
+        if (clientTimeTaken < 3000) {
+          console.warn('⚠️ Potential bot detected - form submitted too quickly');
+          return res.status(400).json({
+            ok: false,
+            error: 'Por favor, espera unos segundos antes de enviar'
+          });
+        }
+        
+        // Only check timestamp sanity with generous tolerance for clock skew
+        const serverNow = Date.now();
+        const maxClockSkew = 5 * 60 * 1000; // 5 minutes tolerance for clock differences
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours max
+        
+        // Only reject extremely suspicious timestamps (not minor clock skew)
+        if (serverNow - formStartTime > maxAge || formStartTime > serverNow + maxClockSkew) {
+          console.warn('⚠️ Invalid timestamps detected - form age or future timestamp');
+          return res.status(400).json({
+            ok: false,
+            error: 'Por favor, recarga la página e intenta de nuevo'
+          });
+        }
+      }
+
+      // Validation with clear field requirements
+      if (!firstName || typeof firstName !== 'string' || firstName.length < 2 || firstName.length > 100) {
+        return res.status(400).json({ ok: false, error: 'Nombre inválido (2-100 caracteres)' });
+      }
+      if (!lastName || typeof lastName !== 'string' || lastName.length < 2 || lastName.length > 100) {
+        return res.status(400).json({ ok: false, error: 'Apellido inválido (2-100 caracteres)' });
+      }
+      if (!phone || typeof phone !== 'string' || phone.length < 6 || phone.length > 30) {
+        return res.status(400).json({ ok: false, error: 'Teléfono inválido' });
+      }
+      
+      // Country validation with allowed ISO codes (matching frontend)
+      const allowedCountryCodes = [
+        'AR', 'MX', 'CO', 'CL', 'PE', 'EC', 'UY', 'PY', 'BO', 'VE', 'BR', 'ES', 'US', 'OTHER'
+      ];
+      if (!country || typeof country !== 'string' || !allowedCountryCodes.includes(country)) {
+        return res.status(400).json({ ok: false, error: 'País inválido' });
+      }
+      
+      if (!message || typeof message !== 'string' || message.length < 10 || message.length > 2000) {
+        return res.status(400).json({ ok: false, error: 'Mensaje inválido (10-2000 caracteres)' });
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || typeof email !== 'string' || !emailRegex.test(email)) {
+        return res.status(400).json({
+          ok: false,
+          error: 'Email inválido'
+        });
+      }
+
+      // CRITICAL: Mark nonce as used AFTER all validation passes but BEFORE any async operations
+      // This prevents replay attacks while allowing users to fix validation errors and retry
+      if (tokenResult.nonce) {
+        usedNonces.set(tokenResult.nonce, Date.now());
+        console.log('🔒 Nonce consumed after validation passed');
+      }
+
+      if (!RESEND_API_KEY) {
+        console.error('❌ RESEND_API_KEY not configured');
+        return res.status(500).json({
+          ok: false,
+          error: 'Email service not configured'
+        });
+      }
+
+      const resend = new Resend(RESEND_API_KEY);
+
+      // Render the contact email template
+      const emailHtml = await render(
+        ContactEmail({
+          firstName,
+          lastName,
+          email,
+          company: company || '',
+          phone,
+          country,
+          message,
+        }) as any
+      );
+
+      // Send email to contact@seencel.com
+      const result = await resend.emails.send({
+        from: 'Seencel Formulario <sistema@seencel.com>',
+        to: ['contacto@seencel.com'],
+        replyTo: email,
+        subject: `Nuevo contacto: ${firstName} ${lastName}${company ? ` - ${company}` : ''}`,
+        html: emailHtml,
+      });
+
+      if (result.error) {
+        console.error('❌ Resend error:', result.error);
+        return res.status(500).json({
+          ok: false,
+          error: 'Error al enviar el mensaje'
+        });
+      }
+
+      console.log('✅ Contact email sent:', result.data);
+      return res.json({ ok: true, message: 'Mensaje enviado exitosamente' });
+    } catch (error: any) {
+      console.error('❌ Contact form error:', error);
+      return res.status(500).json({
+        ok: false,
+        error: error.message || 'Error al procesar el formulario'
+      });
     }
   });
 

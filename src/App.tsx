@@ -13,7 +13,8 @@ import Landing from "@/pages/public/Landing";
 import Login from "@/pages/public/Login";
 import Register from "@/pages/public/Register";
 import ForgotPassword from "@/pages/public/ForgotPassword";
-import Privacy from "@/pages/Privacy";
+import Privacy from "@/pages/public/Privacy";
+import Contact from "@/pages/public/Contact";
 import CourseLanding from "@/pages/public/CourseLanding";
 import CourseCatalog from "@/pages/public/CourseCatalog";
 
@@ -146,6 +147,7 @@ function Router() {
         <Route path="/cursos" component={CourseCatalog} />
         <Route path="/cursos/:slug" component={CourseLanding} />
         <Route path="/privacy" component={Privacy} />
+        <Route path="/contact" component={Contact} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
         <Route path="/forgot-password" component={ForgotPassword} />

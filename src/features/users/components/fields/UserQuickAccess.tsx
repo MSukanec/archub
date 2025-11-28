@@ -19,7 +19,7 @@ import { useProjectContext } from "@/stores/projectContext";
 import { useProjectsLite } from "@/features/projects";
 import { useAuthStore } from "@/stores/authStore";
 import { cn } from "@/lib/utils";
-import { Building2, FolderOpen, User, ChevronDown, LogOut, ArrowUpRight, Home, CreditCard } from "lucide-react";
+import { Building2, FolderOpen, User, ChevronDown, LogOut, ArrowUpRight, Home, CreditCard, MessageCircle } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -154,6 +154,11 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
 
   const handleGoToLanding = () => {
     navigate('/');
+    setIsOpen(false);
+  };
+
+  const handleGoToContact = () => {
+    navigate('/contact');
     setIsOpen(false);
   };
 
@@ -398,6 +403,18 @@ export function UserQuickAccess({ className }: UserQuickAccessProps) {
                 <Home className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
                 <span className="text-sm text-foreground group-hover:text-accent transition-colors">
                   Página de Inicio
+                </span>
+              </button>
+
+              {/* Contact Button */}
+              <button
+                onClick={handleGoToContact}
+                className="w-full px-4 py-3 flex items-center gap-2.5 hover:bg-accent/10 transition-colors group"
+                data-testid="button-go-to-contact"
+              >
+                <MessageCircle className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
+                <span className="text-sm text-foreground group-hover:text-accent transition-colors">
+                  Contacto
                 </span>
               </button>
 
