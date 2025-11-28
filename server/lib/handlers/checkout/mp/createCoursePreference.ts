@@ -130,16 +130,52 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
         return { success: false, error: "Tasa de cambio no disponible", status: 500 };
       }
 
-      // Convertir a ARS y redondear
-      const rawArsPrice = unit_price * Number(exchangeRate.rate);
+      // ✅ VALIDACIÓN FÉRREA PRE-CÁLCULO
+      const rate = Number(exchangeRate.rate);
+      
+      // Verificar que unit_price sea un número válido
+      if (!Number.isFinite(unit_price)) {
+        console.error('🚨 ERROR FATAL: unit_price no es un número válido:', unit_price, 'Tipo:', typeof unit_price);
+        return { success: false, error: "Error interno: Precio calculado inválido.", status: 500 };
+      }
+
+      // Verificar que la tasa de cambio sea un número válido
+      if (!Number.isFinite(rate)) {
+        console.error('🚨 ERROR FATAL: exchangeRate.rate no es un número válido:', exchangeRate.rate, 'Tipo:', typeof rate);
+        return { success: false, error: "Tasa de cambio no disponible o inválida", status: 500 };
+      }
+
+      // 🔍 DEBUG PRE-CÁLCULO ARS
+      console.log('🔍 DEBUG PRE-CÁLCULO ARS:', {
+        usdPrice: unit_price,
+        rate: rate,
+        usdPriceIsFinite: Number.isFinite(unit_price),
+        rateIsFinite: Number.isFinite(rate)
+      });
+
+      // Cálculo seguro
+      const rawArsPrice = unit_price * rate;
+
+      // 🔍 DEBUG POST-CÁLCULO
+      console.log('🔍 DEBUG POST-CÁLCULO:', {
+        rawArsPrice,
+        isFinite: Number.isFinite(rawArsPrice)
+      });
+
       unit_price = Math.round(rawArsPrice);
 
       console.log('[MP create-course-preference] Price converted to ARS:', {
         usd_price: unit_price,
-        exchange_rate: exchangeRate.rate,
+        exchange_rate: rate,
         raw_ars_price: rawArsPrice,
         final_ars_price: unit_price
       });
+    } else {
+      // Si es USD, validar que sea un número válido
+      if (!Number.isFinite(unit_price)) {
+        console.error('🚨 ERROR FATAL: unit_price USD no es un número válido:', unit_price);
+        return { success: false, error: "Error interno: Precio del curso inválido.", status: 500 };
+      }
     }
 
     const productId = course.id;

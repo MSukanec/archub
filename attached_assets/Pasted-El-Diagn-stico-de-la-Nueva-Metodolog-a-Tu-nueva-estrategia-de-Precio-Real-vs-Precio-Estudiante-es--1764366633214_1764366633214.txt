@@ -1,0 +1,82 @@
+El Diagnóstico de la Nueva Metodología
+Tu nueva estrategia de "Precio Real vs Precio Estudiante" es buena conceptualmente, pero la implementación tiene un bug crítico.
+
+Mira tus propios logs de debug (¡son salvadores!):
+
+DEBUG 1 - Precio ARS Base: NaN 'number'
+
+¡ALERTA ROJA! NaN significa "Not a Number" (No es un Número).
+
+Tu código dice que el tipo es 'number', porque typeof NaN en JavaScript es, irónicamente, 'number'. Pero el valor es inválido.
+
+Esto significa que el cálculo precio_en_dolares * tasa_de_cambio falló estrepitosamente.
+
+DEBUG 2 - Precio tras cupón: NaN 'number'
+
+Como el precio base ya era NaN, cualquier operación posterior sigue dando NaN.
+
+[MP Safety Check] Precio ARS antes del redondeo final: NaN
+
+El redondeo de seguridad recibe NaN.
+
+[MP Safety Check] Precio ARS final enviado a MP: NaN
+
+Math.round(NaN) da como resultado... NaN.
+
+El Resultado Final: Le envías unit_price: NaN a Mercado Pago, y ellos te devuelven el error items[0].unit_price must be a number.
+
+¿Dónde está el bug?
+El problema está en la línea donde calculas el precio inicial en ARS. Es muy probable que una de las dos variables sea inválida:
+
+unit_price = unit_price * Number(exchangeRate.rate);
+
+Hipótesis A: unit_price (el precio en USD) no es un número válido. ¿Viene como string "2" o "1" desde la base de datos y no se convirtió bien?
+
+Hipótesis B: exchangeRate.rate (la tasa de cambio) es null, undefined o no se pudo convertir a número correctamente.
+
+LA SOLUCIÓN: Validar ANTES de multiplicar
+Tenemos que asegurarnos de que los ingredientes de la multiplicación sean números sanos antes de mezclarlos.
+
+Abre createCoursePreference.ts y busca la parte donde obtienes el precio y la tasa de cambio.
+
+Reemplaza el bloque de cálculo por esto, que incluye validaciones férreas:
+
+TypeScript
+
+// --- EN createCoursePreference.ts ---
+
+// 1. Obtener el precio base en USD (sea el normal o el de estudiante)
+// Aseguramos que sea un número.
+let usdPrice = Number(course.price); // O el campo que estés usando ahora
+
+// VALIDACIÓN 1: El precio USD debe ser un número válido
+if (!Number.isFinite(usdPrice) || usdPrice < 0) {
+    console.error('🚨 ERROR FATAL: El precio base en USD no es un número válido:', usdPrice);
+    return { success: false, error: "Error interno: Precio del curso inválido.", status: 500 };
+}
+
+// ... (tu lógica para elegir precio normal vs estudiante si aplica cupón) ...
+
+// Si la moneda es ARS, obtenemos la tasa
+if (currency === 'ARS') {
+    // ... (tu código para buscar exchangeRate en Supabase) ...
+
+    // VALIDACIÓN 2: La tasa de cambio debe existir y ser un número válido
+    if (exchangeError || !exchangeRate || !Number.isFinite(Number(exchangeRate.rate))) {
+      console.error('[MP create-course-preference] Exchange rate error or invalid:', exchangeError, exchangeRate?.rate);
+      return { success: false, error: "Tasa de cambio no disponible o inválida", status: 500 };
+    }
+
+    const rate = Number(exchangeRate.rate);
+
+    // CÁLCULO SEGURO
+    unit_price = usdPrice * rate;
+
+    console.log('🔍 DEBUG PRE-CÁLCULO ARS:', { usdPrice, rate, resultado: unit_price });
+} else {
+    // Si es USD, el precio unitario es el precio USD
+    unit_price = usdPrice;
+}
+
+// ... (luego sigue tu código con el redondeo final Math.round, ese déjalo, es útil)
+Resumen: El error cambió porque tu nueva lógica introdujo un NaN en el cálculo inicial. Aplica estas validaciones para asegurarte de que nunca intentes multiplicar cosas que no son números. Con esto, el NaN debería desaparecer y el flujo debería continuar hasta el redondeo final y el éxito en MP. ¡Ánimo, que ya lo tienes acorralado!
