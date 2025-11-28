@@ -23,10 +23,43 @@ export async function getGeneralCostPayment(
   const { data, error } = await supabase
     .from('general_costs_payments')
     .select(`
-      *,
-      currency:currencies(*),
-      wallet:organization_wallets(*, wallets(*)),
-      general_cost:general_costs(*),
+      id,
+      organization_id,
+      amount,
+      currency_id,
+      exchange_rate,
+      payment_date,
+      notes,
+      reference,
+      created_at,
+      updated_at,
+      wallet_id,
+      general_cost_id,
+      status,
+      created_by,
+      currency:currencies(
+        id,
+        code,
+        symbol,
+        name
+      ),
+      wallet:organization_wallets(
+        id,
+        organization_id,
+        wallet_id,
+        is_active,
+        is_default,
+        wallets:wallet_id(
+          id,
+          name,
+          is_active
+        )
+      ),
+      general_cost:general_costs(
+        id,
+        name,
+        description
+      ),
       creator:organization_members!general_costs_payments_created_by_fkey(
         id,
         users(id, full_name, avatar_url)
@@ -43,5 +76,22 @@ export async function getGeneralCostPayment(
     throw error;
   }
 
-  return data;
+  if (!data) return null;
+
+  const walletData = Array.isArray(data.wallet) ? data.wallet[0] : data.wallet;
+  const creatorData = Array.isArray(data.creator) ? data.creator[0] : data.creator;
+  
+  return {
+    ...data,
+    currency: Array.isArray(data.currency) ? data.currency[0] : data.currency,
+    general_cost: Array.isArray(data.general_cost) ? data.general_cost[0] : data.general_cost,
+    wallet: walletData ? {
+      ...walletData,
+      wallets: Array.isArray(walletData.wallets) ? walletData.wallets[0] : walletData.wallets
+    } : null,
+    creator: creatorData ? {
+      ...creatorData,
+      users: Array.isArray(creatorData.users) ? creatorData.users[0] : creatorData.users
+    } : null,
+  } as unknown as GeneralCostPayment;
 }
