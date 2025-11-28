@@ -1,0 +1,110 @@
+declare
+  replit_url text := 'https://seencel.com/api/email/send';
+  email_subject text;
+  user_email text;
+  user_name text;
+begin
+  --------------------------------------------------------------------
+  -- 1) NUEVO USUARIO REGISTRADO
+  --------------------------------------------------------------------
+  if TG_TABLE_NAME = 'users' 
+     and TG_TABLE_SCHEMA = 'auth'
+     and TG_OP = 'INSERT' then
+
+    user_email := NEW.email;
+    user_name := coalesce(NEW.raw_user_meta_data->>'full_name', 'Arquitecto');
+
+    email_subject := '¡Bienvenido a Seencel! 🏗️';
+
+    perform extensions.http((
+      'POST',
+      replit_url,
+      ARRAY[extensions.http_header('Content-Type', 'application/json')],
+      'application/json',
+      jsonb_build_object(
+        'to', user_email,
+        'subject', email_subject,
+        'template', 'welcome',
+        'userName', user_name,
+        'notifyAdmin', true
+      )::text
+    )::extensions.http_request);
+
+  --------------------------------------------------------------------
+  -- 2) NUEVA COMPRA DE CURSO (PAGO ONLINE)
+  --------------------------------------------------------------------
+  elsif TG_TABLE_NAME = 'purchases'
+        and TG_TABLE_SCHEMA = 'public'
+        and TG_OP = 'INSERT' then
+
+    select email into user_email 
+    from auth.users 
+    where id = NEW.user_id;
+
+    email_subject := 'Confirmación de Compra: ' || NEW.course_name;
+
+    perform extensions.http((
+      'POST',
+      replit_url,
+      ARRAY[extensions.http_header('Content-Type', 'application/json')],
+      'application/json',
+      jsonb_build_object(
+        'to', user_email,
+        'subject', email_subject,
+        'template', 'purchase',
+        'userName', 'Estudiante',
+        'courseName', NEW.course_name,
+        'amount', '$' || NEW.amount,
+        'transactionId', NEW.id::text,
+        'notifyAdmin', true
+      )::text
+    )::extensions.http_request);
+
+    --------------------------------------------------------------------
+  -- 3) NUEVO PAGO POR TRANSFERENCIA (BANK_TRANSFER_PAYMENTS)
+  --    SOLO notifica al admin, NO al usuario
+  --------------------------------------------------------------------
+  elsif TG_TABLE_NAME = 'bank_transfer_payments'
+        and TG_TABLE_SCHEMA = 'public'
+        and TG_OP = 'INSERT' then
+
+    -- buscar email y nombre del usuario
+    select email into user_email
+    from auth.users 
+    where id = NEW.user_id;
+
+    user_name := coalesce(NEW.payer_name, 'Cliente');
+
+    -- buscar nombre del curso
+    declare
+      course_name text;
+    begin
+      select c.title into course_name
+      from course_prices cp
+      join courses c on c.id = cp.course_id
+      where cp.id = NEW.course_price_id;
+
+      -- Llamar endpoint especial que SOLO notifica al admin
+      perform extensions.http((
+        'POST',
+        'https://seencel.com/api/email/admin-bank-transfer-alert',
+        ARRAY[extensions.http_header('Content-Type', 'application/json')],
+        'application/json',
+        jsonb_build_object(
+          'userName', user_name,
+          'userEmail', user_email,
+          'courseName', coalesce(course_name, 'Curso'),
+          'amount', NEW.amount::text,
+          'currency', NEW.currency,
+          'transferId', NEW.id::text
+        )::text
+      )::extensions.http_request);
+    end;
+
+  --------------------------------------------------------------------
+  else
+    return NEW;
+  end if;
+
+  return NEW;
+end;
