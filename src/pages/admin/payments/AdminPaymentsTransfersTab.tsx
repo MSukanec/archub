@@ -23,7 +23,8 @@ interface BankTransferPayment {
   amount: number;
   currency: string;
   status: 'pending' | 'approved' | 'rejected';
-  receipt_url: string | null;
+  image_bucket: string | null;
+  image_path: string | null;
   created_at: string;
   users: {
     id: string;
@@ -110,7 +111,7 @@ const AdminPaymentsTransfersTab = () => {
   }, [payments]);
 
   const handleViewReceipt = (payment: BankTransferPayment) => {
-    if (!payment.receipt_url) {
+    if (!payment.image_bucket || !payment.image_path) {
       toast({
         title: 'Sin comprobante',
         description: 'Este pago no tiene comprobante adjunto',

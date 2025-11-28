@@ -1410,7 +1410,8 @@ export const bank_transfer_payments = pgTable("bank_transfer_payments", {
   payment_id: uuid("payment_id"), // FK a payments
   amount: numeric("amount", { precision: 14, scale: 2 }).notNull(),
   currency: text("currency").notNull(),
-  receipt_url: text("receipt_url"),
+  image_bucket: text("image_bucket"), // Storage bucket name (e.g., 'private-assets')
+  image_path: text("image_path"), // Full path within bucket (e.g., 'marketplace/receipts/...')
   payer_name: text("payer_name"),
   payer_note: text("payer_note"),
   status: text("status").notNull().default("pending"),

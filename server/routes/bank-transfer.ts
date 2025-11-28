@@ -260,10 +260,6 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         return res.status(500).json({ error: "Failed to upload file to storage" });
       }
 
-      // Store the path reference (not public URL since it's a private bucket)
-      // Format: bucket:path for easy retrieval and signed URL generation
-      const receiptRef = `${bucket}:${filePath}`;
-
       // 1️⃣ Crear registro en payments SOLO si no existe todavía (evita duplicados en re-uploads)
       let paymentId = existingPayment.payment_id;
       
@@ -294,12 +290,13 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         console.log('[bank-transfer/upload] Payment already exists, reusing:', paymentId);
       }
 
-      // 2️⃣ Actualizar bank_transfer_payments con payment_id y receipt_url (bucket:path format)
+      // 2️⃣ Actualizar bank_transfer_payments con payment_id, image_bucket e image_path
       const { error: updateError } = await adminClient
         .from('bank_transfer_payments')
         .update({ 
           payment_id: paymentId,
-          receipt_url: receiptRef,
+          image_bucket: bucket,
+          image_path: filePath,
           updated_at: new Date().toISOString(),
         })
         .eq('id', btp_id);
@@ -312,14 +309,14 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         if (paymentId !== existingPayment.payment_id) {
           await adminClient.from('payments').delete().eq('id', paymentId);
         }
-        return res.status(500).json({ error: "Failed to update receipt URL" });
+        return res.status(500).json({ error: "Failed to update payment record" });
       }
 
       // Generate signed URL for WhatsApp notification (1 hour expiry)
       const { data: signedUrlData } = await adminClient.storage
         .from(bucket)
         .createSignedUrl(filePath, 3600);
-      const signedUrl = signedUrlData?.signedUrl || receiptRef;
+      const signedUrl = signedUrlData?.signedUrl || `${bucket}:${filePath}`;
 
       // Send WhatsApp notification (if Twilio is configured)
       try {
@@ -335,7 +332,8 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
 
       return res.json({
         success: true,
-        receipt_url: receiptRef,
+        image_bucket: bucket,
+        image_path: filePath,
       });
     } catch (error: any) {
       console.error("Error uploading receipt:", error);
@@ -371,10 +369,10 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
 
       const { btp_id } = req.params;
 
-      // Get the payment with receipt_url
+      // Get the payment with image_bucket and image_path
       const { data: payment, error: fetchError } = await adminClient
         .from('bank_transfer_payments')
-        .select('receipt_url')
+        .select('image_bucket, image_path')
         .eq('id', btp_id)
         .single();
 
@@ -382,43 +380,21 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         return res.status(404).json({ error: "Payment not found" });
       }
 
-      if (!payment.receipt_url) {
+      if (!payment.image_bucket || !payment.image_path) {
         return res.status(404).json({ error: "No receipt uploaded" });
       }
 
-      // Parse the receipt_url (format: bucket:path or legacy public URL)
-      let signedUrl = payment.receipt_url;
+      // Generate signed URL from image_bucket and image_path
+      const { data: signedUrlData, error: signError } = await adminClient.storage
+        .from(payment.image_bucket)
+        .createSignedUrl(payment.image_path, 3600); // 1 hour expiry
       
-      if (payment.receipt_url.startsWith('private-assets:')) {
-        // New format: private-assets:path
-        const filePath = payment.receipt_url.replace('private-assets:', '');
-        const { data: signedUrlData, error: signError } = await adminClient.storage
-          .from('private-assets')
-          .createSignedUrl(filePath, 3600); // 1 hour expiry
-        
-        if (signError) {
-          console.error("Error generating signed URL:", signError);
-          return res.status(500).json({ error: "Failed to generate signed URL" });
-        }
-        signedUrl = signedUrlData.signedUrl;
-      } else if (payment.receipt_url.startsWith('bank-transfer-receipts:')) {
-        // Legacy format with bucket prefix: bank-transfer-receipts:path
-        const filePath = payment.receipt_url.replace('bank-transfer-receipts:', '');
-        const { data: signedUrlData, error: signError } = await adminClient.storage
-          .from('bank-transfer-receipts')
-          .createSignedUrl(filePath, 3600);
-        
-        if (signError) {
-          console.error("Error generating signed URL for legacy bucket:", signError);
-          return res.status(500).json({ error: "Failed to generate signed URL" });
-        }
-        signedUrl = signedUrlData.signedUrl;
-      } else if (payment.receipt_url.startsWith('http')) {
-        // Legacy public URL (direct URL from old uploads) - use as-is
-        signedUrl = payment.receipt_url;
+      if (signError) {
+        console.error("Error generating signed URL:", signError);
+        return res.status(500).json({ error: "Failed to generate signed URL" });
       }
 
-      return res.json({ signed_url: signedUrl });
+      return res.json({ signed_url: signedUrlData.signedUrl });
     } catch (error: any) {
       console.error("Error getting receipt signed URL:", error);
       return res.status(500).json({ error: error.message || "Failed to get receipt" });

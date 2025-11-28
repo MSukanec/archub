@@ -817,11 +817,12 @@ Titular: Matias Esteban Sukanec`;
 
       const data = await response.json();
 
-      if (!response.ok || !data.receipt_url) {
+      if (!response.ok || !data.success) {
         throw new Error(data.error || "No se pudo subir el comprobante");
       }
 
-      setReceiptUrl(data.receipt_url);
+      // Store bucket:path format for display purposes
+      setReceiptUrl(`${data.image_bucket}:${data.image_path}`);
       setReceiptUploaded(true);
 
       toast({

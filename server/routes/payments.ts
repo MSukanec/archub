@@ -125,14 +125,15 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   app.options("/api/checkout/paypal/webhook", paypalController.webhook);
 
   // ==================== BANK TRANSFER ====================
+  // NOTE: Bank transfer routes are now handled in server/routes/bank-transfer.ts
+  // with the new architecture using image_bucket + image_path instead of receipt_url
+  // The routes below are kept commented for reference only
   
-  // POST /api/bank-transfer/create
-  app.post("/api/bank-transfer/create", bankTransferController.create);
-  app.options("/api/bank-transfer/create", bankTransferController.create);
-  
-  // POST /api/bank-transfer/upload
-  app.post("/api/bank-transfer/upload", bankTransferController.upload);
-  app.options("/api/bank-transfer/upload", bankTransferController.upload);
+  // Legacy routes (replaced by bank-transfer.ts):
+  // app.post("/api/bank-transfer/create", bankTransferController.create);
+  // app.options("/api/bank-transfer/create", bankTransferController.create);
+  // app.post("/api/bank-transfer/upload", bankTransferController.upload);
+  // app.options("/api/bank-transfer/upload", bankTransferController.upload);
 
   // ==================== ADMIN ROUTES (Bank Transfer Management) ====================
 

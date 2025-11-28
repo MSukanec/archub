@@ -90,6 +90,31 @@ src/pages/learning/courses/CourseView.tsx (payment flow UI)
 - Mercado Pago Courses → new handlers in `server/lib/handlers/checkout/mp/`
 - PayPal Subscriptions → new handlers (subscription-specific, separate from courses)
 
+### Bank Transfer Receipt Upload Flow
+**Status:** COMPLETE - November 28, 2025
+
+**Architecture:**
+- Entity type: `course_purchase_receipt`
+- Storage: `private-assets/marketplace/receipts/{course_id}/{user_id}/{btp_id}{ext}`
+- Database columns: `image_bucket` + `image_path` (NOT receipt_url)
+- Uses adminClient (service role) for upload to private bucket
+- Admin access via time-limited signed URLs (1 hour expiry)
+
+**Key Files:**
+```
+server/routes/bank-transfer.ts (POST /api/bank-transfer/upload, GET /api/admin/bank-transfer/receipt/:btp_id)
+src/lib/storage/types.ts (EntityType)
+src/lib/storage/config.ts (course_purchase_receipt config)
+src/pages/checkout/CheckoutPage.tsx (upload UI)
+src/features/finances/modals/admin/BankTransferReceiptModal.tsx (admin view)
+```
+
+**Critical Rules:**
+- Always use `adminClient` for uploads to private-assets bucket
+- Store `image_bucket` and `image_path` separately (not combined URL)
+- Generate signed URLs on-demand for admin viewing
+- Compression preset: 'document' (for PDFs and scanned images)
+
 ## External Dependencies
 - **Supabase**: Authentication.
 - **Neon Database**: Serverless PostgreSQL hosting.

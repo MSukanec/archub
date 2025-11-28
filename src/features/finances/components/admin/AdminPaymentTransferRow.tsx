@@ -12,7 +12,8 @@ interface BankTransferPayment {
   amount: number;
   currency: string;
   status: 'pending' | 'approved' | 'rejected';
-  receipt_url: string | null;
+  image_bucket: string | null;
+  image_path: string | null;
   created_at: string;
   users: {
     id: string;
@@ -128,7 +129,7 @@ export default function AdminPaymentTransferRow({
       </div>
 
       {/* Botón Ver - ancho completo fuera del contenedor */}
-      {payment.receipt_url && (
+      {payment.image_bucket && payment.image_path && (
         <Button
           className="w-full mt-3"
           onClick={() => onViewReceipt(payment)}
