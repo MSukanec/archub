@@ -338,7 +338,7 @@ export default function GeneralCostPaymentForm({
               />
             </div>
 
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4">
               <FormField
                 control={form.control}
                 name="wallet_id"
@@ -411,15 +411,13 @@ export default function GeneralCostPaymentForm({
                   </FormItem>
                 )}
               />
-            </div>
 
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
               <FormField
                 control={form.control}
                 name="exchange_rate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cotización (opcional)</FormLabel>
+                    <FormLabel>Cotización</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -434,20 +432,6 @@ export default function GeneralCostPaymentForm({
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="reference"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Referencia (opcional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Número de recibo, factura, etc." {...field} data-testid="input-reference" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             <FormField
@@ -455,9 +439,23 @@ export default function GeneralCostPaymentForm({
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notas (opcional)</FormLabel>
+                  <FormLabel>Notas</FormLabel>
                   <FormControl>
                     <Textarea placeholder="Observaciones adicionales..." {...field} rows={3} data-testid="textarea-notes" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="reference"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Referencia</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Número de recibo, factura, etc." {...field} data-testid="input-reference" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
