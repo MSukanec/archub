@@ -80,7 +80,6 @@ export default function GeneralCostPaymentForm({
 
   const isLoading = currenciesLoading || generalCostsLoading || walletsLoading || (mode === 'edit' && loadingPayment)
 
-  const formReset = form.reset
   React.useEffect(() => {
     if (mode !== 'edit' || !paymentLoaded || !existingPayment) return
     
@@ -92,7 +91,7 @@ export default function GeneralCostPaymentForm({
       paymentDate = new Date()
     }
     
-    formReset({
+    form.reset({
       payment_date: paymentDate,
       general_cost_id: existingPayment.general_cost?.id || '',
       currency_id: existingPayment.currency?.id || '',
@@ -103,7 +102,7 @@ export default function GeneralCostPaymentForm({
       reference: existingPayment.reference || '',
       status: (existingPayment.status || 'confirmed') as 'confirmed' | 'pending' | 'rejected' | 'void',
     })
-  }, [paymentId, paymentLoaded, existingPayment, mode, formReset])
+  }, [paymentId, paymentLoaded, existingPayment, mode, form])
 
   React.useEffect(() => {
     if (mediaFiles && mediaFiles.length > 0) {
@@ -113,7 +112,6 @@ export default function GeneralCostPaymentForm({
     }
   }, [mediaFiles])
 
-  const formSetValue = form.setValue
   const hasSetDefaultsRef = React.useRef(false)
   React.useEffect(() => {
     if (mode !== 'create' || paymentId || hasSetDefaultsRef.current) return
@@ -123,19 +121,19 @@ export default function GeneralCostPaymentForm({
       
       const defaultCurrency = currencies.find((c) => c.is_default)?.currency?.id
       if (defaultCurrency) {
-        formSetValue('currency_id', defaultCurrency)
+        form.setValue('currency_id', defaultCurrency)
       } else if (currencies[0].currency?.id) {
-        formSetValue('currency_id', currencies[0].currency?.id)
+        form.setValue('currency_id', currencies[0].currency?.id)
       }
       
       const defaultWallet = wallets.find((w) => w.is_default)
       if (defaultWallet && defaultWallet.id) {
-        formSetValue('wallet_id', defaultWallet.id)
+        form.setValue('wallet_id', defaultWallet.id)
       } else if (wallets[0].id) {
-        formSetValue('wallet_id', wallets[0].id)
+        form.setValue('wallet_id', wallets[0].id)
       }
     }
-  }, [currencies, wallets, mode, paymentId, formSetValue])
+  }, [currencies, wallets, mode, paymentId, form])
 
   const createPaymentMutation = useCreateGeneralCostPayment()
   const updatePaymentMutation = useUpdateGeneralCostPayment()
