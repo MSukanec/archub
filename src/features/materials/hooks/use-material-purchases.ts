@@ -44,6 +44,12 @@ export interface MaterialPurchase {
     id: string;
     name: string;
   } | null;
+  attachments?: Array<{
+    id: string;
+    file_url: string;
+    file_name: string;
+    file_type: string;
+  }>;
 }
 
 export const MATERIAL_PURCHASE_STATUS = {

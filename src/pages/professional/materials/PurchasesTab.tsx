@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { ShoppingCart, Plus, Edit, Trash2, CheckCircle2, Clock, DollarSign } from 'lucide-react';
+import { ShoppingCart, Plus, Edit, Trash2, CheckCircle2, Clock, DollarSign, Paperclip } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContext } from '@/stores/projectContext';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
@@ -446,6 +446,13 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
             </div>
           ),
         }}
+        leadingRowAction={(purchase: MaterialPurchase) => 
+          purchase.attachments && purchase.attachments.length > 0 ? {
+            label: 'Ver Adjunto',
+            icon: Paperclip,
+            onClick: () => window.open(purchase.attachments![0].file_url, '_blank'),
+          } : null
+        }
         rowActions={(purchase) => [
           {
             label: 'Editar',

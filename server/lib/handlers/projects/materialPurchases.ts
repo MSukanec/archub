@@ -43,6 +43,12 @@ export interface MaterialPurchase {
     id: string;
     name: string;
   } | null;
+  attachments?: Array<{
+    id: string;
+    file_url: string;
+    file_name: string;
+    file_type: string;
+  }>;
 }
 
 export interface ListMaterialPurchasesParams {
@@ -284,6 +290,43 @@ export async function listMaterialPurchases(
       }
     }
 
+    // Get attachments for all purchases
+    const purchaseIds = (purchases || []).map((p: any) => p.id);
+    let attachmentsMap: Record<string, any[]> = {};
+    
+    if (purchaseIds.length > 0) {
+      const { data: attachments, error: attachmentsError } = await supabase
+        .from('media_links')
+        .select(`
+          id,
+          material_purchase_id,
+          media_file:media_files (
+            id,
+            file_url,
+            file_name,
+            file_type
+          )
+        `)
+        .in('material_purchase_id', purchaseIds)
+        .eq('organization_id', params.organizationId);
+
+      if (!attachmentsError && attachments) {
+        attachments.forEach((att: any) => {
+          if (!attachmentsMap[att.material_purchase_id]) {
+            attachmentsMap[att.material_purchase_id] = [];
+          }
+          if (att.media_file) {
+            attachmentsMap[att.material_purchase_id].push({
+              id: att.id,
+              file_url: att.media_file.file_url,
+              file_name: att.media_file.file_name,
+              file_type: att.media_file.file_type,
+            });
+          }
+        });
+      }
+    }
+
     const mappedPurchases = (purchases || []).map((purchase: any) => ({
       ...purchase,
       provider: purchase.provider_id ? (contactsMap.get(purchase.provider_id) || null) : null,
@@ -293,6 +336,7 @@ export async function listMaterialPurchases(
         user: purchase.creator.users || null
       } : null,
       project: purchase.project || null,
+      attachments: attachmentsMap[purchase.id] || [],
     }));
 
     return { success: true, data: mappedPurchases };
