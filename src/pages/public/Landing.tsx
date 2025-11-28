@@ -143,7 +143,7 @@ function HeroSectionComponent() {
       }}
     >
       {/* Overlay oscuro para legibilidad */}
-      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-black/40 z-0" />
       
       <div className="text-center max-w-5xl mx-auto relative z-10">
         <h1 
