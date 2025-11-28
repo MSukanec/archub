@@ -40,7 +40,7 @@ import { cn } from "@/lib/utils";
 import { useCoursePricing } from "@/features/learning/hooks/use-course-pricing";
 import { getApiBase } from "@/utils/apiBase";
 import { toE164, fromE164 } from "@/utils/phone";
-import { orderedMethods, getPaymentButtonText } from "@/utils/paymentOrder";
+import { orderedMethods, getPaymentButtonText, isArgentineCountry } from "@/utils/paymentOrder";
 import { apiRequest } from "@/lib/queryClient";
 import mercadoPagoLogo from "/MercadoPago_logo.png";
 import paypalLogo from "/Paypal_2014_logo.png";
@@ -222,13 +222,24 @@ export default function CheckoutPage() {
     }
   }, [courseSlug, navigate]);
 
-  // Preselección automática de Transferencia Bancaria (incentiva 5% de descuento)
+  // Determinar si el usuario es argentino
+  const isArgentine = useMemo(() => {
+    const countryData = countries.find((c) => c.id === country);
+    return isArgentineCountry(countryData?.alpha_3);
+  }, [countries, country]);
+
+  // Preselección automática según país
   useEffect(() => {
     if (!selectedMethod && country && countries.length > 0) {
-      // Siempre preseleccionar transferencia para incentivar el descuento del 5%
-      setSelectedMethod("transfer");
+      if (isArgentine) {
+        // Argentinos: preseleccionar transferencia (incentivo 5% descuento)
+        setSelectedMethod("transfer");
+      } else {
+        // No argentinos: preseleccionar PayPal (único método disponible)
+        setSelectedMethod("paypal");
+      }
     }
-  }, [country, countries, selectedMethod]);
+  }, [country, countries, selectedMethod, isArgentine]);
 
   // Limpiar cupón SOLO cuando cambia la moneda (NO cuando cambia el método)
   // IMPORTANTE: El descuento debe recalcularse con el nuevo precio en la nueva moneda
@@ -1415,7 +1426,7 @@ Titular: Matias Esteban Sukanec`;
                     >
                       {paymentMethodsOrder.map((method) => {
                         if (method === "mercadopago") {
-                          const isMPBlocked = false; // 🧪 TEMPORAL: Habilitado para pruebas con cupones
+                          const isMPBlocked = !isArgentine; // Bloqueado para usuarios no argentinos
                           return (
                             <div
                               key="mercadopago"
@@ -1452,7 +1463,7 @@ Titular: Matias Esteban Sukanec`;
                                     >
                                       <CreditCard className="h-5 w-5 text-accent" />
                                       Mercado Pago
-                                      <Badge variant="outline" className="text-xs font-normal bg-muted/60 border-border/50">
+                                      <Badge className="text-xs font-normal bg-[hsl(210,40%,55%)] hover:bg-[hsl(210,40%,55%)] text-white border-0">
                                         Pago en ARS
                                       </Badge>
                                     </Label>
@@ -1473,8 +1484,8 @@ Titular: Matias Esteban Sukanec`;
                                 <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-[1px]">
                                   <div className="px-4 py-3 bg-card border border-border shadow-md rounded-lg max-w-[280px]">
                                     <p className="text-sm font-medium text-foreground flex items-center gap-2 mb-2">
-                                      <span className="text-base">⚠️</span>
-                                      No disponible con cupones
+                                      <span className="text-base">🌍</span>
+                                      Solo disponible en Argentina
                                     </p>
                                     <a 
                                       href="https://wa.me/5491132273000" 
@@ -1515,7 +1526,7 @@ Titular: Matias Esteban Sukanec`;
                                   >
                                     <CreditCard className="h-5 w-5 text-accent" />
                                     PayPal
-                                    <Badge variant="outline" className="text-xs font-normal bg-muted/60 border-border/50">
+                                    <Badge className="text-xs font-normal bg-success hover:bg-success text-white border-0">
                                       Pago en USD
                                     </Badge>
                                   </Label>
@@ -1534,37 +1545,76 @@ Titular: Matias Esteban Sukanec`;
                         }
 
                         // transfer
+                        const isTransferBlocked = !isArgentine; // Bloqueado para usuarios no argentinos
                         return (
                           <div
                             key="transfer"
                             className={cn(
-                              "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all hover:border-accent/50",
-                              selectedMethod === "transfer"
-                                ? "border-accent bg-accent/5 shadow-sm"
-                                : "border-border"
+                              "relative rounded-lg border-2 overflow-hidden transition-all",
+                              isTransferBlocked 
+                                ? "cursor-not-allowed border-border/50" 
+                                : cn(
+                                    "cursor-pointer hover:border-accent/50",
+                                    selectedMethod === "transfer"
+                                      ? "border-accent bg-accent/5 shadow-sm"
+                                      : "border-border"
+                                  )
                             )}
-                            onClick={() => setSelectedMethod("transfer")}
+                            onClick={() => !isTransferBlocked && setSelectedMethod("transfer")}
                             data-testid="payment-option-transfer"
                           >
-                            <RadioGroupItem value="transfer" id="transfer" className="mt-0.5" />
-                            <div className="flex-1">
-                              <Label
-                                htmlFor="transfer"
-                                className="flex items-center gap-2 cursor-pointer font-medium"
-                              >
-                                <Building2 className="h-5 w-5 text-accent" />
-                                Transferencia
-                                <Badge variant="outline" className="text-xs font-normal bg-muted/60 border-border/50">
-                                  Pago en ARS
-                                </Badge>
-                                <Badge className="text-xs font-semibold bg-accent hover:bg-accent/90 text-white border-0">
-                                  💸 -5% Extra
-                                </Badge>
-                              </Label>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                Transferencia o depósito directo. Aprobación manual.
-                              </p>
+                            {/* Contenido original con blur cuando está bloqueado */}
+                            <div className={cn(
+                              "flex items-start space-x-4 p-4 transition-all",
+                              isTransferBlocked && "blur-[3px] pointer-events-none select-none"
+                            )}>
+                              <RadioGroupItem 
+                                value="transfer" 
+                                id="transfer" 
+                                className="mt-0.5" 
+                                disabled={isTransferBlocked ? true : undefined}
+                              />
+                              <div className="flex-1">
+                                <Label
+                                  htmlFor="transfer"
+                                  className="flex items-center gap-2 cursor-pointer font-medium"
+                                >
+                                  <Building2 className="h-5 w-5 text-accent" />
+                                  Transferencia
+                                  <Badge className="text-xs font-normal bg-[hsl(210,40%,55%)] hover:bg-[hsl(210,40%,55%)] text-white border-0">
+                                    Pago en ARS
+                                  </Badge>
+                                  <Badge className="text-xs font-semibold bg-accent hover:bg-accent/90 text-white border-0">
+                                    💸 -5% Extra
+                                  </Badge>
+                                </Label>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  Transferencia o depósito directo. Aprobación manual.
+                                </p>
+                              </div>
                             </div>
+
+                            {/* Badge tipo popover centrado */}
+                            {isTransferBlocked && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-[1px]">
+                                <div className="px-4 py-3 bg-card border border-border shadow-md rounded-lg max-w-[280px]">
+                                  <p className="text-sm font-medium text-foreground flex items-center gap-2 mb-2">
+                                    <span className="text-base">🌍</span>
+                                    Solo disponible en Argentina
+                                  </p>
+                                  <a 
+                                    href="https://wa.me/5491132273000" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="pointer-events-auto inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-accent transition-colors"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <MessageCircle className="h-3.5 w-3.5" />
+                                    Dudas? WhatsApp
+                                  </a>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         );
                       })}

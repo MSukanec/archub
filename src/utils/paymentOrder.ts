@@ -1,16 +1,33 @@
 type PaymentMethod = "mercadopago" | "paypal" | "transfer";
 
-// Países donde Mercado Pago es el método preferido
-const MP_COUNTRIES = new Set(['AR', 'BR', 'CL', 'CO', 'MX', 'PE', 'UY', 'PY']);
+/**
+ * Verifica si el país es Argentina
+ */
+export function isArgentineCountry(countryAlpha3?: string): boolean {
+  return countryAlpha3?.toUpperCase() === 'ARG' || countryAlpha3?.toUpperCase() === 'AR';
+}
 
 /**
- * Ordena los métodos de pago.
- * SIEMPRE: Transferencia primero (por descuento del 5%), Mercado Pago segundo, PayPal último.
- * Si hay cupón aplicado, MP queda bloqueado pero mantiene el orden.
+ * Ordena los métodos de pago según el país del usuario.
+ * 
+ * ARGENTINOS (ARG/AR):
+ *   - Orden: Transfer → MercadoPago → PayPal
+ *   - Todos habilitados
+ * 
+ * NO ARGENTINOS:
+ *   - Orden: PayPal → Transfer → MercadoPago
+ *   - Solo PayPal habilitado (Transfer y MP bloqueados)
  */
 export function orderedMethods(countryAlpha3?: string, hasCoupon?: boolean): PaymentMethod[] {
-  // Orden fijo: Transferencia primero (incentiva descuento 5%), MP segundo, PayPal último
-  return ['transfer', 'mercadopago', 'paypal'];
+  const isArgentine = isArgentineCountry(countryAlpha3);
+  
+  if (isArgentine) {
+    // Argentinos: Transfer primero (incentiva descuento 5%), MP segundo, PayPal último
+    return ['transfer', 'mercadopago', 'paypal'];
+  } else {
+    // No argentinos: PayPal primero (único habilitado), luego Transfer y MP (bloqueados)
+    return ['paypal', 'transfer', 'mercadopago'];
+  }
 }
 
 /**
