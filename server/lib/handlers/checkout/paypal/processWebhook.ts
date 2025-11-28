@@ -297,6 +297,29 @@ export async function processWebhook(
         console.log(`[PayPal webhook] 🏢 Processing SUBSCRIPTION payment`);
 
         if (organization_id && billing_period && captureId) {
+          // CRITICAL: Resolve auth_id (user_hint) to users.id
+          let publicUserId: string | null = null;
+          if (user_hint) {
+            const { data: userProfile, error: profileError } = await supabase
+              .from("users")
+              .select("id")
+              .eq("auth_id", user_hint)
+              .maybeSingle();
+
+            if (profileError || !userProfile) {
+              console.error("[PayPal webhook] ❌ Failed to resolve auth_id to user_id:", {
+                auth_id: user_hint,
+                error: profileError,
+              });
+            } else {
+              publicUserId = userProfile.id;
+              console.log("[PayPal webhook] ✅ Resolved auth_id to user_id:", {
+                auth_id: user_hint,
+                user_id: publicUserId,
+              });
+            }
+          }
+
           let resolvedPlanId = plan_id;
 
           if (!resolvedPlanId && plan_slug) {
@@ -327,8 +350,10 @@ export async function processWebhook(
             };
           }
 
-          await insertPayment(supabase, "paypal", {
+          // Insert payment with idempotency
+          const paymentResult = await insertPayment(supabase, "paypal", {
             providerPaymentId: captureId,
+            userId: publicUserId, // ✅ CRITICAL: Pass resolved users.id
             amount: amount || null,
             currency: currency,
             status: "completed",
@@ -337,16 +362,23 @@ export async function processWebhook(
             productId: resolvedPlanId,
           });
 
-          await upgradeOrganizationPlan(supabase, {
-            organizationId: organization_id,
-            planId: resolvedPlanId,
-            billingPeriod: billing_period,
-            paymentId: captureId,
-            amount: amount,
-            currency: currency,
-          });
-
-          console.log(`[PayPal webhook] ✅ Subscription processed successfully`);
+          // IDEMPOTENT: Only upgrade organization if payment was NEWLY inserted
+          if (paymentResult.inserted && paymentResult.paymentId) {
+            console.log(`[PayPal webhook] 🔄 Upgrading organization plan (FIRST-TIME payment processing)`);
+            await upgradeOrganizationPlan(supabase, {
+              organizationId: organization_id,
+              planId: resolvedPlanId,
+              billingPeriod: billing_period,
+              paymentId: paymentResult.paymentId, // ✅ Use UUID from payments table
+              amount: amount,
+              currency: currency,
+            });
+            console.log(`[PayPal webhook] ✅ Subscription processed successfully`);
+          } else if (!paymentResult.inserted) {
+            console.log(`[PayPal webhook] ⏭️ Skipping organization upgrade (duplicate webhook - payment already processed)`);
+          } else {
+            console.error(`[PayPal webhook] ❌ No payment ID returned for subscription`);
+          }
         } else {
           console.error(`[PayPal webhook] ❌ Missing subscription data:`, {
             organization_id,

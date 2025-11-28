@@ -107,7 +107,8 @@ export async function captureSubscriptionOrder(
     );
 
     // Parse custom_id to get subscription metadata
-    let userId: string | null = null;
+    // Format: auth_id|plan_id|organization_id|billing_period
+    let authId: string | null = null;
     let planId: string | null = null;
     let organizationId: string | null = null;
     let billingPeriod: "monthly" | "annual" | null = null;
@@ -115,14 +116,14 @@ export async function captureSubscriptionOrder(
     if (customId && customId.includes("|")) {
       const parts = customId.split("|");
       if (parts.length === 4) {
-        userId = parts[0] || null;
+        authId = parts[0] || null;
         planId = parts[1] || null;
         organizationId = parts[2] || null;
         billingPeriod =
           parts[3] === "monthly" || parts[3] === "annual" ? parts[3] : null;
 
         console.log("[PayPal capture-subscription] Parsed metadata:", {
-          userId,
+          authId,
           planId,
           organizationId,
           billingPeriod,
@@ -134,13 +135,34 @@ export async function captureSubscriptionOrder(
 
     // Process subscription if we have all data and payment is completed
     if (
-      userId &&
+      authId &&
       planId &&
       organizationId &&
       billingPeriod &&
       status === "COMPLETED" &&
       providerPaymentId
     ) {
+      // CRITICAL: Resolve auth_id to users.id (database PK)
+      let publicUserId: string | null = null;
+      const { data: userProfile, error: profileError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_id", authId)
+        .maybeSingle();
+
+      if (profileError || !userProfile) {
+        console.error("[PayPal capture-subscription] ❌ Failed to resolve auth_id to user_id:", {
+          authId,
+          error: profileError,
+        });
+      } else {
+        publicUserId = userProfile.id;
+        console.log("[PayPal capture-subscription] ✅ Resolved auth_id to user_id:", {
+          authId,
+          userId: publicUserId,
+        });
+      }
+
       // Log payment event for auditing
       await logPaymentEvent(supabase, "paypal", {
         providerEventId: providerPaymentId,
@@ -149,7 +171,7 @@ export async function captureSubscriptionOrder(
         rawPayload: captureData,
         orderId: orderId,
         customId: customId,
-        userHint: userId,
+        userHint: authId,
         providerPaymentId: providerPaymentId,
         amount: amountValue ? parseFloat(amountValue) : null,
         currency: currencyCode,
@@ -157,45 +179,40 @@ export async function captureSubscriptionOrder(
 
       console.log("[PayPal capture-subscription] ✅ Payment event logged");
 
-      // Check if payment already exists (idempotency)
-      const { data: existingPayment } = await supabase
-        .from("payments")
-        .select("id")
-        .eq("provider_payment_id", providerPaymentId)
-        .single();
+      // Insert payment with idempotency
+      console.log("[PayPal capture-subscription] Processing subscription payment...");
 
-      if (existingPayment) {
-        console.log(
-          "[PayPal capture-subscription] ℹ️ Payment already processed (idempotent)"
-        );
-      } else {
-        console.log("[PayPal capture-subscription] Processing new subscription...");
+      const paymentResult = await insertPayment(supabase, "paypal", {
+        providerPaymentId: providerPaymentId,
+        userId: publicUserId, // ✅ CRITICAL: Pass resolved users.id
+        organizationId: organizationId,
+        productId: planId,
+        amount: amountValue ? parseFloat(amountValue) : null,
+        currency: currencyCode || "USD",
+        status: "completed",
+        productType: "subscription",
+      });
 
-        // Insert payment
-        await insertPayment(supabase, "paypal", {
-          providerPaymentId: providerPaymentId,
-          organizationId: organizationId,
-          productId: planId,
-          amount: amountValue ? parseFloat(amountValue) : null,
-          currency: currencyCode || "USD",
-          status: "completed",
-          productType: "subscription",
-        });
+      // IDEMPOTENT: Only upgrade organization if payment was NEWLY inserted
+      if (paymentResult.inserted && paymentResult.paymentId) {
+        console.log("[PayPal capture-subscription] ✅ Payment created, upgrading organization...");
 
-        console.log("[PayPal capture-subscription] ✅ Payment created");
-
-        // Upgrade organization plan
+        // Upgrade organization plan with UUID from payments table
         await upgradeOrganizationPlan(supabase, {
           organizationId: organizationId,
           planId: planId,
           billingPeriod: billingPeriod,
-          paymentId: providerPaymentId,
+          paymentId: paymentResult.paymentId, // ✅ Use UUID from payments table
           amount: amountValue ? parseFloat(amountValue) : 0,
           currency: currencyCode || "USD",
         });
 
         console.log("[PayPal capture-subscription] ✅ Organization updated");
         upgraded = true;
+      } else if (!paymentResult.inserted) {
+        console.log("[PayPal capture-subscription] ⏭️ Payment already exists (idempotent), skipping upgrade");
+      } else {
+        console.error("[PayPal capture-subscription] ❌ No payment ID returned");
       }
     } else {
       console.log(
