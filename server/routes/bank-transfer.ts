@@ -97,8 +97,8 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
       // Get course info from course_slug
       const { data: course, error: courseError } = await adminClient
         .from('courses')
-        .eq('is_deleted', false)
         .select('id')
+        .eq('is_deleted', false)
         .eq('slug', course_slug)
         .maybeSingle();
 
