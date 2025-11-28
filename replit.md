@@ -59,6 +59,37 @@ Preferred communication style: Simple, everyday language.
 - **Client Unit Migration**: Architecture change to one client per project, with unit information now commitment-specific (`unit_name`, `unit_description` in `client_commitments`).
 - **Lab Neural Network Renderer System**: Extensible node rendering architecture for neural network graphs, including `SphereNodeRenderer` and `AvatarNodeRenderer` with type-specific styling and image caching.
 
+## 🔒 PROTECTED PAYMENT FLOWS - DO NOT MODIFY
+
+### PayPal Course Payment Flow (PRODUCTION-READY ✅)
+**Status:** COMPLETE, TESTED, WITH COUPON SUPPORT - November 28, 2025
+
+**Protected Files** - These files are LOCKED and handle PayPal course payments with coupon support. Do not modify without explicit review:
+```
+server/controllers/payments/paypal.controller.ts
+server/lib/handlers/checkout/paypal/createCourseOrder.ts
+server/lib/handlers/checkout/paypal/captureCourseOrder.ts
+server/lib/handlers/checkout/shared/coupons.ts
+server/lib/handlers/checkout/shared/payments.ts
+server/lib/handlers/checkout/shared/enrollments.ts
+server/lib/handlers/checkout/shared/events.ts
+server/routes/payments.ts (POST /api/checkout/paypal/create-course, GET /api/checkout/paypal/capture-and-redirect)
+src/features/learning/hooks/use-course-enrollment.ts
+src/pages/learning/courses/CourseView.tsx (payment flow UI)
+```
+
+**Critical Rules:**
+- ID Resolution: Frontend uses `auth_id`, backend must resolve to `users.id` for all DB operations
+- Price from Database: Always fetch from `courses.price`, never trust client
+- Coupon Redemption: Direct insert to `coupon_redemptions` (not RPC) using service role
+- Payment Status: Automatically set to 'completed' when captured
+
+**Full Documentation:** See `prompts/documentation/Payment_Course_Paypal.md`
+
+**Future Payment Methods** - Create separate handlers, DO NOT reuse course payment files:
+- Mercado Pago Courses → new handlers in `server/lib/handlers/checkout/mp/`
+- PayPal Subscriptions → new handlers (subscription-specific, separate from courses)
+
 ## External Dependencies
 - **Supabase**: Authentication.
 - **Neon Database**: Serverless PostgreSQL hosting.
