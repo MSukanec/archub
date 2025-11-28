@@ -182,35 +182,20 @@ export async function captureAndRedirect(req: Request, res: Response) {
       return res.status(400).send(errorHtml('Información de orden incompleta'));
     }
     
-    // Parse custom_id: format is "auth_id|course_id" or "auth_id|course_id|coupon_code|coupon_id"
+    // Parse custom_id: format is "user_id|course_id" or "user_id|course_id|coupon_code|coupon_id"
+    // NOTE: The user_id here is already the users.id (not auth_id) because createCourseOrder does the lookup
     const parts = customId.split('|');
-    const authId = parts[0];
+    const userId = parts[0];
     const courseId = parts[1];
     const couponCode = parts[2] || null;
     const couponId = parts[3] || null;
     
-    console.log('[PayPal capture-and-redirect] Parsed custom_id:', { authId, courseId, couponCode, couponId });
+    console.log('[PayPal capture-and-redirect] Parsed custom_id:', { userId, courseId, couponCode, couponId });
     
-    if (!authId || !courseId) {
+    if (!userId || !courseId) {
       console.error('[PayPal capture-and-redirect] Invalid custom_id format:', customId);
       return res.status(400).send(errorHtml('Formato de orden inválido'));
     }
-    
-    // Look up actual user ID from auth_id in users table
-    const supabase = createServiceSupabaseClient();
-    const { data: userRecord, error: userError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('auth_id', authId)
-      .single();
-    
-    if (userError || !userRecord) {
-      console.error('[PayPal capture-and-redirect] User lookup failed:', userError);
-      return res.status(400).send(errorHtml('Usuario no encontrado'));
-    }
-    
-    const userId = userRecord.id;
-    console.log('[PayPal capture-and-redirect] Resolved auth_id to user_id:', { authId, userId });
     
     // 2. Capture the payment
     console.log('[PayPal capture-and-redirect] Capturing order...');
