@@ -1,7 +1,6 @@
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import { PlanRestricted } from '@/features/users/components/plans/PlanRestricted';
 import type { Course } from '@shared/schema';
 
 interface CTAFooterProps {
@@ -21,14 +20,12 @@ export function CTAFooter({ course }: CTAFooterProps) {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <PlanRestricted reason="coming_soon">
-              <Link href="/register">
-                <Button size="lg" className="px-8 text-lg">
-                  Inscribirme Ahora
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </Link>
-            </PlanRestricted>
+            <Link href="/register">
+              <Button size="lg" className="px-8 text-lg">
+                Inscribirme Ahora
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
             {course.price && (
               <div className="text-center">
                 <p className="text-3xl font-bold">${course.price}</p>

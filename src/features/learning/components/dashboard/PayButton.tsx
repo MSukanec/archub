@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
 import { useLocation } from 'wouter';
-import { PlanRestricted } from '@/features/users/components/plans/PlanRestricted';
 
 interface PayButtonProps {
   courseSlug: string;
@@ -25,17 +24,15 @@ export default function PayButton({
   };
 
   return (
-    <PlanRestricted reason="coming_soon">
-      <Button
-        variant={variant}
-        size={size}
-        onClick={handlePay}
-        className={className}
-        data-testid="button-pay-course"
-      >
-        <ShoppingCart className="h-4 w-4 mr-1" />
-        Suscribirme
-      </Button>
-    </PlanRestricted>
+    <Button
+      variant={variant}
+      size={size}
+      onClick={handlePay}
+      className={className}
+      data-testid="button-pay-course"
+    >
+      <ShoppingCart className="h-4 w-4 mr-1" />
+      Suscribirme
+    </Button>
   );
 }

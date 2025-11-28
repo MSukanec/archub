@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { BookOpen, Clock, CheckCircle, MessageCircle, Shield } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
-import { PlanRestricted } from '@/features/users/components/plans/PlanRestricted';
 import type { Course } from '@shared/schema';
 import type { CourseStats } from '../../types';
 
@@ -118,29 +117,15 @@ export function CourseStickyCard({ course, stats, isEnrolled = false, progressPe
 
         {/* CTA Button - Only ONE button shown at a time */}
         <div className="pt-2">
-          {isEnrolled ? (
-            <Button 
-              size="lg" 
-              variant={buttonVariant}
-              className="w-full text-base font-semibold"
-              onClick={handleCTAClick}
-              data-testid="button-continue"
-            >
-              {buttonText}
-            </Button>
-          ) : (
-            <PlanRestricted reason="coming_soon">
-              <Button 
-                size="lg" 
-                variant={buttonVariant}
-                className="w-full text-base font-semibold"
-                onClick={handleCTAClick}
-                data-testid="button-enroll"
-              >
-                {buttonText}
-              </Button>
-            </PlanRestricted>
-          )}
+          <Button 
+            size="lg" 
+            variant={buttonVariant}
+            className="w-full text-base font-semibold"
+            onClick={handleCTAClick}
+            data-testid={isEnrolled ? "button-continue" : "button-enroll"}
+          >
+            {buttonText}
+          </Button>
         </div>
       </CardContent>
     </Card>
