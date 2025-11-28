@@ -37,6 +37,10 @@ interface Payment {
     title: string;
     slug: string;
   } | null;
+  coupon_redemptions?: {
+    coupon_code?: string;
+    discount?: number;
+  } | null;
 }
 
 const AdminPaymentsTab = () => {
@@ -80,11 +84,11 @@ const AdminPaymentsTab = () => {
       const userIds = [...new Set(paymentsData.map(p => p.user_id))];
       const courseIds = [...new Set(paymentsData.map(p => p.course_id).filter(Boolean))];
 
-      // Fetch users by auth_id
+      // Fetch users by id
       const { data: usersData, error: usersError } = await supabase
         .from('users')
-        .select('auth_id, full_name, email')
-        .in('auth_id', userIds);
+        .select('id, auth_id, full_name, email')
+        .in('id', userIds);
 
       if (usersError) throw usersError;
 
@@ -98,12 +102,12 @@ const AdminPaymentsTab = () => {
       if (coursesError) throw coursesError;
 
       // Map users and courses to payments
-      const usersMap = new Map(usersData?.map(u => [u.auth_id, u]) || []);
+      const usersMap = new Map(usersData?.map(u => [u.id, u]) || []);
       const coursesMap = new Map(coursesData?.map(c => [c.id, c]) || []);
 
       return paymentsData.map((payment: any) => ({
         ...payment,
-        users: usersMap.get(payment.user_id) || { auth_id: payment.user_id, full_name: null, email: 'Unknown' },
+        users: usersMap.get(payment.user_id) || { id: payment.user_id, auth_id: payment.user_id, full_name: null, email: 'Unknown' },
         courses: payment.course_id ? (coursesMap.get(payment.course_id) || null) : null
       })) as Payment[];
     },
@@ -245,7 +249,7 @@ const AdminPaymentsTab = () => {
     {
       key: 'amount',
       label: 'Monto',
-      width: '13%',
+      width: '11%',
       render: (payment: Payment) => (
         <div className="flex flex-col">
           <span className="font-semibold text-sm">
@@ -260,9 +264,32 @@ const AdminPaymentsTab = () => {
       ),
     },
     {
+      key: 'coupon',
+      label: 'Cupón',
+      width: '12%',
+      render: (payment: Payment) => {
+        const coupon = payment.coupon_redemptions;
+        if (!coupon) {
+          return <span className="text-xs text-muted-foreground">-</span>;
+        }
+        return (
+          <div className="flex flex-col">
+            <span className="font-mono text-xs font-medium">{coupon.coupon_code || 'N/A'}</span>
+            <span className="text-xs text-muted-foreground">
+              -{coupon.discount ? new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: payment.currency,
+                minimumFractionDigits: 0,
+              }).format(coupon.discount) : '0'}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
       key: 'status',
       label: 'Estado',
-      width: '13%',
+      width: '11%',
       render: () => (
         <Badge variant="secondary" className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
           Completado
