@@ -10,6 +10,7 @@ import { createServiceSupabaseClient } from "../../lib/handlers/checkout/shared/
 import { insertPayment } from "../../lib/handlers/checkout/shared/payments.js";
 import { upsertEnrollment } from "../../lib/handlers/checkout/shared/enrollments.js";
 import { logPaymentEvent } from "../../lib/handlers/checkout/shared/events.js";
+import { markCouponAsUsed } from "../../lib/handlers/checkout/shared/coupons.js";
 
 export async function createCourse(req: Request, res: Response) {
   try {
@@ -251,7 +252,41 @@ export async function captureAndRedirect(req: Request, res: Response) {
       console.log('[PayPal capture-and-redirect] Payment inserted:', paymentResult.paymentId);
     }
     
-    // 5. Enroll user in course (12 months access)
+    // 5. Redeem coupon if one was used
+    if (couponId && paymentResult.paymentId) {
+      console.log('[PayPal capture-and-redirect] Redeeming coupon:', { couponId, couponCode });
+      
+      // Get original course price to calculate amount saved
+      const { data: course } = await supabase
+        .from('courses')
+        .select('price')
+        .eq('id', courseId)
+        .single();
+      
+      const originalPrice = course?.price ? parseFloat(course.price) : 0;
+      const amountSaved = originalPrice - amount;
+      
+      if (amountSaved > 0) {
+        const couponResult = await markCouponAsUsed(
+          supabase,
+          couponId,
+          userId,
+          courseId,
+          paymentResult.paymentId,
+          amountSaved,
+          currency
+        );
+        
+        if (couponResult.success) {
+          console.log('[PayPal capture-and-redirect] ✅ Coupon redeemed:', { amountSaved, currency });
+        } else {
+          console.error('[PayPal capture-and-redirect] Coupon redemption failed:', couponResult.error);
+          // Don't fail the payment - just log the error
+        }
+      }
+    }
+    
+    // 6. Enroll user in course (12 months access)
     const enrollmentResult = await upsertEnrollment(supabase, userId, courseId, 12);
     if (!enrollmentResult.success) {
       console.error('[PayPal capture-and-redirect] Enrollment failed:', enrollmentResult.error);
@@ -259,7 +294,7 @@ export async function captureAndRedirect(req: Request, res: Response) {
     }
     console.log('[PayPal capture-and-redirect] ✅ User enrolled successfully');
     
-    // 6. Return HTML with loader and client-side redirect
+    // 7. Return HTML with loader and client-side redirect
     const redirectUrl = courseSlug 
       ? `/learning/courses/${courseSlug}?payment=success`
       : `/learning/courses?payment=success`;
