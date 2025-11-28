@@ -190,248 +190,248 @@ export default function Contact() {
         ogDescription: "Contacta al equipo de Seencel para consultas sobre gestión de proyectos de construcción.",
       }}
     >
-      <div className="max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-5 gap-12 lg:gap-16">
-          <div className="lg:col-span-2 space-y-8">
-            <div className="space-y-4">
-              <h1 className="text-4xl font-bold tracking-tight">Contáctanos</h1>
-              <p className="text-lg text-muted-foreground">
-                ¿Tienes preguntas sobre Seencel? ¿Necesitas ayuda con tu proyecto? 
-                Estamos aquí para ayudarte.
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                  <Mail className="w-5 h-5 text-accent" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">Email</h3>
-                  <a 
-                    href="mailto:contacto@seencel.com" 
-                    className="text-muted-foreground hover:text-accent transition-colors"
-                  >
-                    contacto@seencel.com
-                  </a>
-                </div>
+      <div className="min-h-[calc(100vh-80px)] flex items-center py-12">
+        <div className="max-w-5xl mx-auto w-full">
+          <div className="grid lg:grid-cols-5 gap-10 lg:gap-12 items-start">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="space-y-3">
+                <h1 className="text-3xl font-bold tracking-tight">Contáctanos</h1>
+                <p className="text-muted-foreground">
+                  ¿Tienes preguntas sobre Seencel? ¿Necesitas ayuda con tu proyecto? 
+                  Estamos aquí para ayudarte.
+                </p>
               </div>
 
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                  <Building2 className="w-5 h-5 text-accent" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">Empresas</h3>
-                  <p className="text-muted-foreground">
-                    Para planes empresariales y demos personalizadas
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-5 h-5 text-accent" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">Ubicación</h3>
-                  <p className="text-muted-foreground">
-                    Buenos Aires, Argentina
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-6 border-t">
-              <p className="text-sm text-muted-foreground">
-                Responderemos tu consulta en un plazo máximo de 24-48 horas hábiles.
-              </p>
-            </div>
-          </div>
-
-          <div className="lg:col-span-3">
-            <div className="bg-card border rounded-xl p-6 md:p-8 shadow-sm">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nombre *</FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="Tu nombre" 
-                              {...field} 
-                              data-testid="input-first-name"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Apellido *</FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="Tu apellido" 
-                              {...field} 
-                              data-testid="input-last-name"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-4 h-4 text-accent" />
                   </div>
-
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email *</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="tu@email.com" 
-                            {...field} 
-                            data-testid="input-email"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="company"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Empresa (opcional)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Nombre de tu empresa" 
-                            {...field} 
-                            data-testid="input-company"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="country"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>País *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger data-testid="select-country">
-                                <SelectValue placeholder="Selecciona tu país" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {countries.map((country) => (
-                                <SelectItem key={country.code} value={country.code}>
-                                  {country.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Teléfono *</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="tel" 
-                              placeholder="+54 11 1234-5678" 
-                              {...field} 
-                              data-testid="input-phone"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="message"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mensaje *</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Cuéntanos cómo podemos ayudarte..."
-                            className="min-h-[120px] resize-none"
-                            {...field} 
-                            data-testid="textarea-message"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-                    <label htmlFor="website">No llenar este campo</label>
-                    <input
-                      type="text"
-                      id="website"
-                      {...form.register("honeypot")}
-                      tabIndex={-1}
-                      autoComplete="off"
-                    />
-                  </div>
-
-                  <Button 
-                    type="submit" 
-                    size="lg" 
-                    className="w-full"
-                    disabled={submitMutation.isPending}
-                    data-testid="button-submit-contact"
-                  >
-                    {submitMutation.isPending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Enviando...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4 mr-2" />
-                        Enviar Mensaje
-                      </>
-                    )}
-                  </Button>
-
-                  <p className="text-xs text-muted-foreground text-center">
-                    Al enviar este formulario, aceptas nuestra{" "}
-                    <a href="/privacy" className="underline hover:text-accent">
-                      Política de Privacidad
+                  <div>
+                    <p className="text-sm font-medium">Email</p>
+                    <a 
+                      href="mailto:contacto@seencel.com" 
+                      className="text-sm text-muted-foreground hover:text-accent transition-colors"
+                    >
+                      contacto@seencel.com
                     </a>
-                    .
-                  </p>
-                </form>
-              </Form>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0">
+                    <Building2 className="w-4 h-4 text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Empresas</p>
+                    <p className="text-sm text-muted-foreground">
+                      Planes empresariales y demos
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Ubicación</p>
+                    <p className="text-sm text-muted-foreground">
+                      Buenos Aires, Argentina
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground pt-4 border-t">
+                Responderemos en un plazo de 24-48 horas hábiles.
+              </p>
+            </div>
+
+            <div className="lg:col-span-3">
+              <div className="bg-card border rounded-xl p-6 shadow-sm">
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nombre *</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Tu nombre" 
+                                {...field} 
+                                data-testid="input-first-name"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Apellido *</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Tu apellido" 
+                                {...field} 
+                                data-testid="input-last-name"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email *</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="email" 
+                              placeholder="tu@email.com" 
+                              {...field} 
+                              data-testid="input-email"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="company"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Empresa (opcional)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Nombre de tu empresa" 
+                              {...field} 
+                              data-testid="input-company"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <FormField
+                        control={form.control}
+                        name="country"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>País *</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger data-testid="select-country">
+                                  <SelectValue placeholder="Selecciona tu país" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {countries.map((country) => (
+                                  <SelectItem key={country.code} value={country.code}>
+                                    {country.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Teléfono *</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="tel" 
+                                placeholder="+54 11 1234-5678" 
+                                {...field} 
+                                data-testid="input-phone"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="message"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Mensaje *</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Cuéntanos cómo podemos ayudarte..."
+                              className="min-h-[100px] resize-none"
+                              {...field} 
+                              data-testid="textarea-message"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+                      <label htmlFor="website">No llenar este campo</label>
+                      <input
+                        type="text"
+                        id="website"
+                        {...form.register("honeypot")}
+                        tabIndex={-1}
+                        autoComplete="off"
+                      />
+                    </div>
+
+                    <Button 
+                      type="submit" 
+                      size="lg" 
+                      className="w-full"
+                      disabled={submitMutation.isPending}
+                      data-testid="button-submit-contact"
+                    >
+                      {submitMutation.isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Enviando...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          Enviar Mensaje
+                        </>
+                      )}
+                    </Button>
+
+                    <p className="text-xs text-muted-foreground text-center">
+                      Al enviar este formulario, aceptas nuestra{" "}
+                      <a href="/privacy" className="underline hover:text-accent">
+                        Política de Privacidad
+                      </a>
+                      .
+                    </p>
+                  </form>
+                </Form>
+              </div>
             </div>
           </div>
         </div>
