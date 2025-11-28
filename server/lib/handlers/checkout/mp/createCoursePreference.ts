@@ -55,10 +55,10 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
   });
 
   try {
-    // 5. Obtener curso y precio en USD (con student_price si disponible)
+    // 5. Obtener curso y precio en USD
     const { data: course, error: courseError } = await supabase
       .from("courses")
-      .select("id, title, slug, short_description, is_active, price, student_price")
+      .select("id, title, slug, short_description, is_active, price")
       .eq("slug", course_slug)
       .single();
 
@@ -66,8 +66,7 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
       return { success: false, error: "Curso no encontrado o inactivo", status: 404 };
     }
 
-    // 6. Obtener precio base en USD y convertir a ARS
-    // --- NUEVA LÓGICA: Si hay cupón, usar student_price ---
+    // 6. Obtener precio base en USD
     let basePriceUsd = Number(course.price);
     
     if (!Number.isFinite(basePriceUsd) || basePriceUsd <= 0) {
@@ -78,7 +77,7 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
     let unit_price = basePriceUsd;
     let couponData: any = null;
 
-    // 7. Validar cupón si se proporcionó - SOLO PARA VALIDAR, no para calcular descuento
+    // 7. Validar cupón y aplicar descuento si se proporcionó
     if (code && code.trim()) {
       const { data: validationResult, error: couponError } = await supabase.rpc('validate_coupon', {
         p_code: code.trim(),
@@ -96,24 +95,15 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
         };
       }
 
-      // ✅ Cupón válido. Ahora usamos student_price si existe
-      if (course.student_price && Number(course.student_price) > 0) {
-        unit_price = Number(course.student_price);
-        couponData = validationResult;
-        console.log('[MP create-course-preference] ✅ Cupón válido - Usando student_price:', {
-          code: code.trim(),
-          student_price_usd: unit_price,
-          original_price_usd: basePriceUsd
-        });
-      } else {
-        // Si no hay student_price, usar el cálculo original del RPC
-        unit_price = Number(validationResult.final_price);
-        couponData = validationResult;
-        console.log('[MP create-course-preference] ✅ Cupón válido - Usando RPC final_price:', {
-          code: code.trim(),
-          final_price_usd: unit_price
-        });
-      }
+      // ✅ Cupón válido - Usar el precio final calculado por el RPC (con descuento aplicado)
+      unit_price = Number(validationResult.final_price);
+      couponData = validationResult;
+      console.log('[MP create-course-preference] ✅ Cupón válido - Descuento aplicado:', {
+        code: code.trim(),
+        original_price_usd: basePriceUsd,
+        discount_percent: validationResult.discount_percent,
+        final_price_usd: unit_price
+      });
     }
 
     // Convertir a ARS si es necesario
@@ -287,8 +277,8 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
         course_id: course.id,
         coupon_id: couponData?.coupon_id || null,
         coupon_code: couponData ? code.trim().toUpperCase() : null,
-        student_price_usd: String(basePriceUsd),
-        original_price_usd: String(course.price),
+        student_price_usd: String(unit_price),
+        original_price_usd: String(basePriceUsd),
         currency,
         access_months: accessMonths,
       });
