@@ -147,13 +147,10 @@ function HeroSectionComponent() {
       
       <div className="text-center max-w-5xl mx-auto relative z-10">
         <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight text-white">
-          La plataforma integral para{" "}
-          <span className="text-primary">
-            arquitectura y construcción
-          </span>
+          La plataforma integral para arquitectura y construcción
         </h1>
         
-        <p className="text-xl mb-12 max-w-4xl mx-auto leading-relaxed text-white/90">
+        <p className="text-xl mb-12 max-w-4xl mx-auto leading-relaxed text-gray-300">
           Gestiona todo el ciclo de vida de tus proyectos: desde diseño y planificación, 
           pasando por ventas y marketing, hasta construcción y entrega. Con IA integrada, 
           capacitación continua y conexión con las herramientas que ya usas.
