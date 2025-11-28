@@ -68,48 +68,24 @@ const AdminPaymentsTab = () => {
   const { data: payments = [], isLoading } = useQuery<Payment[]>({
     queryKey: ['admin-all-payments'],
     queryFn: async () => {
-      if (!supabase) throw new Error('Supabase not available');
+      const session = await supabase?.auth.getSession();
+      const token = session?.data.session?.access_token;
+      
+      if (!token) throw new Error('No authorization token');
 
-      // Fetch payments
-      const { data: paymentsData, error: paymentsError } = await supabase
-        .from('payments')
-        .select('*')
-        .eq('status', 'completed')
-        .order('created_at', { ascending: false });
+      const response = await fetch('/api/admin/payments/all', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-      if (paymentsError) throw paymentsError;
-      if (!paymentsData || paymentsData.length === 0) return [];
+      if (!response.ok) {
+        throw new Error('Failed to fetch payments');
+      }
 
-      // Get unique user IDs and course IDs
-      const userIds = [...new Set(paymentsData.map(p => p.user_id))];
-      const courseIds = [...new Set(paymentsData.map(p => p.course_id).filter(Boolean))];
-
-      // Fetch users by id
-      const { data: usersData, error: usersError } = await supabase
-        .from('users')
-        .select('id, auth_id, full_name, email')
-        .in('id', userIds);
-
-      if (usersError) throw usersError;
-
-      // Fetch courses
-      const { data: coursesData, error: coursesError } = await supabase
-        .from('courses')
-        .eq('is_deleted', false)
-        .select('id, title, slug')
-        .in('id', courseIds);
-
-      if (coursesError) throw coursesError;
-
-      // Map users and courses to payments
-      const usersMap = new Map(usersData?.map(u => [u.id, u]) || []);
-      const coursesMap = new Map(coursesData?.map(c => [c.id, c]) || []);
-
-      return paymentsData.map((payment: any) => ({
-        ...payment,
-        users: usersMap.get(payment.user_id) || { id: payment.user_id, auth_id: payment.user_id, full_name: null, email: 'Unknown' },
-        courses: payment.course_id ? (coursesMap.get(payment.course_id) || null) : null
-      })) as Payment[];
+      const data = await response.json();
+      return data as Payment[];
     },
   });
 

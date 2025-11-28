@@ -172,6 +172,75 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
     }
   });
 
+  // GET /api/admin/payments/all - Get all completed payments with user and coupon info (admin only)
+  app.get("/api/admin/payments/all", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const { isAdmin, error } = await verifyAdmin(authHeader);
+      if (!isAdmin) {
+        return res.status(403).json({ error });
+      }
+      
+      const adminClient = getAdminClient();
+      
+      const { data: payments, error: fetchError } = await adminClient
+        .from('payments')
+        .select(`
+          *,
+          users:user_id (id, auth_id, full_name, email),
+          courses:course_id (id, title, slug)
+        `)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false });
+      
+      if (fetchError) {
+        console.error("Error fetching all payments:", fetchError);
+        return res.status(500).json({ error: "Failed to fetch payments" });
+      }
+
+      // Fetch coupon redemptions for these payments if they exist
+      if (!payments || payments.length === 0) {
+        return res.json([]);
+      }
+
+      const paymentIds = payments.map(p => p.id);
+      const { data: redemptions, error: redemptionsError } = await adminClient
+        .from('coupon_redemptions')
+        .select('order_id, coupon_id, amount_saved, coupons:coupon_id (code)')
+        .in('order_id', paymentIds);
+
+      if (redemptionsError) {
+        console.error("Error fetching coupon redemptions:", redemptionsError);
+        // Continue without redemption data
+      }
+
+      // Map coupon data to payments
+      const redemptionsMap = new Map(
+        (redemptions || []).map((r: any) => [
+          r.order_id,
+          {
+            coupon_code: r.coupons?.code,
+            discount: r.amount_saved
+          }
+        ])
+      );
+
+      const enrichedPayments = payments.map(payment => ({
+        ...payment,
+        coupon_redemptions: redemptionsMap.get(payment.id) || null
+      }));
+      
+      return res.json(enrichedPayments);
+    } catch (error: any) {
+      console.error("Error in /api/admin/payments/all:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
   // PATCH /api/admin/payments/:id/approve - Approve bank transfer payment (admin only)
   app.patch("/api/admin/payments/:id/approve", async (req, res) => {
     try {
