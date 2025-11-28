@@ -194,20 +194,9 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
       return { success: false, error: tokenValidation.error, status: 500 };
     }
 
-    // 10. Construir customData
-    const customData: any = {
-      user_id,
-      product_type: 'course',
-      course_slug,
-      months: accessMonths,
-    };
-
-    if (couponData) {
-      customData.coupon_code = code.trim().toUpperCase();
-      customData.coupon_id = couponData.coupon_id;
-    }
-
-    const custom_id = encodeCustomData(customData);
+    // 10. Generar ID corto para external_reference (max 64 chars, solo alfanuméricos)
+    const shortId = `mp_${nanoid(12)}`;
+    console.log("[MP create-course-preference] ID corto generado:", shortId);
 
     // 11. Construir URLs
     const urlContext = buildURLContext(req);
@@ -233,7 +222,7 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
           currency_id: currency,
         },
       ],
-      external_reference: custom_id,
+      external_reference: shortId,
       payer: { 
         email: userData.email,
         first_name: userData.firstName || "Comprador", 
@@ -287,6 +276,28 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
     }
 
     console.log("[MP create-course-preference] ✅ Preferencia creada:", result.preferenceId);
+
+    // 13. Guardar datos en mp_course_preferences para que el webhook los lea
+    const { error: insertError } = await supabase
+      .from("mp_course_preferences")
+      .insert({
+        id: shortId,
+        preference_id: result.preferenceId,
+        user_id: user_id,
+        course_id: course.id,
+        coupon_id: couponData?.coupon_id || null,
+        coupon_code: couponData ? code.trim().toUpperCase() : null,
+        student_price_usd: String(basePriceUsd),
+        original_price_usd: String(course.price),
+        currency,
+        access_months: accessMonths,
+      });
+
+    if (insertError) {
+      console.error("[MP create-course-preference] ⚠️ Error guardando preferencia en BD (continúa):", insertError);
+    } else {
+      console.log("[MP create-course-preference] ✅ Preferencia guardada en BD:", shortId);
+    }
 
     return { 
       success: true, 

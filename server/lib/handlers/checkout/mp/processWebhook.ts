@@ -83,7 +83,35 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
     if (type === "payment" && finalId) {
       const pay = await getMPPayment(String(finalId));
       const md = extractMetadata(pay);
-      const fromExt = decodeExternalReference(md.external_reference);
+      const externalRef = md.external_reference || "";
+      
+      // NUEVO: Buscar datos en mp_course_preferences si es un ID corto (empieza con "mp_")
+      let fromDb: any = null;
+      if (externalRef.startsWith("mp_")) {
+        console.log("[MP webhook] 🔍 Buscando datos en BD para:", externalRef);
+        const { data: prefData, error: prefError } = await supabase
+          .from("mp_course_preferences")
+          .select("*, courses!inner(slug)")
+          .eq("id", externalRef)
+          .maybeSingle();
+        
+        if (prefData && !prefError) {
+          fromDb = {
+            user_id: prefData.user_id,
+            course_slug: prefData.courses?.slug,
+            months: prefData.access_months,
+            coupon_code: prefData.coupon_code,
+            coupon_id: prefData.coupon_id,
+            product_type: 'course',
+          };
+          console.log("[MP webhook] ✅ Datos encontrados en BD:", fromDb);
+        } else {
+          console.warn("[MP webhook] ⚠️ No se encontraron datos en BD:", prefError);
+        }
+      }
+      
+      // Fallback al viejo método (base64) si no hay datos en BD
+      const fromExt = fromDb || decodeExternalReference(externalRef);
       const effectiveMonths = md.months ?? fromExt.months ?? 12;
       const resolvedUserId = md.user_id ?? fromExt.user_id ?? null;
       const resolvedSlug = md.course_slug ?? fromExt.course_slug ?? null;
@@ -276,7 +304,34 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
     if (type === "merchant_order" && finalId) {
       const mo = await getMPMerchantOrder(String(finalId));
       const md = extractMetadata(mo);
-      const fromExt = decodeExternalReference(md.external_reference);
+      const externalRefMo = md.external_reference || "";
+      
+      // NUEVO: Buscar datos en mp_course_preferences si es un ID corto (empieza con "mp_")
+      let fromDbMo: any = null;
+      if (externalRefMo.startsWith("mp_")) {
+        console.log("[MP webhook MO] 🔍 Buscando datos en BD para:", externalRefMo);
+        const { data: prefDataMo, error: prefErrorMo } = await supabase
+          .from("mp_course_preferences")
+          .select("*, courses!inner(slug)")
+          .eq("id", externalRefMo)
+          .maybeSingle();
+        
+        if (prefDataMo && !prefErrorMo) {
+          fromDbMo = {
+            user_id: prefDataMo.user_id,
+            course_slug: prefDataMo.courses?.slug,
+            months: prefDataMo.access_months,
+            coupon_code: prefDataMo.coupon_code,
+            coupon_id: prefDataMo.coupon_id,
+            product_type: 'course',
+          };
+          console.log("[MP webhook MO] ✅ Datos encontrados en BD:", fromDbMo);
+        } else {
+          console.warn("[MP webhook MO] ⚠️ No se encontraron datos en BD:", prefErrorMo);
+        }
+      }
+      
+      const fromExt = fromDbMo || decodeExternalReference(externalRefMo);
       const effectiveMonths = md.months ?? fromExt.months ?? 12;
       const resolvedUserId = md.user_id ?? fromExt.user_id ?? null;
       const resolvedSlug =
