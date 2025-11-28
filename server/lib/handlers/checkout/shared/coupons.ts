@@ -89,7 +89,7 @@ export async function validateAndApplyCoupon(
     };
   }
 
-  const finalPrice = Number(validationResult.final_price);
+  let finalPrice = Number(validationResult.final_price);
   
   if (!Number.isFinite(finalPrice) || finalPrice <= 0) {
     return { 
@@ -97,6 +97,18 @@ export async function validateAndApplyCoupon(
       error: "Este cupón otorga acceso gratuito. Usa el flujo de inscripción gratuita.",
       freeEnrollment: true
     };
+  }
+  
+  // --- REDONDEO FINAL PARA ARS ---
+  // Mercado Pago Argentina NO acepta decimales
+  // El RPC puede devolver decimales, aseguramos redondeo si es ARS
+  if (currency === 'ARS') {
+    const roundedPrice = Math.round(finalPrice);
+    console.log('[coupons] Redondeando precio con cupón para ARS:', {
+      original_from_rpc: finalPrice,
+      rounded_final: roundedPrice
+    });
+    finalPrice = roundedPrice;
   }
   
   console.log('[coupons] Cupón aplicado:', {
