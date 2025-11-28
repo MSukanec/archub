@@ -45,13 +45,6 @@ function EmailTemplatesContent() {
   const [purUserName, setPurUserName] = useState('Jorge Benitest');
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
 
-  // Editable fields for bank transfer admin alert
-  const [btaUserName, setBtaUserName] = useState('Juan Pérez');
-  const [btaUserEmail, setBtaUserEmail] = useState('juan.perez@example.com');
-  const [btaCourseName, setBtaCourseName] = useState('Curso de Gestión de Proyectos');
-  const [btaAmount, setBtaAmount] = useState('85000');
-  const [btaCurrency, setBtaCurrency] = useState('ARS');
-
   useEffect(() => {
     loadCourses();
     loadEmails();
@@ -106,11 +99,11 @@ function EmailTemplatesContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userName: btaUserName,
-          userEmail: btaUserEmail,
-          courseName: btaCourseName,
-          amount: btaAmount,
-          currency: btaCurrency,
+          userName: 'Juan Pérez',
+          userEmail: 'juan.perez@example.com',
+          courseName: 'Curso de Gestión de Proyectos',
+          amount: '85000',
+          currency: 'ARS',
           transferId: 'btp-preview-001',
         })
       });
@@ -313,86 +306,9 @@ function EmailTemplatesContent() {
   );
 
   const BankTransferAdminEmailEditor = () => (
-    <div className="space-y-6">
-      <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30">
-        <CardHeader>
-          <CardTitle className="text-base">Personalizar Alerta de Transferencia (Admin)</CardTitle>
-          <CardDescription>Este email se envía automáticamente cuando un usuario sube un comprobante de transferencia bancaria</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Nombre del Cliente</label>
-              <Input 
-                value={btaUserName} 
-                onChange={(e) => setBtaUserName(e.target.value)}
-                placeholder="Ej: Juan Pérez"
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Email del Cliente</label>
-              <Input 
-                value={btaUserEmail} 
-                onChange={(e) => setBtaUserEmail(e.target.value)}
-                placeholder="Ej: juan@example.com"
-                className="mt-1"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">Nombre del Curso</label>
-            <Input 
-              value={btaCourseName} 
-              onChange={(e) => setBtaCourseName(e.target.value)}
-              placeholder="Ej: Curso de Gestión de Proyectos"
-              className="mt-1"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Monto</label>
-              <Input 
-                value={btaAmount} 
-                onChange={(e) => setBtaAmount(e.target.value)}
-                placeholder="Ej: 85000"
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Moneda</label>
-              <Select value={btaCurrency} onValueChange={setBtaCurrency}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ARS">ARS (Peso Argentino)</SelectItem>
-                  <SelectItem value="USD">USD (Dólar)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="p-3 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-sm">
-            <p><strong>Destinatario:</strong> contacto@seencel.com (solo admin)</p>
-            <p className="mt-1 text-muted-foreground">El botón del email lleva a: /admin/payments/transfers</p>
-          </div>
-
-          <Button 
-            onClick={loadEmails} 
-            disabled={loading}
-            className="w-full"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Actualizar Vista Previa
-          </Button>
-        </CardContent>
-      </Card>
-
+    <div className="space-y-4">
       {bankTransferAdminEmail && (
-        <div className="space-y-4">
+        <>
           <Card>
             <CardHeader>
               <CardTitle className="text-sm flex items-center justify-between">
@@ -429,7 +345,7 @@ function EmailTemplatesContent() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </>
       )}
     </div>
   );
