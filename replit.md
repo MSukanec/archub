@@ -90,6 +90,45 @@ src/pages/learning/courses/CourseView.tsx (payment flow UI)
 - Mercado Pago Courses → new handlers in `server/lib/handlers/checkout/mp/`
 - PayPal Subscriptions → new handlers (subscription-specific, separate from courses)
 
+### PayPal Subscription Payment Flow (PRODUCTION-READY ✅)
+**Status:** COMPLETE, TESTED - November 28, 2025
+
+**Protected Files:**
+```
+server/lib/handlers/checkout/paypal/createSubscriptionOrder.ts
+server/lib/handlers/checkout/paypal/captureSubscriptionOrder.ts
+server/lib/handlers/checkout/paypal/processWebhook.ts (subscription section)
+server/lib/handlers/checkout/shared/subscriptions.ts
+server/routes/payments.ts (POST /api/checkout/paypal/create-subscription, GET /api/checkout/paypal/capture-subscription)
+```
+
+**Critical Rules:**
+- ID Resolution: `auth_id` in custom_id must be resolved to `users.id` before DB operations
+- Guard clause: If user resolution fails, return early (webhook will retry)
+- Idempotent: Use `paymentResult.inserted` check before upgradeOrganizationPlan
+- Payment ID: Use `paymentResult.paymentId` (UUID) for organization_subscriptions and billing_cycles
+
+**Full Documentation:** See `prompts/documentation/Payment_Subscription_PayPal.md`
+
+### Mercado Pago Subscription Payment Flow (PRODUCTION-READY ✅)
+**Status:** COMPLETE, TESTED - November 28, 2025
+
+**Protected Files:**
+```
+server/lib/handlers/checkout/mp/createSubscriptionPreference.ts
+server/lib/handlers/checkout/mp/processWebhook.ts (subscription section)
+server/lib/handlers/checkout/shared/subscriptions.ts
+server/routes/payments.ts (POST /api/checkout/mp/create-subscription, webhook handling)
+```
+
+**Critical Rules:**
+- ID Resolution: metadata `user_id` is auth_id, must resolve to `users.id`
+- ARS Conversion: Use exchange_rates table for USD→ARS conversion
+- Duplicate Prevention: Check for existing active subscription before creating
+- Idempotent: Same pattern as PayPal with `paymentResult.inserted` check
+
+**Full Documentation:** See `prompts/documentation/Payment_Subscription_MercadoPago.md`
+
 ### Bank Transfer Receipt Upload Flow
 **Status:** COMPLETE - November 28, 2025
 

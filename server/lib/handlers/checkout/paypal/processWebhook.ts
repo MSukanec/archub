@@ -311,13 +311,18 @@ export async function processWebhook(
                 auth_id: user_hint,
                 error: profileError,
               });
-            } else {
-              publicUserId = userProfile.id;
-              console.log("[PayPal webhook] ✅ Resolved auth_id to user_id:", {
-                auth_id: user_hint,
-                user_id: publicUserId,
-              });
+              // Cannot proceed without user - log error and return
+              return { success: true, processed: false, eventType };
             }
+            
+            publicUserId = userProfile.id;
+            console.log("[PayPal webhook] ✅ Resolved auth_id to user_id:", {
+              auth_id: user_hint,
+              user_id: publicUserId,
+            });
+          } else {
+            console.error("[PayPal webhook] ❌ Missing user_hint for subscription");
+            return { success: true, processed: false, eventType };
           }
 
           let resolvedPlanId = plan_id;

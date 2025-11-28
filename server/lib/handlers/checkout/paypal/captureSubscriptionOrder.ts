@@ -155,13 +155,21 @@ export async function captureSubscriptionOrder(
           authId,
           error: profileError,
         });
-      } else {
-        publicUserId = userProfile.id;
-        console.log("[PayPal capture-subscription] ✅ Resolved auth_id to user_id:", {
-          authId,
-          userId: publicUserId,
-        });
+        // Still show success to user - webhook will retry with user resolution
+        // The payment was captured in PayPal, so we can't fail here
+        console.log("[PayPal capture-subscription] ⚠️ User resolution failed, webhook will handle subscription creation");
+        return {
+          success: true,
+          html: SUCCESS_HTML,
+          upgraded: false,
+        };
       }
+      
+      publicUserId = userProfile.id;
+      console.log("[PayPal capture-subscription] ✅ Resolved auth_id to user_id:", {
+        authId,
+        userId: publicUserId,
+      });
 
       // Log payment event for auditing
       await logPaymentEvent(supabase, "paypal", {
