@@ -389,7 +389,7 @@ export function ModalLayout({
         data-modal-content
         data-testid={`modal-content-${modalId}`}
         className={cn(
-          "fixed flex flex-col bg-background shadow-2xl",
+          "fixed flex flex-col bg-background shadow-2xl overflow-hidden",
           "inset-0 w-full h-full",
           "pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]",
           "pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]",
@@ -455,24 +455,27 @@ export function ModalLayout({
           </Button>
         </div>
 
-        <div className="flex-1 overflow-auto">
-          {readinessState && !readinessState.isReady ? (
+        {readinessState && !readinessState.isReady ? (
+          <div className="flex-1 overflow-y-auto">
             <readinessState.LoadingGate>
               <div className="p-8"></div>
             </readinessState.LoadingGate>
-          ) : children ? (
-            // Nueva API: children ya contiene la estructura (ModalBody, etc)
-            children
-          ) : (
-            // Vieja API: envolver en ModalBody
+          </div>
+        ) : children ? (
+          // Nueva API: children ya contiene la estructura (ModalBody, etc)
+          // No envolver en div con overflow porque ModalBody ya lo tiene
+          children
+        ) : (
+          // Vieja API: envolver en ModalBody con scroll
+          <div className="flex-1 overflow-y-auto">
             <ModalBody 
               columns={columns} 
               data-testid={`modal-body-${modalId}`}
             >
               {getCurrentPanel()}
             </ModalBody>
-          )}
-        </div>
+          </div>
+        )}
 
         {footerContent && (
           <div className="shrink-0" data-testid={`modal-footer-${modalId}`}>
