@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from "@/stores/authStore";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -91,13 +92,29 @@ export function Header({ navigation }: HeaderProps) {
 
   const handleNavigate = (href: string) => {
     setMobileMenuOpen(false);
-    // Si es un anchor, hacer scroll
+    // Si es un anchor, hacer scroll con animación
     if (href.startsWith('#')) {
       const element = document.querySelector(href);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+        // Agregar animación al elemento antes de hacer scroll
+        element.animate([
+          { transform: 'translateY(-20px)', opacity: 0.7 },
+          { transform: 'translateY(0)', opacity: 1 }
+        ], {
+          duration: 800,
+          easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+        });
+        
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       }
     }
+  };
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const getIconForNavItem = (label: string) => {
@@ -331,14 +348,18 @@ export function Header({ navigation }: HeaderProps) {
       <header className={headerClasses}>
         <div className={`container mx-auto px-6 ${headerHeight} flex items-center justify-between`}>
           <div className="flex items-center space-x-8">
-            <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer">
+            <a 
+              href="/" 
+              onClick={handleLogoClick}
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer"
+            >
               <img 
                 src="/seencel-logo-192.png" 
                 alt="Seencel" 
                 className="h-8 w-8 object-contain"
               />
               <span className={logoTextClasses}>Seencel</span>
-            </Link>
+            </a>
             
             {/* Desktop Navigation */}
             {navItems && navItems.length > 0 && (
@@ -350,7 +371,11 @@ export function Header({ navigation }: HeaderProps) {
                     return (
                       <a 
                         key={item.href}
-                        href={item.href} 
+                        href={item.href}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleNavigate(item.href);
+                        }}
                         className={navLinkClasses}
                         data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                       >
