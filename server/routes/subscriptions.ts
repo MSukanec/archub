@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import type { RouteDeps } from "./_base";
 import { z } from "zod";
+import { getOrganizationLimitStatus, updateResourceOverLimitStatus, applyPlanLimits } from "../lib/handlers/checkout/shared/plan-limits.js";
 
 /**
  * Plan hierarchy for validation
@@ -562,6 +563,381 @@ export function registerSubscriptionRoutes(app: Express, deps: RouteDeps): void 
     } catch (error: any) {
       console.error('[Cancel Subscription] Error:', error);
       return res.status(500).json({ ok: false, error: error.message || 'Internal server error' });
+    }
+  });
+
+  // GET /api/subscriptions/limit-status - Get organization's plan limit status
+  app.get("/api/subscriptions/limit-status", async (req, res) => {
+    try {
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json(createErrorResponse(ErrorCodes.UNAUTHORIZED, "No authorization token provided"));
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      if (userError || !user) {
+        return res.status(401).json(createErrorResponse(ErrorCodes.UNAUTHORIZED, "Unauthorized"));
+      }
+
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+
+      if (!dbUser) {
+        return res.status(404).json(createErrorResponse(ErrorCodes.NOT_FOUND, "User not found"));
+      }
+
+      const { data: userPrefs } = await authenticatedSupabase
+        .from('user_preferences')
+        .select('last_organization_id')
+        .eq('user_id', dbUser.id)
+        .maybeSingle();
+
+      if (!userPrefs?.last_organization_id) {
+        return res.status(404).json(createErrorResponse(ErrorCodes.NOT_FOUND, "No active organization"));
+      }
+
+      const organizationId = userPrefs.last_organization_id;
+
+      const { data: membership } = await authenticatedSupabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('user_id', dbUser.id)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (!membership) {
+        return res.status(403).json(createErrorResponse(ErrorCodes.FORBIDDEN, "You don't have access to this organization"));
+      }
+
+      const status = await getOrganizationLimitStatus(authenticatedSupabase, organizationId);
+
+      if (!status.success) {
+        return res.status(500).json(createErrorResponse(ErrorCodes.INTERNAL_ERROR, status.error || "Failed to get limit status"));
+      }
+
+      return res.status(200).json({
+        ok: true,
+        data: status
+      });
+
+    } catch (error: any) {
+      logError('Limit Status', error);
+      return res.status(500).json(createErrorResponse(ErrorCodes.INTERNAL_ERROR, "Internal server error"));
+    }
+  });
+
+  // POST /api/subscriptions/reapply-limits - Reapply plan limits to organization
+  app.post("/api/subscriptions/reapply-limits", async (req, res) => {
+    try {
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json(createErrorResponse(ErrorCodes.UNAUTHORIZED, "No authorization token provided"));
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      if (userError || !user) {
+        return res.status(401).json(createErrorResponse(ErrorCodes.UNAUTHORIZED, "Unauthorized"));
+      }
+
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+
+      if (!dbUser) {
+        return res.status(404).json(createErrorResponse(ErrorCodes.NOT_FOUND, "User not found"));
+      }
+
+      const { data: userPrefs } = await authenticatedSupabase
+        .from('user_preferences')
+        .select('last_organization_id')
+        .eq('user_id', dbUser.id)
+        .maybeSingle();
+
+      if (!userPrefs?.last_organization_id) {
+        return res.status(404).json(createErrorResponse(ErrorCodes.NOT_FOUND, "No active organization"));
+      }
+
+      const organizationId = userPrefs.last_organization_id;
+
+      const { data: membership } = await authenticatedSupabase
+        .from('organization_members')
+        .select('id, role_id, role:roles!inner(name)')
+        .eq('organization_id', organizationId)
+        .eq('user_id', dbUser.id)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (!membership) {
+        return res.status(403).json(createErrorResponse(ErrorCodes.FORBIDDEN, "You don't have access to this organization"));
+      }
+
+      const role = Array.isArray(membership.role) ? membership.role[0] : membership.role;
+      const roleName = role?.name?.toLowerCase();
+      if (roleName !== 'admin' && roleName !== 'owner' && roleName !== 'administrador') {
+        return res.status(403).json(createErrorResponse(ErrorCodes.FORBIDDEN, "Only administrators can reapply plan limits"));
+      }
+
+      const { data: org } = await authenticatedSupabase
+        .from('organizations')
+        .select('id, plan_id, plans!left(name)')
+        .eq('id', organizationId)
+        .single();
+
+      const planName = (org as any)?.plans?.name || 'Free';
+
+      const result = await applyPlanLimits(authenticatedSupabase, organizationId, planName);
+
+      if (!result.success) {
+        return res.status(500).json(createErrorResponse(ErrorCodes.INTERNAL_ERROR, result.error || "Failed to apply limits"));
+      }
+
+      return res.status(200).json({
+        ok: true,
+        data: {
+          projectsMarked: result.projectsMarked,
+          membersMarked: result.membersMarked,
+          details: result.details
+        }
+      });
+
+    } catch (error: any) {
+      logError('Reapply Limits', error);
+      return res.status(500).json(createErrorResponse(ErrorCodes.INTERNAL_ERROR, "Internal server error"));
+    }
+  });
+
+  // POST /api/subscriptions/update-resource-limit - Update a specific resource's over-limit status
+  app.post("/api/subscriptions/update-resource-limit", async (req, res) => {
+    try {
+      const updateSchema = z.object({
+        resourceType: z.enum(['project', 'member']),
+        resourceId: z.string().uuid(),
+        isOverLimit: z.boolean()
+      });
+
+      const parsed = updateSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json(createErrorResponse(ErrorCodes.VALIDATION_ERROR, parsed.error.message));
+      }
+
+      const { resourceType, resourceId, isOverLimit } = parsed.data;
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json(createErrorResponse(ErrorCodes.UNAUTHORIZED, "No authorization token provided"));
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      if (userError || !user) {
+        return res.status(401).json(createErrorResponse(ErrorCodes.UNAUTHORIZED, "Unauthorized"));
+      }
+
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+
+      if (!dbUser) {
+        return res.status(404).json(createErrorResponse(ErrorCodes.NOT_FOUND, "User not found"));
+      }
+
+      const { data: userPrefs } = await authenticatedSupabase
+        .from('user_preferences')
+        .select('last_organization_id')
+        .eq('user_id', dbUser.id)
+        .maybeSingle();
+
+      if (!userPrefs?.last_organization_id) {
+        return res.status(404).json(createErrorResponse(ErrorCodes.NOT_FOUND, "No active organization"));
+      }
+
+      const organizationId = userPrefs.last_organization_id;
+
+      const { data: membership } = await authenticatedSupabase
+        .from('organization_members')
+        .select('id, role_id, role:roles!inner(name)')
+        .eq('organization_id', organizationId)
+        .eq('user_id', dbUser.id)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (!membership) {
+        return res.status(403).json(createErrorResponse(ErrorCodes.FORBIDDEN, "You don't have access to this organization"));
+      }
+
+      const role = Array.isArray(membership.role) ? membership.role[0] : membership.role;
+      const roleName = role?.name?.toLowerCase();
+      if (roleName !== 'admin' && roleName !== 'owner' && roleName !== 'administrador') {
+        return res.status(403).json(createErrorResponse(ErrorCodes.FORBIDDEN, "Only administrators can modify resource limits"));
+      }
+
+      if (resourceType === 'project') {
+        const { data: project } = await authenticatedSupabase
+          .from('projects')
+          .select('id, organization_id')
+          .eq('id', resourceId)
+          .maybeSingle();
+
+        if (!project || project.organization_id !== organizationId) {
+          return res.status(403).json(createErrorResponse(ErrorCodes.FORBIDDEN, "Project does not belong to your organization"));
+        }
+      } else {
+        const { data: member } = await authenticatedSupabase
+          .from('organization_members')
+          .select('id, organization_id')
+          .eq('id', resourceId)
+          .maybeSingle();
+
+        if (!member || member.organization_id !== organizationId) {
+          return res.status(403).json(createErrorResponse(ErrorCodes.FORBIDDEN, "Member does not belong to your organization"));
+        }
+      }
+
+      const result = await updateResourceOverLimitStatus(authenticatedSupabase, resourceType, resourceId, isOverLimit);
+
+      if (!result.success) {
+        return res.status(500).json(createErrorResponse(ErrorCodes.INTERNAL_ERROR, result.error || "Failed to update resource"));
+      }
+
+      return res.status(200).json({
+        ok: true,
+        message: `Resource ${isOverLimit ? 'marked as over limit' : 'restored to active'}`
+      });
+
+    } catch (error: any) {
+      logError('Update Resource Limit', error);
+      return res.status(500).json(createErrorResponse(ErrorCodes.INTERNAL_ERROR, "Internal server error"));
+    }
+  });
+
+  // POST /api/subscriptions/swap-resources - Swap which resources are active vs over-limit
+  app.post("/api/subscriptions/swap-resources", async (req, res) => {
+    try {
+      const swapSchema = z.object({
+        resourceType: z.enum(['project', 'member']),
+        activateId: z.string().uuid(),
+        deactivateId: z.string().uuid()
+      });
+
+      const parsed = swapSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json(createErrorResponse(ErrorCodes.VALIDATION_ERROR, parsed.error.message));
+      }
+
+      const { resourceType, activateId, deactivateId } = parsed.data;
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json(createErrorResponse(ErrorCodes.UNAUTHORIZED, "No authorization token provided"));
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      if (userError || !user) {
+        return res.status(401).json(createErrorResponse(ErrorCodes.UNAUTHORIZED, "Unauthorized"));
+      }
+
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+
+      if (!dbUser) {
+        return res.status(404).json(createErrorResponse(ErrorCodes.NOT_FOUND, "User not found"));
+      }
+
+      const { data: userPrefs } = await authenticatedSupabase
+        .from('user_preferences')
+        .select('last_organization_id')
+        .eq('user_id', dbUser.id)
+        .maybeSingle();
+
+      if (!userPrefs?.last_organization_id) {
+        return res.status(404).json(createErrorResponse(ErrorCodes.NOT_FOUND, "No active organization"));
+      }
+
+      const organizationId = userPrefs.last_organization_id;
+
+      const { data: membership } = await authenticatedSupabase
+        .from('organization_members')
+        .select('id, role_id, role:roles!inner(name)')
+        .eq('organization_id', organizationId)
+        .eq('user_id', dbUser.id)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (!membership) {
+        return res.status(403).json(createErrorResponse(ErrorCodes.FORBIDDEN, "You don't have access to this organization"));
+      }
+
+      const role = Array.isArray(membership.role) ? membership.role[0] : membership.role;
+      const roleName = role?.name?.toLowerCase();
+      if (roleName !== 'admin' && roleName !== 'owner' && roleName !== 'administrador') {
+        return res.status(403).json(createErrorResponse(ErrorCodes.FORBIDDEN, "Only administrators can swap resources"));
+      }
+
+      const table = resourceType === 'project' ? 'projects' : 'organization_members';
+
+      const { data: resources } = await authenticatedSupabase
+        .from(table)
+        .select('id, organization_id, is_over_limit')
+        .in('id', [activateId, deactivateId]);
+
+      if (!resources || resources.length !== 2) {
+        return res.status(404).json(createErrorResponse(ErrorCodes.NOT_FOUND, "One or both resources not found"));
+      }
+
+      for (const resource of resources) {
+        if (resource.organization_id !== organizationId) {
+          return res.status(403).json(createErrorResponse(ErrorCodes.FORBIDDEN, "Resources must belong to your organization"));
+        }
+      }
+
+      const activateResource = resources.find(r => r.id === activateId);
+      const deactivateResource = resources.find(r => r.id === deactivateId);
+
+      if (!activateResource?.is_over_limit) {
+        return res.status(400).json(createErrorResponse(ErrorCodes.BUSINESS_LOGIC_ERROR, "Resource to activate is not currently over limit"));
+      }
+
+      if (deactivateResource?.is_over_limit) {
+        return res.status(400).json(createErrorResponse(ErrorCodes.BUSINESS_LOGIC_ERROR, "Resource to deactivate is already over limit"));
+      }
+
+      const activateResult = await updateResourceOverLimitStatus(authenticatedSupabase, resourceType, activateId, false);
+      if (!activateResult.success) {
+        return res.status(500).json(createErrorResponse(ErrorCodes.INTERNAL_ERROR, activateResult.error || "Failed to activate resource"));
+      }
+
+      const deactivateResult = await updateResourceOverLimitStatus(authenticatedSupabase, resourceType, deactivateId, true);
+      if (!deactivateResult.success) {
+        await updateResourceOverLimitStatus(authenticatedSupabase, resourceType, activateId, true);
+        return res.status(500).json(createErrorResponse(ErrorCodes.INTERNAL_ERROR, deactivateResult.error || "Failed to deactivate resource"));
+      }
+
+      return res.status(200).json({
+        ok: true,
+        message: `Successfully swapped ${resourceType}s`
+      });
+
+    } catch (error: any) {
+      logError('Swap Resources', error);
+      return res.status(500).json(createErrorResponse(ErrorCodes.INTERNAL_ERROR, "Internal server error"));
     }
   });
 }

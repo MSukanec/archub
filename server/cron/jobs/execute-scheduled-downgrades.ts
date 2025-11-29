@@ -108,6 +108,7 @@ export async function runScheduledDowngradesJob(): Promise<DowngradeJobResult> {
             new_subscription_id: switchResult.newSubscriptionId,
             organization_name: org?.name,
             original_target_plan_id: subscription.scheduled_downgrade_plan_id,
+            limits_applied: switchResult.limitsApplied || null,
           },
           status: switchResult.success ? 'success' : 'error',
           error_message: switchResult.error || null,

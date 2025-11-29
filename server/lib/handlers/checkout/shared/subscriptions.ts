@@ -1,4 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
+import { applyPlanLimits } from "./plan-limits.js";
 
 export type ScheduledDowngradeParams = {
   organizationId: string;
@@ -16,6 +17,10 @@ export type ScheduledDowngradeResult = {
     to_plan_id: string;
     from_plan_name?: string;
     to_plan_name?: string;
+  };
+  limitsApplied?: {
+    projectsMarked: number;
+    membersMarked: number;
   };
 };
 
@@ -136,6 +141,12 @@ export async function executeScheduledPlanSwitch(
         return result;
       }
 
+      const limitsResult = await applyPlanLimits(supabase, organizationId, 'Free');
+      result.limitsApplied = {
+        projectsMarked: limitsResult.projectsMarked,
+        membersMarked: limitsResult.membersMarked,
+      };
+
       result.error = `Downgrade to paid plan ${newPlan.name} not supported. Switched to FREE instead.`;
       result.success = true;
       return result;
@@ -198,6 +209,12 @@ export async function executeScheduledPlanSwitch(
       result.success = false;
       return result;
     }
+
+    const limitsResult = await applyPlanLimits(supabase, organizationId, result.details.to_plan_name || 'Free');
+    result.limitsApplied = {
+      projectsMarked: limitsResult.projectsMarked,
+      membersMarked: limitsResult.membersMarked,
+    };
 
     result.success = true;
     return result;
