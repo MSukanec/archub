@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Menu, X, Home, LogOut, User, BookOpen, Sparkles, HelpCircle, Mail, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -64,6 +64,7 @@ function MarketingMobileMenuButton({
 export function Header({ navigation }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, loading, initialized, initialize, logout } = useAuthStore();
+  const [location, setLocation] = useLocation();
   
   // Usar navegación por defecto agnóstica (siempre consistente)
   const navItems = navigation || DEFAULT_NAVIGATION;
@@ -113,14 +114,16 @@ export function Header({ navigation }: HeaderProps) {
     }
   };
 
-  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleLogoClick = (e: React.MouseEvent) => {
     // Si estamos en la landing (/), hacer scroll al top
-    // Si estamos en otra página, navegar a la landing
-    if (window.location.pathname === '/') {
+    // Si estamos en otra página, navegar a la landing usando wouter
+    if (location === '/') {
       e.preventDefault();
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      e.preventDefault();
+      setLocation('/');
     }
-    // Si no estamos en la landing, dejar que el link navegue normalmente a "/"
   };
 
   const getIconForNavItem = (label: string) => {
@@ -356,10 +359,10 @@ export function Header({ navigation }: HeaderProps) {
       <header className={headerClasses}>
         <div className={`container mx-auto px-6 ${headerHeight} flex items-center justify-between`}>
           <div className="flex items-center space-x-8">
-            <a 
-              href="/" 
+            <button 
               onClick={handleLogoClick}
               className="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer"
+              data-testid="logo-home"
             >
               <img 
                 src="/seencel-logo-192.png" 
@@ -367,7 +370,7 @@ export function Header({ navigation }: HeaderProps) {
                 className="h-8 w-8 object-contain"
               />
               <span className={logoTextClasses}>Seencel</span>
-            </a>
+            </button>
             
             {/* Desktop Navigation */}
             {navItems && navItems.length > 0 && (
