@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { DashboardLayout as Layout, HeroLayout } from "@/layouts";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { Card } from "@/components/ui/card";
@@ -927,31 +927,67 @@ export default function PricingPlan() {
             {[
               {
                 q: "¿Qué es la insignia de Fundador y qué incluye?",
-                a: "La insignia de Fundador es un reconocimiento exclusivo y permanente que obtienes al suscribirse a cualquier plan anual durante este período de lanzamiento limitado. Es visible en tu perfil como muestra de tu apoyo inicial a Seencel. Los beneficios incluyen: acceso anticipado a nuevas funcionalidades antes que otros usuarios, membresía en el grupo privado de fundadores para networking e intercambio de conocimiento, y descuentos permanentes (10% en renovaciones de suscripción y 20% en cursos) que se mantienen de por vida, incluso si cambias de plan. Si eres fundador en Pro y luego asciendes a Teams, la insignia y todos los beneficios se transfieren y se extienden a todos los miembros actuales y futuros de tu organización."
+                a: () => (
+                  <div>
+                    La insignia de Fundador es un reconocimiento exclusivo y permanente que obtienes al suscribirse a cualquier plan anual durante este período de lanzamiento limitado. Es visible en tu perfil como muestra de tu apoyo inicial a Seencel. Los beneficios incluyen: acceso anticipado a nuevas funcionalidades antes que otros usuarios, membresía en el grupo privado de fundadores para networking e intercambio de conocimiento, y descuentos permanentes (10% en renovaciones de suscripción y 20% en cursos) que se mantienen de por vida, incluso si cambias de plan. Si eres fundador en Pro y luego asciendes a Teams, la insignia y todos los beneficios se transfieren y se extienden a todos los miembros actuales y futuros de tu organización.
+                  </div>
+                )
               },
               {
                 q: "¿Puedo cambiar de plan en cualquier momento?",
-                a: "Sí, puedes actualizar, degradar o cambiar entre planes en cualquier momento sin penalidades. Cuando cambias de plan en medio de un ciclo de facturación, aplicamos prorrateo automático: si actualizas a un plan superior, tu próxima facturación reflejará el costo proporcional del tiempo restante al nuevo precio. Si degradas a un plan inferior, se acumula un crédito que se aplica a tu próxima facturación. No pierdes datos ni acceso: el cambio se aplica inmediatamente."
+                a: () => (
+                  <div>
+                    Sí, puedes actualizar, degradar o cambiar entre planes en cualquier momento sin penalidades. Cuando cambias de plan en medio de un ciclo de facturación, aplicamos prorrateo automático: si actualizas a un plan superior, tu próxima facturación reflejará el costo proporcional del tiempo restante al nuevo precio. Si degradas a un plan inferior, se acumula un crédito que se aplica a tu próxima facturación. No pierdes datos ni acceso: el cambio se aplica inmediatamente.
+                  </div>
+                )
               },
               {
                 q: "¿Cómo funcionan los créditos de IA?",
-                a: "Los créditos de IA (también llamados 'tokens') son unidades de consumo que utilizas cada vez que interactúas con las funciones de inteligencia artificial de Seencel. Se consumen tanto en consultas pasivas (como pedir análisis de un presupuesto o resumen de documentos) como en acciones automáticas (como sugerencias de optimización o análisis financiero automático). El plan Free incluye créditos limitados ideales para explorar funciones de IA. Pro y Teams incluyen límites mensuales más generosos que se renuevan cada período de facturación. Los créditos no utilizados en un mes no se acumulan para el siguiente."
+                a: () => (
+                  <div>
+                    Los créditos de IA (también llamados 'tokens') son unidades de consumo que utilizas cada vez que interactúas con las funciones de inteligencia artificial de Seencel. Se consumen tanto en consultas pasivas (como pedir análisis de un presupuesto o resumen de documentos) como en acciones automáticas (como sugerencias de optimización o análisis financiero automático). El plan Free incluye créditos limitados ideales para explorar funciones de IA. Pro y Teams incluyen límites mensuales más generosos que se renuevan cada período de facturación. Los créditos no utilizados en un mes no se acumulan para el siguiente.
+                  </div>
+                )
               },
               {
                 q: "¿Qué métodos de pago aceptan?",
-                a: "Aceptamos múltiples métodos de pago para tu conveniencia: tarjetas de crédito y débito (Visa, Mastercard, American Express), PayPal para pagos internacionales, Mercado Pago para Argentina, y transferencias bancarias. Si eres Enterprise, ofrecemos facturación personalizada con términos negociables."
+                a: () => (
+                  <div>
+                    Aceptamos múltiples métodos de pago para tu conveniencia: tarjetas de crédito y débito (Visa, Mastercard, American Express), PayPal para pagos internacionales, Mercado Pago para Argentina, y transferencias bancarias. Si eres Enterprise, ofrecemos facturación personalizada con términos negociables. <Link href="/contact" className="text-accent hover:underline">Contacta con nuestro equipo</Link> para más detalles sobre opciones de facturación personalizada.
+                  </div>
+                )
               },
               {
                 q: "¿Qué sucede con mis datos si cancelo la suscripción?",
-                a: "Tus datos se conservan en nuestros servidores durante 90 días después de la cancelación, lo que te permite reactivar tu cuenta sin perder información. Pasados 90 días, los datos se eliminan permanentemente. Puedes exportar tus datos en cualquier momento antes de la cancelación."
+                a: () => (
+                  <div>
+                    Tus datos se conservan en nuestros servidores durante 90 días después de la cancelación, lo que te permite reactivar tu cuenta sin perder información. Pasados 90 días, los datos se eliminan permanentemente. Puedes exportar tus datos en cualquier momento antes de la cancelación.
+                  </div>
+                )
               },
               {
                 q: "¿Puedo cambiar entre facturación mensual y anual?",
-                a: "Sí. Puedes cambiar tu ciclo de facturación en cualquier momento desde la configuración de tu plan. Si pasas de mensual a anual, se aplica un ajuste de precio en tu próxima facturación. Si pasas de anual a mensual, el cambio toma efecto al final de tu ciclo anual actual."
+                a: () => (
+                  <div>
+                    Sí. Puedes cambiar tu ciclo de facturación en cualquier momento desde la configuración de tu plan. Si pasas de mensual a anual, se aplica un ajuste de precio en tu próxima facturación. Si pasas de anual a mensual, el cambio toma efecto al final de tu ciclo anual actual.
+                  </div>
+                )
               },
               {
                 q: "¿Qué sucede con mi equipo si cambio de plan?",
-                a: "Para el plan Free (1 usuario), solo tú tienes acceso. En Pro (1 usuario) también es individual pero con más capacidades. En Teams (usuarios ilimitados), puedes agregar miembros y asignarles roles con permisos específicos. Si degradas desde Teams a Pro o Free, los miembros adicionales pierden acceso automáticamente, pero sus datos se preservan por si reinvitas a más usuarios después."
+                a: () => (
+                  <div>
+                    Para el plan Free (1 usuario), solo tú tienes acceso. En Pro (1 usuario) también es individual pero con más capacidades. En Teams (usuarios ilimitados), puedes agregar miembros y asignarles roles con permisos específicos. Si degradas desde Teams a Pro o Free, los miembros adicionales pierden acceso automáticamente, pero sus datos se preservan por si reinvitas a más usuarios después.
+                  </div>
+                )
+              },
+              {
+                q: "¿Qué es el plan Enterprise y para quién es?",
+                a: () => (
+                  <div>
+                    El plan Enterprise está diseñado para organizaciones grandes y equipos extensos que requieren soluciones personalizadas y a medida. Este plan te permite personalizar funciones, límites, integraciones y opciones de seguridad según tus necesidades específicas de negocio. Incluye: usuarios ilimitados con gestión avanzada de permisos, almacenamiento y límites de recursos adaptados a tu escala, facturación flexible con términos negociables, soporte prioritario dedicado con SLA garantizado, implementación asistida, y opciones de infraestructura personalizada. Si tu equipo necesita configuraciones específicas, cumplimiento normativo especial, o integraciones personalizadas, Enterprise es la solución ideal. <Link href="/contact" className="text-accent hover:underline">Habla con nuestro equipo de ventas</Link> para discutir tus requerimientos específicos y recibir una propuesta personalizada.
+                  </div>
+                )
               }
             ].map((faq, idx) => (
               <details
@@ -970,7 +1006,7 @@ export default function PricingPlan() {
                   </svg>
                 </summary>
                 <div className="px-6 pb-4 text-sm text-[var(--text-muted)] leading-relaxed">
-                  {faq.a}
+                  {faq.a()}
                 </div>
               </details>
             ))}
