@@ -67,10 +67,17 @@ function HeroSection() {
     <section
       className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 -mx-6 relative overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, hsl(0, 0%, 8%) 0%, hsl(76, 30%, 12%) 50%, hsl(0, 0%, 10%) 100%)'
+        backgroundImage: 'url(/hero-founders-1080.webp)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
       }}
       data-testid="section-hero"
     >
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/60" />
+      
+      {/* Subtle gradient overlay for visual interest */}
       <div className="absolute inset-0 opacity-20">
         <div 
           className="absolute inset-0"
