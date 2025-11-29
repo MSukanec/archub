@@ -21,6 +21,7 @@ interface HeaderProps {
 
 // Navegación por defecto agnóstica (siempre igual en todas las páginas públicas)
 const DEFAULT_NAVIGATION: Array<{ label: string; href: string }> = [
+  { label: "Inicio", href: "/" },
   { label: "Cursos", href: "/cursos" },
   { label: "Fundadores", href: "/founders" },
   { label: "Contacto", href: "/contact" }
@@ -119,6 +120,7 @@ export function Header({ navigation }: HeaderProps) {
 
   const getIconForNavItem = (label: string) => {
     const lower = label.toLowerCase();
+    if (lower.includes('inicio')) return Home;
     if (lower.includes('curso')) return BookOpen;
     if (lower.includes('fundador')) return Sparkles;
     if (lower.includes('característica')) return Sparkles;
