@@ -20,6 +20,7 @@ import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
 import { useUnreadUserSupportMessages } from '@/hooks/use-unread-user-support-messages';
 import ButtonSidebar from "./ButtonSidebar";
 import { SidebarIconButton } from "./SidebarIconButton";
+import { PlanBadge } from "@/components/shared/PlanBadge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
   DropdownMenu,
@@ -628,6 +629,9 @@ export function LeftSidebar() {
                   testId="sidebar-button-administration"
                 />
               )}
+
+              {/* Botón del Plan Actual */}
+              <PlanBadge planName={userData?.organization?.plan?.name} />
 
               {/* Botón de Ajustes */}
               <SidebarIconButton
