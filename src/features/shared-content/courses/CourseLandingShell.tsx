@@ -79,7 +79,7 @@ export function CourseLandingShell({
             subtitle={landingSections?.faq?.subtitle}
             description={landingSections?.faq?.description}
           />
-          <CTAFooter course={course} />
+          {!isEnrolled && <CTAFooter course={course} />}
         </div>
       </main>
     </div>
