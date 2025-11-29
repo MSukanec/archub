@@ -90,28 +90,19 @@ export function PricingContent({ mode }: PricingContentProps) {
   };
 
   const handlePlanSelect = (plan: Plan) => {
-    const isFree = plan.name.toLowerCase() === 'free';
     const isTeams = plan.name.toLowerCase() === 'teams';
+    const isCurrentPlan = plan.name.toLowerCase() === userPlanName?.toLowerCase();
     
-    if (isTeams) return;
+    if (isTeams || isCurrentPlan) return;
     
-    if (mode === 'public') {
-      if (isAuthenticated) {
-        navigate('/settings/pricing-plan');
-      } else {
-        navigate('/register');
-      }
-    } else {
-      const currentPlanLevel = userPlanName ? getPlanLevel(userPlanName) : 0;
-      const thisPlanLevel = getPlanLevel(plan.name);
-      const isCurrentPlan = plan.name.toLowerCase() === userPlanName?.toLowerCase();
-      
-      if (isCurrentPlan) return;
-      
-      if (thisPlanLevel < currentPlanLevel) {
-        return;
-      }
-      
+    // Si no está autenticado, ir al registro
+    if (!isAuthenticated) {
+      navigate('/register');
+      return;
+    }
+    
+    // Si está autenticado en dashboard, ir al checkout
+    if (mode === 'dashboard') {
       navigate(`/subscription/checkout?plan=${plan.slug}&billing=${billingPeriod}`);
     }
   };

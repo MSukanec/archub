@@ -50,11 +50,16 @@ export function PlanCard({
   const getButtonText = () => {
     if (isTeams) return 'Próximamente';
     if (isCurrentPlan) return 'Tu Plan Actual';
-    if (isAuthenticated) {
-      if (isFree) return 'Cambiar a Free';
-      return billingPeriod === 'annual' ? 'Suscribirse Anualmente' : 'Suscribirse Mensualmente';
-    }
-    return billingPeriod === 'annual' ? 'Ser Fundador' : 'Comenzar ahora';
+    if (!isAuthenticated) return 'Comenzar';
+    return `Cambiar a ${plan.name}`;
+  };
+
+  const getButtonColor = () => {
+    if (isCurrentPlan) return undefined;
+    if (isFree) return '#84cc16';
+    if (plan.name.toLowerCase() === 'pro') return '#0047AB';
+    if (isTeams) return '#8B5CF6';
+    return undefined;
   };
 
   return (
@@ -173,17 +178,14 @@ export function PlanCard({
         <Button
           className={cn(
             "w-full h-11 font-medium rounded-lg",
-            isPopular && !isCurrentPlan
-              ? "bg-accent text-accent-foreground hover:bg-accent/90" 
-              : ""
+            !isCurrentPlan && getButtonColor() ? "text-white hover:opacity-90" : ""
           )}
-          variant={
-            isCurrentPlan 
-              ? "outline" 
-              : isPopular 
-                ? "default" 
-                : "secondary"
+          style={
+            !isCurrentPlan && getButtonColor()
+              ? { backgroundColor: getButtonColor() }
+              : undefined
           }
+          variant={isCurrentPlan ? "outline" : "default"}
           onClick={() => onSelect(plan)}
           disabled={isCurrentPlan || isTeams}
           data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
