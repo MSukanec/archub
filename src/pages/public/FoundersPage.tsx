@@ -6,7 +6,6 @@ export default function FoundersPage() {
     <MarketingLayout
       headerNavigation={[
         { label: "Inicio", href: "/" },
-        { label: "Características", href: "/#features" },
         { label: "Cursos", href: "/cursos" },
         { label: "Contacto", href: "/contact" }
       ]}
