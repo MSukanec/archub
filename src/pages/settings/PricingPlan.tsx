@@ -713,7 +713,7 @@ export default function PricingPlan() {
             {/* Desktop: 4 columnas con sticky header */}
             <div className="hidden md:block border border-[var(--border-default)] rounded-lg overflow-hidden">
               {/* Sticky Header */}
-              <div className="sticky top-0 z-10 bg-background border-b border-[var(--border-default)]">
+              <div className="sticky top-0 z-10 border-b border-[var(--border-default)]">
                 <div className="grid grid-cols-4">
                   {/* Empty cell for alignment */}
                   <div className="px-6 py-4">
@@ -766,7 +766,7 @@ export default function PricingPlan() {
                 {comparisonData.map((section, sectionIdx) => (
                   <div key={sectionIdx}>
                     {/* Category Header - con bordes arriba y abajo */}
-                    <div className="grid grid-cols-4 border-y border-[var(--border-default)] bg-background">
+                    <div className="grid grid-cols-4 border-y border-[var(--border-default)]">
                       <div className="col-span-4 px-6 py-3">
                         <h3 className="text-sm font-semibold text-[var(--text-default)]">
                           {section.category}
@@ -824,7 +824,7 @@ export default function PricingPlan() {
                 {comparisonData.map((section, sectionIdx) => (
                   <div key={sectionIdx}>
                     {/* Category Header - con bordes arriba y abajo */}
-                    <div className="px-4 py-3 border-y border-[var(--border-default)] bg-background">
+                    <div className="px-4 py-3 border-y border-[var(--border-default)]">
                       <h3 className="text-sm font-semibold text-[var(--text-default)]">
                         {section.category}
                       </h3>
