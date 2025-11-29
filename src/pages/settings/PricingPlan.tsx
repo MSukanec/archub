@@ -782,7 +782,7 @@ export default function PricingPlan() {
             {/* Desktop: 4 columnas con sticky header */}
             <div className="hidden md:block border border-[var(--border-default)] rounded-lg overflow-hidden">
               {/* Sticky Header */}
-              <div className="sticky top-0 z-10">
+              <div className="sticky top-0 z-20 bg-background border-b border-[var(--border-default)]">
                 <div className="grid grid-cols-4">
                   {/* Empty cell for alignment */}
                   <div className="px-6 py-4">
