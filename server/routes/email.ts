@@ -3,10 +3,10 @@ import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import crypto from 'crypto';
 import type { RouteDeps } from './_base';
-import WelcomeEmail from '../../emails/WelcomeEmail';
-import PurchaseEmail from '../../emails/PurchaseEmail';
-import ContactEmail from '../../emails/ContactEmail';
-import AdminBankTransferAlert from '../../emails/AdminBankTransferAlert';
+import WelcomeEmail from '../../src/emails/WelcomeEmail';
+import PurchaseEmail from '../../src/emails/PurchaseEmail';
+import ContactEmail from '../../src/emails/ContactEmail';
+import AdminBankTransferAlert from '../../src/emails/AdminBankTransferAlert';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
