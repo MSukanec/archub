@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { 
   Building, 
   Clock, 
@@ -9,7 +9,9 @@ import {
   ArrowRight,
   Users,
   FileText,
-  Users2
+  Users2,
+  Camera,
+  Loader2
 } from "lucide-react";
 import { useLocation } from 'wouter';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -37,10 +39,17 @@ import { supabase } from '@/lib/supabase';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { uploadOrgLogo } from '@/lib/storage';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getOrganizationInitials } from '@/utils/initials';
+import { cn } from '@/lib/utils';
 
 export default function OrganizationDashboard() {
   const [, setLocation] = useLocation();
   const { openModal } = useGlobalModalStore();
+  const [isLogoUploading, setIsLogoUploading] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   
   const { data: userData, isLoading } = useCurrentUser();
   const { currentOrganizationId, setSelectedProject } = useProjectContext();
@@ -62,6 +71,65 @@ export default function OrganizationDashboard() {
   const organization = userData?.organizations?.find(org => org.id === currentOrganizationId) || 
                       ((userData as UserData | undefined)?.organization ?? null);
   const currentTime = new Date();
+
+  // Sincronizar logoUrl con la organización cuando cambia
+  useEffect(() => {
+    if (organization) {
+      // Generar URL del logo desde image_bucket + image_path
+      if ((organization as any).image_bucket && (organization as any).image_path) {
+        const { data } = supabase.storage
+          .from((organization as any).image_bucket)
+          .getPublicUrl((organization as any).image_path);
+        setLogoUrl(data.publicUrl);
+      } else if ((organization as any).logo_url) {
+        setLogoUrl((organization as any).logo_url);
+      } else {
+        setLogoUrl(null);
+      }
+    }
+  }, [organization]);
+
+  // Handler para subir logo
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !organizationId) return;
+    
+    e.target.value = ''; // Reset input
+    setIsLogoUploading(true);
+    
+    try {
+      const result = await uploadOrgLogo(file, organizationId);
+      
+      const { error } = await supabase
+        .from('organizations')
+        .update({
+          image_bucket: result.bucket,
+          image_path: result.file_path
+        })
+        .eq('id', organizationId);
+      
+      if (error) throw error;
+      
+      if (result.file_url) {
+        setLogoUrl(result.file_url);
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      
+      toast({
+        title: "Logo actualizado",
+        description: "El logo de la organización se ha actualizado correctamente",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo subir el logo",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLogoUploading(false);
+    }
+  };
   
   // Prepare projects with active flag
   const projectsWithActive = projects.map(project => ({
@@ -189,19 +257,53 @@ export default function OrganizationDashboard() {
         {/* Welcome Section - Sin Card, directo en el fondo como Home */}
         <div className="space-y-2 pb-6 border-b border-border">
           <div className="flex items-center gap-4">
-            {/* Organization Avatar */}
-            <div className="flex-shrink-0">
-              {organization?.logo_url ? (
-                <img 
-                  src={organization.logo_url} 
-                  alt={organization.name}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-accent"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center border-2 border-accent">
-                  <Building className="w-8 h-8 text-accent" />
+            {/* Organization Avatar - Clickeable para subir logo */}
+            <div className="flex-shrink-0 relative group">
+              <button
+                type="button"
+                onClick={() => logoInputRef.current?.click()}
+                disabled={isLogoUploading}
+                className="relative cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 rounded-full"
+                title="Cambiar logo de la organización"
+                data-testid="button-upload-org-logo"
+              >
+                <Avatar className="h-16 w-16 border-2 border-accent">
+                  {logoUrl && logoUrl.trim() !== '' && (
+                    <AvatarImage 
+                      src={logoUrl} 
+                      alt={organization?.name || 'Organización'}
+                      className="object-cover"
+                    />
+                  )}
+                  <AvatarFallback className="text-xl font-bold bg-accent text-white">
+                    {getOrganizationInitials(organization?.name || '')}
+                  </AvatarFallback>
+                </Avatar>
+
+                {/* Overlay con icono de cámara al hacer hover */}
+                <div className={cn(
+                  "absolute inset-0 rounded-full flex items-center justify-center transition-all",
+                  "bg-black/50 opacity-0 group-hover:opacity-100",
+                  isLogoUploading && "opacity-100"
+                )}>
+                  {isLogoUploading ? (
+                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                  ) : (
+                    <Camera className="h-6 w-6 text-white" />
+                  )}
                 </div>
-              )}
+              </button>
+
+              {/* Hidden file input */}
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                disabled={isLogoUploading}
+                className="hidden"
+                aria-label="Cargar logo de organización"
+              />
             </div>
             <div>
               <h2 className="text-4xl font-bold text-foreground">
