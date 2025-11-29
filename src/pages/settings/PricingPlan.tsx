@@ -261,6 +261,26 @@ export default function PricingPlan() {
     return String(value);
   };
 
+  // Helper: Format storage in MB/GB
+  const formatStorage = (mb: number | null | undefined): string => {
+    if (mb === null || mb === undefined) return '—';
+    if (mb >= 1024) {
+      const gb = (mb / 1024).toFixed(0);
+      return `${gb} GB`;
+    }
+    return `${mb} MB`;
+  };
+
+  // Helper: Format file size in MB
+  const formatFileSize = (mb: number | null | undefined): string => {
+    if (mb === null || mb === undefined) return '—';
+    if (mb >= 1024) {
+      const gb = (mb / 1024).toFixed(1);
+      return `${gb} GB`;
+    }
+    return `${mb} MB`;
+  };
+
   // Build comparison data dynamically from plan features
   const buildComparisonData = () => {
     const freeFeatures = getPlanFeatures('free');
@@ -278,45 +298,52 @@ export default function PricingPlan() {
             teams: formatLimit(teamsFeatures.max_projects)
           },
           { label: 'Dashboard de proyecto', free: true, pro: true, teams: true },
-          { label: 'Vistas Gantt y Kanban', free: 'Básicas', pro: 'Avanzadas', teams: 'Avanzadas' },
-          { label: 'Reportes de progreso', free: 'Básicos', pro: 'Avanzados', teams: 'Avanzados + IA' }
+          { label: 'Colores personalizados por proyecto', free: true, pro: true, teams: true }
         ]
       },
       {
         category: 'Gestión Financiera',
         rows: [
           { label: 'Presupuestos', free: true, pro: true, teams: true },
-          { label: 'Multi-moneda (ARS, USD)', free: false, pro: true, teams: true },
-          { label: 'Control de gastos', free: 'Básico', pro: 'Avanzado', teams: 'Avanzado' },
-          { label: 'Análisis de rentabilidad', free: false, pro: true, teams: true },
-          { label: 'Integraciones de pago', free: false, pro: true, teams: true }
+          { label: 'Multi-moneda (ARS, USD)', free: true, pro: true, teams: true }
         ]
       },
       {
         category: 'Construcción',
         rows: [
-          { label: 'Subcontratos', free: 'Básico', pro: 'Avanzado', teams: 'Avanzado' },
-          { label: 'Personal', free: 'Hasta 10', pro: 'Hasta 100', teams: 'Ilimitado' },
+          { label: 'Subcontratos', free: true, pro: true, teams: true },
+          { label: 'Personal', free: true, pro: true, teams: true },
           { label: 'Bitácora de obra', free: true, pro: true, teams: true }
         ]
       },
       {
         category: 'Almacenamiento',
         rows: [
-          { label: 'Espacio de archivos', free: '500 MB', pro: '50 GB', teams: '500 GB' },
+          { 
+            label: 'Espacio de archivos', 
+            free: formatStorage(freeFeatures.max_storage_mb),
+            pro: formatStorage(proFeatures.max_storage_mb),
+            teams: formatStorage(teamsFeatures.max_storage_mb)
+          },
+          { 
+            label: 'Tamaño máximo de archivo', 
+            free: formatFileSize(freeFeatures.max_file_size_mb),
+            pro: formatFileSize(proFeatures.max_file_size_mb),
+            teams: formatFileSize(teamsFeatures.max_file_size_mb)
+          },
           { 
             label: 'PDFs personalizables', 
             free: freeFeatures.export_pdf_custom ?? false,
             pro: proFeatures.export_pdf_custom ?? true,
             teams: teamsFeatures.export_pdf_custom ?? true
           },
-          { label: 'Backup automático', free: 'Semanal', pro: 'Diario', teams: 'Cada 6hs' }
+          { label: 'Backup (incluido en plan)', free: false, pro: true, teams: true }
         ]
       },
       {
         category: 'Inteligencia Artificial',
         rows: [
-          { label: 'Tokens IA/mes', free: 'Resúmenes', pro: '10,000', teams: 'Ilimitados' },
+          { label: 'Tokens IA/mes', free: 'Resúmenes', pro: '10,000', teams: '100,000' },
           { label: 'Asistente conversacional', free: false, pro: true, teams: true },
           { label: 'Análisis financiero IA', free: false, pro: true, teams: true }
         ]
@@ -338,8 +365,7 @@ export default function PricingPlan() {
         category: 'Soporte',
         rows: [
           { label: 'Email', free: true, pro: true, teams: true },
-          { label: 'Prioritario', free: false, pro: true, teams: true },
-          { label: '24/7', free: false, pro: false, teams: true }
+          { label: 'Prioritario', free: false, pro: true, teams: true }
         ]
       }
     ];
