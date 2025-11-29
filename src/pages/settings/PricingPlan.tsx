@@ -321,6 +321,39 @@ export default function PricingPlan() {
       <HeroLayout>
         <div className="max-w-7xl mx-auto space-y-16 py-12 px-4">
         
+        {/* Selector Mensual/Anual */}
+        <div className="flex justify-center">
+          <div className="inline-flex items-center bg-card rounded-xl p-1.5 shadow-sm border border-[var(--border-default)]">
+            <button
+              onClick={() => setBillingPeriod('monthly')}
+              className={cn(
+                "px-8 py-2.5 rounded-lg font-medium transition-all text-sm",
+                billingPeriod === 'monthly'
+                  ? "bg-accent text-accent-foreground shadow-md"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-default)]"
+              )}
+              data-testid="button-billing-monthly"
+            >
+              Mensual
+            </button>
+            <button
+              onClick={() => setBillingPeriod('annual')}
+              className={cn(
+                "px-8 py-2.5 rounded-lg font-medium transition-all text-sm flex items-center gap-2.5",
+                billingPeriod === 'annual'
+                  ? "bg-accent text-accent-foreground shadow-md"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-default)]"
+              )}
+              data-testid="button-billing-annual"
+            >
+              <span>Anual</span>
+              <span className="text-xs font-bold bg-accent-foreground/20 px-2 py-0.5 rounded">
+                -20%
+              </span>
+            </button>
+          </div>
+        </div>
+
         {/* Banner Fundador - solo si facturación es anual */}
         {billingPeriod === 'annual' && (
           <Card className="border border-accent/20 bg-gradient-to-r from-background via-accent/[0.03] to-background">
@@ -366,39 +399,6 @@ export default function PricingPlan() {
             </div>
           </Card>
         )}
-
-        {/* Selector Mensual/Anual */}
-        <div className="flex justify-center">
-          <div className="inline-flex items-center bg-card rounded-xl p-1.5 shadow-sm border border-[var(--border-default)]">
-            <button
-              onClick={() => setBillingPeriod('monthly')}
-              className={cn(
-                "px-8 py-2.5 rounded-lg font-medium transition-all text-sm",
-                billingPeriod === 'monthly'
-                  ? "bg-accent text-accent-foreground shadow-md"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-default)]"
-              )}
-              data-testid="button-billing-monthly"
-            >
-              Mensual
-            </button>
-            <button
-              onClick={() => setBillingPeriod('annual')}
-              className={cn(
-                "px-8 py-2.5 rounded-lg font-medium transition-all text-sm flex items-center gap-2.5",
-                billingPeriod === 'annual'
-                  ? "bg-accent text-accent-foreground shadow-md"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-default)]"
-              )}
-              data-testid="button-billing-annual"
-            >
-              <span>Anual</span>
-              <span className="text-xs font-bold bg-accent-foreground/20 px-2 py-0.5 rounded">
-                -20%
-              </span>
-            </button>
-          </div>
-        </div>
 
         {/* Cards de Planes */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
