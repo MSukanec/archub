@@ -1,9 +1,8 @@
 import React, { useRef } from "react";
 import { Camera, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-type AvatarSize = 'sm' | 'md' | 'lg';
 
 interface AvatarUploaderProps {
   avatarUrl?: string | null;
@@ -12,30 +11,7 @@ interface AvatarUploaderProps {
   onAvatarSelect: (file: File) => void;
   isUploading?: boolean;
   className?: string;
-  size?: AvatarSize;
-  showLabel?: boolean;
 }
-
-const sizeConfig = {
-  sm: {
-    avatar: "h-16 w-16",
-    fallbackText: "text-xl",
-    cameraButton: "p-1.5",
-    cameraIcon: "h-3.5 w-3.5",
-  },
-  md: {
-    avatar: "h-24 w-24",
-    fallbackText: "text-2xl",
-    cameraButton: "p-1.5",
-    cameraIcon: "h-4 w-4",
-  },
-  lg: {
-    avatar: "h-32 w-32",
-    fallbackText: "text-4xl",
-    cameraButton: "p-2",
-    cameraIcon: "h-5 w-5",
-  }
-};
 
 export function AvatarUploader({
   avatarUrl,
