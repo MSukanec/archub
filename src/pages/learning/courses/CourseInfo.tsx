@@ -17,7 +17,7 @@ export default function CourseInfo() {
 
   const isEnrolled = enrollmentData?.isEnrolled || false;
   const progressPercentage = (() => {
-    if (!progressData || progressData.length === 0) return 0;
+    if (!isEnrolled || !progressData || progressData.length === 0) return 0;
     const completed = progressData.filter(p => p.is_completed).length;
     return Math.round((completed / progressData.length) * 100);
   })();

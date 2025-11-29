@@ -99,12 +99,10 @@ export function CourseStickyCardWithMode({
                 <MessageCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
                 <span>Foro de Consultas Privado</span>
               </div>
-              {course.instructor_name && (
-                <div className="flex items-start gap-2">
-                  <Shield className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Avalado por {course.instructor_name}</span>
-                </div>
-              )}
+              <div className="flex items-start gap-2">
+                <Shield className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                <span>Avalado por Graphisoft Argentina</span>
+              </div>
             </div>
 
             <div className="pt-2">
