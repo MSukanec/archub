@@ -1,2 +1,3 @@
 export { CoursesCatalogContent } from './CoursesCatalogContent';
-export type { CoursesMode, CoursesCatalogContentProps, CourseCatalogTab } from './types';
+export { CourseLandingContent } from './CourseLandingContent';
+export type { CoursesMode, CoursesCatalogContentProps, CourseCatalogTab, CourseLandingContentProps, CourseLandingData } from './types';

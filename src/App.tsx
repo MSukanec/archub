@@ -95,6 +95,7 @@ import CommunityMap from "@/pages/community/CommunityMap";
 // Learning Pages (Lazy Loaded - incluye reproductor Vimeo pesado)
 const LearningDashboard = lazy(() => import("@/pages/learning/dashboard/LearningDashboard"));
 const CourseList = lazy(() => import("@/pages/learning/courses/CourseList"));
+const CourseInfo = lazy(() => import("@/pages/learning/courses/CourseInfo"));
 const CourseView = lazy(() => import("@/pages/learning/courses/CourseView"));
 const CourseLandingPrivate = lazy(() => import("@/pages/professional/learning/CourseLanding"));
 const PaymentReturn = lazy(() => import("@/pages/learning/PaymentReturn"));
@@ -246,6 +247,11 @@ function Router() {
         <Route path="/learning/courses">
           <Suspense fallback={<LazyLoadFallback />}>
             <CourseList />
+          </Suspense>
+        </Route>
+        <Route path="/learning/courses/:slug/info">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <CourseInfo />
           </Suspense>
         </Route>
         <Route path="/learning/courses/:id">

@@ -41,7 +41,7 @@ export function UnifiedCourseCard({
   
   const courseInfoUrl = mode === 'public' 
     ? `/cursos/${course.slug}` 
-    : `/cursos/${course.slug}`;
+    : `/learning/courses/${course.slug}/info`;
   
   const courseLearningUrl = mode === 'public'
     ? `/cursos/${course.slug}`

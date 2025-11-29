@@ -6,14 +6,9 @@ import {
   useCourseEnrollment,
   useCourseProgress,
   HeroSection,
-  InstructorSection,
-  ModulesSection,
-  LessonsSection,
-  FeaturesSection,
-  FAQSection,
-  CTAFooter,
   CourseStickyCard,
 } from '@/features/learning';
+import { CourseLandingContent } from '@/features/shared-content/courses';
 
 export default function CourseLanding() {
   const { slug } = useParams<{ slug: string }>();
@@ -50,9 +45,8 @@ export default function CourseLanding() {
     );
   }
 
-  const { course, modules, faqs, stats } = data;
+  const { course, stats } = data;
 
-  // SEO metadata
   const seoProps = {
     title: `${course.title} - Curso Online | Seencel`,
     description: course.short_description || '',
@@ -60,20 +54,15 @@ export default function CourseLanding() {
     ogImage: course.og_image_url || course.cover_url || '',
   };
 
-  // Check if user is enrolled
   const isEnrolled = enrollmentData?.isEnrolled || false;
 
-  // Calculate progress percentage
   const progressPercentage = (() => {
     if (!progressData || progressData.length === 0) return 0;
     const completed = progressData.filter(p => p.is_completed).length;
     return Math.round((completed / progressData.length) * 100);
   })();
 
-  // Sticky sidebar content (shown in desktop only)
   const stickyContent = <CourseStickyCard course={course} stats={stats} isEnrolled={isEnrolled} progressPercentage={progressPercentage} />;
-  
-  // Full-width hero section
   const heroSection = <HeroSection course={course} stats={stats} isEnrolled={isEnrolled} progressPercentage={progressPercentage} />;
 
   return (
@@ -82,7 +71,6 @@ export default function CourseLanding() {
       stickyContent={stickyContent}
       heroSlot={heroSection}
     >
-      {/* Structured Data (JSON-LD) for SEO */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -118,25 +106,7 @@ export default function CourseLanding() {
         }}
       />
 
-      {/* Landing Sections */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
-        <InstructorSection course={course} />
-        <ModulesSection 
-          modules={modules} 
-          title={(course.landing_sections as any)?.modules?.title}
-          subtitle={(course.landing_sections as any)?.modules?.subtitle}
-          description={(course.landing_sections as any)?.modules?.description}
-        />
-        <LessonsSection modules={modules} />
-        <FeaturesSection course={course} />
-        <FAQSection 
-          faqs={faqs}
-          title={(course.landing_sections as any)?.faq?.title}
-          subtitle={(course.landing_sections as any)?.faq?.subtitle}
-          description={(course.landing_sections as any)?.faq?.description}
-        />
-        <CTAFooter course={course} />
-      </div>
+      <CourseLandingContent mode="public" slug={slug || ''} />
     </MarketingLayout>
   );
 }

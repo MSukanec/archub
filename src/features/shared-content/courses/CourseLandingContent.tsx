@@ -1,0 +1,256 @@
+import { useLocation } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { ArrowRight, BookOpen, Eye, Clock, CheckCircle } from 'lucide-react';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { 
+  useCourseLanding, 
+  useCourseEnrollment,
+  useCourseProgress,
+  InstructorSection,
+  ModulesSection,
+  LessonsSection,
+  FeaturesSection,
+  FAQSection,
+} from '@/features/learning';
+import type { CourseLandingContentProps } from './types';
+
+export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) {
+  const [, navigate] = useLocation();
+  const { data: userData } = useCurrentUser();
+  const { data, isLoading, error } = useCourseLanding(slug);
+  const { data: enrollmentData } = useCourseEnrollment(data?.course?.id, userData?.user?.id);
+  const { data: progressData } = useCourseProgress(data?.course?.id);
+
+  const isEnrolled = enrollmentData?.isEnrolled || false;
+  const progressPercentage = (() => {
+    if (!progressData || progressData.length === 0) return 0;
+    const completed = progressData.filter(p => p.is_completed).length;
+    return Math.round((completed / progressData.length) * 100);
+  })();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-muted-foreground">Cargando curso...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <h1 className="text-2xl font-bold">Curso no encontrado</h1>
+          <p className="text-muted-foreground">
+            El curso que buscas no existe o no está disponible.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const { course, modules, faqs, stats } = data;
+
+  const handleCTAClick = () => {
+    if (mode === 'dashboard') {
+      navigate(`/learning/courses/${course.slug}`);
+    } else if (isEnrolled) {
+      navigate(`/learning/courses/${course.slug}`);
+    } else if (userData?.user) {
+      navigate(`/checkout?course=${course.slug}`);
+    } else {
+      navigate('/register');
+    }
+  };
+
+  const ctaButtonText = mode === 'dashboard' 
+    ? (progressPercentage > 0 ? 'Continuar Curso' : 'Ver Curso')
+    : (isEnrolled ? 'Continuar Curso' : 'Inscribirme Ahora');
+
+  return (
+    <>
+      {mode === 'dashboard' && (
+        <DashboardCourseHeader 
+          course={course}
+          stats={stats}
+          isEnrolled={isEnrolled}
+          progressPercentage={progressPercentage}
+          onCTAClick={handleCTAClick}
+          ctaButtonText={ctaButtonText}
+        />
+      )}
+      
+      <div className={mode === 'dashboard' ? "space-y-8" : "container mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16"}>
+        <InstructorSection course={course} />
+        <ModulesSection 
+          modules={modules} 
+          title={(course.landing_sections as any)?.modules?.title}
+          subtitle={(course.landing_sections as any)?.modules?.subtitle}
+          description={(course.landing_sections as any)?.modules?.description}
+        />
+        <LessonsSection modules={modules} />
+        <FeaturesSection course={course} />
+        <FAQSection 
+          faqs={faqs}
+          title={(course.landing_sections as any)?.faq?.title}
+          subtitle={(course.landing_sections as any)?.faq?.subtitle}
+          description={(course.landing_sections as any)?.faq?.description}
+        />
+        
+        {mode === 'public' && (
+          <PublicCTAFooter 
+            course={course}
+            isEnrolled={isEnrolled}
+            onCTAClick={handleCTAClick}
+            ctaButtonText={ctaButtonText}
+          />
+        )}
+        
+        {mode === 'dashboard' && (
+          <DashboardCTAFooter 
+            onCTAClick={handleCTAClick}
+            ctaButtonText={ctaButtonText}
+          />
+        )}
+      </div>
+    </>
+  );
+}
+
+interface DashboardCourseHeaderProps {
+  course: any;
+  stats: any;
+  isEnrolled: boolean;
+  progressPercentage: number;
+  onCTAClick: () => void;
+  ctaButtonText: string;
+}
+
+function DashboardCourseHeader({ 
+  course, 
+  stats, 
+  isEnrolled, 
+  progressPercentage, 
+  onCTAClick,
+  ctaButtonText 
+}: DashboardCourseHeaderProps) {
+  return (
+    <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background rounded-lg overflow-hidden mb-8">
+      <div className="flex flex-col lg:flex-row gap-6 p-6">
+        {course.cover_url && (
+          <div className="lg:w-1/3 aspect-video lg:aspect-auto lg:h-48 rounded-lg overflow-hidden flex-shrink-0">
+            <img
+              src={course.cover_url}
+              alt={course.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+        
+        <div className="flex-1 space-y-4">
+          <div>
+            <h1 className="text-2xl font-bold">{course.title}</h1>
+            <p className="text-muted-foreground mt-2">{course.short_description}</p>
+          </div>
+          
+          {isEnrolled && progressPercentage > 0 && (
+            <div className="max-w-xs space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Progreso</span>
+                <span className="font-semibold">{progressPercentage}%</span>
+              </div>
+              <Progress value={progressPercentage} className="h-2" />
+            </div>
+          )}
+          
+          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <BookOpen className="w-4 h-4" />
+              <span>{stats.total_modules} Módulos</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <CheckCircle className="w-4 h-4" />
+              <span>{stats.total_lessons} Lecciones</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock className="w-4 h-4" />
+              <span>{stats.total_duration_formatted}</span>
+            </div>
+          </div>
+          
+          <Button onClick={onCTAClick} className="gap-2" data-testid="button-cta-header">
+            <Eye className="w-4 h-4" />
+            {ctaButtonText}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface PublicCTAFooterProps {
+  course: any;
+  isEnrolled: boolean;
+  onCTAClick: () => void;
+  ctaButtonText: string;
+}
+
+function PublicCTAFooter({ course, isEnrolled, onCTAClick, ctaButtonText }: PublicCTAFooterProps) {
+  return (
+    <section className="py-20 bg-gradient-to-br from-primary/10 via-primary/5 to-background rounded-lg">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto text-center space-y-8">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            {isEnrolled ? '¿Listo para continuar?' : '¿Listo para comenzar?'}
+          </h2>
+          <p className="text-xl text-muted-foreground">
+            {isEnrolled 
+              ? 'Retoma tu aprendizaje donde lo dejaste'
+              : 'Únete hoy y transforma tu forma de trabajar'
+            }
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <Button size="lg" className="px-8 text-lg" onClick={onCTAClick}>
+              {ctaButtonText}
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+            {course.price && !isEnrolled && (
+              <div className="text-center">
+                <p className="text-3xl font-bold">${course.price}</p>
+                <p className="text-sm text-muted-foreground">/ año</p>
+              </div>
+            )}
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            {isEnrolled 
+              ? 'Tu progreso se guarda automáticamente'
+              : 'Acceso inmediato • Sin compromisos • Contenido siempre disponible'
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+interface DashboardCTAFooterProps {
+  onCTAClick: () => void;
+  ctaButtonText: string;
+}
+
+function DashboardCTAFooter({ onCTAClick, ctaButtonText }: DashboardCTAFooterProps) {
+  return (
+    <div className="flex justify-center py-8">
+      <Button size="lg" onClick={onCTAClick} className="gap-2 px-8" data-testid="button-cta-footer">
+        <Eye className="w-5 h-5" />
+        {ctaButtonText}
+      </Button>
+    </div>
+  );
+}
