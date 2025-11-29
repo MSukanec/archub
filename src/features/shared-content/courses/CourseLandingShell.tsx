@@ -4,6 +4,7 @@ import {
   PlatformSection,
   ModulesSection,
   LessonsSection,
+  CourseDetailsSection,
   FAQSection,
   CTAFooter,
 } from '@/features/learning';
@@ -68,6 +69,7 @@ export function CourseLandingShell({
           description={landingSections?.modules?.description}
         />
         <LessonsSection modules={modules} />
+        <CourseDetailsSection course={course} />
         <FAQSection 
           faqs={faqs}
           title={landingSections?.faq?.title}

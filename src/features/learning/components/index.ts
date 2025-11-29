@@ -12,6 +12,7 @@ export { InstructorSection } from './landing/InstructorSection';
 export { PlatformSection } from './landing/PlatformSection';
 export { ModulesSection } from './landing/ModulesSection.tsx';
 export { LessonsSection } from './landing/LessonsSection';
+export { CourseDetailsSection } from './landing/CourseDetailsSection';
 export { FAQSection } from './landing/FAQSection';
 export { CTAFooter } from './landing/CTAFooter';
 export { CourseCard } from './landing/CourseCard';
