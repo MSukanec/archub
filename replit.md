@@ -176,3 +176,24 @@ src/features/finances/modals/admin/BankTransferReceiptModal.tsx (admin view)
 - **Google Maps Platform**: For location services and interactive maps.
 - **yet-another-react-lightbox**: Unified media lightbox.
 - **browser-image-compression**: Client-side image compression for optimized uploads.
+- **@dnd-kit**: Modern drag-and-drop toolkit (replaced react-beautiful-dnd).
+
+## Technical Debt & Maintenance
+
+### Completed (November 29, 2025)
+- **DnD Library Migration**: Migrated from `react-beautiful-dnd` to `@dnd-kit` in:
+  - `src/components/ui-custom/KanbanBox.tsx` (Kanban board with cross-list card dragging)
+  - `src/components/construction/PhaseOrderManager.tsx` (vertical list reordering)
+- **CSS Reorganization**: Restructured `src/index.css` (~1122 lines) with proper organization:
+  - `:root` themes at top, eliminated duplications, consolidated `@layer` definitions
+
+### Pending (Blocked by npm network issues)
+- **ESLint Configuration**: Install and configure ESLint with TypeScript rules
+- **Remove react-beautiful-dnd**: Uninstall deprecated package from dependencies
+- **Console Statement Cleanup**: ~2,120 console statements in 386 files (requires ESLint)
+
+### Known Technical Debt
+- **TypeScript `any` types**: ~1,396 instances across codebase
+- **Test Coverage**: Only 7 test files for 1,222 TypeScript files
+- **Legacy Files**: 29 files in `src/features/legacy/` pending migration
+- **Deep Imports**: Files in `src/features/` use relative paths (`../../../../shared/schema`) instead of aliases (would require vite.config.ts modification)
