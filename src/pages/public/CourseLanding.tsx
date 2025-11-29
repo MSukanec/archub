@@ -1,14 +1,25 @@
 import { useEffect } from 'react';
 import { useParams, useLocation } from 'wouter';
-import { useCourseLanding } from '@/features/learning';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCourseLanding, useCourseEnrollment, useCourseProgress } from '@/features/learning';
 import { CourseLandingShell } from '@/features/shared-content/courses';
 import { Header } from '@/layouts/marketing/components/Header';
 import { Footer } from '@/layouts/marketing/components/Footer';
 
 export default function CourseLanding() {
   const { slug } = useParams<{ slug: string }>();
-  const [location] = useLocation();
-  const { data, isLoading } = useCourseLanding(slug || '');
+  const [location, navigate] = useLocation();
+  const { data: userData } = useCurrentUser();
+  const { data, isLoading, error } = useCourseLanding(slug || '');
+  const { data: enrollmentData } = useCourseEnrollment(data?.course?.id, userData?.user?.id);
+  const { data: progressData } = useCourseProgress(data?.course?.id);
+
+  const isEnrolled = enrollmentData?.isEnrolled || false;
+  const progressPercentage = (() => {
+    if (!progressData || progressData.length === 0) return 0;
+    const completed = progressData.filter(p => p.is_completed).length;
+    return Math.round((completed / progressData.length) * 100);
+  })();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -50,6 +61,18 @@ export default function CourseLanding() {
     };
   }, [data]);
 
+  const handleCTAClick = () => {
+    if (isEnrolled) {
+      navigate(`/learning/courses/${data?.course?.slug}`);
+    } else if (userData?.user) {
+      navigate(`/checkout?course=${data?.course?.slug}`);
+    } else {
+      navigate('/register');
+    }
+  };
+
+  const ctaButtonText = isEnrolled ? 'CONTINUAR CURSO' : 'INSCRIBIRME';
+
   if (isLoading) {
     return (
       <div className="min-h-screen">
@@ -64,48 +87,73 @@ export default function CourseLanding() {
     );
   }
 
+  if (error || !data) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center space-y-4">
+            <h1 className="text-2xl font-bold">Curso no encontrado</h1>
+            <p className="text-muted-foreground">
+              El curso que buscas no existe o no está disponible.
+            </p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <Header />
       
-      {data?.course && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Course',
-              name: data.course.title,
-              description: data.course.short_description,
-              provider: {
-                '@type': 'Organization',
-                name: 'Seencel',
-                url: 'https://seencel.com',
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Course',
+            name: data.course.title,
+            description: data.course.short_description,
+            provider: {
+              '@type': 'Organization',
+              name: 'Seencel',
+              url: 'https://seencel.com',
+            },
+            ...(data.course.instructor_name && {
+              instructor: {
+                '@type': 'Person',
+                name: data.course.instructor_name,
               },
-              ...(data.course.instructor_name && {
-                instructor: {
-                  '@type': 'Person',
-                  name: data.course.instructor_name,
-                },
-              }),
-              ...(data.course.price && {
-                offers: {
-                  '@type': 'Offer',
-                  price: data.course.price,
-                  priceCurrency: 'USD',
-                  availability: 'https://schema.org/InStock',
-                },
-              }),
-              educationalLevel: 'Beginner to Advanced',
-              inLanguage: 'es',
-              numberOfCredits: data.stats.total_lessons,
-              timeRequired: `PT${data.stats.total_duration_hours}H`,
             }),
-          }}
-        />
-      )}
+            ...(data.course.price && {
+              offers: {
+                '@type': 'Offer',
+                price: data.course.price,
+                priceCurrency: 'USD',
+                availability: 'https://schema.org/InStock',
+              },
+            }),
+            educationalLevel: 'Beginner to Advanced',
+            inLanguage: 'es',
+            numberOfCredits: data.stats.total_lessons,
+            timeRequired: `PT${data.stats.total_duration_hours}H`,
+          }),
+        }}
+      />
       
-      <CourseLandingShell mode="public" slug={slug || ''} />
+      <CourseLandingShell 
+        mode="public" 
+        course={data.course}
+        modules={data.modules}
+        faqs={data.faqs}
+        stats={data.stats}
+        isEnrolled={isEnrolled}
+        progressPercentage={progressPercentage}
+        onCTAClick={handleCTAClick}
+        ctaButtonText={ctaButtonText}
+      />
       
       <Footer />
     </div>

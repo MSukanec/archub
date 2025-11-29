@@ -1,11 +1,5 @@
-import { useLocation } from 'wouter';
-import { useCurrentUser } from '@/hooks/use-current-user';
 import { 
-  useCourseLanding, 
-  useCourseEnrollment,
-  useCourseProgress,
   HeroSection,
-  CourseStickyCard,
   InstructorSection,
   ModulesSection,
   LessonsSection,
@@ -14,55 +8,48 @@ import {
   CTAFooter,
 } from '@/features/learning';
 import type { CoursesMode } from './types';
+import { CourseStickyCardWithMode } from './components/CourseStickyCardWithMode';
 
 interface CourseLandingShellProps {
   mode: CoursesMode;
-  slug: string;
+  course: any;
+  modules: any[];
+  faqs: any[];
+  stats: any;
+  isEnrolled: boolean;
+  progressPercentage: number;
+  onCTAClick: () => void;
+  ctaButtonText: string;
 }
 
-export function CourseLandingShell({ mode, slug }: CourseLandingShellProps) {
-  const [, navigate] = useLocation();
-  const { data: userData } = useCurrentUser();
-  const { data, isLoading, error } = useCourseLanding(slug);
-  const { data: enrollmentData } = useCourseEnrollment(data?.course?.id, userData?.user?.id);
-  const { data: progressData } = useCourseProgress(data?.course?.id);
-
-  const isEnrolled = enrollmentData?.isEnrolled || false;
-  const progressPercentage = (() => {
-    if (!progressData || progressData.length === 0) return 0;
-    const completed = progressData.filter(p => p.is_completed).length;
-    return Math.round((completed / progressData.length) * 100);
-  })();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-muted-foreground">Cargando curso...</p>
-        </div>
-      </div>
-    );
+export function CourseLandingShell({ 
+  mode, 
+  course, 
+  modules, 
+  faqs, 
+  stats, 
+  isEnrolled, 
+  progressPercentage,
+  onCTAClick,
+  ctaButtonText,
+}: CourseLandingShellProps) {
+  if (!course || !stats) {
+    return null;
   }
-
-  if (error || !data) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <h1 className="text-2xl font-bold">Curso no encontrado</h1>
-          <p className="text-muted-foreground">
-            El curso que buscas no existe o no está disponible.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const { course, modules, faqs, stats } = data;
-
+  
+  const landingSections = (course.landing_sections as any) || {};
+  
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <StickyCardWrapper course={course} stats={stats} isEnrolled={isEnrolled} progressPercentage={progressPercentage} mode={mode} />
+      <CourseStickyCardWithMode 
+        mode={mode}
+        course={course} 
+        stats={stats} 
+        isEnrolled={isEnrolled} 
+        progressPercentage={progressPercentage}
+        onCTAClick={onCTAClick}
+        ctaButtonText={ctaButtonText}
+      />
       
       <main className="overflow-x-hidden">
         <HeroSection 
@@ -76,54 +63,21 @@ export function CourseLandingShell({ mode, slug }: CourseLandingShellProps) {
           <InstructorSection course={course} />
           <ModulesSection 
             modules={modules} 
-            title={(course.landing_sections as any)?.modules?.title}
-            subtitle={(course.landing_sections as any)?.modules?.subtitle}
-            description={(course.landing_sections as any)?.modules?.description}
+            title={landingSections?.modules?.title}
+            subtitle={landingSections?.modules?.subtitle}
+            description={landingSections?.modules?.description}
           />
           <LessonsSection modules={modules} />
           <FeaturesSection course={course} />
           <FAQSection 
             faqs={faqs}
-            title={(course.landing_sections as any)?.faq?.title}
-            subtitle={(course.landing_sections as any)?.faq?.subtitle}
-            description={(course.landing_sections as any)?.faq?.description}
+            title={landingSections?.faq?.title}
+            subtitle={landingSections?.faq?.subtitle}
+            description={landingSections?.faq?.description}
           />
           <CTAFooter course={course} />
         </div>
       </main>
-    </div>
-  );
-}
-
-interface StickyCardWrapperProps {
-  course: any;
-  stats: any;
-  isEnrolled: boolean;
-  progressPercentage: number;
-  mode: CoursesMode;
-}
-
-function StickyCardWrapper({ course, stats, isEnrolled, progressPercentage, mode }: StickyCardWrapperProps) {
-  const rightOffset = mode === 'dashboard' 
-    ? 'max(32px, calc((100vw - 1472px) / 2 - 72px))'
-    : 'max(32px, calc((100vw - 1472px) / 2))';
-  
-  return (
-    <div 
-      className="hidden lg:block fixed top-24 z-40"
-      style={{
-        width: '368px',
-        right: rightOffset
-      }}
-    >
-      <div className="sticky top-24">
-        <CourseStickyCard 
-          course={course} 
-          stats={stats} 
-          isEnrolled={isEnrolled} 
-          progressPercentage={progressPercentage} 
-        />
-      </div>
     </div>
   );
 }
