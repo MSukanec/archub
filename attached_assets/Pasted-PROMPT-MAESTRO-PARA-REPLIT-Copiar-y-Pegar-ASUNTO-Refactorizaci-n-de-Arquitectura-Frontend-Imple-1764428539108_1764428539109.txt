@@ -1,0 +1,98 @@
+PROMPT MAESTRO PARA REPLIT (Copiar y Pegar)
+ASUNTO: Refactorización de Arquitectura Frontend - Implementación del Patrón de "Componentes de Contenido Compartido".
+
+CONTEXTO: Actualmente, tenemos páginas clave (como Pricing, Fundadores, Landings de Cursos) que están "hardcodeadas" para funcionar solo en la parte pública de la web (usando el MarketingLayout).
+
+EL PROBLEMA: Necesitamos mostrar EXACTAMENTE el mismo contenido de estas páginas dentro del Dashboard privado del usuario (donde se usa el DashboardLayout). Si seguimos como ahora, tendríamos que duplicar el código de estas páginas, lo cual es inaceptable por mantenimiento.
+
+LA SOLUCIÓN ARQUITECTÓNICA: Vamos a adoptar el patrón de "Componentes de Contenido Compartido".
+
+Extraer el Contenido: Vamos a sacar todo el JSX que representa la información de la página (textos, tablas, imágenes, listados) y moverlo a un componente reutilizable agnóstico del layout.
+
+Componentes "Tontos": Estos nuevos componentes NO deben saber si están en la home pública o en el dashboard. No deben incluir headers, footers ni sidebars.
+
+Inyección de Contexto: Estos componentes recibirán una prop (ej: mode: 'public' | 'dashboard') para manejar pequeñas diferencias de comportamiento (por ejemplo, un botón de "Comprar" en público lleva al registro, pero en el dashboard abre un modal de pago).
+
+Páginas Contenedoras: Las páginas actuales en src/pages/public/ pasarán a ser simples contenedores que importan el componente compartido y lo envuelven en el MarketingLayout.
+
+INSTRUCCIONES DE EJECUCIÓN PASO A PASO:
+
+1. Preparar la Estructura Crea una nueva ruta de carpetas para alojar estos componentes estratégicos: src/components/shared/content/
+
+2. El Patrón a Seguir (EJEMPLO)
+
+Quiero que uses este patrón como referencia para todas las refactorizaciones.
+
+Ejemplo con la página de Pricing:
+
+ANTES (Lo que tenemos ahora en src/pages/public/PricingPage.tsx):
+
+TypeScript
+
+// (Un archivo monolítico)
+import { MarketingLayout } from '@/layouts/...';
+export default function PricingPage() {
+  return (
+    <MarketingLayout>
+       <Header />
+       <div className="pricing-container">
+         <h1>Nuestros Precios</h1>
+         {/* ... 200 líneas de tablas de precios y botones ... */}
+         <a href="/signup">Empezar</a>
+       </div>
+       <Footer />
+    </MarketingLayout>
+  );
+}
+DESPUÉS (El objetivo):
+
+A) Nuevo Componente Compartido (src/components/shared/content/PricingContent.tsx):
+
+TypeScript
+
+interface PricingContentProps {
+  mode: 'public' | 'dashboard';
+}
+export const PricingContent = ({ mode }: PricingContentProps) => {
+  return (
+    <div className="pricing-container-limpio">
+      <h1>Nuestros Precios</h1>
+      {/* ... Las 200 líneas de contenido aquí ... */}
+
+      {/* El botón cambia según el modo */}
+      {mode === 'public' ? (
+         <Button href="/signup">Empezar</Button>
+      ) : (
+         <Button onClick={openStripeModal}>Actualizar Plan</Button>
+      )}
+    </div>
+  );
+};
+B) La Página Pública Refactorizada (src/pages/public/PricingPage.tsx):
+
+TypeScript
+
+import { MarketingLayout } from '@/layouts/...';
+import { PricingContent } from '@/components/shared/content/PricingContent';
+
+export default function PricingPage() {
+  return (
+    <MarketingLayout>
+       {/* Simplemente inyectamos el contenido en modo público */}
+       <PricingContent mode="public" />
+    </MarketingLayout>
+  );
+}
+3. Tareas Específicas a Realizar AHORA:
+
+Aplica este patrón de refactorización a las siguientes páginas existentes. Extrae su contenido principal a src/components/shared/content/ y actualiza las páginas públicas para que usen el nuevo componente.
+
+Página de Pricing (Precios): Extrae la tabla/lista de planes. Asegúrate de que los botones de acción usen la prop mode para diferenciar entre "Ir a registro" (público) y "Cambiar plan" (dashboard).
+
+Página de Fundadores: Extrae toda la explicación de beneficios y el CTA.
+
+Listado de Cursos (Página principal de cursos): Extrae la grilla/lista de tarjetas de cursos disponibles.
+
+Landing Page Individual de Curso: (Esta es crítica). Extrae la estructura de la landing (video hero, temario, profesor, precio). El componente compartido deberá recibir el courseId o el objeto del curso como prop para saber qué renderizar.
+
+Nota Final: Al terminar, verifica que las URLs públicas actuales sigan funcionando y viéndose exactamente igual que antes. El cambio debe ser invisible para el usuario final, pero estructural para el código.
