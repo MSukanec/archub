@@ -163,10 +163,15 @@ function HeroSectionComponent() {
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href="/register">
-            <Button size="lg" className="px-8 py-4 text-lg font-medium">
-              Comenzar Gratis
+          <Link href="/founders">
+            <Button size="lg" className="px-8 py-4 text-lg font-medium" data-testid="button-hero-founders">
+              Ser Fundador
               <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
+          <Link href="/register">
+            <Button size="lg" variant="secondary" className="px-8 py-4 text-lg font-medium" data-testid="button-hero-register">
+              Comenzar Gratis
             </Button>
           </Link>
         </div>
