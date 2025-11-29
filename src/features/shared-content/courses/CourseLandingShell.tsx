@@ -1,6 +1,7 @@
 import { 
   HeroSection,
   InstructorSection,
+  PlatformSection,
   ModulesSection,
   LessonsSection,
   FeaturesSection,
@@ -59,8 +60,13 @@ export function CourseLandingShell({
           progressPercentage={progressPercentage} 
         />
         
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <InstructorSection course={course} />
+        </div>
+        
+        <PlatformSection />
+        
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
           <ModulesSection 
             modules={modules} 
             title={landingSections?.modules?.title}

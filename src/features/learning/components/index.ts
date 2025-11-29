@@ -9,6 +9,7 @@
 // ========== LANDING COMPONENTS (PUBLIC) ==========
 export { HeroSection } from './landing/HeroSection';
 export { InstructorSection } from './landing/InstructorSection';
+export { PlatformSection } from './landing/PlatformSection';
 export { ModulesSection } from './landing/ModulesSection.tsx';
 export { LessonsSection } from './landing/LessonsSection';
 export { FeaturesSection } from './landing/FeaturesSection';
