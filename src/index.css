@@ -1,71 +1,32 @@
-/* Import Inter Variable Font - all weights, modern and clean like SF Pro Display */
+/* ========================================
+   📦 IMPORTS
+   ======================================== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-
-/* Import Leaflet CSS for maps */
 @import 'leaflet/dist/leaflet.css';
 @import 'leaflet.markercluster/dist/MarkerCluster.css';
 @import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
+/* ========================================
+   🎨 TAILWIND & BASE RESETS
+   ======================================== */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Global typography - consistent like mood slider reference */
-@layer base {
-  * {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-    font-weight: 400;
-    line-height: 1.5;
-    letter-spacing: -0.011em; /* Optical spacing like Apple */
-  }
-  
-  /* Headings with proper weights */
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-    font-weight: 600;
-    letter-spacing: -0.022em; /* Tighter for headings */
-    line-height: 1.2;
-  }
-  
-  h1 { font-size: 2.25rem; font-weight: 700; }
-  h2 { font-size: 1.875rem; font-weight: 700; }
-  h3 { font-size: 1.5rem; font-weight: 600; }
-  h4 { font-size: 1.25rem; font-weight: 600; }
-  h5 { font-size: 1.125rem; font-weight: 600; }
-  h6 { font-size: 1rem; font-weight: 600; }
-  
-  /* Button text - medium weight */
-  button {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-    font-weight: 500;
-    letter-spacing: -0.011em;
-  }
-  
-  /* Input text */
-  input, textarea, select {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-    font-weight: 400;
-    letter-spacing: -0.011em;
-  }
-}
-
+/* ========================================
+   🌞 LIGHT THEME - ROOT VARIABLES
+   ======================================== */
 :root {
   /* Layout */
-  --layout-bg: hsl(0, 0%, 85%); /* Desktop - fondo oscuro que rodea todo */
-  --layout-mobile-bg: hsl(0, 0%, 96%); /* Mobile - fondo claro */
+  --layout-bg: hsl(0, 0%, 85%);
+  --layout-mobile-bg: hsl(0, 0%, 96%);
   --layout-text: hsl(0, 0%, 40%);
   --layout-border: hsl(0, 0%, 40%);
 
   /* Content */
-  --content-bg: hsl(0, 0%, 95%); /* Fondo sólido para páginas generales */
-  --content-gradient-from: hsl(0, 0%, 96%); /* Inicio del degradado para páginas de proyecto */
-  --content-gradient-to: hsl(76, 40%, 94%); /* Fin del degradado para páginas de proyecto */
+  --content-bg: hsl(0, 0%, 95%);
+  --content-gradient-from: hsl(0, 0%, 96%);
+  --content-gradient-to: hsl(76, 40%, 94%);
 
   /* Header */
   --header-bg: hsl(0, 0%, 95%);
@@ -139,7 +100,7 @@
   --input-placeholder: hsl(0, 0%, 55%);
   --input-focus-ring: hsl(76, 100%, 40%);
   --input-focus-border: hsl(76, 100%, 40%);
-  
+
   /* Muted foreground */
   --muted-fg: hsl(0, 0%, 45%);
 
@@ -160,22 +121,15 @@
   --accent: hsl(76, 100%, 40%);
   --accent-2: hsl(150, 40%, 40%);
   --accent-rgb: 132, 204, 22;
-  --accent-hover: hsl(76, 100%, 32%); /* Más oscuro para hover en modo claro */
+  --accent-hover: hsl(76, 100%, 32%);
   --accent-foreground-hsl: 0 0% 100%;
   --accent-foreground: hsl(0, 0%, 100%);
-  
-  /* Gradient colors - DEPRECATED: Use --content-gradient-from/to instead */
-  --gradient-from-light: var(--content-gradient-from);
-  --gradient-to-light: var(--content-gradient-to);
-  
+
   --destructive: hsl(0, 84%, 60%);
-  --destructive-l: hsl(0, 84%, 60%);
   --destructive-text: hsl(0, 0%, 100%);
   --success: hsl(120, 18%, 35%);
-  --success-l: hsl(76, 100%, 40%);
   --success-text: hsl(0, 0%, 100%);
   --warning: hsl(45, 90%, 50%);
-  --warning-l: hsl(45, 90%, 50%);
   --warning-text: hsl(240, 10%, 4%);
 
   /* Charts */
@@ -186,6 +140,8 @@
   --chart-5: hsl(0, 87%, 67%);
   --chart-grid-text: hsl(0, 0%, 40%);
   --chart-positive: hsl(76, 100%, 40%);
+  --chart-negative: hsl(0, 50%, 50%);
+  --chart-neutral: hsl(200, 30%, 40%);
   --chart-ring-bg: hsl(0, 0%, 85%, 0.4);
 
   /* Tables */
@@ -198,10 +154,6 @@
   --table-row-border: hsl(0, 0%, 85%);
   --table-group-header-bg: hsl(0, 0%, 40%);
   --table-group-header-fg: hsl(0, 0%, 100%);
-
-  /* Table Dynamic Group Headers (filas de agrupación dinámicas) */
-  --chart-negative: hsl(0, 50%, 50%);
-  --chart-neutral: hsl(200, 30%, 40%);
 
   /* Checkbox */
   --checkbox-bg: hsl(0, 0%, 100%);
@@ -251,51 +203,12 @@
   --radius-lg: 10px;
 }
 
-/* Animated border class */
-.animated-border {
-  animation: border-glow 2s ease-in-out infinite;
-}
-
-/* Plan-specific card styles */
-.plan-card-free {
-  background-color: var(--plan-free-bg) !important;
-}
-
-.plan-card-pro {
-  background-color: var(--plan-pro-bg) !important;
-}
-
-.plan-card-teams {
-  background-color: var(--plan-teams-bg) !important;
-}
-
-.plan-card-enterprise {
-  background-color: var(--plan-enterprise-bg) !important;
-}
-
-/* Global checkbox styling with accent color */
-.checkbox-accent {
-  background-color: var(--checkbox-bg);
-  border-color: var(--checkbox-border);
-  accent-color: var(--checkbox-checked-bg);
-}
-
-.checkbox-accent:checked {
-  background-color: var(--checkbox-checked-bg);
-  border-color: var(--checkbox-checked-border);
-}
-
-.checkbox-accent:focus {
-  ring-color: var(--checkbox-checked-bg);
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px var(--checkbox-checked-bg);
-}
-
+/* ========================================
+   🌙 DARK THEME - ROOT VARIABLES
+   ======================================== */
 .dark {
-  /* Scrollbar - discreto en dark theme */
   color-scheme: dark;
-  
+
   /* Button Shadows */
   --button-shadow-normal: 0 4px 14px 0 rgba(0, 0, 0, 0.3);
   --button-shadow-hover: 0 8px 20px 0 rgba(0, 0, 0, 0.4);
@@ -306,9 +219,9 @@
   --layout-border: hsl(0, 0%, 20%);
 
   /* Content */
-  --content-bg: hsl(0, 0%, 20%); /* Fondo sólido para páginas generales */
-  --content-gradient-from: hsl(0, 0%, 20%); /* Inicio del degradado para páginas de proyecto */
-  --content-gradient-to: hsl(0, 0%, 15%); /* Fin del degradado para páginas de proyecto */
+  --content-bg: hsl(0, 0%, 20%);
+  --content-gradient-from: hsl(0, 0%, 20%);
+  --content-gradient-to: hsl(0, 0%, 15%);
 
   /* Header */
   --header-bg: hsl(0, 0%, 20%);
@@ -338,7 +251,6 @@
   --card-text: hsl(0, 0%, 90%);
   --card-border: hsl(0, 0%, 20%);
   --card-hover-bg: hsl(0, 0%, 14%);
-
 
   /* Buttons - Primary */
   --button-primary-bg: hsl(76, 100%, 40%);
@@ -373,7 +285,7 @@
   --input-placeholder: hsl(0, 0%, 55%);
   --input-focus-ring: hsl(90, 50%, 50%);
   --input-focus-border: hsl(90, 50%, 50%);
-  
+
   /* Muted foreground */
   --muted-fg: hsl(0, 0%, 60%);
 
@@ -393,14 +305,10 @@
   --accent-hsl: 76 100% 40%;
   --accent: hsl(76, 100%, 40%);
   --accent-rgb: 132, 204, 22;
-  --accent-hover: hsl(76, 100%, 48%); /* Más brillante para hover en modo oscuro */
+  --accent-hover: hsl(76, 100%, 48%);
   --accent-foreground-hsl: 0 0% 100%;
   --accent-text: hsl(0, 0%, 100%);
-  
-  /* Gradient colors - DEPRECATED: Use --content-gradient-from/to instead */
-  --gradient-from-dark: var(--content-gradient-from);
-  --gradient-to-dark: var(--content-gradient-to);
-  
+
   --destructive: hsl(0, 84%, 65%);
   --destructive-text: hsl(0, 0%, 100%);
   --success: hsl(76, 100%, 40%);
@@ -420,7 +328,7 @@
   --chart-neutral: #84cc16;
   --chart-ring-bg: hsl(0, 0%, 30%, 0.3);
 
-  /* Checkbox dark mode */
+  /* Checkbox */
   --checkbox-bg: hsl(0, 0%, 12%);
   --checkbox-border: hsl(0, 0%, 30%);
   --checkbox-checked-bg: hsl(76, 100%, 40%);
@@ -443,13 +351,11 @@
   --table-row-border: hsl(0, 0%, 22%);
   --table-row-hover-bg: hsl(0, 0%, 12%);
 
-  /* Plan Colors (same for both themes) */
+  /* Plan Colors */
   --plan-free-bg: hsl(76, 100%, 40%);
   --plan-pro-bg: hsl(213, 100%, 33%);
   --plan-teams-bg: hsl(271, 76%, 53%);
   --plan-enterprise-bg: hsl(215, 16%, 47%);
-
-
 
   /* Text */
   --text-default: hsl(0, 0%, 98%);
@@ -463,6 +369,7 @@
   --border-strong: hsl(0, 50%, 50%);
   --section-divider: hsl(0, 0%, 30%);
   --section-divider-strong: hsl(0, 0%, 100%);
+  --ring-default: hsl(0, 50%, 50%);
 
   /* Tailwind variables */
   --border: hsl(0, 0%, 22%);
@@ -470,7 +377,6 @@
   --card-foreground: hsl(0, 0%, 70%);
   --background: hsl(0, 0%, 16%);
   --foreground: hsl(0, 0%, 90%);
-  --ring-default: hsl(0, 50%, 50%);
 
   /* Radius */
   --radius-sm: 4px;
@@ -478,7 +384,165 @@
   --radius-lg: 8px;
 }
 
-/* Movement row solid color classes */
+/* ========================================
+   📝 GLOBAL TYPOGRAPHY
+   ======================================== */
+@layer base {
+  * {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: -0.011em;
+    @apply font-sans antialiased;
+    background-color: var(--layout-bg);
+    color: var(--layout-text);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    line-height: 1.2;
+  }
+
+  h1 { font-size: 2.25rem; font-weight: 700; }
+  h2 { font-size: 1.875rem; font-weight: 700; }
+  h3 { font-size: 1.5rem; font-weight: 600; }
+  h4 { font-size: 1.25rem; font-weight: 600; }
+  h5 { font-size: 1.125rem; font-weight: 600; }
+  h6 { font-size: 1rem; font-weight: 600; }
+
+  button {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.011em;
+  }
+
+  input, textarea, select {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-weight: 400;
+    letter-spacing: -0.011em;
+  }
+
+  * {
+    @apply border-[var(--border-default)];
+  }
+
+  .plan-restricted-title {
+    color: white !important;
+  }
+}
+
+/* ========================================
+   🎨 COMPONENT STYLES
+   ======================================== */
+@layer components {
+  .shadow-button-normal {
+    box-shadow: var(--button-shadow-normal);
+  }
+
+  .shadow-button-hover {
+    box-shadow: var(--button-shadow-hover);
+  }
+
+  .button-black-glow {
+    background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.12) 0%,
+      rgba(0, 0, 0, 1) 40%,
+      rgba(0, 0, 0, 1) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.15),
+      0 2px 4px 0 rgba(0, 0, 0, 0.3),
+      0 6px 20px 4px rgba(218, 165, 32, 0.4),
+      0 8px 30px 8px rgba(255, 215, 0, 0.3);
+  }
+
+  .button-black-glow:hover {
+    background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(20, 20, 20, 1) 40%,
+      rgba(0, 0, 0, 1) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+      0 4px 8px 0 rgba(0, 0, 0, 0.4),
+      0 8px 25px 6px rgba(218, 165, 32, 0.5),
+      0 12px 40px 12px rgba(255, 215, 0, 0.4);
+  }
+}
+
+/* ========================================
+   🔧 UTILITIES
+   ======================================== */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thumb-rounded {
+    scrollbar-color: hsl(var(--muted-foreground)) transparent;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ========================================
+   🎯 PLAN CARD STYLES
+   ======================================== */
+.plan-card-free {
+  background-color: var(--plan-free-bg) !important;
+}
+
+.plan-card-pro {
+  background-color: var(--plan-pro-bg) !important;
+}
+
+.plan-card-teams {
+  background-color: var(--plan-teams-bg) !important;
+}
+
+.plan-card-enterprise {
+  background-color: var(--plan-enterprise-bg) !important;
+}
+
+/* ========================================
+   ✓ CHECKBOX STYLES
+   ======================================== */
+.checkbox-accent {
+  background-color: var(--checkbox-bg);
+  border-color: var(--checkbox-border);
+  accent-color: var(--checkbox-checked-bg);
+}
+
+.checkbox-accent:checked {
+  background-color: var(--checkbox-checked-bg);
+  border-color: var(--checkbox-checked-border);
+}
+
+.checkbox-accent:focus {
+  ring-color: var(--checkbox-checked-bg);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--checkbox-checked-bg);
+}
+
+/* ========================================
+   💰 MOVEMENT ROW COLORS
+   ======================================== */
 .movement-row-income {
   background-color: rgba(34, 197, 94, 0.08) !important;
   border-left: 4px solid var(--movement-income-border) !important;
@@ -499,24 +563,6 @@
   border-left: 4px solid rgb(168, 85, 247) !important;
 }
 
-/* Estilo para botones ghost "apretados" cuando están activos */
-.button-ghost-pressed {
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-  transform: translateY(1px) !important;
-  background-color: rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Variante secondary con efecto apretado */
-.button-secondary-pressed {
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-  transform: translateY(1px) !important;
-}
-
-/* Evitar cambio de color en hover para botones activos */
-.button-secondary-pressed:hover {
-  background-color: hsl(var(--secondary)) !important;
-}
-
 .movement-row-aportes-propios {
   background-color: rgba(107, 114, 128, 0.08) !important;
   border-left: 4px solid var(--movement-aportes-propios-border) !important;
@@ -527,98 +573,27 @@
   border-left: 4px solid var(--movement-retiros-propios-border) !important;
 }
 
-/* Avatar styles - aplicar borde de 3px a todos los avatares */
+/* ========================================
+   👤 AVATAR STYLES
+   ======================================== */
 .avatar-border,
 [data-avatar],
 .avatar {
   border: 3px solid var(--card-border) !important;
 }
 
-/* Button Shadow Styles - All variants get shadow */
-@layer components {
-  .shadow-button-normal {
-    box-shadow: var(--button-shadow-normal);
-  }
-
-  .shadow-button-hover {
-    box-shadow: var(--button-shadow-hover);
-  }
-
-  /* Black button with golden illumination effect - exactly like reference */
-  .button-black-glow {
-    background: linear-gradient(180deg, 
-      rgba(255, 255, 255, 0.12) 0%, 
-      rgba(0, 0, 0, 1) 40%, 
-      rgba(0, 0, 0, 1) 100%
-    );
-    box-shadow: 
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.15),
-      0 2px 4px 0 rgba(0, 0, 0, 0.3),
-      0 6px 20px 4px rgba(218, 165, 32, 0.4),
-      0 8px 30px 8px rgba(255, 215, 0, 0.3);
-  }
-
-  .button-black-glow:hover {
-    background: linear-gradient(180deg, 
-      rgba(255, 255, 255, 0.18) 0%, 
-      rgba(20, 20, 20, 1) 40%, 
-      rgba(0, 0, 0, 1) 100%
-    );
-    box-shadow: 
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
-      0 4px 8px 0 rgba(0, 0, 0, 0.4),
-      0 8px 25px 6px rgba(218, 165, 32, 0.5),
-      0 12px 40px 12px rgba(255, 215, 0, 0.4);
-  }
-}
-
-@layer base {
-  * {
-    @apply border-[var(--border-default)];
-  }
-
-  body {
-    @apply font-sans antialiased;
-    background-color: var(--layout-bg);
-    color: var(--layout-text);
-    font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 400;
-  }
-
-  /* Force white color for plan restricted popover title */
-  .plan-restricted-title {
-    color: white !important;
-  }
-}
-
-@layer utilities {
-  .scrollbar-thin {
-    scrollbar-width: thin;
-  }
-
-  .scrollbar-thumb-rounded {
-    scrollbar-color: hsl(var(--muted-foreground)) transparent;
-  }
-
-  /* Hide scrollbars completely */
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-/* Global styling for required field asterisks */
+/* ========================================
+   📋 FORM REQUIRED FIELDS
+   ======================================== */
 label[data-required="true"]::after,
 .required-asterisk::after {
   content: " *";
   color: var(--accent);
 }
 
-/* Important text styling - for titles and important content */
+/* ========================================
+   🏷️ TEXT STYLES
+   ======================================== */
 .text-important,
 .card-title,
 .page-title,
@@ -630,22 +605,22 @@ label[data-required="true"]::after,
   font-weight: 500 !important;
 }
 
-/* Allow h1-h6 to be customized without global color override */
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 500;
-}
-
-/* Override for pricing plan Pro card title */
 .pricing-plan-title-white {
   color: #ffffff !important;
 }
 
-/* Hide scrollbars while maintaining scroll functionality */
+[class*="ProjectItemCard"] h3,
+.project-card-title {
+  color: white !important;
+}
+
+/* ========================================
+   📊 SCROLLBAR OVERRIDES
+   ======================================== */
 .overflow-x-auto::-webkit-scrollbar {
   display: none;
 }
 
-/* Hide scrollbar in Gantt timeline header */
 #timeline-header-scroll::-webkit-scrollbar {
   display: none !important;
 }
@@ -655,7 +630,6 @@ h1, h2, h3, h4, h5, h6 {
   scrollbar-width: none !important;
 }
 
-/* Show scrollbars specifically for Gantt timeline content only */
 .gantt-timeline-scroll::-webkit-scrollbar {
   display: block !important;
   height: 24px;
@@ -678,7 +652,9 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 0.8;
 }
 
-/* Remove number input arrows/spinners */
+/* ========================================
+   🔢 NUMBER INPUT FIXES
+   ======================================== */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -689,313 +665,13 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-
-
-
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes float-horizontal {
-
-  0%,
-  100% {
-    transform: translateX(0px);
-  }
-
-  50% {
-    transform: translateX(20px);
-  }
-}
-
-@keyframes float-vertical {
-
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-15px);
-  }
-}
-
-@keyframes float-diagonal {
-
-  0%,
-  100% {
-    transform: translate(0px, 0px);
-  }
-
-  25% {
-    transform: translate(10px, -8px);
-  }
-
-  50% {
-    transform: translate(-5px, -12px);
-  }
-
-  75% {
-    transform: translate(-10px, 5px);
-  }
-}
-
-@keyframes border-glow {
-  0% {
-    box-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 15px var(--accent);
-  }
-
-  50% {
-    box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent), 0 0 30px var(--accent);
-  }
-
-  100% {
-    box-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent), 0 0 15px var(--accent);
-  }
-}
-
-/* Mobile modal zoom prevention */
-@media (max-width: 768px) {
-
-  /* Prevent zoom on modal content */
-  .modal-no-zoom {
-    touch-action: manipulation !important;
-    -webkit-touch-callout: none !important;
-    -webkit-user-select: none !important;
-    -webkit-tap-highlight-color: transparent !important;
-    user-select: none !important;
-  }
-
-  /* Prevent zoom on input fields inside modals */
-  .modal-no-zoom input,
-  .modal-no-zoom textarea,
-  .modal-no-zoom select,
-  .modal-no-zoom button {
-    font-size: 16px !important;
-    /* Prevents zoom on iOS when tapping inputs */
-    -webkit-transform: scale(1) !important;
-    transform: scale(1) !important;
-  }
-
-  /* Prevent pinch-to-zoom gestures */
-  .modal-no-zoom * {
-    -webkit-touch-callout: none !important;
-    -webkit-user-select: none !important;
-    touch-action: manipulation !important;
-  }
-
-  /* Override any zoom behavior */
-  html.modal-open {
-    touch-action: manipulation !important;
-    -webkit-text-size-adjust: 100% !important;
-    -ms-text-size-adjust: 100% !important;
-  }
-
-  body.modal-open {
-    touch-action: manipulation !important;
-    -webkit-text-size-adjust: 100% !important;
-    -ms-text-size-adjust: 100% !important;
-  }
-}
-
-/* Placeholder text color matching ghost button text */
-.placeholder-ghost-text::placeholder {
-  color: var(--button-ghost-text);
-  opacity: 0.7;
-}
-
-/* Global Scrollbar Styles */
-*::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-}
-
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-*::-webkit-scrollbar-thumb {
-  background-color: hsl(210, 16%, 82%);
-  border-radius: 6px;
-  border: none;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(210, 16%, 76%);
-}
-
-*::-webkit-scrollbar-corner {
-  background: transparent;
-}
-
-/* Remove scrollbar gutter to avoid white border when no scrollbar */
-
-/* Main Header - Use same color as sidebar buttons in normal state */
-.main-header-title {
-  color: var(--main-sidebar-fg) !important;
-}
-
-.main-header-icon {
-  color: hsl(var(--accent-hsl)) !important;
-}
-
 /* ========================================
-   🎨 Enhanced Color Transition Animations
+   🎨 CARD & BORDER EFFECTS
    ======================================== */
-
-/* Smooth color transitions for accent changes */
-:root {
-  transition: 
-    --accent 700ms cubic-bezier(0.4, 0, 0.2, 1),
-    --accent-hover 700ms cubic-bezier(0.4, 0, 0.2, 1),
-    --accent-foreground 700ms cubic-bezier(0.4, 0, 0.2, 1);
+.animated-border {
+  animation: border-glow 2s ease-in-out infinite;
 }
 
-/* Enhanced transitions for components using accent colors */
-.accent-transition {
-  transition: 
-    background-color 700ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 700ms cubic-bezier(0.4, 0, 0.2, 1),
-    color 700ms cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 700ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Breathing effect for project pages - subtle background animation */
-@keyframes breathing {
-  0%, 100% { 
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% { 
-    opacity: 0.6;
-    transform: scale(1.02);
-  }
-}
-
-@keyframes breathing-glow {
-  0%, 100% { 
-    box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.1);
-  }
-  50% { 
-    box-shadow: 0 0 40px rgba(var(--accent-rgb), 0.2);
-  }
-}
-
-/* Project page breathing background - Organic, soft gradients like mood slider */
-.project-breathing-bg {
-  position: relative;
-}
-
-/* Multiple layered radial gradients for organic effect - NO background on container */
-.project-breathing-bg::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(
-      circle at 50% 15%,
-      rgba(var(--accent-rgb), 0.06) 0%,
-      rgba(var(--accent-rgb), 0.03) 25%,
-      rgba(var(--accent-rgb), 0.015) 40%,
-      rgba(var(--accent-rgb), 0.008) 60%,
-      transparent 80%
-    );
-  filter: blur(50px);
-  animation: breathing 10s ease-in-out infinite;
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* Secondary glow layer for depth */
-.project-breathing-bg::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(
-    ellipse 120% 100% at 50% 20%,
-    rgba(var(--accent-rgb), 0.04) 0%,
-    rgba(var(--accent-rgb), 0.015) 30%,
-    transparent 65%
-  );
-  filter: blur(80px);
-  animation: breathing 14s ease-in-out infinite reverse;
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* Subtle accent glow for cards with accent colors */
-.accent-glow {
-  animation: breathing-glow 6s ease-in-out infinite;
-}
-
-/* Soft organic breathing animation */
-@keyframes organicBreathing {
-  0%, 100% { 
-    opacity: 0.8;
-    transform: scale(1);
-  }
-  50% { 
-    opacity: 1;
-    transform: scale(1.05);
-  }
-}
-
-/* Alternative gradient background - softer approach */
-.project-gradient-bg {
-  position: relative;
-  background: linear-gradient(
-    180deg,
-    rgba(var(--accent-rgb), 0.025) 0%,
-    transparent 40%
-  );
-}
-
-/* Smooth fade-in for color changes */
-@keyframes accentFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.accent-fade-in {
-  animation: accentFadeIn 500ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Border pulse effect for accent borders */
-@keyframes borderPulse {
-  0%, 100% {
-    border-color: rgba(var(--accent-rgb), 0.3);
-  }
-  50% {
-    border-color: rgba(var(--accent-rgb), 0.6);
-  }
-}
-
-.accent-border-pulse {
-  animation: borderPulse 3s ease-in-out infinite;
-}
-
-/* Card variants with accent colors */
 .card-accent-border {
   border-color: rgba(var(--accent-rgb), 0.2) !important;
 }
@@ -1006,7 +682,7 @@ input[type="number"] {
 }
 
 .card-accent-bg {
-  background: 
+  background:
     radial-gradient(
       ellipse 120% 150% at 50% 0%,
       rgba(var(--accent-rgb), 0.03),
@@ -1015,12 +691,10 @@ input[type="number"] {
     var(--card-bg) !important;
 }
 
-/* Icon with accent color */
 .icon-accent {
   color: var(--accent);
 }
 
-/* Progress bars with accent */
 .progress-accent {
   background-color: rgba(var(--accent-rgb), 0.1);
 }
@@ -1030,52 +704,22 @@ input[type="number"] {
 }
 
 /* ========================================
-   ✨ AI ICON SPECTACULAR EFFECTS
+   ✨ AI ICON EFFECTS
    ======================================== */
-
-/* Animación de respiración suave para el icono de IA */
-@keyframes ai-icon-breathe {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-/* Animación de partículas sutiles (opacity pulse) */
-@keyframes ai-particle-pulse {
-  0%, 100% {
-    opacity: 0.85;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-/* Clase para el icono brillante con curva bezier suave */
 .ai-icon-sparkle {
-  animation: 
+  animation:
     ai-icon-breathe 4s cubic-bezier(0.4, 0, 0.2, 1) infinite,
     ai-particle-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Efecto hover suave */
 .ai-icon-sparkle:hover {
   transform: scale(1.15) !important;
 }
 
 /* ========================================
-   🎴 PROJECT CARD STYLES
+   🌍 GLOBAL SCROLLBAR
    ======================================== */
-
-/* Forzar color blanco en títulos de proyectos */
-[class*="ProjectItemCard"] h3,
-.project-card-title {
-  color: white !important;
-}
-/* Scrollbar styling for better appearance in dark mode */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -1111,7 +755,6 @@ input[type="number"] {
   background-clip: padding-box;
 }
 
-/* Firefox scrollbar */
 * {
   scrollbar-color: hsl(0, 0%, 30%) transparent;
   scrollbar-width: thin;
@@ -1119,4 +762,110 @@ input[type="number"] {
 
 .dark * {
   scrollbar-color: hsl(0, 0%, 25%) transparent;
+}
+
+/* ========================================
+   🎬 KEYFRAME ANIMATIONS
+   ======================================== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-horizontal {
+  0%, 100% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(20px);
+  }
+}
+
+@keyframes float-vertical {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes float-diagonal {
+  0%, 100% {
+    transform: translate(0px, 0px);
+  }
+  25% {
+    transform: translate(10px, -8px);
+  }
+  50% {
+    transform: translate(-5px, -12px);
+  }
+  75% {
+    transform: translate(-10px, 5px);
+  }
+}
+
+@keyframes border-glow {
+  0% {
+    border-color: rgba(var(--accent-rgb), 0.2);
+    box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.1);
+  }
+  50% {
+    border-color: rgba(var(--accent-rgb), 0.6);
+    box-shadow: 0 0 8px 2px rgba(var(--accent-rgb), 0.2);
+  }
+  100% {
+    border-color: rgba(var(--accent-rgb), 0.2);
+    box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.1);
+  }
+}
+
+@keyframes accentFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes borderPulse {
+  0%, 100% {
+    border-color: rgba(var(--accent-rgb), 0.3);
+  }
+  50% {
+    border-color: rgba(var(--accent-rgb), 0.6);
+  }
+}
+
+@keyframes ai-icon-breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes ai-particle-pulse {
+  0%, 100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.accent-fade-in {
+  animation: accentFadeIn 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accent-border-pulse {
+  animation: borderPulse 3s ease-in-out infinite;
 }
