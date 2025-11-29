@@ -15,7 +15,7 @@ export function SectionHeader({ title, subtitle, description }: SectionHeaderPro
         </p>
       )}
       {title && (
-        <h2 className="text-4xl sm:text-7xl font-bold uppercase tracking-tight text-white leading-tight">
+        <h2 className="text-4xl sm:text-7xl font-bold uppercase tracking-tight text-foreground leading-tight">
           {title}
         </h2>
       )}
