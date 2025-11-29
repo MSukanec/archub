@@ -97,6 +97,7 @@ export function CoursesCatalogContent({ mode, showTabs = true }: CoursesCatalogC
   return (
     <UnifiedCourseGrid 
       courses={filteredCourses}
+      mode={mode}
       isLoading={isLoading}
       showTabs={showTabs && isAuthenticated}
       activeTab={activeTab}

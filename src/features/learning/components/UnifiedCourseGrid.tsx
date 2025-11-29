@@ -3,6 +3,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { BookOpen } from 'lucide-react';
 import { Tabs } from '@/components/ui-custom/Tabs';
 
+type CourseMode = 'public' | 'dashboard';
+
 interface CourseWithEnrollment {
   id: string;
   slug: string;
@@ -26,6 +28,7 @@ interface CourseWithEnrollment {
 
 interface UnifiedCourseGridProps {
   courses: CourseWithEnrollment[];
+  mode?: CourseMode;
   isLoading?: boolean;
   showTabs?: boolean;
   activeTab?: string;
@@ -52,6 +55,7 @@ function CourseCardSkeleton() {
 
 export function UnifiedCourseGrid({
   courses,
+  mode = 'dashboard',
   isLoading = false,
   showTabs = false,
   activeTab = 'all',
@@ -59,7 +63,6 @@ export function UnifiedCourseGrid({
   enrolledCount = 0,
   completedCount = 0,
 }: UnifiedCourseGridProps) {
-  // Loading State - Show 3 skeleton cards
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -83,7 +86,6 @@ export function UnifiedCourseGrid({
     );
   }
 
-  // Empty State
   if (!courses || courses.length === 0) {
     return (
       <div className="space-y-6">
@@ -113,7 +115,6 @@ export function UnifiedCourseGrid({
     );
   }
 
-  // Courses Grid
   return (
     <div className="space-y-6">
       {showTabs && onTabChange && (
@@ -135,11 +136,10 @@ export function UnifiedCourseGrid({
           <UnifiedCourseCard
             key={course.id}
             course={course}
+            mode={mode}
             isEnrolled={course.isEnrolled || false}
             progress={course.progress}
             onViewCourse={course.onViewCourse}
-            onBuyCourse={course.onBuyCourse}
-            showCartIcon={course.showCartIcon}
           />
         ))}
       </div>

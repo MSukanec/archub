@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { BookOpen, Award, Eye } from 'lucide-react';
 
+type CourseMode = 'public' | 'dashboard';
+
 interface UnifiedCourseCardProps {
   course: {
     id: string;
@@ -17,6 +19,7 @@ interface UnifiedCourseCardProps {
     instructor_title?: string | null;
     badge_text?: string | null;
   };
+  mode?: CourseMode;
   isEnrolled?: boolean;
   progress?: {
     completed: number;
@@ -28,6 +31,7 @@ interface UnifiedCourseCardProps {
 
 export function UnifiedCourseCard({
   course,
+  mode = 'dashboard',
   isEnrolled = false,
   progress,
   onViewCourse,
@@ -35,13 +39,19 @@ export function UnifiedCourseCard({
   const [, navigate] = useLocation();
   const hasProgress = progress && progress.percentage > 0;
   
-  // Unified card design - always the same structure
+  const courseInfoUrl = mode === 'public' 
+    ? `/cursos/${course.slug}` 
+    : `/cursos/${course.slug}`;
+  
+  const courseLearningUrl = mode === 'public'
+    ? `/cursos/${course.slug}`
+    : `/learning/courses/${course.slug}`;
+  
   const cardContent = (
     <Card 
       className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden"
       data-testid={`card-course-${course.id}`}
     >
-      {/* Cover Image */}
       <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
         {course.cover_url ? (
           <img
@@ -54,7 +64,6 @@ export function UnifiedCourseCard({
             <BookOpen className="w-16 h-16 text-primary/30" />
           </div>
         )}
-        {/* Badge Overlay */}
         {course.badge_text && (
           <div className="absolute top-3 left-3">
             <Badge variant="secondary" className="px-3 py-1 shadow-md">
@@ -65,7 +74,6 @@ export function UnifiedCourseCard({
         )}
       </div>
 
-      {/* Course Info */}
       <CardHeader className="pb-3">
         <h3 className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-colors">
           {course.title}
@@ -87,11 +95,9 @@ export function UnifiedCourseCard({
         )}
       </CardContent>
 
-      {/* Footer - Different content based on enrollment */}
       <CardFooter className="pt-3 border-t flex-col gap-3">
         {isEnrolled ? (
           <>
-            {/* Progress Section */}
             {hasProgress && (
               <div className="w-full space-y-2">
                 <div className="flex items-center justify-between text-xs">
@@ -102,13 +108,12 @@ export function UnifiedCourseCard({
               </div>
             )}
             
-            {/* Info Button - Secondary */}
             <Button 
               variant="secondary"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                navigate(`/cursos/${course.slug}`);
+                navigate(courseInfoUrl);
               }}
               className="w-full rounded-lg"
               size="sm"
@@ -117,12 +122,15 @@ export function UnifiedCourseCard({
               Ver Información
             </Button>
             
-            {/* Action Button */}
             <Button 
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                onViewCourse?.();
+                if (onViewCourse) {
+                  onViewCourse();
+                } else {
+                  navigate(courseLearningUrl);
+                }
               }}
               className="w-full gap-2"
               size="sm"
@@ -133,7 +141,6 @@ export function UnifiedCourseCard({
             </Button>
           </>
         ) : (
-          /* Not enrolled - show price */
           <div className="w-full flex justify-between items-center">
             {course.price ? (
               <div className="flex flex-col">
@@ -152,11 +159,21 @@ export function UnifiedCourseCard({
     </Card>
   );
 
-  // If not enrolled, wrap in Link
+  const cardUrl = mode === 'public' ? `/cursos/${course.slug}` : `/learning/courses/${course.slug}`;
+
   if (!isEnrolled) {
-    return <Link href={`/cursos/${course.slug}`}>{cardContent}</Link>;
+    return <Link href={cardUrl}>{cardContent}</Link>;
   }
 
-  // If enrolled, return card with onClick handler
-  return <div onClick={onViewCourse}>{cardContent}</div>;
+  return (
+    <div onClick={() => {
+      if (onViewCourse) {
+        onViewCourse();
+      } else {
+        navigate(courseLearningUrl);
+      }
+    }}>
+      {cardContent}
+    </div>
+  );
 }
