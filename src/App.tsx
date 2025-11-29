@@ -18,6 +18,7 @@ import Contact from "@/pages/public/Contact";
 import CourseLanding from "@/pages/public/CourseLanding";
 import CourseCatalog from "@/pages/public/CourseCatalog";
 import FoundersPage from "@/pages/public/FoundersPage";
+import PricingPlanPublic from "@/pages/public/PricingPlan";
 
 // Protected Pages
 
@@ -147,6 +148,7 @@ function Router() {
       <Switch>
         {/* Public Routes */}
         <Route path="/" component={Landing} />
+        <Route path="/precios" component={PricingPlanPublic} />
         <Route path="/founders" component={FoundersPage} />
         <Route path="/cursos" component={CourseCatalog} />
         <Route path="/cursos/:slug" component={CourseLanding} />

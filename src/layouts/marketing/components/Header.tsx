@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { Menu, X, Home, LogOut, User, BookOpen, Sparkles, HelpCircle, Mail } from "lucide-react";
+import { Menu, X, Home, LogOut, User, BookOpen, Sparkles, HelpCircle, Mail, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from "@/stores/authStore";
@@ -24,6 +24,7 @@ const DEFAULT_NAVIGATION: Array<{ label: string; href: string }> = [
   { label: "Inicio", href: "/" },
   { label: "Cursos", href: "/cursos" },
   { label: "Fundadores", href: "/founders" },
+  { label: "Precios", href: "/precios" },
   { label: "Contacto", href: "/contact" }
 ];
 
@@ -123,6 +124,7 @@ export function Header({ navigation }: HeaderProps) {
     if (lower.includes('inicio')) return Home;
     if (lower.includes('curso')) return BookOpen;
     if (lower.includes('fundador')) return Sparkles;
+    if (lower.includes('precio')) return CreditCard;
     if (lower.includes('característica')) return Sparkles;
     if (lower.includes('ayuda') || lower.includes('faq')) return HelpCircle;
     if (lower.includes('contacto')) return Mail;
