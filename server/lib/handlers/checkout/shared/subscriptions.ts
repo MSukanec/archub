@@ -1,5 +1,213 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
+export type ScheduledDowngradeParams = {
+  organizationId: string;
+  oldSubscriptionId: string;
+  newPlanId: string;
+  oldPlanId: string;
+};
+
+export type ScheduledDowngradeResult = {
+  success: boolean;
+  newSubscriptionId?: string;
+  error?: string;
+  details: {
+    from_plan_id: string;
+    to_plan_id: string;
+    from_plan_name?: string;
+    to_plan_name?: string;
+  };
+};
+
+/**
+ * Execute a scheduled plan switch (downgrade) without requiring a new payment.
+ * This is used by the cron job to process downgrades when subscriptions expire.
+ * 
+ * IMPORTANT: Only FREE plan downgrades are executed automatically.
+ * Downgrades to paid plans require manual action (user must pay).
+ */
+export async function executeScheduledPlanSwitch(
+  supabase: SupabaseClient,
+  params: ScheduledDowngradeParams
+): Promise<ScheduledDowngradeResult> {
+  const { organizationId, oldSubscriptionId, newPlanId, oldPlanId } = params;
+
+  const result: ScheduledDowngradeResult = {
+    success: false,
+    details: {
+      from_plan_id: oldPlanId,
+      to_plan_id: newPlanId,
+    },
+  };
+
+  try {
+    const { data: newPlan, error: planError } = await supabase
+      .from('plans')
+      .select('id, name, slug, monthly_amount, annual_amount')
+      .eq('id', newPlanId)
+      .single();
+
+    if (planError || !newPlan) {
+      result.error = `Plan not found: ${newPlanId}`;
+      return result;
+    }
+
+    const { data: oldPlan } = await supabase
+      .from('plans')
+      .select('name')
+      .eq('id', oldPlanId)
+      .single();
+
+    result.details.from_plan_name = oldPlan?.name || 'Unknown';
+    result.details.to_plan_name = newPlan.name;
+
+    const isFree = newPlan.slug === 'free';
+    
+    if (!isFree) {
+      const { data: freePlan } = await supabase
+        .from('plans')
+        .select('id, name')
+        .eq('slug', 'free')
+        .single();
+
+      if (!freePlan) {
+        result.error = `Automatic downgrade to paid plans not supported and FREE plan not found.`;
+        return result;
+      }
+
+      result.details.to_plan_id = freePlan.id;
+      result.details.to_plan_name = freePlan.name;
+      
+      const expiresAt = new Date();
+      expiresAt.setFullYear(expiresAt.getFullYear() + 100);
+
+      const { data: newSubscription, error: createError } = await supabase
+        .from('organization_subscriptions')
+        .insert({
+          organization_id: organizationId,
+          plan_id: freePlan.id,
+          payment_id: null,
+          status: 'active',
+          billing_period: 'annual',
+          started_at: new Date().toISOString(),
+          expires_at: expiresAt.toISOString(),
+          amount: 0,
+          currency: 'USD',
+          scheduled_downgrade_plan_id: null,
+        })
+        .select()
+        .single();
+
+      if (createError || !newSubscription) {
+        result.error = `Failed to create FREE subscription: ${createError?.message}`;
+        return result;
+      }
+
+      result.newSubscriptionId = newSubscription.id;
+
+      const { error: orgError } = await supabase
+        .from('organizations')
+        .update({ plan_id: freePlan.id })
+        .eq('id', organizationId);
+
+      if (orgError) {
+        await supabase
+          .from('organization_subscriptions')
+          .delete()
+          .eq('id', newSubscription.id);
+        
+        result.error = `Failed to update organization plan: ${orgError.message}`;
+        return result;
+      }
+
+      const { error: expireError } = await supabase
+        .from('organization_subscriptions')
+        .update({ 
+          status: 'expired', 
+          cancelled_at: new Date().toISOString(),
+          scheduled_downgrade_plan_id: null,
+        })
+        .eq('id', oldSubscriptionId);
+
+      if (expireError) {
+        console.error('[executeScheduledPlanSwitch] Failed to expire old subscription:', expireError);
+        result.error = `Switched to FREE but failed to expire old subscription: ${expireError.message}`;
+        result.success = false;
+        return result;
+      }
+
+      result.error = `Downgrade to paid plan ${newPlan.name} not supported. Switched to FREE instead.`;
+      result.success = true;
+      return result;
+    }
+
+    const expiresAt = new Date();
+    expiresAt.setFullYear(expiresAt.getFullYear() + 100);
+
+    const { data: newSubscription, error: createError } = await supabase
+      .from('organization_subscriptions')
+      .insert({
+        organization_id: organizationId,
+        plan_id: newPlanId,
+        payment_id: null,
+        status: 'active',
+        billing_period: 'annual',
+        started_at: new Date().toISOString(),
+        expires_at: expiresAt.toISOString(),
+        amount: 0,
+        currency: 'USD',
+        scheduled_downgrade_plan_id: null,
+      })
+      .select()
+      .single();
+
+    if (createError || !newSubscription) {
+      result.error = `Failed to create new subscription: ${createError?.message}`;
+      return result;
+    }
+
+    result.newSubscriptionId = newSubscription.id;
+
+    const { error: orgError } = await supabase
+      .from('organizations')
+      .update({ plan_id: newPlanId })
+      .eq('id', organizationId);
+
+    if (orgError) {
+      await supabase
+        .from('organization_subscriptions')
+        .delete()
+        .eq('id', newSubscription.id);
+      
+      result.error = `Failed to update organization plan: ${orgError.message}`;
+      return result;
+    }
+
+    const { error: expireError } = await supabase
+      .from('organization_subscriptions')
+      .update({ 
+        status: 'expired', 
+        cancelled_at: new Date().toISOString(),
+        scheduled_downgrade_plan_id: null,
+      })
+      .eq('id', oldSubscriptionId);
+
+    if (expireError) {
+      console.error('[executeScheduledPlanSwitch] Failed to expire old subscription:', expireError);
+      result.error = `Plan switched successfully but failed to expire old subscription: ${expireError.message}`;
+      result.success = false;
+      return result;
+    }
+
+    result.success = true;
+    return result;
+
+  } catch (error: any) {
+    result.error = `Unexpected error: ${error.message}`;
+    return result;
+  }
+}
+
 export type SubscriptionUpgradeParams = {
   organizationId: string;
   planId: string;

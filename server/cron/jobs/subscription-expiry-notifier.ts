@@ -1,11 +1,21 @@
 import { Resend } from 'resend';
 import { render } from '@react-email/render';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import SubscriptionExpiryEmail from '../../../src/emails/SubscriptionExpiryEmail.js';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const supabaseUrl = process.env.VITE_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+function createServiceSupabaseClient(): SupabaseClient | null {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('[SubscriptionNotifier] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+    return null;
+  }
+  
+  return createClient(supabaseUrl, supabaseServiceKey);
+}
 
 type NotificationType = '7_days_before' | '3_days_before' | '1_day_before' | 'expired';
 
@@ -24,9 +34,6 @@ interface NotificationResult {
   }>;
 }
 
-function createServiceSupabaseClient() {
-  return createClient(supabaseUrl, supabaseServiceKey);
-}
 
 function getDaysRemaining(expiresAt: Date): number {
   const now = new Date();
@@ -69,6 +76,12 @@ export async function runSubscriptionExpiryNotifier(): Promise<NotificationResul
   }
 
   const supabase = createServiceSupabaseClient();
+  
+  if (!supabase) {
+    console.error('[SubscriptionNotifier] Could not create Supabase client');
+    return result;
+  }
+  
   const resend = new Resend(RESEND_API_KEY);
 
   try {
