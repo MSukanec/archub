@@ -5,9 +5,9 @@ export default function PricingPlanPublic() {
   return (
     <MarketingLayout
       headerNavigation={[
-        { label: "Inicio", href: "/" },
         { label: "Cursos", href: "/cursos" },
         { label: "Fundadores", href: "/founders" },
+        { label: "Precios", href: "/precios" },
         { label: "Contacto", href: "/contact" }
       ]}
       seo={{

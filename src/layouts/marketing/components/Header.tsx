@@ -19,9 +19,8 @@ interface HeaderProps {
   navigation?: Array<{ label: string; href: string }>;
 }
 
-// Navegación por defecto agnóstica (siempre igual en todas las páginas públicas)
+// Navegación por defecto para páginas públicas (sin "Inicio" - el logo lleva a la landing)
 const DEFAULT_NAVIGATION: Array<{ label: string; href: string }> = [
-  { label: "Inicio", href: "/" },
   { label: "Cursos", href: "/cursos" },
   { label: "Fundadores", href: "/founders" },
   { label: "Precios", href: "/precios" },
@@ -115,8 +114,13 @@ export function Header({ navigation }: HeaderProps) {
   };
 
   const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Si estamos en la landing (/), hacer scroll al top
+    // Si estamos en otra página, navegar a la landing
+    if (window.location.pathname === '/') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    // Si no estamos en la landing, dejar que el link navegue normalmente a "/"
   };
 
   const getIconForNavItem = (label: string) => {

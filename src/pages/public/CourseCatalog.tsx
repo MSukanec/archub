@@ -4,6 +4,12 @@ import { CoursesCatalogContent } from '@/features/shared-content/courses';
 export default function CourseCatalog() {
   return (
     <MarketingLayout
+      headerNavigation={[
+        { label: "Cursos", href: "/cursos" },
+        { label: "Fundadores", href: "/founders" },
+        { label: "Precios", href: "/precios" },
+        { label: "Contacto", href: "/contact" }
+      ]}
       seo={{
         title: "Cursos Online | Seencel",
         description: "Explora nuestro catálogo de cursos profesionales. Aprende a tu ritmo con los mejores instructores.",

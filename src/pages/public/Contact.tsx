@@ -147,8 +147,8 @@ export default function Contact() {
       <MarketingLayout
         headerNavigation={[
           { label: "Cursos", href: "/cursos" },
-          { label: "Características", href: "/#features" },
-          { label: "Capacidades", href: "/#capabilities" },
+          { label: "Fundadores", href: "/founders" },
+          { label: "Precios", href: "/precios" },
           { label: "Contacto", href: "/contact" },
         ]}
         seo={{
@@ -179,8 +179,8 @@ export default function Contact() {
     <MarketingLayout
       headerNavigation={[
         { label: "Cursos", href: "/cursos" },
-        { label: "Características", href: "/#features" },
-        { label: "Capacidades", href: "/#capabilities" },
+        { label: "Fundadores", href: "/founders" },
+        { label: "Precios", href: "/precios" },
         { label: "Contacto", href: "/contact" },
       ]}
       seo={{
