@@ -7,9 +7,6 @@ export { SupportConversationStartModal } from './modals/admin/SupportConversatio
 export { AnnouncementFormModal } from './modals/admin/AnnouncementFormModal';
 export { ChangelogFormModal } from './modals/admin/ChangelogFormModal';
 
-// Auth Modals
-export { AuthModal } from './modals/auth/AuthModal';
-
 // Plan Modals
 export { PlanUpgradeModal } from './modals/plans/PlanUpgradeModal';
 export { DowngradeModal } from './modals/DowngradeModal';

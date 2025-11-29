@@ -10,7 +10,7 @@ import { useOnboardingStore } from "@/stores/onboardingStore";
 import { useThemeStore } from "@/stores/themeStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { AuthModal, Step1UserData } from "@/features/users";
+import { Step1UserData } from "@/features/users";
 import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
 
 export default function Onboarding() {
@@ -33,11 +33,9 @@ export default function Onboarding() {
   }
 
   if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <AuthModal open={true} onOpenChange={() => {}} />
-      </div>
-    );
+    // Redirect to login if not authenticated
+    navigate('/login');
+    return <LoadingSpinner fullScreen size="lg" />;
   }
 
   // Initialize form data with existing user data if available

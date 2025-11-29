@@ -1,9 +1,8 @@
-import { useEffect, useState, useRef, ReactNode } from 'react';
+import { useEffect, useRef, ReactNode } from 'react';
 import { useLocation } from 'wouter';
 import { useAuthStore } from '@/stores/authStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContextInit } from '@/hooks/use-project-context-init';
-import { AuthModal } from '../../modals/auth/AuthModal';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 interface AuthGuardProps {
@@ -29,7 +28,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
   
   const { data: userData, isLoading: userDataLoading } = useCurrentUser();
   const [location, navigate] = useLocation();
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const lastNavigationRef = useRef<string | null>(null);
   
   // Initialize project context when organization changes
@@ -57,23 +55,18 @@ export function AuthGuard({ children }: AuthGuardProps) {
     if (!user) {
       // Allow access to public routes
       if (isPublicRoute) {
-        setShowAuthModal(false);
         return;
       }
       
-      // Show auth modal for protected routes
-      setShowAuthModal(true);
-      
-      // Redirect to landing page when logged out
-      if (!isPublicRoute && lastNavigationRef.current !== '/') {
-        lastNavigationRef.current = '/';
-        navigate('/');
+      // Redirect to login for protected routes
+      if (!isPublicRoute && lastNavigationRef.current !== '/login') {
+        lastNavigationRef.current = '/login';
+        navigate('/login');
       }
       return;
     }
 
     // CASE 2: User exists - Handle authenticated state
-    setShowAuthModal(false);
 
     // WAIT for userData to load before making any routing decisions
     if (!userData) {
@@ -163,19 +156,9 @@ export function AuthGuard({ children }: AuthGuardProps) {
     return <LoadingSpinner fullScreen size="lg" />;
   }
 
-  // Auth modal for unauthenticated users on protected routes
+  // Show loading while userData is being fetched for authenticated users on protected routes
   const isPublicRoute = PUBLIC_ROUTES.includes(location) || 
     PUBLIC_ROUTE_PREFIXES.some(prefix => location.startsWith(prefix));
-  
-  if (!user && showAuthModal && !isPublicRoute) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <AuthModal open={true} onOpenChange={setShowAuthModal} />
-      </div>
-    );
-  }
-
-  // Show loading while userData is being fetched for authenticated users on protected routes
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(location);
   
   if (user && userDataLoading && !isPublicRoute && !isOnboardingRoute) {
