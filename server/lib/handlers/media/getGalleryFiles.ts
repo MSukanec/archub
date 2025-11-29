@@ -12,7 +12,6 @@ interface GalleryFile {
   organization_id: string;
   project_id: string | null;
   site_log_id: string | null;
-  movement_id: string | null;
   contact_id: string | null;
   course_lesson_id: string | null;
   general_cost_payment_id: string | null;
@@ -78,7 +77,6 @@ export async function getGalleryFiles(
         organization_id,
         project_id,
         site_log_id,
-        movement_id,
         contact_id,
         course_lesson_id,
         general_cost_payment_id,
