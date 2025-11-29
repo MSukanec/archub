@@ -250,9 +250,9 @@ function CourseBonusSection() {
         <div className="max-w-4xl mx-auto">
           {/* Badge */}
           <div className="flex justify-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 border border-primary/30">
-              <Gift className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-primary">Bonus de Capacitación Actual</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/20">
+              <Gift className="h-3.5 w-3.5 text-white" />
+              <span className="text-xs font-medium text-white">Bonus de Capacitación Actual</span>
             </div>
           </div>
 
@@ -269,10 +269,11 @@ function CourseBonusSection() {
               className="text-lg sm:text-xl mb-8 max-w-3xl mx-auto"
               style={{ color: '#d0d0d0' }}
             >
-              Como miembro fundador, obtienes acceso <strong className="text-white">vitalicio y gratuito</strong> al 
-              curso más completo de Archicad en español. Un programa valorado en{' '}
-              <span className="text-primary font-bold">USD $169/año</span> que será tuyo para siempre 
-              mientras mantengas tu suscripción activa.
+              Como miembro fundador, tienes acceso <strong className="text-white">gratuito e incluido</strong> al 
+              bonus de capacitación vigente. Actualmente es el curso más completo de Archicad en español, 
+              un programa valorado en{' '}
+              <span className="text-primary font-bold">USD $169/año</span> que podrás disfrutar 
+              sin costo adicional mientras mantengas tu suscripción activa.
             </p>
 
             {/* Stats */}
@@ -301,7 +302,7 @@ function CourseBonusSection() {
                 </div>
               </div>
               <p className="text-sm text-white/70">
-                Acceso permanente mientras seas miembro fundador. Sin pagos adicionales, sin renovaciones.
+                Acceso permanente mientras seas miembro fundador. Para todos los miembros de la organización. Sin pagos adicionales, sin renovaciones.
               </p>
             </div>
 
@@ -309,8 +310,7 @@ function CourseBonusSection() {
             <Link href={`/cursos/${courseSlug}`}>
               <Button
                 size="lg"
-                variant="outline"
-                className="px-8 py-6 text-lg font-medium bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white"
+                className="px-8 py-6 text-lg font-medium"
                 data-testid="button-course-bonus-cta"
               >
                 <Play className="mr-2 h-5 w-5" />
