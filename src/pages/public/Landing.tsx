@@ -188,6 +188,7 @@ export default function Landing() {
         { label: "Capacidades", href: "#capabilities" },
         { label: "Cursos", href: "/cursos" },
         { label: "Fundadores", href: "/founders" },
+        { label: "Precios", href: "/precios" },
         { label: "Contacto", href: "/contact" }
       ]}
       heroSlot={<HeroSectionComponent />}
