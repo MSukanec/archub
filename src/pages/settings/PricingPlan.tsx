@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { DashboardLayout as Layout } from "@/layouts";
+import { DashboardLayout as Layout, HeroLayout } from "@/layouts";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -244,10 +244,12 @@ export default function PricingPlan() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps}>
-        <div className="flex items-center justify-center h-96">
-          <LoadingSpinner />
-        </div>
+      <Layout hideHeader>
+        <HeroLayout>
+          <div className="flex items-center justify-center h-96">
+            <LoadingSpinner />
+          </div>
+        </HeroLayout>
       </Layout>
     );
   }
@@ -315,8 +317,9 @@ export default function PricingPlan() {
   ];
 
   return (
-    <Layout headerProps={headerProps}>
-      <div className="max-w-7xl mx-auto space-y-16 py-12 px-4">
+    <Layout hideHeader>
+      <HeroLayout>
+        <div className="max-w-7xl mx-auto space-y-16 py-12 px-4">
         
         {/* Banner Fundador - solo si facturación es anual */}
         {billingPeriod === 'annual' && (
@@ -1011,6 +1014,7 @@ export default function PricingPlan() {
           }}
         />
       )}
+      </HeroLayout>
     </Layout>
   );
 }
