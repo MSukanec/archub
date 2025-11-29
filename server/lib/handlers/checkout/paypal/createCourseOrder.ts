@@ -71,13 +71,6 @@ export async function createCourseOrder(
 
     const user_id = userRecord.id;
 
-    console.log("[PayPal create-course-order] Request received:", {
-      user_id,
-      course_slug,
-      hasCouponCode: !!code,
-      couponCode: code ? code.trim() : null,
-    });
-
     // Resolve course_id from course_slug and get price in USD
     const { data: course, error: courseError } = await supabase
       .from("courses")
@@ -116,14 +109,6 @@ export async function createCourseOrder(
 
     // Validate coupon if provided
     if (code && code.trim()) {
-      console.log("[PayPal create-course-order] Validating coupon:", {
-        code: code.trim(),
-        user_id,
-        course_id: course.id,
-        price: amount,
-        currency: "USD",
-      });
-
       const { data: validationResult, error: couponError } = await supabase.rpc(
         "validate_coupon",
         {
@@ -167,13 +152,6 @@ export async function createCourseOrder(
 
       // If coupon gives 100% discount, return special response for free enrollment
       if (!Number.isFinite(finalPrice) || finalPrice <= 0) {
-        console.log(
-          "[PayPal create-course-order] 100% discount coupon - free enrollment:",
-          {
-            code: code.trim(),
-            coupon_id: validationResult.coupon_id,
-          }
-        );
         return {
           success: true,
           freeEnrollment: true,
@@ -183,24 +161,7 @@ export async function createCourseOrder(
       }
 
       amount = finalPrice;
-      console.log("[PayPal create-course-order] Coupon applied:", {
-        code: code.trim(),
-        discount: validationResult.discount,
-        final_price: amount,
-      });
     }
-
-    console.log(
-      "[PayPal create-course-order] Course resolved with server-side pricing:",
-      {
-        course_id: course.id,
-        course_title: course.title,
-        amount,
-        currency: "USD",
-        hasCoupon: !!couponData,
-        couponCode: couponData ? code.trim() : null,
-      }
-    );
 
     logPayPalMode("create-course-order");
 
@@ -254,14 +215,6 @@ export async function createCourseOrder(
       },
     };
 
-    console.log("[PayPal create-course-order] Creating order for:", {
-      user_id,
-      productSlug,
-      amount,
-      return_url,
-      cancel_url,
-    });
-
     const result = await createPayPalOrder(orderBody);
 
     if (!result.success) {
@@ -273,8 +226,6 @@ export async function createCourseOrder(
         details: result.body,
       };
     }
-
-    console.log("[PayPal create-course-order] ✅ Order created:", result.orderId);
 
     return {
       success: true,

@@ -18,8 +18,6 @@ export async function deleteMediaFile(
   const { linkId, organizationId } = params;
 
   try {
-    console.log('[deleteMediaFile] Attempting to delete link:', linkId);
-
     const { data: linkData, error: fetchLinkError } = await supabase
       .from('media_links')
       .select('id, media_file_id, organization_id')
@@ -46,8 +44,6 @@ export async function deleteMediaFile(
       console.error('[deleteMediaFile] Error deleting link:', deleteLinkError);
       return { success: false, error: 'Failed to delete link' };
     }
-
-    console.log('[deleteMediaFile] Link deleted successfully');
 
     const { data: remainingLinks, error: checkLinksError } = await supabase
       .from('media_links')
@@ -94,7 +90,6 @@ export async function deleteMediaFile(
           return { success: true, deletedFileFromStorage: false };
         }
 
-        console.log('[deleteMediaFile] File removed from storage successfully');
         return { success: true, deletedFileFromStorage: true };
       }
     }

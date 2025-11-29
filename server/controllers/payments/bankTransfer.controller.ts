@@ -173,11 +173,8 @@ export async function upload(req: Request, res: Response) {
 
       if (session?.course_id) {
         courseId = session.course_id;
-        console.log('[bank-transfer/upload] Fallback successful, found course_id:', courseId);
       }
     }
-
-    console.log('[bank-transfer/upload] Using course_id:', courseId);
 
     if (!courseId) {
       console.error('❌ [bank-transfer/upload] Missing courseId - cannot process upload');
@@ -241,8 +238,6 @@ export async function upload(req: Request, res: Response) {
       }
 
       paymentId = payment.id;
-    } else {
-      console.log('[bank-transfer/upload] Payment already exists, reusing:', paymentId);
     }
 
     const { error: updateError } = await authenticatedSupabase

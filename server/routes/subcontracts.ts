@@ -36,8 +36,6 @@ export function registerSubcontractRoutes(app: Express, deps: RouteDeps): void {
         return res.status(400).json({ error: "Missing or invalid movements array" });
       }
 
-      console.log('Received bulk movements:', movements.length);
-
       // Use authenticated client with user's token
       const token = user_token || getToken(req.headers.authorization);
       if (!token) {
@@ -56,7 +54,6 @@ export function registerSubcontractRoutes(app: Express, deps: RouteDeps): void {
         return res.status(500).json({ error: "Failed to insert movements", details: error.message });
       }
 
-      console.log('Successfully inserted movements:', data?.length);
       res.json({ success: true, insertedCount: data?.length || 0, data });
     } catch (error) {
       console.error("Error in bulk movements endpoint:", error);
@@ -292,8 +289,6 @@ export function registerSubcontractRoutes(app: Express, deps: RouteDeps): void {
   app.delete("/api/subcontract-bids/:bidId", async (req, res) => {
     try {
       const { bidId } = req.params;
-      
-      console.log("Attempting to delete bid:", bidId);
 
       const token = getToken(req.headers.authorization);
       if (!token) {
@@ -328,7 +323,6 @@ export function registerSubcontractRoutes(app: Express, deps: RouteDeps): void {
 
       // Si es la oferta ganadora, limpiar la referencia primero
       if (subcontract.winner_bid_id === bidId) {
-        console.log("Cleaning winner reference for bid:", bidId);
         const { error: updateError } = await authenticatedSupabase
           .from('subcontracts')
           .update({ 
@@ -354,7 +348,6 @@ export function registerSubcontractRoutes(app: Express, deps: RouteDeps): void {
         return res.status(500).json({ error: "Failed to delete subcontract bid" });
       }
 
-      console.log("Successfully deleted bid:", bidId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting subcontract bid:", error);
@@ -730,8 +723,6 @@ export function registerSubcontractRoutes(app: Express, deps: RouteDeps): void {
   app.delete("/api/subcontracts/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      
-      console.log("Attempting to delete subcontract:", id);
 
       const token = getToken(req.headers.authorization);
       if (!token) {
@@ -798,7 +789,6 @@ export function registerSubcontractRoutes(app: Express, deps: RouteDeps): void {
         return res.status(500).json({ error: "Failed to delete subcontract" });
       }
 
-      console.log("Successfully deleted subcontract:", id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting subcontract:", error);

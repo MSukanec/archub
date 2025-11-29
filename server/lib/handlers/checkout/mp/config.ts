@@ -19,5 +19,4 @@ export function validateMPToken(): { valid: true } | { valid: false; error: stri
 }
 
 export function logMPMode(context: string): void {
-  console.log(`[MP ${context}] Modo: ${isTestMode ? '🧪 TEST' : '💰 PRODUCCIÓN'}`);
 }

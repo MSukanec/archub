@@ -165,7 +165,6 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
             userEmail: to,
           }) as any
         );
-        console.log('📧 Using WelcomeEmail template');
       } else if (template === 'purchase') {
         emailHtml = await render(
           PurchaseEmail({
@@ -175,10 +174,8 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
             transactionId: transactionId || 'N/A',
           }) as any
         );
-        console.log('📧 Using PurchaseEmail template');
       } else if (html) {
         emailHtml = html;
-        console.log('📧 Using raw HTML');
       } else {
         return res.status(400).json({
           ok: false,
@@ -201,8 +198,6 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
           error: userEmailResult.error.message
         });
       }
-
-      console.log('✅ User email sent successfully:', userEmailResult.data);
 
       // 2️⃣ Send admin notification if requested
       let adminEmailResult = null;
@@ -229,8 +224,6 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
 
         if (adminEmailResult.error) {
           console.error('❌ Resend error (admin email):', adminEmailResult.error);
-        } else {
-          console.log('✅ Admin notification sent:', adminEmailResult.data);
         }
       }
 
@@ -394,8 +387,6 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         }) as any
       );
 
-      console.log('📧 Sending admin bank transfer alert for transfer:', transferId);
-
       const result = await resend.emails.send({
         from: 'Seencel <sistema@seencel.com>',
         to: adminEmail,
@@ -410,8 +401,6 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
           error: result.error.message
         });
       }
-
-      console.log('✅ Admin bank transfer alert sent:', result.data);
 
       return res.json({
         ok: true,
@@ -437,8 +426,6 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
       const clientIP = normalizeIP(req.ip || req.headers['x-forwarded-for']);
       const tokenData = createContactToken(clientIP);
       
-      console.log('🔐 Contact token generated for IP:', clientIP.substring(0, 10) + '...');
-      
       return res.json(tokenData);
     } catch (error: any) {
       console.error('❌ Token generation error:', error);
@@ -451,8 +438,6 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
 
   // POST /api/contact - Public contact form endpoint
   app.post('/api/contact', async (req, res) => {
-    console.log('📬 Contact form submission received');
-
     try {
       const { firstName, lastName, email, company, phone, country, message, formStartTime, submittedAt, honeypot, contactToken } = req.body;
 
@@ -563,7 +548,6 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
       // This prevents replay attacks while allowing users to fix validation errors and retry
       if (tokenResult.nonce) {
         usedNonces.set(tokenResult.nonce, Date.now());
-        console.log('🔒 Nonce consumed after validation passed');
       }
 
       if (!RESEND_API_KEY) {
@@ -606,7 +590,6 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         });
       }
 
-      console.log('✅ Contact email sent:', result.data);
       return res.json({ ok: true, message: 'Mensaje enviado exitosamente' });
     } catch (error: any) {
       console.error('❌ Contact form error:', error);
@@ -619,8 +602,6 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
 
   // POST /api/webhooks/test-email - Test email connection
   app.post('/api/webhooks/test-email', async (req, res) => {
-    console.log('🔔 Test email webhook received!');
-
     try {
       if (!RESEND_API_KEY) {
         console.error('❌ RESEND_API_KEY not configured');
@@ -638,7 +619,6 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         html: '<p>¡Funciona! Tu backend Express en Replit puede enviar correos.</p>'
       });
 
-      console.log('✅ Test email sent:', data);
       return res.status(200).json({ message: 'Test exitoso', data });
     } catch (error: any) {
       console.error('❌ Error sending test email:', error);

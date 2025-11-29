@@ -446,8 +446,6 @@ export async function createMaterialPayment(
       exchange_rate: exchangeRate,
       created_by: orgAccessResult.memberId,
     };
-    
-    console.log('Inserting material payment with payload:', JSON.stringify(insertPayload, null, 2));
 
     const { data: newPayment, error: insertError } = await supabase
       .from('material_payments')

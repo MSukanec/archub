@@ -69,12 +69,6 @@ export async function successHandler(req: Request, res: Response) {
 
     const courseSlug = String(course_slug);
 
-    console.log("[MP success-handler] Payment success redirect:", { 
-      courseSlug, 
-      payment_id, 
-      status 
-    });
-
     return res.redirect(`/learning/courses/${courseSlug}?payment=success`);
   } catch (e: any) {
     console.error("[MP success-handler] Error:", e);

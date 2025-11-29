@@ -42,11 +42,5 @@ export async function registerMemberEvent(
 
   if (error) {
     console.error('[billing] Error registering member event:', error);
-  } else {
-    console.log('[billing] Member event registered:', {
-      organizationId: params.organizationId,
-      eventType: params.eventType,
-      memberId: params.memberId
-    });
   }
 }

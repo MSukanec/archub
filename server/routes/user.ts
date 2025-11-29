@@ -126,7 +126,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
       let userData, error;
       
       if (forceRefresh) {
-        console.log("Force refresh requested - calling RPC twice to ensure fresh data");
         // Call RPC twice to force refresh of cached data
         await authenticatedSupabase.rpc('get_user');
         const result = await authenticatedSupabase.rpc('get_user');
@@ -146,7 +145,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         
         // Special handling for newly registered users who might not have complete data yet
         if (error.message && error.message.includes('organization')) {
-          console.log("User appears to be newly registered without complete organization data");
           return res.status(404).json({ error: "User not found" });
         }
         
@@ -154,7 +152,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
       }
       
       if (!userData) {
-        console.log("No user data found");
         return res.status(404).json({ error: "User not found" });
       }
       
@@ -225,8 +222,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
       
       const authenticatedSupabase = createAuthenticatedClient(token);
 
-      console.log("Updating profile for user:", user_id);
-
       // Update user_data table - now includes first_name, last_name, birthdate, country and phone_e164
       if (birthdate !== undefined || country !== undefined || first_name !== undefined || last_name !== undefined || phone_e164 !== undefined) {
         // Check if user_data record exists
@@ -253,8 +248,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
           if (error) {
             console.error("Error updating user_data:", error);
             return res.status(500).json({ error: "Failed to update user data", details: error });
-          } else {
-            console.log("Updated user_data successfully");
           }
         } else {
           // Insert new record
@@ -268,8 +261,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
           if (error) {
             console.error("Error inserting user_data:", error);
             return res.status(500).json({ error: "Failed to insert user data", details: error });
-          } else {
-            console.log("Inserted user_data successfully");
           }
         }
       }
@@ -296,8 +287,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
           if (error) {
             console.error("Error updating user_preferences:", error);
             return res.status(500).json({ error: "Failed to update user preferences", details: error });
-          } else {
-            console.log("Updated user_preferences successfully");
           }
         } else {
           const { error } = await authenticatedSupabase
@@ -310,8 +299,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
           if (error) {
             console.error("Error inserting user_preferences:", error);
             return res.status(500).json({ error: "Failed to insert user preferences", details: error });
-          } else {
-            console.log("Inserted user_preferences successfully");
           }
         }
       }
@@ -331,8 +318,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
           if (error) {
             console.error("Error updating users table:", error);
             return res.status(500).json({ error: "Failed to update user profile", details: error });
-          } else {
-            console.log("Updated users table successfully");
           }
         }
       }
@@ -385,8 +370,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
 
       if (error) {
         if (error.code === 'PGRST116') { // No rows found
-          console.log("🔧 No preferences found, creating default ones for new user");
-          
           // Create default preferences for new user
           const { data: newPreferences, error: createError } = await authenticatedSupabase
             .from('user_organization_preferences')
@@ -461,7 +444,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
       }
 
       const user_id = dbUser.id;
-      console.log(`Updating organization for user ${user_id} to ${organization_id}`);
 
       // Verificar si existe el registro de user_preferences
       const { data: existingPrefs, error: checkError } = await authenticatedSupabase
@@ -566,8 +548,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
       
       const authenticatedSupabase = createAuthenticatedClient(token);
 
-      console.log("🔧 Updating user organization preferences", { user_id, organization_id, last_project_id });
-
       const { data, error } = await authenticatedSupabase
         .from('user_organization_preferences')
         .upsert(
@@ -589,7 +569,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         return res.status(500).json({ error: "Failed to update organization preferences" });
       }
 
-      console.log("🔧 Successfully updated user organization preferences", data);
       res.json({ success: true, data });
     } catch (error) {
       console.error("Error updating organization preferences:", error);
@@ -614,8 +593,6 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
       }
       
       const authenticatedSupabase = createAuthenticatedClient(token);
-
-      console.log("🔧 Getting user organization preferences", { user_id, organizationId });
 
       const { data, error } = await authenticatedSupabase
         .from('user_organization_preferences')

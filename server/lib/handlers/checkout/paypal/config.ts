@@ -19,5 +19,4 @@ export const PAYPAL_BASE_URL = isPayPalSandbox
   : "https://api-m.paypal.com";
 
 export function logPayPalMode(context: string): void {
-  console.log(`[PayPal ${context}] Modo: ${isPayPalSandbox ? '🧪 SANDBOX' : '💰 PRODUCTION'}`);
 }

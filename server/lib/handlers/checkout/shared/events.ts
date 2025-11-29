@@ -38,7 +38,5 @@ export async function logPaymentEvent(
   
   if (error) {
     console.error("[events] payment_events insert error:", error, insert);
-  } else {
-    console.log("[events] ✅ payment_event insertado");
   }
 }

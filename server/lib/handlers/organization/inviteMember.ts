@@ -55,8 +55,6 @@ export async function inviteMember(
     const roleName = roles?.name?.toLowerCase() || '';
     const isAdmin = roleName.includes("admin");
 
-    console.log("Admin check:", { roleName, isAdmin, userId });
-
     if (!isAdmin) {
       return {
         success: false,

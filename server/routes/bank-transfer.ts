@@ -214,11 +214,8 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         
         if (session?.course_id) {
           courseId = session.course_id;
-          console.log('[bank-transfer/upload] Fallback successful, found course_id:', courseId);
         }
       }
-      
-      console.log('[bank-transfer/upload] Using course_id:', courseId);
       
       // ⚠️ VALIDATE EARLY: No courseId = fail before any uploads
       if (!courseId) {
@@ -286,8 +283,6 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
         }
         
         paymentId = payment.id;
-      } else {
-        console.log('[bank-transfer/upload] Payment already exists, reusing:', paymentId);
       }
 
       // 2️⃣ Actualizar bank_transfer_payments con payment_id, image_bucket e image_path
@@ -327,7 +322,7 @@ export function registerBankTransferRoutes(app: Express, deps: RouteDeps) {
           receiptUrl: signedUrl,
         });
       } catch (whatsappError: any) {
-        console.log("WhatsApp notification skipped:", whatsappError?.message || "Twilio not configured");
+        // WhatsApp notification skipped - Twilio not configured or error occurred
       }
 
       return res.json({

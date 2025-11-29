@@ -75,8 +75,6 @@ export async function captureSubscriptionOrder(
       };
     }
 
-    console.log("[PayPal capture-subscription] Token:", token, "PayerID:", PayerID);
-
     // === CAPTURAR LA ORDEN EN PAYPAL ===
     // Solo capturamos la orden aquí. El webhook procesará todo lo demás.
     let captureData: any;
@@ -99,13 +97,6 @@ export async function captureSubscriptionOrder(
     const amountValue = captureObj?.amount?.value || null;
     const currencyCode = captureObj?.amount?.currency_code || null;
 
-    console.log(
-      "[PayPal capture-subscription] ✅ Order captured:",
-      orderId,
-      "Status:",
-      status
-    );
-
     // Parse custom_id to get subscription metadata
     // Format: auth_id|plan_id|organization_id|billing_period
     let authId: string | null = null;
@@ -121,13 +112,6 @@ export async function captureSubscriptionOrder(
         organizationId = parts[2] || null;
         billingPeriod =
           parts[3] === "monthly" || parts[3] === "annual" ? parts[3] : null;
-
-        console.log("[PayPal capture-subscription] Parsed metadata:", {
-          authId,
-          planId,
-          organizationId,
-          billingPeriod,
-        });
       }
     }
 
@@ -155,9 +139,6 @@ export async function captureSubscriptionOrder(
           authId,
           error: profileError,
         });
-        // Still show success to user - webhook will retry with user resolution
-        // The payment was captured in PayPal, so we can't fail here
-        console.log("[PayPal capture-subscription] ⚠️ User resolution failed, webhook will handle subscription creation");
         return {
           success: true,
           html: SUCCESS_HTML,
@@ -166,10 +147,6 @@ export async function captureSubscriptionOrder(
       }
       
       publicUserId = userProfile.id;
-      console.log("[PayPal capture-subscription] ✅ Resolved auth_id to user_id:", {
-        authId,
-        userId: publicUserId,
-      });
 
       // Log payment event for auditing
       await logPaymentEvent(supabase, "paypal", {
@@ -185,11 +162,7 @@ export async function captureSubscriptionOrder(
         currency: currencyCode,
       });
 
-      console.log("[PayPal capture-subscription] ✅ Payment event logged");
-
       // Insert payment with idempotency
-      console.log("[PayPal capture-subscription] Processing subscription payment...");
-
       const paymentResult = await insertPayment(supabase, "paypal", {
         providerPaymentId: providerPaymentId,
         userId: publicUserId, // ✅ CRITICAL: Pass resolved users.id
@@ -203,8 +176,6 @@ export async function captureSubscriptionOrder(
 
       // IDEMPOTENT: Only upgrade organization if payment was NEWLY inserted
       if (paymentResult.inserted && paymentResult.paymentId) {
-        console.log("[PayPal capture-subscription] ✅ Payment created, upgrading organization...");
-
         // Upgrade organization plan with UUID from payments table
         await upgradeOrganizationPlan(supabase, {
           organizationId: organizationId,
@@ -215,17 +186,10 @@ export async function captureSubscriptionOrder(
           currency: currencyCode || "USD",
         });
 
-        console.log("[PayPal capture-subscription] ✅ Organization updated");
         upgraded = true;
-      } else if (!paymentResult.inserted) {
-        console.log("[PayPal capture-subscription] ⏭️ Payment already exists (idempotent), skipping upgrade");
-      } else {
+      } else if (paymentResult.inserted && !paymentResult.paymentId) {
         console.error("[PayPal capture-subscription] ❌ No payment ID returned");
       }
-    } else {
-      console.log(
-        "[PayPal capture-subscription] ℹ️ Missing data or payment not completed, webhook will handle it"
-      );
     }
 
     return {

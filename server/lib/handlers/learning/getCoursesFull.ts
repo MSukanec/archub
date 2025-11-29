@@ -40,8 +40,6 @@ export async function getCoursesFull(
   try {
     const { supabase } = ctx;
 
-    console.log('[getCoursesFull] ===== FETCHING COURSES WITH IMAGES =====');
-
     const dbUser = await getAuthenticatedUser(ctx);
     if (!dbUser) {
       return {
@@ -97,12 +95,6 @@ export async function getCoursesFull(
         .not('image_bucket', 'is', null)
         .not('image_path', 'is', null)
     ]);
-
-    console.log('[getCoursesFull] Courses result:', coursesResult.error ? coursesResult.error : `${coursesResult.data?.length} courses`);
-    console.log('[getCoursesFull] Enrollments result:', enrollmentsResult.error ? enrollmentsResult.error : `${enrollmentsResult.data?.length} enrollments`);
-    console.log('[getCoursesFull] Progress result:', progressResult.error ? progressResult.error : `${progressResult.data?.length} progress records`);
-    console.log('[getCoursesFull] Course images result:', courseImagesResult.error ? courseImagesResult.error : `${courseImagesResult.data?.length} images`);
-    console.log('[getCoursesFull] Course details result:', courseDetailsResult.error ? courseDetailsResult.error : `${courseDetailsResult.data?.length} details`);
 
     if (coursesResult.error) {
       console.error('Error fetching courses:', coursesResult.error);

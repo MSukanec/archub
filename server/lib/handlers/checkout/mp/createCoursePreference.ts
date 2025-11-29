@@ -45,15 +45,6 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
 
   const user_id = user.id;
 
-  console.log('[MP create-course-preference] Request received:', {
-    user_id,
-    course_slug,
-    currency,
-    months,
-    hasCouponCode: !!code,
-    couponCode: code ? code.trim() : null
-  });
-
   try {
     // 5. Obtener curso y precio en USD
     const { data: course, error: courseError } = await supabase
@@ -98,12 +89,6 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
       // ✅ Cupón válido - Usar el precio final calculado por el RPC (con descuento aplicado)
       unit_price = Number(validationResult.final_price);
       couponData = validationResult;
-      console.log('[MP create-course-preference] ✅ Cupón válido - Descuento aplicado:', {
-        code: code.trim(),
-        original_price_usd: basePriceUsd,
-        discount_percent: validationResult.discount_percent,
-        final_price_usd: unit_price
-      });
     }
 
     // Convertir a ARS si es necesario
@@ -136,31 +121,10 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
         return { success: false, error: "Tasa de cambio no disponible o inválida", status: 500 };
       }
 
-      // 🔍 DEBUG PRE-CÁLCULO ARS
-      console.log('🔍 DEBUG PRE-CÁLCULO ARS:', {
-        usdPrice: unit_price,
-        rate: rate,
-        usdPriceIsFinite: Number.isFinite(unit_price),
-        rateIsFinite: Number.isFinite(rate)
-      });
-
       // Cálculo seguro
       const rawArsPrice = unit_price * rate;
 
-      // 🔍 DEBUG POST-CÁLCULO
-      console.log('🔍 DEBUG POST-CÁLCULO:', {
-        rawArsPrice,
-        isFinite: Number.isFinite(rawArsPrice)
-      });
-
       unit_price = Math.round(rawArsPrice);
-
-      console.log('[MP create-course-preference] Price converted to ARS:', {
-        usd_price: unit_price,
-        exchange_rate: rate,
-        raw_ars_price: rawArsPrice,
-        final_ars_price: unit_price
-      });
     } else {
       // Si es USD, validar que sea un número válido
       if (!Number.isFinite(unit_price)) {
@@ -186,7 +150,6 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
 
     // 10. Generar ID corto para external_reference (max 64 chars, solo alfanuméricos)
     const shortId = `mp_${nanoid(12)}`;
-    console.log("[MP create-course-preference] ID corto generado:", shortId);
 
     // 11. Construir URLs
     const urlContext = buildURLContext(req);
@@ -235,28 +198,6 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
       }
     };
 
-    console.log("[MP create-course-preference] Creando preferencia para:", { 
-      user_id, 
-      productSlug,
-      unit_price, 
-      currency,
-      hasCoupon: !!couponData,
-      couponCode: couponData ? code.trim() : null
-    });
-
-    // 🔍 LOG DEL JSON COMPLETO PARA MP (sin tokens sensibles)
-    const debugPrefBody = {
-      items: prefBody.items,
-      external_reference: prefBody.external_reference,
-      payer: prefBody.payer,
-      back_urls: prefBody.back_urls,
-      auto_return: prefBody.auto_return,
-      binary_mode: prefBody.binary_mode,
-      statement_descriptor: prefBody.statement_descriptor,
-      metadata: prefBody.metadata
-    };
-    console.log("[MP DEBUG] JSON Preferencia a enviar:", JSON.stringify(debugPrefBody, null, 2));
-
     // 12. Create MP preference
     const result = await createMPPreference(prefBody);
 
@@ -264,8 +205,6 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
       console.error("[MP create-course-preference] Error de Mercado Pago:", result.body);
       return { success: false, error: result.error, status: result.status };
     }
-
-    console.log("[MP create-course-preference] ✅ Preferencia creada:", result.preferenceId);
 
     // 13. Guardar datos en mp_course_preferences para que el webhook los lea
     const { error: insertError } = await supabase
@@ -285,8 +224,6 @@ export async function createCoursePreference(req: Request): Promise<CreateCourse
 
     if (insertError) {
       console.error("[MP create-course-preference] ⚠️ Error guardando preferencia en BD (continúa):", insertError);
-    } else {
-      console.log("[MP create-course-preference] ✅ Preferencia guardada en BD:", shortId);
     }
 
     return { 

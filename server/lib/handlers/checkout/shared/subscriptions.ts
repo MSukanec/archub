@@ -13,8 +13,6 @@ export async function upgradeOrganizationPlan(
   supabase: SupabaseClient,
   params: SubscriptionUpgradeParams
 ): Promise<void> {
-  console.log('🏢 [subscriptions] Starting upgrade...', params);
-  
   const { error: cancelError } = await supabase
     .from('organization_subscriptions')
     .update({ 
@@ -122,15 +120,6 @@ export async function upgradeOrganizationPlan(
 
   if (cycleError) {
     console.error('[subscriptions] Error creating billing cycle:', cycleError);
-  } else {
-    console.log('[subscriptions] ✅ Billing cycle created (Option C):', {
-      organizationId: params.organizationId,
-      seats: actualSeats,
-      billed_seats: billedSeats,
-      amount_per_seat: amountPerSeat,
-      base_amount: baseAmount,
-      total_amount: baseAmount,
-    });
   }
   
   const { error: orgError } = await supabase
@@ -142,6 +131,4 @@ export async function upgradeOrganizationPlan(
     console.error('❌ [subscriptions] ERROR updating organization:', orgError);
     throw orgError;
   }
-  
-  console.log('✅ [subscriptions] Success! Subscription created:', subscription);
 }

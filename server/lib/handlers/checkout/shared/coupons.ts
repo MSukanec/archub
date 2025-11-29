@@ -13,15 +13,6 @@ export async function markCouponAsUsed(
   amount: number,
   currency: string
 ): Promise<{ success: boolean; error?: string }> {
-  console.log('[coupons] Inserting coupon redemption directly:', {
-    coupon_id: couponId,
-    user_id: userId,
-    course_id: courseId,
-    order_id: orderId,
-    amount_saved: amount,
-    currency
-  });
-
   // Instead of using RPC (which fails with auth.uid() when called from backend),
   // directly insert into coupon_redemptions table using service role
   const { error: insertError } = await supabase
@@ -40,7 +31,6 @@ export async function markCouponAsUsed(
     return { success: false, error: insertError.message };
   }
 
-  console.log('[coupons] ✅ Coupon redemption inserted successfully');
   return { success: true };
 }
 
@@ -52,14 +42,6 @@ export async function validateAndApplyCoupon(
   currency: string,
   userId: string
 ): Promise<CouponValidationResult> {
-  console.log('[coupons] Validando cupón:', {
-    code: code.trim(),
-    user_id: userId,
-    course_id: courseId,
-    price: originalPrice,
-    currency
-  });
-
   const { data: validationResult, error: couponError } = await supabase.rpc('validate_coupon', {
     p_code: code.trim(),
     p_course_id: courseId,
@@ -103,19 +85,8 @@ export async function validateAndApplyCoupon(
   // Mercado Pago Argentina NO acepta decimales
   // El RPC puede devolver decimales, aseguramos redondeo si es ARS
   if (currency === 'ARS') {
-    const roundedPrice = Math.round(finalPrice);
-    console.log('[coupons] Redondeando precio con cupón para ARS:', {
-      original_from_rpc: finalPrice,
-      rounded_final: roundedPrice
-    });
-    finalPrice = roundedPrice;
+    finalPrice = Math.round(finalPrice);
   }
-  
-  console.log('[coupons] Cupón aplicado:', {
-    code: code.trim(),
-    discount: validationResult.discount,
-    final_price: finalPrice
-  });
 
   return { 
     success: true, 

@@ -41,10 +41,8 @@ function extractToken(authHeader: string | undefined): string | null {
 
 export async function handleGetCoursesFull(req: Request, res: Response) {
   try {
-    console.log('[handleGetCoursesFull] ================ STARTING REQUEST ================');
     const token = extractToken(req.headers.authorization);
     if (!token) {
-      console.log('[handleGetCoursesFull] No token provided');
       return res.status(401).json({ error: 'No authorization token provided' });
     }
 
@@ -53,11 +51,6 @@ export async function handleGetCoursesFull(req: Request, res: Response) {
 
     const result = await getCoursesFull(ctx);
 
-    console.log('[handleGetCoursesFull] ================ HANDLER RESULT ================');
-    console.log('[handleGetCoursesFull] Success:', result.success);
-    console.log('[handleGetCoursesFull] Courses count:', result.success ? result.data?.courses?.length : 0);
-    console.log('[handleGetCoursesFull] First course:', JSON.stringify(result.success ? result.data?.courses?.[0] : null, null, 2));
-
     if (result.success) {
       // Add cache control headers AND ETag to prevent caching
       res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
@@ -65,9 +58,6 @@ export async function handleGetCoursesFull(req: Request, res: Response) {
       res.set('Expires', '0');
       res.set('Surrogate-Control', 'no-store');
       res.set('ETag', `"${Date.now()}"`); // Force fresh response every time
-      
-      console.log('[handleGetCoursesFull] ================ SENDING RESPONSE ================');
-      console.log('[handleGetCoursesFull] Response data:', JSON.stringify(result.data, null, 2));
       
       return res.status(200).json(result.data);
     } else {
@@ -105,7 +95,6 @@ export async function handleGetDashboard(req: Request, res: Response) {
 
 export async function handleGetDashboardFast(req: Request, res: Response) {
   try {
-    console.log('[handleGetDashboardFast] ================ STARTING REQUEST ================');
     const token = extractToken(req.headers.authorization);
     if (!token) {
       return res.status(401).json({ error: 'No authorization token provided' });
@@ -116,11 +105,6 @@ export async function handleGetDashboardFast(req: Request, res: Response) {
 
     const result = await getDashboardFast(ctx);
 
-    console.log('[handleGetDashboardFast] ================ HANDLER RESULT ================');
-    console.log('[handleGetDashboardFast] Success:', result.success);
-    console.log('[handleGetDashboardFast] Courses count:', result.success ? result.data?.courses?.length : 0);
-    console.log('[handleGetDashboardFast] First course:', JSON.stringify(result.success ? result.data?.courses?.[0] : null, null, 2));
-
     if (result.success) {
       // Add aggressive cache control
       res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
@@ -128,8 +112,6 @@ export async function handleGetDashboardFast(req: Request, res: Response) {
       res.set('Expires', '0');
       res.set('Surrogate-Control', 'no-store');
       res.set('ETag', `"${Date.now()}"`); // Force fresh response every time
-      
-      console.log('[handleGetDashboardFast] ================ SENDING RESPONSE ================');
       
       return res.status(200).json(result.data);
     } else {

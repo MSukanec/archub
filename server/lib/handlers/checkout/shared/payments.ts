@@ -48,7 +48,6 @@ export async function insertPayment(
 
   if (error) {
     if (error.code === '23505') {
-      console.log('[payments] ⚠️ Payment ya existe (ignorado)');
       // Try to get existing payment ID
       const { data: existing } = await supabase
         .from("payments")
@@ -61,7 +60,6 @@ export async function insertPayment(
       return { inserted: false, error: error.message };
     }
   } else {
-    console.log("[payments] ✅ payment insertado", data.productType === 'subscription' ? '(subscription)' : '(course)');
-    return { inserted: true, paymentId: insertedPayment.id }; // Successfully inserted with UUID
+    return { inserted: true, paymentId: insertedPayment.id };
   }
 }

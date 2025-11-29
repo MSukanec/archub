@@ -218,7 +218,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
 
     // Si el pipeline devolvió un resultado cacheado, devolverlo directamente
     if (pipelineContext.metadata.cacheHit && pipelineContext.result) {
-      console.log('[AI Pipeline] Cache hit - returning cached response');
       return {
         success: true,
         status: 200,
@@ -242,15 +241,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
     const enrichedSystemPrompt = pipelineContext.error
       ? baseSystemPrompt
       : enrichSystemPrompt(baseSystemPrompt, pipelineContext);
-
-    // Log del pipeline para debugging
-    if (pipelineContext.intent) {
-      console.log('[AI Pipeline] Intent:', pipelineContext.intent.type, pipelineContext.intent.subtype);
-      console.log('[AI Pipeline] Entities:', pipelineContext.intent.entities.map(e => `${e.type}:${e.name}`));
-    }
-    if (pipelineContext.queryPlan) {
-      console.log('[AI Pipeline] Suggested tool:', pipelineContext.queryPlan.toolName);
-    }
 
     // Construir el historial de mensajes para GPT
     const messages = [
@@ -636,10 +626,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
     let responseContent = responseMessage?.content || "Lo siento, no pude generar una respuesta.";
     let usage = completion.usage;
 
-    console.log('===== AI CHAT DEBUG =====');
-    console.log('Response message tool_calls:', responseMessage?.tool_calls);
-    console.log('Response message content:', responseMessage?.content);
-
     // Si la IA decidió usar una función
     if (responseMessage?.tool_calls && responseMessage.tool_calls.length > 0) {
       const toolCall = responseMessage.tool_calls[0];
@@ -653,9 +639,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           status: 400
         };
       }
-      
-      console.log('Function name:', toolCall.function.name);
-      console.log('Function arguments:', toolCall.function.arguments);
       
       // Verificar que haya organizationId
       if (!organizationId) {
@@ -838,8 +821,6 @@ export async function getChatHandler(params: ChatHandlerParams): Promise<ChatHan
           default:
             functionResult = `Función ${toolCall.function.name} no implementada.`;
         }
-        
-        console.log('Function result:', functionResult);
         
         // Segunda llamada a OpenAI con el resultado de la función
         const secondCompletion = await openai.chat.completions.create({

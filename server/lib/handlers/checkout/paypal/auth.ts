@@ -11,11 +11,6 @@ export async function getPayPalAccessToken(): Promise<string> {
 
   const clientIdPreview = PAYPAL_CLIENT_ID?.substring(0, 10) || "UNDEFINED";
   const hasSecret = !!PAYPAL_CLIENT_SECRET;
-  
-  console.log(`[PayPal Auth] Requesting token from: ${PAYPAL_BASE_URL}`);
-  console.log(`[PayPal Auth] Mode: ${isPayPalSandbox ? 'SANDBOX' : 'PRODUCTION'}`);
-  console.log(`[PayPal Auth] Client ID starts with: ${clientIdPreview}...`);
-  console.log(`[PayPal Auth] Secret configured: ${hasSecret ? 'YES' : 'NO'}`);
 
   if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
     throw new Error(
@@ -52,8 +47,6 @@ export async function getPayPalAccessToken(): Promise<string> {
   const data = await r.json();
   const accessToken = data.access_token;
   const expiresIn = Number(data.expires_in || 3600);
-  
-  console.log(`[PayPal Auth] ✅ Token obtained successfully (expires in ${expiresIn}s)`);
   
   cachedToken = {
     accessToken,

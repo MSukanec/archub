@@ -21,13 +21,6 @@ export async function createSubscriptionOrder(
       description = "Seencel subscription",
     } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
-    console.log("[PayPal create-subscription-order] Request received:", {
-      plan_slug,
-      organization_id,
-      billing_period,
-      amount_usd,
-    });
-
     // Validar parámetros requeridos
     if (!plan_slug || !organization_id || !billing_period) {
       return {
@@ -61,7 +54,6 @@ export async function createSubscriptionOrder(
     }
 
     const user_id = user.id;
-    console.log("[PayPal create-subscription-order] Authenticated user:", user_id);
 
     // CRÍTICO: Verificar que el usuario pertenece a la organización y es admin
     const adminCheck = await verifyAdminRoleForOrganization(
@@ -124,28 +116,10 @@ export async function createSubscriptionOrder(
     const seats = 1; // Primer pago siempre es solo por el admin
     const amount = basePrice * seats;
 
-    // NOTA: El conteo real de billable members se hace en upgradeOrganizationPlan
-    // para crear el snapshot correcto en organization_billing_cycles
-    console.log('[PayPal create-subscription-order] Seat calculation:', {
-      plan_id: plan.id,
-      billing_period,
-      base_price_per_seat: basePrice,
-      seats,
-      total_amount: amount
-    });
-
     const productId = plan.id;
     const productTitle = `Plan ${plan.name} - ${billing_period === "monthly" ? "Monthly" : "Annual"}`;
     const productSlug = plan_slug;
     const productDescription = `${billing_period === "monthly" ? "Monthly" : "Annual"} subscription to ${plan.name} plan`;
-
-    console.log("[PayPal create-subscription-order] Subscription order:", {
-      plan_id: plan.id,
-      plan_name: plan.name,
-      billing_period,
-      amount,
-      organization_id,
-    });
 
     logPayPalMode("create-subscription-order");
 
@@ -190,16 +164,6 @@ export async function createSubscriptionOrder(
       },
     };
 
-    console.log("[PayPal create-subscription-order] Creating order for:", {
-      user_id,
-      productSlug,
-      amount,
-      organization_id,
-      billing_period,
-      return_url,
-      cancel_url,
-    });
-
     const result = await createPayPalOrder(orderBody);
 
     if (!result.success) {
@@ -214,11 +178,6 @@ export async function createSubscriptionOrder(
         details: result.body,
       };
     }
-
-    console.log(
-      "[PayPal create-subscription-order] ✅ Order created:",
-      result.orderId
-    );
 
     return {
       success: true,

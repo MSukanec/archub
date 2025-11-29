@@ -49,14 +49,6 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
 
   const user_id = user.id;
 
-  console.log('[MP create-subscription-preference] Request received:', {
-    user_id,
-    plan_slug,
-    organization_id,
-    billing_period,
-    currency
-  });
-
   try {
     // 5. CRÍTICO: Verificar que el usuario pertenece a la organización y es admin
     const adminCheck = await verifyAdminRoleForOrganization(supabase, user_id, organization_id);
@@ -102,13 +94,6 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
         const isStillActive = !expiresAt || expiresAt > new Date();
 
         if (isStillActive) {
-          console.log('[MP create-subscription-preference] Duplicate subscription prevented:', {
-            user_id,
-            organization_id,
-            plan_id: plan.id,
-            existing_status: existingSubscription.status,
-            expires_at: existingSubscription.expires_at
-          });
           return { 
             success: false, 
             error: "Ya tienes una suscripción activa a este plan", 
@@ -140,16 +125,6 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
     const seats = 1; // Primer pago siempre es solo por el admin
     let unit_price = basePrice * seats;
 
-    // NOTA: El conteo real de billable members se hace en upgradeOrganizationPlan
-    // para crear el snapshot correcto en organization_billing_cycles
-    console.log('[MP create-subscription-preference] Seat calculation:', {
-      plan_id: plan.id,
-      billing_period,
-      base_price_per_seat: basePrice,
-      seats,
-      total_before_conversion: unit_price
-    });
-
     // Si la moneda es ARS, convertir usando exchange_rates
     if (currency === 'ARS') {
       const { data: exchangeRate, error: exchangeError } = await supabase
@@ -166,20 +141,6 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
       }
 
       unit_price = unit_price * Number(exchangeRate.rate);
-      console.log('[MP create-subscription-preference] Price converted:', {
-        plan_id: plan.id,
-        billing_period,
-        usd_price: priceAmount,
-        exchange_rate: exchangeRate.rate,
-        ars_price: unit_price
-      });
-    } else {
-      console.log('[MP create-subscription-preference] Price (no conversion):', {
-        plan_id: plan.id,
-        billing_period,
-        currency,
-        unit_price
-      });
     }
 
     const productId = plan.id;
@@ -243,15 +204,6 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
       }
     };
 
-    console.log("[MP create-subscription-preference] Creando preferencia para:", { 
-      user_id, 
-      productSlug,
-      unit_price, 
-      currency,
-      organization_id,
-      billing_period
-    });
-
     // 12. Create MP preference
     const result = await createMPPreference(prefBody);
 
@@ -259,8 +211,6 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
       console.error("[MP create-subscription-preference] Error de Mercado Pago:", result.body);
       return { success: false, error: result.error, status: result.status };
     }
-
-    console.log("[MP create-subscription-preference] ✅ Preferencia creada:", result.preferenceId);
 
     return { 
       success: true, 

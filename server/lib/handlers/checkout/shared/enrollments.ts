@@ -31,7 +31,6 @@ export async function upsertEnrollment(
     console.error("[enrollments] upsertEnrollment error:", error);
     return { success: false, error: error.message };
   } else {
-    console.log("[enrollments] ✅ Enrollment created/updated");
     return { success: true };
   }
 }

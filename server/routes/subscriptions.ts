@@ -554,8 +554,6 @@ export function registerSubscriptionRoutes(app: Express, deps: RouteDeps): void 
         return res.status(500).json({ ok: false, error: 'Failed to cancel subscription' });
       }
 
-      console.log('[Cancel Subscription] ✅ Subscription cancelled successfully:', id);
-
       return res.status(200).json({
         ok: true,
         message: 'Subscription cancelled successfully. Access will remain until expiration date.'

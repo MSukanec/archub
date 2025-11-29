@@ -80,8 +80,6 @@ export async function handleUpdateUserProfile(req: Request, res: Response) {
       return res.status(403).json({ error: 'Cannot update another user\'s profile' });
     }
 
-    console.log('Updating profile for user:', userId);
-
     // Handle user_data updates
     let userDataUpdates: any = {};
     if (first_name !== undefined) userDataUpdates.first_name = first_name;
@@ -107,7 +105,6 @@ export async function handleUpdateUserProfile(req: Request, res: Response) {
           console.error('Error updating user_data:', updateError);
           return res.status(500).json({ error: updateError.message });
         }
-        console.log('Updated user_data successfully');
       } else {
         const { error: insertError } = await supabase
           .from('user_data')
@@ -117,7 +114,6 @@ export async function handleUpdateUserProfile(req: Request, res: Response) {
           console.error('Error inserting user_data:', insertError);
           return res.status(500).json({ error: insertError.message });
         }
-        console.log('Inserted new user_data successfully');
       }
     }
 

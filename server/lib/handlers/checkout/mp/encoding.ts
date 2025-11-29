@@ -22,7 +22,6 @@ export function decodeExternalReference(ext?: string | null): DecodedExternalRef
     const parsed = JSON.parse(decoded);
     
     if (typeof parsed === 'object' && parsed !== null) {
-      console.log('[MP encoding] ✅ Decoded base64 JSON:', parsed);
       return {
         user_id: parsed.user_id || null,
         course_slug: parsed.course_slug || null,

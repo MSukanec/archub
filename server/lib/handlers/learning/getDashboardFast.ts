@@ -307,9 +307,6 @@ export async function getDashboardFast(
     // BULK QUERY 2: Get course cover images
     // Filter by category='course_cover' to get only cover images (not instructor photos, OG images, etc.)
     // Use admin client to bypass RLS for public course images
-    console.log('[getDashboardFast] ============= FETCHING COURSE IMAGES =============');
-    console.log('[getDashboardFast] Course IDs:', courseIds);
-    
     const { data: courseImages, error: imagesError } = await supabaseAdmin
       .from('media_links')
       .select(`
@@ -325,41 +322,20 @@ export async function getDashboardFast(
       .eq('category', 'course_cover')
       .eq('media_files.is_deleted', false)
       .order('created_at', { ascending: false });
-    
-    console.log('[getDashboardFast] ============= QUERY RESULT =============');
-    console.log('[getDashboardFast] Error:', imagesError);
-    console.log('[getDashboardFast] Data count:', courseImages?.length || 0);
-    console.log('[getDashboardFast] Full data:', JSON.stringify(courseImages, null, 2));
 
     // Build image map - first match per course wins (already sorted)
     const courseImageMap = new Map<string, string>();
     if (courseImages) {
       for (const img of courseImages) {
-        console.log('[getDashboardFast] Processing image:', {
-          course_id: img.course_id,
-          category: img.category,
-          media_files_type: Array.isArray(img.media_files) ? 'array' : typeof img.media_files,
-          media_files: img.media_files
-        });
-        
         if (!courseImageMap.has(img.course_id)) {
           // Normalize: media_files can be array or object depending on Supabase response
           const mediaFile = Array.isArray(img.media_files) ? img.media_files[0] : img.media_files;
-          console.log('[getDashboardFast] Normalized mediaFile:', mediaFile);
-          
           if (mediaFile?.file_url) {
-            console.log('[getDashboardFast] Setting course image:', img.course_id, '→', mediaFile.file_url);
             courseImageMap.set(img.course_id, mediaFile.file_url);
-          } else {
-            console.log('[getDashboardFast] NO file_url found for course:', img.course_id);
           }
         }
       }
     }
-    
-    console.log('[getDashboardFast] ============= FINAL IMAGE MAP =============');
-    console.log('[getDashboardFast] Image map size:', courseImageMap.size);
-    console.log('[getDashboardFast] Image map entries:', Array.from(courseImageMap.entries()));
 
     // BULK QUERY 3: Get ALL modules for these courses (NO JOINS)
     const { data: modules, error: modulesError } = await supabase
