@@ -116,13 +116,34 @@
   --toast-title: hsl(0, 0%, 10%);
   --toast-description: hsl(0, 0%, 40%);
 
-  /* Accent / State */
+  /* Accent / State - UNIVERSAL (same in light/dark) */
   --accent-hsl: 76 100% 40%;
-  --accent: hsl(76, 100%, 40%);
-  --accent-2: hsl(150, 40%, 40%);
   --accent-rgb: 132, 204, 22;
-  --accent-hover: hsl(76, 100%, 32%);
+  --accent-2: hsl(150, 40%, 40%);
   --accent-foreground-hsl: 0 0% 100%;
+
+  /* Plan Colors - UNIVERSAL (same in light/dark) */
+  --plan-free-bg: hsl(76, 100%, 40%);
+  --plan-pro-bg: hsl(213, 100%, 33%);
+  --plan-teams-bg: hsl(271, 76%, 53%);
+  --plan-enterprise-bg: hsl(215, 16%, 47%);
+
+  /* Movement Border Colors - UNIVERSAL (same in light/dark) */
+  --movement-income-border: hsl(142, 76%, 36%);
+  --movement-expense-border: hsl(0, 72%, 51%);
+  --movement-conversion-border: hsl(217, 91%, 60%);
+  --movement-transfer-border: hsl(262, 83%, 58%);
+  --movement-aportes-propios-border: hsl(210, 10%, 60%);
+  --movement-retiros-propios-border: hsl(210, 10%, 60%);
+
+  /* Radius - UNIVERSAL */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+
+  /* Theme-specific variables below */
+  --accent: hsl(76, 100%, 40%);
+  --accent-hover: hsl(76, 100%, 32%);
   --accent-foreground: hsl(0, 0%, 100%);
 
   --destructive: hsl(0, 84%, 60%);
@@ -161,14 +182,6 @@
   --checkbox-checked-bg: hsl(76, 100%, 40%);
   --checkbox-checked-border: hsl(76, 100%, 40%);
 
-  /* Movement border colors */
-  --movement-income-border: hsl(142, 76%, 36%);
-  --movement-expense-border: hsl(0, 72%, 51%);
-  --movement-conversion-border: hsl(217, 91%, 60%);
-  --movement-transfer-border: hsl(262, 83%, 58%);
-  --movement-aportes-propios-border: hsl(210, 10%, 60%);
-  --movement-retiros-propios-border: hsl(210, 10%, 60%);
-
   /* Text */
   --text-default: hsl(240, 10%, 4%);
   --text-muted: hsl(240, 5%, 45%);
@@ -176,12 +189,6 @@
   --text-inverted: hsl(0, 0%, 100%);
   --text-card-title: hsl(0, 0%, 0%);
   --text-important: hsl(0, 0%, 10%);
-
-  /* Plan Colors */
-  --plan-free-bg: hsl(76, 100%, 40%);
-  --plan-pro-bg: hsl(213, 100%, 33%);
-  --plan-teams-bg: hsl(271, 76%, 53%);
-  --plan-enterprise-bg: hsl(215, 16%, 47%);
 
   /* Borders and Rings */
   --border-default: hsl(240, 6%, 90%);
@@ -196,11 +203,6 @@
   --card-foreground: hsl(0, 0%, 35%);
   --background: hsl(0, 0%, 99%);
   --foreground: hsl(0, 0%, 45%);
-
-  /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
 }
 
 /* ========================================
@@ -301,12 +303,10 @@
   --toast-title: hsl(0, 0%, 98%);
   --toast-description: hsl(240, 5%, 65%);
 
-  /* Accent / State */
-  --accent-hsl: 76 100% 40%;
+  /* Accent - Dark theme is brighter for visibility */
   --accent: hsl(76, 100%, 40%);
-  --accent-rgb: 132, 204, 22;
   --accent-hover: hsl(76, 100%, 48%);
-  --accent-foreground-hsl: 0 0% 100%;
+  --accent-foreground: hsl(0, 0%, 100%);
   --accent-text: hsl(0, 0%, 100%);
 
   --destructive: hsl(0, 84%, 65%);
@@ -316,7 +316,7 @@
   --warning: hsl(45, 90%, 55%);
   --warning-text: hsl(240, 10%, 4%);
 
-  /* Charts */
+  /* Charts - Dark adjustments */
   --chart-1: hsl(210, 40%, 55%);
   --chart-2: hsl(173, 58%, 45%);
   --chart-3: hsl(197, 37%, 35%);
@@ -328,21 +328,13 @@
   --chart-neutral: #84cc16;
   --chart-ring-bg: hsl(0, 0%, 30%, 0.3);
 
-  /* Checkbox */
+  /* Checkbox - Dark */
   --checkbox-bg: hsl(0, 0%, 12%);
   --checkbox-border: hsl(0, 0%, 30%);
   --checkbox-checked-bg: hsl(76, 100%, 40%);
   --checkbox-checked-border: hsl(76, 100%, 40%);
 
-  /* Movement border colors */
-  --movement-income-border: hsl(142, 76%, 36%);
-  --movement-expense-border: hsl(0, 72%, 51%);
-  --movement-conversion-border: hsl(217, 91%, 60%);
-  --movement-transfer-border: hsl(262, 83%, 58%);
-  --movement-aportes-propios-border: hsl(210, 10%, 60%);
-  --movement-retiros-propios-border: hsl(210, 10%, 60%);
-
-  /* Tables */
+  /* Tables - Dark */
   --table-header-bg: hsl(0, 0%, 16%);
   --table-header-fg: hsl(0, 0%, 100%);
   --table-header-border: hsl(0, 0%, 22%);
@@ -351,37 +343,26 @@
   --table-row-border: hsl(0, 0%, 22%);
   --table-row-hover-bg: hsl(0, 0%, 12%);
 
-  /* Plan Colors */
-  --plan-free-bg: hsl(76, 100%, 40%);
-  --plan-pro-bg: hsl(213, 100%, 33%);
-  --plan-teams-bg: hsl(271, 76%, 53%);
-  --plan-enterprise-bg: hsl(215, 16%, 47%);
-
-  /* Text */
+  /* Text - Dark */
   --text-default: hsl(0, 0%, 98%);
   --text-muted: hsl(240, 5%, 65%);
   --text-subtle: hsl(0, 0%, 60%);
   --text-inverted: hsl(240, 10%, 4%);
   --text-important: hsl(0, 0%, 98%);
 
-  /* Borders and Rings */
+  /* Borders and Rings - Dark */
   --border-default: hsl(0, 0%, 16%);
   --border-strong: hsl(0, 50%, 50%);
   --section-divider: hsl(0, 0%, 30%);
   --section-divider-strong: hsl(0, 0%, 100%);
   --ring-default: hsl(0, 50%, 50%);
 
-  /* Tailwind variables */
+  /* Tailwind variables - Dark */
   --border: hsl(0, 0%, 22%);
   --card: hsl(0, 0%, 14%);
   --card-foreground: hsl(0, 0%, 70%);
   --background: hsl(0, 0%, 16%);
   --foreground: hsl(0, 0%, 90%);
-
-  /* Radius */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
 }
 
 /* ========================================
