@@ -1542,6 +1542,23 @@ export const insertOrganizationMemberEventSchema = createInsertSchema(organizati
   created_at: true,
 });
 
+// System Job Logs Table - For auditing automated system processes
+export const system_job_logs = pgTable("system_job_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id").notNull(),
+  subscription_id: uuid("subscription_id"),
+  job_type: text("job_type").notNull(), // 'execute_downgrade', 'auto_renewal', etc.
+  details: jsonb("details"), // { from_plan, to_plan, reason, etc. }
+  status: text("status").notNull(), // 'success', 'error'
+  error_message: text("error_message"),
+  processed_at: timestamp("processed_at", { withTimezone: true }).defaultNow(),
+});
+
+export const insertSystemJobLogSchema = createInsertSchema(system_job_logs).omit({
+  id: true,
+  processed_at: true,
+});
+
 // Types for payments
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
@@ -1557,6 +1574,8 @@ export type OrganizationBillingCycle = typeof organization_billing_cycles.$infer
 export type InsertOrganizationBillingCycle = z.infer<typeof insertOrganizationBillingCycleSchema>;
 export type OrganizationMemberEvent = typeof organization_member_events.$inferSelect;
 export type InsertOrganizationMemberEvent = z.infer<typeof insertOrganizationMemberEventSchema>;
+export type SystemJobLog = typeof system_job_logs.$inferSelect;
+export type InsertSystemJobLog = z.infer<typeof insertSystemJobLogSchema>;
 
 // Global Announcements Table
 export const global_announcements = pgTable("global_announcements", {
