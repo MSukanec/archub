@@ -202,7 +202,7 @@ export function Header({ navigation }: HeaderProps) {
           </Button>
         </Link>
         <Link href="/register">
-          <Button size="sm" className="h-8 px-3 bg-white text-black hover:bg-white/90" data-testid="button-register">
+          <Button variant="default" size="sm" className="h-8 px-3" data-testid="button-register">
             Comenzar Gratis
           </Button>
         </Link>

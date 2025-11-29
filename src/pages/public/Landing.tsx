@@ -351,7 +351,7 @@ export default function Landing() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/register">
-                <Button size="lg" className="px-8 py-4 text-lg font-medium">
+                <Button variant="default" size="lg" className="px-8 py-4 text-lg font-medium">
                   Crear Cuenta Gratuita
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
