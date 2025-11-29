@@ -1,13 +1,19 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ComparisonCategory } from "../types";
+import type { ComparisonCategory, Plan } from "../types";
 
 type SelectedPlan = 'free' | 'pro' | 'teams';
 
 interface ComparisonTableProps {
   comparisonData: ComparisonCategory[];
+  userPlanName?: string;
+  isAuthenticated?: boolean;
+  plans?: Plan[];
+  billingPeriod?: 'monthly' | 'annual';
+  onPlanSelect?: (plan: Plan | string) => void;
 }
 
 function renderValue(value: boolean | string, color: string) {
@@ -26,8 +32,63 @@ function renderValue(value: boolean | string, color: string) {
   return <span className="text-sm text-[var(--text-default)]">{value}</span>;
 }
 
-export function ComparisonTable({ comparisonData }: ComparisonTableProps) {
+export function ComparisonTable({ 
+  comparisonData, 
+  userPlanName = '', 
+  isAuthenticated = false, 
+  plans = [],
+  billingPeriod = 'annual',
+  onPlanSelect
+}: ComparisonTableProps) {
+  const [, navigate] = useLocation();
   const [selectedPlanForComparison, setSelectedPlanForComparison] = useState<SelectedPlan>('pro');
+
+  const getPlanLevel = (planName: string): number => {
+    const levels: Record<string, number> = {
+      'free': 1,
+      'pro': 2,
+      'teams': 3
+    };
+    return levels[planName.toLowerCase()] || 0;
+  };
+
+  const getButtonTextAndColor = (planName: string) => {
+    const isTeams = planName.toLowerCase() === 'teams';
+    const isCurrentPlan = planName.toLowerCase() === userPlanName?.toLowerCase();
+    
+    if (isTeams) {
+      return { text: 'Próximamente', color: '#84cc16', disabled: true };
+    }
+    
+    if (isCurrentPlan) {
+      return { text: 'Tu plan actual', color: '#84cc16', disabled: true };
+    }
+    
+    if (!isAuthenticated) {
+      return { text: 'Comenzar', color: planName.toLowerCase() === 'pro' ? '#0047AB' : planName.toLowerCase() === 'teams' ? '#8B5CF6' : '#84cc16', disabled: false };
+    }
+    
+    return { text: `Cambiar a ${planName}`, color: planName.toLowerCase() === 'pro' ? '#0047AB' : planName.toLowerCase() === 'teams' ? '#8B5CF6' : '#84cc16', disabled: false };
+  };
+
+  const handleTableButtonClick = (planName: string) => {
+    const isTeams = planName.toLowerCase() === 'teams';
+    const isCurrentPlan = planName.toLowerCase() === userPlanName?.toLowerCase();
+    
+    if (isTeams || isCurrentPlan) return;
+    
+    if (!isAuthenticated) {
+      navigate('/register');
+      return;
+    }
+    
+    const plan = plans.find(p => p.name.toLowerCase() === planName.toLowerCase());
+    if (plan && onPlanSelect) {
+      onPlanSelect(plan);
+    }
+  };
+
+  const planNames = ['free', 'pro', 'teams'] as const;
 
   return (
     <div className="mt-20 px-4">
@@ -44,42 +105,27 @@ export function ComparisonTable({ comparisonData }: ComparisonTableProps) {
               <div className="px-6 py-4">
               </div>
               
-              <div className="px-6 py-4 text-center">
-                <div className="text-sm font-bold text-[var(--text-default)] mb-2">Free</div>
-                <Button 
-                  size="sm" 
-                  variant="default"
-                  className="text-xs"
-                  data-testid="button-table-free"
-                >
-                  Comenzar
-                </Button>
-              </div>
-
-              <div className="px-6 py-4 text-center">
-                <div className="text-sm font-bold text-[var(--text-default)] mb-2">Pro</div>
-                <Button 
-                  size="sm" 
-                  variant="default"
-                  className="text-xs"
-                  data-testid="button-table-pro"
-                >
-                  Ser Fundador
-                </Button>
-              </div>
-
-              <div className="px-6 py-4 text-center">
-                <div className="text-sm font-bold text-[var(--text-default)] mb-2">Teams</div>
-                <Button 
-                  size="sm" 
-                  variant="default"
-                  className="text-xs"
-                  disabled
-                  data-testid="button-table-teams"
-                >
-                  Próximamente
-                </Button>
-              </div>
+              {planNames.map((planKey) => {
+                const planName = planKey.charAt(0).toUpperCase() + planKey.slice(1);
+                const { text, color, disabled } = getButtonTextAndColor(planName);
+                
+                return (
+                  <div key={planKey} className="px-6 py-4 text-center">
+                    <div className="text-sm font-bold text-[var(--text-default)] mb-2">{planName}</div>
+                    <Button 
+                      size="sm" 
+                      style={!disabled ? { backgroundColor: color } : undefined}
+                      className={cn("text-xs", !disabled && "text-white hover:opacity-90")}
+                      variant={disabled ? "outline" : "default"}
+                      disabled={disabled}
+                      onClick={() => handleTableButtonClick(planName)}
+                      data-testid={`button-table-${planKey}`}
+                    >
+                      {text}
+                    </Button>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

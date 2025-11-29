@@ -49,7 +49,7 @@ export function PlanCard({
 
   const getButtonText = () => {
     if (isTeams) return 'Próximamente';
-    if (isCurrentPlan) return 'Tu Plan Actual';
+    if (isCurrentPlan) return 'Tu plan actual';
     if (!isAuthenticated) return 'Comenzar';
     return `Cambiar a ${plan.name}`;
   };

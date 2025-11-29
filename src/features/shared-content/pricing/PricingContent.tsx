@@ -150,7 +150,14 @@ export function PricingContent({ mode }: PricingContentProps) {
 
       {enterprisePlan && <EnterpriseCard />}
 
-      <ComparisonTable comparisonData={comparisonData} />
+      <ComparisonTable 
+        comparisonData={comparisonData}
+        userPlanName={userPlanName}
+        isAuthenticated={isAuthenticated}
+        plans={plans}
+        billingPeriod={billingPeriod}
+        onPlanSelect={handlePlanSelect}
+      />
 
       <FAQSection />
     </div>
