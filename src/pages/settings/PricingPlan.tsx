@@ -715,9 +715,8 @@ export default function PricingPlan() {
               {/* Sticky Header */}
               <div className="sticky top-0 z-10 bg-background border-b border-[var(--border-default)]">
                 <div className="grid grid-cols-4">
-                  {/* Features label */}
+                  {/* Empty cell for alignment */}
                   <div className="px-6 py-4">
-                    <span className="text-sm font-medium text-[var(--text-muted)]">Features</span>
                   </div>
                   
                   {/* Free */}
@@ -725,7 +724,7 @@ export default function PricingPlan() {
                     <div className="text-sm font-bold text-[var(--text-default)] mb-2">Free</div>
                     <Button 
                       size="sm" 
-                      variant="outline"
+                      variant="default"
                       className="text-xs"
                       data-testid="button-table-free"
                     >
@@ -739,7 +738,7 @@ export default function PricingPlan() {
                     <Button 
                       size="sm" 
                       variant="default"
-                      className="text-xs bg-accent text-accent-foreground hover:bg-accent/90"
+                      className="text-xs"
                       data-testid="button-table-pro"
                     >
                       Ser Fundador
@@ -751,7 +750,7 @@ export default function PricingPlan() {
                     <div className="text-sm font-bold text-[var(--text-default)] mb-2">Teams</div>
                     <Button 
                       size="sm" 
-                      variant="outline"
+                      variant="default"
                       className="text-xs"
                       disabled
                       data-testid="button-table-teams"
