@@ -9,17 +9,16 @@ export const plansConfig: Record<PlanSlug, PlanConfig> = {
     cardHeader: 'Perfecto para comenzar',
     description: 'Para profesionales individuales y equipos pequeños',
     features: [
-      'Gestión básica de proyectos',
-      'Presupuestos y seguimiento',
-      'Documentación de obra',
-      'Resúmenes diarios con IA',
-      'Dashboard de proyecto',
-      'Soporte por email'
+      'Gestión de proyectos',
+      'Seguimiento de obra',
+      'Finanzas generales',
+      'Soporte por email',
+      'Documentación de obra'
     ],
     limits: [
-      { iconComponent: Folder, value: '3 proyectos' },
+      { iconComponent: Folder, value: '4 proyectos' },
       { iconComponent: HardDrive, value: '500 MB' },
-      { iconComponent: Bot, value: 'Solo resúmenes' },
+      { iconComponent: Bot, value: 'Resúmenes básicos' },
       { iconComponent: Users, value: '1 usuario' }
     ]
   },
@@ -31,14 +30,12 @@ export const plansConfig: Record<PlanSlug, PlanConfig> = {
     description: 'Para equipos que necesitan funciones avanzadas',
     features: [
       'Todo en Free',
-      'Gestión multi-moneda',
       'PDFs personalizables',
-      '10,000 tokens IA/mes',
-      'Control de subcontratos',
-      'Gestión de personal',
-      'Gantt y Kanban avanzados',
+      'Tokens IA avanzados',
       'Integraciones de pago',
-      'Soporte prioritario'
+      'Soporte prioritario',
+      'Visitantes/Clientes ilimitados',
+      'Comunidad'
     ],
     limits: [
       { iconComponent: Folder, value: '50 proyectos' },
@@ -55,12 +52,10 @@ export const plansConfig: Record<PlanSlug, PlanConfig> = {
     description: 'Para organizaciones con múltiples usuarios',
     features: [
       'Todo en Pro',
-      'Usuarios ilimitados',
-      'IA ilimitada',
+      'Miembros ilimitados',
+      'Tokens IA ilimitados',
       'Colaboración en tiempo real',
       'Historial de cambios',
-      'Admin de equipo',
-      'Múltiples organizaciones',
       'API de integración',
       'Soporte 24/7'
     ],
