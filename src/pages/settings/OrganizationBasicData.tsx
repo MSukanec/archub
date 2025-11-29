@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { getOrganizationInitials } from '@/utils/initials';
+import { uploadOrgLogo } from '@/lib/storage';
 
 export default function OrganizationBasicData() {
   const { data: userData } = useCurrentUser();
@@ -85,15 +86,15 @@ export default function OrganizationBasicData() {
   const [website, setWebsite] = useState('');
   const [taxId, setTaxId] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isLogoUploading, setIsLogoUploading] = useState(false);
 
   const saveOrganizationMutation = useMutation({
     mutationFn: async (dataToSave: any) => {
       if (!organizationId || !supabase) return;
 
-      if (dataToSave.name !== undefined || dataToSave.logo_url !== undefined) {
+      if (dataToSave.name !== undefined) {
         const orgFields = {
           name: dataToSave.name,
-          logo_url: dataToSave.logo_url,
         };
 
         const cleanOrgData = Object.fromEntries(
@@ -158,7 +159,6 @@ export default function OrganizationBasicData() {
   const { isSaving } = useAutoSave({
     data: {
       name: organizationName,
-      logo_url: logoUrl,
       description,
       address,
       city,
@@ -189,7 +189,18 @@ export default function OrganizationBasicData() {
   useEffect(() => {
     if (organizationInfo) {
       setOrganizationName(organizationInfo.name || '');
-      setLogoUrl(organizationInfo.logo_url || '');
+      // Priority: new system (image_bucket + image_path) > legacy (logo_url)
+      if (organizationInfo.image_bucket && organizationInfo.image_path) {
+        const { data } = supabase.storage
+          .from(organizationInfo.image_bucket)
+          .getPublicUrl(organizationInfo.image_path);
+        setLogoUrl(data.publicUrl);
+      } else if (organizationInfo.logo_url) {
+        // Fallback to legacy logo_url for backwards compatibility
+        setLogoUrl(organizationInfo.logo_url);
+      } else {
+        setLogoUrl('');
+      }
     }
   }, [organizationInfo]);
 
@@ -217,27 +228,26 @@ export default function OrganizationBasicData() {
     }
   }, [organizationInfo, organizationData]);
 
-  const handleLogoUploadSuccess = async (imageUrl: string) => {
-    if (!organizationId || !supabase) {
-      return;
-    }
-
+  const handleLogoSelect = async (file: File) => {
+    if (!organizationId) return;
+    
+    setIsLogoUploading(true);
     try {
+      const result = await uploadOrgLogo(file, organizationId);
+      
       const { error } = await supabase
         .from('organizations')
-        .update({ logo_url: imageUrl })
+        .update({
+          image_bucket: result.bucket,
+          image_path: result.file_path
+        })
         .eq('id', organizationId);
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: "No se pudo actualizar el logo en la base de datos",
-          variant: "destructive"
-        });
-        return;
+      
+      if (error) throw error;
+      
+      if (result.file_url) {
+        setLogoUrl(result.file_url);
       }
-
-      setLogoUrl(imageUrl);
       
       queryClient.invalidateQueries({ queryKey: ['organization-info', organizationId] });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
@@ -246,9 +256,14 @@ export default function OrganizationBasicData() {
         title: "Logo actualizado",
         description: "El logo de la organización se ha actualizado correctamente",
       });
-      
-    } catch (error) {
-      console.error('Unexpected error in logo upload callback:', error);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo subir el logo",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLogoUploading(false);
     }
   };
 
@@ -277,14 +292,11 @@ export default function OrganizationBasicData() {
 
             <div>
               <AvatarUploader
-                currentImageUrl={logoUrl}
-                fallbackText={getOrganizationInitials(organizationName || organizationInfo?.name || '')}
-                bucketName="organization-logo"
-                uploadPath={`org-${organizationId}/logo.jpg`}
-                onUploadSuccess={handleLogoUploadSuccess}
-                title="Logo de la organización"
-                description="Imagen que representa tu organización"
-                maxSizeMB={5}
+                avatarUrl={logoUrl}
+                initials={getOrganizationInitials(organizationName || organizationInfo?.name || '')}
+                displayName={organizationName || organizationInfo?.name || 'Organización'}
+                onAvatarSelect={handleLogoSelect}
+                isUploading={isLogoUploading}
               />
             </div>
           </div>
