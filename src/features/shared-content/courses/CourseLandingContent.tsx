@@ -10,7 +10,6 @@ import {
   InstructorSection,
   ModulesSection,
   LessonsSection,
-  FeaturesSection,
   FAQSection,
 } from '@/features/learning';
 import type { CourseLandingContentProps } from './types';
@@ -93,7 +92,6 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
           description={(course.landing_sections as any)?.modules?.description}
         />
         <LessonsSection modules={modules} />
-        <FeaturesSection course={course} />
         <FAQSection 
           faqs={faqs}
           title={(course.landing_sections as any)?.faq?.title}

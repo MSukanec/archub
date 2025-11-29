@@ -32,7 +32,6 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
 
   // Marketing fields
   const [badgeText, setBadgeText] = useState('');
-  const [highlights, setHighlights] = useState('');
   const [previewVideoId, setPreviewVideoId] = useState('');
 
   // SEO fields
@@ -43,7 +42,6 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
   const [landingSections, setLandingSections] = useState<LandingSections>({
     instructor: { title: 'SOBRE EL DOCENTE', subtitle: 'NUESTRO CURSO', description: '' },
     modules: { title: 'MÓDULOS Y LECCIONES', subtitle: 'CONTENIDO DEL CURSO', description: 'Contenido estructurado paso a paso para tu aprendizaje profesional' },
-    features: undefined,
     faq: undefined,
   });
 
@@ -205,7 +203,6 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       setInstructorBio(courseData.instructor_bio || '');
       setInstructorPhotoUrl(courseData.instructor_photo_url || '');
       setBadgeText(courseData.badge_text || '');
-      setHighlights(Array.isArray(courseData.highlights) ? courseData.highlights.join(', ') : '');
       setPreviewVideoId(courseData.preview_video_id || '');
       setSeoKeywords(Array.isArray(courseData.seo_keywords) ? courseData.seo_keywords.join(', ') : '');
       setOgImageUrl(courseData.og_image_url || '');
@@ -216,7 +213,6 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
         setLandingSections({
           instructor: sections?.instructor || { title: 'SOBRE EL DOCENTE', subtitle: 'NUESTRO CURSO', description: '' },
           modules: sections?.modules || { title: 'MÓDULOS Y LECCIONES', subtitle: 'CONTENIDO DEL CURSO', description: 'Contenido estructurado paso a paso para tu aprendizaje profesional' },
-          features: sections?.features,
           faq: sections?.faq || { title: 'PREGUNTAS FRECUENTES', subtitle: 'DUDAS COMUNES', description: 'Resolvemos tus dudas sobre el curso' }
         });
       } else {
@@ -224,7 +220,6 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
         setLandingSections({
           instructor: { title: 'SOBRE EL DOCENTE', subtitle: 'NUESTRO CURSO', description: '' },
           modules: { title: 'MÓDULOS Y LECCIONES', subtitle: 'CONTENIDO DEL CURSO', description: 'Contenido estructurado paso a paso para tu aprendizaje profesional' },
-          features: undefined,
           faq: { title: 'PREGUNTAS FRECUENTES', subtitle: 'DUDAS COMUNES', description: 'Resolvemos tus dudas sobre el curso' }
         });
       }
@@ -365,9 +360,6 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       instructor_bio: instructorBio || null,
       instructor_photo_url: instructorPhotoUrl || null,
       badge_text: badgeText || null,
-      highlights: highlights 
-        ? highlights.split(',').map(h => h.trim()).filter(Boolean)
-        : null,
       preview_video_id: previewVideoId || null,
       seo_keywords: seoKeywords
         ? seoKeywords.split(',').map(k => k.trim()).filter(Boolean)
@@ -709,21 +701,6 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
               />
               <p className="text-xs text-muted-foreground">
                 Badge que aparece en la esquina superior de la portada del curso
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="highlights">Puntos Destacados (Highlights)</Label>
-              <Textarea
-                id="highlights"
-                value={highlights}
-                onChange={(e) => setHighlights(e.target.value)}
-                placeholder="Aprende desde cero, Certificación incluida, Acceso de por vida"
-                rows={3}
-                data-testid="textarea-highlights"
-              />
-              <p className="text-xs text-muted-foreground">
-                Separa cada punto con una coma (,). Estos se mostrarán como viñetas en la landing.
               </p>
             </div>
 
