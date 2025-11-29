@@ -1014,32 +1014,30 @@ export default function PricingPlan() {
         </div>
 
         {/* CTA Final */}
-        <Card className="mt-20 bg-gradient-to-br from-accent/5 via-accent/10 to-accent/5 border-2 border-accent/20 rounded-2xl">
-          <div className="p-12 text-center space-y-6">
-            <h3 className="text-3xl font-bold text-[var(--text-default)]">
-              ¿Listo para transformar tu gestión?
-            </h3>
-            <p className="text-base text-[var(--text-muted)] max-w-2xl mx-auto">
-              Únete a cientos de profesionales optimizando sus proyectos con Seencel.
-            </p>
-            <div className="flex gap-4 justify-center mt-8">
-              <Button 
-                size="lg"
-                variant="default"
-                data-testid="button-cta-trial"
-              >
-                Comenzar prueba gratuita
-              </Button>
-              <Button 
-                size="lg"
-                variant="secondary"
-                data-testid="button-cta-contact"
-              >
-                Hablar con ventas
-              </Button>
+        <div className="mt-20 border border-[var(--border-default)] rounded-xl p-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+            <div className="flex-1">
+              <h3 className="text-2xl font-semibold text-[var(--text-default)] mb-2">
+                ¿No estás seguro de qué plan elegir?
+              </h3>
+              <p className="text-[var(--text-muted)]">
+                Habla con nuestro equipo sobre Pro, Teams o Enterprise. Conoce opciones de personalización, obtén una demostración personalizada o consulta sobre precios especiales.
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <Link href="/contact">
+                <Button 
+                  size="lg"
+                  variant="default"
+                  data-testid="button-cta-contact-pricing"
+                  className="whitespace-nowrap"
+                >
+                  Agendar consulta →
+                </Button>
+              </Link>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Downgrade Modal */}
