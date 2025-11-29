@@ -783,6 +783,9 @@ export function LeftSidebar() {
                     Mi Perfil
                   </DropdownMenuItem>
                   
+                  {/* Separador */}
+                  <DropdownMenuSeparator className="bg-border" />
+                  
                   {/* Página de Inicio */}
                   <DropdownMenuItem
                     onClick={() => navigate('/')}
@@ -803,6 +806,9 @@ export function LeftSidebar() {
                     Contacto
                   </DropdownMenuItem>
                   
+                  {/* Separador */}
+                  <DropdownMenuSeparator className="bg-border" />
+                  
                   {/* Cambiar Modo */}
                   <DropdownMenuItem
                     onClick={() => navigate('/select-mode')}
@@ -812,9 +818,6 @@ export function LeftSidebar() {
                     <Settings className="h-4 w-4" />
                     Cambiar Modo
                   </DropdownMenuItem>
-                  
-                  {/* Separador */}
-                  <DropdownMenuSeparator className="bg-border" />
                   
                   {/* Cerrar Sesión */}
                   <DropdownMenuItem
