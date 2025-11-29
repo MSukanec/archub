@@ -116,7 +116,7 @@ export function Header({ navigation }: HeaderProps) {
     if (user) {
       return (
         <div className="hidden md:flex items-center space-x-3">
-          <Link href="/organization/dashboard">
+          <Link href="/home">
             <Button variant="default" size="sm" className="h-8 px-3" data-testid="button-dashboard">
               Ingresar
             </Button>
@@ -151,7 +151,7 @@ export function Header({ navigation }: HeaderProps) {
 
               {/* Dashboard Link */}
               <DropdownMenuItem asChild>
-                <Link href="/organization/dashboard" className="cursor-pointer">
+                <Link href="/home" className="cursor-pointer">
                   <Home className="h-4 w-4 mr-2" />
                   <span>Dashboard</span>
                 </Link>

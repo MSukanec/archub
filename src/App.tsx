@@ -59,6 +59,7 @@ import Profile from "@/pages/profile/Profile";
 
 import Onboarding from "@/pages/public/Onboarding";
 import SelectMode from "@/pages/public/SelectMode";
+import Home from "@/pages/Home";
 import Activity from "@/pages/activity/Activity";
 
 // Lab Pages (Lazy Loaded - experimental POCs)
@@ -158,6 +159,9 @@ function Router() {
         {/* Onboarding and Mode Selection Routes */}
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/select-mode" component={SelectMode} />
+        
+        {/* Home Route - Redirects to correct dashboard based on user mode */}
+        <Route path="/home" component={Home} />
 
         {/* Main Dashboard - Independent dashboard */}
         <Route path="/dashboard" component={OrganizationDashboard} />
