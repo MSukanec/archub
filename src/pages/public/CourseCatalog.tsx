@@ -1,5 +1,5 @@
 import { MarketingLayout } from '@/layouts';
-import { CourseCatalogContent } from '@/features/learning/pages';
+import { CoursesCatalogContent } from '@/features/shared-content/courses';
 
 export default function CourseCatalog() {
   return (
@@ -10,7 +10,6 @@ export default function CourseCatalog() {
         keywords: "cursos online, capacitación profesional, cursos archicad",
       }}
     >
-      {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-background via-background to-muted/20 py-16 sm:py-20 -mx-6 px-6 mb-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center space-y-6">
@@ -26,12 +25,10 @@ export default function CourseCatalog() {
         </div>
       </section>
 
-      {/* Courses Catalog Content - Shared Component */}
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <CourseCatalogContent showTabs={true} />
+        <CoursesCatalogContent mode="public" showTabs={true} />
       </section>
 
-      {/* CTA Section */}
       <section className="relative bg-gradient-to-br from-muted/20 to-background py-12 -mx-6 px-6 mt-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center space-y-4">

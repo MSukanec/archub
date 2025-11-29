@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { DashboardLayout as Layout } from "@/layouts";
-import { CourseCatalogContent } from '@/features/learning/pages';
+import { CoursesCatalogContent } from '@/features/shared-content/courses';
 import { BookOpen } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 
@@ -25,8 +25,7 @@ export default function CourseList() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {/* Courses Catalog Content - Shared Component */}
-        <CourseCatalogContent showTabs={true} />
+        <CoursesCatalogContent mode="dashboard" showTabs={true} />
       </div>
     </Layout>
   );
