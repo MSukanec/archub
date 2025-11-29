@@ -10,7 +10,6 @@ import {
   InstructorSection,
   ModulesSection,
   LessonsSection,
-  FeaturesSection,
   FAQSection,
   CTAFooter,
 } from '@/features/learning';
@@ -80,7 +79,6 @@ export default function CourseLanding() {
           <InstructorSection course={course} />
           <ModulesSection modules={modules} />
           <LessonsSection modules={modules} />
-          <FeaturesSection course={course} />
           <FAQSection faqs={faqs} />
           <CTAFooter course={course} />
         </div>
