@@ -186,11 +186,17 @@ src/features/finances/modals/admin/BankTransferReceiptModal.tsx (admin view)
   - `src/components/construction/PhaseOrderManager.tsx` (vertical list reordering)
 - **CSS Reorganization**: Restructured `src/index.css` (~1122 lines) with proper organization:
   - `:root` themes at top, eliminated duplications, consolidated `@layer` definitions
+- **Server Console.log Cleanup**: Removed ~200 debug logs from production server files:
+  - Payment handlers (PayPal/MP webhooks, controllers, routes)
+  - Checkout shared utilities (coupons, subscriptions, payments, enrollments)
+  - Learning handlers, AI handlers, media handlers
+  - All `console.error` and `console.warn` preserved for error tracking
+  - Only `server/vite.ts` retains 1 log (core Vite file, not modified)
 
 ### Pending (Blocked by npm network issues)
 - **ESLint Configuration**: Install and configure ESLint with TypeScript rules
 - **Remove react-beautiful-dnd**: Uninstall deprecated package from dependencies
-- **Console Statement Cleanup**: ~2,120 console statements in 386 files (requires ESLint)
+- **Frontend Console Statement Cleanup**: Remaining ~1,900 console statements in frontend files
 
 ### Known Technical Debt
 - **TypeScript `any` types**: ~1,396 instances across codebase
