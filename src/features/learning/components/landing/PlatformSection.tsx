@@ -9,8 +9,7 @@ interface PlatformSectionProps {
 
 export function PlatformSection({ 
   title = "CÓMO FUNCIONA LA PLATAFORMA",
-  subtitle = "NUESTRA PLATAFORMA",
-  description = "Acceso online 24/7, con lecciones ordenadas, en video, y a tu ritmo"
+  subtitle = "NUESTRA PLATAFORMA"
 }: PlatformSectionProps) {
   return (
     <section 
@@ -25,11 +24,18 @@ export function PlatformSection({
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-0">
           <div className="lg:col-span-3 space-y-12">
-            <SectionHeader
-              title={title}
-              subtitle={subtitle}
-              description={description}
-            />
+            <div className="mb-12 space-y-4">
+              {subtitle && (
+                <p className="text-xs sm:text-base uppercase tracking-wide font-semibold" style={{ color: '#9EFF00' }}>
+                  {subtitle}
+                </p>
+              )}
+              {title && (
+                <h2 className="text-4xl sm:text-7xl font-bold uppercase tracking-tight leading-tight" style={{ color: '#ffffff !important' }}>
+                  {title}
+                </h2>
+              )}
+            </div>
 
             <div className="space-y-6 text-sm sm:text-lg text-gray-300 leading-relaxed max-w-3xl">
               <p>
