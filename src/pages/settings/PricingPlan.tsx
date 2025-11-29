@@ -703,152 +703,92 @@ export default function PricingPlan() {
           </div>
         )}
 
-        {/* Tabla de Comparación - IDÉNTICA a referencia */}
+        {/* Tabla de Comparación - Estilo Vercel */}
         <div className="mt-20 px-4">
           <h2 className="text-3xl font-bold text-center mb-12 text-[var(--text-default)]">
             Comparación Detallada
           </h2>
           
-          {/* Selector Mobile */}
-          <div className="md:hidden mb-6 flex justify-center">
-            <div className="inline-flex bg-card rounded-lg p-1 border border-[var(--border-default)]">
-              {(['free', 'pro', 'teams'] as SelectedPlan[]).map((planKey) => (
-                <button
-                  key={planKey}
-                  onClick={() => setSelectedPlanForComparison(planKey)}
-                  className={cn(
-                    "px-6 py-2 rounded-md text-sm font-medium transition-all capitalize",
-                    selectedPlanForComparison === planKey
-                      ? "bg-accent text-accent-foreground"
-                      : "text-[var(--text-muted)]"
-                  )}
-                  data-testid={`tab-comparison-${planKey}`}
-                >
-                  {planKey}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="max-w-6xl mx-auto overflow-x-auto">
-            {/* Desktop: 4 columnas */}
+          <div className="max-w-6xl mx-auto">
+            {/* Desktop: 4 columnas con sticky header */}
             <div className="hidden md:block">
-              <div className="grid grid-cols-4 gap-4">
-                {/* Header con info de planes y botones */}
-                <div className="p-6">
-                  {/* Espacio vacío en esquina superior izquierda */}
-                </div>
-                
-                {/* Free Column Header */}
-                <div 
-                  className="p-6 space-y-4 rounded-lg border border-[var(--border-default)]"
-                  style={{ backgroundColor: getPlanConfig('free').bgColor }}
-                >
-                  <div>
-                    <div className="text-sm font-bold text-[var(--text-default)] mb-1">Free</div>
-                    <div className="text-xs text-[var(--text-muted)]">
-                      {getPlanConfig('free').description}
-                    </div>
+              {/* Sticky Header */}
+              <div className="sticky top-0 z-10 bg-background border-b border-[var(--border-default)]">
+                <div className="grid grid-cols-4">
+                  {/* Features label */}
+                  <div className="px-6 py-4">
+                    <span className="text-sm font-medium text-[var(--text-muted)]">Features</span>
                   </div>
-                  <Button 
-                    size="sm" 
-                    className="w-full text-xs text-white"
-                    style={{ backgroundColor: getPlanConfig('free').iconColor }}
-                    data-testid="button-table-free"
-                  >
-                    Comenzar
-                  </Button>
-                </div>
-
-                {/* Pro Column Header */}
-                <div 
-                  className="p-6 space-y-4 rounded-lg border border-[var(--border-default)]"
-                  style={{ backgroundColor: getPlanConfig('pro').bgColor }}
-                >
-                  <div>
-                    <div className="text-sm font-bold text-[var(--text-default)] mb-1">Pro</div>
-                    <div className="text-xs text-[var(--text-muted)]">
-                      {getPlanConfig('pro').description}
-                    </div>
+                  
+                  {/* Free */}
+                  <div className="px-6 py-4 text-center">
+                    <div className="text-sm font-bold text-[var(--text-default)] mb-2">Free</div>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="text-xs"
+                      data-testid="button-table-free"
+                    >
+                      Comenzar
+                    </Button>
                   </div>
-                  <Button 
-                    size="sm" 
-                    className="w-full text-xs text-white"
-                    style={{ backgroundColor: getPlanConfig('pro').iconColor }}
-                    disabled
-                    data-testid="button-table-pro"
-                  >
-                    Ser Fundador
-                  </Button>
-                </div>
 
-                {/* Teams Column Header */}
-                <div 
-                  className="p-6 space-y-4 rounded-lg border border-[var(--border-default)]"
-                  style={{ backgroundColor: getPlanConfig('teams').bgColor }}
-                >
-                  <div>
-                    <div className="text-sm font-bold text-[var(--text-default)] mb-1">Teams</div>
-                    <div className="text-xs text-[var(--text-muted)]">
-                      {getPlanConfig('teams').description}
-                    </div>
+                  {/* Pro */}
+                  <div className="px-6 py-4 text-center">
+                    <div className="text-sm font-bold text-[var(--text-default)] mb-2">Pro</div>
+                    <Button 
+                      size="sm" 
+                      variant="default"
+                      className="text-xs bg-accent text-accent-foreground hover:bg-accent/90"
+                      data-testid="button-table-pro"
+                    >
+                      Ser Fundador
+                    </Button>
                   </div>
-                  <Button 
-                    size="sm" 
-                    className="w-full text-xs text-white"
-                    style={{ backgroundColor: getPlanConfig('teams').iconColor }}
-                    disabled
-                    data-testid="button-table-teams"
-                  >
-                    Comenzar
-                  </Button>
-                </div>
 
-                {/* Rows */}
+                  {/* Teams */}
+                  <div className="px-6 py-4 text-center">
+                    <div className="text-sm font-bold text-[var(--text-default)] mb-2">Teams</div>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="text-xs"
+                      disabled
+                      data-testid="button-table-teams"
+                    >
+                      Próximamente
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Table Body */}
+              <div>
                 {comparisonData.map((section, sectionIdx) => (
-                  <div key={sectionIdx} className="col-span-4 contents">
-                    {/* Category Header - Color continuo en columnas */}
-                    <div className="p-3 pt-6">
-                      <h3 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                        {section.category}
-                      </h3>
+                  <div key={sectionIdx}>
+                    {/* Category Header - con bordes arriba y abajo */}
+                    <div className="grid grid-cols-4 border-y border-[var(--border-default)] bg-background">
+                      <div className="col-span-4 px-6 py-3">
+                        <h3 className="text-sm font-semibold text-[var(--text-default)]">
+                          {section.category}
+                        </h3>
+                      </div>
                     </div>
-                    <div 
-                      className="p-3 pt-6"
-                      style={{ backgroundColor: getPlanConfig('free').bgColor }}
-                    />
-                    <div 
-                      className="p-3 pt-6"
-                      style={{ backgroundColor: getPlanConfig('pro').bgColor }}
-                    />
-                    <div 
-                      className="p-3 pt-6"
-                      style={{ backgroundColor: getPlanConfig('teams').bgColor }}
-                    />
                     
-                    {/* Category Rows */}
+                    {/* Category Rows - sin bordes entre items */}
                     {section.rows.map((row, rowIdx) => (
-                      <div key={rowIdx} className="contents">
-                        <div className="p-4 text-sm font-medium text-[var(--text-default)]">
+                      <div key={rowIdx} className="grid grid-cols-4">
+                        <div className="px-6 py-3 text-sm text-[var(--text-default)]">
                           {row.label}
                         </div>
-                        <div 
-                          className="p-4 flex justify-center items-center"
-                          style={{ backgroundColor: getPlanConfig('free').bgColor }}
-                        >
-                          {renderValue(row.free, getPlanConfig('free').iconColor)}
+                        <div className="px-6 py-3 flex justify-center items-center">
+                          {renderValue(row.free, 'currentColor')}
                         </div>
-                        <div 
-                          className="p-4 flex justify-center items-center"
-                          style={{ backgroundColor: getPlanConfig('pro').bgColor }}
-                        >
-                          {renderValue(row.pro, getPlanConfig('pro').iconColor)}
+                        <div className="px-6 py-3 flex justify-center items-center">
+                          {renderValue(row.pro, 'currentColor')}
                         </div>
-                        <div 
-                          className="p-4 flex justify-center items-center"
-                          style={{ backgroundColor: getPlanConfig('teams').bgColor }}
-                        >
-                          {renderValue(row.teams, getPlanConfig('teams').iconColor)}
+                        <div className="px-6 py-3 flex justify-center items-center">
+                          {renderValue(row.teams, 'currentColor')}
                         </div>
                       </div>
                     ))}
@@ -857,50 +797,48 @@ export default function PricingPlan() {
               </div>
             </div>
 
-            {/* Mobile: 2 columnas */}
+            {/* Mobile: Sticky tabs + 2 columnas */}
             <div className="md:hidden">
-              <div className="grid grid-cols-2 gap-0 border border-[var(--border-default)] rounded-lg overflow-hidden">
-                {/* Header con botón */}
-                <div className="col-span-2 p-4" style={{ backgroundColor: getPlanConfig(selectedPlanForComparison).bgColor }}>
-                  <div className="mb-3">
-                    <div className="text-sm font-bold text-[var(--text-default)] mb-1 capitalize">
-                      {selectedPlanForComparison}
-                    </div>
-                    <div className="text-xs text-[var(--text-muted)]">
-                      {getPlanConfig(selectedPlanForComparison).description}
-                    </div>
-                  </div>
-                  <Button 
-                    variant={selectedPlanForComparison === 'pro' ? 'default' : 'secondary'}
-                    size="sm" 
-                    className="w-full text-xs"
-                    disabled={selectedPlanForComparison === 'pro' || selectedPlanForComparison === 'teams'}
-                  >
-                    {selectedPlanForComparison === 'pro' ? 'Ser Fundador' : 'Comenzar'}
-                  </Button>
+              {/* Sticky Plan Selector */}
+              <div className="sticky top-0 z-10 bg-background py-3 border-b border-[var(--border-default)]">
+                <div className="flex justify-center gap-2">
+                  {(['free', 'pro', 'teams'] as SelectedPlan[]).map((planKey) => (
+                    <button
+                      key={planKey}
+                      onClick={() => setSelectedPlanForComparison(planKey)}
+                      className={cn(
+                        "px-4 py-1.5 rounded-full text-sm font-medium transition-all capitalize",
+                        selectedPlanForComparison === planKey
+                          ? "bg-[var(--text-default)] text-background"
+                          : "text-[var(--text-muted)] border border-[var(--border-default)]"
+                      )}
+                      data-testid={`tab-comparison-${planKey}`}
+                    >
+                      {planKey}
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                {/* Rows */}
+              {/* Table */}
+              <div className="mt-4">
                 {comparisonData.map((section, sectionIdx) => (
-                  <div key={sectionIdx} className="col-span-2 contents">
-                    {/* Category Header */}
-                    <div className="col-span-2 bg-[var(--accent)]/5 p-2.5 border-t border-[var(--border-default)]">
-                      <h3 className="text-[10px] font-bold text-[var(--text-default)] uppercase tracking-wider">
+                  <div key={sectionIdx}>
+                    {/* Category Header - con bordes arriba y abajo */}
+                    <div className="px-4 py-3 border-y border-[var(--border-default)] bg-background">
+                      <h3 className="text-sm font-semibold text-[var(--text-default)]">
                         {section.category}
                       </h3>
                     </div>
                     
                     {/* Category Rows */}
                     {section.rows.map((row, rowIdx) => (
-                      <div key={rowIdx} className="contents">
-                        <div className="bg-background p-3 text-xs font-medium text-[var(--text-default)] border-t border-r border-[var(--border-default)]">
+                      <div key={rowIdx} className="grid grid-cols-2">
+                        <div className="px-4 py-3 text-sm text-[var(--text-default)]">
                           {row.label}
                         </div>
-                        <div 
-                          className="p-3 flex justify-center items-center border-t border-[var(--border-default)]"
-                          style={{ backgroundColor: getPlanConfig(selectedPlanForComparison).bgColor }}
-                        >
-                          {renderValue(row[selectedPlanForComparison], getPlanConfig(selectedPlanForComparison).iconColor)}
+                        <div className="px-4 py-3 flex justify-center items-center">
+                          {renderValue(row[selectedPlanForComparison], 'currentColor')}
                         </div>
                       </div>
                     ))}
@@ -1022,9 +960,9 @@ export default function PricingPlan() {
 function renderValue(value: string | boolean, iconColor: string) {
   if (typeof value === 'boolean') {
     return value ? (
-      <Check className="h-5 w-5" style={{ color: iconColor }} />
+      <Check className="h-5 w-5 text-[var(--text-muted)]" />
     ) : (
-      <X className="h-4 w-4 text-gray-300 dark:text-gray-700" />
+      <span className="text-[var(--text-muted)]">—</span>
     );
   }
   return <span className="text-sm text-[var(--text-default)]">{value}</span>;
