@@ -242,6 +242,111 @@ export default function PricingPlan() {
     description: "Elige el plan que mejor se adapte a tus necesidades"
   };
 
+  // Helper: Extract features from plan by slug
+  const getPlanFeatures = (planSlug: string) => {
+    const plan = plans.find(p => p.slug?.toLowerCase() === planSlug || p.name.toLowerCase() === planSlug);
+    return plan?.features || {};
+  };
+
+  // Helper: Format numeric limit (null/high = "Ilimitados", otherwise number)
+  const formatLimit = (value: number | null | undefined, suffix?: string): string => {
+    if (value === null || value === undefined || value >= 9999) return 'Ilimitados';
+    if (value === 1) return '1';
+    return suffix ? `${value} ${suffix}` : String(value);
+  };
+
+  // Helper: Format member limit for display
+  const formatMembers = (value: number | null | undefined): string => {
+    if (value === null || value === undefined || value >= 9999) return 'Ilimitados';
+    return String(value);
+  };
+
+  // Build comparison data dynamically from plan features
+  const buildComparisonData = () => {
+    const freeFeatures = getPlanFeatures('free');
+    const proFeatures = getPlanFeatures('pro');
+    const teamsFeatures = getPlanFeatures('teams');
+
+    return [
+      {
+        category: 'Gestión de Proyectos',
+        rows: [
+          { 
+            label: 'Número de proyectos', 
+            free: formatLimit(freeFeatures.max_projects),
+            pro: formatLimit(proFeatures.max_projects),
+            teams: formatLimit(teamsFeatures.max_projects)
+          },
+          { label: 'Dashboard de proyecto', free: true, pro: true, teams: true },
+          { label: 'Vistas Gantt y Kanban', free: 'Básicas', pro: 'Avanzadas', teams: 'Avanzadas' },
+          { label: 'Reportes de progreso', free: 'Básicos', pro: 'Avanzados', teams: 'Avanzados + IA' }
+        ]
+      },
+      {
+        category: 'Gestión Financiera',
+        rows: [
+          { label: 'Presupuestos', free: true, pro: true, teams: true },
+          { label: 'Multi-moneda (ARS, USD)', free: false, pro: true, teams: true },
+          { label: 'Control de gastos', free: 'Básico', pro: 'Avanzado', teams: 'Avanzado' },
+          { label: 'Análisis de rentabilidad', free: false, pro: true, teams: true },
+          { label: 'Integraciones de pago', free: false, pro: true, teams: true }
+        ]
+      },
+      {
+        category: 'Construcción',
+        rows: [
+          { label: 'Subcontratos', free: 'Básico', pro: 'Avanzado', teams: 'Avanzado' },
+          { label: 'Personal', free: 'Hasta 10', pro: 'Hasta 100', teams: 'Ilimitado' },
+          { label: 'Bitácora de obra', free: true, pro: true, teams: true }
+        ]
+      },
+      {
+        category: 'Almacenamiento',
+        rows: [
+          { label: 'Espacio de archivos', free: '500 MB', pro: '50 GB', teams: '500 GB' },
+          { 
+            label: 'PDFs personalizables', 
+            free: freeFeatures.export_pdf_custom ?? false,
+            pro: proFeatures.export_pdf_custom ?? true,
+            teams: teamsFeatures.export_pdf_custom ?? true
+          },
+          { label: 'Backup automático', free: 'Semanal', pro: 'Diario', teams: 'Cada 6hs' }
+        ]
+      },
+      {
+        category: 'Inteligencia Artificial',
+        rows: [
+          { label: 'Tokens IA/mes', free: 'Resúmenes', pro: '10,000', teams: 'Ilimitados' },
+          { label: 'Asistente conversacional', free: false, pro: true, teams: true },
+          { label: 'Análisis financiero IA', free: false, pro: true, teams: true }
+        ]
+      },
+      {
+        category: 'Colaboración',
+        rows: [
+          { 
+            label: 'Usuarios', 
+            free: formatMembers(freeFeatures.max_members),
+            pro: formatMembers(proFeatures.max_members),
+            teams: formatMembers(teamsFeatures.max_members)
+          },
+          { label: 'Roles y permisos', free: false, pro: false, teams: true },
+          { label: 'Colaboración en tiempo real', free: false, pro: false, teams: true }
+        ]
+      },
+      {
+        category: 'Soporte',
+        rows: [
+          { label: 'Email', free: true, pro: true, teams: true },
+          { label: 'Prioritario', free: false, pro: true, teams: true },
+          { label: '24/7', free: false, pro: false, teams: true }
+        ]
+      }
+    ];
+  };
+
+  const comparisonData = buildComparisonData();
+
   if (isLoading) {
     return (
       <Layout hideHeader>
@@ -253,68 +358,6 @@ export default function PricingPlan() {
       </Layout>
     );
   }
-
-  const comparisonData = [
-    {
-      category: 'Gestión de Proyectos',
-      rows: [
-        { label: 'Número de proyectos', free: '3', pro: '50', teams: 'Ilimitados' },
-        { label: 'Dashboard de proyecto', free: true, pro: true, teams: true },
-        { label: 'Vistas Gantt y Kanban', free: 'Básicas', pro: 'Avanzadas', teams: 'Avanzadas' },
-        { label: 'Reportes de progreso', free: 'Básicos', pro: 'Avanzados', teams: 'Avanzados + IA' }
-      ]
-    },
-    {
-      category: 'Gestión Financiera',
-      rows: [
-        { label: 'Presupuestos', free: true, pro: true, teams: true },
-        { label: 'Multi-moneda (ARS, USD)', free: false, pro: true, teams: true },
-        { label: 'Control de gastos', free: 'Básico', pro: 'Avanzado', teams: 'Avanzado' },
-        { label: 'Análisis de rentabilidad', free: false, pro: true, teams: true },
-        { label: 'Integraciones de pago', free: false, pro: true, teams: true }
-      ]
-    },
-    {
-      category: 'Construcción',
-      rows: [
-        { label: 'Subcontratos', free: 'Básico', pro: 'Avanzado', teams: 'Avanzado' },
-        { label: 'Personal', free: 'Hasta 10', pro: 'Hasta 100', teams: 'Ilimitado' },
-        { label: 'Bitácora de obra', free: true, pro: true, teams: true }
-      ]
-    },
-    {
-      category: 'Almacenamiento',
-      rows: [
-        { label: 'Espacio de archivos', free: '500 MB', pro: '50 GB', teams: '500 GB' },
-        { label: 'PDFs personalizables', free: false, pro: true, teams: true },
-        { label: 'Backup automático', free: 'Semanal', pro: 'Diario', teams: 'Cada 6hs' }
-      ]
-    },
-    {
-      category: 'Inteligencia Artificial',
-      rows: [
-        { label: 'Tokens IA/mes', free: 'Resúmenes', pro: '10,000', teams: 'Ilimitados' },
-        { label: 'Asistente conversacional', free: false, pro: true, teams: true },
-        { label: 'Análisis financiero IA', free: false, pro: true, teams: true }
-      ]
-    },
-    {
-      category: 'Colaboración',
-      rows: [
-        { label: 'Usuarios', free: '1', pro: '1', teams: 'Ilimitados' },
-        { label: 'Roles y permisos', free: false, pro: false, teams: true },
-        { label: 'Colaboración en tiempo real', free: false, pro: false, teams: true }
-      ]
-    },
-    {
-      category: 'Soporte',
-      rows: [
-        { label: 'Email', free: true, pro: true, teams: true },
-        { label: 'Prioritario', free: false, pro: true, teams: true },
-        { label: '24/7', free: false, pro: false, teams: true }
-      ]
-    }
-  ];
 
   return (
     <Layout hideHeader>
