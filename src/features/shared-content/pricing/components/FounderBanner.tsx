@@ -1,9 +1,16 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Crown, ExternalLink } from "lucide-react";
-import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Check, Crown, ExternalLink, ArrowRight } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import type { PricingMode } from "../types";
 
-export function FounderBanner() {
+interface FounderBannerProps {
+  mode?: PricingMode;
+}
+
+export function FounderBanner({ mode = 'public' }: FounderBannerProps) {
+  const [, navigate] = useLocation();
   return (
     <div className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-accent/5 via-accent/10 to-accent/5 rounded-2xl blur-2xl" />
@@ -78,10 +85,17 @@ export function FounderBanner() {
             </div>
           </div>
 
-          <div className="pt-2 border-t border-accent/10">
+          <div className="flex items-center justify-between gap-4 pt-2 border-t border-accent/10">
             <p className="text-xs text-[var(--text-muted)]">
               ¿Preguntas? <Link href="/contact" className="text-accent hover:underline">Contacta con nuestro equipo</Link>
             </p>
+            <Button 
+              onClick={() => navigate(mode === 'dashboard' ? '/settings/founders' : '/fundadores')}
+              className="text-xs bg-accent text-accent-foreground hover:bg-accent/90 gap-1.5 h-8 px-3"
+            >
+              Ver Detalles
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
           </div>
         </div>
       </Card>

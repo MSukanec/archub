@@ -13,7 +13,7 @@ interface ComparisonTableProps {
   isAuthenticated?: boolean;
   plans?: Plan[];
   billingPeriod?: 'monthly' | 'annual';
-  onPlanSelect?: (plan: Plan | string) => void;
+  onPlanSelect?: (plan: Plan) => void;
 }
 
 function renderValue(value: boolean | string, color: string) {
