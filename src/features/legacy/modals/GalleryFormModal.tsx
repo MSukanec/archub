@@ -10,7 +10,7 @@ import { FormModalFooter } from '@/components/modal';
 import { useModalPanelStore } from '@/components/modal';
 import { Images } from 'lucide-react';
 import { useProjectContext } from '@/stores/projectContext';
-import { Uploader } from '@/components/shared/Uploader';
+import { FileUploader } from '@/components/shared/FileUploader';
 import { supabase } from '@/lib/supabase';
 
 interface GalleryFormModalProps {
@@ -154,7 +154,7 @@ export function GalleryFormModal({ modalData, onClose }: GalleryFormModalProps) 
 
   const editPanel = (
     <div className="space-y-4">
-      <Uploader
+      <FileUploader
         mode="multiple"
         existingFiles={existingFiles}
         filesToUpload={filesToUpload}

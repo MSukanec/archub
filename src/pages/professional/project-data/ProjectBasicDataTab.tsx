@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ImageIcon, Palette, Settings } from 'lucide-react'
-import { Uploader } from '@/components/shared/Uploader'
+import { FileUploader } from '@/components/shared/FileUploader'
 import { uploadProjectImage, deleteProjectImage } from '@/features/projects'
 import { compressImage, formatCompressionStats } from '@/lib/imageCompression'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -412,7 +412,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         {/* Right Column - Imagen Principal Content */}
         <div>
           {activeProjectId && organizationId && (
-            <Uploader
+            <FileUploader
               variant="hero"
               mode="single"
               accept="images"

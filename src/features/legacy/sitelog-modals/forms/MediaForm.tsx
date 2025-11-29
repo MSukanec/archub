@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Uploader } from "@/components/shared/Uploader";
+import { FileUploader } from "@/components/shared/FileUploader";
 import { deleteMediaFileV2 } from "@/features/media/services/deleteMediaFileV2";
 import type { SiteLogFileInput } from '../../types';
 
@@ -64,7 +64,7 @@ export function MediaForm({
   };
 
   return (
-    <Uploader
+    <FileUploader
       mode="multiple"
       existingFiles={siteLogFiles}
       filesToUpload={filesToUpload}

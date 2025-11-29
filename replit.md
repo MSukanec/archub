@@ -36,12 +36,13 @@ Preferred communication style: Simple, everyday language.
 - **Access Control**: `PlanRestricted` component system for organization membership and subscription plans.
 - **Cost System**: Three-tier cost system (Seencel Cost, Organization Cost, Independent Cost).
 - **Media Uploads**: Unified component for image and multi-file uploads using a scalable `MEDIA_FILES` + `MEDIA_LINKS` architecture.
-- **Unified Uploader Component**: `src/components/shared/Uploader.tsx` consolidates all file upload functionality:
+- **Unified FileUploader Component**: `src/components/shared/FileUploader.tsx` consolidates all file upload functionality:
   - `mode`: 'single' | 'multiple' for file count
   - `variant`: 'dropzone' (default) | 'hero' (project covers) | 'compact' (inline display)
   - `accept`: 'all' | 'images' | 'media' | 'documents' or custom Record
   - Supports `compressionPreset`, `compressOnDrop`, `maxSize`, `showLightbox`
   - Hero variant: Large image preview with drag-drop for project cover images
+- **AvatarUploader Component**: `src/components/shared/AvatarUploader.tsx` for circular avatar uploads (user profiles, organization logos)
 - **Image Compression System**: Client-side automatic image compression with predefined presets.
 - **Date Utilities (CRITICAL)**: All date handling MUST use `src/lib/date-utils.ts` to avoid timezone issues:
   - `parseLocalDate(input)`: Convert database date strings to Date objects (prevents day shift)

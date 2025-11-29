@@ -15,9 +15,9 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ComboBoxMultiSelectField } from "@/components/ui-custom/fields/ComboBoxMultiSelectField";
-import { Uploader } from "@/components/shared/Uploader";
+import { FileUploader } from "@/components/shared/FileUploader";
 import { PhoneField } from "@/components/ui-custom/fields/PhoneField";
-import { AvatarUploader } from "@/components/ui-custom/AvatarUploader";
+import { AvatarUploader } from "@/components/shared/AvatarUploader";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useContactTypes } from "@/features/contacts/hooks";
@@ -365,7 +365,7 @@ function FormPanel({
           <p className="text-xs text-muted-foreground">
             Gestiona los archivos adjuntos del contacto
           </p>
-          <Uploader
+          <FileUploader
             mode="multiple"
             existingFiles={[]}
             filesToUpload={filesToUpload}

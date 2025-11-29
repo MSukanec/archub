@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Uploader } from "@/components/shared/Uploader";
+import { FileUploader } from "@/components/shared/FileUploader";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/features/organization";
@@ -211,7 +211,7 @@ function FormPanel({
 
         <div className="space-y-2">
           <FormLabel>Imagen Principal (opcional)</FormLabel>
-          <Uploader
+          <FileUploader
             variant="hero"
             mode="single"
             accept="images"

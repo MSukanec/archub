@@ -21,7 +21,7 @@ import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { formatContactName } from '@/utils/contacts'
 import { uploadFile, deleteFile } from '@/lib/storage'
-import { Uploader } from '@/components/shared/Uploader'
+import { FileUploader } from '@/components/shared/FileUploader'
 import { useQueryClient } from '@tanstack/react-query'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { 
@@ -421,7 +421,7 @@ function FormPanel({
 
         {/* Row 6: Archivos Adjuntos */}
         <div>
-          <Uploader
+          <FileUploader
             mode="multiple"
             filesToUpload={filesToUpload}
             existingFiles={existingFiles}

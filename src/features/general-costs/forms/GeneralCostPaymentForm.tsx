@@ -21,7 +21,7 @@ import { useGeneralCostPayment } from '../hooks/use-general-cost-payment'
 import { useCreateGeneralCostPayment } from '../hooks/use-create-general-cost-payment'
 import { useUpdateGeneralCostPayment } from '../hooks/use-update-general-cost-payment'
 import { generalCostPaymentSchema, type GeneralCostPaymentFormData } from '../schemas'
-import { Uploader } from '@/components/shared/Uploader'
+import { FileUploader } from '@/components/shared/FileUploader'
 import { uploadFile, deleteFile } from '@/lib/storage'
 import { useQueryClient } from '@tanstack/react-query'
 import { useGeneralCostPaymentMedia } from '../hooks/use-general-cost-payment-media'
@@ -464,7 +464,7 @@ export default function GeneralCostPaymentForm({
 
             <div className="space-y-2">
               <FormLabel>Adjuntos (opcional)</FormLabel>
-              <Uploader
+              <FileUploader
                 mode="multiple"
                 existingFiles={existingFiles}
                 filesToUpload={filesToUpload}

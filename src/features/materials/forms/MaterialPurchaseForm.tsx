@@ -28,7 +28,7 @@ import {
   getMaterialPurchaseStatusBadgeConfig,
   DOCUMENT_TYPES,
 } from '@/features/materials/hooks/use-material-purchases'
-import { Uploader } from '@/components/shared/Uploader'
+import { FileUploader } from '@/components/shared/FileUploader'
 import { uploadFile, deleteFile } from '@/lib/storage'
 
 const materialPurchaseSchema = z.object({
@@ -753,7 +753,7 @@ export function MaterialPurchaseForm({ modalData, onClose, mode = 'create' }: Ma
               />
 
               <div>
-                <Uploader
+                <FileUploader
                   mode="multiple"
                   existingFiles={existingFiles}
                   filesToUpload={filesToUpload}

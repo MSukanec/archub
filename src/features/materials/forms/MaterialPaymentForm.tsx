@@ -19,7 +19,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { uploadFile, deleteFile } from '@/lib/storage'
-import { Uploader } from '@/components/shared/Uploader'
+import { FileUploader } from '@/components/shared/FileUploader'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { 
@@ -299,7 +299,7 @@ function FormPanel({
         />
 
         <div>
-          <Uploader
+          <FileUploader
             mode="multiple"
             filesToUpload={filesToUpload}
             existingFiles={existingFiles}

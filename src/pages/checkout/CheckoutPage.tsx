@@ -18,7 +18,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCountries } from "@/hooks/use-countries";
 import { PhoneField } from "@/components/ui-custom/fields/PhoneField";
-import { Uploader } from "@/components/shared/Uploader";
+import { FileUploader } from "@/components/shared/FileUploader";
 import {
   ShoppingCart,
   ArrowLeft,
@@ -1678,7 +1678,7 @@ Titular: Matias Esteban Sukanec`;
                     {!receiptUploaded ? (
                       /* File selection and upload */
                       <div className="space-y-4">
-                        <Uploader
+                        <FileUploader
                           mode="single"
                           filesToUpload={filesToUpload}
                           onFilesChange={setFilesToUpload}

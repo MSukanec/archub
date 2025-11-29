@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch'
 import { useGlobalModalStore } from '@/components/modal'
 import { useCreateHeroSection, useUpdateHeroSection } from '../hooks/use-hero-sections'
 import { useToast } from '@/hooks/use-toast'
-import Uploader from '@/components/shared/Uploader'
+import { FileUploader } from '@/components/shared/FileUploader'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
 const heroSectionSchema = z.object({
@@ -187,14 +187,20 @@ export default function HeroSectionForm({ modalData }: HeroSectionFormProps) {
               <FormItem className="md:col-span-2">
                 <FormLabel>Imagen/Video de Fondo</FormLabel>
                 <FormControl>
-                  <Uploader
+                  <FileUploader
                     mode="single"
                     variant="hero"
                     accept={form.watch('media_type') === 'video' ? 'media' : 'images'}
-                    value={field.value ? [{ url: field.value, name: 'hero-media' }] : []}
-                    onChange={(files: Array<{ url: string; name: string }>) => field.onChange(files[0]?.url || '')}
+                    heroImageUrl={field.value || null}
+                    onHeroImageChange={(url) => field.onChange(url || '')}
+                    filesToUpload={[]}
+                    onFilesChange={(files) => {
+                      if (files[0]?.file) {
+                        const url = URL.createObjectURL(files[0].file);
+                        field.onChange(url);
+                      }
+                    }}
                     compressionPreset="course-cover"
-                    data-testid="uploader-hero-media"
                   />
                 </FormControl>
                 <FormMessage />

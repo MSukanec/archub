@@ -27,7 +27,7 @@ import { siteLogSchema, type SiteLogFormData } from "../schemas";
 import type { SiteLogFileInput } from "../types";
 import { useSiteLogTypes } from "../hooks/use-sitelog-types";
 import { useSiteLogFiles } from "../hooks/use-sitelog-files";
-import { Uploader } from "@/components/shared/Uploader";
+import { FileUploader } from "@/components/shared/FileUploader";
 import { deleteMediaFileV2 } from "@/features/media/services/deleteMediaFileV2";
 
 interface SiteLogFormProps {
@@ -402,7 +402,7 @@ function FormPanel({
 
         <div className="space-y-2">
           <FormLabel>Fotos y Videos</FormLabel>
-          <Uploader
+          <FileUploader
             mode="multiple"
             accept="media"
             compressOnDrop={true}
