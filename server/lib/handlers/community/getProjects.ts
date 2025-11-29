@@ -39,7 +39,7 @@ export async function getProjects(
         name,
         organization_id,
         color,
-        organizations!inner(id, name, logo_url),
+        organizations!inner(id, name, image_bucket, image_path),
         project_data!left(lat, lng, address, city, state, country, image_bucket, image_path)
       `)
       .eq('is_active', true)
@@ -72,12 +72,22 @@ export async function getProjects(
             }
           }
 
+          // Generate organization logo URL on-demand from bucket+path
+          let organizationLogo: string | null = null;
+          if (p.organizations?.image_bucket && p.organizations?.image_path) {
+            try {
+              organizationLogo = await getFileUrl(p.organizations.image_bucket as BucketName, p.organizations.image_path);
+            } catch (error) {
+              console.error('Error generating logo URL for org', p.organizations.id, error);
+            }
+          }
+
           return {
             id: p.id,
             name: p.name,
             organizationId: p.organization_id,
             organizationName: p.organizations.name,
-            organizationLogo: p.organizations.logo_url,
+            organizationLogo,
             color: p.color,
             lat: Number(lat),
             lng: Number(lng),

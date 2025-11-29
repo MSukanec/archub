@@ -1,5 +1,7 @@
 import type { Express } from "express";
 import type { RouteDeps } from "./_base";
+import { getFileUrl } from '@/lib/storage/getFileUrl';
+import type { BucketName } from '@/lib/storage/types';
 
 /**
  * Register user-related endpoints (profile, preferences, authentication)
@@ -155,31 +157,41 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         return res.status(404).json({ error: "User not found" });
       }
       
-      // Enhance organizations array with logo_url
+      // Enhance organizations array with logo_url (computed from image_bucket + image_path)
       if (userData.organizations && Array.isArray(userData.organizations)) {
-
-        
         // Get organization IDs for bulk query
         const orgIds = userData.organizations.map((org: any) => org.id);
         
-        // Fetch logo_url for all organizations in one query
+        // Fetch image_bucket and image_path for all organizations in one query
         const { data: orgLogos, error: logoError } = await authenticatedSupabase
           .from('organizations')
-          .select('id, logo_url')
+          .select('id, image_bucket, image_path')
           .eq('is_deleted', false)
           .in('id', orgIds);
           
         if (!logoError && orgLogos) {
-          // Create a map for quick lookup
-          const logoMap = new Map(orgLogos.map((org: any) => [org.id, org.logo_url]));
+          // Create a map for quick lookup with generated URLs
+          const logoMap = new Map<string, string | null>();
+          
+          await Promise.all(
+            orgLogos.map(async (org: any) => {
+              let logoUrl: string | null = null;
+              if (org.image_bucket && org.image_path) {
+                try {
+                  logoUrl = await getFileUrl(org.image_bucket as BucketName, org.image_path);
+                } catch (error) {
+                  console.error('Error generating logo URL for org', org.id, error);
+                }
+              }
+              logoMap.set(org.id, logoUrl);
+            })
+          );
           
           // Add logo_url to each organization
           userData.organizations = userData.organizations.map((org: any) => ({
             ...org,
             logo_url: logoMap.get(org.id) || null
           }));
-          
-
         } else {
           console.error("Error fetching organization logos:", logoError);
         }

@@ -24,7 +24,6 @@ export async function getOrganizationInfo(
         is_system,
         created_at,
         updated_at,
-        logo_url,
         contact_email,
         contact_phone,
         website,

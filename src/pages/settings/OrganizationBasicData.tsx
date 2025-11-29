@@ -189,15 +189,12 @@ export default function OrganizationBasicData() {
   useEffect(() => {
     if (organizationInfo) {
       setOrganizationName(organizationInfo.name || '');
-      // Priority: new system (image_bucket + image_path) > legacy (logo_url)
+      // Generate logo URL from image_bucket + image_path
       if (organizationInfo.image_bucket && organizationInfo.image_path) {
         const { data } = supabase.storage
           .from(organizationInfo.image_bucket)
           .getPublicUrl(organizationInfo.image_path);
         setLogoUrl(data.publicUrl);
-      } else if (organizationInfo.logo_url) {
-        // Fallback to legacy logo_url for backwards compatibility
-        setLogoUrl(organizationInfo.logo_url);
       } else {
         setLogoUrl('');
       }

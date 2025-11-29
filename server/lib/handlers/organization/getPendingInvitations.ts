@@ -1,6 +1,8 @@
 // api/lib/handlers/organization/getPendingInvitations.ts
 import { SupabaseClient } from "@supabase/supabase-js";
 import { HttpError } from "../../auth/helpers.js";
+import { getFileUrl } from '@/lib/storage/getFileUrl';
+import type { BucketName } from '@/lib/storage/types';
 
 export interface PendingInvitation {
   id: string;
@@ -56,7 +58,7 @@ export async function getPendingInvitations(
       // Get organization data
       const { data: org } = await supabase
         .from('organizations')
-        .select('name, logo_url')
+        .select('name, image_bucket, image_path')
         .eq('is_deleted', false)
         .eq('id', inv.organization_id)
         .single();
@@ -91,11 +93,21 @@ export async function getPendingInvitations(
         avatar_url: m.users?.avatar_url,
       }));
 
+      // Generate organization avatar URL on-demand from bucket+path
+      let organizationAvatar: string | null = null;
+      if (org?.image_bucket && org?.image_path) {
+        try {
+          organizationAvatar = await getFileUrl(org.image_bucket as BucketName, org.image_path);
+        } catch (error) {
+          console.error('Error generating logo URL for org', inv.organization_id, error);
+        }
+      }
+
       return {
         id: inv.id,
         organization_id: inv.organization_id,
         organization_name: org?.name || 'Organización',
-        organization_avatar: (org?.logo_url && org.logo_url.trim() !== '') ? org.logo_url : null,
+        organization_avatar: organizationAvatar,
         role_id: inv.role_id,
         role_name: role?.name || 'Miembro',
         invited_by: inv.invited_by,

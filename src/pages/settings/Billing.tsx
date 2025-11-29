@@ -198,13 +198,23 @@ const Billing = () => {
 
       const { data, error } = await supabase
         .from('organizations')
-        .select('name, logo_url, plan_id, plans(name, slug)')
+        .select('name, image_bucket, image_path, plan_id, plans(name, slug)')
         .eq('is_deleted', false)
         .eq('id', currentOrganizationId)
         .single();
 
       if (error) throw error;
-      return data as any;
+      
+      // Generate logo URL from bucket + path
+      let logo_url: string | null = null;
+      if (data?.image_bucket && data?.image_path) {
+        const { data: urlData } = supabase.storage
+          .from(data.image_bucket)
+          .getPublicUrl(data.image_path);
+        logo_url = urlData.publicUrl;
+      }
+      
+      return { ...data, logo_url } as any;
     },
     enabled: !!currentOrganizationId && !!supabase,
   });
