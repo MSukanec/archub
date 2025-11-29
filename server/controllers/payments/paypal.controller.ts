@@ -165,8 +165,6 @@ export async function captureAndRedirect(req: Request, res: Response) {
   `;
   
   try {
-    console.log('[PayPal capture-and-redirect] Starting capture for order:', token);
-    
     if (!token) {
       console.error('[PayPal capture-and-redirect] Missing token');
       return res.status(400).send(errorHtml('Token de orden faltante'));
@@ -174,7 +172,6 @@ export async function captureAndRedirect(req: Request, res: Response) {
     
     // 1. Get the order first to extract custom_id (contains user_id|course_id|coupon info)
     const orderDetails = await getPayPalOrder(token);
-    console.log('[PayPal capture-and-redirect] Order details:', JSON.stringify(orderDetails, null, 2));
     
     const purchaseUnit = orderDetails.purchase_units?.[0];
     const customId = purchaseUnit?.custom_id;
@@ -192,8 +189,6 @@ export async function captureAndRedirect(req: Request, res: Response) {
     const couponCode = parts[2] || null;
     const couponId = parts[3] || null;
     
-    console.log('[PayPal capture-and-redirect] Parsed custom_id:', { userId, courseId, couponCode, couponId });
-    
     if (!userId || !courseId) {
       console.error('[PayPal capture-and-redirect] Invalid custom_id format:', customId);
       return res.status(400).send(errorHtml('Formato de orden inválido'));
@@ -203,9 +198,7 @@ export async function captureAndRedirect(req: Request, res: Response) {
     const supabase = createServiceSupabaseClient();
     
     // 2. Capture the payment
-    console.log('[PayPal capture-and-redirect] Capturing order...');
     const captureResult = await capturePayPalOrder(token);
-    console.log('[PayPal capture-and-redirect] Capture result:', JSON.stringify(captureResult, null, 2));
     
     if (captureResult.status !== 'COMPLETED') {
       console.error('[PayPal capture-and-redirect] Capture not completed:', captureResult.status);
@@ -217,8 +210,6 @@ export async function captureAndRedirect(req: Request, res: Response) {
     const amount = parseFloat(capturedPayment?.amount?.value || '0');
     const currency = capturedPayment?.amount?.currency_code || 'USD';
     const providerPaymentId = capturedPayment?.id || token;
-    
-    console.log('[PayPal capture-and-redirect] Payment captured:', { amount, currency, providerPaymentId });
     
     // 3. Log payment event
     await logPaymentEvent(supabase, 'paypal', {
@@ -245,15 +236,10 @@ export async function captureAndRedirect(req: Request, res: Response) {
     
     if (paymentResult.error) {
       console.error('[PayPal capture-and-redirect] Payment insert error:', paymentResult.error);
-      // Continue anyway - user should still get enrolled
-    } else {
-      console.log('[PayPal capture-and-redirect] Payment inserted:', paymentResult.paymentId);
     }
     
     // 5. Redeem coupon if one was used
     if (couponId && paymentResult.paymentId) {
-      console.log('[PayPal capture-and-redirect] Redeeming coupon:', { couponCode, couponId });
-      
       const couponResult = await markCouponAsUsed(
         supabase,
         couponId,
@@ -264,11 +250,8 @@ export async function captureAndRedirect(req: Request, res: Response) {
         currency
       );
       
-      if (couponResult.success) {
-        console.log('[PayPal capture-and-redirect] ✅ Coupon redeemed:', { couponCode, amount, currency });
-      } else {
+      if (!couponResult.success) {
         console.error('[PayPal capture-and-redirect] Coupon redemption failed:', couponResult.error);
-        // Don't fail the payment - just log the error
       }
     }
     
@@ -278,14 +261,11 @@ export async function captureAndRedirect(req: Request, res: Response) {
       console.error('[PayPal capture-and-redirect] Enrollment failed:', enrollmentResult.error);
       return res.status(400).send(errorHtml(`No se pudo inscribir al usuario en el curso: ${enrollmentResult.error}`));
     }
-    console.log('[PayPal capture-and-redirect] ✅ User enrolled successfully');
     
     // 7. Return HTML with loader and client-side redirect
     const redirectUrl = courseSlug 
       ? `/learning/courses/${courseSlug}?payment=success`
       : `/learning/courses?payment=success`;
-    
-    console.log('[PayPal capture-and-redirect] Redirecting to:', redirectUrl);
     
     const loaderHtml = `
       <!DOCTYPE html>

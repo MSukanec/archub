@@ -40,8 +40,6 @@ async function verifyAdmin(authHeader: string) {
 }
 
 async function enrollUserInCourse(user_id: string, course_id: string, months: number = 12) {
-  console.log('📚 [enrollUserInCourse] Starting enrollment...', { user_id, course_id, months });
-  
   const expiresAt = new Date();
   expiresAt.setMonth(expiresAt.getMonth() + months);
   
@@ -53,8 +51,6 @@ async function enrollUserInCourse(user_id: string, course_id: string, months: nu
     expires_at: expiresAt.toISOString()
   };
   
-  console.log('📚 [enrollUserInCourse] Enrollment data:', enrollmentData);
-  
   const { data, error } = await getAdminClient()
     .from('course_enrollments')
     .insert(enrollmentData)
@@ -62,7 +58,6 @@ async function enrollUserInCourse(user_id: string, course_id: string, months: nu
   
   if (error) {
     if (error.code === '23505') {
-      console.log('⚠️ [enrollUserInCourse] User already enrolled, extending expiration...');
       const { data: updated, error: updateError } = await getAdminClient()
         .from('course_enrollments')
         .update({ expires_at: expiresAt.toISOString(), status: 'active' })
@@ -74,14 +69,12 @@ async function enrollUserInCourse(user_id: string, course_id: string, months: nu
         console.error('❌ [enrollUserInCourse] ERROR updating expiration:', updateError);
         throw updateError;
       }
-      console.log('✅ [enrollUserInCourse] Success! Expiration extended:', updated);
       return updated;
     }
     console.error('❌ [enrollUserInCourse] ERROR:', error);
     throw error;
   }
   
-  console.log('✅ [enrollUserInCourse] Success! Enrollment created:', data);
   return data;
 }
 
@@ -282,8 +275,6 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
 
       const courseId = payment.course_id;
       
-      console.log('✅ [approve] Approving payment:', { id, courseId, months });
-      
       const { error: updateError } = await adminClient
         .from('bank_transfer_payments')
         .update({ status: 'approved' })
@@ -309,10 +300,8 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         });
       }
       
-      console.log('✅ [approve] All validations passed, enrolling user...');
       try {
         await enrollUserInCourse(payment.users.id, courseId, months);
-        console.log('✅ [approve] User enrolled successfully');
       } catch (enrollError: any) {
         console.error('❌ [approve] Enrollment failed:', enrollError);
         return res.status(500).json({ 

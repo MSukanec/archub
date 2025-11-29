@@ -93,8 +93,6 @@ export async function processWebhook(
       typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const eventType = json?.event_type ?? "UNKNOWN";
 
-    console.log(`[PayPal webhook] 📨 Event received: ${eventType}`);
-
     let order_id = extractOrderId(json);
     let invoice_id = json?.resource?.purchase_units?.[0]?.invoice_id ?? null;
     let custom_id_raw = json?.resource?.purchase_units?.[0]?.custom_id ?? null;
@@ -143,49 +141,18 @@ export async function processWebhook(
             organization_id = parts[2] || null;
             billing_period = parts[3];
             product_type = "subscription";
-
-            console.log(
-              "[PayPal webhook] ✅ Decoded custom_id (subscription pipe format):",
-              {
-                user_hint,
-                plan_id,
-                organization_id,
-                billing_period,
-                product_type,
-              }
-            );
           }
           // Course format with coupon: user_id|course_id|coupon_code|coupon_id (4 parts)
           else if (parts.length === 4) {
             user_hint = parts[0] || null;
             course_hint = parts[1] || null;
             product_type = "course";
-
-            console.log(
-              "[PayPal webhook] ✅ Decoded custom_id (course pipe format with coupon):",
-              {
-                user_hint,
-                course_hint,
-                coupon_code: parts[2],
-                coupon_id: parts[3],
-                product_type,
-              }
-            );
           }
           // Course format without coupon: user_id|course_id (2 parts)
           else if (parts.length === 2) {
             user_hint = parts[0] || null;
             course_hint = parts[1] || null;
             product_type = "course";
-
-            console.log(
-              "[PayPal webhook] ✅ Decoded custom_id (course pipe format):",
-              {
-                user_hint,
-                course_hint,
-                product_type,
-              }
-            );
           }
         }
         // Old base64 JSON format (backward compatibility)
@@ -202,14 +169,6 @@ export async function processWebhook(
             organization_id = customData.o ?? null;
             billing_period = customData.bp ?? null;
             course_hint = customData.c ?? null;
-
-            console.log("[PayPal webhook] ✅ Decoded custom_id (base64 new):", {
-              user_hint,
-              product_type,
-              organization_id,
-              plan_id,
-              billing_period,
-            });
           }
           // Old format with full keys
           else if (customData.user_id || customData.product_type) {
@@ -220,14 +179,6 @@ export async function processWebhook(
             plan_id = customData.plan_id ?? null;
             organization_id = customData.organization_id ?? null;
             billing_period = customData.billing_period ?? null;
-
-            console.log("[PayPal webhook] ✅ Decoded custom_id (base64 old):", {
-              user_hint,
-              product_type,
-              organization_id,
-              plan_id,
-              billing_period,
-            });
           }
         }
       } catch (e) {
@@ -253,22 +204,7 @@ export async function processWebhook(
       if (bp === "monthly" || bp === "annual") {
         billing_period = bp;
       }
-
-      console.log("[PayPal webhook] ℹ️ Using invoice_id metadata (legacy)");
     }
-
-    console.log(`[PayPal webhook] 📦 Metadata extracted:`, {
-      product_type,
-      user_hint,
-      course_hint,
-      organization_id,
-      plan_id,
-      plan_slug,
-      billing_period,
-      amount,
-      currency,
-      status,
-    });
 
     await logPaymentEvent(supabase, "paypal", {
       providerEventId: json.id ?? null,
@@ -291,11 +227,7 @@ export async function processWebhook(
       status === "APPROVED";
 
     if (isApproved) {
-      console.log(`[PayPal webhook] ✅ Payment approved, processing...`);
-
       if (product_type === "subscription") {
-        console.log(`[PayPal webhook] 🏢 Processing SUBSCRIPTION payment`);
-
         if (organization_id && billing_period && captureId) {
           // CRITICAL: Resolve auth_id (user_hint) to users.id
           let publicUserId: string | null = null;
@@ -316,10 +248,6 @@ export async function processWebhook(
             }
             
             publicUserId = userProfile.id;
-            console.log("[PayPal webhook] ✅ Resolved auth_id to user_id:", {
-              auth_id: user_hint,
-              user_id: publicUserId,
-            });
           } else {
             console.error("[PayPal webhook] ❌ Missing user_hint for subscription");
             return { success: true, processed: false, eventType };
@@ -328,9 +256,6 @@ export async function processWebhook(
           let resolvedPlanId = plan_id;
 
           if (!resolvedPlanId && plan_slug) {
-            console.log(
-              `[PayPal webhook] 🔍 Resolving plan_id from plan_slug: ${plan_slug}`
-            );
             resolvedPlanId = await getPlanIdBySlug(supabase, plan_slug);
 
             if (!resolvedPlanId) {
@@ -343,8 +268,6 @@ export async function processWebhook(
                 warn: `plan_slug: ${plan_slug}`,
               };
             }
-
-            console.log(`[PayPal webhook] ✅ Resolved plan_id: ${resolvedPlanId}`);
           }
 
           if (!resolvedPlanId) {
@@ -369,7 +292,6 @@ export async function processWebhook(
 
           // IDEMPOTENT: Only upgrade organization if payment was NEWLY inserted
           if (paymentResult.inserted && paymentResult.paymentId) {
-            console.log(`[PayPal webhook] 🔄 Upgrading organization plan (FIRST-TIME payment processing)`);
             await upgradeOrganizationPlan(supabase, {
               organizationId: organization_id,
               planId: resolvedPlanId,
@@ -378,9 +300,8 @@ export async function processWebhook(
               amount: amount,
               currency: currency,
             });
-            console.log(`[PayPal webhook] ✅ Subscription processed successfully`);
           } else if (!paymentResult.inserted) {
-            console.log(`[PayPal webhook] ⏭️ Skipping organization upgrade (duplicate webhook - payment already processed)`);
+            // Duplicate webhook - payment already processed
           } else {
             console.error(`[PayPal webhook] ❌ No payment ID returned for subscription`);
           }
@@ -392,8 +313,6 @@ export async function processWebhook(
           });
         }
       } else {
-        console.log(`[PayPal webhook] 📚 Processing COURSE payment`);
-
         if (user_hint && course_hint && captureId) {
           await insertPayment(supabase, "paypal", {
             providerPaymentId: captureId,
@@ -406,8 +325,6 @@ export async function processWebhook(
           });
 
           await upsertEnrollment(supabase, user_hint, course_hint, months);
-
-          console.log(`[PayPal webhook] ✅ Course enrollment processed successfully`);
         } else {
           console.error(`[PayPal webhook] ❌ Missing course data:`, {
             user_hint,
@@ -419,9 +336,6 @@ export async function processWebhook(
 
       return { success: true, processed: true, eventType };
     } else {
-      console.log(
-        `[PayPal webhook] ⚠️ Payment not approved yet. Status: ${status}, Event: ${eventType}`
-      );
       return { success: true, processed: false, eventType };
     }
   } catch (e: any) {

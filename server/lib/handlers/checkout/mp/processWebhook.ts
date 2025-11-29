@@ -53,9 +53,6 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
     // 1. Validación de secret (TEMPORALMENTE DESHABILITADA PARA DEBUG)
     if (MP_WEBHOOK_SECRET) {
       const q = String(req.query?.secret ?? "");
-      console.log("[mp/webhook] DEBUG - Secret from URL:", q);
-      console.log("[mp/webhook] DEBUG - Secret from ENV:", MP_WEBHOOK_SECRET);
-      console.log("[mp/webhook] DEBUG - Secrets match:", q === MP_WEBHOOK_SECRET);
       
       if (!q || q !== MP_WEBHOOK_SECRET) {
         console.warn("[mp/webhook] secret mismatch - PERO CONTINUANDO PARA DEBUG");
@@ -88,7 +85,6 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       // NUEVO: Buscar datos en mp_course_preferences si es un ID corto (empieza con "mp_")
       let fromDb: any = null;
       if (externalRef.startsWith("mp_")) {
-        console.log("[MP webhook] 🔍 Buscando datos en BD para:", externalRef);
         const { data: prefData, error: prefError } = await supabase
           .from("mp_course_preferences")
           .select("*, courses!inner(slug)")
@@ -104,7 +100,6 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
             coupon_id: prefData.coupon_id,
             product_type: 'course',
           };
-          console.log("[MP webhook] ✅ Datos encontrados en BD:", fromDb);
         } else {
           console.warn("[MP webhook] ⚠️ No se encontraron datos en BD:", prefError);
         }
@@ -146,26 +141,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
           });
         } else {
           publicUserId = userProfile.id;
-          console.log('[MP webhook] ✅ Resolved auth_id to user_id:', {
-            auth_id: resolvedUserId,
-            user_id: publicUserId
-          });
         }
-      }
-
-      // Log detallado para pagos no aprobados
-      if (status !== "approved") {
-        console.log(`[MP webhook] ❌ Pago rechazado/pendiente:`);
-        console.log(`  - Payment ID: ${providerPaymentId}`);
-        console.log(`  - Status: ${status}`);
-        console.log(`  - Status Detail: ${statusDetail}`);
-        console.log(`  - Amount: ${amount} ${currency}`);
-        console.log(`  - Product Type: ${productType}`);
-        console.log(`  - User: ${resolvedUserId}`);
-        console.log(`  - Course: ${resolvedSlug}`);
-        console.log(`  - Organization: ${organizationId}`);
-        console.log(`  - Plan ID: ${planIdFromMetadata}`);
-        console.log(`  - Plan Slug: ${planSlug}`);
       }
 
       // 1. Insertar en payment_events
@@ -186,21 +162,16 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       // 2. Si está aprobado, procesar según product_type
       if (status === "approved") {
         if (productType === 'subscription') {
-          console.log(`[MP webhook] 🏢 Processing SUBSCRIPTION payment`);
-          
           if (organizationId && billingPeriod) {
             let resolvedPlanId = planIdFromMetadata;
             
             if (!resolvedPlanId && planSlug) {
-              console.log(`[MP webhook] 🔍 Resolving plan_id from plan_slug: ${planSlug}`);
               resolvedPlanId = await getPlanIdBySlug(supabase, planSlug);
               
               if (!resolvedPlanId) {
                 console.error(`[MP webhook] ❌ Failed to resolve plan_id from slug "${planSlug}"`);
                 return { success: true, processed: "error", id: 'plan_not_found' };
               }
-              
-              console.log(`[MP webhook] ✅ Resolved plan_id: ${resolvedPlanId}`);
             }
             
             if (!resolvedPlanId) {
@@ -222,7 +193,6 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
 
             // IDEMPOTENT: Only upgrade organization plan if payment was NEWLY inserted
             if (subPaymentResult.inserted && subPaymentResult.paymentId) {
-              console.log(`[MP webhook] 🔄 Upgrading organization plan (FIRST-TIME payment processing)`);
               await upgradeOrganizationPlan(supabase, {
                 organizationId: organizationId,
                 planId: resolvedPlanId,
@@ -232,18 +202,14 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
                 currency: currency,
               });
             } else if (!subPaymentResult.inserted) {
-              console.log(`[MP webhook] ⏭️ Skipping organization upgrade (duplicate webhook - payment already processed)`);
+              // Duplicate webhook - payment already processed
             } else {
               console.error(`[MP webhook] ❌ No payment ID returned for subscription`);
             }
-
-            console.log(`[MP webhook] ✅ Subscription processed successfully`);
           } else {
             console.error(`[MP webhook] ❌ Missing subscription data:`, { organizationId, billingPeriod });
           }
         } else {
-          console.log(`[MP webhook] 📚 Processing COURSE payment`);
-          
           // course_id si podemos
           let course_id: string | null = null;
           if (resolvedSlug) course_id = await getCourseIdBySlug(supabase, resolvedSlug);
@@ -264,7 +230,6 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
 
             // IDEMPOTENT: Only mark coupon as used if payment was NEWLY inserted (not duplicate)
             if (paymentResult.inserted && paymentResult.paymentId && couponId && couponCode) {
-              console.log(`[MP webhook] 🎟️ Redeeming coupon: ${couponCode} (${couponId})`);
               // Calculate amount saved (we need to store original price in metadata for this)
               // For now, use 0 as placeholder - ideally we'd store original_price in metadata
               const amountSaved = 0; // TODO: Store original_price in metadata to calculate discount
@@ -284,8 +249,6 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
 
             // Upsert enrollment - using publicUserId
             await upsertEnrollment(supabase, publicUserId, course_id, effectiveMonths);
-
-            console.log(`[MP webhook] ✅ Course enrollment processed successfully`);
           } else {
             console.error(`[MP webhook] ❌ Missing course data:`, { 
               auth_id: resolvedUserId, 
@@ -309,7 +272,6 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       // NUEVO: Buscar datos en mp_course_preferences si es un ID corto (empieza con "mp_")
       let fromDbMo: any = null;
       if (externalRefMo.startsWith("mp_")) {
-        console.log("[MP webhook MO] 🔍 Buscando datos en BD para:", externalRefMo);
         const { data: prefDataMo, error: prefErrorMo } = await supabase
           .from("mp_course_preferences")
           .select("*, courses!inner(slug)")
@@ -325,7 +287,6 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
             coupon_id: prefDataMo.coupon_id,
             product_type: 'course',
           };
-          console.log("[MP webhook MO] ✅ Datos encontrados en BD:", fromDbMo);
         } else {
           console.warn("[MP webhook MO] ⚠️ No se encontraron datos en BD:", prefErrorMo);
         }
@@ -364,22 +325,8 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
           });
         } else {
           moPublicUserId = userProfile.id;
-          console.log('[MP webhook] ✅ Resolved auth_id to user_id (MO):', {
-            auth_id: resolvedUserId,
-            user_id: moPublicUserId
-          });
         }
       }
-
-      // Log detallado del merchant_order
-      console.log(`[MP webhook] 📦 Merchant Order recibida:`);
-      console.log(`  - Order ID: ${mo?.id}`);
-      console.log(`  - Total: ${mo?.total_amount}`);
-      console.log(`  - Order Status: ${mo?.order_status}`);
-      console.log(`  - Product Type: ${productType}`);
-      console.log(`  - Plan ID: ${planIdFromMetadata}`);
-      console.log(`  - Plan Slug: ${planSlug}`);
-      console.log(`  - Payments:`, JSON.stringify(mo?.payments, null, 2));
 
       // ¿Hay pago aprobado?
       const approved = Array.isArray(mo?.payments)
@@ -411,21 +358,16 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
 
         if (providerPaymentId) {
           if (productType === 'subscription') {
-            console.log(`[MP webhook] 🏢 Processing SUBSCRIPTION merchant order`);
-            
             if (organizationId && billingPeriod) {
               let resolvedPlanId = planIdFromMetadata;
               
               if (!resolvedPlanId && planSlug) {
-                console.log(`[MP webhook] 🔍 Resolving plan_id from plan_slug: ${planSlug}`);
                 resolvedPlanId = await getPlanIdBySlug(supabase, planSlug);
                 
                 if (!resolvedPlanId) {
                   console.error(`[MP webhook] ❌ Failed to resolve plan_id from slug "${planSlug}"`);
                   return { success: true, processed: "error", id: 'plan_not_found' };
                 }
-                
-                console.log(`[MP webhook] ✅ Resolved plan_id: ${resolvedPlanId}`);
               }
               
               if (!resolvedPlanId) {
@@ -447,7 +389,6 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
 
               // IDEMPOTENT: Only upgrade organization plan if payment was NEWLY inserted
               if (moSubPaymentResult.inserted && moSubPaymentResult.paymentId) {
-                console.log(`[MP webhook] 🔄 Upgrading organization plan from merchant_order (FIRST-TIME payment processing)`);
                 await upgradeOrganizationPlan(supabase, {
                   organizationId: organizationId,
                   planId: resolvedPlanId,
@@ -457,18 +398,14 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
                   currency: "ARS",
                 });
               } else if (!moSubPaymentResult.inserted) {
-                console.log(`[MP webhook] ⏭️ Skipping organization upgrade (duplicate merchant_order webhook - payment already processed)`);
+                // Duplicate merchant_order webhook - payment already processed
               } else {
                 console.error(`[MP webhook] ❌ No payment ID returned for subscription (MO)`);
               }
-
-              console.log(`[MP webhook] ✅ Subscription merchant order processed successfully`);
             } else {
               console.error(`[MP webhook] ❌ Missing subscription data in merchant order:`, { organizationId, billingPeriod });
             }
           } else {
-            console.log(`[MP webhook] 📚 Processing COURSE merchant order`);
-            
             // course_id si podemos
             let course_id: string | null = null;
             if (resolvedSlug) course_id = await getCourseIdBySlug(supabase, resolvedSlug);
@@ -488,7 +425,6 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
 
               // IDEMPOTENT: Only mark coupon as used if payment was NEWLY inserted
               if (paymentResult.inserted && paymentResult.paymentId && couponId && couponCode) {
-                console.log(`[MP webhook] 🎟️ Redeeming coupon (MO): ${couponCode} (${couponId})`);
                 const amountSaved = 0; // TODO: Store original_price in metadata to calculate discount
                 const couponResult = await markCouponAsUsed(
                   supabase,
@@ -505,8 +441,6 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
               }
 
               await upsertEnrollment(supabase, moPublicUserId, course_id, effectiveMonths);
-
-              console.log(`[MP webhook] ✅ Course merchant order processed successfully`);
             } else {
               console.error(`[MP webhook] ❌ Missing course data in merchant order:`, { 
                 auth_id: resolvedUserId, 
