@@ -62,7 +62,7 @@ export function PlanBadge({ planName, className }: PlanBadgeProps) {
       title={config.label}
       data-testid="button-plan-badge"
       className={cn(
-        "h-8 w-8 rounded-lg cursor-pointer transition-all duration-200 flex items-center justify-center",
+        "h-8 w-8 rounded-full cursor-pointer transition-all duration-200 flex items-center justify-center",
         "hover:scale-105 hover:opacity-90",
         className
       )}
