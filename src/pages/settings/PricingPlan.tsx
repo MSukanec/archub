@@ -711,7 +711,7 @@ export default function PricingPlan() {
           
           <div className="max-w-6xl mx-auto">
             {/* Desktop: 4 columnas con sticky header */}
-            <div className="hidden md:block">
+            <div className="hidden md:block border border-[var(--border-default)] rounded-lg overflow-hidden">
               {/* Sticky Header */}
               <div className="sticky top-0 z-10 bg-background border-b border-[var(--border-default)]">
                 <div className="grid grid-cols-4">
