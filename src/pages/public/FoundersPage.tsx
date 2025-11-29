@@ -90,9 +90,9 @@ function HeroSection() {
       </div>
 
       <div className="text-center max-w-4xl mx-auto relative z-10">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-8">
-          <Star className="h-3.5 w-3.5 text-primary" />
-          <span className="text-xs font-medium text-primary">El Círculo Exclusivo de Seencel</span>
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 mb-8">
+          <Star className="h-3.5 w-3.5 text-white" />
+          <span className="text-xs font-medium text-white">El Círculo Exclusivo de Seencel</span>
         </div>
 
         <h1
