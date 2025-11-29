@@ -144,7 +144,7 @@ export function MarketingLayout({
   // Special layout with hero section (for course landing pages)
   if (heroSlot) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen overflow-x-hidden">
         <Header navigation={headerNavigation} />
         
         {/* Floating Sticky Card - Desktop only, positioned absolutely */}
@@ -162,7 +162,7 @@ export function MarketingLayout({
           </div>
         )}
         
-        <main>
+        <main className="overflow-x-hidden">
           {heroSlot}
           {children}
         </main>
@@ -174,7 +174,7 @@ export function MarketingLayout({
 
   // Normal layout (for standard marketing pages)
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
       <Header navigation={headerNavigation} />
       <div className="container mx-auto px-6 py-12 flex-1">
         {children}
