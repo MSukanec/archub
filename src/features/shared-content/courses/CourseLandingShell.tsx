@@ -59,28 +59,22 @@ export function CourseLandingShell({
           progressPercentage={progressPercentage} 
         />
         
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <InstructorSection course={course} />
-        </div>
-        
+        <InstructorSection course={course} />
         <PlatformSection />
-        
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
-          <ModulesSection 
-            modules={modules} 
-            title={landingSections?.modules?.title}
-            subtitle={landingSections?.modules?.subtitle}
-            description={landingSections?.modules?.description}
-          />
-          <LessonsSection modules={modules} />
-          <FAQSection 
-            faqs={faqs}
-            title={landingSections?.faq?.title}
-            subtitle={landingSections?.faq?.subtitle}
-            description={landingSections?.faq?.description}
-          />
-          {!isEnrolled && <CTAFooter course={course} />}
-        </div>
+        <ModulesSection 
+          modules={modules} 
+          title={landingSections?.modules?.title}
+          subtitle={landingSections?.modules?.subtitle}
+          description={landingSections?.modules?.description}
+        />
+        <LessonsSection modules={modules} />
+        <FAQSection 
+          faqs={faqs}
+          title={landingSections?.faq?.title}
+          subtitle={landingSections?.faq?.subtitle}
+          description={landingSections?.faq?.description}
+        />
+        {!isEnrolled && <CTAFooter course={course} />}
       </main>
     </div>
   );
