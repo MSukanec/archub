@@ -32,7 +32,7 @@ export function ComingSoonRestricted({ children }: ComingSoonRestrictedProps) {
             </div>
           </div>
         </TooltipTrigger>
-        <TooltipContent side="right" className="bg-black text-white border-black">
+        <TooltipContent side="right" sideOffset={-35} className="bg-black text-white border-black">
           Próximamente
         </TooltipContent>
       </Tooltip>

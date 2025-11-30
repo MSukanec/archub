@@ -34,6 +34,7 @@ import { supabase } from "@/lib/supabase";
 import { useMobileMenuStore } from "./useMobileMenuStore";
 import { useProjects } from "@/features/projects";
 import { PlanRestricted } from "@/features/users";
+import { ComingSoonRestricted } from "@/components/shared/restrictions/guards/ComingSoonRestricted";
 import { useProjectContext } from "@/stores/projectContext";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -281,7 +282,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       />
                     );
 
-                    if (contextButton.restricted) {
+                    if (contextButton.restricted === "coming_soon") {
+                      return (
+                        <ComingSoonRestricted key={contextButton.id}>
+                          {button}
+                        </ComingSoonRestricted>
+                      );
+                    } else if (contextButton.restricted) {
                       return (
                         <PlanRestricted key={contextButton.id} reason={contextButton.restricted}>
                           {button}
@@ -327,7 +334,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                             
                             return (
                               <div key={item.id}>
-                                {item.restricted ? (
+                                {item.restricted === "coming_soon" ? (
+                                  <ComingSoonRestricted>
+                                    {button}
+                                  </ComingSoonRestricted>
+                                ) : item.restricted ? (
                                   <PlanRestricted reason={item.restricted}>
                                     {button}
                                   </PlanRestricted>
@@ -373,7 +384,11 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                           </div>
                         )}
                         
-                        {item.restricted ? (
+                        {item.restricted === "coming_soon" ? (
+                          <ComingSoonRestricted>
+                            {button}
+                          </ComingSoonRestricted>
+                        ) : item.restricted ? (
                           <PlanRestricted reason={item.restricted}>
                             {button}
                           </PlanRestricted>
