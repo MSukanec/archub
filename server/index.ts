@@ -3,6 +3,22 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeCronJobs } from "./cron/index.js";
 
+process.on('uncaughtException', (err) => {
+  if (err.message?.includes('SASL') || err.message?.includes('WebSocket') || err.message?.includes('SCRAM')) {
+    console.error('[DB] Transient connection error (ignored):', err.message);
+  } else {
+    console.error('[FATAL] Uncaught exception:', err);
+  }
+});
+
+process.on('unhandledRejection', (reason: any) => {
+  if (reason?.message?.includes('SASL') || reason?.message?.includes('WebSocket') || reason?.message?.includes('SCRAM')) {
+    console.error('[DB] Transient connection error (ignored):', reason.message);
+  } else {
+    console.error('[FATAL] Unhandled rejection:', reason);
+  }
+});
+
 const app = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
