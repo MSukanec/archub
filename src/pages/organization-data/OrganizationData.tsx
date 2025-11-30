@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { DashboardLayout as Layout } from "@/layouts";
 import { OrganizationProfileTab } from '@/pages/organization-data/tabs/OrganizationProfileTab';
+import { OrganizationFinancesTab } from '@/pages/organization-data/tabs/OrganizationFinancesTab';
 import { Building2 } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -17,13 +18,16 @@ export default function OrganizationData() {
   const organizationId = userData?.organization?.id;
 
   const tabs = [
-    { id: 'profile', label: 'Perfil', isActive: activeTab === 'profile' }
+    { id: 'profile', label: 'Perfil', isActive: activeTab === 'profile' },
+    { id: 'finances', label: 'Finanzas', isActive: activeTab === 'finances' }
   ];
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'profile':
         return <OrganizationProfileTab />;
+      case 'finances':
+        return <OrganizationFinancesTab />;
       default:
         return <OrganizationProfileTab />;
     }

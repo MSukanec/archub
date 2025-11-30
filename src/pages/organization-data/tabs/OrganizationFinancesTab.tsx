@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Coins, Wallet } from 'lucide-react';
 
-import { DashboardLayout as Layout } from "@/layouts";
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ComboBoxMultiSelectField } from '@/components/ui-custom/fields/ComboBoxMultiSelectField';
@@ -11,14 +10,12 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
 import { useAllWallets } from '@/hooks/use-wallets';
 import { useOrganizationWallets } from '@/features/organization';
-import { useNavigationStore } from '@/stores/navigationStore';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 
-export default function Finances() {
+export function OrganizationFinancesTab() {
   const { data: userData } = useCurrentUser();
-  const { setSidebarLevel } = useNavigationStore();
   const { data: allCurrencies } = useCurrencies();
   const { data: organizationCurrencies } = useOrganizationCurrencies(userData?.organization?.id);
   const { data: allWallets } = useAllWallets();
@@ -30,10 +27,6 @@ export default function Finances() {
   const [defaultWallet, setDefaultWallet] = useState<string>('');
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
   const [useCurrencyExchange, setUseCurrencyExchange] = useState<string>('no');
-
-  useEffect(() => {
-    setSidebarLevel('settings');
-  }, [setSidebarLevel]);
 
   useEffect(() => {
     if (organizationCurrencies?.length) {
@@ -318,136 +311,125 @@ export default function Finances() {
   const availableSecondaryCurrencies = allCurrencies?.filter(c => c.id !== defaultCurrency) || [];
   const availableSecondaryWallets = allWallets?.filter(w => w.id !== defaultWallet) || [];
 
-  const headerProps = {
-    icon: Wallet,
-    title: 'Finanzas',
-    subtitle: 'Configuración Financiera',
-    description: 'Gestiona las monedas y billeteras de tu organización.',
-    organizationId: userData?.organization?.id,
-    showMembers: true
-  };
-
   return (
-    <Layout headerProps={headerProps} wide={false}>
-      <div className="space-y-12">
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div>
-            <div className="flex items-center gap-2 mb-6">
-              <Coins className="h-5 w-5 text-[var(--accent)]" />
-              <h2 className="text-lg font-semibold">Moneda por Defecto</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Selecciona la moneda principal que se usará automáticamente en todos los movimientos financieros de tu organización.
-            </p>
+    <div className="space-y-12">
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <Coins className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Moneda por Defecto</h2>
           </div>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="default-currency">Moneda por Defecto</Label>
-              <Select value={defaultCurrency} onValueChange={handleDefaultCurrencyChange}>
-                <SelectTrigger id="default-currency">
-                  <SelectValue placeholder="Selecciona una moneda" />
-                </SelectTrigger>
-                <SelectContent>
-                  {allCurrencies?.map((currency) => (
-                    <SelectItem key={currency.id} value={currency.id}>
-                      {currency.name} ({currency.symbol})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Selecciona la moneda principal que se usará automáticamente en todos los movimientos financieros de tu organización.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div>
-            <div className="flex items-center gap-2 mb-6">
-              <Coins className="h-5 w-5 text-[var(--accent)]" />
-              <h2 className="text-lg font-semibold">Monedas Secundarias y Cotización</h2>
-              <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: "hsl(213, 100%, 30%)" }}>
-                PRO
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Configura monedas adicionales y habilita la funcionalidad de cotización para gestionar tasas de cambio personalizadas.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
-              <ComboBoxMultiSelectField
-                options={availableSecondaryCurrencies.map(currency => ({
-                  value: currency.id,
-                  label: `${currency.name} (${currency.symbol})`
-                }))}
-                value={secondaryCurrencies}
-                onChange={handleSecondaryCurrenciesChange}
-                placeholder="Selecciona monedas secundarias"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="currency-exchange-select">Usar Cotización de Monedas</Label>
-              <Select value={useCurrencyExchange} onValueChange={handleCurrencyExchangeChange}>
-                <SelectTrigger id="currency-exchange-select">
-                  <SelectValue placeholder="Selecciona una opción" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="no">No usar cotización</SelectItem>
-                  <SelectItem value="si">Usar cotización</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="default-currency">Moneda por Defecto</Label>
+            <Select value={defaultCurrency} onValueChange={handleDefaultCurrencyChange}>
+              <SelectTrigger id="default-currency">
+                <SelectValue placeholder="Selecciona una moneda" />
+              </SelectTrigger>
+              <SelectContent>
+                {allCurrencies?.map((currency) => (
+                  <SelectItem key={currency.id} value={currency.id}>
+                    {currency.name} ({currency.symbol})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div>
-            <div className="flex items-center gap-2 mb-6">
-              <Wallet className="h-5 w-5 text-[var(--accent)]" />
-              <h2 className="text-lg font-semibold">Billeteras</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Define las billeteras que utilizas para gestionar tus fondos. La billetera por defecto se seleccionará automáticamente en nuevos movimientos, mientras que las secundarias estarán disponibles como opciones.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="default-wallet">Billetera por Defecto</Label>
-              <Select value={defaultWallet} onValueChange={handleDefaultWalletChange}>
-                <SelectTrigger id="default-wallet">
-                  <SelectValue placeholder="Selecciona una billetera" />
-                </SelectTrigger>
-                <SelectContent>
-                  {allWallets?.map((wallet) => (
-                    <SelectItem key={wallet.id} value={wallet.id}>
-                      {wallet.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
-              <ComboBoxMultiSelectField
-                options={availableSecondaryWallets.map(wallet => ({
-                  value: wallet.id,
-                  label: wallet.name
-                }))}
-                value={secondaryWallets}
-                onChange={handleSecondaryWalletsChange}
-                placeholder="Selecciona billeteras secundarias"
-              />
-            </div>
-          </div>
-        </div>
-
       </div>
-    </Layout>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <Coins className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Monedas Secundarias y Cotización</h2>
+            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: "hsl(213, 100%, 30%)" }}>
+              PRO
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Configura monedas adicionales y habilita la funcionalidad de cotización para gestionar tasas de cambio personalizadas.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
+            <ComboBoxMultiSelectField
+              options={availableSecondaryCurrencies.map(currency => ({
+                value: currency.id,
+                label: `${currency.name} (${currency.symbol})`
+              }))}
+              value={secondaryCurrencies}
+              onChange={handleSecondaryCurrenciesChange}
+              placeholder="Selecciona monedas secundarias"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="currency-exchange-select">Usar Cotización de Monedas</Label>
+            <Select value={useCurrencyExchange} onValueChange={handleCurrencyExchangeChange}>
+              <SelectTrigger id="currency-exchange-select">
+                <SelectValue placeholder="Selecciona una opción" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="no">No usar cotización</SelectItem>
+                <SelectItem value="si">Usar cotización</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <Wallet className="h-5 w-5 text-[var(--accent)]" />
+            <h2 className="text-lg font-semibold">Billeteras</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Define las billeteras que utilizas para gestionar tus fondos. La billetera por defecto se seleccionará automáticamente en nuevos movimientos, mientras que las secundarias estarán disponibles como opciones.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="default-wallet">Billetera por Defecto</Label>
+            <Select value={defaultWallet} onValueChange={handleDefaultWalletChange}>
+              <SelectTrigger id="default-wallet">
+                <SelectValue placeholder="Selecciona una billetera" />
+              </SelectTrigger>
+              <SelectContent>
+                {allWallets?.map((wallet) => (
+                  <SelectItem key={wallet.id} value={wallet.id}>
+                    {wallet.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
+            <ComboBoxMultiSelectField
+              options={availableSecondaryWallets.map(wallet => ({
+                value: wallet.id,
+                label: wallet.name
+              }))}
+              value={secondaryWallets}
+              onChange={handleSecondaryWalletsChange}
+              placeholder="Selecciona billeteras secundarias"
+            />
+          </div>
+        </div>
+      </div>
+
+    </div>
   );
 }
