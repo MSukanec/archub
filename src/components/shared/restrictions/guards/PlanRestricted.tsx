@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/bottom-sheet";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useProjectContext } from "@/stores/projectContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { PlanUpgradeModal } from "@/features/users/modals/plans/PlanUpgradeModal";
@@ -50,6 +51,7 @@ export function PlanRestricted({
 }: PlanRestrictedProps) {
   const { can, limit } = usePlanFeatures();
   const { data: userData } = useCurrentUser();
+  const isAdmin = useIsAdmin();
   const { selectedProjectId } = useProjectContext();
   const [, setLocation] = useLocation();
   const isMobile = useMobile();
@@ -57,6 +59,11 @@ export function PlanRestricted({
 
   // Determine if content is restricted
   const isRestricted = useMemo(() => {
+    // Admin can always access everything
+    if (isAdmin) {
+      return false;
+    }
+    
     if (reason === "general_mode") {
       return selectedProjectId === null;
     }
@@ -71,7 +78,7 @@ export function PlanRestricted({
       return !can(feature);
     }
     return false;
-  }, [reason, selectedProjectId, feature, current, can, limit]);
+  }, [isAdmin, reason, selectedProjectId, feature, current, can, limit]);
 
   if (!isRestricted) {
     return <>{children}</>;
