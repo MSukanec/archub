@@ -1,7 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, ArrowDownCircle, Calendar, ShieldAlert, X } from "lucide-react";
+import { AlertCircle, ArrowDownCircle, Calendar, ShieldAlert, X, FolderX, UserX, AlertTriangle } from "lucide-react";
 import { useState, useMemo } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -11,6 +11,7 @@ import { FormModalFooter } from "@/components/modal";
 import { FormModalLayout } from "@/components/modal";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DowngradeModalProps {
   modalData?: {
@@ -57,6 +58,18 @@ const PLAN_FEATURES: Record<string, string[]> = {
   free: []
 };
 
+// Plan limits matching backend (server/lib/handlers/checkout/shared/plan-limits.ts)
+const PLAN_LIMITS: Record<string, { maxProjects: number; maxMembers: number }> = {
+  teams: { maxProjects: Infinity, maxMembers: 999 },
+  pro: { maxProjects: 25, maxMembers: Infinity },
+  free: { maxProjects: 2, maxMembers: 1 },
+};
+
+interface UsageStats {
+  projectsCount: number;
+  membersCount: number;
+}
+
 export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
   const { toast } = useToast();
   const { currentOrganizationId } = useProjectContext();
@@ -68,6 +81,42 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
     targetPlan: { name: '', slug: '', monthly_amount: 0, annual_amount: 0 },
     isManualPlan: false
   };
+
+  // Fetch usage stats to calculate impact
+  const { data: usageStats, isLoading: isLoadingStats } = useQuery<UsageStats>({
+    queryKey: ['/api/organizations', currentOrganizationId, 'usage-stats'],
+    queryFn: async () => {
+      const response = await fetch(`/api/organizations/${currentOrganizationId}/usage-stats`);
+      if (!response.ok) throw new Error('Failed to fetch usage stats');
+      return response.json();
+    },
+    enabled: !!currentOrganizationId,
+  });
+
+  // Calculate impact based on target plan limits
+  const impact = useMemo(() => {
+    if (!usageStats) return { projectsAtRisk: 0, membersAtRisk: 0, hasImpact: false };
+    
+    const targetLimits = PLAN_LIMITS[targetPlan.slug.toLowerCase()] || PLAN_LIMITS.free;
+    
+    const projectsAtRisk = targetLimits.maxProjects === Infinity 
+      ? 0 
+      : Math.max(0, usageStats.projectsCount - targetLimits.maxProjects);
+    
+    const membersAtRisk = targetLimits.maxMembers === Infinity 
+      ? 0 
+      : Math.max(0, usageStats.membersCount - targetLimits.maxMembers);
+    
+    return {
+      projectsAtRisk,
+      membersAtRisk,
+      hasImpact: projectsAtRisk > 0 || membersAtRisk > 0,
+      currentProjects: usageStats.projectsCount,
+      currentMembers: usageStats.membersCount,
+      projectLimit: targetLimits.maxProjects === Infinity ? '∞' : targetLimits.maxProjects,
+      memberLimit: targetLimits.maxMembers === Infinity ? '∞' : targetLimits.maxMembers,
+    };
+  }, [usageStats, targetPlan.slug]);
 
   // Check if user is admin in current organization
   const isAdmin = useMemo(() => {
@@ -237,6 +286,59 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     {format(new Date(subscriptionEndDate), 'dd MMMM yyyy', { locale: es })}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Resource Impact Warning */}
+          {isLoadingStats ? (
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          ) : impact.hasImpact && (
+            <div className="bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1 space-y-3">
+                  <div>
+                    <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-1">
+                      Impacto en tus recursos
+                    </h4>
+                    <p className="text-sm text-amber-700 dark:text-amber-300">
+                      Al cambiar al plan {targetPlan.name}, algunos de tus recursos quedarán bloqueados:
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {impact.projectsAtRisk > 0 && (
+                      <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300 bg-amber-100/50 dark:bg-amber-900/30 rounded-md px-3 py-2">
+                        <FolderX className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                        <span>
+                          <strong>{impact.projectsAtRisk}</strong> proyecto{impact.projectsAtRisk > 1 ? 's' : ''} bloqueado{impact.projectsAtRisk > 1 ? 's' : ''}
+                          <span className="text-amber-600 dark:text-amber-400 ml-1">
+                            ({impact.currentProjects} actual{impact.currentProjects !== 1 ? 'es' : ''} → límite: {impact.projectLimit})
+                          </span>
+                        </span>
+                      </div>
+                    )}
+                    {impact.membersAtRisk > 0 && (
+                      <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300 bg-amber-100/50 dark:bg-amber-900/30 rounded-md px-3 py-2">
+                        <UserX className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                        <span>
+                          <strong>{impact.membersAtRisk}</strong> miembro{impact.membersAtRisk > 1 ? 's' : ''} bloqueado{impact.membersAtRisk > 1 ? 's' : ''}
+                          <span className="text-amber-600 dark:text-amber-400 ml-1">
+                            ({impact.currentMembers} actual{impact.currentMembers !== 1 ? 'es' : ''} → límite: {impact.memberLimit})
+                          </span>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <p className="text-xs text-amber-600 dark:text-amber-400 italic">
+                    Los recursos bloqueados quedarán inaccesibles pero no se eliminarán. Podrás recuperar el acceso mejorando tu plan.
                   </p>
                 </div>
               </div>

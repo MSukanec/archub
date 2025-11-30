@@ -11,6 +11,7 @@ import { EnterpriseCard } from "./components/EnterpriseCard";
 import { ComparisonTable } from "./components/ComparisonTable";
 import { FAQSection } from "./components/FAQSection";
 import { buildComparisonData } from "./data/comparison";
+import { useGlobalModalStore } from "@/components/modal";
 import type { PricingContentProps, Plan, BillingPeriod } from "./types";
 
 export function PricingContent({ mode }: PricingContentProps) {
@@ -19,10 +20,12 @@ export function PricingContent({ mode }: PricingContentProps) {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [enterprisePlan, setEnterprisePlan] = useState<Plan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { openModal } = useGlobalModalStore();
   
   const { data: userData } = useCurrentUser();
   const userPlanName = userData?.organization?.plan?.name;
   const isAuthenticated = !!userData?.user?.id;
+  const subscriptionEndDate = userData?.organization?.subscription_end_date;
 
   const organizationId = userData?.organization?.id;
   const { data: billableMembersData } = useQuery<{ seats: number }>({
@@ -95,15 +98,37 @@ export function PricingContent({ mode }: PricingContentProps) {
     
     if (isTeams || isCurrentPlan) return;
     
-    // Si no está autenticado, ir al registro
     if (!isAuthenticated) {
       navigate('/register');
       return;
     }
     
-    // Si está autenticado en dashboard, ir al checkout
     if (mode === 'dashboard') {
-      navigate(`/subscription/checkout?plan=${plan.slug}&billing=${billingPeriod}`);
+      const currentPlanLevel = getPlanLevel(userPlanName || '');
+      const targetPlanLevel = getPlanLevel(plan.name);
+      const isDowngrade = targetPlanLevel < currentPlanLevel;
+      
+      if (isDowngrade) {
+        const currentPlan = plans.find(p => p.name.toLowerCase() === userPlanName?.toLowerCase());
+        const isManualPlan = userData?.organization?.is_manual_plan || false;
+        
+        openModal('downgrade', {
+          currentPlan: {
+            name: currentPlan?.name || userPlanName || '',
+            slug: currentPlan?.slug || '',
+          },
+          targetPlan: {
+            name: plan.name,
+            slug: plan.slug,
+            monthly_amount: plan.monthly_amount,
+            annual_amount: plan.annual_amount,
+          },
+          subscriptionEndDate: subscriptionEndDate,
+          isManualPlan: isManualPlan,
+        });
+      } else {
+        navigate(`/subscription/checkout?plan=${plan.slug}&billing=${billingPeriod}`);
+      }
     }
   };
 
