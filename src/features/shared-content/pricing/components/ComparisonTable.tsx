@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ComingSoonRestricted } from "@/components/shared/restrictions/guards/ComingSoonRestricted";
 import type { ComparisonCategory, Plan } from "../types";
 
 type SelectedPlan = 'free' | 'pro' | 'teams';
@@ -54,21 +55,25 @@ export function ComparisonTable({
 
   const getButtonTextAndColor = (planName: string) => {
     const isTeams = planName.toLowerCase() === 'teams';
+    const isPro = planName.toLowerCase() === 'pro';
     const isCurrentPlan = planName.toLowerCase() === userPlanName?.toLowerCase();
+    const isComingSoon = isPro || isTeams;
     
-    if (isTeams) {
-      return { text: 'Próximamente', color: '#84cc16', disabled: true };
-    }
+    const getColor = () => {
+      if (isPro) return '#0047AB';
+      if (isTeams) return '#8B5CF6';
+      return '#84cc16';
+    };
     
     if (isCurrentPlan) {
-      return { text: 'Tu plan actual', color: '#84cc16', disabled: true };
+      return { text: 'Tu plan actual', color: getColor(), disabled: true, isComingSoon: false };
     }
     
     if (!isAuthenticated) {
-      return { text: 'Comenzar', color: planName.toLowerCase() === 'pro' ? '#0047AB' : planName.toLowerCase() === 'teams' ? '#8B5CF6' : '#84cc16', disabled: false };
+      return { text: 'Comenzar', color: getColor(), disabled: isComingSoon, isComingSoon };
     }
     
-    return { text: `Cambiar a ${planName}`, color: planName.toLowerCase() === 'pro' ? '#0047AB' : planName.toLowerCase() === 'teams' ? '#8B5CF6' : '#84cc16', disabled: false };
+    return { text: `Cambiar a ${planName}`, color: getColor(), disabled: isComingSoon, isComingSoon };
   };
 
   const handleTableButtonClick = (planName: string) => {
@@ -107,22 +112,28 @@ export function ComparisonTable({
               
               {planNames.map((planKey) => {
                 const planName = planKey.charAt(0).toUpperCase() + planKey.slice(1);
-                const { text, color, disabled } = getButtonTextAndColor(planName);
+                const { text, color, disabled, isComingSoon } = getButtonTextAndColor(planName);
+                
+                const buttonElement = (
+                  <Button 
+                    size="sm" 
+                    style={!disabled || isComingSoon ? { backgroundColor: color } : undefined}
+                    className={cn("text-xs", (!disabled || isComingSoon) && "text-white hover:opacity-90")}
+                    variant={disabled && !isComingSoon ? "outline" : "default"}
+                    disabled={disabled && !isComingSoon}
+                    onClick={() => handleTableButtonClick(planName)}
+                    data-testid={`button-table-${planKey}`}
+                  >
+                    {text}
+                  </Button>
+                );
                 
                 return (
                   <div key={planKey} className="px-6 py-4 text-center">
                     <div className="text-sm font-bold text-[var(--text-default)] mb-2">{planName}</div>
-                    <Button 
-                      size="sm" 
-                      style={!disabled ? { backgroundColor: color } : undefined}
-                      className={cn("text-xs", !disabled && "text-white hover:opacity-90")}
-                      variant={disabled ? "outline" : "default"}
-                      disabled={disabled}
-                      onClick={() => handleTableButtonClick(planName)}
-                      data-testid={`button-table-${planKey}`}
-                    >
-                      {text}
-                    </Button>
+                    {isComingSoon ? (
+                      <ComingSoonRestricted>{buttonElement}</ComingSoonRestricted>
+                    ) : buttonElement}
                   </div>
                 );
               })}

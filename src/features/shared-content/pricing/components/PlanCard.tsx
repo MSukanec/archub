@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getPlanConfig } from "../data/plans-config";
+import { ComingSoonRestricted } from "@/components/shared/restrictions/guards/ComingSoonRestricted";
 import type { Plan, BillingPeriod, PricingMode } from "../types";
 
 interface PlanCardProps {
@@ -48,11 +49,12 @@ export function PlanCard({
   const totalPrice = getTotalPrice();
 
   const getButtonText = () => {
-    if (isTeams) return 'Próximamente';
     if (isCurrentPlan) return 'Tu plan actual';
     if (!isAuthenticated) return 'Comenzar';
     return `Cambiar a ${plan.name}`;
   };
+  
+  const isComingSoon = plan.name.toLowerCase() === 'pro' || isTeams;
 
   const getButtonColor = () => {
     if (isCurrentPlan) return undefined;
@@ -87,13 +89,6 @@ export function PlanCard({
         </div>
       )}
       
-      {isTeams && (
-        <div className="absolute top-4 right-4 z-10">
-          <Badge className="bg-purple-600 text-white text-[9px] font-bold px-3 py-1 uppercase">
-            Próximamente
-          </Badge>
-        </div>
-      )}
       
       <div className="p-8 space-y-6">
         <div className={cn(
@@ -183,23 +178,39 @@ export function PlanCard({
           )}
         </div>
 
-        <Button
-          className={cn(
-            "w-full h-11 font-medium rounded-lg",
-            !isCurrentPlan && getButtonColor() ? "text-white hover:opacity-90" : ""
-          )}
-          style={
-            !isCurrentPlan && getButtonColor()
-              ? { backgroundColor: getButtonColor() }
-              : undefined
-          }
-          variant={isCurrentPlan ? "outline" : "default"}
-          onClick={() => onSelect(plan)}
-          disabled={isCurrentPlan || isTeams}
-          data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
-        >
-          {getButtonText()}
-        </Button>
+        {isComingSoon && !isCurrentPlan ? (
+          <ComingSoonRestricted>
+            <Button
+              className={cn(
+                "w-full h-11 font-medium rounded-lg",
+                getButtonColor() ? "text-white hover:opacity-90" : ""
+              )}
+              style={getButtonColor() ? { backgroundColor: getButtonColor() } : undefined}
+              variant="default"
+              data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
+            >
+              {getButtonText()}
+            </Button>
+          </ComingSoonRestricted>
+        ) : (
+          <Button
+            className={cn(
+              "w-full h-11 font-medium rounded-lg",
+              !isCurrentPlan && getButtonColor() ? "text-white hover:opacity-90" : ""
+            )}
+            style={
+              !isCurrentPlan && getButtonColor()
+                ? { backgroundColor: getButtonColor() }
+                : undefined
+            }
+            variant={isCurrentPlan ? "outline" : "default"}
+            onClick={() => onSelect(plan)}
+            disabled={isCurrentPlan}
+            data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
+          >
+            {getButtonText()}
+          </Button>
+        )}
 
         <div className="space-y-3 pt-4 border-t border-white/10">
           <div className={cn(
