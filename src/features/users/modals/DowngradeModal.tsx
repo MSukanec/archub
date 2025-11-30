@@ -125,21 +125,13 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
 
   // Check if user is admin in current organization
   const isAdmin = useMemo(() => {
-    if (!currentOrganizationId || !userData?.memberships) {
+    if (!userData?.role) {
       return false;
     }
     
-    const membership = userData.memberships.find(
-      m => m.organization_id === currentOrganizationId
-    );
-    
-    if (!membership) {
-      return false;
-    }
-    
-    const roleName = membership.role?.name?.toLowerCase();
+    const roleName = userData.role.name?.toLowerCase();
     return roleName === 'admin' || roleName === 'administrator';
-  }, [currentOrganizationId, userData?.memberships]);
+  }, [userData?.role]);
 
   // Validation checks
   const validationError = useMemo(() => {
@@ -151,16 +143,8 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
       return "No se ha seleccionado una organización";
     }
     
-    if (!userData?.memberships || userData.memberships.length === 0) {
-      return "No se pudo verificar tu membresía";
-    }
-    
-    const membership = userData.memberships.find(
-      m => m.organization_id === currentOrganizationId
-    );
-    
-    if (!membership) {
-      return "No tienes membresía en esta organización";
+    if (!userData?.role) {
+      return "No se pudo verificar tu rol";
     }
     
     if (!isAdmin) {
@@ -168,7 +152,7 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
     }
     
     return null;
-  }, [targetPlan?.slug, currentOrganizationId, userData?.memberships, isAdmin]);
+  }, [targetPlan?.slug, currentOrganizationId, userData?.role, isAdmin]);
 
   const scheduleDowngradeMutation = useMutation({
     mutationFn: async () => {
