@@ -94,6 +94,10 @@ export const plans = pgTable("plans", {
   annual_amount: numeric("annual_amount", { precision: 10, scale: 2 }),
   is_active: boolean("is_active").default(true),
   billing_type: text("billing_type").default("per_user"),
+  // PayPal Billing Plans (for recurring subscriptions)
+  paypal_product_id: text("paypal_product_id"),
+  paypal_plan_monthly_id: text("paypal_plan_monthly_id"),
+  paypal_plan_annual_id: text("paypal_plan_annual_id"),
 });
 
 export const insertPlanSchema = createInsertSchema(plans).omit({
@@ -1476,6 +1480,9 @@ export const organization_subscriptions = pgTable("organization_subscriptions", 
   currency: text("currency").notNull(),
   created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  // Provider subscription tracking (for PayPal/MercadoPago recurring subscriptions)
+  provider: text("provider"), // 'paypal' | 'mercadopago' | 'bank_transfer'
+  provider_subscription_id: text("provider_subscription_id"), // PayPal subscription ID or MP preapproval ID
 });
 
 export const insertOrganizationSubscriptionSchema = createInsertSchema(organization_subscriptions).omit({
