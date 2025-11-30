@@ -53,7 +53,7 @@ export function usePlanFeatures(): PlanFeatures {
   const limit = (feature: string): number => {
     const featureValue = planFeatures[feature];
     
-    // Si es un número, devolver el límite exacto
+    // Si es un número en features, devolver el límite exacto
     if (typeof featureValue === 'number') {
       return featureValue === -1 ? Infinity : featureValue;
     }
@@ -63,52 +63,49 @@ export function usePlanFeatures(): PlanFeatures {
       return Infinity;
     }
     
-    // Si no hay features o la feature no existe, usar valores por defecto basados en el plan
-    const planName = currentPlan?.name;
-    
+    // PRIORIDAD 1: Leer límites directamente de las columnas del plan (desde la DB)
+    // Estos valores vienen de: plans.max_projects, plans.max_members, plans.max_storage_mb, plans.max_ai_tokens
     if (feature === 'max_members') {
-      if (planName === 'Teams') {
-        return 999;
+      const dbValue = currentPlan?.max_members;
+      if (dbValue !== undefined && dbValue !== null) {
+        return dbValue === -1 ? Infinity : dbValue;
       }
-      if (planName === 'Pro') {
-        return Infinity;
-      }
-      if (planName === 'Free') {
-        return 1; // Solo el admin
-      }
-      // Si no hay plan definido, asumir Free por defecto
-      return 1;
     }
     
     if (feature === 'max_projects') {
-      if (planName === 'Teams') {
-        return Infinity;
+      const dbValue = currentPlan?.max_projects;
+      if (dbValue !== undefined && dbValue !== null) {
+        return dbValue === -1 ? Infinity : dbValue;
       }
-      if (planName === 'Pro') {
-        return 25;
+    }
+    
+    if (feature === 'max_storage_mb') {
+      const dbValue = currentPlan?.max_storage_mb;
+      if (dbValue !== undefined && dbValue !== null) {
+        return dbValue === -1 ? Infinity : dbValue;
       }
-      if (planName === 'Free') {
-        return 2;
+    }
+    
+    if (feature === 'max_ai_tokens') {
+      const dbValue = currentPlan?.max_ai_tokens;
+      if (dbValue !== undefined && dbValue !== null) {
+        return dbValue === -1 ? Infinity : dbValue;
       }
-      // Si no hay plan definido, asumir Free por defecto
-      return 2;
     }
     
     if (feature === 'max_kanban_boards') {
-      if (planName === 'Teams') {
-        return Infinity;
+      const dbValue = currentPlan?.max_kanban_boards;
+      if (dbValue !== undefined && dbValue !== null) {
+        return dbValue === -1 ? Infinity : dbValue;
       }
-      if (planName === 'Pro') {
-        return 25;
+      // Fallback: use max_projects as proxy for kanban boards if not defined
+      const projectsLimit = currentPlan?.max_projects;
+      if (projectsLimit !== undefined && projectsLimit !== null) {
+        return projectsLimit === -1 ? Infinity : projectsLimit;
       }
-      if (planName === 'Free') {
-        return 5;
-      }
-      // Si no hay plan definido, asumir Free por defecto
-      return 5;
     }
     
-    // Si es false o no existe, límite por defecto
+    // FALLBACK: Si no hay valor en la DB, devolver 0 (más restrictivo)
     return 0;
   };
 

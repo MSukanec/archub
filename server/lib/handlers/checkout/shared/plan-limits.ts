@@ -32,7 +32,8 @@ export async function getPlanLimitsFromDB(
 
   if (error || !plan) {
     console.error('[PlanLimits] Error fetching plan limits from DB:', error);
-    return { max_projects: 2, max_members: 1 };
+    console.warn('[PlanLimits] Using restrictive fallback defaults. This should not happen in production.');
+    return { max_projects: 1, max_members: 1 };
   }
 
   return {
@@ -55,7 +56,8 @@ export async function getPlanLimitsByName(
 
   if (error || !plan) {
     console.error('[PlanLimits] Error fetching plan limits by name from DB:', error, 'planName:', planName);
-    return { max_projects: 2, max_members: 1 };
+    console.warn('[PlanLimits] Using restrictive fallback defaults. Check if plan name exists in DB.');
+    return { max_projects: 1, max_members: 1 };
   }
 
   return {
