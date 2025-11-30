@@ -273,21 +273,10 @@ export function LeftSidebar() {
       ];
     } else if (sidebarLevel === 'settings') {
       return [
-        {
-          type: 'section' as const,
-          title: organizationName,
-          items: []
-        },
-        {
-          type: 'section' as const,
-          title: userFullName,
-          items: [
-            { id: 'user-basic-data', label: 'Datos Básicos', icon: User, href: '/settings/user-basic-data' },
-            { id: 'user-preferences', label: 'Preferencias', icon: Settings, href: '/settings/user-preferences' },
-            { id: 'user-organizations', label: 'Organizaciones', icon: Building, href: '/settings/user-organizations' },
-            { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/settings/notifications' },
-          ]
-        }
+        { id: 'user-basic-data', label: 'Datos Básicos', icon: User, href: '/settings/user-basic-data' },
+        { id: 'user-preferences', label: 'Preferencias', icon: Settings, href: '/settings/user-preferences' },
+        { id: 'user-organizations', label: 'Organizaciones', icon: Building, href: '/settings/user-organizations' },
+        { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/settings/notifications' },
       ];
     }
     
@@ -904,56 +893,6 @@ export function LeftSidebar() {
                       onClick={handleLogout}
                       variant="secondary"
                     />
-                  </>
-                ) : sidebarLevel === 'settings' ? (
-                  // Renderizado especial para settings con secciones
-                  <>
-                    {navigationItems.map((navItem, sectionIndex) => {
-                      if ('type' in navItem && navItem.type === 'section') {
-                        return (
-                          <div key={sectionIndex}>
-                            {/* Encabezado de sección - solo visible cuando está expandido */}
-                            {isExpanded && (
-                              <div className="px-2 pt-3 pb-2">
-                                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                                  {navItem.title}
-                                </h3>
-                              </div>
-                            )}
-                            
-                            {/* Items de la sección */}
-                            {navItem.items.map((item) => {
-                              const button = (
-                                <ButtonSidebar
-                                  key={item.id}
-                                  icon={<item.icon className="w-[18px] h-[18px]" />}
-                                  label={item.label}
-                                  isActive={location === item.href}
-                                  isExpanded={isExpanded}
-                                  onClick={() => navigate(item.href)}
-                                  href={item.href}
-                                  variant="secondary"
-                                />
-                              );
-
-                              return item.restricted === "coming_soon" ? (
-                                <ComingSoonRestricted key={item.id}>
-                                  {button}
-                                </ComingSoonRestricted>
-                              ) : (
-                                button
-                              );
-                            })}
-                            
-                            {/* Espacio entre secciones (solo si no es la última y está expandido) */}
-                            {sectionIndex < navigationItems.length - 1 && isExpanded && (
-                              <div className="h-6"></div>
-                            )}
-                          </div>
-                        );
-                      }
-                      return null;
-                    })}
                   </>
                 ) : (
                   // Renderizado normal para otros niveles

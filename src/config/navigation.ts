@@ -174,20 +174,12 @@ export const USER_NAVIGATION: NavigationItem[] = [
   { id: 'landing', label: 'Página de Inicio', icon: Home, href: '/', testId: 'nav-user-landing' },
 ];
 
-export function getSettingsNavigation(organizationName: string, userFullName: string): NavigationSection[] {
-  return [
-    {
-      type: 'section' as const,
-      title: userFullName,
-      items: [
-        { id: 'user-basic-data', label: 'Datos Básicos', icon: User, href: '/settings/user-basic-data', testId: 'nav-settings-user-basic-data' },
-        { id: 'user-preferences', label: 'Preferencias', icon: Settings, href: '/settings/user-preferences', testId: 'nav-settings-user-preferences' },
-        { id: 'user-organizations', label: 'Organizaciones', icon: Building, href: '/settings/user-organizations', testId: 'nav-settings-user-organizations' },
-        { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/settings/notifications', testId: 'nav-settings-notifications' },
-      ]
-    }
-  ];
-}
+export const SETTINGS_NAVIGATION: NavigationItem[] = [
+  { id: 'user-basic-data', label: 'Datos Básicos', icon: User, href: '/settings/user-basic-data', testId: 'nav-settings-user-basic-data' },
+  { id: 'user-preferences', label: 'Preferencias', icon: Settings, href: '/settings/user-preferences', testId: 'nav-settings-user-preferences' },
+  { id: 'user-organizations', label: 'Organizaciones', icon: Building, href: '/settings/user-organizations', testId: 'nav-settings-user-organizations' },
+  { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/settings/notifications', testId: 'nav-settings-notifications' },
+];
 
 export type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning' | 'user' | 'settings';
 
@@ -224,7 +216,7 @@ export function getNavigationItems(params: GetNavigationItemsParams): Navigation
     case 'user':
       return USER_NAVIGATION;
     case 'settings':
-      return getSettingsNavigation(organizationName, userFullName);
+      return SETTINGS_NAVIGATION;
     default:
       return [];
   }
