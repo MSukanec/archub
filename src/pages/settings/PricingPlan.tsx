@@ -7,7 +7,7 @@ export default function PricingPlan() {
   const { setSidebarLevel } = useNavigationStore();
 
   useEffect(() => {
-    setSidebarLevel('settings');
+    setSidebarLevel('organization');
   }, [setSidebarLevel]);
 
   return (

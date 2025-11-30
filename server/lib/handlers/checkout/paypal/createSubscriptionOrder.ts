@@ -128,7 +128,7 @@ export async function createSubscriptionOrder(
       const custom_id = `${user_id}|${productId}|${organization_id}|${billing_period}`;
       
       const return_url = `${returnBase}/api/checkout/paypal/capture-subscription?type=recurring`;
-      const cancel_url = `${returnBase}/settings/billing?payment=cancelled`;
+      const cancel_url = `${returnBase}/organization/billing?payment=cancelled`;
 
       const subscriptionResult = await createPayPalSubscription({
         planId: paypalPlanId,
@@ -145,7 +145,7 @@ export async function createSubscriptionOrder(
         brandName: "Seencel"
       });
 
-      if (!subscriptionResult.success || !subscriptionResult.subscription) {
+      if (!subscriptionResult.success) {
         console.error("[PayPal create-subscription-order] Subscription API error:", subscriptionResult);
         return {
           success: false,
@@ -194,7 +194,7 @@ export async function createSubscriptionOrder(
     const custom_id = `${user_id}|${productId}|${organization_id}|${billing_period}`;
 
     const return_url = `${returnBase}/api/checkout/paypal/capture-subscription`;
-    const cancel_url = `${returnBase}/settings/billing?payment=cancelled`;
+    const cancel_url = `${returnBase}/organization/billing?payment=cancelled`;
 
     const orderBody = {
       intent: "CAPTURE",
