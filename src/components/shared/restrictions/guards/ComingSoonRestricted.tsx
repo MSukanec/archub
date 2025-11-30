@@ -1,7 +1,5 @@
 import React from "react";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
-import { RestrictionOverlay } from "../ui/RestrictionOverlay";
-import { Sparkles } from "lucide-react";
 
 interface ComingSoonRestrictedProps {
   children: React.ReactNode;
@@ -10,17 +8,15 @@ interface ComingSoonRestrictedProps {
 export function ComingSoonRestricted({ children }: ComingSoonRestrictedProps) {
   const isAdmin = useIsAdmin();
 
-  // Both admin and regular users see it blocked, but admin can interact
+  // Admin sees it normally
+  if (isAdmin) {
+    return <>{children}</>;
+  }
+
+  // Regular users see it semi-transparent and disabled
   return (
-    <div className={`relative w-full ${isAdmin ? '' : 'pointer-events-none'}`}>
-      <div className="relative w-full opacity-50">
-        {children}
-      </div>
-      <RestrictionOverlay
-        icon={<Sparkles className="w-6 h-6 text-blue-500" />}
-        title="Próximamente"
-        description="Esta función estará disponible pronto."
-      />
+    <div className="opacity-40 pointer-events-none">
+      {children}
     </div>
   );
 }
