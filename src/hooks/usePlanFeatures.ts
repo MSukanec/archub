@@ -51,20 +51,10 @@ export function usePlanFeatures(): PlanFeatures {
   };
 
   const limit = (feature: string): number => {
-    const featureValue = planFeatures[feature];
-    
-    // Si es un número en features, devolver el límite exacto
-    if (typeof featureValue === 'number') {
-      return featureValue === -1 ? Infinity : featureValue;
-    }
-    
-    // Si es booleano y true, asumir límite ilimitado
-    if (featureValue === true) {
-      return Infinity;
-    }
-    
     // PRIORIDAD 1: Leer límites directamente de las columnas del plan (desde la DB)
-    // Estos valores vienen de: plans.max_projects, plans.max_members, plans.max_storage_mb, plans.max_ai_tokens
+    // La tabla `plans` es la ÚNICA fuente de verdad para los límites
+    // Estas columnas tienen prioridad sobre cualquier valor en el JSON features
+    
     if (feature === 'max_members') {
       const dbValue = currentPlan?.max_members;
       if (dbValue !== undefined && dbValue !== null) {
@@ -98,14 +88,26 @@ export function usePlanFeatures(): PlanFeatures {
       if (dbValue !== undefined && dbValue !== null) {
         return dbValue === -1 ? Infinity : dbValue;
       }
-      // Fallback: use max_projects as proxy for kanban boards if not defined
+      // Fallback: use max_projects as proxy for kanban boards
       const projectsLimit = currentPlan?.max_projects;
       if (projectsLimit !== undefined && projectsLimit !== null) {
         return projectsLimit === -1 ? Infinity : projectsLimit;
       }
     }
     
-    // FALLBACK: Si no hay valor en la DB, devolver 0 (más restrictivo)
+    // PRIORIDAD 2: Solo para features NO cubiertas por columnas de la DB,
+    // verificar el JSON features como fallback
+    const featureValue = planFeatures[feature];
+    
+    if (typeof featureValue === 'number') {
+      return featureValue === -1 ? Infinity : featureValue;
+    }
+    
+    if (featureValue === true) {
+      return Infinity;
+    }
+    
+    // FALLBACK: Si no hay valor en la DB ni en features, devolver 0 (más restrictivo)
     return 0;
   };
 
