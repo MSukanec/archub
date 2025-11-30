@@ -215,6 +215,7 @@ export function LeftSidebar() {
         { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard' },
         { id: 'basic-data', label: 'Datos Básicos', icon: Building, href: '/organization/basic-data' },
         { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects' },
+        { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners' },
         { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
         { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
         { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'coming_soon' },
@@ -275,7 +276,6 @@ export function LeftSidebar() {
           title: organizationName,
           items: [
             { id: 'members', label: 'Miembros', icon: Users, href: '/settings/members' },
-            { id: 'partners', label: 'Socios', icon: HandHeart, href: '/settings/partners' },
             { id: 'finances', label: 'Finanzas', icon: Wallet, href: '/settings/finances' },
           ]
         },
