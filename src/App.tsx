@@ -55,6 +55,7 @@ import Calendar from "@/pages/professional/calendar/Calendar";
 const Media = lazy(() => import("@/pages/media/Media"));
 
 import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
+import OrganizationSettings from "@/pages/organization/OrganizationSettings";
 
 import Profile from "@/pages/profile/Profile";
 
@@ -170,6 +171,7 @@ function Router() {
 
         {/* Organization Routes - ORDEN IMPORTANTE: rutas específicas primero */}
         <Route path="/organization/dashboard" component={OrganizationDashboard} />
+        <Route path="/organization/basic-data" component={OrganizationSettings} />
         <Route path="/organization/activity" component={Activity} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/notifications" component={Notifications} />

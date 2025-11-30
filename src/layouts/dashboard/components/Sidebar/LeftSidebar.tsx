@@ -212,6 +212,8 @@ export function LeftSidebar() {
   const getNavigationItems = (): NavigationItem[] => {
     if (sidebarLevel === 'general' || sidebarLevel === 'organization') {
       return [
+        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard' },
+        { id: 'basic-data', label: 'Datos Básicos', icon: Building, href: '/organization/basic-data' },
         { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects' },
         { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
         { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
@@ -272,7 +274,6 @@ export function LeftSidebar() {
           type: 'section' as const,
           title: organizationName,
           items: [
-            { id: 'organization-basic-data', label: 'Datos Básicos', icon: Building, href: '/settings/organization-basic-data' },
             { id: 'members', label: 'Miembros', icon: Users, href: '/settings/members' },
             { id: 'partners', label: 'Socios', icon: HandHeart, href: '/settings/partners' },
             { id: 'finances', label: 'Finanzas', icon: Wallet, href: '/settings/finances' },
