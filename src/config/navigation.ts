@@ -50,7 +50,13 @@ export interface NavigationSpacer {
   id: string;
 }
 
-export type NavigationEntry = NavigationItem | NavigationSection | NavigationSpacer;
+export interface NavigationSectionHeader {
+  type: 'section-header';
+  id: string;
+  label: string;
+}
+
+export type NavigationEntry = NavigationItem | NavigationSection | NavigationSpacer | NavigationSectionHeader;
 
 export interface ContextButton {
   id: 'general' | 'community' | 'organization' | 'project' | 'learning' | 'admin' | 'founders';
@@ -111,12 +117,14 @@ export const CONTEXT_BUTTONS: ContextButton[] = [
 ];
 
 export const ORGANIZATION_NAVIGATION: NavigationEntry[] = [
+  { type: 'section-header', id: 'section-gestion', label: 'Gestión' },
   { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard', testId: 'nav-org-dashboard' },
   { id: 'basic-data', label: 'Datos Básicos', icon: Building, href: '/organization/basic-data', testId: 'nav-org-basic-data' },
   { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects', testId: 'nav-org-projects' },
   { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts', testId: 'nav-org-contacts' },
   { id: 'members', label: 'Miembros', icon: Users, href: '/organization/members', testId: 'nav-org-members' },
   { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing', testId: 'nav-org-billing' },
+  { type: 'section-header', id: 'section-finanzas', label: 'Finanzas' },
   { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs', testId: 'nav-org-expenses' },
   { type: 'spacer', id: 'spacer-lab' },
   { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', restricted: 'lab_user', testId: 'nav-org-partners' },

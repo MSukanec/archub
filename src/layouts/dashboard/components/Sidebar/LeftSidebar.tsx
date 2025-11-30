@@ -839,6 +839,16 @@ export function LeftSidebar() {
                       return <div key={navItem.id} className="h-9" />;
                     }
                     
+                    if ('type' in navItem && navItem.type === 'section-header') {
+                      return (
+                        <div key={navItem.id} className="h-9 flex items-center px-2">
+                          <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-60">
+                            {navItem.label}
+                          </span>
+                        </div>
+                      );
+                    }
+                    
                     if ('type' in navItem && navItem.type === 'section') return null;
                     
                     const item = navItem as SidebarItem;
