@@ -45,13 +45,13 @@ export function FounderBanner({ mode = 'public' }: FounderBannerProps) {
             
             <div className="flex items-start gap-3">
               <Check className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
-              <div className="text-[var(--text-muted)]">
-                <span>Acceso vitalicio al Curso de </span>
-                <Link href="/cursos" className="text-accent hover:underline inline-flex items-center gap-1">
-                  Archicad
-                  <ExternalLink className="h-3 w-3" />
-                </Link>
-              </div>
+              <Link 
+                href={mode === 'dashboard' ? '/learning/courses/master-archicad/info' : '/cursos/master-archicad'}
+                className="text-[var(--text-muted)] hover:text-accent transition-colors inline-flex items-center gap-1"
+              >
+                <span>Acceso vitalicio al curso Master ArchiCAD</span>
+                <ExternalLink className="h-3 w-3" />
+              </Link>
             </div>
 
             <div className="flex items-start gap-3">
