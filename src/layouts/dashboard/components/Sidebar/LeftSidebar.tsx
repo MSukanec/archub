@@ -464,11 +464,7 @@ export function LeftSidebar() {
           className="flex flex-row h-full"
         >
           {/* SIDEBAR IZQUIERDO - CONTEXTOS (siempre visible, 50px, altura total) */}
-          <div 
-            className="bg-[var(--main-sidebar-bg)] w-[50px] h-full rounded-lg flex flex-col"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-          >
+          <div className="bg-[var(--main-sidebar-bg)] w-[50px] h-full rounded-lg flex flex-col">
             {/* SECCIÓN: Botones de contexto con scroll */}
             <div className="px-0 pt-0 overflow-y-auto flex-1">
                 <div className="flex flex-col gap-[2px] items-center pt-3">
@@ -492,6 +488,7 @@ export function LeftSidebar() {
                         id: 'organization' as const,
                         icon: <Building className="h-5 w-5" />,
                         onClick: () => {
+                          setHovered(true);
                           setSidebarLevel('organization');
                           navigate('/organization/dashboard');
                         },
@@ -501,6 +498,7 @@ export function LeftSidebar() {
                         id: 'project' as const,
                         icon: <FolderOpen className="h-5 w-5" />,
                         onClick: () => {
+                          setHovered(true);
                           setSidebarLevel('project');
                           navigate('/project/dashboard');
                         },
@@ -512,6 +510,7 @@ export function LeftSidebar() {
                         testId: 'button-sidebar-founders',
                         onClick: () => {
                           if (!isAdmin) return;
+                          setHovered(true);
                           setSidebarLevel('founders');
                           navigate('/founders/dashboard');
                         },
@@ -526,6 +525,7 @@ export function LeftSidebar() {
                         testId: 'button-sidebar-community',
                         onClick: () => {
                           if (!isAdmin) return;
+                          setHovered(true);
                           setSidebarLevel('community');
                           navigate('/community/dashboard');
                         },
@@ -538,6 +538,7 @@ export function LeftSidebar() {
                         id: 'learning' as const,
                         icon: <GraduationCap className="h-5 w-5" />,
                         onClick: () => {
+                          setHovered(true);
                           setSidebarLevel('learning');
                           navigate('/learning/dashboard');
                         },
