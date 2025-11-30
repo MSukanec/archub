@@ -412,137 +412,116 @@ unit_price = basePrice * Number(exchangeRate.rate);
 6. **Multi-moneda** - USD (PayPal) y ARS (MP con conversión)
 7. **Restricción de features por plan** - `PlanRestricted` component
 8. **Idempotencia en pagos** - Previene duplicados en webhooks
+9. **✅ NUEVO - Soft-Lock System** - Bloqueo suave de recursos excedentes
+10. **✅ NUEVO - Downgrade Automático** - Cron job ejecuta downgrades programados
+11. **✅ NUEVO - Notificaciones de Expiración** - Emails automáticos antes/post-expiración
 
-### 🔴 GAPS CRÍTICOS - NO IMPLEMENTADO:
+### 🔴 GAPS CRÍTICOS - RESUELTOS RECIENTEMENTE:
 
-#### GAP 1: DOWNGRADE AUTOMÁTICO
+#### ✅ GAP 1: DOWNGRADE AUTOMÁTICO [RESUELTO 30-11-2025]
 ```
-❌ No hay cron job que ejecute el downgrade cuando expire la suscripción
-
-PROBLEMA:
-- Usuario tiene PRO, programa downgrade a FREE
-- PRO expira el 29/12/2025
-- scheduled_downgrade_plan_id tiene el UUID de FREE
-- Pero NADA ejecuta el cambio a FREE automáticamente
-- El usuario pierde acceso pero sigue sin plan asignado
-
-SOLUCIÓN REQUERIDA:
-1. Crear cron job que corra cada hora
-2. Buscar suscripciones donde expires_at < now() AND status = 'active'
-3. Si tiene scheduled_downgrade_plan_id:
-   - Crear nueva suscripción con ese plan
-   - Actualizar organizations.plan_id
-4. Si NO tiene scheduled_downgrade_plan_id:
-   - ¿Bajar a FREE automáticamente? ¿O bloquear acceso?
+IMPLEMENTACIÓN:
+- Archivo: server/cron/jobs/execute-scheduled-downgrades.ts
+- Cron: Ejecuta cada hora (configurado en node-cron)
+- Lógica:
+  1. Busca suscripciones donde expires_at < now() AND status = 'active'
+  2. Si tiene scheduled_downgrade_plan_id:
+     - Llama executeScheduledPlanSwitch()
+     - Crea nueva suscripción con ese plan
+     - Actualiza organizations.plan_id
+  3. Inserta log en system_job_logs para auditoría
+  
+RESULTADO: Downgrades se ejecutan automáticamente sin intervención manual
 ```
 
-#### GAP 2: RENOVACIÓN AUTOMÁTICA
+#### ✅ GAP 3: NOTIFICACIONES DE EXPIRACIÓN [RESUELTO 30-11-2025]
 ```
-❌ No hay suscripciones recurrentes reales
+IMPLEMENTACIÓN:
+- Archivo: server/cron/jobs/subscription-expiry-notifier.ts
+- Cron: Ejecuta diariamente a las 9:00 AM UTC
+- Lógica:
+  1. Busca suscripciones próximas a expirar (7, 3, 1 días y ON expiry)
+  2. Envía emails a múltiples destinatarios (admin + org admins)
+  3. Sistema de idempotencia: evita duplicados con sent_at + email_type
+  4. Muestra resumen en logs
+  
+NOTIFICACIONES:
+- 7 días antes: "Tu suscripción expira en 7 días"
+- 3 días antes: "Tu suscripción expira en 3 días"
+- 1 día antes: "Tu suscripción expira mañana"
+- ON EXPIRY: "Tu suscripción ha expirado hoy"
 
-PROBLEMA:
-- PayPal y MP se usan como pagos únicos, no suscripciones
-- Al expirar la suscripción, el usuario debe pagar manualmente
-- No hay cobro automático del siguiente período
+RESULTADO: Usuarios informados proactivamente de cambios próximos
+```
+
+#### ✅ GAP 4: SOFT-LOCK PARA DATOS EXCEDENTES [RESUELTO 30-11-2025]
+```
+IMPLEMENTACIÓN:
+- Archivo: server/lib/handlers/checkout/shared/plan-limits.ts
+- Función principal: applyPlanLimits(supabase, organizationId, newPlanName)
+- Tablas modificadas: projects.is_over_limit, organization_members.is_over_limit
+
+LÓGICA PARA PROYECTOS:
+- Si plan tiene límite (ej. Free=2, Pro=25):
+  1. Obtiene TODOS los proyectos ordenados por created_at ASC
+  2. Los primeros N se marcan con is_over_limit = FALSE (activos)
+  3. Proyectos N+1 en adelante: is_over_limit = TRUE (bloqueados)
+- Si plan es ilimitado (Teams): Todos reciben is_over_limit = FALSE
+
+LÓGICA PARA MIEMBROS:
+- Si plan tiene límite (ej. Free=1, Pro=-1, Teams=999):
+  1. Prioriza ADMIN/OWNER (siempre activos)
+  2. Después ordena por joined_at (miembros más antiguos activos)
+  3. Excedentes: is_over_limit = TRUE
+- Si plan es ilimitado: Todos reciben is_over_limit = FALSE
+
+CAMPOS AGREGADOS:
+```sql
+projects.is_over_limit BOOLEAN DEFAULT false
+organization_members.is_over_limit BOOLEAN DEFAULT false
+```
+
+RESULTADO: Recursos excedentes bloqueados sin pérdida de datos
+```
+
+#### ⚠️ GAP 5: VALIDACIÓN PRE-DOWNGRADE [PARCIALMENTE RESUELTO]
+```
+ESTADO ACTUAL:
+- Soft-lock ya marca recursos excedentes automáticamente
+- UI aún no muestra warning pre-downgrade
+
+TODO PARA PRODUCCIÓN:
+1. Crear endpoint GET /api/subscriptions/downgrade-impact
+   - Devuelve: proyectos a bloquear, miembros a bloquear
+2. Mostrar modal en frontend antes de confirmar downgrade
+   "Al cambiar a FREE:
+    - 3 proyectos serán bloqueados (pueden ser re-activados al upgrade)
+    - 2 miembros serán bloqueados"
+3. Usuario confirma y procede
+```
+
+#### ⚠️ GAP 6: MANEJO DE FALLAS DE PAGO
+```
+ESTADO ACTUAL:
+- Webhooks tienen reintentos a nivel de Supabase
+- No hay dead letter queue implementada aún
+
+TODO PARA PRODUCCIÓN:
+1. Agregar tabla: webhook_failures para logging
+2. Implementar reintento con backoff exponencial
+3. Alertas a admin después de N fallos
+```
+
+#### ⚠️ GAP 7: RENOVACIÓN AUTOMÁTICA
+```
+ESTADO ACTUAL:
+- Intencionalmente manual (usuario debe pagar de nuevo)
+- Notificaciones advierten de expiración
 
 NOTA:
-- Esto puede ser INTENCIONAL (pago manual más control)
-- Pero debe documentarse claramente
-- Y notificar al usuario antes de expiración
-```
-
-#### GAP 3: NOTIFICACIONES DE EXPIRACIÓN
-```
-❌ No hay emails/notificaciones antes de expiración
-
-PROBLEMA:
-- Usuario no sabe que su suscripción está por expirar
-- No hay recordatorio a 7 días, 3 días, 1 día
-- No hay email post-expiración
-
-SOLUCIÓN REQUERIDA:
-1. Cron job diario que busque suscripciones próximas a expirar
-2. Enviar email a 7, 3, 1 días antes
-3. Enviar email cuando expire
-4. Mostrar banner en dashboard
-```
-
-#### GAP 4: QUÉ PASA CON LOS DATOS AL BAJAR DE PLAN
-```
-❌ No hay manejo de exceso de datos al hacer downgrade
-
-PROBLEMA EJEMPLO - TEAMS → FREE:
-- Usuario tiene 15 miembros en TEAMS
-- Hace downgrade a FREE (1 usuario)
-- ¿Qué pasa con los otros 14 miembros?
-- ¿Se desactivan? ¿Se borran? ¿Cuáles?
-
-PROBLEMA EJEMPLO - PRO → FREE:
-- Usuario tiene 30 proyectos en PRO
-- FREE permite solo 4 proyectos
-- ¿Cuáles se archivan? ¿Se bloquean?
-
-SOLUCIÓN REQUERIDA:
-1. Definir política de retención
-2. Antes de downgrade, mostrar warning:
-   "Tienes 15 miembros. FREE permite 1. Los siguientes miembros serán desactivados..."
-3. Implementar lógica de downgrade que:
-   - Archive proyectos excedentes (no borre)
-   - Desactive miembros excedentes (no borre)
-   - Notifique a usuarios afectados
-```
-
-#### GAP 5: VALIDACIÓN PRE-DOWNGRADE
-```
-❌ No hay validación de límites antes de programar downgrade
-
-PROBLEMA:
-- Usuario puede programar downgrade TEAMS → FREE
-- Aunque tenga 50 proyectos y 20 miembros
-- No hay warning ni bloqueo
-
-SOLUCIÓN REQUERIDA:
-1. Antes de schedule-downgrade, validar:
-   - Cantidad de proyectos vs límite del plan target
-   - Cantidad de miembros vs límite del plan target
-   - Storage usado vs límite del plan target
-2. Mostrar modal con impacto:
-   "Al cambiar a FREE:
-    - 46 proyectos serán archivados
-    - 19 miembros serán desactivados
-    - 45GB de archivos quedarán de solo lectura"
-```
-
-#### GAP 6: MANEJO DE FALLAS DE PAGO
-```
-❌ No hay proceso para pagos fallidos
-
-PROBLEMA:
-- Si el webhook de PayPal/MP falla, ¿qué pasa?
-- Si hay un error en upgradeOrganizationPlan, ¿se reintenta?
-- ¿Hay dead letter queue para webhooks fallidos?
-
-SOLUCIÓN REQUERIDA:
-1. Reintentos automáticos de webhooks fallidos
-2. Cola de procesamiento con backoff exponencial
-3. Alertas a admin si falla después de N intentos
-4. Panel de admin para ver pagos pendientes de procesar
-```
-
-#### GAP 7: SINCRONIZACIÓN organizations.plan_id
-```
-⚠️ Posible desincronización entre organization_subscriptions y organizations.plan_id
-
-PROBLEMA:
-- organizations.plan_id es denormalizado para queries rápidas
-- Si upgradeOrganizationPlan falla parcialmente, puede quedar desincronizado
-- No hay proceso de reconciliación
-
-SOLUCIÓN REQUERIDA:
-1. Usar transacciones donde sea posible
-2. Crear job de reconciliación diario
-3. El job compara organizations.plan_id con la suscripción activa más reciente
-```
+- Esto reduce fricción de churn pero requiere recordatorios claros
+- Ya implementados con emails diarios
+- Mostrar banner en dashboard cuando expira pronto
 
 ---
 
@@ -628,7 +607,7 @@ export const plansConfig: Record<PlanSlug, PlanConfig> = {
 
 ---
 
-## 10. CHECKLIST PRE-LANZAMIENTO
+## 10. CHECKLIST PRE-LANZAMIENTO [ACTUALIZADO 30-11-2025]
 
 ### ✅ Listo para Producción:
 - [x] Flujo de upgrade PayPal funciona
@@ -640,17 +619,18 @@ export const plansConfig: Record<PlanSlug, PlanConfig> = {
 - [x] Idempotencia en webhooks
 - [x] Resolución auth_id → users.id
 - [x] Restricción de features por plan (UI)
+- [x] **Cron job para ejecutar downgrades automáticos** ✅ [30-11]
+- [x] **Notificaciones de expiración (email)** ✅ [30-11]
+- [x] **Soft-lock system para datos excedentes** ✅ [30-11]
 
-### 🔴 Requiere Implementación ANTES de Lanzamiento:
-- [ ] **CRÍTICO**: Cron job para ejecutar downgrades automáticos
-- [ ] **CRÍTICO**: Notificaciones de expiración (email)
-- [ ] **ALTO**: Validación pre-downgrade (límites excedidos)
-- [ ] **ALTO**: Manejo de datos excedentes al bajar de plan
+### ⚠️ Requiere Implementación ANTES de Lanzamiento:
+- [ ] **ALTO**: Modal UI pre-downgrade con impacto (UI warning)
+- [ ] **ALTO**: Endpoint GET /api/subscriptions/downgrade-impact
 
-### 🟡 Puede Lanzarse Sin Esto (Pero Recomendado):
+### 🟡 Puede Lanzarse Sin Esto (Post-MVP, Nice-to-Have):
 - [ ] Panel admin para ver pagos pendientes
-- [ ] Reconciliación de plan_id
-- [ ] Dead letter queue para webhooks
+- [ ] Reconciliación automática de plan_id
+- [ ] Dead letter queue para webhooks fallidos
 - [ ] Métricas de suscripciones (MRR, churn, etc.)
 
 ---
