@@ -99,7 +99,13 @@ interface SidebarSpacer {
   id: string;
 }
 
-type NavigationItem = SidebarItem | SidebarSection | SidebarSpacer;
+interface SidebarSectionHeader {
+  type: 'section-header';
+  id: string;
+  label: string;
+}
+
+type NavigationItem = SidebarItem | SidebarSection | SidebarSpacer | SidebarSectionHeader;
 
 export function LeftSidebar() {
   const [location, navigate] = useLocation();
@@ -218,18 +224,20 @@ export function LeftSidebar() {
   const getNavigationItems = (): NavigationItem[] => {
     if (sidebarLevel === 'general' || sidebarLevel === 'organization') {
       return [
+        { type: 'section-header', id: 'section-gestion', label: 'Gestión' },
         { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard' },
         { id: 'basic-data', label: 'Datos Básicos', icon: Building, href: '/organization/basic-data' },
         { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects' },
-        { id: 'members', label: 'Miembros', icon: Users, href: '/organization/members' },
-        { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners' },
-        { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing' },
         { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
+        { id: 'members', label: 'Miembros', icon: Users, href: '/organization/members' },
+        { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing' },
+        { type: 'section-header', id: 'section-finanzas', label: 'Finanzas' },
         { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
-        { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'coming_soon' },
-        { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'coming_soon' },
-        { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'coming_soon' },
-        { id: 'finances-org', label: 'Finanzas', icon: DollarSign, href: '/finances', restricted: 'coming_soon' },
+        { type: 'spacer', id: 'spacer-lab' },
+        { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', restricted: 'lab_user' },
+        { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'lab_user' },
+        { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'lab_user' },
+        { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'lab_user' },
       ];
     } else if (sidebarLevel === 'project' && selectedProjectId) {
       return [
@@ -842,7 +850,7 @@ export function LeftSidebar() {
                     if ('type' in navItem && navItem.type === 'section-header') {
                       return (
                         <div key={navItem.id} className="h-9 flex items-center px-2">
-                          <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-60">
+                          <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-60 uppercase tracking-wide">
                             {navItem.label}
                           </span>
                         </div>
