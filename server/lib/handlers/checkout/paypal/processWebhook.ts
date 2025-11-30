@@ -8,6 +8,7 @@ import { getPlanIdBySlug } from "../shared/helpers.js";
 import { decodeInvoiceId, decodeCustomId } from "./encoding.js";
 import { getPayPalAccessToken } from "./auth.js";
 import { PAYPAL_BASE_URL } from "./config.js";
+import { getSubscription } from "./subscriptions-api.js";
 
 export type ProcessWebhookResult =
   | { success: true; processed: boolean; eventType: string }
@@ -81,6 +82,127 @@ function parseInvoiceId(invoiceId: string) {
     out[mappedKey] = v;
   }
   return out;
+}
+
+async function handleSubscriptionEvent(
+  supabase: ReturnType<typeof createServiceSupabaseClient>,
+  json: any,
+  eventType: string
+): Promise<ProcessWebhookResult> {
+  const resource = json?.resource;
+  const subscriptionId = resource?.id;
+  const customId = resource?.custom_id;
+  const status = resource?.status;
+
+  console.log(`[PayPal webhook] Processing ${eventType}:`, { subscriptionId, status, customId });
+
+  if (!subscriptionId) {
+    return { success: true, processed: false, eventType };
+  }
+
+  await logPaymentEvent(supabase, "paypal", {
+    providerEventId: json.id,
+    providerEventType: eventType,
+    status: "PROCESSED",
+    rawPayload: json,
+    orderId: subscriptionId,
+    customId: customId,
+    providerPaymentId: subscriptionId,
+  });
+
+  if (eventType === "BILLING.SUBSCRIPTION.CANCELLED" || eventType === "BILLING.SUBSCRIPTION.SUSPENDED") {
+    const { error: updateError } = await supabase
+      .from('organization_subscriptions')
+      .update({ 
+        status: eventType.includes("CANCELLED") ? 'cancelled' : 'suspended',
+        cancelled_at: new Date().toISOString() 
+      })
+      .eq('provider_subscription_id', subscriptionId);
+
+    if (updateError) {
+      console.error(`[PayPal webhook] Error updating subscription status:`, updateError);
+    }
+    return { success: true, processed: true, eventType };
+  }
+
+  return { success: true, processed: true, eventType };
+}
+
+async function handleSubscriptionRenewal(
+  supabase: ReturnType<typeof createServiceSupabaseClient>,
+  json: any,
+  eventType: string
+): Promise<ProcessWebhookResult> {
+  const resource = json?.resource;
+  const saleId = resource?.id;
+  const billingAgreementId = resource?.billing_agreement_id;
+  const amount = Number(resource?.amount?.total || resource?.amount?.value || 0);
+  const currency = resource?.amount?.currency || "USD";
+  const state = resource?.state?.toUpperCase();
+
+  console.log(`[PayPal webhook] Processing renewal ${eventType}:`, { saleId, billingAgreementId, amount, state });
+
+  if (!billingAgreementId || state !== "COMPLETED") {
+    return { success: true, processed: false, eventType };
+  }
+
+  await logPaymentEvent(supabase, "paypal", {
+    providerEventId: json.id,
+    providerEventType: eventType,
+    status: "PROCESSED",
+    rawPayload: json,
+    orderId: billingAgreementId,
+    providerPaymentId: saleId,
+    amount: amount,
+    currency: currency,
+  });
+
+  const { data: existingSub, error: subError } = await supabase
+    .from('organization_subscriptions')
+    .select('id, organization_id, plan_id, billing_period, amount, currency')
+    .eq('provider_subscription_id', billingAgreementId)
+    .eq('status', 'active')
+    .maybeSingle();
+
+  if (subError || !existingSub) {
+    console.log(`[PayPal webhook] No active subscription found for billing agreement:`, billingAgreementId);
+    return { success: true, processed: false, eventType };
+  }
+
+  const paymentResult = await insertPayment(supabase, "paypal", {
+    providerPaymentId: saleId,
+    organizationId: existingSub.organization_id,
+    productId: existingSub.plan_id,
+    amount: amount,
+    currency: currency,
+    status: "completed",
+    productType: "subscription",
+  });
+
+  if (paymentResult.inserted) {
+    const newExpiresAt = new Date();
+    if (existingSub.billing_period === 'monthly') {
+      newExpiresAt.setMonth(newExpiresAt.getMonth() + 1);
+    } else {
+      newExpiresAt.setFullYear(newExpiresAt.getFullYear() + 1);
+    }
+
+    const { error: updateError } = await supabase
+      .from('organization_subscriptions')
+      .update({
+        expires_at: newExpiresAt.toISOString(),
+        amount: amount,
+      })
+      .eq('id', existingSub.id);
+
+    if (updateError) {
+      console.error(`[PayPal webhook] Error extending subscription:`, updateError);
+    } else {
+      console.log(`[PayPal webhook] ✅ Subscription renewed for org ${existingSub.organization_id}, new expiry: ${newExpiresAt.toISOString()}`);
+    }
+  }
+
+  return { success: true, processed: true, eventType };
 }
 
 export async function processWebhook(
@@ -219,6 +341,14 @@ export async function processWebhook(
       amount: amount || null,
       currency: currency,
     });
+
+    if (eventType.startsWith("BILLING.SUBSCRIPTION")) {
+      return handleSubscriptionEvent(supabase, json, eventType);
+    }
+
+    if (eventType === "PAYMENT.SALE.COMPLETED") {
+      return handleSubscriptionRenewal(supabase, json, eventType);
+    }
 
     const isApproved =
       eventType === "CHECKOUT.ORDER.APPROVED" ||

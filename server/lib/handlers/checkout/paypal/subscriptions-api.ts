@@ -441,3 +441,7 @@ export async function listPayPalSubscriptionTransactions(
     };
   }
 }
+
+export const createSubscription = createPayPalSubscription;
+export const getSubscription = getPayPalSubscription;
+export const cancelSubscription = cancelPayPalSubscription;

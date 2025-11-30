@@ -234,6 +234,7 @@ export type SubscriptionUpgradeParams = {
   amount: number;
   currency: string;
   userId?: string | null;
+  providerSubscriptionId?: string | null;
 };
 
 /**
@@ -339,19 +340,25 @@ export async function upgradeOrganizationPlan(
     expiresAt.setFullYear(expiresAt.getFullYear() + 1);
   }
   
+  const subscriptionInsert: Record<string, any> = {
+    organization_id: params.organizationId,
+    plan_id: params.planId,
+    payment_id: params.paymentId,
+    status: 'active',
+    billing_period: params.billingPeriod,
+    started_at: new Date().toISOString(),
+    expires_at: expiresAt.toISOString(),
+    amount: params.amount,
+    currency: params.currency,
+  };
+
+  if (params.providerSubscriptionId) {
+    subscriptionInsert.provider_subscription_id = params.providerSubscriptionId;
+  }
+
   const { data: subscription, error: subError } = await supabase
     .from('organization_subscriptions')
-    .insert({
-      organization_id: params.organizationId,
-      plan_id: params.planId,
-      payment_id: params.paymentId,
-      status: 'active',
-      billing_period: params.billingPeriod,
-      started_at: new Date().toISOString(),
-      expires_at: expiresAt.toISOString(),
-      amount: params.amount,
-      currency: params.currency,
-    })
+    .insert(subscriptionInsert)
     .select()
     .single();
   

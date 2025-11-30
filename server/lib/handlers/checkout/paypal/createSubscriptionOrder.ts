@@ -4,9 +4,10 @@ import { verifyAdminRoleForOrganization } from "../shared/permissions.js";
 import { buildURLContext } from "../shared/urls.js";
 import { logPayPalMode } from "./config.js";
 import { createPayPalOrder } from "./api.js";
+import { createSubscription as createPayPalSubscription } from "./subscriptions-api.js";
 
 export type CreateSubscriptionOrderResult =
-  | { success: true; orderId: string; approvalUrl: string; order: any }
+  | { success: true; orderId: string; approvalUrl: string; order: any; isRecurring?: boolean; subscriptionId?: string }
   | { success: false; error: string; status?: number; details?: any };
 
 export async function createSubscriptionOrder(
@@ -21,7 +22,6 @@ export async function createSubscriptionOrder(
       description = "Seencel subscription",
     } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
-    // Validar parámetros requeridos
     if (!plan_slug || !organization_id || !billing_period) {
       return {
         success: false,
@@ -30,7 +30,6 @@ export async function createSubscriptionOrder(
       };
     }
 
-    // SECURITY: Extract and validate auth token
     const authResult = getAuthenticatedClient(req);
     if (!authResult.success) {
       return {
@@ -42,7 +41,6 @@ export async function createSubscriptionOrder(
 
     const { supabase } = authResult;
 
-    // SECURITY: Get user_id from authenticated session, NOT from request body
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       console.error("[PayPal create-subscription-order] Auth error:", userError);
@@ -55,7 +53,6 @@ export async function createSubscriptionOrder(
 
     const user_id = user.id;
 
-    // CRÍTICO: Verificar que el usuario pertenece a la organización y es admin
     const adminCheck = await verifyAdminRoleForOrganization(
       supabase,
       user_id,
@@ -74,10 +71,9 @@ export async function createSubscriptionOrder(
       };
     }
 
-    // Obtener plan con precios en USD
     const { data: plan, error: planError } = await supabase
       .from("plans")
-      .select("id, name, slug, is_active, monthly_amount, annual_amount")
+      .select("id, name, slug, is_active, monthly_amount, annual_amount, paypal_plan_monthly_id, paypal_plan_annual_id")
       .eq("slug", plan_slug)
       .eq("is_active", true)
       .single();
@@ -90,7 +86,6 @@ export async function createSubscriptionOrder(
       };
     }
 
-    // SECURITY: Get price from plans table (USD base)
     const priceAmount =
       billing_period === "monthly"
         ? plan.monthly_amount
@@ -111,9 +106,7 @@ export async function createSubscriptionOrder(
       };
     }
 
-    // Para el primer pago de TEAMS, SIEMPRE cobrar 1 seat
-    // Los snapshots en billing_cycles guardarán el conteo real para renovaciones futuras
-    const seats = 1; // Primer pago siempre es solo por el admin
+    const seats = 1;
     const amount = basePrice * seats;
 
     const productId = plan.id;
@@ -123,21 +116,89 @@ export async function createSubscriptionOrder(
 
     logPayPalMode("create-subscription-order");
 
-    // Build URLs
     const { returnBase } = buildURLContext(req);
 
-    // Generate unique invoice_id (PayPal max 127 chars)
-    // Use shortened UUIDs (first 8 chars) for logging/debug only
+    const paypalPlanId = billing_period === "monthly" 
+      ? plan.paypal_plan_monthly_id 
+      : plan.paypal_plan_annual_id;
+
+    if (paypalPlanId) {
+      console.log("[PayPal create-subscription-order] Using PayPal Subscriptions API (recurring billing)");
+      
+      const custom_id = `${user_id}|${productId}|${organization_id}|${billing_period}`;
+      
+      const return_url = `${returnBase}/api/checkout/paypal/capture-subscription?type=recurring`;
+      const cancel_url = `${returnBase}/settings/billing?payment=cancelled`;
+
+      const subscriptionResult = await createPayPalSubscription({
+        plan_id: paypalPlanId,
+        subscriber: {
+          name: {
+            given_name: user.user_metadata?.full_name?.split(' ')[0] || 'User',
+            surname: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || ''
+          },
+          email_address: user.email || ''
+        },
+        custom_id,
+        application_context: {
+          brand_name: "Seencel",
+          locale: "es-ES",
+          user_action: "SUBSCRIBE_NOW",
+          payment_method: {
+            payer_selected: "PAYPAL",
+            payee_preferred: "IMMEDIATE_PAYMENT_REQUIRED"
+          },
+          return_url,
+          cancel_url
+        }
+      });
+
+      if (!subscriptionResult.success || !subscriptionResult.subscription) {
+        console.error("[PayPal create-subscription-order] Subscription API error:", subscriptionResult);
+        return {
+          success: false,
+          error: subscriptionResult.error || "Failed to create PayPal subscription",
+          status: 500,
+          details: subscriptionResult
+        };
+      }
+
+      const subscription = subscriptionResult.subscription;
+      const approvalLink = subscription.links?.find((link: any) => link.rel === 'approve');
+
+      if (!approvalLink?.href) {
+        return {
+          success: false,
+          error: "No approval URL in PayPal response",
+          status: 500,
+          details: subscription
+        };
+      }
+
+      console.log("[PayPal create-subscription-order] Recurring subscription created:", {
+        subscriptionId: subscription.id,
+        status: subscription.status
+      });
+
+      return {
+        success: true,
+        orderId: subscription.id,
+        subscriptionId: subscription.id,
+        approvalUrl: approvalLink.href,
+        order: subscription,
+        isRecurring: true
+      };
+    }
+
+    console.log("[PayPal create-subscription-order] Using legacy CAPTURE flow (plan has no PayPal billing plan IDs)");
+    
     const shortPlanId = productId.substring(0, 8);
     const shortUserId = user_id.substring(0, 8);
     const shortOrgId = organization_id.substring(0, 8);
     const timestamp = Date.now();
 
-    // Format: sub:UUID;u:UUID;o:UUID;bp:VALUE;ts:TIMESTAMP (~62 chars)
     const uniqueInvoiceId = `sub:${shortPlanId};u:${shortUserId};o:${shortOrgId};bp:${billing_period};ts:${timestamp}`;
 
-    // Custom ID with FULL UUIDs in pipe-delimited format (PayPal max 127 chars)
-    // Format: user_id|plan_id|organization_id|billing_period (~118 chars)
     const custom_id = `${user_id}|${productId}|${organization_id}|${billing_period}`;
 
     const return_url = `${returnBase}/api/checkout/paypal/capture-subscription`;
@@ -184,6 +245,7 @@ export async function createSubscriptionOrder(
       orderId: result.orderId,
       approvalUrl: result.approvalUrl,
       order: { id: result.orderId, links: [{ rel: "approve", href: result.approvalUrl }] },
+      isRecurring: false
     };
   } catch (e: any) {
     console.error("[PayPal create-subscription-order] Fatal error:", e);

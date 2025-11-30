@@ -4,24 +4,93 @@
 
 **Payment flow for organization plan subscriptions via PayPal is COMPLETE and TESTED.**
 
-This document describes the complete flow for purchasing organization subscriptions via PayPal. **DO NOT MODIFY** the files listed in the "Protected Files" section without careful consideration.
+This document describes the complete flow for purchasing organization subscriptions via PayPal, including both the legacy one-time CAPTURE flow and the new recurring subscriptions with automatic renewal.
 
 ---
 
 ## 📋 FLOW OVERVIEW
 
-### User Journey
+### Two Payment Modes
+
+PayPal subscriptions support two modes:
+
+1. **Recurring Subscriptions (NEW)** - Uses PayPal Billing Plans API for automatic renewal
+   - Requires synced PayPal products and billing plans
+   - Automatic monthly/annual charges
+   - Managed via webhooks
+
+2. **Legacy CAPTURE Flow** - One-time payments, no auto-renewal
+   - Fallback when billing plans are not configured
+   - Manual renewal required
+
+The system automatically selects the appropriate mode based on whether the plan has PayPal billing plan IDs configured.
+
+---
+
+## 🔄 RECURRING SUBSCRIPTION FLOW (NEW)
+
+### Prerequisites - Admin Sync
+
+Before recurring subscriptions work, an admin must sync PayPal products and billing plans:
+
+**Endpoint:** `POST /api/admin/paypal/sync-plans`
+
+**What it does:**
+1. Creates PayPal Product for each Seencel plan (if not exists)
+2. Creates Monthly Billing Plan linked to the product
+3. Creates Annual Billing Plan linked to the product
+4. Saves PayPal IDs to the `plans` table:
+   - `paypal_product_id`
+   - `paypal_plan_monthly_id`
+   - `paypal_plan_annual_id`
+
+### User Journey (Recurring)
 
 1. **Admin initiates plan upgrade**
-   - Visits organization billing page (`/organization/billing`)
+   - Visits organization billing page (`/settings/billing`)
    - Selects a plan (e.g., Teams)
    - Chooses billing period (monthly/annual)
    - Clicks "Upgrade with PayPal"
 
-2. **Frontend sends payment request** → Backend creates PayPal order
+2. **Frontend sends payment request** → Backend creates PayPal subscription
    - POST `/api/checkout/paypal/create-subscription`
    - Sends: `plan_slug`, `organization_id`, `billing_period`
-   - Receives: `orderId`, `approvalUrl`
+   - Backend checks if plan has `paypal_plan_monthly_id` or `paypal_plan_annual_id`
+   - If YES → Uses PayPal Subscriptions API
+   - Receives: `subscriptionId`, `approvalUrl`, `isRecurring: true`
+
+3. **User redirected to PayPal**
+   - Approves subscription on PayPal UI
+   - Returns to app with `subscription_id`
+
+4. **Backend activates subscription**
+   - GET `/api/checkout/paypal/capture-subscription?type=recurring&subscription_id={id}`
+   - Verifies subscription status with PayPal API
+   - Resolves `auth_id` → `users.id`
+   - Creates payment record
+   - Upgrades organization plan with `provider_subscription_id`
+   - Creates billing cycle record
+   - Redirects user to billing page with success message
+
+5. **Automatic Renewals (via Webhooks)**
+   - PayPal sends `PAYMENT.SALE.COMPLETED` for each renewal
+   - Webhook handler extends subscription expiry
+   - Creates new payment and billing cycle records
+
+---
+
+## 🔄 LEGACY CAPTURE FLOW
+
+### User Journey (One-Time Payment)
+
+1. **Admin initiates plan upgrade**
+   - Same as recurring flow
+
+2. **Frontend sends payment request** → Backend creates PayPal order
+   - POST `/api/checkout/paypal/create-subscription`
+   - Backend checks if plan has PayPal billing plan IDs
+   - If NO → Uses legacy CAPTURE order
+   - Receives: `orderId`, `approvalUrl`, `isRecurring: false`
 
 3. **User redirected to PayPal**
    - Approves payment on PayPal UI
@@ -35,6 +104,57 @@ This document describes the complete flow for purchasing organization subscripti
    - Upgrades organization plan
    - Creates billing cycle record
    - Redirects user to billing page with success message
+
+---
+
+## 📡 WEBHOOK EVENTS
+
+### Subscription Events (Recurring)
+
+| Event | Handler | Action |
+|-------|---------|--------|
+| `BILLING.SUBSCRIPTION.ACTIVATED` | `handleSubscriptionEvent` | Logs activation |
+| `BILLING.SUBSCRIPTION.CANCELLED` | `handleSubscriptionEvent` | Marks subscription cancelled |
+| `BILLING.SUBSCRIPTION.SUSPENDED` | `handleSubscriptionEvent` | Marks subscription suspended |
+| `PAYMENT.SALE.COMPLETED` | `handleSubscriptionRenewal` | Extends expiry, creates payment |
+
+### Legacy Events
+
+| Event | Handler | Action |
+|-------|---------|--------|
+| `CHECKOUT.ORDER.APPROVED` | `processWebhook` | Processes one-time payment |
+| `PAYMENT.CAPTURE.COMPLETED` | `processWebhook` | Processes capture completion |
+
+---
+
+## 💾 DATABASE SCHEMA ADDITIONS
+
+### Plans Table - New Columns
+
+```sql
+ALTER TABLE plans ADD COLUMN paypal_product_id TEXT;
+ALTER TABLE plans ADD COLUMN paypal_plan_monthly_id TEXT;
+ALTER TABLE plans ADD COLUMN paypal_plan_annual_id TEXT;
+```
+
+### Organization Subscriptions Table - New Column
+
+```sql
+ALTER TABLE organization_subscriptions ADD COLUMN provider_subscription_id TEXT;
+```
+
+### Data Flow
+
+```javascript
+// For recurring subscriptions
+{
+  provider_subscription_id: "I-XXXXX", // PayPal subscription ID
+  // Used to:
+  // 1. Identify subscription for renewal webhooks
+  // 2. Cancel subscription via PayPal API
+  // 3. Link renewals to correct organization
+}
+```
 
 ---
 
@@ -53,53 +173,47 @@ This document describes the complete flow for purchasing organization subscripti
 }
 ```
 
-**Response (Success):**
+**Response (Recurring Subscription):**
 ```json
 {
-  "success": true,
-  "orderId": "7B123456789...",
-  "approvalUrl": "https://www.paypal.com/checkoutnow?token=...",
-  "order": { "id": "...", "links": [...] }
+  "ok": true,
+  "order_id": "I-BW452GLLEP1G",
+  "subscription_id": "I-BW452GLLEP1G",
+  "approval_url": "https://www.paypal.com/webapps/billing/subscriptions?token=...",
+  "isRecurring": true
 }
 ```
 
-**Response (Error):**
+**Response (Legacy CAPTURE):**
 ```json
 {
-  "success": false,
-  "error": "Plan not found or inactive" | "Not organization admin",
-  "status": 403
+  "ok": true,
+  "order_id": "7B123456789...",
+  "approval_url": "https://www.paypal.com/checkoutnow?token=...",
+  "isRecurring": false
 }
 ```
 
-### Step 2: Capture Subscription Order
+### Step 2: Capture/Activate Subscription
 
 **Endpoint:** `GET /api/checkout/paypal/capture-subscription`
 
 **Query Parameters:**
-- `token`: PayPal order ID (token from return URL)
-
-**Happens silently server-side:**
-1. Captures PayPal order
-2. Parses `custom_id` (format: `auth_id|plan_id|org_id|billing_period`)
-3. **CRITICAL**: Resolves `auth_id` → `users.id`
-4. Logs payment event
-5. Inserts payment record (idempotent)
-6. Upgrades organization plan (only if payment newly inserted)
-7. Creates billing cycle record
-8. Returns HTML with spinner → redirects to `/organization/billing?payment=success`
+- `type=recurring` (optional): Indicates recurring subscription flow
+- `subscription_id`: PayPal subscription ID (for recurring)
+- `token`: PayPal order ID (for legacy CAPTURE)
 
 ---
 
 ## 💳 DATA FLOW - Database Changes
 
-### Payment Created
+### Payment Created (Both Flows)
 ```javascript
 // payments table
 {
-  id: "uuid",                    // ✅ Our payment ID (UUID)
+  id: "uuid",
   provider: "paypal",
-  provider_payment_id: "CAPTURE-ID-12345",
+  provider_payment_id: "CAPTURE-ID" | "SUBSCRIPTION-ID",
   user_id: "uuid",               // ✅ users.id (resolved from auth_id)
   organization_id: "uuid",
   product_id: "uuid",            // plan_id
@@ -107,7 +221,7 @@ This document describes the complete flow for purchasing organization subscripti
   currency: "USD",
   status: "completed",
   product_type: "subscription",
-  created_at: "2025-11-28T..."
+  created_at: "2025-11-30T..."
 }
 ```
 
@@ -118,46 +232,14 @@ This document describes the complete flow for purchasing organization subscripti
   id: "uuid",
   organization_id: "uuid",
   plan_id: "uuid",
-  payment_id: "uuid",            // ✅ payments.id (UUID, not PayPal ID)
+  payment_id: "uuid",
   status: "active",
   billing_period: "monthly",
-  started_at: "2025-11-28T...",
-  expires_at: "2025-12-28T...",  // +1 month or +1 year
+  started_at: "2025-11-30T...",
+  expires_at: "2025-12-30T...",
   amount: 20.00,
-  currency: "USD"
-}
-```
-
-### Billing Cycle Created
-```javascript
-// organization_billing_cycles table
-{
-  id: "uuid",
-  organization_id: "uuid",
-  subscription_id: "uuid",
-  plan_id: "uuid",
-  seats: 3,                      // Actual billable members
-  billed_seats: 1,               // First payment always 1 seat
-  amount_per_seat: 20.00,
-  base_amount: 20.00,
-  total_amount: 20.00,
-  billing_period: "monthly",
-  period_start: "2025-11-28T...",
-  period_end: "2025-12-28T...",
-  paid: true,
-  status: "paid",
-  payment_provider: "paypal",
-  payment_id: "uuid",
-  currency_code: "USD"
-}
-```
-
-### Organization Updated
-```javascript
-// organizations table
-{
-  id: "uuid",
-  plan_id: "uuid"  // Updated to new plan
+  currency: "USD",
+  provider_subscription_id: "I-BW452GLLEP1G"  // ✅ NEW for recurring
 }
 ```
 
@@ -205,82 +287,75 @@ const publicUserId = userProfile.id;  // ✅ Use this for DB operations
    - Only upgrade organization if `inserted === true`
    - Prevents duplicate subscriptions from webhook retries
 
-5. **Use payments.id for References**
-   - `organization_subscriptions.payment_id` = UUID from payments table
-   - `organization_billing_cycles.payment_id` = UUID from payments table
-   - NOT the PayPal capture ID
-
 ---
 
-## 📁 PROTECTED FILES - DO NOT MODIFY
+## 📁 KEY FILES
 
-These files implement the PayPal subscription flow and are **FROZEN** to prevent regression:
+### PayPal Subscriptions API
+```
+server/lib/handlers/checkout/paypal/subscriptions-api.ts
+  └─ createPayPalProduct: Create product in PayPal catalog
+  └─ createPayPalBillingPlan: Create monthly/annual billing plans
+  └─ createPayPalSubscription: Create subscription for user
+  └─ getPayPalSubscription: Fetch subscription details
+  └─ cancelPayPalSubscription: Cancel a subscription
+```
 
+### Subscription Flow
 ```
 server/lib/handlers/checkout/paypal/createSubscriptionOrder.ts
-  └─ Function: createSubscriptionOrder
-  └─ Responsibility: Create PayPal order, verify admin, encode custom_id
-  └─ Status: LOCKED FOR PAYPAL SUBSCRIPTIONS
+  └─ Creates recurring subscription OR legacy CAPTURE order
+  └─ Automatically selects mode based on plan configuration
 
 server/lib/handlers/checkout/paypal/captureSubscriptionOrder.ts
-  └─ Function: captureSubscriptionOrder
-  └─ Responsibility: Capture order, resolve auth_id→users.id, upgrade org
-  └─ Status: LOCKED FOR PAYPAL SUBSCRIPTIONS
+  └─ handleRecurringSubscription: Activates PayPal subscription
+  └─ handleLegacyCaptureFlow: Captures one-time payment
 
 server/lib/handlers/checkout/paypal/processWebhook.ts
-  └─ Section: product_type === "subscription"
-  └─ Responsibility: Handle webhook, resolve IDs, idempotent upgrade
-  └─ Status: LOCKED FOR PAYPAL SUBSCRIPTIONS
+  └─ handleSubscriptionEvent: Processes BILLING.SUBSCRIPTION.* events
+  └─ handleSubscriptionRenewal: Processes PAYMENT.SALE.COMPLETED for renewals
+```
 
-server/lib/handlers/checkout/shared/subscriptions.ts
-  └─ Function: upgradeOrganizationPlan
-  └─ Responsibility: Cancel old sub, create new sub, billing cycle
-  └─ Status: LOCKED FOR SUBSCRIPTIONS
-
-server/lib/handlers/checkout/shared/payments.ts
-  └─ Function: insertPayment
-  └─ Responsibility: Idempotent payment insert, returns paymentId
-  └─ Status: LOCKED FOR PAYMENTS
-
-server/lib/handlers/checkout/shared/permissions.ts
-  └─ Function: verifyAdminRoleForOrganization
-  └─ Responsibility: Check user is org admin
-  └─ Status: LOCKED FOR PERMISSIONS
-
-server/routes/payments.ts
-  └─ Endpoints: 
-    └─ POST /api/checkout/paypal/create-subscription
-    └─ GET /api/checkout/paypal/capture-subscription
-  └─ Status: LOCKED FOR PAYPAL SUBSCRIPTION ROUTES
+### Admin Tools
+```
+server/lib/handlers/checkout/paypal/sync-plans.ts
+  └─ syncPayPalPlans: Creates products and billing plans in PayPal
+  └─ Saves IDs to plans table for automatic use
 ```
 
 ---
 
 ## ✅ TESTING CHECKLIST
 
-Use this to validate the flow works:
+### Recurring Subscription Flow
+- [ ] **Admin Sync**
+  - [ ] Call POST `/api/admin/paypal/sync-plans`
+  - [ ] Verify plans table has PayPal IDs
 
-- [ ] **Normal Subscription Flow**
-  - [ ] Admin selects plan
-  - [ ] Clicks "Upgrade with PayPal"
-  - [ ] Redirected to PayPal
-  - [ ] Approves payment
-  - [ ] Redirected back with spinner animation
-  - [ ] Organization plan updated
-  - [ ] Billing cycle created
+- [ ] **Subscription Creation**
+  - [ ] Create subscription → returns `isRecurring: true`
+  - [ ] User redirected to PayPal subscription page
+  - [ ] After approval, subscription activated
+  - [ ] `provider_subscription_id` saved
 
-- [ ] **Idempotency**
-  - [ ] Multiple webhooks for same payment → only one subscription
-  - [ ] Capture + webhook → no duplicates
+- [ ] **Renewal Webhooks**
+  - [ ] Simulate `PAYMENT.SALE.COMPLETED` webhook
+  - [ ] Subscription expiry extended
+  - [ ] New payment record created
 
-- [ ] **Security**
-  - [ ] Non-admin cannot create subscription
-  - [ ] Price comes from database, not request
+- [ ] **Cancellation**
+  - [ ] `BILLING.SUBSCRIPTION.CANCELLED` webhook
+  - [ ] Subscription marked as cancelled
 
-- [ ] **Error Cases**
-  - [ ] Invalid plan → error message
-  - [ ] Not org admin → 403 error
-  - [ ] PayPal capture fails → error page
+### Legacy Flow
+- [ ] **Without PayPal IDs**
+  - [ ] Create subscription → returns `isRecurring: false`
+  - [ ] Payment captured successfully
+  - [ ] Organization upgraded
+
+### Idempotency
+- [ ] Multiple webhooks → only one payment
+- [ ] Activation + webhook → no duplicates
 
 ---
 
@@ -293,52 +368,36 @@ WHERE product_type = 'subscription' AND provider = 'paypal'
 ORDER BY created_at DESC LIMIT 10;
 ```
 
-**View organization subscriptions:**
+**View active recurring subscriptions:**
 ```sql
-SELECT os.*, p.name as plan_name 
+SELECT os.*, p.name as plan_name, os.provider_subscription_id
 FROM organization_subscriptions os
 JOIN plans p ON p.id = os.plan_id
-WHERE os.organization_id = 'org-uuid'
+WHERE os.status = 'active' 
+AND os.provider_subscription_id IS NOT NULL
 ORDER BY os.created_at DESC;
 ```
 
-**View billing cycles:**
+**View PayPal billing plan configuration:**
 ```sql
-SELECT * FROM organization_billing_cycles 
-WHERE organization_id = 'org-uuid' 
-ORDER BY created_at DESC LIMIT 10;
+SELECT id, name, slug, 
+       paypal_product_id, 
+       paypal_plan_monthly_id, 
+       paypal_plan_annual_id
+FROM plans
+WHERE is_active = true;
 ```
-
-**Verify organization plan:**
-```sql
-SELECT o.id, o.name, p.name as plan_name, p.slug as plan_slug
-FROM organizations o
-LEFT JOIN plans p ON p.id = o.plan_id
-WHERE o.id = 'org-uuid';
-```
-
----
-
-## 🚀 FIRST PAYMENT vs RENEWAL
-
-### First Payment (Teams Plan)
-- **Billed seats**: Always 1 (just the admin)
-- **Actual seats**: Snapshot of all billable members
-- **Total amount**: 1 × plan_price
-
-### Renewal (Future)
-- **Billed seats**: Actual billable members count
-- **Total amount**: seats × plan_price
-- Uses billing cycle snapshot for accurate billing
 
 ---
 
 ## 📝 Last Updated
 
-**November 28, 2025** - PayPal subscription flow with proper ID resolution, idempotency, and UUID payment IDs COMPLETE and TESTED.
+**November 30, 2025** - Added PayPal Billing Plans API integration for recurring subscriptions with automatic renewal.
 
-Key fixes implemented:
-- `auth_id` → `users.id` resolution in captureSubscriptionOrder
-- `userId` passed to `insertPayment` for subscriptions
-- `paymentResult.paymentId` (UUID) used in `upgradeOrganizationPlan`
-- Idempotent processing prevents duplicate subscriptions
+Key additions:
+- `subscriptions-api.ts` for PayPal Subscriptions API v1
+- `sync-plans.ts` for admin product/plan sync
+- Dual-mode support in `createSubscriptionOrder.ts`
+- Recurring flow in `captureSubscriptionOrder.ts`
+- Webhook handlers for `BILLING.SUBSCRIPTION.*` and `PAYMENT.SALE.COMPLETED`
+- New database columns for PayPal IDs

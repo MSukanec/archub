@@ -4,6 +4,7 @@ import { logPaymentEvent } from "../shared/events.js";
 import { insertPayment } from "../shared/payments.js";
 import { upgradeOrganizationPlan } from "../shared/subscriptions.js";
 import { capturePayPalOrder } from "./api.js";
+import { getSubscription } from "./subscriptions-api.js";
 
 export type CaptureSubscriptionOrderResult =
   | { success: true; html: string; upgraded: boolean }
@@ -65,139 +66,16 @@ export async function captureSubscriptionOrder(
   const supabase = createServiceSupabaseClient();
 
   try {
-    const { token, PayerID } = req.query;
+    const { token, subscription_id, PayerID, type } = req.query;
 
-    if (!token || typeof token !== "string") {
-      return {
-        success: false,
-        error: "No se encontró el token del pago.",
-        html: ERROR_HTML("No se encontró el token del pago."),
-      };
+    const isRecurring = type === "recurring" || subscription_id;
+    const subscriptionIdParam = (subscription_id || token) as string | undefined;
+
+    if (isRecurring && subscriptionIdParam) {
+      return handleRecurringSubscription(supabase, subscriptionIdParam);
     }
 
-    // === CAPTURAR LA ORDEN EN PAYPAL ===
-    // Solo capturamos la orden aquí. El webhook procesará todo lo demás.
-    let captureData: any;
-    try {
-      captureData = await capturePayPalOrder(token);
-    } catch (e: any) {
-      console.error("[PayPal capture-subscription] Capture failed:", e);
-      return {
-        success: false,
-        error: "No pudimos completar el pago en PayPal.",
-        html: ERROR_HTML("No pudimos completar el pago en PayPal."),
-      };
-    }
-
-    const orderId = captureData.id;
-    const status = captureData.status;
-    const captureObj = captureData?.purchase_units?.[0]?.payments?.captures?.[0];
-    const customId = captureObj?.custom_id || null;
-    const providerPaymentId = captureObj?.id || null;
-    const amountValue = captureObj?.amount?.value || null;
-    const currencyCode = captureObj?.amount?.currency_code || null;
-
-    // Parse custom_id to get subscription metadata
-    // Format: auth_id|plan_id|organization_id|billing_period
-    let authId: string | null = null;
-    let planId: string | null = null;
-    let organizationId: string | null = null;
-    let billingPeriod: "monthly" | "annual" | null = null;
-
-    if (customId && customId.includes("|")) {
-      const parts = customId.split("|");
-      if (parts.length === 4) {
-        authId = parts[0] || null;
-        planId = parts[1] || null;
-        organizationId = parts[2] || null;
-        billingPeriod =
-          parts[3] === "monthly" || parts[3] === "annual" ? parts[3] : null;
-      }
-    }
-
-    let upgraded = false;
-
-    // Process subscription if we have all data and payment is completed
-    if (
-      authId &&
-      planId &&
-      organizationId &&
-      billingPeriod &&
-      status === "COMPLETED" &&
-      providerPaymentId
-    ) {
-      // CRITICAL: Resolve auth_id to users.id (database PK)
-      let publicUserId: string | null = null;
-      const { data: userProfile, error: profileError } = await supabase
-        .from("users")
-        .select("id")
-        .eq("auth_id", authId)
-        .maybeSingle();
-
-      if (profileError || !userProfile) {
-        console.error("[PayPal capture-subscription] ❌ Failed to resolve auth_id to user_id:", {
-          authId,
-          error: profileError,
-        });
-        return {
-          success: true,
-          html: SUCCESS_HTML,
-          upgraded: false,
-        };
-      }
-      
-      publicUserId = userProfile.id;
-
-      // Log payment event for auditing
-      await logPaymentEvent(supabase, "paypal", {
-        providerEventId: providerPaymentId,
-        providerEventType: "PAYMENT.CAPTURE.COMPLETED",
-        status: "PROCESSED",
-        rawPayload: captureData,
-        orderId: orderId,
-        customId: customId,
-        userHint: authId,
-        providerPaymentId: providerPaymentId,
-        amount: amountValue ? parseFloat(amountValue) : null,
-        currency: currencyCode,
-      });
-
-      // Insert payment with idempotency
-      const paymentResult = await insertPayment(supabase, "paypal", {
-        providerPaymentId: providerPaymentId,
-        userId: publicUserId, // ✅ CRITICAL: Pass resolved users.id
-        organizationId: organizationId,
-        productId: planId,
-        amount: amountValue ? parseFloat(amountValue) : null,
-        currency: currencyCode || "USD",
-        status: "completed",
-        productType: "subscription",
-      });
-
-      // IDEMPOTENT: Only upgrade organization if payment was NEWLY inserted
-      if (paymentResult.inserted && paymentResult.paymentId) {
-        // Upgrade organization plan with UUID from payments table
-        await upgradeOrganizationPlan(supabase, {
-          organizationId: organizationId,
-          planId: planId,
-          billingPeriod: billingPeriod,
-          paymentId: paymentResult.paymentId, // ✅ Use UUID from payments table
-          amount: amountValue ? parseFloat(amountValue) : 0,
-          currency: currencyCode || "USD",
-          userId: publicUserId, // ✅ For Founders Program
-        });
-
-        upgraded = true;
-      } else if (paymentResult.inserted && !paymentResult.paymentId) {
-        console.error("[PayPal capture-subscription] ❌ No payment ID returned");
-      }
-    }
-
-    return {
-      success: true,
-      html: SUCCESS_HTML,
-      upgraded,
-    };
+    return handleLegacyCaptureFlow(supabase, token as string | undefined);
   } catch (e: any) {
     console.error("[PayPal capture-subscription] Error fatal:", e);
     return {
@@ -209,4 +87,273 @@ export async function captureSubscriptionOrder(
       ),
     };
   }
+}
+
+async function handleRecurringSubscription(
+  supabase: ReturnType<typeof createServiceSupabaseClient>,
+  subscriptionId: string
+): Promise<CaptureSubscriptionOrderResult> {
+  console.log("[PayPal capture-subscription] Processing recurring subscription:", subscriptionId);
+
+  const subscriptionResult = await getSubscription(subscriptionId);
+
+  if (!subscriptionResult.success || !subscriptionResult.subscription) {
+    console.error("[PayPal capture-subscription] Failed to get subscription:", subscriptionResult);
+    return {
+      success: false,
+      error: "No se pudo verificar la suscripción en PayPal.",
+      html: ERROR_HTML("No se pudo verificar la suscripción en PayPal."),
+    };
+  }
+
+  const subscription = subscriptionResult.subscription;
+  const status = subscription.status;
+  const customId = subscription.custom_id || null;
+
+  console.log("[PayPal capture-subscription] Subscription status:", {
+    id: subscriptionId,
+    status,
+    customId
+  });
+
+  if (status !== "ACTIVE" && status !== "APPROVED") {
+    console.error("[PayPal capture-subscription] Subscription not active:", status);
+    return {
+      success: false,
+      error: `La suscripción no está activa (estado: ${status}).`,
+      html: ERROR_HTML(`La suscripción no está activa (estado: ${status}).`),
+    };
+  }
+
+  let authId: string | null = null;
+  let planId: string | null = null;
+  let organizationId: string | null = null;
+  let billingPeriod: "monthly" | "annual" | null = null;
+
+  if (customId && customId.includes("|")) {
+    const parts = customId.split("|");
+    if (parts.length === 4) {
+      authId = parts[0] || null;
+      planId = parts[1] || null;
+      organizationId = parts[2] || null;
+      billingPeriod = parts[3] === "monthly" || parts[3] === "annual" ? parts[3] : null;
+    }
+  }
+
+  if (!authId || !planId || !organizationId || !billingPeriod) {
+    console.error("[PayPal capture-subscription] Invalid custom_id format:", customId);
+    return {
+      success: false,
+      error: "No se pudo procesar la información de la suscripción.",
+      html: ERROR_HTML("No se pudo procesar la información de la suscripción."),
+    };
+  }
+
+  let publicUserId: string | null = null;
+  const { data: userProfile, error: profileError } = await supabase
+    .from("users")
+    .select("id")
+    .eq("auth_id", authId)
+    .maybeSingle();
+
+  if (profileError || !userProfile) {
+    console.error("[PayPal capture-subscription] ❌ Failed to resolve auth_id to user_id:", {
+      authId,
+      error: profileError,
+    });
+    return {
+      success: true,
+      html: SUCCESS_HTML,
+      upgraded: false,
+    };
+  }
+
+  publicUserId = userProfile.id;
+
+  const billingInfo = subscription.billing_info;
+  const lastPayment = billingInfo?.last_payment;
+  const amountValue = lastPayment?.amount?.value || subscription.plan?.billing_cycles?.[0]?.pricing_scheme?.fixed_price?.value || "0";
+  const currencyCode = lastPayment?.amount?.currency_code || "USD";
+
+  await logPaymentEvent(supabase, "paypal", {
+    providerEventId: subscriptionId,
+    providerEventType: "BILLING.SUBSCRIPTION.ACTIVATED",
+    status: "PROCESSED",
+    rawPayload: subscription,
+    orderId: subscriptionId,
+    customId: customId,
+    userHint: authId,
+    providerPaymentId: subscriptionId,
+    amount: parseFloat(amountValue),
+    currency: currencyCode,
+  });
+
+  const paymentResult = await insertPayment(supabase, "paypal", {
+    providerPaymentId: subscriptionId,
+    userId: publicUserId,
+    organizationId: organizationId,
+    productId: planId,
+    amount: parseFloat(amountValue),
+    currency: currencyCode,
+    status: "completed",
+    productType: "subscription",
+  });
+
+  let upgraded = false;
+
+  if (paymentResult.inserted && paymentResult.paymentId) {
+    await upgradeOrganizationPlan(supabase, {
+      organizationId: organizationId,
+      planId: planId,
+      billingPeriod: billingPeriod,
+      paymentId: paymentResult.paymentId,
+      amount: parseFloat(amountValue),
+      currency: currencyCode,
+      userId: publicUserId,
+      providerSubscriptionId: subscriptionId,
+    });
+
+    upgraded = true;
+    console.log("[PayPal capture-subscription] ✅ Recurring subscription activated:", {
+      subscriptionId,
+      organizationId,
+      planId,
+      billingPeriod
+    });
+  }
+
+  return {
+    success: true,
+    html: SUCCESS_HTML,
+    upgraded,
+  };
+}
+
+async function handleLegacyCaptureFlow(
+  supabase: ReturnType<typeof createServiceSupabaseClient>,
+  token: string | undefined
+): Promise<CaptureSubscriptionOrderResult> {
+  console.log("[PayPal capture-subscription] Processing legacy CAPTURE flow");
+
+  if (!token || typeof token !== "string") {
+    return {
+      success: false,
+      error: "No se encontró el token del pago.",
+      html: ERROR_HTML("No se encontró el token del pago."),
+    };
+  }
+
+  let captureData: any;
+  try {
+    captureData = await capturePayPalOrder(token);
+  } catch (e: any) {
+    console.error("[PayPal capture-subscription] Capture failed:", e);
+    return {
+      success: false,
+      error: "No pudimos completar el pago en PayPal.",
+      html: ERROR_HTML("No pudimos completar el pago en PayPal."),
+    };
+  }
+
+  const orderId = captureData.id;
+  const status = captureData.status;
+  const captureObj = captureData?.purchase_units?.[0]?.payments?.captures?.[0];
+  const customId = captureObj?.custom_id || null;
+  const providerPaymentId = captureObj?.id || null;
+  const amountValue = captureObj?.amount?.value || null;
+  const currencyCode = captureObj?.amount?.currency_code || null;
+
+  let authId: string | null = null;
+  let planId: string | null = null;
+  let organizationId: string | null = null;
+  let billingPeriod: "monthly" | "annual" | null = null;
+
+  if (customId && customId.includes("|")) {
+    const parts = customId.split("|");
+    if (parts.length === 4) {
+      authId = parts[0] || null;
+      planId = parts[1] || null;
+      organizationId = parts[2] || null;
+      billingPeriod =
+        parts[3] === "monthly" || parts[3] === "annual" ? parts[3] : null;
+    }
+  }
+
+  let upgraded = false;
+
+  if (
+    authId &&
+    planId &&
+    organizationId &&
+    billingPeriod &&
+    status === "COMPLETED" &&
+    providerPaymentId
+  ) {
+    let publicUserId: string | null = null;
+    const { data: userProfile, error: profileError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("auth_id", authId)
+      .maybeSingle();
+
+    if (profileError || !userProfile) {
+      console.error("[PayPal capture-subscription] ❌ Failed to resolve auth_id to user_id:", {
+        authId,
+        error: profileError,
+      });
+      return {
+        success: true,
+        html: SUCCESS_HTML,
+        upgraded: false,
+      };
+    }
+    
+    publicUserId = userProfile.id;
+
+    await logPaymentEvent(supabase, "paypal", {
+      providerEventId: providerPaymentId,
+      providerEventType: "PAYMENT.CAPTURE.COMPLETED",
+      status: "PROCESSED",
+      rawPayload: captureData,
+      orderId: orderId,
+      customId: customId,
+      userHint: authId,
+      providerPaymentId: providerPaymentId,
+      amount: amountValue ? parseFloat(amountValue) : null,
+      currency: currencyCode,
+    });
+
+    const paymentResult = await insertPayment(supabase, "paypal", {
+      providerPaymentId: providerPaymentId,
+      userId: publicUserId,
+      organizationId: organizationId,
+      productId: planId,
+      amount: amountValue ? parseFloat(amountValue) : null,
+      currency: currencyCode || "USD",
+      status: "completed",
+      productType: "subscription",
+    });
+
+    if (paymentResult.inserted && paymentResult.paymentId) {
+      await upgradeOrganizationPlan(supabase, {
+        organizationId: organizationId,
+        planId: planId,
+        billingPeriod: billingPeriod,
+        paymentId: paymentResult.paymentId,
+        amount: amountValue ? parseFloat(amountValue) : 0,
+        currency: currencyCode || "USD",
+        userId: publicUserId,
+      });
+
+      upgraded = true;
+    } else if (paymentResult.inserted && !paymentResult.paymentId) {
+      console.error("[PayPal capture-subscription] ❌ No payment ID returned");
+    }
+  }
+
+  return {
+    success: true,
+    html: SUCCESS_HTML,
+    upgraded,
+  };
 }
