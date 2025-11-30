@@ -75,6 +75,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlanRestricted } from "@/features/users";
 import { NotificationBell } from "@/features/users";
 import { useAuthStore } from "@/stores/authStore";
+import { FounderBadge } from "@/components/shared/FounderBadge";
 
 interface SidebarItem {
   id: string;
@@ -629,6 +630,9 @@ export function LeftSidebar() {
                   testId="sidebar-button-administration"
                 />
               )}
+
+              {/* Badge de Organización Fundadora */}
+              <FounderBadge isFounder={userData?.organization?.settings?.is_founder} size="md" />
 
               {/* Botón del Plan Actual */}
               <PlanBadge planName={userData?.organization?.plan?.name} />

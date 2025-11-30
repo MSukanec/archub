@@ -3,6 +3,7 @@ import { Building2, FileText, Users, MapPin, Globe } from 'lucide-react';
 
 import { DashboardLayout as Layout } from "@/layouts";
 import { AvatarUploader } from '@/components/shared/AvatarUploader';
+import { FounderBadge } from '@/components/shared/FounderBadge';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -281,6 +282,7 @@ export default function OrganizationBasicData() {
               <div className="flex items-center gap-2 mb-6">
                 <Building2 className="h-5 w-5 text-[var(--accent)]" />
                 <h2 className="text-lg font-semibold">Logo de la Organización</h2>
+                <FounderBadge isFounder={organizationInfo?.settings?.is_founder} size="md" />
               </div>
               <p className="text-sm text-muted-foreground">
                 Sube el logo oficial de tu organización. Este logo se mostrará en documentos, reportes y comunicaciones oficiales.
