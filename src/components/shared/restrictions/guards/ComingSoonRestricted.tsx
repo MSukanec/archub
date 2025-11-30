@@ -8,9 +8,9 @@ interface ComingSoonRestrictedProps {
 export function ComingSoonRestricted({ children }: ComingSoonRestrictedProps) {
   const isAdmin = useIsAdmin();
 
-  // Admin sees it normally
+  // Both see it semi-transparent, but admin can interact
   if (isAdmin) {
-    return <>{children}</>;
+    return <div className="opacity-40">{children}</div>;
   }
 
   // Regular users see it semi-transparent and disabled
