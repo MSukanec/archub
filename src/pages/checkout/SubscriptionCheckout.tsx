@@ -28,6 +28,7 @@ import {
   Receipt,
   Crown,
   Check,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getApiBase } from "@/utils/apiBase";
@@ -1051,9 +1052,17 @@ export default function SubscriptionCheckout() {
                     {billingPeriod === 'annual' && (
                       <div className="p-3 bg-accent/10 border border-accent/30 rounded-lg flex items-start gap-2">
                         <Crown className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
-                        <div className="text-xs text-accent/90">
+                        <div className="flex-1 text-xs text-accent/90">
                           <p className="font-semibold mb-1">Beneficios de Fundador incluidos</p>
-                          <p>Badge exclusivo, acceso anticipado y descuentos permanentes</p>
+                          <p>Acceso anticipado, bonus de capacitación y más</p>
+                          <button
+                            type="button"
+                            onClick={() => window.open('/settings/founders', '_blank')}
+                            className="mt-2 text-accent hover:underline font-medium inline-flex items-center gap-1"
+                          >
+                            Ver Detalles
+                            <ExternalLink className="h-3 w-3" />
+                          </button>
                         </div>
                       </div>
                     )}
