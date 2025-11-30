@@ -87,6 +87,14 @@ export function PlanCard({
         </div>
       )}
       
+      {isTeams && (
+        <div className="absolute top-4 right-4 z-10">
+          <Badge className="bg-purple-600 text-white text-[9px] font-bold px-3 py-1 uppercase">
+            Próximamente
+          </Badge>
+        </div>
+      )}
+      
       <div className="p-8 space-y-6">
         <div className={cn(
           "text-xs leading-relaxed min-h-[36px]",
