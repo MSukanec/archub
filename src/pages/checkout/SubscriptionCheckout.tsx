@@ -36,6 +36,27 @@ import { toE164, fromE164 } from "@/utils/phone";
 import mercadoPagoLogo from "/MercadoPago_logo.png";
 import paypalLogo from "/Paypal_2014_logo.png";
 
+interface ProrationData {
+  hasActiveSubscription: boolean;
+  currentPlan: { id: string; name: string; slug: string } | null;
+  credit: {
+    daysRemaining: number;
+    totalDays: number;
+    percentageRemaining: number;
+    creditAmount: number;
+    creditCurrency: string;
+  } | null;
+  targetPlan: {
+    id: string;
+    name: string;
+    slug: string;
+    priceUSD: number;
+    priceARS: number;
+  };
+  finalPrice: { usd: number; ars: number };
+  savings: { usd: number; ars: number };
+}
+
 async function fetchWithTimeout(url: string, init: RequestInit = {}, ms = 15000) {
   const ctrl = new AbortController();
   const id = setTimeout(() => ctrl.abort(), ms);
@@ -87,6 +108,8 @@ export default function SubscriptionCheckout() {
   const [exchangeRate, setExchangeRate] = useState<number>(1);
   const [priceLoading, setPriceLoading] = useState(true);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [prorationData, setProrationData] = useState<ProrationData | null>(null);
+  const [prorationLoading, setProrationLoading] = useState(false);
 
   const { data: userData } = useCurrentUser();
   const { data: countries = [] } = useCountries();
@@ -136,6 +159,49 @@ export default function SubscriptionCheckout() {
       loadPlanData();
     }
   }, [planSlug, toast]);
+
+  useEffect(() => {
+    if (planSlug && organizationId) {
+      const loadProration = async () => {
+        setProrationLoading(true);
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session?.access_token) {
+            setProrationLoading(false);
+            return;
+          }
+
+          const API_BASE = getApiBase();
+          const res = await fetch(`${API_BASE}/api/checkout/calculate-proration`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              organization_id: organizationId,
+              target_plan_slug: planSlug,
+              billing_period: billingPeriod,
+            }),
+          });
+
+          if (res.ok) {
+            const result = await res.json();
+            if (result.ok && result.data) {
+              setProrationData(result.data);
+              console.log('[Proration] Loaded:', result.data);
+            }
+          }
+        } catch (error) {
+          console.error('[Proration] Error loading:', error);
+        } finally {
+          setProrationLoading(false);
+        }
+      };
+
+      loadProration();
+    }
+  }, [planSlug, organizationId, billingPeriod]);
 
   useEffect(() => {
     if (selectedMethod === 'mercadopago') {
@@ -649,7 +715,14 @@ export default function SubscriptionCheckout() {
   };
 
   const calculatePrice = useMemo(() => {
-    if (!planData) return { amount: '0.00', currency: 'USD', numericAmount: 0 };
+    if (!planData) return { 
+      amount: '0.00', 
+      currency: 'USD', 
+      numericAmount: 0,
+      originalAmount: 0,
+      hasDiscount: false,
+      discountAmount: 0
+    };
     
     const basePrice = billingPeriod === 'annual' 
       ? parseFloat(planData.annual_amount) 
@@ -657,19 +730,31 @@ export default function SubscriptionCheckout() {
     
     if (selectedMethod === 'mercadopago') {
       const arsAmount = basePrice * exchangeRate;
+      const finalArs = prorationData?.finalPrice?.ars ?? arsAmount;
+      const discountArs = prorationData?.savings?.ars ?? 0;
+      
       return {
-        amount: arsAmount.toFixed(2),
+        amount: finalArs.toFixed(2),
         currency: 'ARS',
-        numericAmount: arsAmount
+        numericAmount: finalArs,
+        originalAmount: arsAmount,
+        hasDiscount: discountArs > 0,
+        discountAmount: discountArs
       };
     }
     
+    const finalUsd = prorationData?.finalPrice?.usd ?? basePrice;
+    const discountUsd = prorationData?.savings?.usd ?? 0;
+    
     return {
-      amount: basePrice.toFixed(2),
+      amount: finalUsd.toFixed(2),
       currency: 'USD',
-      numericAmount: basePrice
+      numericAmount: finalUsd,
+      originalAmount: basePrice,
+      hasDiscount: discountUsd > 0,
+      discountAmount: discountUsd
     };
-  }, [planData, billingPeriod, selectedMethod, exchangeRate]);
+  }, [planData, billingPeriod, selectedMethod, exchangeRate, prorationData]);
 
   const finalPrice = calculatePrice.numericAmount;
 
@@ -1089,17 +1174,52 @@ export default function SubscriptionCheckout() {
 
                     <Separator />
 
-                    <div className="flex justify-between items-baseline">
-                      <span className="text-lg font-semibold">Total</span>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold">
-                          {calculatePrice.currency} ${parseFloat(calculatePrice.amount).toLocaleString("es-AR")}
-                        </p>
-                        {selectedMethod && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {selectedMethod === "paypal" ? "Pago en USD" : "Pago en ARS"}
+                    {prorationData?.credit && prorationData.credit.daysRemaining > 0 && (
+                      <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg space-y-2">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                          <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                            Crédito por tu plan actual
                           </p>
-                        )}
+                        </div>
+                        <p className="text-xs text-green-600 dark:text-green-500">
+                          Te quedan {prorationData.credit.daysRemaining} días de {prorationData.currentPlan?.name}. 
+                          Aplicamos el valor proporcional como descuento.
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      {calculatePrice.hasDiscount && (
+                        <>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Precio {planData?.name}</span>
+                            <span className="text-muted-foreground">
+                              {calculatePrice.currency} ${calculatePrice.originalAmount.toLocaleString("es-AR")}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-green-600 dark:text-green-400">Crédito aplicado</span>
+                            <span className="text-green-600 dark:text-green-400">
+                              - {calculatePrice.currency} ${calculatePrice.discountAmount.toLocaleString("es-AR")}
+                            </span>
+                          </div>
+                          <Separator className="my-2" />
+                        </>
+                      )}
+                      
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-lg font-semibold">Total a pagar</span>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold">
+                            {calculatePrice.currency} ${parseFloat(calculatePrice.amount).toLocaleString("es-AR")}
+                          </p>
+                          {selectedMethod && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {selectedMethod === "paypal" ? "Pago en USD" : "Pago en ARS"}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
 
