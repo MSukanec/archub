@@ -77,10 +77,9 @@ export function ComparisonTable({
   };
 
   const handleTableButtonClick = (planName: string) => {
-    const isTeams = planName.toLowerCase() === 'teams';
     const isCurrentPlan = planName.toLowerCase() === userPlanName?.toLowerCase();
     
-    if (isTeams || isCurrentPlan) return;
+    if (isCurrentPlan) return;
     
     if (!isAuthenticated) {
       navigate('/register');

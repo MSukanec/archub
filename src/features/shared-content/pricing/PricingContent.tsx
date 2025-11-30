@@ -93,10 +93,9 @@ export function PricingContent({ mode }: PricingContentProps) {
   };
 
   const handlePlanSelect = (plan: Plan) => {
-    const isTeams = plan.name.toLowerCase() === 'teams';
     const isCurrentPlan = plan.name.toLowerCase() === userPlanName?.toLowerCase();
     
-    if (isTeams || isCurrentPlan) return;
+    if (isCurrentPlan) return;
     
     if (!isAuthenticated) {
       navigate('/register');
