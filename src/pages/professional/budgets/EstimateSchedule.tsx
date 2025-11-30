@@ -21,7 +21,7 @@ import { es } from 'date-fns/locale'
 import { GanttContainer, GanttRowProps } from '@/features/projects'
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 
-import { PlanRestricted } from "@/features/users"
+import { RoleRestricted } from "@/features/users"
 
 // Función para limpiar nombres de tareas eliminando códigos y variables
 function cleanTaskDisplayName(name: string): string {
@@ -202,7 +202,7 @@ export function EstimateSchedule() {
 
       {activeTab === 'list' && (
         <div className="space-y-6">
-          <PlanRestricted reason="coming_soon">
+          <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>
             <div className="flex flex-col items-center justify-center py-16">
               <CheckSquare className="w-16 h-16 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Listado de Estimaciones</h3>
@@ -211,13 +211,13 @@ export function EstimateSchedule() {
                 del proyecto en formato de tabla con filtros avanzados.
               </p>
             </div>
-          </PlanRestricted>
+          </RoleRestricted>
         </div>
       )}
 
       {activeTab === 'analytics' && (
         <div className="space-y-6">
-          <PlanRestricted reason="coming_soon">
+          <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>
             <div className="flex flex-col items-center justify-center py-16">
               <BarChart3 className="w-16 h-16 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Análisis Visual</h3>
@@ -226,7 +226,7 @@ export function EstimateSchedule() {
                 burndown charts y análisis de rutas críticas del cronograma.
               </p>
             </div>
-          </PlanRestricted>
+          </RoleRestricted>
         </div>
       )}
     </div>

@@ -72,7 +72,7 @@ import {
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PlanRestricted } from "@/features/users";
+import { PlanRestricted, RoleRestricted } from "@/features/users";
 import { NotificationBell } from "@/features/users";
 import { useAuthStore } from "@/stores/authStore";
 import { FounderBadge } from "@/components/shared/FounderBadge";
@@ -519,7 +519,7 @@ export function LeftSidebar() {
                         },
                         shouldRender: () => true,
                         wrapper: (children: React.ReactNode) => (
-                          <PlanRestricted reason="coming_soon">{children}</PlanRestricted>
+                          <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>{children}</RoleRestricted>
                         ),
                       },
                       {

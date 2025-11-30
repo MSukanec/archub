@@ -19,7 +19,6 @@ import {
 import { usePlanFeatures } from "@/hooks/usePlanFeatures";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from "@/stores/projectContext";
-import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useMobile } from "@/hooks/use-mobile";
 import { PlanUpgradeModal } from "@/features/users/modals/plans/PlanUpgradeModal";
 import { RestrictionOverlay } from "../ui/RestrictionOverlay";
@@ -27,10 +26,9 @@ import { RestrictionOverlay } from "../ui/RestrictionOverlay";
 interface PlanRestrictedProps {
   feature?: string;
   current?: number;
-  reason?: "coming_soon" | "general_mode" | string;
+  reason?: "general_mode" | string;
   functionName?: string;
   size?: "small" | "large";
-  adminBypass?: boolean;
   useUpgradeModal?: boolean;
   modalImage?: string;
   modalTitle?: string;
@@ -44,7 +42,6 @@ export function PlanRestricted({
   reason,
   functionName,
   size = "small",
-  adminBypass = false,
   useUpgradeModal = false,
   modalImage,
   modalTitle,
@@ -53,7 +50,6 @@ export function PlanRestricted({
 }: PlanRestrictedProps) {
   const { can, limit } = usePlanFeatures();
   const { data: userData } = useCurrentUser();
-  const isAdmin = useIsAdmin();
   const { selectedProjectId } = useProjectContext();
   const [, setLocation] = useLocation();
   const isMobile = useMobile();
@@ -61,9 +57,6 @@ export function PlanRestricted({
 
   // Determine if content is restricted
   const isRestricted = useMemo(() => {
-    if (reason === "coming_soon") {
-      return true;
-    }
     if (reason === "general_mode") {
       return selectedProjectId === null;
     }
@@ -82,21 +75,6 @@ export function PlanRestricted({
 
   if (!isRestricted) {
     return <>{children}</>;
-  }
-
-  // CASE: COMING SOON - admins can bypass with reduced opacity
-  if (reason === "coming_soon") {
-    if (isAdmin) {
-      return <div className="opacity-40">{children}</div>;
-    }
-    return (
-      <div className="opacity-40 pointer-events-none cursor-not-allowed">
-        {React.cloneElement(children as React.ReactElement, {
-          disableHover: true,
-          onClick: undefined,
-        })}
-      </div>
-    );
   }
 
   // Prepare plan info

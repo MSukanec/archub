@@ -7,18 +7,19 @@ import { Crown, Beaker } from "lucide-react";
 interface RoleRestrictedProps {
   requiredRole: "admin" | "founder" | "lab_user";
   hideCompletely?: boolean;
+  showAsPreview?: boolean;
   children: React.ReactNode;
 }
 
 export function RoleRestricted({
   requiredRole,
   hideCompletely = false,
+  showAsPreview = false,
   children,
 }: RoleRestrictedProps) {
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
 
-  // Check if user has required role
   const hasRequiredRole = useMemo(() => {
     switch (requiredRole) {
       case "admin":
@@ -26,7 +27,6 @@ export function RoleRestricted({
       case "founder":
         return userData?.organization?.settings?.is_founder === true;
       case "lab_user":
-        // Can be expanded later with actual lab_user check
         return isAdmin;
       default:
         return false;
@@ -34,21 +34,22 @@ export function RoleRestricted({
   }, [requiredRole, isAdmin, userData?.organization?.settings?.is_founder]);
 
   if (hasRequiredRole) {
+    if (showAsPreview) {
+      return <div className="opacity-40">{children}</div>;
+    }
     return <>{children}</>;
   }
 
-  // If hideCompletely is true, don't render anything
   if (hideCompletely) {
     return null;
   }
 
-  // Prepare restriction message based on role
   const getRoleInfo = () => {
     switch (requiredRole) {
       case "admin":
         return {
           title: "Solo para Administradores",
-          description: "Solo los administradores de la organización pueden acceder a esto.",
+          description: "Solo los administradores del sistema pueden acceder a esto.",
           icon: <Crown className="w-6 h-6 text-amber-500" />,
         };
       case "founder":

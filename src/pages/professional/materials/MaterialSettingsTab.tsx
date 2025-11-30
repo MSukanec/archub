@@ -1,4 +1,4 @@
-import { PlanRestricted } from "@/features/users"
+import { RoleRestricted } from "@/features/users"
 import { Settings } from 'lucide-react'
 
 interface MaterialSettingsTabProps {
@@ -7,7 +7,7 @@ interface MaterialSettingsTabProps {
 
 export default function MaterialSettingsTab({ projectId }: MaterialSettingsTabProps) {
   return (
-    <PlanRestricted reason="coming_soon">
+    <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>
       <div className="flex flex-col items-center justify-center py-16">
         <Settings className="w-16 h-16 text-muted-foreground mb-4" />
         <h3 className="text-lg font-semibold mb-2">Ajustes</h3>
@@ -16,6 +16,6 @@ export default function MaterialSettingsTab({ projectId }: MaterialSettingsTabPr
           proveedores, categorías de materiales y otras opciones.
         </p>
       </div>
-    </PlanRestricted>
+    </RoleRestricted>
   )
 }
