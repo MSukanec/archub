@@ -55,20 +55,22 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
   const { course, modules, faqs, stats } = data;
 
   const handleCTAClick = () => {
-    if (mode === 'dashboard') {
-      navigate(`/learning/courses/${course.slug}`);
-    } else if (isEnrolled) {
+    if (isEnrolled) {
+      // Usuario inscrito → ir al curso
       navigate(`/learning/courses/${course.slug}`);
     } else if (userData?.user) {
+      // Usuario logueado pero NO inscrito → ir a checkout
       navigate(`/checkout?course=${course.slug}`);
     } else {
+      // Usuario no logueado → ir a registro
       navigate('/register');
     }
   };
 
-  const ctaButtonText = mode === 'dashboard' 
+  // Texto del botón según estado de inscripción
+  const ctaButtonText = isEnrolled 
     ? (progressPercentage > 0 ? 'Continuar Curso' : 'Ver Curso')
-    : (isEnrolled ? 'Continuar Curso' : 'Inscribirme Ahora');
+    : 'Inscribirme Ahora';
 
   return (
     <>
