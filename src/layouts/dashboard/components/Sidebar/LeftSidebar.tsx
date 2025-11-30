@@ -73,6 +73,7 @@ import {
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlanRestricted, RoleRestricted } from "@/features/users";
+import { ComingSoonRestricted } from "@/components/shared/restrictions/guards/ComingSoonRestricted";
 import { NotificationBell } from "@/features/users";
 import { useAuthStore } from "@/stores/authStore";
 import { FounderBadge } from "@/components/shared/FounderBadge";
@@ -948,7 +949,11 @@ export function LeftSidebar() {
                                 />
                               );
 
-                              return item.restricted ? (
+                              return item.restricted === "coming_soon" ? (
+                                <ComingSoonRestricted key={item.id}>
+                                  {button}
+                                </ComingSoonRestricted>
+                              ) : item.restricted ? (
                                 <PlanRestricted key={item.id} reason={item.restricted}>
                                   {button}
                                 </PlanRestricted>
@@ -998,7 +1003,11 @@ export function LeftSidebar() {
                       />
                     );
                     
-                    return item.restricted ? (
+                    return item.restricted === "coming_soon" ? (
+                      <ComingSoonRestricted key={item.id}>
+                        {button}
+                      </ComingSoonRestricted>
+                    ) : item.restricted ? (
                       <PlanRestricted key={item.id} reason={item.restricted}>
                         {button}
                       </PlanRestricted>
