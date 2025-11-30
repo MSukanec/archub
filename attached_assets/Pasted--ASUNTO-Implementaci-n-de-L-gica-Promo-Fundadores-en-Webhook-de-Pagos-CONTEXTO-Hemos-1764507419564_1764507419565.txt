@@ -1,0 +1,27 @@
+**ASUNTO:** Implementación de Lógica "Promo Fundadores" en Webhook de Pagos.
+
+**CONTEXTO:**
+Hemos retomado la funcionalidad de "Miembros Fundadores". La base de datos ya está lista (tabla `app_settings` con el curso, columna `settings` en `organizations`, y un trigger automático para nuevos miembros).
+Ahora necesitamos que el backend aplique la marca de "Fundador" a la organización cuando corresponde.
+
+**OBJETIVO TÉCNICO:**
+Modificar la lógica de procesamiento de pagos exitosos (específicamente en la función `upgradeOrganizationPlan` o donde se finaliza la suscripción) para detectar si se cumplen las condiciones de la promo y aplicar la marca en la base de datos.
+
+**REQUISITOS:**
+
+1.  **Condición de la Promo:** La promo aplica si el `billingPeriod` es `'annual'` (ANUAL).
+    * *Opcional avanzado:* Podrías leer un flag `founder_promo_active` de `app_settings` si quisieras apagarla remotamente, pero por ahora solo con que sea ANUAL alcanza.
+
+2.  **Acción en la DB (El Tatuaje):**
+    * Si se cumple la condición, debes actualizar la fila de la organización en la tabla `organizations`.
+    * Debes hacer un update del campo JSONB `settings`.
+    * Debes agregar/setear la clave `"is_founder": true` dentro de ese JSONB, *sin borrar* otras claves que pudieran existir.
+    * *Tip:* En Supabase JS esto suele ser un `.update({ settings: { ...existingSettings, is_founder: true } })` si lees primero, o usar una función RPC si quieres ser atómico. Un update directo al JSONB a veces es complejo con la librería cliente. Decide la forma más segura.
+
+3.  **Regalo Inmediato al Comprador:**
+    * El trigger de DB solo sirve para los que se unen *después*.
+    * Al usuario que está pagando (el admin) hay que darle el curso YA.
+    * Lee el ID del curso desde `app_settings` (clave `founder_bonus_course_id`) e inscribe al `userId` del comprador en ese curso inmediatamente.
+
+**UBICACIÓN ESPERADA:**
+Revisa `server/lib/handlers/checkout/shared/subscriptions.ts` (función `upgradeOrganizationPlan`) o el final de los archivos `processWebhook.ts` de MP y PayPal.
