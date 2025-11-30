@@ -20,18 +20,48 @@ interface ApplyLimitsResult {
   };
 }
 
-export function getPlanLimits(planName: string): PlanLimits {
+export async function getPlanLimitsFromDB(
+  supabase: SupabaseClient,
+  planId: string
+): Promise<PlanLimits> {
+  const { data: plan, error } = await supabase
+    .from('plans')
+    .select('max_projects, max_members')
+    .eq('id', planId)
+    .single();
+
+  if (error || !plan) {
+    console.error('[PlanLimits] Error fetching plan limits from DB:', error);
+    return { max_projects: 2, max_members: 1 };
+  }
+
+  return {
+    max_projects: plan.max_projects ?? -1,
+    max_members: plan.max_members ?? -1,
+  };
+}
+
+export async function getPlanLimitsByName(
+  supabase: SupabaseClient,
+  planName: string
+): Promise<PlanLimits> {
   const normalizedName = planName?.toLowerCase() || 'free';
   
-  switch (normalizedName) {
-    case 'teams':
-      return { max_projects: -1, max_members: 999 };
-    case 'pro':
-      return { max_projects: 25, max_members: -1 };
-    case 'free':
-    default:
-      return { max_projects: 2, max_members: 1 };
+  const { data: plan, error } = await supabase
+    .from('plans')
+    .select('max_projects, max_members')
+    .ilike('name', normalizedName)
+    .single();
+
+  if (error || !plan) {
+    console.error('[PlanLimits] Error fetching plan limits by name from DB:', error, 'planName:', planName);
+    return { max_projects: 2, max_members: 1 };
   }
+
+  return {
+    max_projects: plan.max_projects ?? -1,
+    max_members: plan.max_members ?? -1,
+  };
 }
 
 export async function applyPlanLimits(
@@ -54,7 +84,7 @@ export async function applyPlanLimits(
   };
 
   try {
-    const limits = getPlanLimits(newPlanName);
+    const limits = await getPlanLimitsByName(supabase, newPlanName);
     result.details.projectLimit = limits.max_projects === -1 ? Infinity : limits.max_projects;
     result.details.memberLimit = limits.max_members === -1 ? Infinity : limits.max_members;
 
@@ -257,7 +287,7 @@ export async function getOrganizationLimitStatus(
   try {
     const { data: org, error: orgError } = await supabase
       .from('organizations')
-      .select('id, name, plan_id, plans!left (name)')
+      .select('id, name, plan_id, plans!left (id, name, max_projects, max_members)')
       .eq('id', organizationId)
       .single();
 
@@ -268,8 +298,13 @@ export async function getOrganizationLimitStatus(
       };
     }
 
-    const planName = (org as any).plans?.name || 'Free';
-    const limits = getPlanLimits(planName);
+    const planData = (org as any).plans;
+    const planName = planData?.name || 'Free';
+    
+    const limits: PlanLimits = {
+      max_projects: planData?.max_projects ?? 2,
+      max_members: planData?.max_members ?? 1,
+    };
 
     const { data: projects, error: projectsError } = await supabase
       .from('projects')

@@ -611,29 +611,34 @@ Cuando una organización hace downgrade a un plan con límites más restrictivos
 
 **Archivo:** `server/lib/handlers/checkout/shared/plan-limits.ts`
 
-**Función:** `applyPlanLimits()`
+**IMPORTANTE: Los límites se leen SIEMPRE de la tabla `plans` en la base de datos.**
+
+**Funciones principales:**
 
 ```typescript
-export function getPlanLimits(planName: string): PlanLimits {
-  const normalizedName = planName?.toLowerCase() || 'free';
-  
-  switch (normalizedName) {
-    case 'teams':
-      return { max_projects: -1, max_members: 999 };
-    case 'pro':
-      return { max_projects: 25, max_members: -1 };
-    case 'free':
-    default:
-      return { max_projects: 2, max_members: 1 };
-  }
-}
+// Lee límites directamente de la DB por plan_id
+export async function getPlanLimitsFromDB(
+  supabase: SupabaseClient,
+  planId: string
+): Promise<PlanLimits>
 
+// Lee límites directamente de la DB por nombre del plan
+export async function getPlanLimitsByName(
+  supabase: SupabaseClient,
+  planName: string
+): Promise<PlanLimits>
+
+// Aplica los límites marcando recursos excedentes
 export async function applyPlanLimits(
   supabase: SupabaseClient,
   organizationId: string,
   newPlanName: string
 ): Promise<ApplyLimitsResult>
 ```
+
+**Columnas usadas de la tabla `plans`:**
+- `max_projects`: Límite de proyectos (-1 = ilimitado)
+- `max_members`: Límite de miembros (-1 = ilimitado)
 
 ### Lógica de Bloqueo
 

@@ -58,16 +58,18 @@ const PLAN_FEATURES: Record<string, string[]> = {
   free: []
 };
 
-// Plan limits matching backend (server/lib/handlers/checkout/shared/plan-limits.ts)
-const PLAN_LIMITS: Record<string, { maxProjects: number; maxMembers: number }> = {
-  teams: { maxProjects: Infinity, maxMembers: 999 },
-  pro: { maxProjects: 25, maxMembers: Infinity },
-  free: { maxProjects: 2, maxMembers: 1 },
-};
+interface PlanLimits {
+  maxProjects: number;
+  maxMembers: number;
+}
 
 interface UsageStats {
   projectsCount: number;
   membersCount: number;
+  currentPlanLimits: PlanLimits;
+  currentPlanName: string;
+  targetPlanLimits?: PlanLimits;
+  targetPlanName?: string;
 }
 
 export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
@@ -82,22 +84,25 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
     isManualPlan: false
   };
 
-  // Fetch usage stats to calculate impact
+  // Fetch usage stats to calculate impact (includes target plan limits from DB)
   const { data: usageStats, isLoading: isLoadingStats } = useQuery<UsageStats>({
-    queryKey: ['/api/organizations', currentOrganizationId, 'usage-stats'],
+    queryKey: ['/api/organizations', currentOrganizationId, 'usage-stats', targetPlan.slug],
     queryFn: async () => {
-      const response = await fetch(`/api/organizations/${currentOrganizationId}/usage-stats`);
+      const url = `/api/organizations/${currentOrganizationId}/usage-stats?targetPlan=${encodeURIComponent(targetPlan.slug)}`;
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch usage stats');
       return response.json();
     },
-    enabled: !!currentOrganizationId,
+    enabled: !!currentOrganizationId && !!targetPlan.slug,
   });
 
-  // Calculate impact based on target plan limits
+  // Calculate impact based on target plan limits (from DB)
   const impact = useMemo(() => {
-    if (!usageStats) return { projectsAtRisk: 0, membersAtRisk: 0, hasImpact: false };
+    if (!usageStats || !usageStats.targetPlanLimits) {
+      return { projectsAtRisk: 0, membersAtRisk: 0, hasImpact: false };
+    }
     
-    const targetLimits = PLAN_LIMITS[targetPlan.slug.toLowerCase()] || PLAN_LIMITS.free;
+    const targetLimits = usageStats.targetPlanLimits;
     
     const projectsAtRisk = targetLimits.maxProjects === Infinity 
       ? 0 
@@ -116,7 +121,7 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
       projectLimit: targetLimits.maxProjects === Infinity ? '∞' : targetLimits.maxProjects,
       memberLimit: targetLimits.maxMembers === Infinity ? '∞' : targetLimits.maxMembers,
     };
-  }, [usageStats, targetPlan.slug]);
+  }, [usageStats]);
 
   // Check if user is admin in current organization
   const isAdmin = useMemo(() => {

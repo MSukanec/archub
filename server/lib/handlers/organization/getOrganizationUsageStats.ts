@@ -1,13 +1,23 @@
 import type { Request, Response } from 'express';
 import { createServiceSupabaseClient } from '../checkout/shared/auth.js';
 
+interface PlanLimits {
+  maxProjects: number;
+  maxMembers: number;
+}
+
 interface UsageStats {
   projectsCount: number;
   membersCount: number;
+  currentPlanLimits: PlanLimits;
+  currentPlanName: string;
+  targetPlanLimits?: PlanLimits;
+  targetPlanName?: string;
 }
 
 export async function handleGetOrganizationUsageStats(req: Request, res: Response): Promise<void> {
   const { organizationId } = req.params;
+  const targetPlanSlug = req.query.targetPlan as string | undefined;
 
   if (!organizationId) {
     res.status(400).json({ error: 'Organization ID is required' });
@@ -17,7 +27,7 @@ export async function handleGetOrganizationUsageStats(req: Request, res: Respons
   try {
     const supabase = createServiceSupabaseClient();
 
-    const [projectsResult, membersResult] = await Promise.all([
+    const [projectsResult, membersResult, orgResult] = await Promise.all([
       supabase
         .from('projects')
         .select('id', { count: 'exact', head: true })
@@ -28,7 +38,12 @@ export async function handleGetOrganizationUsageStats(req: Request, res: Respons
         .from('organization_members')
         .select('id', { count: 'exact', head: true })
         .eq('organization_id', organizationId)
-        .eq('is_active', true)
+        .eq('is_active', true),
+      supabase
+        .from('organizations')
+        .select('plan_id, plans!left (name, max_projects, max_members)')
+        .eq('id', organizationId)
+        .single()
     ]);
 
     if (projectsResult.error) {
@@ -43,10 +58,38 @@ export async function handleGetOrganizationUsageStats(req: Request, res: Respons
       return;
     }
 
+    const planData = (orgResult.data as any)?.plans;
+    const currentPlanName = planData?.name || 'Free';
+    const currentMaxProjects = planData?.max_projects ?? 2;
+    const currentMaxMembers = planData?.max_members ?? 1;
+
     const stats: UsageStats = {
       projectsCount: projectsResult.count ?? 0,
       membersCount: membersResult.count ?? 0,
+      currentPlanName,
+      currentPlanLimits: {
+        maxProjects: currentMaxProjects === -1 ? Infinity : currentMaxProjects,
+        maxMembers: currentMaxMembers === -1 ? Infinity : currentMaxMembers,
+      },
     };
+
+    if (targetPlanSlug) {
+      const targetPlanResult = await supabase
+        .from('plans')
+        .select('name, max_projects, max_members')
+        .eq('slug', targetPlanSlug)
+        .eq('is_active', true)
+        .single();
+
+      if (targetPlanResult.data) {
+        const targetPlan = targetPlanResult.data;
+        stats.targetPlanName = targetPlan.name;
+        stats.targetPlanLimits = {
+          maxProjects: targetPlan.max_projects === -1 ? Infinity : (targetPlan.max_projects ?? 2),
+          maxMembers: targetPlan.max_members === -1 ? Infinity : (targetPlan.max_members ?? 1),
+        };
+      }
+    }
 
     res.json(stats);
   } catch (error) {
