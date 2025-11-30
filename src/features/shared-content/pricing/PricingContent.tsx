@@ -48,7 +48,7 @@ export function PricingContent({ mode }: PricingContentProps) {
       try {
         const { data, error } = await supabase
           .from('plans')
-          .select('id, name, slug, features, billing_type, is_active, monthly_amount, annual_amount, max_projects, max_members, max_storage_mb, max_ai_tokens, max_file_size_mb')
+          .select('id, name, slug, features, billing_type, is_active, monthly_amount, annual_amount')
           .eq('is_active', true);
 
         if (error) throw error;
@@ -57,14 +57,7 @@ export function PricingContent({ mode }: PricingContentProps) {
           id: plan.id,
           name: plan.name,
           slug: plan.slug,
-          features: {
-            ...(plan.features || {}),
-            max_projects: plan.max_projects,
-            max_members: plan.max_members,
-            max_storage_mb: plan.max_storage_mb,
-            max_ai_tokens: plan.max_ai_tokens,
-            max_file_size_mb: plan.max_file_size_mb,
-          },
+          features: plan.features || {},
           billing_type: plan.billing_type,
           monthly_amount: parseFloat(plan.monthly_amount) || 0,
           annual_amount: parseFloat(plan.annual_amount) || 0

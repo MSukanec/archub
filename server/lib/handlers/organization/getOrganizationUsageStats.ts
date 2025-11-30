@@ -41,7 +41,7 @@ export async function handleGetOrganizationUsageStats(req: Request, res: Respons
         .eq('is_active', true),
       supabase
         .from('organizations')
-        .select('plan_id, plans!left (name, max_projects, max_members)')
+        .select('plan_id, plans!left (name, features)')
         .eq('id', organizationId)
         .single()
     ]);
@@ -60,8 +60,9 @@ export async function handleGetOrganizationUsageStats(req: Request, res: Respons
 
     const planData = (orgResult.data as any)?.plans;
     const currentPlanName = planData?.name || 'Free';
-    const currentMaxProjects = planData?.max_projects ?? 2;
-    const currentMaxMembers = planData?.max_members ?? 1;
+    const features = planData?.features || {};
+    const currentMaxProjects = features.max_projects ?? 2;
+    const currentMaxMembers = features.max_members ?? 1;
 
     const stats: UsageStats = {
       projectsCount: projectsResult.count ?? 0,
@@ -76,17 +77,18 @@ export async function handleGetOrganizationUsageStats(req: Request, res: Respons
     if (targetPlanSlug) {
       const targetPlanResult = await supabase
         .from('plans')
-        .select('name, max_projects, max_members')
+        .select('name, features')
         .eq('slug', targetPlanSlug)
         .eq('is_active', true)
         .single();
 
       if (targetPlanResult.data) {
         const targetPlan = targetPlanResult.data;
+        const targetFeatures = (targetPlan as any).features || {};
         stats.targetPlanName = targetPlan.name;
         stats.targetPlanLimits = {
-          maxProjects: targetPlan.max_projects === -1 ? Infinity : (targetPlan.max_projects ?? 2),
-          maxMembers: targetPlan.max_members === -1 ? Infinity : (targetPlan.max_members ?? 1),
+          maxProjects: targetFeatures.max_projects === -1 ? Infinity : (targetFeatures.max_projects ?? 2),
+          maxMembers: targetFeatures.max_members === -1 ? Infinity : (targetFeatures.max_members ?? 1),
         };
       }
     }
