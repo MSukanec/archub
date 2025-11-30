@@ -233,7 +233,6 @@ export function LeftSidebar() {
         { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing' },
         { type: 'section-header', id: 'section-finanzas', label: 'Finanzas' },
         { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
-        { type: 'spacer', id: 'spacer-lab' },
         { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', restricted: 'lab_user' },
         { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'lab_user' },
         { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'lab_user' },
@@ -241,16 +240,17 @@ export function LeftSidebar() {
       ];
     } else if (sidebarLevel === 'project' && selectedProjectId) {
       return [
+        { type: 'section-header', id: 'section-gestion', label: 'Gestión' },
         { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard' },
         { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project' },
+        { type: 'section-header', id: 'section-construccion', label: 'Construcción' },
+        { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'lab_user' },
+        { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel' },
+        { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'lab_user' },
+        { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'lab_user' },
         { id: 'logs', label: 'Bitácora de Obra', icon: BookOpen, href: '/construction/logs' },
-        { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials' },
+        { type: 'section-header', id: 'section-comercializacion', label: 'Comercialización y Venta' },
         { id: 'clients', label: 'Clientes', icon: Users, href: '/clients' },
-        { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media' },
-        { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets', restricted: 'coming_soon' },
-        { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel', restricted: 'coming_soon' },
-        { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
-        { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon' },
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
