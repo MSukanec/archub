@@ -29,6 +29,7 @@ export interface PlanFeatures {
   max_members?: number;
   max_storage_mb?: number;
   max_file_size_mb?: number;
+  max_ai_tokens?: number;
   export_pdf_custom?: boolean;
   [key: string]: any;
 }

@@ -205,12 +205,21 @@ const PLAN_HIERARCHY = {
 
 ### Límites por Plan
 
+> **CRÍTICO**: Estos valores se leen SIEMPRE de la tabla `plans` en la base de datos. 
+> **NUNCA** usar valores hardcodeados en el código. La tabla `plans` es la ÚNICA fuente de verdad.
+
 | Plan | max_projects | max_members | max_storage_mb | max_ai_tokens |
 |------|-------------|-------------|----------------|---------------|
 | Free | 2 | 1 | 500 | 1000 |
 | Pro | 25 | -1 (ilimitado) | 5000 | 50000 |
 | Teams | -1 (ilimitado) | 999 | 25000 | -1 (ilimitado) |
 | Enterprise | -1 | -1 | -1 | -1 |
+
+**Columnas de la tabla `plans`:**
+- `max_projects`: Número máximo de proyectos (-1 = ilimitado)
+- `max_members`: Número máximo de miembros (-1 = ilimitado)  
+- `max_storage_mb`: Almacenamiento máximo en MB (-1 = ilimitado)
+- `max_ai_tokens`: Tokens de IA por mes (-1 = ilimitado)
 
 ### Reglas de Cambio de Plan
 

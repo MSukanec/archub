@@ -29,6 +29,15 @@ export function formatFileSize(mb: number | null | undefined): string {
   return `${mb} MB`;
 }
 
+export function formatTokens(tokens: number | null | undefined): string {
+  if (tokens === null || tokens === undefined) return '—';
+  if (tokens === -1 || tokens >= 999999) return 'Ilimitados';
+  if (tokens === 0) return 'Básico';
+  if (tokens < 1000) return String(tokens);
+  if (tokens >= 1000000) return `${(tokens / 1000000).toFixed(1)}M`;
+  return `${(tokens / 1000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}k`;
+}
+
 export function buildComparisonData(
   freeFeatures: PlanFeatures,
   proFeatures: PlanFeatures,
@@ -90,7 +99,12 @@ export function buildComparisonData(
     {
       category: 'Inteligencia Artificial',
       rows: [
-        { label: 'Tokens IA/mes', free: 'Resúmenes', pro: '10,000', teams: '100,000' },
+        { 
+          label: 'Tokens IA/mes', 
+          free: formatTokens(freeFeatures.max_ai_tokens),
+          pro: formatTokens(proFeatures.max_ai_tokens),
+          teams: formatTokens(teamsFeatures.max_ai_tokens)
+        },
         { label: 'Asistente conversacional', free: false, pro: true, teams: true },
         { label: 'Análisis financiero IA', free: false, pro: true, teams: true }
       ]
