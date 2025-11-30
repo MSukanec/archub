@@ -82,6 +82,10 @@ export interface UserData {
     is_active: boolean
     is_system: boolean
     created_at: string
+    settings?: {
+      is_founder?: boolean
+      [key: string]: any
+    } | null
     plan: {
       id: string
       name: string
