@@ -94,7 +94,12 @@ interface SidebarSection {
   items: SidebarItem[];
 }
 
-type NavigationItem = SidebarItem | SidebarSection;
+interface SidebarSpacer {
+  type: 'spacer';
+  id: string;
+}
+
+type NavigationItem = SidebarItem | SidebarSection | SidebarSpacer;
 
 export function LeftSidebar() {
   const [location, navigate] = useLocation();
@@ -830,7 +835,11 @@ export function LeftSidebar() {
               {/* Botones de navegación */}
               <div className="flex flex-col gap-[2px] flex-1 overflow-y-auto">
                 {navigationItems.map((navItem) => {
-                    if ('type' in navItem) return null;
+                    if ('type' in navItem && navItem.type === 'spacer') {
+                      return <div key={navItem.id} className="h-9" />;
+                    }
+                    
+                    if ('type' in navItem && navItem.type === 'section') return null;
                     
                     const item = navItem as SidebarItem;
                     if (item.adminOnly && !isAdmin) return null;

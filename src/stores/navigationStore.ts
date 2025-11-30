@@ -1,9 +1,9 @@
 import { create } from 'zustand'
 
-export type SidebarContext = 'organization' | 'project' | 'design' | 'construction' | 'finances' | 'commercialization' | 'postsale' | 'organizations' | 'admin' | 'recursos' | 'perfil' | 'learning'
+export type SidebarContext = 'organization' | 'project' | 'design' | 'construction' | 'finances' | 'commercialization' | 'postsale' | 'organizations' | 'admin' | 'recursos' | 'perfil' | 'learning' | 'community' | 'founders'
 
 // Nuevo tipo para los niveles del sidebar
-export type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning' | 'user' | 'settings'
+export type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning' | 'founders'
 
 interface NavigationState {
   currentSidebarContext: SidebarContext

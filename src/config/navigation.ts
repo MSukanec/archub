@@ -45,7 +45,12 @@ export interface NavigationSection {
   items: NavigationItem[];
 }
 
-export type NavigationEntry = NavigationItem | NavigationSection;
+export interface NavigationSpacer {
+  type: 'spacer';
+  id: string;
+}
+
+export type NavigationEntry = NavigationItem | NavigationSection | NavigationSpacer;
 
 export interface ContextButton {
   id: 'general' | 'community' | 'organization' | 'project' | 'learning' | 'admin' | 'founders';
@@ -105,16 +110,17 @@ export const CONTEXT_BUTTONS: ContextButton[] = [
   },
 ];
 
-export const ORGANIZATION_NAVIGATION: NavigationItem[] = [
+export const ORGANIZATION_NAVIGATION: NavigationEntry[] = [
   { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard', testId: 'nav-org-dashboard' },
   { id: 'basic-data', label: 'Datos Básicos', icon: Building, href: '/organization/basic-data', testId: 'nav-org-basic-data' },
   { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects', testId: 'nav-org-projects' },
   { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts', testId: 'nav-org-contacts' },
   { id: 'members', label: 'Miembros', icon: Users, href: '/organization/members', testId: 'nav-org-members' },
-  { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', restricted: 'lab_user', testId: 'nav-org-partners' },
   { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing', testId: 'nav-org-billing' },
   { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs', testId: 'nav-org-expenses' },
-  { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', testId: 'nav-org-analysis' },
+  { type: 'spacer', id: 'spacer-lab' },
+  { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', restricted: 'lab_user', testId: 'nav-org-partners' },
+  { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'lab_user', testId: 'nav-org-analysis' },
   { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'lab_user', testId: 'nav-org-finances' },
   { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'lab_user', testId: 'nav-org-capital' },
 ];
