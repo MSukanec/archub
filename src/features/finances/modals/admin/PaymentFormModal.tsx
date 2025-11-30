@@ -323,7 +323,7 @@ export function PaymentFormModal({ modalData, onClose }: PaymentFormModalProps) 
                   <SelectItem value="manual">Manual</SelectItem>
                   <SelectItem value="mercadopago">Mercado Pago</SelectItem>
                   <SelectItem value="paypal">PayPal</SelectItem>
-                  <SelectItem value="bank_transfer">Transferencia Bancaria</SelectItem>
+                  <SelectItem value="bank_transfer">Transferencia</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription>

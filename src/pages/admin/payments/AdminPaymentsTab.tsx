@@ -202,13 +202,13 @@ const AdminPaymentsTab = () => {
         const providerLabels: Record<string, string> = {
           'mercadopago': 'Mercado Pago',
           'paypal': 'PayPal',
-          'bank_transfer': 'Transferencia Bancaria',
+          'bank_transfer': 'Transferencia',
           'manual': 'Manual'
         };
         const providerColors: Record<string, string> = {
           'mercadopago': '#00b3ff',
           'paypal': '#0070ba',
-          'bank_transfer': '#10b981',
+          'bank_transfer': '#6b7280',
           'manual': '#6b7280'
         };
         const provider = payment.provider?.toLowerCase() || '';

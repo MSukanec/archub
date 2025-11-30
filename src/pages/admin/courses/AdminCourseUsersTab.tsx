@@ -307,14 +307,14 @@ export default function AdminCourseUsersTab() {
           'mercadopago': 'Mercado Pago',
           'paypal': 'PayPal',
           'stripe': 'Stripe',
-          'bank_transfer': 'Transferencia Bancaria'
+          'bank_transfer': 'Transferencia'
         };
         
         const providerColors: Record<string, string> = {
           'mercadopago': '#00b3ff',
           'paypal': '#0070ba',
           'stripe': '#635bff',
-          'bank_transfer': '#10b981'
+          'bank_transfer': '#6b7280'
         };
         
         return (
