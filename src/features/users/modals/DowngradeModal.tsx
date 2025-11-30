@@ -399,7 +399,7 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
       rightLabel={scheduleDowngradeMutation.isPending ? "Procesando..." : "Confirmar Cambio"}
       onRightClick={handleConfirm}
       isSubmitting={scheduleDowngradeMutation.isPending}
-      isRightDisabled={isConfirmDisabled}
+      submitDisabled={isConfirmDisabled}
     />
   );
 

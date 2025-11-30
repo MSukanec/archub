@@ -41,8 +41,11 @@ Preferred communication style: Simple, everyday language.
 - **Modal Naming Standard**: Modals follow `<Entity>Form.tsx` naming convention, stored in `forms/` folders, and support CREATE/EDIT/VIEW modes within a single component.
 - **Delete/Replace Pattern**: Universal delete confirmation modal with optional replace functionality, enabling zero-downtime deletion with data migration.
 - **Universal Import System**: 5-step wizard with reusable hooks for parsing, auto-mapping, validation, and AI-powered suggestions (GPT-4o mini).
-- **Subscription Expiry Notification System**: Scheduled daily job for multi-recipient email notifications before and on subscription expiry, with idempotency.
+- **Subscription Expiry Notification System**: Scheduled daily job for multi-recipient email notifications before and on subscription expiry, with idempotency via `subscription_notifications_log` table.
 - **Founders Program**: Annual subscribers (PRO/TEAMS) receive permanent founder status (`organizations.settings.is_founder`) and lifetime access to bonus course via `app_settings.founder_bonus_course_id`. Integrated into `upgradeOrganizationPlan` for both PayPal and MercadoPago flows.
+- **Soft-Lock System**: Plan limit enforcement via `is_over_limit` flags on `projects` and `organization_members`. Uses `applyPlanLimits()` function with intelligent ordering (oldest first, admins protected).
+- **Automated Downgrade Execution**: Hourly cron job (`execute-scheduled-downgrades.ts`) processes expired subscriptions with `scheduled_downgrade_plan_id`, creates new subscription, and applies soft-lock limits.
+- **Downgrade Impact Calculation**: `DowngradeModal` fetches usage stats and calculates resources to be locked before user confirms downgrade.
 - **Lab Neural Network Renderer System**: Extensible node rendering architecture for neural network graphs.
 
 ## External Dependencies
