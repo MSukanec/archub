@@ -179,7 +179,6 @@ export function getSettingsNavigation(organizationName: string, userFullName: st
         { id: 'members', label: 'Miembros', icon: Users, href: '/settings/members', testId: 'nav-settings-members' },
         { id: 'finances', label: 'Finanzas', icon: Wallet, href: '/settings/finances', testId: 'nav-settings-finances' },
         { id: 'organization-activity', label: 'Actividad', icon: Activity, href: '/settings/organization-activity', restricted: 'coming_soon', testId: 'nav-settings-org-activity' },
-        { id: 'pricing-plan', label: 'Planes', icon: Crown, href: '/settings/pricing-plan', testId: 'nav-settings-pricing-plan' },
       ]
     },
     {

@@ -277,7 +277,6 @@ export function LeftSidebar() {
             { id: 'partners', label: 'Socios', icon: HandHeart, href: '/settings/partners' },
             { id: 'finances', label: 'Finanzas', icon: Wallet, href: '/settings/finances' },
             { id: 'organization-activity', label: 'Actividad', icon: Activity, href: '/settings/organization-activity', restricted: 'coming_soon' },
-            { id: 'pricing-plan', label: 'Planes', icon: Crown, href: '/settings/pricing-plan' },
           ]
         },
         {
