@@ -12,22 +12,22 @@ interface ComingSoonRestrictedProps {
 }
 
 export function ComingSoonRestricted({ children }: ComingSoonRestrictedProps) {
-  // Clonar el elemento hijo y agregable un badge de candado
-  const childElement = React.isValidElement(children)
-    ? React.cloneElement(children as React.ReactElement, {
-        // Agregar overlay y badge al elemento hijo
-        className: `${(children as React.ReactElement)?.props?.className || ""} relative pointer-events-none opacity-60 cursor-not-allowed`,
-      })
-    : children;
-
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="relative flex items-center justify-center">
-            {childElement}
+          {/* Wrapper que bloquea interacción y muestra el badge */}
+          <div className="relative w-full inline-block">
+            {/* Overlay invisible que bloquea clicks */}
+            <div className="absolute inset-0 pointer-events-auto z-10" />
+            
+            {/* Contenido con opacidad reducida */}
+            <div className="opacity-60 pointer-events-none">
+              {children}
+            </div>
+            
             {/* Badge de candado NEGRO centrado */}
-            <div className="absolute bg-black dark:bg-gray-900 rounded-full p-1 flex items-center justify-center border border-white dark:border-gray-800">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black dark:bg-gray-900 rounded-full p-1 flex items-center justify-center border border-white dark:border-gray-800 z-20">
               <Lock className="w-3 h-3 text-white" />
             </div>
           </div>
