@@ -101,9 +101,9 @@ export function buildComparisonData(
       rows: [
         { 
           label: 'Tokens IA/mes', 
-          free: formatTokens(freeFeatures.max_ai_tokens),
-          pro: formatTokens(proFeatures.max_ai_tokens),
-          teams: formatTokens(teamsFeatures.max_ai_tokens)
+          free: formatTokens(freeFeatures.ai_tokens || freeFeatures.max_ai_tokens),
+          pro: formatTokens(proFeatures.ai_tokens || proFeatures.max_ai_tokens),
+          teams: formatTokens(teamsFeatures.ai_tokens || teamsFeatures.max_ai_tokens)
         },
         { label: 'Asistente conversacional', free: false, pro: true, teams: true },
         { label: 'Análisis financiero IA', free: false, pro: true, teams: true }
