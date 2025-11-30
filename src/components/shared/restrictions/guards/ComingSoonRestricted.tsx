@@ -1,11 +1,4 @@
 import React from "react";
-import { Lock } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface ComingSoonRestrictedProps {
   children: React.ReactNode;
@@ -13,30 +6,20 @@ interface ComingSoonRestrictedProps {
 
 export function ComingSoonRestricted({ children }: ComingSoonRestrictedProps) {
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          {/* Wrapper que bloquea interacción y muestra el badge */}
-          <div className="relative w-full inline-block overflow-visible cursor-not-allowed">
-            {/* Overlay invisible que bloquea clicks */}
-            <div className="absolute inset-0 pointer-events-auto z-10" />
-            
-            {/* Contenido con opacidad reducida */}
-            <div className="opacity-50 pointer-events-none">
-              {children}
-            </div>
-            
-            {/* Badge pequeño y sutil - ícono de candado en la esquina inferior derecha */}
-            <div className="absolute -bottom-1 -right-1 bg-yellow-500 dark:bg-yellow-600 rounded-full p-0.5 flex items-center justify-center border border-yellow-600 dark:border-yellow-700 z-[9999] shadow-lg pointer-events-none">
-              <Lock className="w-2.5 h-2.5 text-gray-900" />
-            </div>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="top" sideOffset={8} className="bg-gray-900 text-white border-gray-800 z-[9999]">
-          Próximamente
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <div className="relative w-full inline-block overflow-visible cursor-not-allowed">
+      {/* Overlay invisible que bloquea clicks */}
+      <div className="absolute inset-0 pointer-events-auto z-10" />
+      
+      {/* Contenido con blur mínimo */}
+      <div className="blur-[0.5px] pointer-events-none">
+        {children}
+      </div>
+      
+      {/* Badge PROXIMAMENTE super pequeño, negro con texto blanco */}
+      <div className="absolute -bottom-0.5 -right-0.5 bg-black rounded px-1 py-0.5 flex items-center justify-center z-[9999] shadow-lg pointer-events-none">
+        <span className="text-[0.5rem] font-bold text-white">PRÓXIMAMENTE</span>
+      </div>
+    </div>
   );
 }
 
