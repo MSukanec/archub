@@ -8,6 +8,9 @@ import * as mpController from '../controllers/payments/mp.controller.js';
 import * as paypalController from '../controllers/payments/paypal.controller.js';
 import * as bankTransferController from '../controllers/payments/bankTransfer.controller.js';
 
+// Import proration calculator
+import { calculateProration } from '../lib/handlers/checkout/shared/proration.js';
+
 /**
  * Helper function to verify admin access
  */
@@ -81,6 +84,57 @@ async function enrollUserInCourse(user_id: string, course_id: string, months: nu
 // ==================== PAYMENT ROUTES ====================
 
 export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
+  // ==================== PRORATION CALCULATOR ====================
+  
+  // POST /api/checkout/calculate-proration - Calculate upgrade price with proration credit
+  app.post("/api/checkout/calculate-proration", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "No autorizado" });
+      }
+
+      const token = authHeader.substring(7);
+      const authSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { persistSession: false } }
+      );
+
+      const { data: { user }, error: authError } = await authSupabase.auth.getUser(token);
+      if (authError || !user) {
+        return res.status(401).json({ error: "Token inválido o expirado" });
+      }
+
+      const { organization_id, target_plan_slug, billing_period } = req.body;
+
+      if (!organization_id || !target_plan_slug || !billing_period) {
+        return res.status(400).json({ 
+          error: "Faltan parámetros: organization_id, target_plan_slug, billing_period" 
+        });
+      }
+
+      const result = await calculateProration(getAdminClient(), {
+        organizationId: organization_id,
+        targetPlanSlug: target_plan_slug,
+        billingPeriod: billing_period as 'monthly' | 'annual',
+      });
+
+      console.log('[proration] Calculated:', {
+        hasActiveSubscription: result.hasActiveSubscription,
+        currentPlan: result.currentPlan?.name,
+        targetPlan: result.targetPlan.name,
+        credit: result.credit,
+        finalPrice: result.finalPrice,
+      });
+
+      return res.json({ ok: true, data: result });
+    } catch (error: any) {
+      console.error('[proration] Error:', error);
+      return res.status(500).json({ error: error.message || "Error interno" });
+    }
+  });
+
   // ==================== MERCADO PAGO CHECKOUT & WEBHOOKS ====================
   
   // POST /api/checkout/mp/create-course
