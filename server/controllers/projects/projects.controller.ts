@@ -57,23 +57,21 @@ export async function handleCreateProject(req: Request, res: Response) {
       } else {
         const { data: orgData, error: orgError } = await supabase
           .from('organizations')
-          .select('plan_id, plans(name, features)')
+          .select('plan_id, plans(name, max_projects, features)')
           .eq('id', organization_id)
           .single();
 
         if (!orgError && orgData) {
-          const planName = (orgData as any).plans?.name;
-          const planFeatures = (orgData as any).plans?.features || {};
+          const planData = (orgData as any).plans;
+          const planFeatures = planData?.features || {};
           
-          let maxProjects = 2;
+          let maxProjects: number;
           
-          if (planFeatures.max_projects !== undefined) {
+          if (planData?.max_projects !== undefined && planData?.max_projects !== null) {
+            maxProjects = planData.max_projects === -1 ? Infinity : planData.max_projects;
+          } else if (planFeatures.max_projects !== undefined) {
             maxProjects = planFeatures.max_projects === -1 ? Infinity : planFeatures.max_projects;
-          } else if (planName === 'Teams' || planName === 'TEAMS') {
-            maxProjects = Infinity;
-          } else if (planName === 'Pro' || planName === 'PRO') {
-            maxProjects = 25;
-          } else if (planName === 'Free' || planName === 'FREE') {
+          } else {
             maxProjects = 2;
           }
 
