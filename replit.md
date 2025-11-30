@@ -32,7 +32,7 @@ Preferred communication style: Simple, everyday language.
 - **Core Feature Management**: Comprehensive CRUD operations for Projects, Subcontracts, Personnel, Materials, Financial, Contacts, Sitelog, Project Types, and Project Modalities.
 - **Learning Module**: Supports course management, video integration, progress tracking, notes, enrollment, pricing, and payment integration.
 - **AI Assistant**: Clean frontend/backend separation, orchestrating context-aware GPT-4o powered responses.
-- **Payment Architecture**: Unified `payments` table supporting multiple gateways and centralized checkout, including production-ready PayPal course and subscription flows, Mercado Pago subscription flows, and bank transfer receipt uploads.
+- **Payment Architecture**: Unified `payments` table supporting multiple gateways and centralized checkout, including production-ready PayPal course and subscription flows, Mercado Pago subscription flows, and bank transfer receipt uploads. PayPal subscriptions now support recurring billing via Billing Plans API (Nov 2025) with automatic renewal, stored in `plans.paypal_plan_monthly_id` / `paypal_plan_annual_id`, and tracked via `organization_subscriptions.provider_subscription_id`.
 - **Access Control**: `PlanRestricted` component system for organization membership and subscription plans.
 - **Cost System**: Three-tier cost system (Seencel Cost, Organization Cost, Independent Cost).
 - **Media Uploads**: Unified component for image and multi-file uploads using a scalable `MEDIA_FILES` + `MEDIA_LINKS` architecture, with client-side image compression and a 3-bucket storage architecture (public-assets, private-assets, social-assets).
