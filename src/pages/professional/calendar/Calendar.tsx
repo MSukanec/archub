@@ -69,20 +69,20 @@ function CalendarContent() {
     setActions({
       search: {
         id: 'search',
-        icon: <Search className="h-5 w-5" />,
+        icon: Search,
         label: 'Buscar',
         onClick: () => {} // TODO: implement search
       },
       create: {
         id: 'create',
-        icon: <Plus className="h-6 w-6" />,
+        icon: Plus,
         label: 'Nueva Lista',
         onClick: () => openModal('list', { boardId: currentBoardId }),
         variant: 'primary'
       },
       filter: {
         id: 'filter',
-        icon: <Filter className="h-5 w-5" />,
+        icon: Filter,
         label: 'Filtros',
         onClick: () => {} // TODO: implement filters
       }

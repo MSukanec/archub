@@ -953,10 +953,6 @@ export function LeftSidebar() {
                                 <ComingSoonRestricted key={item.id}>
                                   {button}
                                 </ComingSoonRestricted>
-                              ) : item.restricted ? (
-                                <PlanRestricted key={item.id} reason={item.restricted}>
-                                  {button}
-                                </PlanRestricted>
                               ) : (
                                 button
                               );
@@ -1007,10 +1003,6 @@ export function LeftSidebar() {
                       <ComingSoonRestricted key={item.id}>
                         {button}
                       </ComingSoonRestricted>
-                    ) : item.restricted ? (
-                      <PlanRestricted key={item.id} reason={item.restricted}>
-                        {button}
-                      </PlanRestricted>
                     ) : (
                       button
                     );

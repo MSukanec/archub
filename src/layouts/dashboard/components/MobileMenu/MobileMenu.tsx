@@ -288,12 +288,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                           {button}
                         </ComingSoonRestricted>
                       );
-                    } else if (contextButton.restricted) {
-                      return (
-                        <PlanRestricted key={contextButton.id} reason={contextButton.restricted}>
-                          {button}
-                        </PlanRestricted>
-                      );
                     }
 
                     return button;
@@ -338,10 +332,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                                   <ComingSoonRestricted>
                                     {button}
                                   </ComingSoonRestricted>
-                                ) : item.restricted ? (
-                                  <PlanRestricted reason={item.restricted}>
-                                    {button}
-                                  </PlanRestricted>
                                 ) : (
                                   button
                                 )}
@@ -388,10 +378,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                           <ComingSoonRestricted>
                             {button}
                           </ComingSoonRestricted>
-                        ) : item.restricted ? (
-                          <PlanRestricted reason={item.restricted}>
-                            {button}
-                          </PlanRestricted>
                         ) : (
                           button
                         )}
