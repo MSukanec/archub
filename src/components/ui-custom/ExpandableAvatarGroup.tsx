@@ -105,8 +105,8 @@ export function ExpandableAvatarGroup({
           size="sm"
           className="w-full bg-foreground hover:bg-foreground/90 text-background"
           onClick={() => {
-            setSidebarLevel('settings');
-            setLocation("/settings/members");
+            setSidebarLevel('organization');
+            setLocation("/organization/members");
           }}
           data-testid="button-view-members"
         >

@@ -113,7 +113,7 @@ export const CONTEXT_BUTTONS: ContextButton[] = [
     label: 'Ajustes',
     icon: Settings,
     testId: 'button-sidebar-settings',
-    href: '/settings/members',
+    href: '/settings/user-basic-data',
   },
 ];
 
@@ -121,6 +121,7 @@ export const ORGANIZATION_NAVIGATION: NavigationItem[] = [
   { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard', testId: 'nav-org-dashboard' },
   { id: 'basic-data', label: 'Datos Básicos', icon: Building, href: '/organization/basic-data', testId: 'nav-org-basic-data' },
   { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects', testId: 'nav-org-projects' },
+  { id: 'members', label: 'Miembros', icon: Users, href: '/organization/members', testId: 'nav-org-members' },
   { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', testId: 'nav-org-partners' },
   { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts', testId: 'nav-org-contacts' },
   { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs', testId: 'nav-org-expenses' },
@@ -174,14 +175,6 @@ export const USER_NAVIGATION: NavigationItem[] = [
 
 export function getSettingsNavigation(organizationName: string, userFullName: string): NavigationSection[] {
   return [
-    {
-      type: 'section' as const,
-      title: organizationName,
-      items: [
-        { id: 'members', label: 'Miembros', icon: Users, href: '/settings/members', testId: 'nav-settings-members' },
-        { id: 'finances', label: 'Finanzas', icon: Wallet, href: '/settings/finances', testId: 'nav-settings-finances' },
-      ]
-    },
     {
       type: 'section' as const,
       title: userFullName,
