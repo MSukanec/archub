@@ -311,9 +311,6 @@ export function MembersListTab() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => openModal('member', { editingMember: member })}>
-                              Editar rol
-                            </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="text-red-600"
                               onClick={() => handleDeleteMember(member)}
@@ -419,9 +416,6 @@ export function MembersListTab() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              Editar rol
-                            </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="text-red-600"
                               onClick={() => handleDeleteMember(guest)}
