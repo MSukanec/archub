@@ -1,0 +1,115 @@
+ASUNTO: Refactorización Crítica de la Documentación de Modales (02-Modals.md) - Patrón de "Formularios Agnósticos".
+
+CONTEXTO URGENTE: He revisado el archivo de documentación 02-Modals.md y el ejemplo de código que contiene enseña un patrón de diseño arquitectónicamente incorrecto y no escalable.
+
+El ejemplo actual muestra un <form> con toda su lógica y estado (hooks) acoplado directamente dentro de la estructura del componente <Dialog>.
+
+EL PROBLEMA: Esto impide la reutilización. Si mañana queremos usar ese mismo formulario de "Crear Proyecto" en una página normal o en un panel lateral (drawer) en lugar de un modal, no podemos. Tendríamos que duplicar el código.
+
+EL NUEVO ESTÁNDAR (Formularios Agnósticos): Debemos establecer que, para la arquitectura de Seencel, la lógica del formulario debe vivir en un componente independiente que NO SEPA dónde se está renderizando (modal, página, panel).
+
+Componente del Formulario (CreateProjectForm.tsx): Contiene los inputs, useForm, validación y la función onSubmit. Recibe una prop onSuccess para avisar al padre cuando termina.
+
+Componente del Modal (CreateProjectModal.tsx): Es un contenedor "tonto". Solo maneja abrir/cerrar el diálogo y renderiza el componente del formulario en su interior.
+
+TU TAREA: Tienes que reescribir completamente la sección de ejemplo de código en el archivo 02-Modals.md para reflejar este nuevo patrón estándar.
+
+INSTRUCCIONES PRECISAS DE EDICIÓN:
+
+Abre el archivo 02-Modals.md.
+
+Localiza el bloque de código largo que comienza después del texto "La estructura del modal debe seguir el siguiente patrón...".
+
+BORRA TODO ESE BLOQUE DE CÓDIGO.
+
+Reemplázalo exactamente con los dos bloques de código que te presento a continuación. Agrega también los pequeños textos explicativos entre ellos para que la guía sea clara.
+
+(COPIA DESDE AQUÍ PARA PEGAR EN REPLIT)
+
+Nuevo Estándar: Formularios Agnósticos y Reutilizables
+Para garantizar la máxima reutilización y mantenibilidad, separamos la lógica del formulario de su contenedor visual (el modal).
+
+1. El Componente del Formulario Puro (Lógica de Negocio)
+Este componente vive en la carpeta de su feature correspondiente (ej: src/features/projects/components/). No tiene headers, footers ni estilos de modal. Solo inputs y lógica.
+
+TypeScript
+
+// src/features/projects/components/forms/CreateProjectForm.tsx
+
+import { useForm } from 'react-hook-form';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+// Importar esquema de validación y hook de mutación...
+
+interface CreateProjectFormProps {
+  onSuccess?: () => void; // Callback para cerrar el modal o redirigir
+  className?: string;     // Para estilos opcionales desde el padre
+}
+
+export const CreateProjectForm = ({ onSuccess, className }: CreateProjectFormProps) => {
+  // ... Lógica de useForm y useMutation aquí ...
+  const { register, handleSubmit, formState: { isSubmitting } } = useForm();
+
+  const onSubmit = async (data: any) => {
+    // ... Lógica de guardado en backend ...
+    // Al terminar con éxito:
+    onSuccess?.();
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className={`space-y-6 ${className}`}>
+      {/* Inputs del formulario (Inputs estilo Supabase) */}
+      <div className="space-y-4">
+          <Input label="Nombre del Proyecto" {...register('name')} placeholder="Ej: Torre Capital" />
+          <Select label="Tipo de Obra" {...register('type')} options={...} />
+          {/* ... más inputs, acordeones, etc. ... */}
+      </div>
+
+      {/* Botón de submit (puede ser parte del form o inyectado via Portal) */}
+      <div className="flex justify-end pt-4">
+          <Button type="submit" isLoading={isSubmitting}>
+              Crear Proyecto
+          </Button>
+      </div>
+    </form>
+  );
+};
+2. El Componente del Modal Contenedor (Estructura Visual)
+Este componente vive en la carpeta global de modales (src/components/modals/). Es un contenedor "tonto" que usa los componentes de UI estándar y renderiza el formulario lógico en su interior.
+
+TypeScript
+
+// src/components/modals/projects/CreateProjectModal.tsx
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { FormModalBody } from '@/components/ui/form-modal-body'; // Componente estandarizado
+import { useCreateProjectModal } from '@/hooks/modals/useCreateProjectModal'; // Hook de estado zustand
+import { CreateProjectForm } from '@/features/projects/components/forms/CreateProjectForm';
+
+export const CreateProjectModal = () => {
+  // El estado de apertura/cierre lo maneja un hook global (zustand)
+  const { isOpen, onClose } = useCreateProjectModal();
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px] p-0 gap-0 overflow-hidden">
+        {/* Header Compacto estilo Lemon Squeezy */}
+        <DialogHeader className="px-6 py-4 border-b bg-muted/10">
+          <DialogTitle className="text-lg font-semibold">
+              Crear nuevo proyecto
+          </DialogTitle>
+        </DialogHeader>
+
+        {/* Cuerpo del modal con scroll interno si es necesario */}
+        <FormModalBody>
+          {/* INYECCIÓN DEL FORMULARIO AGNÓSTICO */}
+          {/* Le pasamos onClose como prop onSuccess para que el modal se cierre al terminar */}
+          <CreateProjectForm onSuccess={onClose} />
+        </FormModalBody>
+
+        {/* No es necesario un DialogFooter si el botón está dentro del form */}
+      </DialogContent>
+    </Dialog>
+  );
+};
