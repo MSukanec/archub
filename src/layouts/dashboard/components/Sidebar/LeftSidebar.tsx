@@ -462,13 +462,11 @@ export function LeftSidebar() {
       <div className="h-full p-1 rounded-lg bg-[var(--content-bg)]">
         <div 
           className="flex flex-row h-full"
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
         >
           {/* SIDEBAR IZQUIERDO - CONTEXTOS (siempre visible, 50px, altura total) */}
           <div className="bg-[var(--main-sidebar-bg)] w-[50px] h-full rounded-lg flex flex-col">
             {/* SECCIÓN: Botones de contexto con scroll */}
-            <div className="px-0 pt-0 overflow-y-auto flex-1">
+            <div className="px-0 pt-0 overflow-y-auto flex-1" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
                 <div className="flex flex-col gap-[2px] items-center pt-3">
                   {/* Logo */}
                   <div className="h-[32px] flex items-center justify-center w-8 mb-3">
