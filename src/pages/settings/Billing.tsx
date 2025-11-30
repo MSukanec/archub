@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, RefreshCw, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -81,18 +81,8 @@ const Billing = () => {
     const params = new URLSearchParams(window.location.search);
     const paymentStatus = params.get('payment');
 
-    if (paymentStatus === 'success' && currentOrganizationId) {
-      refreshCurrentUserCache(queryClient).then(() => {
-        queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
-        queryClient.invalidateQueries({ queryKey: ['subscription-payments', currentOrganizationId] });
-        queryClient.invalidateQueries({ queryKey: ['organization', currentOrganizationId] });
-      });
-      
-      toast({
-        title: '¡Pago exitoso!',
-        description: 'Tu suscripción ha sido activada correctamente.',
-      });
-
+    if (paymentStatus && currentOrganizationId) {
+      // Clean URL immediately
       const url = new URL(window.location.href);
       url.searchParams.delete('payment');
       url.searchParams.delete('collection_id');
@@ -107,8 +97,30 @@ const Billing = () => {
       url.searchParams.delete('processing_mode');
       url.searchParams.delete('merchant_account_id');
       window.history.replaceState({}, '', url.pathname);
+
+      if (paymentStatus === 'success') {
+        // Refresh data
+        refreshCurrentUserCache(queryClient).then(() => {
+          queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
+          queryClient.invalidateQueries({ queryKey: ['subscription-payments', currentOrganizationId] });
+          queryClient.invalidateQueries({ queryKey: ['organization', currentOrganizationId] });
+          queryClient.invalidateQueries({ queryKey: ['subscription-activity', currentOrganizationId] });
+        });
+        
+        // Show success modal
+        openModal('payment-feedback', {
+          type: 'success',
+          planName: userData?.organization?.plan?.name,
+          isFounder: userData?.organization?.settings?.is_founder || false,
+        });
+      } else if (paymentStatus === 'cancelled') {
+        // Show cancelled modal
+        openModal('payment-feedback', {
+          type: 'cancelled',
+        });
+      }
     }
-  }, [currentOrganizationId, toast]);
+  }, [currentOrganizationId, openModal, userData]);
 
   const { data: subscription, isLoading: subscriptionLoading, error: subscriptionError, refetch: refetchSubscription } = useQuery<OrganizationSubscription | null>({
     queryKey: ['current-subscription', currentOrganizationId],
@@ -232,6 +244,80 @@ const Billing = () => {
   const { data: billingCycles = [] } = useQuery<any[]>({
     queryKey: ['/api/billing/cycles', currentOrganizationId],
     enabled: !!currentOrganizationId && isTeamsPlan,
+  });
+
+  // Subscription activity (payment events + recent changes)
+  interface SubscriptionActivity {
+    id: string;
+    type: 'payment' | 'subscription' | 'founder';
+    description: string;
+    status: 'success' | 'pending' | 'error';
+    amount?: number;
+    currency?: string;
+    provider?: string;
+    created_at: string;
+  }
+
+  const { data: subscriptionActivity = [], isLoading: activityLoading } = useQuery<SubscriptionActivity[]>({
+    queryKey: ['subscription-activity', currentOrganizationId],
+    queryFn: async () => {
+      if (!supabase || !currentOrganizationId) return [];
+
+      const activities: SubscriptionActivity[] = [];
+
+      // Get recent payment events for this organization's payments
+      const { data: recentPayments } = await supabase
+        .from('payments')
+        .select('id, provider_payment_id, amount, currency, status, provider, created_at, product_type')
+        .eq('organization_id', currentOrganizationId)
+        .eq('product_type', 'subscription')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (recentPayments) {
+        for (const payment of recentPayments) {
+          activities.push({
+            id: `payment-${payment.id}`,
+            type: 'payment',
+            description: `Pago procesado via ${payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago'}`,
+            status: payment.status === 'completed' ? 'success' : payment.status === 'pending' ? 'pending' : 'error',
+            amount: payment.amount,
+            currency: payment.currency,
+            provider: payment.provider,
+            created_at: payment.created_at,
+          });
+        }
+      }
+
+      // Get recent subscription changes
+      const { data: recentSubs } = await supabase
+        .from('organization_subscriptions')
+        .select('id, status, billing_period, amount, currency, created_at, plans!plan_id(name)')
+        .eq('organization_id', currentOrganizationId)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (recentSubs) {
+        for (const sub of recentSubs) {
+          const planName = (sub.plans as any)?.name || 'Plan';
+          activities.push({
+            id: `sub-${sub.id}`,
+            type: 'subscription',
+            description: `Suscripción ${planName} (${sub.billing_period === 'annual' ? 'Anual' : 'Mensual'}) ${sub.status === 'active' ? 'activada' : sub.status === 'cancelled' ? 'cancelada' : 'procesada'}`,
+            status: sub.status === 'active' ? 'success' : sub.status === 'cancelled' ? 'error' : 'pending',
+            amount: sub.amount,
+            currency: sub.currency,
+            created_at: sub.created_at,
+          });
+        }
+      }
+
+      // Sort by date and return top 10
+      return activities
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 10);
+    },
+    enabled: !!currentOrganizationId && !!supabase,
   });
 
   const cancelSubscriptionMutation = useMutation({
@@ -673,6 +759,84 @@ const Billing = () => {
               </Card>
             )}
           </div>
+        )}
+
+        {/* Recent Activity Section */}
+        {subscriptionActivity.length > 0 && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-muted-foreground" />
+                <CardTitle className="text-lg">Actividad Reciente</CardTitle>
+              </div>
+              <CardDescription>
+                Últimas operaciones de tu suscripción
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {activityLoading ? (
+                <div className="space-y-3">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {subscriptionActivity.map((activity) => (
+                    <div 
+                      key={activity.id} 
+                      className="flex items-center justify-between py-3 border-b last:border-0"
+                      data-testid={`activity-item-${activity.id}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "h-8 w-8 rounded-full flex items-center justify-center",
+                          activity.status === 'success' ? 'bg-green-100 dark:bg-green-900/30' :
+                          activity.status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
+                          'bg-red-100 dark:bg-red-900/30'
+                        )}>
+                          {activity.type === 'payment' ? (
+                            <CreditCard className={cn(
+                              "h-4 w-4",
+                              activity.status === 'success' ? 'text-green-600 dark:text-green-400' :
+                              activity.status === 'pending' ? 'text-yellow-600 dark:text-yellow-400' :
+                              'text-red-600 dark:text-red-400'
+                            )} />
+                          ) : (
+                            <ArrowUpCircle className={cn(
+                              "h-4 w-4",
+                              activity.status === 'success' ? 'text-green-600 dark:text-green-400' :
+                              activity.status === 'pending' ? 'text-yellow-600 dark:text-yellow-400' :
+                              'text-red-600 dark:text-red-400'
+                            )} />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{activity.description}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(activity.created_at), "dd MMM yyyy 'a las' HH:mm", { locale: es })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        {activity.amount && (
+                          <p className="text-sm font-medium">
+                            {activity.currency} ${activity.amount.toFixed(2)}
+                          </p>
+                        )}
+                        <Badge 
+                          variant={activity.status === 'success' ? 'default' : activity.status === 'pending' ? 'secondary' : 'destructive'}
+                          className="text-xs"
+                        >
+                          {activity.status === 'success' ? 'Completado' : activity.status === 'pending' ? 'Pendiente' : 'Error'}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         )}
 
         <Table

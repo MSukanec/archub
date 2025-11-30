@@ -12,6 +12,7 @@ import { ClientCommitmentForm } from '@/features/clients/forms/ClientCommitmentF
 import { ClientScheduleItemForm } from '@/features/clients/forms/ClientScheduleItemForm';
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
 import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
+import { default as PaymentFeedbackModal } from '@/components/forms/PaymentFeedbackModal';
 import { UniversalImportForm } from '@/features/imports';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal, MaterialPaymentForm, PurchaseOrderForm, MaterialPurchaseForm } from '@/features/materials';
 import { UserFormModal, ChangelogFormModal, NotificationFormModal, AnnouncementFormModal, SupportConversationStartModal, PlanFormModal, PlanPriceFormModal, DowngradeModal } from '@/features/users';
@@ -327,6 +328,20 @@ export function initializeModalRegistry(): void {
     ...generalConfig, 
     size: 'sm',
     preventCloseOnBackdrop: true,
+  });
+  
+  registerModal('payment-feedback', PaymentFeedbackModal as any, {
+    ...generalConfig,
+    size: 'sm',
+    mapDataToProps: (data) => ({
+      modalData: {
+        type: data?.type || 'success',
+        title: data?.title,
+        description: data?.description,
+        planName: data?.planName,
+        isFounder: data?.isFounder,
+      }
+    }),
   });
   
   registerModal('hero-section-form', HeroSectionForm as any, {
