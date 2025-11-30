@@ -89,19 +89,6 @@ const AdminLayoutContentTab = () => {
 
   return (
     <div className="space-y-6" data-testid="admin-layout-content-tab">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Contenido del Dashboard</h2>
-          <p className="text-muted-foreground text-sm mt-1">
-            Gestiona el carrusel hero del dashboard de capacitaciones
-          </p>
-        </div>
-        <Button onClick={handleCreateSection} data-testid="button-create-hero-section">
-          <Plus className="w-4 h-4 mr-2" />
-          Nueva Sección
-        </Button>
-      </div>
 
       {/* Hero Sections */}
       {heroSections.length > 0 ? (
