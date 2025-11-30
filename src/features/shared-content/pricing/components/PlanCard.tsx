@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { getPlanConfig } from "../data/plans-config";
 import { ComingSoonRestricted } from "@/components/shared/restrictions/guards/ComingSoonRestricted";
 import type { Plan, BillingPeriod, PricingMode } from "../types";
@@ -26,6 +27,7 @@ export function PlanCard({
   onSelect
 }: PlanCardProps) {
   const config = getPlanConfig(plan.name);
+  const isAdmin = useIsAdmin();
   const Icon = config.icon;
   const isPopular = plan.name.toLowerCase() === 'pro';
   const isFree = plan.name.toLowerCase() === 'free';
@@ -54,7 +56,8 @@ export function PlanCard({
     return `Cambiar a ${plan.name}`;
   };
   
-  const isComingSoon = plan.name.toLowerCase() === 'pro' || isTeams;
+  // Only show as coming soon if NOT admin
+  const isComingSoon = !isAdmin && (plan.name.toLowerCase() === 'pro' || isTeams);
 
   const getButtonColor = () => {
     if (isCurrentPlan) return undefined;
