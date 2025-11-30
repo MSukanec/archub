@@ -90,7 +90,6 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
       } else {
         await createMutation.mutateAsync({
           ...values,
-          organization_id: userData?.organization?.id,
           section_type: 'learning_dashboard',
         })
         toast({ title: 'Sección creada', description: 'La nueva sección del carrusel se creó correctamente' })

@@ -1716,10 +1716,9 @@ export const insertMediaLinkSchema = createInsertSchema(media_links).omit({
 export type MediaLink = typeof media_links.$inferSelect;
 export type InsertMediaLink = z.infer<typeof insertMediaLinkSchema>;
 
-// Hero Sections Table (for dynamic carousel hero content)
+// Hero Sections Table (for dynamic carousel hero content - admin only)
 export const hero_sections = pgTable("hero_sections", {
   id: uuid("id").primaryKey().defaultRandom(),
-  organization_id: uuid("organization_id"),
   section_type: text("section_type").notNull().default("learning_dashboard"),
   order_index: integer("order_index").notNull().default(0),
   title: text("title").notNull(),

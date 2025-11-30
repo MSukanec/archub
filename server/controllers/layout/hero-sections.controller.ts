@@ -23,7 +23,6 @@ export async function getHeroSections(req: Request, res: Response) {
 export async function createHeroSection(req: Request, res: Response) {
   try {
     const { 
-      organization_id, 
       section_type = 'learning_dashboard',
       title, 
       description, 
@@ -47,12 +46,12 @@ export async function createHeroSection(req: Request, res: Response) {
 
     const result = await db.execute(sql`
       INSERT INTO hero_sections (
-        organization_id, section_type, order_index, title, description, 
+        section_type, order_index, title, description, 
         media_url, media_type, primary_button_text, primary_button_action, 
         primary_button_action_type, secondary_button_text, secondary_button_action,
         secondary_button_action_type, is_active
       ) VALUES (
-        ${organization_id}, ${section_type}, ${nextOrder}, ${title}, ${description},
+        ${section_type}, ${nextOrder}, ${title}, ${description},
         ${media_url}, ${media_type}, ${primary_button_text}, ${primary_button_action},
         ${primary_button_action_type}, ${secondary_button_text}, ${secondary_button_action},
         ${secondary_button_action_type}, ${is_active}
