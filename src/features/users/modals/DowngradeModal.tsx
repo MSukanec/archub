@@ -125,13 +125,23 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
 
   // Check if user is admin in current organization
   const isAdmin = useMemo(() => {
-    if (!userData?.role) {
+    if (!currentOrganizationId || !userData?.memberships) {
       return false;
     }
     
-    const roleName = userData.role.name?.toLowerCase();
-    return roleName === 'admin' || roleName === 'administrator';
-  }, [userData?.role]);
+    // Find membership for current organization
+    const membership = userData.memberships.find(
+      m => m.organization_id === currentOrganizationId && m.is_active
+    );
+    
+    if (!membership || !membership.role) {
+      return false;
+    }
+    
+    // Check role name (handle both Spanish "Administrador" and English variants)
+    const roleName = membership.role.name?.toLowerCase().trim();
+    return roleName === 'administrador' || roleName === 'admin' || roleName === 'administrator';
+  }, [currentOrganizationId, userData?.memberships]);
 
   // Validation checks
   const validationError = useMemo(() => {
@@ -143,8 +153,16 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
       return "No se ha seleccionado una organización";
     }
     
-    if (!userData?.role) {
-      return "No se pudo verificar tu rol";
+    if (!userData?.memberships || userData.memberships.length === 0) {
+      return "No se pudo verificar tu membresía";
+    }
+    
+    const membership = userData.memberships.find(
+      m => m.organization_id === currentOrganizationId
+    );
+    
+    if (!membership) {
+      return "No tienes membresía en esta organización";
     }
     
     if (!isAdmin) {
@@ -152,7 +170,7 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
     }
     
     return null;
-  }, [targetPlan?.slug, currentOrganizationId, userData?.role, isAdmin]);
+  }, [targetPlan?.slug, currentOrganizationId, userData?.memberships, isAdmin]);
 
   const scheduleDowngradeMutation = useMutation({
     mutationFn: async () => {
