@@ -63,10 +63,10 @@ export default function Finances() {
   }, [organizationWallets]);
 
   useEffect(() => {
-    if (userData?.organization_preferences) {
-      setUseCurrencyExchange(userData.organization_preferences.use_currency_exchange ? 'si' : 'no');
+    if (userData?.organization?.preferences) {
+      setUseCurrencyExchange(userData.organization.preferences.use_currency_exchange ? 'si' : 'no');
     }
-  }, [userData?.organization_preferences]);
+  }, [userData?.organization?.preferences]);
 
   const saveDefaultCurrencyMutation = useMutation({
     mutationFn: async (currencyId: string) => {

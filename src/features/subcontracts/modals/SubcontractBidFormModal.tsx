@@ -76,7 +76,7 @@ export function SubcontractBidFormModal({
     defaultValues: {
       contact_id: initialData?.contact_id || '',
       amount: initialData?.amount?.toString() || '',
-      currency_id: initialData?.currency_id || userData?.organization_preferences?.default_currency || '',
+      currency_id: initialData?.currency_id || userData?.organization?.preferences?.default_currency || '',
       exchange_rate: initialData?.exchange_rate?.toString() || '',
       submitted_at: initialData?.submitted_at ? new Date(initialData.submitted_at) : (mode === 'create' ? new Date() : undefined),
       notes: initialData?.notes || ''
@@ -84,15 +84,15 @@ export function SubcontractBidFormModal({
   });
 
   useEffect(() => {
-    if (mode === 'create' && !initialData && userData?.organization_preferences?.default_currency) {
+    if (mode === 'create' && !initialData && userData?.organization?.preferences?.default_currency) {
       if (!form.watch('currency_id')) {
-        form.setValue('currency_id', userData.organization_preferences.default_currency);
+        form.setValue('currency_id', userData.organization.preferences.default_currency);
       }
       if (!form.watch('submitted_at')) {
         form.setValue('submitted_at', new Date());
       }
     }
-  }, [mode, initialData, userData?.organization_preferences?.default_currency, form]);
+  }, [mode, initialData, userData?.organization?.preferences?.default_currency, form]);
 
   useEffect(() => {
     
