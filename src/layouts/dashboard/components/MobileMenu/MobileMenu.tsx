@@ -459,7 +459,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 </div>
               )}
 
-              {(sidebarLevel === 'admin' || sidebarLevel === 'community' || sidebarLevel === 'learning' || sidebarLevel === 'general' || sidebarLevel === 'settings' || sidebarLevel === 'user') && (
+              {(sidebarLevel === 'admin' || sidebarLevel === 'community' || sidebarLevel === 'learning' || sidebarLevel === 'general' || sidebarLevel === 'settings') && (
                 <div className="flex-1" />
               )}
 
@@ -467,7 +467,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <Avatar 
                   className="h-12 w-12 cursor-pointer hover:opacity-80 transition-opacity border-0 ring-0"
                   onClick={() => {
-                    navigate('/profile');
+                    navigate('/user');
                     handleCloseMenu();
                   }}
                 >

@@ -68,7 +68,8 @@ import {
   CircleHelp,
   Globe,
   HandHeart,
-  FlaskConical
+  FlaskConical,
+  Star
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -266,11 +267,6 @@ export function LeftSidebar() {
         { id: 'courses', label: 'Cursos', icon: GraduationCap, href: '/learning/courses' },
         { id: 'community', label: 'Comunidad Discord', icon: MessageCircle, href: 'https://discord.com/channels/868615664070443008' },
       ];
-    } else if (sidebarLevel === 'user') {
-      return [
-        { id: 'user-settings', label: 'Configuración', icon: User, href: '/user' },
-        { id: 'landing', label: 'Página de Inicio', icon: Home, href: '/' },
-      ];
     }
     
     return [];
@@ -352,7 +348,6 @@ export function LeftSidebar() {
       case 'community': return 'Comunidad';
       case 'learning': return 'Capacitaciones';
       case 'admin': return 'Administración';
-      case 'user': return 'Usuario';
       case 'settings': return 'Ajustes';
       default: return '';
     }
@@ -478,21 +473,6 @@ export function LeftSidebar() {
                     // Descriptor de botones de contexto con sus configuraciones
                     const contextButtons = [
                       {
-                        id: 'community' as const,
-                        icon: <Globe className="h-5 w-5" />,
-                        testId: 'button-sidebar-community',
-                        onClick: () => {
-                          // Early return guard: prevent state mutation for restricted users
-                          if (!isAdmin) return;
-                          setSidebarLevel('community');
-                          navigate('/community/dashboard');
-                        },
-                        shouldRender: () => true,
-                        wrapper: (children: React.ReactNode) => (
-                          <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>{children}</RoleRestricted>
-                        ),
-                      },
-                      {
                         id: 'organization' as const,
                         icon: <Building className="h-5 w-5" />,
                         onClick: () => {
@@ -508,7 +488,27 @@ export function LeftSidebar() {
                           setSidebarLevel('project');
                           navigate('/project/dashboard');
                         },
-                        shouldRender: () => hasProjects && !!selectedProjectId, // Solo si hay proyectos
+                        shouldRender: () => hasProjects && !!selectedProjectId,
+                      },
+                      {
+                        id: 'founders' as const,
+                        icon: <Star className="h-5 w-5" />,
+                        testId: 'button-sidebar-founders',
+                        onClick: () => {},
+                        shouldRender: () => true,
+                        wrapper: (children: React.ReactNode) => (
+                          <ComingSoonRestricted>{children}</ComingSoonRestricted>
+                        ),
+                      },
+                      {
+                        id: 'community' as const,
+                        icon: <Globe className="h-5 w-5" />,
+                        testId: 'button-sidebar-community',
+                        onClick: () => {},
+                        shouldRender: () => true,
+                        wrapper: (children: React.ReactNode) => (
+                          <ComingSoonRestricted>{children}</ComingSoonRestricted>
+                        ),
                       },
                       {
                         id: 'learning' as const,
@@ -738,10 +738,7 @@ export function LeftSidebar() {
                 >
                   {/* Mi Perfil */}
                   <DropdownMenuItem
-                    onClick={() => {
-                      setSidebarLevel('user');
-                      navigate('/user');
-                    }}
+                    onClick={() => navigate('/user')}
                     className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
                     data-testid="button-profile"
                   >
@@ -807,77 +804,24 @@ export function LeftSidebar() {
                 <h2 className="text-lg font-semibold text-[var(--main-sidebar-fg)]">
                   {getContextTitle()}
                 </h2>
-                {/* Botón de anclar inline - solo icono (no mostrar en nivel user) */}
-                {sidebarLevel !== 'user' && (
-                  <button
-                    onClick={handleDockToggle}
-                    className="h-6 w-6 flex items-center justify-center rounded-md transition-colors group"
-                    title={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
-                    data-testid="button-dock-toggle"
-                  >
-                    {isDocked ? (
-                      <PanelLeftClose className="w-4 h-4 text-[var(--main-sidebar-fg)] group-hover:text-black dark:group-hover:text-black transition-colors" />
-                    ) : (
-                      <PanelLeftOpen className="w-4 h-4 text-[var(--main-sidebar-fg)] group-hover:text-black dark:group-hover:text-black transition-colors" />
-                    )}
-                  </button>
-                )}
+                {/* Botón de anclar inline - solo icono */}
+                <button
+                  onClick={handleDockToggle}
+                  className="h-6 w-6 flex items-center justify-center rounded-md transition-colors group"
+                  title={isDocked ? "Desanclar sidebar" : "Anclar sidebar"}
+                  data-testid="button-dock-toggle"
+                >
+                  {isDocked ? (
+                    <PanelLeftClose className="w-4 h-4 text-[var(--main-sidebar-fg)] group-hover:text-black dark:group-hover:text-black transition-colors" />
+                  ) : (
+                    <PanelLeftOpen className="w-4 h-4 text-[var(--main-sidebar-fg)] group-hover:text-black dark:group-hover:text-black transition-colors" />
+                  )}
+                </button>
               </div>
 
               {/* Botones de navegación */}
               <div className="flex flex-col gap-[2px] flex-1 overflow-y-auto">
-                {sidebarLevel === 'user' ? (
-                  // Renderizado especial para el nivel user con separador
-                  <>
-                    {/* Mi Perfil */}
-                    <ButtonSidebar
-                      icon={<User className="w-[18px] h-[18px]" />}
-                      label="Mi Perfil"
-                      isActive={location === '/user'}
-                      isExpanded={true}
-                      onClick={() => navigate('/user')}
-                      href="/user"
-                      variant="secondary"
-                    />
-                    
-                    {/* Espacio vacío simulando un botón */}
-                    <div className="h-9"></div>
-                    
-                    {/* Página de Inicio */}
-                    <ButtonSidebar
-                      icon={<Home className="w-[18px] h-[18px]" />}
-                      label="Página de Inicio"
-                      isActive={location === '/'}
-                      isExpanded={true}
-                      onClick={() => navigate('/')}
-                      href="/"
-                      variant="secondary"
-                    />
-                    
-                    {/* Cambiar Modo */}
-                    <ButtonSidebar
-                      icon={<Settings className="w-[18px] h-[18px]" />}
-                      label="Cambiar Modo"
-                      isActive={location === '/select-mode'}
-                      isExpanded={true}
-                      onClick={() => navigate('/select-mode')}
-                      href="/select-mode"
-                      variant="secondary"
-                    />
-                    
-                    {/* Cerrar Sesión */}
-                    <ButtonSidebar
-                      icon={<LogOut className="w-[18px] h-[18px]" />}
-                      label="Cerrar Sesión"
-                      isActive={false}
-                      isExpanded={true}
-                      onClick={handleLogout}
-                      variant="secondary"
-                    />
-                  </>
-                ) : (
-                  // Renderizado normal para otros niveles
-                  navigationItems.map((navItem) => {
+                {navigationItems.map((navItem) => {
                     if ('type' in navItem) return null;
                     
                     const item = navItem as SidebarItem;
@@ -921,8 +865,7 @@ export function LeftSidebar() {
                     } else {
                       return button;
                     }
-                  })
-                )}
+                  })}
               </div>
             </div>
           )}

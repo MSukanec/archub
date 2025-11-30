@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { User as UserIcon } from 'lucide-react';
 
 import { DashboardLayout as Layout } from "@/layouts";
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useNavigationStore } from '@/stores/navigationStore';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
 import UserBasicDataTab from './tabs/UserBasicDataTab';
@@ -14,11 +13,6 @@ import UserNotificationsTab from './tabs/UserNotificationsTab';
 export default function User() {
   const [activeTab, setActiveTab] = useState('basic-data');
   const { data: userData, isLoading } = useCurrentUser();
-  const { setSidebarLevel } = useNavigationStore();
-  
-  useEffect(() => {
-    setSidebarLevel('user');
-  }, [setSidebarLevel]);
 
   const tabs = [
     { id: 'basic-data', label: 'Datos Básicos', isActive: activeTab === 'basic-data' },

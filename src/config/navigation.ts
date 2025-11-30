@@ -25,7 +25,8 @@ import {
   Crown,
   Bell,
   Globe,
-  HandHeart
+  HandHeart,
+  Star
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -47,7 +48,7 @@ export interface NavigationSection {
 export type NavigationEntry = NavigationItem | NavigationSection;
 
 export interface ContextButton {
-  id: 'general' | 'community' | 'organization' | 'project' | 'learning' | 'admin' | 'user';
+  id: 'general' | 'community' | 'organization' | 'project' | 'learning' | 'admin' | 'founders';
   label: string;
   icon: React.ComponentType<any>;
   testId: string;
@@ -57,21 +58,6 @@ export interface ContextButton {
 }
 
 export const CONTEXT_BUTTONS: ContextButton[] = [
-  {
-    id: 'general',
-    label: 'Inicio',
-    icon: Home,
-    testId: 'button-sidebar-home',
-    href: '/home',
-  },
-  {
-    id: 'community',
-    label: 'Comunidad',
-    icon: Globe,
-    testId: 'button-sidebar-community',
-    href: '/community/dashboard',
-    restricted: 'coming_soon',
-  },
   {
     id: 'organization',
     label: 'Organización',
@@ -85,6 +71,22 @@ export const CONTEXT_BUTTONS: ContextButton[] = [
     icon: FolderOpen,
     testId: 'button-sidebar-project',
     href: '/project/dashboard',
+  },
+  {
+    id: 'founders',
+    label: 'Fundadores',
+    icon: Star,
+    testId: 'button-sidebar-founders',
+    href: '/founders/dashboard',
+    restricted: 'coming_soon',
+  },
+  {
+    id: 'community',
+    label: 'Comunidad',
+    icon: Globe,
+    testId: 'button-sidebar-community',
+    href: '/community/dashboard',
+    restricted: 'coming_soon',
   },
   {
     id: 'learning',
@@ -101,23 +103,16 @@ export const CONTEXT_BUTTONS: ContextButton[] = [
     href: '/admin/dashboard',
     adminOnly: true,
   },
-  {
-    id: 'user',
-    label: 'Usuario',
-    icon: User,
-    testId: 'button-sidebar-user',
-    href: '/user',
-  },
 ];
 
 export const ORGANIZATION_NAVIGATION: NavigationItem[] = [
   { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard', testId: 'nav-org-dashboard' },
   { id: 'basic-data', label: 'Datos Básicos', icon: Building, href: '/organization/basic-data', testId: 'nav-org-basic-data' },
   { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects', testId: 'nav-org-projects' },
+  { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts', testId: 'nav-org-contacts' },
   { id: 'members', label: 'Miembros', icon: Users, href: '/organization/members', testId: 'nav-org-members' },
   { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', restricted: 'lab_user', testId: 'nav-org-partners' },
   { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing', testId: 'nav-org-billing' },
-  { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts', testId: 'nav-org-contacts' },
   { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs', testId: 'nav-org-expenses' },
   { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', testId: 'nav-org-analysis' },
   { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'lab_user', testId: 'nav-org-finances' },
@@ -162,12 +157,8 @@ export const LEARNING_NAVIGATION: NavigationItem[] = [
   { id: 'community', label: 'Comunidad Discord', icon: MessageCircle, href: 'https://discord.com/channels/868615664070443008', testId: 'nav-learning-discord' },
 ];
 
-export const USER_NAVIGATION: NavigationItem[] = [
-  { id: 'user-settings', label: 'Configuración', icon: User, href: '/user', testId: 'nav-user-settings' },
-  { id: 'landing', label: 'Página de Inicio', icon: Home, href: '/', testId: 'nav-user-landing' },
-];
 
-export type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning' | 'user';
+export type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning' | 'founders';
 
 export interface GetNavigationItemsParams {
   sidebarLevel: SidebarLevel;
@@ -199,8 +190,6 @@ export function getNavigationItems(params: GetNavigationItemsParams): Navigation
       return COMMUNITY_NAVIGATION;
     case 'learning':
       return LEARNING_NAVIGATION;
-    case 'user':
-      return USER_NAVIGATION;
     default:
       return [];
   }
@@ -240,7 +229,6 @@ export function getContextTitle(sidebarLevel: SidebarLevel): string {
     case 'community': return 'Comunidad';
     case 'learning': return 'Capacitaciones';
     case 'admin': return 'Administración';
-    case 'user': return 'Usuario';
     case 'general': return 'Menú';
     default: return 'Menú';
   }
