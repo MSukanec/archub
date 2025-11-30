@@ -26,7 +26,10 @@ export { SupportPanel } from './components/support/SupportPanel';
 
 // Plan Components
 export { default as PlanBadge } from './components/plans/PlanBadge';
-export { PlanRestricted } from './components/plans/PlanRestricted';
+export { PlanRestricted } from '@/components/shared/restrictions';
+
+// Restriction Components (re-export from new architecture)
+export { RoleRestricted, ContextRestricted, RestrictionOverlay, EmptyStateBlock } from '@/components/shared/restrictions';
 
 // Announcement Components
 export { GlobalAnnouncement, AnnouncementProvider, useAnnouncementBanner } from './components/announcements/GlobalAnnouncement';
