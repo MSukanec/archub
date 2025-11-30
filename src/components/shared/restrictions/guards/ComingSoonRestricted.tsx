@@ -24,10 +24,10 @@ export function ComingSoonRestricted({ children }: ComingSoonRestrictedProps) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="relative">
+          <div className="relative flex items-center justify-center">
             {childElement}
-            {/* Badge de candado NEGRO en la esquina superior derecha */}
-            <div className="absolute -top-2 -right-2 bg-black dark:bg-gray-900 rounded-full p-1 flex items-center justify-center border border-white dark:border-gray-800">
+            {/* Badge de candado NEGRO centrado */}
+            <div className="absolute bg-black dark:bg-gray-900 rounded-full p-1 flex items-center justify-center border border-white dark:border-gray-800">
               <Lock className="w-3 h-3 text-white" />
             </div>
           </div>
