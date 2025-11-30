@@ -23,7 +23,7 @@ const ERROR_HTML = (message: string, detail?: string) => `
       <p>${message}</p>
       ${detail ? `<p style="color: #6b7280; font-size: 0.875rem; margin-top: 1rem;">${detail}</p>` : ''}
       <p style="margin-top: 1rem;">
-        <a href="/organization/billing" style="color: #2563eb; text-decoration: none;">Volver a Facturación</a>
+        <a href="/settings/billing" style="color: #2563eb; text-decoration: none;">Volver a Facturación</a>
       </p>
     </div>
   </body>
@@ -52,7 +52,7 @@ const SUCCESS_HTML = `
     </style>
     <script>
       setTimeout(() => {
-        window.location.href = '/organization/billing?payment=success';
+        window.location.href = '/settings/billing?payment=success';
       }, 2000);
     </script>
   </body>

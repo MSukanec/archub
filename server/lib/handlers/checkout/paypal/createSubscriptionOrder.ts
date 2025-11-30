@@ -140,8 +140,8 @@ export async function createSubscriptionOrder(
     // Format: user_id|plan_id|organization_id|billing_period (~118 chars)
     const custom_id = `${user_id}|${productId}|${organization_id}|${billing_period}`;
 
-    const return_url = `${returnBase}/api/paypal/capture-subscription`;
-    const cancel_url = `${returnBase}/organization/billing?payment=cancelled`;
+    const return_url = `${returnBase}/api/checkout/paypal/capture-subscription`;
+    const cancel_url = `${returnBase}/settings/billing?payment=cancelled`;
 
     const orderBody = {
       intent: "CAPTURE",
