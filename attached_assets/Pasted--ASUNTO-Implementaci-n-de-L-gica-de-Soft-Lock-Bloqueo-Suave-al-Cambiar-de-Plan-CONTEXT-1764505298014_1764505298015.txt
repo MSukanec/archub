@@ -1,0 +1,38 @@
+**ASUNTO:** Implementación de Lógica de "Soft-Lock" (Bloqueo Suave) al Cambiar de Plan.
+
+**CONTEXTO:**
+Cuando una organización cambia de plan (especialmente un downgrade), es posible que su uso actual de recursos (cantidad de proyectos, cantidad de miembros) exceda los límites del nuevo plan.
+Ya hemos agregado una columna booleana `is_over_limit` en las tablas `projects` y `organization_members` en Supabase.
+
+**OBJETIVO TÉCNICO:**
+Crear una función de servicio en el backend que sea capaz de "reconciliar" el estado de una organización con los límites de su plan actual. Esta función debe ejecutarse inmediatamente después de cualquier cambio de plan exitoso.
+
+**REQUISITOS ESPECÍFICOS:**
+
+**1. Nueva Función de Servicio (`server/services/planLimits.ts`):**
+* Nombre sugerido: `reconcileOrganizationPlanLimits(organizationId: string, newPlanSlug: string)`
+* Debe leer la configuración de límites del plan (definida en `src/features/shared-content/pricing/data/plans-config.ts` o su equivalente en el backend).
+
+**2. Lógica para PROYECTOS:**
+* Obtener el límite de proyectos del `newPlanSlug` (ej. Free = 2, Pro = 50, Teams = -1/ilimitado).
+* Si es ilimitado: Ejecutar un UPDATE en `projects` seteando `is_over_limit = FALSE` para TODOS los proyectos de esa organización. (Desbloquear todo).
+* Si tiene límite (ej. N):
+    * Consultar todos los proyectos de la organización, ordenados por fecha de creación descendente (los más nuevos primero).
+    * Los primeros N proyectos se marcan como `is_over_limit = FALSE` (se mantienen activos).
+    * Todos los proyectos restantes (del N+1 en adelante) se marcan como `is_over_limit = TRUE` (se bloquean).
+
+**3. Lógica para MIEMBROS:**
+* Obtener límite de miembros (ej. Free = 1, Pro = 1, Teams = -1).
+* Si es ilimitado (Teams): Setear `is_over_limit = FALSE` para todos los miembros.
+* Si tiene límite (ej. N=1 para Free/Pro):
+    * Identificar al dueño/creador de la organización (siempre debe quedar activo) o al miembro más antiguo. Mantenerlo con `is_over_limit = FALSE`.
+    * Marcar a TODOS los demás miembros como `is_over_limit = TRUE`.
+
+**4. Integración (Puntos de llamada):**
+* Esta función `reconcileOrganizationPlanLimits` debe ser llamada en dos lugares críticos:
+    1.  Al final de `upgradeOrganizationPlan` (cuando un pago se procesa exitosamente).
+    2.  Al final del nuevo Cron Job que ejecuta downgrades (`server/cron/jobs/execute-scheduled-downgrades.ts`), si el downgrade fue exitoso.
+
+**ENTREGABLES:**
+* El archivo del servicio `server/services/planLimits.ts` con la lógica de marcado.
+* La integración de la llamada a esta función en los flujos de upgrade y downgrade.
