@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { applyPlanLimits } from "./plan-limits.js";
+import { upsertEnrollment } from "./enrollments.js";
 
 export type ScheduledDowngradeParams = {
   organizationId: string;
@@ -232,7 +233,87 @@ export type SubscriptionUpgradeParams = {
   paymentId: string;
   amount: number;
   currency: string;
+  userId?: string | null;
 };
+
+/**
+ * Apply Founders Program benefits for annual subscribers.
+ * - Marks organization as founder in settings
+ * - Enrolls the paying user in the bonus course with lifetime access
+ */
+async function applyFoundersProgram(
+  supabase: SupabaseClient,
+  organizationId: string,
+  userId: string,
+  billingPeriod: 'monthly' | 'annual'
+): Promise<void> {
+  if (billingPeriod !== 'annual') {
+    return;
+  }
+
+  console.log('[Founders] 🎉 Annual subscription detected, applying Founders Program...');
+
+  try {
+    const { data: org, error: orgFetchError } = await supabase
+      .from('organizations')
+      .select('settings')
+      .eq('id', organizationId)
+      .single();
+
+    if (orgFetchError) {
+      console.error('[Founders] ❌ Error fetching organization:', orgFetchError);
+      return;
+    }
+
+    const existingSettings = (org?.settings as Record<string, any>) || {};
+    
+    if (existingSettings.is_founder) {
+      console.log('[Founders] ℹ️ Organization already marked as founder, skipping mark');
+    } else {
+      const { error: updateError } = await supabase
+        .from('organizations')
+        .update({
+          settings: {
+            ...existingSettings,
+            is_founder: true,
+            founder_since: new Date().toISOString(),
+          }
+        })
+        .eq('id', organizationId);
+
+      if (updateError) {
+        console.error('[Founders] ❌ Error marking organization as founder:', updateError);
+      } else {
+        console.log('[Founders] ✅ Organization marked as founder');
+      }
+    }
+
+    const { data: appSetting, error: settingError } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'founder_bonus_course_id')
+      .maybeSingle();
+
+    if (settingError || !appSetting?.value) {
+      console.warn('[Founders] ⚠️ No founder_bonus_course_id configured in app_settings');
+      return;
+    }
+
+    const bonusCourseId = appSetting.value;
+    console.log('[Founders] 📚 Enrolling user in bonus course:', bonusCourseId);
+
+    const enrollResult = await upsertEnrollment(supabase, userId, bonusCourseId, null);
+    
+    if (enrollResult.success) {
+      console.log('[Founders] ✅ User enrolled in bonus course with lifetime access');
+    } else {
+      console.error('[Founders] ❌ Error enrolling user:', enrollResult.error);
+    }
+
+  } catch (error: any) {
+    console.error('[Founders] ❌ Unexpected error in applyFoundersProgram:', error.message);
+  }
+}
 
 export async function upgradeOrganizationPlan(
   supabase: SupabaseClient,
@@ -355,5 +436,15 @@ export async function upgradeOrganizationPlan(
   if (orgError) {
     console.error('❌ [subscriptions] ERROR updating organization:', orgError);
     throw orgError;
+  }
+
+  // Apply Founders Program benefits for annual subscribers
+  if (params.userId && params.billingPeriod === 'annual') {
+    await applyFoundersProgram(
+      supabase,
+      params.organizationId,
+      params.userId,
+      params.billingPeriod
+    );
   }
 }

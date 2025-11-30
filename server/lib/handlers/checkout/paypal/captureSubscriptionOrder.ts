@@ -184,6 +184,7 @@ export async function captureSubscriptionOrder(
           paymentId: paymentResult.paymentId, // ✅ Use UUID from payments table
           amount: amountValue ? parseFloat(amountValue) : 0,
           currency: currencyCode || "USD",
+          userId: publicUserId, // ✅ For Founders Program
         });
 
         upgraded = true;

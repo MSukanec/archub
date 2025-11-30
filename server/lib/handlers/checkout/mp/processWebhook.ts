@@ -200,6 +200,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
                 paymentId: subPaymentResult.paymentId, // ✅ UUID from payments table
                 amount: amount,
                 currency: currency,
+                userId: publicUserId, // ✅ For Founders Program
               });
             } else if (!subPaymentResult.inserted) {
               // Duplicate webhook - payment already processed
@@ -396,6 +397,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
                   paymentId: moSubPaymentResult.paymentId, // ✅ UUID from payments table
                   amount: amount,
                   currency: "ARS",
+                  userId: moPublicUserId, // ✅ For Founders Program
                 });
               } else if (!moSubPaymentResult.inserted) {
                 // Duplicate merchant_order webhook - payment already processed

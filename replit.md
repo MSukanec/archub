@@ -42,6 +42,7 @@ Preferred communication style: Simple, everyday language.
 - **Delete/Replace Pattern**: Universal delete confirmation modal with optional replace functionality, enabling zero-downtime deletion with data migration.
 - **Universal Import System**: 5-step wizard with reusable hooks for parsing, auto-mapping, validation, and AI-powered suggestions (GPT-4o mini).
 - **Subscription Expiry Notification System**: Scheduled daily job for multi-recipient email notifications before and on subscription expiry, with idempotency.
+- **Founders Program**: Annual subscribers (PRO/TEAMS) receive permanent founder status (`organizations.settings.is_founder`) and lifetime access to bonus course via `app_settings.founder_bonus_course_id`. Integrated into `upgradeOrganizationPlan` for both PayPal and MercadoPago flows.
 - **Lab Neural Network Renderer System**: Extensible node rendering architecture for neural network graphs.
 
 ## External Dependencies
