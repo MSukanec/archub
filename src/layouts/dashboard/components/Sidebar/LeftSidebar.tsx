@@ -217,6 +217,7 @@ export function LeftSidebar() {
         { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects' },
         { id: 'members', label: 'Miembros', icon: Users, href: '/organization/members' },
         { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners' },
+        { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing' },
         { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
         { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
         { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'coming_soon' },
@@ -283,7 +284,6 @@ export function LeftSidebar() {
           items: [
             { id: 'user-basic-data', label: 'Datos Básicos', icon: User, href: '/settings/user-basic-data' },
             { id: 'user-preferences', label: 'Preferencias', icon: Settings, href: '/settings/user-preferences' },
-            { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/settings/billing' },
             { id: 'user-organizations', label: 'Organizaciones', icon: Building, href: '/settings/user-organizations' },
             { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/settings/notifications' },
           ]
@@ -631,7 +631,7 @@ export function LeftSidebar() {
                 isActive={sidebarLevel === 'settings'}
                 onClick={() => {
                   setSidebarLevel('settings');
-                  navigate('/settings/billing');
+                  navigate('/settings/user-basic-data');
                 }}
                 title="Ajustes"
                 testId="sidebar-button-settings"

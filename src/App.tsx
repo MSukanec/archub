@@ -113,7 +113,7 @@ import FinancesPage from "@/pages/finances/Finances";
 
 // Settings Pages
 import PricingPlan from "@/pages/settings/PricingPlan";
-import Billing from "@/pages/settings/Billing";
+import Billing from "@/pages/billing/Billing";
 import Members from "@/pages/members/Members";
 import Partners from "@/pages/partners/Partners";
 import OrganizationActivity from "@/pages/settings/OrganizationActivity";
@@ -229,7 +229,7 @@ function Router() {
         <Route path="/community" component={Community} />
 
         {/* Settings Routes */}
-        <Route path="/settings/billing" component={Billing} />
+        <Route path="/organization/billing" component={Billing} />
         <Route path="/organization/members" component={Members} />
         <Route path="/organization/partners" component={Partners} />
         <Route path="/settings/organization-activity" component={OrganizationActivity} />

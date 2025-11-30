@@ -1,0 +1,826 @@
+import { useEffect, useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { useProjectContext } from '@/stores/projectContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, RefreshCw, Activity } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import { InvoicePDF } from '@/features/pdf';
+import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser, refreshCurrentUserCache } from '@/hooks/use-current-user';
+import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useGlobalModalStore } from '@/components/modal';
+import { useLocation } from 'wouter';
+
+interface OrganizationSubscription {
+  id: string;
+  plan_id: string;
+  status: string;
+  billing_period: string;
+  started_at: string;
+  expires_at: string;
+  amount: number;
+  currency: string;
+  scheduled_downgrade_plan_id?: string | null;
+  plans: {
+    name: string;
+    slug: string;
+  };
+  scheduled_downgrade_plan?: {
+    name: string;
+    slug: string;
+  } | null;
+}
+
+interface Payment {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  payment_method: string;
+  provider: string;
+  provider_payment_id: string;
+  payer_email: string;
+  created_at: string;
+}
+
+interface NextInvoice {
+  seats: number;
+  pricePerSeat: number;
+  baseAmount: number;
+  prorationAdjustment: number;
+  totalAmount: number;
+  currency: string;
+  nextBillingDate: string | null;
+}
+
+export function BillingListTab() {
+  const { currentOrganizationId } = useProjectContext();
+  const { toast } = useToast();
+  const { data: userData } = useCurrentUser();
+  const { openModal } = useGlobalModalStore();
+  const [location, setLocation] = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get('payment');
+
+    if (paymentStatus && currentOrganizationId) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('payment');
+      url.searchParams.delete('collection_id');
+      url.searchParams.delete('collection_status');
+      url.searchParams.delete('payment_id');
+      url.searchParams.delete('status');
+      url.searchParams.delete('external_reference');
+      url.searchParams.delete('payment_type');
+      url.searchParams.delete('merchant_order_id');
+      url.searchParams.delete('preference_id');
+      url.searchParams.delete('site_id');
+      url.searchParams.delete('processing_mode');
+      url.searchParams.delete('merchant_account_id');
+      window.history.replaceState({}, '', url.pathname);
+
+      if (paymentStatus === 'success') {
+        refreshCurrentUserCache(queryClient).then(() => {
+          queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
+          queryClient.invalidateQueries({ queryKey: ['subscription-payments', currentOrganizationId] });
+          queryClient.invalidateQueries({ queryKey: ['organization', currentOrganizationId] });
+          queryClient.invalidateQueries({ queryKey: ['subscription-activity', currentOrganizationId] });
+        });
+        
+        openModal('payment-feedback', {
+          type: 'success',
+          planName: userData?.organization?.plan?.name,
+          isFounder: userData?.organization?.settings?.is_founder || false,
+        });
+      } else if (paymentStatus === 'cancelled') {
+        openModal('payment-feedback', {
+          type: 'cancelled',
+        });
+      }
+    }
+  }, [currentOrganizationId, openModal, userData]);
+
+  const { data: subscription, isLoading: subscriptionLoading, error: subscriptionError, refetch: refetchSubscription } = useQuery<OrganizationSubscription | null>({
+    queryKey: ['current-subscription', currentOrganizationId],
+    queryFn: async () => {
+      if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
+
+      const { data, error} = await supabase
+        .from('organization_subscriptions')
+        .select(`
+          id,
+          plan_id,
+          status,
+          billing_period,
+          started_at,
+          expires_at,
+          amount,
+          currency,
+          plans!plan_id(name, slug)
+        `)
+        .eq('organization_id', currentOrganizationId)
+        .eq('status', 'active')
+        .gt('expires_at', new Date().toISOString())
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      if (data) {
+        try {
+          const { data: fullData } = await supabase
+            .from('organization_subscriptions')
+            .select('scheduled_downgrade_plan_id')
+            .eq('id', data.id)
+            .maybeSingle();
+          
+          if (fullData?.scheduled_downgrade_plan_id) {
+            (data as any).scheduled_downgrade_plan_id = fullData.scheduled_downgrade_plan_id;
+            
+            const { data: scheduledPlan } = await supabase
+              .from('plans')
+              .select('name, slug')
+              .eq('id', fullData.scheduled_downgrade_plan_id)
+              .maybeSingle();
+            
+            if (scheduledPlan) {
+              (data as any).scheduled_downgrade_plan = scheduledPlan;
+            }
+          }
+        } catch (err) {
+          console.log('Note: scheduled_downgrade_plan_id column not yet in database');
+        }
+      }
+      
+      return data as any;
+    },
+    enabled: !!currentOrganizationId && !!supabase,
+  });
+
+  const { data: payments = [], isLoading: paymentsLoading, error: paymentsError, refetch: refetchPayments } = useQuery<Payment[]>({
+    queryKey: ['subscription-payments', currentOrganizationId],
+    queryFn: async () => {
+      if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
+
+      const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('organization_id', currentOrganizationId)
+        .eq('product_type', 'subscription')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!currentOrganizationId && !!supabase,
+  });
+
+  const { data: organization } = useQuery<{ name: string; logo_url: string | null; plan_id: string | null; plans: { name: string; slug: string } | null }>({
+    queryKey: ['organization', currentOrganizationId],
+    queryFn: async () => {
+      if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
+
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('name, image_bucket, image_path, plan_id, plans(name, slug)')
+        .eq('is_deleted', false)
+        .eq('id', currentOrganizationId)
+        .single();
+
+      if (error) throw error;
+      
+      let logo_url: string | null = null;
+      if (data?.image_bucket && data?.image_path) {
+        const { data: urlData } = supabase.storage
+          .from(data.image_bucket)
+          .getPublicUrl(data.image_path);
+        logo_url = urlData.publicUrl;
+      }
+      
+      return { ...data, logo_url } as any;
+    },
+    enabled: !!currentOrganizationId && !!supabase,
+  });
+
+  const planSlug = organization?.plans?.slug || subscription?.plans?.slug || 'free';
+  const isTeamsPlan = planSlug === 'teams';
+
+  const { data: nextInvoice } = useQuery<NextInvoice>({
+    queryKey: ['/api/billing/next-invoice', currentOrganizationId],
+    enabled: !!currentOrganizationId && isTeamsPlan,
+  });
+
+  const { data: billingCycles = [] } = useQuery<any[]>({
+    queryKey: ['/api/billing/cycles', currentOrganizationId],
+    enabled: !!currentOrganizationId && isTeamsPlan,
+  });
+
+  interface SubscriptionActivity {
+    id: string;
+    type: 'payment' | 'subscription' | 'founder';
+    description: string;
+    status: 'success' | 'pending' | 'error';
+    amount?: number;
+    currency?: string;
+    provider?: string;
+    created_at: string;
+  }
+
+  const { data: subscriptionActivity = [], isLoading: activityLoading } = useQuery<SubscriptionActivity[]>({
+    queryKey: ['subscription-activity', currentOrganizationId],
+    queryFn: async () => {
+      if (!supabase || !currentOrganizationId) return [];
+
+      const activities: SubscriptionActivity[] = [];
+
+      const { data: recentPayments } = await supabase
+        .from('payments')
+        .select('id, provider_payment_id, amount, currency, status, provider, created_at, product_type')
+        .eq('organization_id', currentOrganizationId)
+        .eq('product_type', 'subscription')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (recentPayments) {
+        for (const payment of recentPayments) {
+          activities.push({
+            id: `payment-${payment.id}`,
+            type: 'payment',
+            description: `Pago procesado via ${payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago'}`,
+            status: payment.status === 'completed' ? 'success' : payment.status === 'pending' ? 'pending' : 'error',
+            amount: payment.amount,
+            currency: payment.currency,
+            provider: payment.provider,
+            created_at: payment.created_at,
+          });
+        }
+      }
+
+      const { data: recentSubs } = await supabase
+        .from('organization_subscriptions')
+        .select('id, status, billing_period, amount, currency, created_at, plans!plan_id(name)')
+        .eq('organization_id', currentOrganizationId)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (recentSubs) {
+        for (const sub of recentSubs) {
+          const planName = (sub.plans as any)?.name || 'Plan';
+          activities.push({
+            id: `sub-${sub.id}`,
+            type: 'subscription',
+            description: `Suscripción ${planName} (${sub.billing_period === 'annual' ? 'Anual' : 'Mensual'}) ${sub.status === 'active' ? 'activada' : sub.status === 'cancelled' ? 'cancelada' : 'procesada'}`,
+            status: sub.status === 'active' ? 'success' : sub.status === 'cancelled' ? 'error' : 'pending',
+            amount: sub.amount,
+            currency: sub.currency,
+            created_at: sub.created_at,
+          });
+        }
+      }
+
+      return activities
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 10);
+    },
+    enabled: !!currentOrganizationId && !!supabase,
+  });
+
+  const cancelSubscriptionMutation = useMutation({
+    mutationFn: async (subscriptionId: string) => {
+      return await apiRequest('POST', `/api/subscriptions/${subscriptionId}/cancel`);
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Suscripción cancelada',
+        description: 'Tu suscripción ha sido cancelada. Mantendrás acceso hasta la fecha de expiración.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
+      queryClient.invalidateQueries({ queryKey: ['subscription-payments', currentOrganizationId] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo cancelar la suscripción',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const planName = organization?.plans?.name || subscription?.plans?.name || 'Free';
+  const billingPeriod = subscription?.billing_period === 'monthly' ? 'mes' : 'año';
+  const amount = subscription?.amount || 0;
+  const currency = subscription?.currency || 'USD';
+  const expiresAt = subscription?.expires_at;
+  const subscriptionStatus = subscription?.status || 'free';
+
+  const isFreePlan = planSlug === 'free';
+  const isCancelled = subscriptionStatus === 'cancelled';
+  const isActive = subscriptionStatus === 'active';
+
+  const getPlanBadgeClass = (slug: string) => {
+    const classes: Record<string, string> = {
+      'free': 'plan-card-free',
+      'pro': 'plan-card-pro',
+      'teams': 'plan-card-teams',
+      'enterprise': 'plan-card-enterprise',
+    };
+    return classes[slug.toLowerCase()] || classes['free'];
+  };
+
+  const getNextPlan = () => {
+    const planHierarchy: Record<string, { slug: string; name: string } | null> = {
+      'free': { slug: 'pro', name: 'PRO' },
+      'pro': { slug: 'teams', name: 'TEAMS' },
+      'teams': { slug: 'enterprise', name: 'ENTERPRISE' },
+      'enterprise': null,
+    };
+    return planHierarchy[planSlug.toLowerCase()] || null;
+  };
+
+  const columns = [
+    {
+      key: 'invoice',
+      label: 'Factura',
+      width: '25%',
+      render: (payment: Payment) => (
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-sm">
+                #{payment.provider_payment_id?.slice(0, 12) || payment.id.slice(0, 12)}
+              </span>
+              <Badge variant="secondary" className="text-xs bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
+                Pagado
+              </Badge>
+            </div>
+          </div>
+          {organization && (
+            <PDFDownloadLink
+              document={
+                <InvoicePDF
+                  payment={payment}
+                  subscription={subscription ?? null}
+                  organization={organization}
+                />
+              }
+              fileName={`factura-${payment.provider_payment_id?.slice(0, 12) || payment.id.slice(0, 12)}.pdf`}
+            >
+              {({ loading }) => (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 w-8 p-0"
+                  disabled={loading}
+                  data-testid={`button-download-invoice-${payment.id}`}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              )}
+            </PDFDownloadLink>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'date',
+      label: 'Fecha',
+      width: '20%',
+      render: (payment: Payment) => (
+        <span className="text-sm">
+          {format(new Date(payment.created_at), 'dd MMM yyyy', { locale: es })}
+        </span>
+      ),
+    },
+    {
+      key: 'amount',
+      label: 'Monto',
+      width: '15%',
+      render: (payment: Payment) => (
+        <span className="text-sm font-medium">
+          {currency} ${parseFloat(payment.amount.toString()).toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      key: 'plan',
+      label: 'Plan',
+      width: '20%',
+      render: () => (
+        <span className="text-sm">{planName}</span>
+      ),
+    },
+    {
+      key: 'method',
+      label: 'Método',
+      width: '20%',
+      render: (payment: Payment) => (
+        <div className="flex items-center gap-2">
+          <img 
+            src={payment.provider === 'paypal' ? '/Paypal_2014_logo.png' : '/MercadoPago_logo.png'}
+            alt={payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
+            className="h-4 w-auto object-contain"
+          />
+          <span className="text-sm">
+            {payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
+          </span>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {subscriptionError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error al cargar la suscripción</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>No se pudo cargar la información de tu suscripción. Por favor, intenta nuevamente.</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => refetchSubscription()}
+              className="ml-4"
+              data-testid="button-retry-subscription"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reintentar
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {paymentsError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error al cargar pagos</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>No se pudo cargar el historial de pagos. Por favor, intenta nuevamente.</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => refetchPayments()}
+              className="ml-4"
+              data-testid="button-retry-payments"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reintentar
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <StatCard>
+          <div className="flex items-center justify-between mb-4">
+            <CardTitle className="text-lg">Plan Actual</CardTitle>
+            <Badge 
+              className={`text-xs text-white ${getPlanBadgeClass(planSlug)}`}
+            >
+              {planName}
+            </Badge>
+          </div>
+          <CardDescription className="mb-4">
+            Tu plan de suscripción y detalles de facturación
+          </CardDescription>
+          
+          {subscriptionLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-12 w-32" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : (
+            <>
+              <div className="flex items-baseline gap-2 mb-4">
+                <span className="text-3xl font-bold">${amount}</span>
+                <span className="text-muted-foreground">/ {billingPeriod}</span>
+              </div>
+              
+              <div className="space-y-2 mb-4">
+                {expiresAt && !isFreePlan && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      {isCancelled ? 'Expira el:' : 'Próxima renovación:'}
+                    </span>
+                    <span className="font-medium">
+                      {format(new Date(expiresAt), 'dd MMM yyyy', { locale: es })}
+                    </span>
+                  </div>
+                )}
+
+                {isCancelled && (
+                  <div className="bg-muted p-3 rounded-lg">
+                    <p className="text-xs text-muted-foreground">
+                      Tu suscripción está cancelada. Mantendrás acceso a las funciones premium hasta la fecha de expiración.
+                    </p>
+                  </div>
+                )}
+
+                {subscription?.scheduled_downgrade_plan_id && subscription?.scheduled_downgrade_plan && (
+                  <div className="bg-orange-100 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 p-3 rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-xs bg-orange-200 dark:bg-orange-900 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700">
+                        Cambio Programado
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-orange-700 dark:text-orange-400">
+                      Tu plan cambiará a <strong>{subscription.scheduled_downgrade_plan.name}</strong> {expiresAt ? `el ${format(new Date(expiresAt), 'dd MMM yyyy', { locale: es })}` : 'al final del ciclo actual'}.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                {isActive && (
+                  <Button 
+                    variant="secondary" 
+                    className="w-full" 
+                    onClick={() => {
+                      openModal('delete-confirmation', {
+                        mode: 'dangerous',
+                        title: 'Cancelar Suscripción',
+                        description: `¿Estás seguro que deseas cancelar tu suscripción al plan ${planName}? Mantendrás acceso hasta ${expiresAt ? format(new Date(expiresAt), 'dd MMM yyyy', { locale: es }) : 'el final del período de facturación'}. Después de esa fecha, tu plan volverá a Free.`,
+                        itemName: 'CANCELAR',
+                        destructiveActionText: 'Cancelar Suscripción',
+                        onConfirm: () => {
+                          if (subscription?.id) {
+                            cancelSubscriptionMutation.mutate(subscription.id);
+                          }
+                        },
+                        isLoading: cancelSubscriptionMutation.isPending
+                      });
+                    }}
+                    data-testid="button-cancel-subscription"
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Cancelar Suscripción
+                  </Button>
+                )}
+                
+                {getNextPlan() && (
+                  <Button 
+                    className={cn(
+                      "w-full text-white",
+                      `plan-card-${getNextPlan()?.slug}`
+                    )}
+                    onClick={() => setLocation('/settings/pricing-plan')}
+                    data-testid="button-upgrade-plan"
+                  >
+                    <ArrowUpCircle className="w-4 h-4 mr-2" />
+                    {isFreePlan ? 'Mejorar Plan' : `Mejorar a ${getNextPlan()?.name}`}
+                  </Button>
+                )}
+              </div>
+            </>
+          )}
+        </StatCard>
+
+        <StatCard>
+          <CardTitle className="text-lg mb-4">Método de Pago</CardTitle>
+          <CardDescription className="mb-4">
+            Administra tu información de pago
+          </CardDescription>
+          
+          {subscriptionLoading || paymentsLoading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          ) : isFreePlan ? (
+            <div className="text-sm text-muted-foreground">
+              No hay método de pago configurado para el plan Free
+            </div>
+          ) : payments.length > 0 ? (
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-16 rounded-md bg-white dark:bg-gray-800 border border-border flex items-center justify-center p-1">
+                <img 
+                  src={payments[0].provider === 'paypal' ? '/Paypal_2014_logo.png' : '/MercadoPago_logo.png'}
+                  alt={payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="flex-1">
+                <div className="font-medium text-sm">
+                  {payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {payments[0].payer_email}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">
+              No hay métodos de pago registrados
+            </div>
+          )}
+        </StatCard>
+      </div>
+
+      {isTeamsPlan && (
+        <div className="space-y-6">
+          {nextInvoice && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Próxima Factura Estimada</CardTitle>
+                <CardDescription>
+                  Resumen de tu próxima facturación basada en tus miembros activos
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm text-muted-foreground">Miembros facturables:</span>
+                    <span className="font-medium">{nextInvoice.seats}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm text-muted-foreground">Precio por asiento:</span>
+                    <span className="font-medium">{nextInvoice.currency} ${nextInvoice.pricePerSeat.toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm text-muted-foreground">Monto base:</span>
+                    <span className="font-medium">{nextInvoice.currency} ${nextInvoice.baseAmount.toFixed(2)}</span>
+                  </div>
+                  {nextInvoice.prorationAdjustment !== 0 && (
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm text-muted-foreground">Ajuste de prorrateo:</span>
+                      <span className={cn(
+                        "font-medium",
+                        nextInvoice.prorationAdjustment > 0 ? "text-orange-600" : "text-green-600"
+                      )}>
+                        {nextInvoice.prorationAdjustment > 0 ? '+' : ''}
+                        {nextInvoice.currency} ${nextInvoice.prorationAdjustment.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between py-2 border-t pt-4">
+                    <span className="font-semibold">Total:</span>
+                    <span className="text-2xl font-bold">{nextInvoice.currency} ${nextInvoice.totalAmount.toFixed(2)}</span>
+                  </div>
+                  {nextInvoice.nextBillingDate && (
+                    <div className="text-sm text-muted-foreground text-center">
+                      Próxima fecha de facturación: {format(new Date(nextInvoice.nextBillingDate), 'dd MMM yyyy', { locale: es })}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {billingCycles.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Historial de Ciclos de Facturación</CardTitle>
+                <CardDescription>
+                  Últimos 12 ciclos de facturación con detalles de asientos
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Período</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Asientos</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Monto</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {billingCycles.map((cycle: any) => (
+                        <tr key={cycle.id} className="border-b last:border-0">
+                          <td className="py-3 px-4 text-sm">
+                            {format(new Date(cycle.period_start), 'dd MMM', { locale: es })} - {format(new Date(cycle.period_end), 'dd MMM yyyy', { locale: es })}
+                          </td>
+                          <td className="py-3 px-4 text-sm">
+                            {cycle.billed_seats} facturado{cycle.billed_seats !== cycle.seats ? ` (${cycle.seats} en org)` : ''}
+                          </td>
+                          <td className="py-3 px-4 text-sm font-medium">
+                            {cycle.currency_code} ${parseFloat(cycle.total_amount).toFixed(2)}
+                          </td>
+                          <td className="py-3 px-4">
+                            <Badge variant={cycle.status === 'paid' ? 'default' : 'secondary'} className="text-xs">
+                              {cycle.status === 'paid' ? 'Pagado' : cycle.status === 'pending' ? 'Pendiente' : 'Cancelado'}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {subscriptionActivity.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-muted-foreground" />
+              <CardTitle className="text-lg">Actividad Reciente</CardTitle>
+            </div>
+            <CardDescription>
+              Últimas operaciones de tu suscripción
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {activityLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {subscriptionActivity.map((activity) => (
+                  <div 
+                    key={activity.id} 
+                    className="flex items-center justify-between py-3 border-b last:border-0"
+                    data-testid={`activity-item-${activity.id}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "h-8 w-8 rounded-full flex items-center justify-center",
+                        activity.status === 'success' ? 'bg-green-100 dark:bg-green-900/30' :
+                        activity.status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
+                        'bg-red-100 dark:bg-red-900/30'
+                      )}>
+                        {activity.type === 'payment' ? (
+                          <CreditCard className={cn(
+                            "h-4 w-4",
+                            activity.status === 'success' ? 'text-green-600 dark:text-green-400' :
+                            activity.status === 'pending' ? 'text-yellow-600 dark:text-yellow-400' :
+                            'text-red-600 dark:text-red-400'
+                          )} />
+                        ) : (
+                          <ArrowUpCircle className={cn(
+                            "h-4 w-4",
+                            activity.status === 'success' ? 'text-green-600 dark:text-green-400' :
+                            activity.status === 'pending' ? 'text-yellow-600 dark:text-yellow-400' :
+                            'text-red-600 dark:text-red-400'
+                          )} />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{activity.description}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(activity.created_at), "dd MMM yyyy 'a las' HH:mm", { locale: es })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      {activity.amount && (
+                        <p className="text-sm font-medium">
+                          {activity.currency} ${activity.amount.toFixed(2)}
+                        </p>
+                      )}
+                      <Badge 
+                        variant={activity.status === 'success' ? 'default' : activity.status === 'pending' ? 'secondary' : 'destructive'}
+                        className="text-xs"
+                      >
+                        {activity.status === 'success' ? 'Completado' : activity.status === 'pending' ? 'Pendiente' : 'Error'}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <Table
+        columns={columns}
+        data={payments}
+        isLoading={paymentsLoading}
+        rowActions={(payment: Payment) => [
+          {
+            icon: Download,
+            label: 'Descargar',
+            onClick: () => console.log('Download invoice:', payment.id)
+          }
+        ]}
+        emptyStateConfig={{
+          icon: <Inbox />,
+          title: 'No hay facturas',
+          description: 'Tus facturas aparecerán aquí cuando realices pagos.',
+        }}
+      />
+    </div>
+  );
+}

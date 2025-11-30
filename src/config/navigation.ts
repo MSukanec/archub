@@ -123,6 +123,7 @@ export const ORGANIZATION_NAVIGATION: NavigationItem[] = [
   { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects', testId: 'nav-org-projects' },
   { id: 'members', label: 'Miembros', icon: Users, href: '/organization/members', testId: 'nav-org-members' },
   { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', testId: 'nav-org-partners' },
+  { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing', testId: 'nav-org-billing' },
   { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts', testId: 'nav-org-contacts' },
   { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs', testId: 'nav-org-expenses' },
   { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', testId: 'nav-org-analysis' },
@@ -181,7 +182,6 @@ export function getSettingsNavigation(organizationName: string, userFullName: st
       items: [
         { id: 'user-basic-data', label: 'Datos Básicos', icon: User, href: '/settings/user-basic-data', testId: 'nav-settings-user-basic-data' },
         { id: 'user-preferences', label: 'Preferencias', icon: Settings, href: '/settings/user-preferences', testId: 'nav-settings-user-preferences' },
-        { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/settings/billing', testId: 'nav-settings-billing' },
         { id: 'user-organizations', label: 'Organizaciones', icon: Building, href: '/settings/user-organizations', testId: 'nav-settings-user-organizations' },
         { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/settings/notifications', testId: 'nav-settings-notifications' },
       ]
