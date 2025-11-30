@@ -55,6 +55,10 @@ const PRESETS: Record<ImagePreset, CompressionPreset> = {
 };
 
 export function shouldCompress(file: File): boolean {
+  // Don't compress GIFs - preserve animation
+  if (file.type === 'image/gif') {
+    return false;
+  }
   return file.type.startsWith('image/');
 }
 
