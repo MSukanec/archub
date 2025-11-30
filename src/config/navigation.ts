@@ -178,7 +178,6 @@ export function getSettingsNavigation(organizationName: string, userFullName: st
         { id: 'organization-basic-data', label: 'Datos Básicos', icon: Building, href: '/settings/organization-basic-data', testId: 'nav-settings-org-basic-data' },
         { id: 'members', label: 'Miembros', icon: Users, href: '/settings/members', testId: 'nav-settings-members' },
         { id: 'finances', label: 'Finanzas', icon: Wallet, href: '/settings/finances', testId: 'nav-settings-finances' },
-        { id: 'organization-activity', label: 'Actividad', icon: Activity, href: '/settings/organization-activity', restricted: 'coming_soon', testId: 'nav-settings-org-activity' },
       ]
     },
     {
