@@ -164,9 +164,11 @@ export default function SubscriptionCheckout() {
     if (planSlug && organizationId) {
       const loadProration = async () => {
         setProrationLoading(true);
+        console.log('[Proration] Starting load for org:', organizationId, 'plan:', planSlug);
         try {
           const { data: { session } } = await supabase.auth.getSession();
           if (!session?.access_token) {
+            console.log('[Proration] No session token');
             setProrationLoading(false);
             return;
           }
@@ -187,10 +189,19 @@ export default function SubscriptionCheckout() {
 
           if (res.ok) {
             const result = await res.json();
+            console.log('[Proration] API Response:', result);
             if (result.ok && result.data) {
               setProrationData(result.data);
-              console.log('[Proration] Loaded:', result.data);
+              console.log('[Proration] Loaded successfully:', {
+                hasActiveSubscription: result.data.hasActiveSubscription,
+                currentPlan: result.data.currentPlan?.name,
+                credit: result.data.credit,
+                finalPrice: result.data.finalPrice,
+                savings: result.data.savings
+              });
             }
+          } else {
+            console.error('[Proration] API Error:', res.status, res.statusText);
           }
         } catch (error) {
           console.error('[Proration] Error loading:', error);
@@ -200,6 +211,8 @@ export default function SubscriptionCheckout() {
       };
 
       loadProration();
+    } else {
+      console.log('[Proration] Waiting for data - planSlug:', planSlug, 'organizationId:', organizationId);
     }
   }, [planSlug, organizationId, billingPeriod]);
 
