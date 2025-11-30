@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { DashboardLayout as Layout } from "@/layouts";
-import { OrganizationProfileTab } from './tabs/OrganizationProfileTab';
+import { OrganizationProfileTab } from '@/pages/organization-data/tabs/OrganizationProfileTab';
 import { Building2 } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
-export default function OrganizationSettings() {
+export default function OrganizationData() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
   const [activeTab, setActiveTab] = useState('profile');

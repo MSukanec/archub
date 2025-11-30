@@ -498,16 +498,6 @@ export function LeftSidebar() {
                     // Descriptor de botones de contexto con sus configuraciones
                     const contextButtons = [
                       {
-                        id: 'general' as const,
-                        icon: <Home className="h-5 w-5" />,
-                        testId: 'button-sidebar-home',
-                        onClick: () => {
-                          setSidebarLevel('general');
-                          navigate('/organization/dashboard');
-                        },
-                        shouldRender: () => true, // Siempre visible
-                      },
-                      {
                         id: 'community' as const,
                         icon: <Globe className="h-5 w-5" />,
                         testId: 'button-sidebar-community',
