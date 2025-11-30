@@ -10,16 +10,9 @@ export function ComingSoonRestricted({ children }: ComingSoonRestrictedProps) {
       {/* Overlay invisible que bloquea clicks */}
       <div className="absolute inset-0 pointer-events-auto z-10" />
       
-      {/* Contenido con blur */}
-      <div className="blur-sm pointer-events-none">
+      {/* Contenido con blur mínimo */}
+      <div className="blur-[0.75px] pointer-events-none">
         {children}
-      </div>
-      
-      {/* Badge PROXIMAMENTE en el centro */}
-      <div className="absolute inset-0 flex items-center justify-center z-[9999] pointer-events-none">
-        <div className="bg-black rounded px-2 py-1 flex items-center justify-center">
-          <span className="text-xs font-bold text-white">PRÓXIMAMENTE</span>
-        </div>
       </div>
     </div>
   );
