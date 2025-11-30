@@ -131,7 +131,7 @@ export async function createSubscriptionOrder(
       const cancel_url = `${returnBase}/settings/billing?payment=cancelled`;
 
       const subscriptionResult = await createPayPalSubscription({
-        plan_id: paypalPlanId,
+        planId: paypalPlanId,
         subscriber: {
           name: {
             given_name: user.user_metadata?.full_name?.split(' ')[0] || 'User',
@@ -139,18 +139,10 @@ export async function createSubscriptionOrder(
           },
           email_address: user.email || ''
         },
-        custom_id,
-        application_context: {
-          brand_name: "Seencel",
-          locale: "es-ES",
-          user_action: "SUBSCRIBE_NOW",
-          payment_method: {
-            payer_selected: "PAYPAL",
-            payee_preferred: "IMMEDIATE_PAYMENT_REQUIRED"
-          },
-          return_url,
-          cancel_url
-        }
+        customId: custom_id,
+        returnUrl: return_url,
+        cancelUrl: cancel_url,
+        brandName: "Seencel"
       });
 
       if (!subscriptionResult.success || !subscriptionResult.subscription) {
