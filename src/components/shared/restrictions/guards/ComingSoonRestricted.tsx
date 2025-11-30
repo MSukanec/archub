@@ -27,7 +27,7 @@ export function ComingSoonRestricted({ children }: ComingSoonRestrictedProps) {
             </div>
             
             {/* Badge pequeño y sutil - ícono de candado en la esquina inferior derecha */}
-            <div className="absolute -bottom-1 -right-1 bg-yellow-500 dark:bg-yellow-600 rounded-full p-0.5 flex items-center justify-center border border-yellow-600 dark:border-yellow-700 z-20 shadow-sm">
+            <div className="absolute -bottom-1 -right-1 bg-yellow-500 dark:bg-yellow-600 rounded-full p-0.5 flex items-center justify-center border border-yellow-600 dark:border-yellow-700 z-[9999] shadow-lg pointer-events-none">
               <Lock className="w-2.5 h-2.5 text-gray-900" />
             </div>
           </div>
