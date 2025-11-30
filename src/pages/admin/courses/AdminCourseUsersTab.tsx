@@ -306,13 +306,15 @@ export default function AdminCourseUsersTab() {
         const providerNames: Record<string, string> = {
           'mercadopago': 'Mercado Pago',
           'paypal': 'PayPal',
-          'stripe': 'Stripe'
+          'stripe': 'Stripe',
+          'bank_transfer': 'Transferencia Bancaria'
         };
         
         const providerColors: Record<string, string> = {
           'mercadopago': '#00b3ff',
           'paypal': '#0070ba',
-          'stripe': '#635bff'
+          'stripe': '#635bff',
+          'bank_transfer': '#10b981'
         };
         
         return (

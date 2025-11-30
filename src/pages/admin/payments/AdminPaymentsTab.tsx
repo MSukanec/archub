@@ -179,9 +179,20 @@ const AdminPaymentsTab = () => {
       key: 'product',
       label: 'Producto',
       width: '22%',
-      render: (payment: Payment) => (
-        <span className="text-sm">{payment.courses?.title || 'N/A'}</span>
-      ),
+      render: (payment: Payment) => {
+        if (payment.courses?.title) {
+          return <span className="text-sm">{payment.courses.title}</span>;
+        }
+        const productTypeLabels: Record<string, string> = {
+          'subscription': 'Suscripción',
+          'course': 'Curso',
+        };
+        return (
+          <span className="text-sm">
+            {payment.product_type ? productTypeLabels[payment.product_type] || payment.product_type : 'N/A'}
+          </span>
+        );
+      },
     },
     {
       key: 'provider',
@@ -191,12 +202,25 @@ const AdminPaymentsTab = () => {
         const providerLabels: Record<string, string> = {
           'mercadopago': 'Mercado Pago',
           'paypal': 'PayPal',
-          'bank_transfer': 'Transferencia',
+          'bank_transfer': 'Transferencia Bancaria',
           'manual': 'Manual'
         };
+        const providerColors: Record<string, string> = {
+          'mercadopago': '#00b3ff',
+          'paypal': '#0070ba',
+          'bank_transfer': '#10b981',
+          'manual': '#6b7280'
+        };
+        const provider = payment.provider?.toLowerCase() || '';
         return (
-          <Badge variant="outline" className="text-xs">
-            {providerLabels[payment.provider] || payment.provider}
+          <Badge 
+            variant="outline"
+            style={{ 
+              borderColor: providerColors[provider] || '#6b7280',
+              color: providerColors[provider] || '#6b7280'
+            }}
+          >
+            {providerLabels[provider] || payment.provider}
           </Badge>
         );
       },
