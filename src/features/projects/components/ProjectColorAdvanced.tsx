@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useThemeStore } from "@/stores/themeStore";
-import { PlanRestricted } from "@/features/users";
 
 type Props = {
   initialHue?: number | null;
@@ -107,11 +106,7 @@ export default function ProjectColorAdvanced({
   };
 
   return (
-    <PlanRestricted 
-      feature="custom_project_color" 
-      size="large"
-    >
-      <div className="rounded-xl border border-border p-4 mt-4 bg-card">
+    <div className="rounded-xl border border-border p-4 mt-4 bg-card">
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -218,6 +213,5 @@ export default function ProjectColorAdvanced({
           )}
         </div>
       </div>
-    </PlanRestricted>
   );
 }

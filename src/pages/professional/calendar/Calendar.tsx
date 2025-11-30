@@ -14,7 +14,6 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
 import { useNavigationStore } from '@/stores/navigationStore';
 
-import { PlanRestricted } from "@/features/users";
 import { ActionBarMobileProvider, useActionBarMobile } from '@/layouts';
 import { ActionBarMobile } from '@/layouts';
 
@@ -215,15 +214,10 @@ function CalendarContent() {
           title="No hay tableros creados"
           description="Crea tu primer tablero para comenzar a organizar tareas con el sistema Kanban"
           action={
-            <PlanRestricted 
-              feature="max_kanban_boards" 
-              current={boards.length}
-            >
-              <Button onClick={() => openModal('board', {})}>
-                <Plus className="w-4 h-4 mr-2" />
-                Nuevo Tablero
-              </Button>
-            </PlanRestricted>
+            <Button onClick={() => openModal('board', {})}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Tablero
+            </Button>
           }
         />
       </Layout>

@@ -6,7 +6,6 @@ import { DashboardLayout as Layout } from "@/layouts";
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ComboBoxMultiSelectField } from '@/components/ui-custom/fields/ComboBoxMultiSelectField';
-import { PlanRestricted } from '@/features/users';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
@@ -379,32 +378,28 @@ export default function Finances() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
-              <PlanRestricted feature="allow_secondary_currencies">
-                <ComboBoxMultiSelectField
-                  options={availableSecondaryCurrencies.map(currency => ({
-                    value: currency.id,
-                    label: `${currency.name} (${currency.symbol})`
-                  }))}
-                  value={secondaryCurrencies}
-                  onChange={handleSecondaryCurrenciesChange}
-                  placeholder="Selecciona monedas secundarias"
-                />
-              </PlanRestricted>
+              <ComboBoxMultiSelectField
+                options={availableSecondaryCurrencies.map(currency => ({
+                  value: currency.id,
+                  label: `${currency.name} (${currency.symbol})`
+                }))}
+                value={secondaryCurrencies}
+                onChange={handleSecondaryCurrenciesChange}
+                placeholder="Selecciona monedas secundarias"
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="currency-exchange-select">Usar Cotización de Monedas</Label>
-              <PlanRestricted feature="allow_exchange_rate">
-                <Select value={useCurrencyExchange} onValueChange={handleCurrencyExchangeChange}>
-                  <SelectTrigger id="currency-exchange-select">
-                    <SelectValue placeholder="Selecciona una opción" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="no">No usar cotización</SelectItem>
-                    <SelectItem value="si">Usar cotización</SelectItem>
-                  </SelectContent>
-                </Select>
-              </PlanRestricted>
+              <Select value={useCurrencyExchange} onValueChange={handleCurrencyExchangeChange}>
+                <SelectTrigger id="currency-exchange-select">
+                  <SelectValue placeholder="Selecciona una opción" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="no">No usar cotización</SelectItem>
+                  <SelectItem value="si">Usar cotización</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
