@@ -30,19 +30,25 @@
 CREATE TABLE plans (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,                    -- 'Free', 'Pro', 'Teams', 'Enterprise'
-  slug TEXT UNIQUE NOT NULL,             -- 'free', 'pro', 'teams', 'enterprise'
-  description TEXT,
+  slug TEXT,                             -- 'free', 'pro', 'teams', 'enterprise'
+  features JSONB,                        -- Todos los límites están AQUÍ (max_projects, max_members, max_storage_mb, max_ai_tokens, etc.)
+  billing_type TEXT DEFAULT 'per_user',  -- Modelo de facturación
   is_active BOOLEAN DEFAULT true,
-  monthly_amount DECIMAL(10,2),          -- Precio mensual en USD
-  annual_amount DECIMAL(10,2),           -- Precio anual en USD (con descuento)
-  max_projects INTEGER DEFAULT -1,       -- -1 = ilimitado
-  max_members INTEGER DEFAULT -1,        -- -1 = ilimitado
-  max_storage_mb INTEGER DEFAULT 500,
-  max_ai_tokens INTEGER DEFAULT 0,
-  tier INTEGER NOT NULL,                 -- Nivel jerárquico (1=free, 2=pro, 3=teams, 4=enterprise)
-  features JSONB DEFAULT '[]',           -- Lista de features habilitadas
+  monthly_amount NUMERIC,                -- Precio mensual en USD
+  annual_amount NUMERIC,                 -- Precio anual en USD (con descuento)
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- ESTRUCTURA DE FEATURES JSON (CRÍTICO - ÚNICA FUENTE DE VERDAD):
+-- {
+--   "max_projects": 25,                 -- -1 = ilimitado
+--   "max_members": -1,                  -- -1 = ilimitado
+--   "max_storage_mb": 5000,             -- -1 = ilimitado
+--   "max_ai_tokens": 50000,             -- -1 = ilimitado
+--   "max_file_size_mb": 100,
+--   "custom_project_color": true,
+--   ... otras features booleanas
+-- }
 ```
 
 ### 1.2 Tabla `organization_subscriptions`
@@ -205,8 +211,9 @@ const PLAN_HIERARCHY = {
 
 ### Límites por Plan
 
-> **CRÍTICO**: Estos valores se leen SIEMPRE de la tabla `plans` en la base de datos. 
-> **NUNCA** usar valores hardcodeados en el código. La tabla `plans` es la ÚNICA fuente de verdad.
+> **🚨 CRÍTICO**: Estos valores se leen SIEMPRE del JSON `features` dentro de la tabla `plans`.
+> **NUNCA** usar valores hardcodeados en el código. El JSON `features` es la ÚNICA fuente de verdad.
+> Los límites están **DENTRO del JSON**, no como columnas separadas de la tabla.
 
 | Plan | max_projects | max_members | max_storage_mb | max_ai_tokens |
 |------|-------------|-------------|----------------|---------------|
@@ -215,11 +222,21 @@ const PLAN_HIERARCHY = {
 | Teams | -1 (ilimitado) | 999 | 25000 | -1 (ilimitado) |
 | Enterprise | -1 | -1 | -1 | -1 |
 
-**Columnas de la tabla `plans`:**
+**Campos dentro del JSON `features` en la tabla `plans`:**
 - `max_projects`: Número máximo de proyectos (-1 = ilimitado)
 - `max_members`: Número máximo de miembros (-1 = ilimitado)  
 - `max_storage_mb`: Almacenamiento máximo en MB (-1 = ilimitado)
 - `max_ai_tokens`: Tokens de IA por mes (-1 = ilimitado)
+
+**Cómo leerlos:**
+```typescript
+// Backend (TypeScript)
+const features = plan.features || {};
+const maxProjects = features.max_projects ?? 2; // Fallback a 2 si no existe
+
+// SQL (Supabase)
+SELECT features->>'max_projects' as max_projects FROM plans WHERE slug = 'pro';
+```
 
 ### Reglas de Cambio de Plan
 
