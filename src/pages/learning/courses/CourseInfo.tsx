@@ -30,10 +30,21 @@ export default function CourseInfo() {
   }, [setSidebarContext, setSidebarLevel, sidebarLevel]);
 
   const handleCTAClick = () => {
-    navigate(`/learning/courses/${data?.course?.slug}`);
+    if (isEnrolled) {
+      // Usuario inscrito → ir al curso
+      navigate(`/learning/courses/${data?.course?.slug}`);
+    } else if (userData?.user) {
+      // Usuario logueado pero NO inscrito → ir a checkout
+      navigate(`/checkout?course=${data?.course?.slug}`);
+    } else {
+      // Usuario no logueado → ir a registro
+      navigate('/register');
+    }
   };
 
-  const ctaButtonText = progressPercentage > 0 ? 'CONTINUAR CURSO' : 'VER CURSO';
+  const ctaButtonText = isEnrolled 
+    ? (progressPercentage > 0 ? 'CONTINUAR CURSO' : 'VER CURSO')
+    : 'INSCRIBIRME AHORA';
 
   if (isLoading) {
     return (
