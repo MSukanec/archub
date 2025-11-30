@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Plus, Trash2, GripVertical, Eye, Edit } from 'lucide-react'
 import { useHeroSections, useDeleteHeroSection, useReorderHeroSections } from '@/features/layout/hooks/use-hero-sections'
 import { useGlobalModalStore } from '@/components/modal'

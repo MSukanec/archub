@@ -2,13 +2,13 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Button } from '@/components/ui/button'
+import { Layers } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { useGlobalModalStore } from '@/components/modal'
+import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { useCreateHeroSection, useUpdateHeroSection } from '../hooks/use-hero-sections'
 import { useToast } from '@/hooks/use-toast'
 import { FileUploader } from '@/components/shared/FileUploader'
@@ -35,10 +35,10 @@ interface HeroSectionFormProps {
     mode: 'create' | 'edit'
     section?: any
   }
+  onClose: () => void
 }
 
-export default function HeroSectionForm({ modalData }: HeroSectionFormProps) {
-  const { popModal } = useGlobalModalStore()
+export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormProps) {
   const { toast } = useToast()
   const createMutation = useCreateHeroSection()
   const updateMutation = useUpdateHeroSection()
@@ -95,7 +95,7 @@ export default function HeroSectionForm({ modalData }: HeroSectionFormProps) {
         })
         toast({ title: 'Sección creada', description: 'La nueva sección del carrusel se creó correctamente' })
       }
-      popModal()
+      onClose()
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -108,228 +108,237 @@ export default function HeroSectionForm({ modalData }: HeroSectionFormProps) {
   const isPending = createMutation.isPending || updateMutation.isPending
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem className="md:col-span-2">
-                <FormLabel>Título</FormLabel>
-                <FormControl>
-                  <Input placeholder="Título del hero" {...field} data-testid="input-hero-title" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <ModalLayout onClose={onClose} size="lg">
+      <ModalHeader
+        title={mode === 'edit' ? 'Editar Sección Hero' : 'Nueva Sección Hero'}
+        description={mode === 'edit' ? 'Actualiza los detalles de la sección del carrusel' : 'Crea una nueva sección para el carrusel del dashboard'}
+        icon={Layers}
+      />
 
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem className="md:col-span-2">
-                <FormLabel>Descripción</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Descripción breve que aparecerá debajo del título" 
-                    {...field} 
-                    data-testid="input-hero-description"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="media_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo de Media</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger data-testid="select-media-type">
-                      <SelectValue placeholder="Seleccionar tipo" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="image">Imagen</SelectItem>
-                    <SelectItem value="video">Video</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="is_active"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                <div className="space-y-0.5">
-                  <FormLabel>Activo</FormLabel>
-                </div>
-                <FormControl>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} data-testid="switch-is-active" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="media_url"
-            render={({ field }) => (
-              <FormItem className="md:col-span-2">
-                <FormLabel>Imagen/Video de Fondo</FormLabel>
-                <FormControl>
-                  <FileUploader
-                    mode="single"
-                    variant="hero"
-                    accept={form.watch('media_type') === 'video' ? 'media' : 'images'}
-                    heroImageUrl={field.value || null}
-                    onHeroImageChange={(url) => field.onChange(url || '')}
-                    filesToUpload={[]}
-                    onFilesChange={(files) => {
-                      if (files[0]?.file) {
-                        const url = URL.createObjectURL(files[0].file);
-                        field.onChange(url);
-                      }
-                    }}
-                    compressionPreset="course-cover"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="border-t pt-4">
-          <h4 className="font-medium mb-4">Botón Primario (Opcional)</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FormField
-              control={form.control}
-              name="primary_button_text"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Texto</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ver Curso" {...field} data-testid="input-primary-button-text" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="primary_button_action"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Acción/URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="/learning/courses/mi-curso" {...field} data-testid="input-primary-button-action" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="primary_button_action_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+      <ModalBody>
+        <Form {...form}>
+          <form id="hero-section-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem className="col-span-full">
+                    <FormLabel>Título</FormLabel>
                     <FormControl>
-                      <SelectTrigger data-testid="select-primary-action-type">
-                        <SelectValue />
-                      </SelectTrigger>
+                      <Input placeholder="Título del hero" {...field} data-testid="input-hero-title" />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="internal_route">Ruta Interna</SelectItem>
-                      <SelectItem value="external">Link Externo</SelectItem>
-                      <SelectItem value="url">URL</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <div className="border-t pt-4">
-          <h4 className="font-medium mb-4">Botón Secundario (Opcional)</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FormField
-              control={form.control}
-              name="secondary_button_text"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Texto</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Contáctanos" {...field} data-testid="input-secondary-button-text" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="secondary_button_action"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Acción/URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="/contacto" {...field} data-testid="input-secondary-button-action" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="secondary_button_action_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="col-span-full">
+                    <FormLabel>Descripción</FormLabel>
                     <FormControl>
-                      <SelectTrigger data-testid="select-secondary-action-type">
-                        <SelectValue />
-                      </SelectTrigger>
+                      <Textarea 
+                        placeholder="Descripción breve que aparecerá debajo del título" 
+                        {...field} 
+                        data-testid="input-hero-description"
+                      />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="internal_route">Ruta Interna</SelectItem>
-                      <SelectItem value="external">Link Externo</SelectItem>
-                      <SelectItem value="url">URL</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button type="button" variant="outline" onClick={() => popModal()} data-testid="button-cancel">
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={isPending} data-testid="button-save">
-            {isPending ? 'Guardando...' : mode === 'edit' ? 'Guardar Cambios' : 'Crear Sección'}
-          </Button>
-        </div>
-      </form>
-    </Form>
+              <FormField
+                control={form.control}
+                name="media_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo de Media</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-media-type">
+                          <SelectValue placeholder="Seleccionar tipo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="image">Imagen</SelectItem>
+                        <SelectItem value="video">Video</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="is_active"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                      <FormLabel>Activo</FormLabel>
+                    </div>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} data-testid="switch-is-active" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="media_url"
+                render={({ field }) => (
+                  <FormItem className="col-span-full">
+                    <FormLabel>Imagen/Video de Fondo</FormLabel>
+                    <FormControl>
+                      <FileUploader
+                        mode="single"
+                        variant="hero"
+                        accept={form.watch('media_type') === 'video' ? 'media' : 'images'}
+                        heroImageUrl={field.value || null}
+                        onHeroImageChange={(url) => field.onChange(url || '')}
+                        filesToUpload={[]}
+                        onFilesChange={(files) => {
+                          if (files[0]?.file) {
+                            const url = URL.createObjectURL(files[0].file);
+                            field.onChange(url);
+                          }
+                        }}
+                        compressionPreset="course-cover"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="border-t pt-4">
+              <h4 className="font-medium mb-4">Botón Primario (Opcional)</h4>
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
+                <FormField
+                  control={form.control}
+                  name="primary_button_text"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Texto</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ver Curso" {...field} data-testid="input-primary-button-text" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="primary_button_action"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Acción/URL</FormLabel>
+                      <FormControl>
+                        <Input placeholder="/learning/courses/mi-curso" {...field} data-testid="input-primary-button-action" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="primary_button_action_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-primary-action-type">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="internal_route">Ruta Interna</SelectItem>
+                          <SelectItem value="external">Link Externo</SelectItem>
+                          <SelectItem value="url">URL</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className="border-t pt-4">
+              <h4 className="font-medium mb-4">Botón Secundario (Opcional)</h4>
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
+                <FormField
+                  control={form.control}
+                  name="secondary_button_text"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Texto</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Contáctanos" {...field} data-testid="input-secondary-button-text" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="secondary_button_action"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Acción/URL</FormLabel>
+                      <FormControl>
+                        <Input placeholder="/contacto" {...field} data-testid="input-secondary-button-action" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="secondary_button_action_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-secondary-action-type">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="internal_route">Ruta Interna</SelectItem>
+                          <SelectItem value="external">Link Externo</SelectItem>
+                          <SelectItem value="url">URL</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </form>
+        </Form>
+      </ModalBody>
+
+      <ModalFooter
+        leftLabel="Cancelar"
+        onLeftClick={onClose}
+        submitText={isPending ? 'Guardando...' : mode === 'edit' ? 'Guardar Cambios' : 'Crear Sección'}
+        onSubmit={form.handleSubmit(onSubmit)}
+        isSubmitting={isPending}
+      />
+    </ModalLayout>
   )
 }
