@@ -225,7 +225,8 @@ export default function CourseView() {
   }
 
   // SECURITY: Check if user is enrolled before showing course content
-  if (!enrollment) {
+  // enrollment is { isEnrolled: boolean }, so we must check the property, not the object itself
+  if (!enrollment?.isEnrolled) {
     return (
       <Layout headerProps={headerProps} wide={false}>
         <EmptyState
@@ -234,10 +235,10 @@ export default function CourseView() {
           description="No tienes acceso a este curso. Necesitas inscribirte primero para poder ver su contenido."
           action={
             <Button 
-              onClick={() => navigate('/learning/courses')}
+              onClick={() => navigate(`/learning/courses/${id}/info`)}
               data-testid="button-back-to-courses"
             >
-              Ver Cursos Disponibles
+              Ver Información del Curso
             </Button>
           }
         />
