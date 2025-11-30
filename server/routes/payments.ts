@@ -118,7 +118,7 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
       const adminClient = getAdminClient();
       const { data: membership, error: membershipError } = await adminClient
         .from('organization_members')
-        .select('role')
+        .select('id, role_id')
         .eq('user_id', user.id)
         .eq('organization_id', organization_id)
         .maybeSingle();
@@ -130,11 +130,6 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
 
       if (!membership) {
         return res.status(403).json({ error: "No tienes acceso a esta organización" });
-      }
-
-      // Only admins can calculate proration for upgrades
-      if (membership.role !== 'admin') {
-        return res.status(403).json({ error: "Solo administradores pueden gestionar suscripciones" });
       }
 
       const result = await calculateProration(adminClient, {
