@@ -244,10 +244,10 @@ export function LeftSidebar() {
         { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard' },
         { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project' },
         { type: 'section-header', id: 'section-construccion', label: 'Construcción' },
-        { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'lab_user' },
+        { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'coming_soon' },
         { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel' },
-        { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'lab_user' },
-        { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'lab_user' },
+        { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon' },
+        { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
         { id: 'logs', label: 'Bitácora de Obra', icon: BookOpen, href: '/construction/logs' },
         { type: 'section-header', id: 'section-comercializacion', label: 'Comercialización y Venta' },
         { id: 'clients', label: 'Clientes', icon: Users, href: '/clients' },
@@ -850,7 +850,7 @@ export function LeftSidebar() {
                     if ('type' in navItem && navItem.type === 'section-header') {
                       return (
                         <div key={navItem.id} className="h-9 flex items-center px-2">
-                          <span className="text-xs font-medium text-[var(--main-sidebar-fg)] opacity-60 uppercase tracking-wide">
+                          <span className="text-xs font-medium text-[var(--main-sidebar-button-fg)] uppercase tracking-wide">
                             {navItem.label}
                           </span>
                         </div>
