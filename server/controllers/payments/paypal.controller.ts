@@ -4,6 +4,7 @@ import { createSubscriptionOrder } from "../../lib/handlers/checkout/paypal/crea
 import { captureCourseOrder } from "../../lib/handlers/checkout/paypal/captureCourseOrder.js";
 import { captureSubscriptionOrder } from "../../lib/handlers/checkout/paypal/captureSubscriptionOrder.js";
 import { processWebhook } from "../../lib/handlers/checkout/paypal/processWebhook.js";
+import { syncPayPalPlans } from "../../lib/handlers/checkout/paypal/sync-plans.js";
 import { handleCorsPreflight } from "../../lib/handlers/checkout/shared/cors.js";
 import { capturePayPalOrder, getPayPalOrder } from "../../lib/handlers/checkout/paypal/api.js";
 import { createServiceSupabaseClient } from "../../lib/handlers/checkout/shared/auth.js";
@@ -369,6 +370,30 @@ export async function webhook(req: Request, res: Response) {
     return res.status(200).json({
       ok: true,
       error: error.message || "Failed to process webhook"
+    });
+  }
+}
+
+export async function syncPlans(req: Request, res: Response) {
+  try {
+    const result = await syncPayPalPlans(req as any);
+    
+    if (!result.success) {
+      return res.status(result.status || 500).json({
+        ok: false,
+        error: result.error
+      });
+    }
+    
+    return res.json({
+      ok: true,
+      results: result.results
+    });
+  } catch (error: any) {
+    console.error("[PayPal sync-plans controller] Error:", error);
+    return res.status(500).json({
+      ok: false,
+      error: error.message || "Failed to sync PayPal plans"
     });
   }
 }

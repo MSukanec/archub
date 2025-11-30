@@ -117,6 +117,9 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   app.post("/api/checkout/paypal/webhook", paypalController.webhook);
   app.options("/api/checkout/paypal/webhook", paypalController.webhook);
 
+  // POST /api/admin/paypal/sync-plans (Admin only - creates PayPal products and billing plans)
+  app.post("/api/admin/paypal/sync-plans", paypalController.syncPlans);
+
   // ==================== BANK TRANSFER ====================
   // NOTE: Bank transfer routes are now handled in server/routes/bank-transfer.ts
   // with the new architecture using image_bucket + image_path instead of receipt_url
