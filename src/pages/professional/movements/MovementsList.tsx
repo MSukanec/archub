@@ -37,8 +37,6 @@ import { Label } from "@/components/ui/label";
 import { Table, ProjectBadge } from "@/components/ui-custom/tables-and-trees/Table";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 
-import { PlanRestricted } from "@/features/users";
-
 import TransferRow, { type TransferGroup } from "@/features/finances/components/TransferRow";
 import MovementRow from "@/features/finances/components/MovementRow";
 import ConversionRow, { type ConversionGroup } from "@/features/finances/components/ConversionRow";
