@@ -205,29 +205,26 @@ export function registerSubscriptionRoutes(app: Express, deps: RouteDeps): void 
 
       const organizationId = userPrefs.last_organization_id;
 
-      // 6. Verify user has admin permissions via organization membership
-      const { data: membership, error: membershipError } = await authenticatedSupabase
-        .from('organization_members')
-        .select('id, role_id, role:roles!inner(id, name)')
-        .eq('user_id', dbUser.id)
-        .eq('organization_id', organizationId)
-        .eq('is_active', true)
+      // 6. Verify user is the organization owner
+      const { data: organization, error: orgError } = await authenticatedSupabase
+        .from('organizations')
+        .select('id, owner_id')
+        .eq('id', organizationId)
         .maybeSingle();
 
-      if (membershipError || !membership) {
-        logError(context, membershipError);
-        return res.status(403).json(createErrorResponse(
-          ErrorCodes.FORBIDDEN,
-          "No tienes permisos para esta organización"
+      if (orgError || !organization) {
+        logError(context, orgError);
+        return res.status(404).json(createErrorResponse(
+          ErrorCodes.NOT_FOUND,
+          "Organización no encontrada"
         ));
       }
 
-      // Check for admin role using role name (since we don't have a permission flag)
-      const role = Array.isArray(membership.role) ? membership.role[0] : membership.role;
-      if (role?.name !== 'Administrador') {
+      // Check if user is the organization owner
+      if (organization.owner_id !== dbUser.id) {
         return res.status(403).json(createErrorResponse(
           ErrorCodes.FORBIDDEN,
-          "Solo los administradores pueden cambiar planes de suscripción"
+          "Solo el propietario de la organización puede cambiar el plan"
         ));
       }
 

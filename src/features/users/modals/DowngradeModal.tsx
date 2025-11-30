@@ -123,25 +123,14 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
     };
   }, [usageStats]);
 
-  // Check if user is admin in current organization
-  const isAdmin = useMemo(() => {
-    if (!currentOrganizationId || !userData?.memberships) {
+  // Check if user is the organization owner
+  const isOwner = useMemo(() => {
+    if (!userData?.user?.id || !userData?.organization) {
       return false;
     }
     
-    // Find membership for current organization
-    const membership = userData.memberships.find(
-      m => m.organization_id === currentOrganizationId && m.is_active
-    );
-    
-    if (!membership || !membership.role) {
-      return false;
-    }
-    
-    // Check role name (handle both Spanish "Administrador" and English variants)
-    const roleName = membership.role.name?.toLowerCase().trim();
-    return roleName === 'administrador' || roleName === 'admin' || roleName === 'administrator';
-  }, [currentOrganizationId, userData?.memberships]);
+    return userData.organization.owner_id === userData.user.id;
+  }, [userData?.user?.id, userData?.organization?.owner_id]);
 
   // Validation checks
   const validationError = useMemo(() => {
@@ -153,24 +142,20 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
       return "No se ha seleccionado una organización";
     }
     
-    if (!userData?.memberships || userData.memberships.length === 0) {
-      return "No se pudo verificar tu membresía";
+    if (!userData?.user) {
+      return "No se pudo verificar tu identidad";
     }
     
-    const membership = userData.memberships.find(
-      m => m.organization_id === currentOrganizationId
-    );
-    
-    if (!membership) {
-      return "No tienes membresía en esta organización";
+    if (!userData?.organization) {
+      return "No se pudo verificar la organización";
     }
     
-    if (!isAdmin) {
-      return "Solo los administradores pueden cambiar el plan";
+    if (!isOwner) {
+      return "Solo el propietario de la organización puede cambiar el plan";
     }
     
     return null;
-  }, [targetPlan?.slug, currentOrganizationId, userData?.memberships, isAdmin]);
+  }, [targetPlan?.slug, currentOrganizationId, userData?.user, userData?.organization, isOwner]);
 
   const scheduleDowngradeMutation = useMutation({
     mutationFn: async () => {

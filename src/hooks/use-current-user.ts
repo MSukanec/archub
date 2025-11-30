@@ -82,6 +82,7 @@ export interface UserData {
     is_active: boolean
     is_system: boolean
     created_at: string
+    owner_id: string
     settings?: {
       is_founder?: boolean
       [key: string]: any
