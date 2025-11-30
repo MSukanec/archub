@@ -78,7 +78,7 @@ export const CONTEXT_BUTTONS: ContextButton[] = [
     icon: Star,
     testId: 'button-sidebar-founders',
     href: '/founders/dashboard',
-    restricted: 'coming_soon',
+    adminOnly: true,
   },
   {
     id: 'community',
@@ -86,7 +86,7 @@ export const CONTEXT_BUTTONS: ContextButton[] = [
     icon: Globe,
     testId: 'button-sidebar-community',
     href: '/community/dashboard',
-    restricted: 'coming_soon',
+    adminOnly: true,
   },
   {
     id: 'learning',

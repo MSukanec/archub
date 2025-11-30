@@ -494,20 +494,28 @@ export function LeftSidebar() {
                         id: 'founders' as const,
                         icon: <Star className="h-5 w-5" />,
                         testId: 'button-sidebar-founders',
-                        onClick: () => {},
+                        onClick: () => {
+                          if (!isAdmin) return;
+                          setSidebarLevel('founders');
+                          navigate('/founders/dashboard');
+                        },
                         shouldRender: () => true,
                         wrapper: (children: React.ReactNode) => (
-                          <ComingSoonRestricted>{children}</ComingSoonRestricted>
+                          <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>{children}</RoleRestricted>
                         ),
                       },
                       {
                         id: 'community' as const,
                         icon: <Globe className="h-5 w-5" />,
                         testId: 'button-sidebar-community',
-                        onClick: () => {},
+                        onClick: () => {
+                          if (!isAdmin) return;
+                          setSidebarLevel('community');
+                          navigate('/community/dashboard');
+                        },
                         shouldRender: () => true,
                         wrapper: (children: React.ReactNode) => (
-                          <ComingSoonRestricted>{children}</ComingSoonRestricted>
+                          <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>{children}</RoleRestricted>
                         ),
                       },
                       {
