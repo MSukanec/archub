@@ -1,31 +1,30 @@
-import { DashboardLayout as Layout } from "@/layouts"
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { useCurrentUser } from '@/hooks/use-current-user'
-import { Bell, CheckCircle, Circle, CheckCheck } from 'lucide-react'
-import React, { useState, useEffect } from 'react'
-import { useLocation } from 'wouter'
-import { supabase } from '@/lib/supabase'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { EmptyState } from '@/components/ui-custom/security/EmptyState'
-import { markAsRead, markAllAsRead, resolveNotificationHref, type UserNotificationRow } from '@/lib/notifications'
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Bell, CheckCircle, Circle, CheckCheck } from 'lucide-react';
+import { useLocation } from 'wouter';
+import { supabase } from '@/lib/supabase';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { markAsRead, markAllAsRead, resolveNotificationHref, type UserNotificationRow } from '@/lib/notifications';
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
-export default function Notifications() {
-  const { data: userData, isLoading } = useCurrentUser()
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
-  const [, navigate] = useLocation()
+interface UserNotificationsTabProps {
+  userId: string;
+}
 
-  // Query para obtener notificaciones
+export default function UserNotificationsTab({ userId }: UserNotificationsTabProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
+
   const { data: notifications = [], isLoading: notificationsLoading } = useQuery({
-    queryKey: ['notifications', userData?.user?.id],
+    queryKey: ['notifications', userId],
     queryFn: async () => {
-      if (!supabase || !userData?.user?.id) {
+      if (!supabase || !userId) {
         throw new Error('No user available');
       }
 
@@ -47,72 +46,66 @@ export default function Notifications() {
             created_at
           )
         `)
-        .eq('user_id', userData.user.id)
-        .order('delivered_at', { ascending: false })
+        .eq('user_id', userId)
+        .order('delivered_at', { ascending: false });
 
-      if (error) throw error
-      return (data as any[]) || []
+      if (error) throw error;
+      return (data as any[]) || [];
     },
-    enabled: !!userData?.user?.id
-  })
+    enabled: !!userId
+  });
 
-  // Mutación para marcar como leída
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: string) => {
-      if (!userData?.user?.id) throw new Error('No user available')
-      await markAsRead(notificationId, userData.user.id)
+      if (!userId) throw new Error('No user available');
+      await markAsRead(notificationId, userId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Error",
         description: "No se pudo marcar la notificación como leída",
         variant: "destructive"
-      })
+      });
     }
-  })
+  });
 
-  // Mutación para marcar todas como leídas
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
-      if (!userData?.user?.id) throw new Error('No user available')
-      await markAllAsRead(userData.user.id)
+      if (!userId) throw new Error('No user available');
+      await markAllAsRead(userId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast({
         title: "Listo",
         description: "Todas las notificaciones han sido marcadas como leídas"
-      })
+      });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Error",
         description: "No se pudieron marcar las notificaciones como leídas",
         variant: "destructive"
-      })
+      });
     }
-  })
+  });
 
-  // Manejar click en fila
   const handleNotificationClick = async (notification: UserNotificationRow) => {
     try {
-      // Marcar como leída si no lo está
       if (!notification.read_at) {
-        await markAsReadMutation.mutateAsync(notification.id)
+        await markAsReadMutation.mutateAsync(notification.id);
       }
 
-      // Navegar a la URL correspondiente
-      const href = resolveNotificationHref(notification)
-      navigate(href)
+      const href = resolveNotificationHref(notification);
+      navigate(href);
     } catch (error) {
-      console.error('Error handling notification click:', error)
+      console.error('Error handling notification click:', error);
     }
-  }
+  };
 
-  // Obtener badge de tipo
   const getTypeBadge = (type: string) => {
     const typeMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
       'task_assigned': { label: 'Tarea', variant: 'default' },
@@ -120,18 +113,17 @@ export default function Notifications() {
       'comment_added': { label: 'Comentario', variant: 'outline' },
       'mention': { label: 'Mención', variant: 'default' },
       'system': { label: 'Sistema', variant: 'secondary' },
-    }
+    };
 
-    const config = typeMap[type] || { label: type, variant: 'outline' as const }
+    const config = typeMap[type] || { label: type, variant: 'outline' as const };
     
     return (
       <Badge variant={config.variant} className="text-xs">
         {config.label}
       </Badge>
-    )
-  }
+    );
+  };
 
-  // Columnas de la tabla
   const columns = [
     {
       key: "type" as const,
@@ -202,52 +194,48 @@ export default function Notifications() {
         </div>
       )
     }
-  ]
+  ];
 
-  if (isLoading || notificationsLoading) {
-    return <LoadingSpinner fullScreen size="lg" />
+  if (notificationsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
   }
 
-  const unreadNotifications = notifications.filter(n => !n.read_at)
-
-  const headerProps = {
-    icon: Bell,
-    title: "Notificaciones",
-    pageTitle: "Notificaciones",
-    subtitle: "Centro de Notificaciones",
-    description: "Consulta todas tus notificaciones y mantente al día con las actualizaciones importantes.",
-    actions: unreadNotifications.length > 0 ? [
-      <Button
-        key="mark-all-read"
-        onClick={() => markAllAsReadMutation.mutate()}
-        disabled={markAllAsReadMutation.isPending}
-        className="h-8 px-3 text-xs"
-        data-testid="button-mark-all-read"
-      >
-        <CheckCheck className="w-4 h-4 mr-1" />
-        Marcar todas como leídas
-      </Button>
-    ] : []
-  }
+  const unreadNotifications = notifications.filter(n => !n.read_at);
 
   if (notifications.length === 0) {
     return (
-      <Layout wide={false} headerProps={headerProps}>
-        <EmptyState
-          icon={<Bell className="w-8 h-8 text-muted-foreground" />}
-          title="No tienes notificaciones"
-          description="Cuando recibas notificaciones, aparecerán aquí"
-        />
-      </Layout>
-    )
+      <EmptyState
+        icon={<Bell className="w-8 h-8 text-muted-foreground" />}
+        title="No tienes notificaciones"
+        description="Cuando recibas notificaciones, aparecerán aquí"
+      />
+    );
   }
 
   return (
-    <Layout wide={false} headerProps={headerProps}>
+    <div className="space-y-4">
+      {unreadNotifications.length > 0 && (
+        <div className="flex justify-end">
+          <Button
+            onClick={() => markAllAsReadMutation.mutate()}
+            disabled={markAllAsReadMutation.isPending}
+            variant="outline"
+            className="h-8 px-3 text-xs"
+            data-testid="button-mark-all-read"
+          >
+            <CheckCheck className="w-4 h-4 mr-1" />
+            Marcar todas como leídas
+          </Button>
+        </div>
+      )}
       <Table
         data={notifications}
         columns={columns}
       />
-    </Layout>
-  )
+    </div>
+  );
 }

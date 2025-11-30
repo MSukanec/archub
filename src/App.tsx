@@ -105,21 +105,18 @@ const PaymentReturn = lazy(() => import("@/pages/learning/PaymentReturn"));
 const CheckoutPage = lazy(() => import("@/pages/checkout/CheckoutPage"));
 const SubscriptionCheckout = lazy(() => import("@/pages/checkout/SubscriptionCheckout"));
 
-// Notifications
-import Notifications from "@/pages/settings/Notifications";
-
 // Finances Pages
 import FinancesPage from "@/pages/finances/Finances";
 
-// Settings Pages
+// Settings Pages (legacy - keeping for backwards compatibility)
 import PricingPlan from "@/pages/settings/PricingPlan";
 import Billing from "@/pages/billing/Billing";
 import Members from "@/pages/members/Members";
 import Partners from "@/pages/partners/Partners";
 import OrganizationActivity from "@/pages/settings/OrganizationActivity";
-import UserBasicData from "@/pages/settings/UserBasicData";
-import UserPreferences from "@/pages/settings/UserPreferences";
-import UserOrganizations from "@/pages/settings/UserOrganizations";
+
+// User Page
+import User from "@/pages/user/User";
 
 
 
@@ -172,7 +169,6 @@ function Router() {
         <Route path="/organization/basic-data" component={OrganizationData} />
         <Route path="/organization/activity" component={Activity} />
         <Route path="/contacts" component={Contacts} />
-        <Route path="/notifications" component={Notifications} />
         <Route path="/organization/projects" component={Projects} />
         
         {/* General Costs Route */}
@@ -228,16 +224,15 @@ function Router() {
         <Route path="/community/map" component={CommunityMap} />
         <Route path="/community" component={Community} />
 
-        {/* Settings Routes */}
+        {/* Organization Settings Routes */}
         <Route path="/organization/billing" component={Billing} />
         <Route path="/organization/members" component={Members} />
         <Route path="/organization/partners" component={Partners} />
         <Route path="/settings/organization-activity" component={OrganizationActivity} />
         <Route path="/settings/pricing-plan" component={PricingPlan} />
-        <Route path="/settings/notifications" component={Notifications} />
-        <Route path="/settings/user-basic-data" component={UserBasicData} />
-        <Route path="/settings/user-preferences" component={UserPreferences} />
-        <Route path="/settings/user-organizations" component={UserOrganizations} />
+        
+        {/* User Page */}
+        <Route path="/user" component={User} />
         
         {/* Legacy pricing route - redirect to settings */}
         <Route path="/pricing-plan" component={PricingPlan} />

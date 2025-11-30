@@ -47,7 +47,7 @@ export interface NavigationSection {
 export type NavigationEntry = NavigationItem | NavigationSection;
 
 export interface ContextButton {
-  id: 'general' | 'community' | 'organization' | 'project' | 'learning' | 'admin' | 'user' | 'settings';
+  id: 'general' | 'community' | 'organization' | 'project' | 'learning' | 'admin' | 'user';
   label: string;
   icon: React.ComponentType<any>;
   testId: string;
@@ -106,14 +106,7 @@ export const CONTEXT_BUTTONS: ContextButton[] = [
     label: 'Usuario',
     icon: User,
     testId: 'button-sidebar-user',
-    href: '/profile',
-  },
-  {
-    id: 'settings',
-    label: 'Ajustes',
-    icon: Settings,
-    testId: 'button-sidebar-settings',
-    href: '/settings/user-basic-data',
+    href: '/user',
   },
 ];
 
@@ -122,13 +115,13 @@ export const ORGANIZATION_NAVIGATION: NavigationItem[] = [
   { id: 'basic-data', label: 'Datos Básicos', icon: Building, href: '/organization/basic-data', testId: 'nav-org-basic-data' },
   { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects', testId: 'nav-org-projects' },
   { id: 'members', label: 'Miembros', icon: Users, href: '/organization/members', testId: 'nav-org-members' },
-  { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', testId: 'nav-org-partners' },
+  { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', restricted: 'lab_user', testId: 'nav-org-partners' },
   { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing', testId: 'nav-org-billing' },
   { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts', testId: 'nav-org-contacts' },
   { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs', testId: 'nav-org-expenses' },
   { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', testId: 'nav-org-analysis' },
-  { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'coming_soon', testId: 'nav-org-finances' },
-  { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'coming_soon', testId: 'nav-org-capital' },
+  { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'lab_user', testId: 'nav-org-finances' },
+  { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'lab_user', testId: 'nav-org-capital' },
 ];
 
 export const PROJECT_NAVIGATION: NavigationItem[] = [
@@ -170,18 +163,11 @@ export const LEARNING_NAVIGATION: NavigationItem[] = [
 ];
 
 export const USER_NAVIGATION: NavigationItem[] = [
-  { id: 'profile', label: 'Mi Perfil', icon: User, href: '/profile', testId: 'nav-user-profile' },
+  { id: 'user-settings', label: 'Configuración', icon: User, href: '/user', testId: 'nav-user-settings' },
   { id: 'landing', label: 'Página de Inicio', icon: Home, href: '/', testId: 'nav-user-landing' },
 ];
 
-export const SETTINGS_NAVIGATION: NavigationItem[] = [
-  { id: 'user-basic-data', label: 'Datos Básicos', icon: User, href: '/settings/user-basic-data', testId: 'nav-settings-user-basic-data' },
-  { id: 'user-preferences', label: 'Preferencias', icon: Settings, href: '/settings/user-preferences', testId: 'nav-settings-user-preferences' },
-  { id: 'user-organizations', label: 'Organizaciones', icon: Building, href: '/settings/user-organizations', testId: 'nav-settings-user-organizations' },
-  { id: 'notifications', label: 'Notificaciones', icon: Bell, href: '/settings/notifications', testId: 'nav-settings-notifications' },
-];
-
-export type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning' | 'user' | 'settings';
+export type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning' | 'user';
 
 export interface GetNavigationItemsParams {
   sidebarLevel: SidebarLevel;
@@ -215,8 +201,6 @@ export function getNavigationItems(params: GetNavigationItemsParams): Navigation
       return LEARNING_NAVIGATION;
     case 'user':
       return USER_NAVIGATION;
-    case 'settings':
-      return SETTINGS_NAVIGATION;
     default:
       return [];
   }
@@ -257,7 +241,6 @@ export function getContextTitle(sidebarLevel: SidebarLevel): string {
     case 'learning': return 'Capacitaciones';
     case 'admin': return 'Administración';
     case 'user': return 'Usuario';
-    case 'settings': return 'Ajustes';
     case 'general': return 'Menú';
     default: return 'Menú';
   }
