@@ -851,7 +851,7 @@ export function LeftSidebar() {
                     if ('type' in navItem && navItem.type === 'section-header') {
                       return (
                         <div key={navItem.id} className="h-9 flex items-center px-2">
-                          <span className="text-xs font-medium text-[var(--main-sidebar-button-fg)] uppercase tracking-wide">
+                          <span className="text-xs font-semibold text-[var(--main-sidebar-button-fg)] uppercase tracking-wide">
                             {navItem.label}
                           </span>
                         </div>
