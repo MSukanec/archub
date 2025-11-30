@@ -211,32 +211,40 @@ const PLAN_HIERARCHY = {
 
 ### Límites por Plan
 
-> **🚨 CRÍTICO**: Estos valores se leen SIEMPRE del JSON `features` dentro de la tabla `plans`.
+> **🚨 CRÍTICO - ÚNICA FUENTE DE VERDAD**: Los límites se leen SIEMPRE del JSON `features` dentro de la tabla `plans`.
 > **NUNCA** usar valores hardcodeados en el código. El JSON `features` es la ÚNICA fuente de verdad.
 > Los límites están **DENTRO del JSON**, no como columnas separadas de la tabla.
 
-| Plan | max_projects | max_members | max_storage_mb | max_ai_tokens |
-|------|-------------|-------------|----------------|---------------|
-| Free | 2 | 1 | 500 | 1000 |
-| Pro | 25 | -1 (ilimitado) | 5000 | 50000 |
-| Teams | -1 (ilimitado) | 999 | 25000 | -1 (ilimitado) |
-| Enterprise | -1 | -1 | -1 | -1 |
-
-**Campos dentro del JSON `features` en la tabla `plans`:**
+**Campos posibles dentro del JSON `features` en la tabla `plans`:**
 - `max_projects`: Número máximo de proyectos (-1 = ilimitado)
 - `max_members`: Número máximo de miembros (-1 = ilimitado)  
 - `max_storage_mb`: Almacenamiento máximo en MB (-1 = ilimitado)
 - `max_ai_tokens`: Tokens de IA por mes (-1 = ilimitado)
+- `max_file_size_mb`: Tamaño máximo por archivo
+- `custom_project_color`: Feature booleana
+- (Otros campos según se configuren en Supabase)
 
-**Cómo leerlos:**
+**Cómo leerlos CORRECTAMENTE:**
 ```typescript
-// Backend (TypeScript)
+// Backend (TypeScript) - SIEMPRE leer del JSON
 const features = plan.features || {};
 const maxProjects = features.max_projects ?? 2; // Fallback a 2 si no existe
+const maxMembers = features.max_members ?? 1;
+const maxStorageMb = features.max_storage_mb ?? 500;
+const maxAiTokens = features.max_ai_tokens ?? 1000;
 
-// SQL (Supabase)
-SELECT features->>'max_projects' as max_projects FROM plans WHERE slug = 'pro';
+// SQL (Supabase) - Consultar el JSON
+SELECT 
+  features->>'max_projects' as max_projects,
+  features->>'max_members' as max_members,
+  features->>'max_storage_mb' as max_storage_mb,
+  features->>'max_ai_tokens' as max_ai_tokens
+FROM plans 
+WHERE slug = 'pro';
 ```
+
+**⚠️ IMPORTANTE**: Los valores específicos de cada plan (Free, Pro, Teams, Enterprise) varían según tu configuración en Supabase. 
+Consulta directamente en Supabase: `select name, features from plans;` para ver los valores reales.
 
 ### Reglas de Cambio de Plan
 
