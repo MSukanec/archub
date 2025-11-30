@@ -25,7 +25,7 @@ export default function GeneralCostsPaymentsTab() {
   const { showDeleteConfirmation } = useDeleteConfirmation();
   
   const organizationId = userData?.organization?.id;
-  const defaultCurrencyId = userData?.organization_preferences?.default_currency_id;
+  const defaultCurrencyId = userData?.organization?.preferences?.default_currency_id;
 
   // Filter states
   const [filterWallet, setFilterWallet] = useState<string>('all');
