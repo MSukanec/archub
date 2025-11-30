@@ -16,6 +16,7 @@ import {
   handleListOrganizationClientPayments,
   handleGetOrganizationClientPaymentsMetrics
 } from '../controllers/organization/clientPayments.controller.js';
+import { handleGetOrganizationUsageStats } from '../lib/handlers/organization/getOrganizationUsageStats.js';
 
 /**
  * Register organization-related endpoints (members, invitations, profile, clients)
@@ -25,6 +26,11 @@ export function registerOrganizationRoutes(app: Express, deps: RouteDeps): void 
   
   // GET /api/organization-members/:organizationId - Get all members of an organization
   app.get("/api/organization-members/:organizationId", handleGetOrganizationMembers);
+
+  // ========== ORGANIZATION - USAGE STATS ENDPOINTS ==========
+  
+  // GET /api/organizations/:organizationId/usage-stats - Get usage stats for downgrade impact calculation
+  app.get("/api/organizations/:organizationId/usage-stats", handleGetOrganizationUsageStats);
 
   // ========== ORGANIZATION - CLIENTS ENDPOINTS ==========
   
