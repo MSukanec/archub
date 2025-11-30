@@ -17,7 +17,7 @@ export function ComingSoonRestricted({ children }: ComingSoonRestrictedProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           {/* Wrapper que bloquea interacción y muestra el badge */}
-          <div className="relative w-full inline-block">
+          <div className="relative w-full inline-block overflow-visible">
             {/* Overlay invisible que bloquea clicks */}
             <div className="absolute inset-0 pointer-events-auto z-10" />
             
@@ -32,7 +32,7 @@ export function ComingSoonRestricted({ children }: ComingSoonRestrictedProps) {
             </div>
           </div>
         </TooltipTrigger>
-        <TooltipContent side="right" sideOffset={-35} className="bg-black text-white border-black">
+        <TooltipContent side="right" sideOffset={-35} className="bg-black text-white border-black z-[9999]">
           Próximamente
         </TooltipContent>
       </Tooltip>
