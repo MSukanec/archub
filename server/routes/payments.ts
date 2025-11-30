@@ -101,8 +101,8 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         { auth: { persistSession: false } }
       );
 
-      const { data: { user }, error: authError } = await authSupabase.auth.getUser(token);
-      if (authError || !user) {
+      const { data: { user: authUser }, error: authError } = await authSupabase.auth.getUser(token);
+      if (authError || !authUser) {
         return res.status(401).json({ error: "Token inválido o expirado" });
       }
 
@@ -114,12 +114,24 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         });
       }
 
-      // SECURITY: Verify user belongs to the organization
+      // Get user from users table (auth_id -> users.id)
       const adminClient = getAdminClient();
+      const { data: dbUser, error: userError } = await adminClient
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .single();
+
+      if (userError || !dbUser) {
+        console.error('[proration] User lookup error:', userError);
+        return res.status(401).json({ error: "Usuario no encontrado" });
+      }
+
+      // SECURITY: Verify user belongs to the organization
       const { data: membership, error: membershipError } = await adminClient
         .from('organization_members')
         .select('id, role_id')
-        .eq('user_id', user.id)
+        .eq('user_id', dbUser.id)
         .eq('organization_id', organization_id)
         .maybeSingle();
 
