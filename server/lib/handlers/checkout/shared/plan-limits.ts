@@ -26,7 +26,7 @@ export async function getPlanLimitsFromDB(
 ): Promise<PlanLimits> {
   const { data: plan, error } = await supabase
     .from('plans')
-    .select('max_projects, max_members')
+    .select('features')
     .eq('id', planId)
     .single();
 
@@ -36,9 +36,10 @@ export async function getPlanLimitsFromDB(
     return { max_projects: 1, max_members: 1 };
   }
 
+  const features = plan.features || {};
   return {
-    max_projects: plan.max_projects ?? -1,
-    max_members: plan.max_members ?? -1,
+    max_projects: features.max_projects ?? -1,
+    max_members: features.max_members ?? -1,
   };
 }
 

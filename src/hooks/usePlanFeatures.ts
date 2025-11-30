@@ -51,55 +51,11 @@ export function usePlanFeatures(): PlanFeatures {
   };
 
   const limit = (feature: string): number => {
-    // PRIORIDAD 1: Leer límites directamente de las columnas del plan (desde la DB)
-    // La tabla `plans` es la ÚNICA fuente de verdad para los límites
-    // Estas columnas tienen prioridad sobre cualquier valor en el JSON features
-    
-    if (feature === 'max_members') {
-      const dbValue = currentPlan?.max_members;
-      if (dbValue !== undefined && dbValue !== null) {
-        return dbValue === -1 ? Infinity : dbValue;
-      }
-    }
-    
-    if (feature === 'max_projects') {
-      const dbValue = currentPlan?.max_projects;
-      if (dbValue !== undefined && dbValue !== null) {
-        return dbValue === -1 ? Infinity : dbValue;
-      }
-    }
-    
-    if (feature === 'max_storage_mb') {
-      const dbValue = currentPlan?.max_storage_mb;
-      if (dbValue !== undefined && dbValue !== null) {
-        return dbValue === -1 ? Infinity : dbValue;
-      }
-    }
-    
-    if (feature === 'max_ai_tokens') {
-      const dbValue = currentPlan?.max_ai_tokens;
-      if (dbValue !== undefined && dbValue !== null) {
-        return dbValue === -1 ? Infinity : dbValue;
-      }
-    }
-    
-    if (feature === 'max_kanban_boards') {
-      const dbValue = currentPlan?.max_kanban_boards;
-      if (dbValue !== undefined && dbValue !== null) {
-        return dbValue === -1 ? Infinity : dbValue;
-      }
-      // Fallback: use max_projects as proxy for kanban boards
-      const projectsLimit = currentPlan?.max_projects;
-      if (projectsLimit !== undefined && projectsLimit !== null) {
-        return projectsLimit === -1 ? Infinity : projectsLimit;
-      }
-    }
-    
-    // PRIORIDAD 2: Solo para features NO cubiertas por columnas de la DB,
-    // verificar el JSON features como fallback
+    // Todos los límites están en el JSON features
     const featureValue = planFeatures[feature];
     
     if (typeof featureValue === 'number') {
+      // -1 significa ilimitado
       return featureValue === -1 ? Infinity : featureValue;
     }
     
@@ -107,7 +63,7 @@ export function usePlanFeatures(): PlanFeatures {
       return Infinity;
     }
     
-    // FALLBACK: Si no hay valor en la DB ni en features, devolver 0 (más restrictivo)
+    // Si no hay valor definido, retornar 0 (sin acceso)
     return 0;
   };
 

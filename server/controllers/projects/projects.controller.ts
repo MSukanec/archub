@@ -57,7 +57,7 @@ export async function handleCreateProject(req: Request, res: Response) {
       } else {
         const { data: orgData, error: orgError } = await supabase
           .from('organizations')
-          .select('plan_id, plans(name, max_projects, features)')
+          .select('plan_id, plans(name, features)')
           .eq('id', organization_id)
           .single();
 
@@ -67,9 +67,7 @@ export async function handleCreateProject(req: Request, res: Response) {
           
           let maxProjects: number;
           
-          if (planData?.max_projects !== undefined && planData?.max_projects !== null) {
-            maxProjects = planData.max_projects === -1 ? Infinity : planData.max_projects;
-          } else if (planFeatures.max_projects !== undefined) {
+          if (planFeatures.max_projects !== undefined && planFeatures.max_projects !== null) {
             maxProjects = planFeatures.max_projects === -1 ? Infinity : planFeatures.max_projects;
           } else {
             maxProjects = 2;
