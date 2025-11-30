@@ -159,10 +159,14 @@ export function UnifiedCourseCard({
     </Card>
   );
 
-  const cardUrl = mode === 'public' ? `/cursos/${course.slug}` : `/learning/courses/${course.slug}`;
+  // Si NO está inscrito → llevar a la landing page del curso (para ver info y comprar)
+  // Si SÍ está inscrito → llevar al CourseView (para ver el contenido)
+  const notEnrolledUrl = mode === 'public' 
+    ? `/cursos/${course.slug}` 
+    : `/learning/courses/${course.slug}/info`;
 
   if (!isEnrolled) {
-    return <Link href={cardUrl}>{cardContent}</Link>;
+    return <Link href={notEnrolledUrl}>{cardContent}</Link>;
   }
 
   return (
