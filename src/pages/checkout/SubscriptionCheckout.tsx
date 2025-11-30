@@ -400,6 +400,8 @@ export default function SubscriptionCheckout() {
         throw new Error("No se encontró la organización del usuario");
       }
 
+      const hasProration = prorationData?.hasActiveSubscription && (prorationData?.savings?.ars ?? 0) > 0;
+
       const requestBody = {
         user_id: userRecord.id,
         product_type: 'subscription',
@@ -407,6 +409,9 @@ export default function SubscriptionCheckout() {
         organization_id: organizationId,
         billing_period: billingPeriod,
         currency: "ARS",
+        is_upgrade: hasProration,
+        proration_amount_ars: hasProration ? prorationData?.finalPrice?.ars : undefined,
+        proration_credit_ars: hasProration ? prorationData?.savings?.ars : undefined,
       };
 
       console.log("[MP] Creando preferencia de suscripción…", requestBody);
@@ -507,9 +512,12 @@ export default function SubscriptionCheckout() {
         throw new Error("Precio inválido");
       }
 
-      const currentAmount = baseAmount;
+      const currentAmount = prorationData?.finalPrice?.usd ?? baseAmount;
+      const hasProration = prorationData?.hasActiveSubscription && (prorationData?.savings?.usd ?? 0) > 0;
 
-      const description = `Suscripción ${planData?.name || planSlug} - ${billingPeriod === 'annual' ? 'Anual' : 'Mensual'}`;
+      const description = hasProration
+        ? `Upgrade ${prorationData.currentPlan?.name} → ${planData?.name || planSlug} - ${billingPeriod === 'annual' ? 'Anual' : 'Mensual'}`
+        : `Suscripción ${planData?.name || planSlug} - ${billingPeriod === 'annual' ? 'Anual' : 'Mensual'}`;
 
       const billing = getBillingData();
       const requestBody = {
@@ -519,6 +527,8 @@ export default function SubscriptionCheckout() {
         billing_period: billingPeriod,
         amount_usd: currentAmount,
         description,
+        is_upgrade: hasProration,
+        proration_credit: hasProration ? (prorationData?.savings?.usd ?? 0) : 0,
         ...(billing && { billing }),
       };
 

@@ -114,7 +114,30 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
         });
       }
 
-      const result = await calculateProration(getAdminClient(), {
+      // SECURITY: Verify user belongs to the organization
+      const adminClient = getAdminClient();
+      const { data: membership, error: membershipError } = await adminClient
+        .from('organization_members')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('organization_id', organization_id)
+        .maybeSingle();
+
+      if (membershipError) {
+        console.error('[proration] Membership check error:', membershipError);
+        return res.status(500).json({ error: "Error verificando pertenencia a organización" });
+      }
+
+      if (!membership) {
+        return res.status(403).json({ error: "No tienes acceso a esta organización" });
+      }
+
+      // Only admins can calculate proration for upgrades
+      if (membership.role !== 'admin') {
+        return res.status(403).json({ error: "Solo administradores pueden gestionar suscripciones" });
+      }
+
+      const result = await calculateProration(adminClient, {
         organizationId: organization_id,
         targetPlanSlug: target_plan_slug,
         billingPeriod: billing_period as 'monthly' | 'annual',

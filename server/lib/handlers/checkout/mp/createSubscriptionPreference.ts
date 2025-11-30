@@ -7,6 +7,8 @@ import { buildURLContext, buildSubscriptionBackUrls } from "../shared/urls.js";
 import { validateMPToken, logMPMode, MP_WEBHOOK_SECRET, isTestMode } from "./config.js";
 import { encodeCustomData } from "./encoding.js";
 import { createMPPreference } from "./api.js";
+import { calculateProration } from "../shared/proration.js";
+import { getAdminClient } from "../../../../routes/_base.js";
 
 export type CreateSubscriptionPreferenceResult =
   | { success: true; initPoint: string; preferenceId: string }
@@ -20,7 +22,10 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
     plan_slug,
     organization_id,
     billing_period,
-    currency = "ARS"
+    currency = "ARS",
+    is_upgrade,
+    proration_amount_ars,
+    proration_credit_ars
   } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
   // 2. Validate inputs
@@ -73,11 +78,11 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
       return { success: false, error: "Plan no encontrado o inactivo", status: 404 };
     }
 
-    // 6.5. VALIDACIÓN: Prevenir suscripciones duplicadas
+    // 6.5. VALIDACIÓN: Prevenir suscripciones duplicadas (excepto para upgrades)
     try {
       const { data: existingSubscription, error: subCheckError } = await supabase
         .from("organization_subscriptions")
-        .select("id, status, expires_at")
+        .select("id, status, expires_at, plan_id")
         .eq("organization_id", organization_id)
         .eq("plan_id", plan.id)
         .in("status", ["active", "trialing", "pending", "cancelled"])
@@ -104,6 +109,23 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
     } catch (error) {
       console.error('[MP create-subscription-preference] Unexpected error checking subscriptions:', error);
       return { success: false, error: "Error inesperado verificando suscripciones", status: 500 };
+    }
+
+    // Si es un upgrade, obtener la suscripción actual para metadata
+    let currentSubscriptionId: string | null = null;
+    if (is_upgrade) {
+      const { data: currentSub } = await supabase
+        .from("organization_subscriptions")
+        .select("id")
+        .eq("organization_id", organization_id)
+        .in("status", ["active", "trialing"])
+        .order("started_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (currentSub) {
+        currentSubscriptionId = currentSub.id;
+      }
     }
 
     // 7. SECURITY: Get price from plans table (USD base) and convert if needed
@@ -143,10 +165,48 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
       unit_price = unit_price * Number(exchangeRate.rate);
     }
 
+    // 7.6. SECURITY: If upgrade requested, recalculate proration server-side (never trust client values)
+    let serverProrationCredit = 0;
+    if (is_upgrade && currency === 'ARS') {
+      try {
+        const adminClient = getAdminClient();
+        const prorationResult = await calculateProration(adminClient, {
+          organizationId: organization_id,
+          targetPlanSlug: plan_slug,
+          billingPeriod: billing_period as 'monthly' | 'annual',
+        });
+
+        if (prorationResult.hasActiveSubscription && prorationResult.savings.ars > 0) {
+          const serverProrationPrice = prorationResult.finalPrice.ars;
+          serverProrationCredit = prorationResult.savings.ars;
+          
+          console.log('[MP create-subscription-preference] Server-calculated proration:', {
+            original_price: unit_price,
+            server_prorated_price: serverProrationPrice,
+            server_credit: serverProrationCredit,
+            client_prorated_price: proration_amount_ars,
+            client_credit: proration_credit_ars,
+          });
+
+          // Use server-calculated price, not client-provided
+          unit_price = serverProrationPrice;
+        } else {
+          console.log('[MP create-subscription-preference] No active subscription for proration, using full price');
+        }
+      } catch (prorationError) {
+        console.error('[MP create-subscription-preference] Proration calculation error:', prorationError);
+        // Continue with full price if proration fails
+      }
+    }
+
     const productId = plan.id;
-    const productTitle = `Plan ${plan.name} - ${billing_period === 'monthly' ? 'Mensual' : 'Anual'}`;
+    const productTitle = is_upgrade 
+      ? `Upgrade a ${plan.name} - ${billing_period === 'monthly' ? 'Mensual' : 'Anual'}`
+      : `Plan ${plan.name} - ${billing_period === 'monthly' ? 'Mensual' : 'Anual'}`;
     const productSlug = plan_slug;
-    const productDescription = `Suscripción ${billing_period === 'monthly' ? 'mensual' : 'anual'} al plan ${plan.name}`;
+    const productDescription = is_upgrade
+      ? `Upgrade de suscripción ${billing_period === 'monthly' ? 'mensual' : 'anual'} al plan ${plan.name}`
+      : `Suscripción ${billing_period === 'monthly' ? 'mensual' : 'anual'} al plan ${plan.name}`;
 
     // 8. Obtener datos del usuario
     const userData = await getUserData(supabase, user_id);
@@ -158,13 +218,24 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
     }
 
     // 10. Construir customData
-    const customData = {
+    const customData: Record<string, any> = {
       user_id,
       product_type: 'subscription',
       plan_slug,
       organization_id,
       billing_period,
     };
+
+    // Incluir datos de upgrade si es un upgrade (use server-calculated credit)
+    if (is_upgrade) {
+      customData.is_upgrade = true;
+      if (currentSubscriptionId) {
+        customData.previous_subscription_id = currentSubscriptionId;
+      }
+      if (serverProrationCredit > 0) {
+        customData.proration_credit = serverProrationCredit;
+      }
+    }
 
     const custom_id = encodeCustomData(customData);
 
@@ -201,6 +272,11 @@ export async function createSubscriptionPreference(req: Request): Promise<Create
         plan_slug,
         organization_id,
         billing_period,
+        ...(is_upgrade && {
+          is_upgrade: true,
+          previous_subscription_id: currentSubscriptionId,
+          proration_credit: serverProrationCredit > 0 ? serverProrationCredit : undefined,
+        }),
       }
     };
 
