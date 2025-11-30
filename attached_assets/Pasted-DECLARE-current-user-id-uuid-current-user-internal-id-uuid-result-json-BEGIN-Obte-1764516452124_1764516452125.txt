@@ -1,0 +1,215 @@
+DECLARE
+  current_user_id uuid;
+  current_user_internal_id uuid;
+  result json;
+BEGIN
+  -- Obtener el ID de autenticación del usuario
+  current_user_id := auth.uid();
+
+  -- Retornar null si no hay usuario autenticado
+  IF current_user_id IS NULL THEN
+    RETURN NULL;
+  END IF;
+
+  -- Obtener el ID interno del usuario (public.users.id)
+  SELECT id INTO current_user_internal_id
+  FROM public.users
+  WHERE auth_id = current_user_id;
+
+  IF current_user_internal_id IS NULL THEN
+      -- Opcional: Manejar el caso donde auth.uid() existe pero el usuario no está en public.users
+      RETURN NULL;
+  END IF;
+
+
+  WITH
+  -- CTE para obtener la organización activa y su plan
+  active_org AS (
+    SELECT
+      o.id, o.name, o.is_active, o.is_system, o.created_by, o.created_at, o.updated_at,
+      p.id AS plan_id, p.name AS plan_name, p.slug AS plan_slug, p.features AS plan_features,
+      p.monthly_amount AS plan_monthly_amount, p.annual_amount AS plan_annual_amount, p.billing_type AS plan_billing_type,
+      op.default_currency_id, op.default_wallet_id, op.default_pdf_template_id, op.use_currency_exchange,
+      op.created_at AS op_created_at, op.updated_at AS op_updated_at,
+      uop.last_project_id,
+      om.role_id -- Rol en la organización activa
+    FROM public.user_preferences up
+    JOIN public.organizations o ON o.id = up.last_organization_id
+    LEFT JOIN public.plans p ON p.id = o.plan_id
+    LEFT JOIN public.organization_preferences op ON op.organization_id = o.id
+    LEFT JOIN public.user_organization_preferences uop ON uop.user_id = up.user_id AND uop.organization_id = o.id
+    -- Asegurar que el usuario es miembro activo de su última organización
+    JOIN public.organization_members om ON om.organization_id = o.id AND om.user_id = up.user_id AND om.is_active = true
+    WHERE up.user_id = current_user_internal_id
+  ),
+
+  -- CTE para obtener el rol y permisos en la organización activa
+  active_role_permissions AS (
+    SELECT
+      r.id AS role_id,
+      r.name AS role_name,
+      json_agg(
+        json_build_object(
+          'id', perm.id,
+          'key', perm.key,
+          'description', perm.description,
+          'category', perm.category
+        )
+      ) FILTER (WHERE perm.id IS NOT NULL) AS permissions -- FILTER para manejar roles sin permisos
+    FROM active_org ao
+    JOIN public.roles r ON r.id = ao.role_id
+    LEFT JOIN public.role_permissions rp ON rp.role_id = r.id
+    LEFT JOIN public.permissions perm ON perm.id = rp.permission_id
+    GROUP BY r.id, r.name
+  ),
+
+  -- CTE para obtener todas las membresías activas del usuario
+  user_memberships AS (
+    SELECT
+      json_agg(
+        json_build_object(
+          'organization_id', om.organization_id,
+          'organization_name', org.name,
+          'is_active', om.is_active,
+          'joined_at', om.joined_at,
+          'last_active_at', om.last_active_at,
+          'role', json_build_object(
+            'id', r.id,
+            'name', r.name
+          )
+        )
+      ) AS memberships
+    FROM public.organization_members om
+    JOIN public.organizations org ON org.id = om.organization_id
+    JOIN public.roles r ON r.id = om.role_id
+    WHERE om.user_id = current_user_internal_id AND om.is_active = true
+  ),
+
+  -- CTE para obtener todas las organizaciones activas del usuario con detalles del plan
+  user_organizations AS (
+    SELECT
+      json_agg(
+        json_build_object(
+          'id', org.id,
+          'name', org.name,
+          'created_at', org.created_at,
+          'is_active', org.is_active,
+          'is_system', org.is_system,
+          'plan', CASE WHEN p.id IS NOT NULL THEN json_build_object( -- Manejo condicional del plan
+            'id', p.id,
+            'name', p.name,
+            'slug', p.slug,
+            'features', p.features,
+            'monthly_amount', p.monthly_amount,
+            'annual_amount', p.annual_amount,
+            'billing_type', p.billing_type,
+            'owner_id', o.owner_id
+          ) ELSE NULL END
+        )
+      ) AS organizations
+    FROM public.organization_members om
+    JOIN public.organizations org ON org.id = om.organization_id
+    LEFT JOIN public.plans p ON p.id = org.plan_id
+    WHERE om.user_id = current_user_internal_id AND om.is_active = true
+  )
+
+
+  -- Consulta principal construyendo el objeto JSON final
+  SELECT json_build_object(
+    -- Usuario
+    'user', json_build_object(
+      'id', u.id,
+      'auth_id', u.auth_id,
+      'email', u.email,
+      'full_name', u.full_name,
+      'avatar_url', u.avatar_url,
+      'avatar_source', u.avatar_source,
+      'created_at', u.created_at
+    ),
+
+    -- Datos personales
+    'user_data', CASE WHEN ud.id IS NOT NULL THEN json_build_object( -- Manejo condicional
+      'id', ud.id,
+      'user_id', ud.user_id,
+      'first_name', ud.first_name,
+      'last_name', ud.last_name,
+      'country', ud.country,
+      'birthdate', ud.birthdate,
+      'phone_e164', ud.phone_e164,
+      'created_at', ud.created_at,
+      'updated_at', ud.updated_at
+    ) ELSE NULL END,
+
+    -- Preferencias de usuario
+    'preferences', CASE WHEN up.id IS NOT NULL THEN json_build_object( -- Manejo condicional
+      'id', up.id,
+      'user_id', up.user_id,
+      'theme', up.theme,
+      'sidebar_docked', up.sidebar_docked,
+      'last_organization_id', up.last_organization_id,
+      'last_project_id', ao.last_project_id, -- Viene de la CTE active_org (origen uop)
+      'last_user_type', up.last_user_type,
+      'onboarding_completed', up.onboarding_completed,
+      'layout', up.layout,
+      'created_at', up.created_at,
+      'updated_at', up.updated_at
+    ) ELSE NULL END,
+
+    -- Organización activa (Incluyendo detalles del plan y preferencias)
+    'organization', CASE WHEN ao.id IS NOT NULL THEN json_build_object( -- Manejo condicional
+      'id', ao.id,
+      'name', ao.name,
+      'is_active', ao.is_active,
+      'is_system', ao.is_system,
+      'created_by', ao.created_by,
+      'created_at', ao.created_at,
+      'updated_at', ao.updated_at,
+      'plan', CASE WHEN ao.plan_id IS NOT NULL THEN json_build_object( -- Plan dentro de organización
+        'id', ao.plan_id,
+        'name', ao.plan_name,
+        'slug', ao.plan_slug,
+        'features', ao.plan_features,
+        'monthly_amount', ao.plan_monthly_amount,
+        'annual_amount', ao.plan_annual_amount,
+        'billing_type', ao.plan_billing_type
+      ) ELSE NULL END,
+       -- Preferencias de organización (Integradas aquí o separadas, tú decides. Separadas como antes:)
+      'preferences', CASE WHEN ao.default_currency_id IS NOT NULL THEN json_build_object(
+         'organization_id', ao.id,
+         'default_currency', ao.default_currency_id,
+         'default_wallet', ao.default_wallet_id,
+         'pdf_template', ao.default_pdf_template_id,
+         'use_currency_exchange', ao.use_currency_exchange,
+         'created_at', ao.op_created_at,
+         'updated_at', ao.op_updated_at
+      ) ELSE NULL END
+    ) ELSE NULL END,
+
+    -- Plan (ELIMINADO de la raíz para evitar duplicación)
+
+    -- Rol y permisos en la organización activa
+    'role', CASE WHEN arp.role_id IS NOT NULL THEN json_build_object( -- Manejo condicional
+      'id', arp.role_id,
+      'name', arp.role_name,
+      'permissions', COALESCE(arp.permissions, '[]'::json) -- Asegurar array vacío si no hay permisos
+    ) ELSE NULL END,
+
+    -- Todas las organizaciones activas
+    'organizations', COALESCE(uo.organizations, '[]'::json), -- Asegurar array vacío
+
+    -- Membresías activas
+    'memberships', COALESCE(um.memberships, '[]'::json) -- Asegurar array vacío
+  )
+  INTO result
+  FROM public.users u
+  LEFT JOIN public.user_data ud ON ud.user_id = u.id
+  LEFT JOIN public.user_preferences up ON up.user_id = u.id
+  -- LEFT JOINs con las CTEs
+  LEFT JOIN active_org ao ON ao.id = up.last_organization_id -- Unir usando last_organization_id
+  LEFT JOIN active_role_permissions arp ON arp.role_id = ao.role_id -- Unir usando el rol obtenido de active_org
+  CROSS JOIN user_memberships um -- CROSS JOIN es seguro porque las CTEs de agregación siempre devuelven 1 fila (o null si no hay datos, manejado por COALESCE)
+  CROSS JOIN user_organizations uo
+  WHERE u.id = current_user_internal_id;
+
+  RETURN result;
+END;
