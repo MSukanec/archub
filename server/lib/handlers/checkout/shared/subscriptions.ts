@@ -532,16 +532,18 @@ export async function upgradeOrganizationPlan(
   // Para el primer pago de TEAMS, siempre es 1 seat facturado
   const billedSeats = 1;
 
-  // Obtener precio del plan
+  // Obtener precio y nombre del plan
   const { data: plan, error: planError } = await supabase
     .from('plans')
-    .select('monthly_amount, annual_amount')
+    .select('name, monthly_amount, annual_amount')
     .eq('id', params.planId)
     .single();
 
   if (planError) {
     console.error('[subscriptions] Error fetching plan:', planError);
   }
+
+  const planName = plan?.name || 'Pro';
 
   const basePlanPrice = params.billingPeriod === 'monthly' 
     ? (plan?.monthly_amount || params.amount)
@@ -595,6 +597,15 @@ export async function upgradeOrganizationPlan(
   if (orgError) {
     console.error('❌ [subscriptions] ERROR updating organization:', orgError);
     throw orgError;
+  }
+
+  // Apply new plan limits - this will unlock projects/members that were over limit
+  console.log(`[subscriptions] Applying plan limits for ${planName}...`);
+  const limitsResult = await applyPlanLimits(supabase, params.organizationId, planName);
+  if (limitsResult.success) {
+    console.log(`[subscriptions] ✅ Plan limits applied: ${limitsResult.projectsMarked} projects marked, ${limitsResult.membersMarked} members marked`);
+  } else {
+    console.error(`[subscriptions] ⚠️ Error applying plan limits:`, limitsResult.error);
   }
 
   // Reactivate any suspended bonus course enrollments when upgrading to a paid plan

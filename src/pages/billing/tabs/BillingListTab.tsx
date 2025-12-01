@@ -178,18 +178,33 @@ export function BillingListTab() {
     queryFn: async () => {
       if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
 
-      const { data, error } = await supabase
+      // Get payments for subscriptions
+      const { data: paymentsData, error } = await supabase
         .from('payments')
-        .select(`
-          *,
-          plans!payments_plan_id_fkey(name, slug)
-        `)
+        .select('*')
         .eq('organization_id', currentOrganizationId)
         .eq('product_type', 'subscription')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      
+      // Fetch plan info for each payment that has a product_id
+      const paymentsWithPlans = await Promise.all(
+        (paymentsData || []).map(async (payment) => {
+          let plans = null;
+          if (payment.product_id) {
+            const { data: planData } = await supabase
+              .from('plans')
+              .select('name, slug')
+              .eq('id', payment.product_id)
+              .maybeSingle();
+            plans = planData;
+          }
+          return { ...payment, plans, plan_id: payment.product_id };
+        })
+      );
+      
+      return paymentsWithPlans;
     },
     enabled: !!currentOrganizationId && !!supabase,
   });
