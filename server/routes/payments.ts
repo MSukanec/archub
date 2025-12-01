@@ -170,8 +170,11 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   // POST /api/checkout/mp/create-course
   app.post("/api/checkout/mp/create-course", mpController.createCourse);
   
-  // POST /api/checkout/mp/create-subscription
+  // POST /api/checkout/mp/create-subscription (Legacy - one-time payment)
   app.post("/api/checkout/mp/create-subscription", mpController.createSubscription);
+  
+  // POST /api/checkout/mp/create-recurring (NEW - recurring subscription via Preapproval API)
+  app.post("/api/checkout/mp/create-recurring", mpController.createRecurring);
   
   // GET /api/checkout/mp/success-handler (NO auth required - redirect endpoint)
   app.get("/api/checkout/mp/success-handler", mpController.successHandler);
@@ -203,6 +206,9 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
 
   // POST /api/admin/paypal/sync-plans (Admin only - creates PayPal products and billing plans)
   app.post("/api/admin/paypal/sync-plans", paypalController.syncPlans);
+
+  // POST /api/admin/mp/sync-plans (Admin only - creates MercadoPago preapproval plans)
+  app.post("/api/admin/mp/sync-plans", mpController.syncPlans);
 
   // ==================== BANK TRANSFER ====================
   // NOTE: Bank transfer routes are now handled in server/routes/bank-transfer.ts

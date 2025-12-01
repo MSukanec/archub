@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import { createCoursePreference } from "../../lib/handlers/checkout/mp/createCoursePreference.js";
 import { createSubscriptionPreference } from "../../lib/handlers/checkout/mp/createSubscriptionPreference.js";
+import { createRecurringSubscription } from "../../lib/handlers/checkout/mp/createRecurringSubscription.js";
+import { syncMPPlans } from "../../lib/handlers/checkout/mp/sync-plans.js";
 import { processWebhook } from "../../lib/handlers/checkout/mp/processWebhook.js";
 import { handleCorsPreflight } from "../../lib/handlers/checkout/shared/cors.js";
 
@@ -103,6 +105,55 @@ export async function webhook(req: Request, res: Response) {
     return res.status(500).json({
       ok: false,
       error: error.message || "Failed to process webhook"
+    });
+  }
+}
+
+export async function createRecurring(req: Request, res: Response) {
+  try {
+    const result = await createRecurringSubscription(req as any);
+    
+    if (!result.success) {
+      return res.status(result.status || 400).json({
+        ok: false,
+        error: result.error
+      });
+    }
+    
+    return res.json({
+      ok: true,
+      init_point: result.initPoint,
+      preapproval_id: result.preapprovalId
+    });
+  } catch (error: any) {
+    console.error("[MP create-recurring controller] Error:", error);
+    return res.status(500).json({
+      ok: false,
+      error: error.message || "Failed to create recurring subscription"
+    });
+  }
+}
+
+export async function syncPlans(req: Request, res: Response) {
+  try {
+    const result = await syncMPPlans(req as any);
+    
+    if (!result.success) {
+      return res.status(result.status || 400).json({
+        ok: false,
+        error: result.error
+      });
+    }
+    
+    return res.json({
+      ok: true,
+      results: result.results
+    });
+  } catch (error: any) {
+    console.error("[MP sync-plans controller] Error:", error);
+    return res.status(500).json({
+      ok: false,
+      error: error.message || "Failed to sync plans with MercadoPago"
     });
   }
 }
