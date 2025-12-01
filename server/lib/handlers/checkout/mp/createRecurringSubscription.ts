@@ -233,51 +233,42 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
     const urlContext = buildURLContext(req);
     const backUrls = buildSubscriptionBackUrls(urlContext.returnBase);
 
-    const mpPlanId = billing_period === 'monthly' 
-      ? (plan as any).mp_plan_monthly_id 
-      : (plan as any).mp_plan_annual_id;
-
     const productTitle = is_upgrade 
       ? `Upgrade a ${plan.name} - ${billing_period === 'monthly' ? 'Mensual' : 'Anual'}`
       : `Suscripción ${plan.name} - ${billing_period === 'monthly' ? 'Mensual' : 'Anual'}`;
 
-    let preapprovalResult;
+    // IMPORTANT: Always use auto_recurring, NOT preapproval_plan_id
+    // Using preapproval_plan_id requires card_token_id (pre-tokenized card)
+    // Using auto_recurring redirects user to MP checkout to enter card
+    const frequency = billing_period === 'monthly' ? 1 : 12;
+    const frequencyType: "months" = "months";
 
-    if (mpPlanId) {
-      console.log('[MP create-recurring-subscription] Using preapproval_plan_id:', mpPlanId);
-      
-      preapprovalResult = await createMPPreapproval({
-        preapproval_plan_id: mpPlanId,
-        reason: productTitle,
-        external_reference: externalReference,
-        payer_email: userData.email,
-        back_url: backUrls.success,
-        status: "pending",
-      });
-    } else {
-      console.log('[MP create-recurring-subscription] Creating preapproval with auto_recurring (no plan ID)');
-      
-      const frequency = billing_period === 'monthly' ? 1 : 12;
-      const frequencyType: "months" = "months";
+    // Round to integer for ARS (MP Argentina requirement)
+    const roundedAmount = Math.round(transactionAmount);
 
-      const autoRecurring: MPAutoRecurring = {
-        frequency,
-        frequency_type: frequencyType,
-        transaction_amount: transactionAmount,
-        currency_id: "ARS",
-      };
+    const autoRecurring: MPAutoRecurring = {
+      frequency,
+      frequency_type: frequencyType,
+      transaction_amount: roundedAmount,
+      currency_id: "ARS",
+    };
 
-      console.log('[MP create-recurring-subscription] auto_recurring config:', autoRecurring);
+    console.log('[MP create-recurring-subscription] Creating preapproval with auto_recurring:', {
+      plan: plan.name,
+      billing_period,
+      amount_ars: roundedAmount,
+      frequency,
+      is_upgrade,
+    });
 
-      preapprovalResult = await createMPPreapproval({
-        reason: productTitle,
-        external_reference: externalReference,
-        payer_email: userData.email,
-        auto_recurring: autoRecurring,
-        back_url: backUrls.success,
-        status: "pending",
-      });
-    }
+    const preapprovalResult = await createMPPreapproval({
+      reason: productTitle,
+      external_reference: externalReference,
+      payer_email: userData.email,
+      auto_recurring: autoRecurring,
+      back_url: backUrls.success,
+      status: "pending",
+    });
 
     if (!preapprovalResult.success) {
       console.error("[MP create-recurring-subscription] Error de Mercado Pago:", preapprovalResult);
