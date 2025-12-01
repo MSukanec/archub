@@ -427,10 +427,10 @@ export default function SubscriptionCheckout() {
         proration_credit_ars: hasProration ? prorationData?.savings?.ars : undefined,
       };
 
-      console.log("[MP] Creando preferencia de suscripción…", requestBody);
+      console.log("[MP] Creando suscripción recurrente…", requestBody);
 
       const API_BASE = getApiBase();
-      const mpUrl = `${API_BASE}/api/checkout/mp/create-subscription`;
+      const mpUrl = `${API_BASE}/api/checkout/mp/create-recurring`;
 
       const res = await fetchWithTimeout(
         mpUrl,
