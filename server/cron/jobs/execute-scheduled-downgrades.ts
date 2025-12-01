@@ -70,80 +70,80 @@ export async function runScheduledDowngradesJob(): Promise<DowngradeJobResult> {
 
     if (queryError) {
       console.error('[ScheduledDowngrades] Error fetching expired subscriptions:', queryError);
-      return result;
+      // Don't return - continue to check for cancelled subscriptions
     }
 
-    if (!expiredSubscriptions || expiredSubscriptions.length === 0) {
+    // PART 1: Process scheduled downgrades
+    if (expiredSubscriptions && expiredSubscriptions.length > 0) {
+      console.log(`[ScheduledDowngrades] Found ${expiredSubscriptions.length} subscriptions with scheduled downgrades to process`);
+
+      for (const subscription of expiredSubscriptions) {
+        result.processed++;
+
+        const org = subscription.organizations as any;
+        const currentPlan = subscription.plans as any;
+
+        console.log(`[ScheduledDowngrades] Processing org "${org?.name}" (${subscription.organization_id})`);
+
+        const switchResult = await executeScheduledPlanSwitch(supabase, {
+          organizationId: subscription.organization_id,
+          oldSubscriptionId: subscription.id,
+          newPlanId: subscription.scheduled_downgrade_plan_id!,
+          oldPlanId: subscription.plan_id,
+        });
+
+        const { error: logError } = await supabase
+          .from('system_job_logs')
+          .insert({
+            organization_id: subscription.organization_id,
+            subscription_id: subscription.id,
+            job_type: 'execute_downgrade',
+            details: {
+              from_plan_id: switchResult.details.from_plan_id,
+              to_plan_id: switchResult.details.to_plan_id,
+              from_plan_name: switchResult.details.from_plan_name || currentPlan?.name,
+              to_plan_name: switchResult.details.to_plan_name,
+              new_subscription_id: switchResult.newSubscriptionId,
+              organization_name: org?.name,
+              original_target_plan_id: subscription.scheduled_downgrade_plan_id,
+              limits_applied: switchResult.limitsApplied || null,
+            },
+            status: switchResult.success ? 'success' : 'error',
+            error_message: switchResult.error || null,
+          });
+
+        if (logError) {
+          console.error('[ScheduledDowngrades] Error logging job result:', logError);
+        }
+
+        if (switchResult.success) {
+          result.successful++;
+          result.details.push({
+            subscriptionId: subscription.id,
+            organizationId: subscription.organization_id,
+            fromPlan: switchResult.details.from_plan_name || 'Unknown',
+            toPlan: switchResult.details.to_plan_name || 'Unknown',
+            status: 'success',
+          });
+          console.log(`[ScheduledDowngrades] Successfully downgraded org "${org?.name}" from ${switchResult.details.from_plan_name} to ${switchResult.details.to_plan_name}`);
+        } else {
+          result.failed++;
+          result.details.push({
+            subscriptionId: subscription.id,
+            organizationId: subscription.organization_id,
+            fromPlan: currentPlan?.name || 'Unknown',
+            toPlan: 'Unknown',
+            status: 'error',
+            error: switchResult.error,
+          });
+          console.error(`[ScheduledDowngrades] Failed to downgrade org "${org?.name}": ${switchResult.error}`);
+        }
+      }
+
+      console.log(`[ScheduledDowngrades] Completed scheduled downgrades: ${result.successful} successful, ${result.failed} failed out of ${result.processed} processed`);
+    } else {
       console.log('[ScheduledDowngrades] No expired subscriptions with scheduled downgrades found');
-      return result;
     }
-
-    console.log(`[ScheduledDowngrades] Found ${expiredSubscriptions.length} subscriptions to process`);
-
-    for (const subscription of expiredSubscriptions) {
-      result.processed++;
-
-      const org = subscription.organizations as any;
-      const currentPlan = subscription.plans as any;
-
-      console.log(`[ScheduledDowngrades] Processing org "${org?.name}" (${subscription.organization_id})`);
-
-      const switchResult = await executeScheduledPlanSwitch(supabase, {
-        organizationId: subscription.organization_id,
-        oldSubscriptionId: subscription.id,
-        newPlanId: subscription.scheduled_downgrade_plan_id!,
-        oldPlanId: subscription.plan_id,
-      });
-
-      const { error: logError } = await supabase
-        .from('system_job_logs')
-        .insert({
-          organization_id: subscription.organization_id,
-          subscription_id: subscription.id,
-          job_type: 'execute_downgrade',
-          details: {
-            from_plan_id: switchResult.details.from_plan_id,
-            to_plan_id: switchResult.details.to_plan_id,
-            from_plan_name: switchResult.details.from_plan_name || currentPlan?.name,
-            to_plan_name: switchResult.details.to_plan_name,
-            new_subscription_id: switchResult.newSubscriptionId,
-            organization_name: org?.name,
-            original_target_plan_id: subscription.scheduled_downgrade_plan_id,
-            limits_applied: switchResult.limitsApplied || null,
-          },
-          status: switchResult.success ? 'success' : 'error',
-          error_message: switchResult.error || null,
-        });
-
-      if (logError) {
-        console.error('[ScheduledDowngrades] Error logging job result:', logError);
-      }
-
-      if (switchResult.success) {
-        result.successful++;
-        result.details.push({
-          subscriptionId: subscription.id,
-          organizationId: subscription.organization_id,
-          fromPlan: switchResult.details.from_plan_name || 'Unknown',
-          toPlan: switchResult.details.to_plan_name || 'Unknown',
-          status: 'success',
-        });
-        console.log(`[ScheduledDowngrades] Successfully downgraded org "${org?.name}" from ${switchResult.details.from_plan_name} to ${switchResult.details.to_plan_name}`);
-      } else {
-        result.failed++;
-        result.details.push({
-          subscriptionId: subscription.id,
-          organizationId: subscription.organization_id,
-          fromPlan: currentPlan?.name || 'Unknown',
-          toPlan: 'Unknown',
-          status: 'error',
-          error: switchResult.error,
-        });
-        console.error(`[ScheduledDowngrades] Failed to downgrade org "${org?.name}": ${switchResult.error}`);
-      }
-    }
-
-    console.log(`[ScheduledDowngrades] Completed scheduled downgrades: ${result.successful} successful, ${result.failed} failed out of ${result.processed} processed`);
 
     // PART 2: Process cancelled subscriptions that have expired (without scheduled downgrade)
     // These should be moved to FREE plan and have bonus course enrollments suspended
