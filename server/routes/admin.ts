@@ -8,6 +8,8 @@ import * as modulesController from '../controllers/admin/modules.controller.js';
 import * as lessonsController from '../controllers/admin/lessons.controller.js';
 import * as enrollmentsController from '../controllers/admin/enrollments.controller.js';
 import * as resetTestDataController from '../controllers/admin/reset-test-data.controller.js';
+import * as subscriptionsController from '../controllers/admin/subscriptions.controller.js';
+import * as plansController from '../controllers/admin/plans.controller.js';
 
 /**
  * Register all admin-related endpoints
@@ -51,6 +53,12 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
   app.post("/api/admin/enrollments", enrollmentsController.postEnrollment);
   app.patch("/api/admin/enrollments/:id", enrollmentsController.patchEnrollment);
   app.delete("/api/admin/enrollments/:id", enrollmentsController.removeEnrollment);
+
+  // ==================== SUBSCRIPTIONS ====================
+  app.get("/api/admin/subscriptions", subscriptionsController.getSubscriptions);
+
+  // ==================== PLANS ====================
+  app.get("/api/admin/plans", plansController.getPlans);
 
   // ==================== DEV/TEST UTILITIES ====================
   app.post("/api/admin/reset-test-data", resetTestDataController.resetTestData);
