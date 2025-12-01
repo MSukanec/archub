@@ -1,5 +1,5 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, ArrowUpCircle, ShieldAlert, Sparkles, Check, Gift } from "lucide-react";
+import { AlertCircle, ArrowUpCircle, ShieldAlert, Sparkles, Check, Gift, Info } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -265,21 +265,27 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
                 </div>
 
                 {hasProration && prorationData.credit && (
-                  <div className="flex justify-between text-green-600 dark:text-green-400">
-                    <span className="flex items-center gap-1">
-                      <Gift className="h-3 w-3" />
-                      Crédito por {prorationData.credit.daysRemaining} días restantes
-                    </span>
-                    <span className="font-medium">
-                      - USD ${prorationData.savings.usd.toFixed(2)}
-                    </span>
-                  </div>
+                  <>
+                    <div className="flex justify-between text-green-600 dark:text-green-400">
+                      <span className="flex items-center gap-1">
+                        <Gift className="h-3 w-3" />
+                        Crédito por {prorationData.credit.daysRemaining} días restantes
+                      </span>
+                      <span className="font-medium">
+                        - USD ${prorationData.savings.usd.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex items-start gap-1.5 p-2 bg-blue-50 dark:bg-blue-950/50 rounded text-xs text-blue-700 dark:text-blue-300">
+                      <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                      <span>Este descuento aplica solo con Mercado Pago. Con PayPal se cobra el precio completo.</span>
+                    </div>
+                  </>
                 )}
 
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-900 dark:text-gray-100 font-semibold">
-                      Total a pagar
+                      Total a pagar {hasProration && <span className="text-xs font-normal text-muted-foreground">(con MercadoPago)</span>}
                     </span>
                     <span className="text-xl font-bold text-green-600 dark:text-green-400">
                       USD ${prorationData.finalPrice.usd.toFixed(2)}
@@ -290,7 +296,7 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
             </div>
           )}
 
-          {isAnnual && (
+          {isAnnual && !userData?.organization?.settings?.is_founder && (
             <div className="bg-yellow-50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
               <div className="flex items-start gap-3">
                 <Gift className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />

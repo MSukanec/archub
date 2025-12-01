@@ -131,49 +131,19 @@ export async function createSubscriptionOrder(
       const return_url = `${returnBase}/api/checkout/paypal/capture-subscription?type=recurring`;
       const cancel_url = `${returnBase}/organization/billing?payment=cancelled`;
 
-      let planOverride = undefined;
+      const planOverride = undefined;
       
-      try {
-        const prorationResult = await calculateProration(supabase, {
-          organizationId: organization_id,
-          targetPlanSlug: plan_slug,
-          billingPeriod: billing_period as 'monthly' | 'annual',
-        });
-
-        console.log("[PayPal create-subscription-order] Proration result:", {
-          hasActiveSubscription: prorationResult.hasActiveSubscription,
-          currentPlan: prorationResult.currentPlan?.name,
-          targetPlan: prorationResult.targetPlan.name,
-          finalPriceUSD: prorationResult.finalPrice.usd,
-          savingsUSD: prorationResult.savings.usd,
-        });
-
-        if (prorationResult.hasActiveSubscription && prorationResult.savings.usd > 0) {
-          const proratedPrice = prorationResult.finalPrice.usd;
-          const regularPrice = prorationResult.targetPlan.priceUSD;
-          
-          console.log("[PayPal create-subscription-order] Applying proration override:", {
-            proratedPrice,
-            regularPrice,
-          });
-
-          planOverride = {
-            billing_cycles: [
-              {
-                sequence: 1,
-                pricing_scheme: {
-                  fixed_price: {
-                    value: proratedPrice.toFixed(2),
-                    currency_code: 'USD',
-                  },
-                },
-              },
-            ],
-          };
-        }
-      } catch (prorationError) {
-        console.error("[PayPal create-subscription-order] Proration calculation failed, proceeding without override:", prorationError);
-      }
+      // NOTE: PayPal proration is temporarily disabled.
+      // The current PayPal billing plans only have a single REGULAR cycle.
+      // When we override the price, it affects ALL future renewals, not just the first payment.
+      // 
+      // TO FIX: Rebuild PayPal billing plans with two cycles:
+      // 1. TRIAL cycle (sequence 1) - can be overridden for prorated amount
+      // 2. REGULAR cycle (sequence 2) - stays at full price for renewals
+      //
+      // For now, upgrades will charge full price to ensure correct renewal amounts.
+      // MercadoPago proration still works correctly.
+      console.log("[PayPal create-subscription-order] Proration disabled - PayPal plans need TRIAL+REGULAR cycles");
 
       const subscriptionResult = await createPayPalSubscription({
         planId: paypalPlanId,

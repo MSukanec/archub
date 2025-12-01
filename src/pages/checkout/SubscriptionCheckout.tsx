@@ -525,11 +525,10 @@ export default function SubscriptionCheckout() {
         throw new Error("Precio inválido");
       }
 
-      const currentAmount = prorationData?.finalPrice?.usd ?? baseAmount;
-      const hasProration = prorationData?.hasActiveSubscription && (prorationData?.savings?.usd ?? 0) > 0;
+      const isUpgrade = prorationData?.hasActiveSubscription && (prorationData?.savings?.usd ?? 0) > 0;
 
-      const description = hasProration
-        ? `Upgrade ${prorationData.currentPlan?.name} → ${planData?.name || planSlug} - ${billingPeriod === 'annual' ? 'Anual' : 'Mensual'}`
+      const description = isUpgrade
+        ? `Upgrade ${prorationData?.currentPlan?.name} → ${planData?.name || planSlug} - ${billingPeriod === 'annual' ? 'Anual' : 'Mensual'}`
         : `Suscripción ${planData?.name || planSlug} - ${billingPeriod === 'annual' ? 'Anual' : 'Mensual'}`;
 
       const billing = getBillingData();
@@ -538,10 +537,10 @@ export default function SubscriptionCheckout() {
         plan_slug: planSlug,
         organization_id: organizationId,
         billing_period: billingPeriod,
-        amount_usd: currentAmount,
+        amount_usd: baseAmount,
         description,
-        is_upgrade: hasProration,
-        proration_credit: hasProration ? (prorationData?.savings?.usd ?? 0) : 0,
+        is_upgrade: isUpgrade,
+        proration_credit: 0,
         ...(billing && { billing }),
       };
 
@@ -766,16 +765,13 @@ export default function SubscriptionCheckout() {
       };
     }
     
-    const finalUsd = prorationData?.finalPrice?.usd ?? basePrice;
-    const discountUsd = prorationData?.savings?.usd ?? 0;
-    
     return {
-      amount: finalUsd.toFixed(2),
+      amount: basePrice.toFixed(2),
       currency: 'USD',
-      numericAmount: finalUsd,
+      numericAmount: basePrice,
       originalAmount: basePrice,
-      hasDiscount: discountUsd > 0,
-      discountAmount: discountUsd
+      hasDiscount: false,
+      discountAmount: 0
     };
   }, [planData, billingPeriod, selectedMethod, exchangeRate, prorationData]);
 
@@ -1207,7 +1203,9 @@ export default function SubscriptionCheckout() {
                         </div>
                         <p className="text-xs text-green-600 dark:text-green-500">
                           Te quedan {prorationData.credit.daysRemaining} días de {prorationData.currentPlan?.name}. 
-                          Aplicamos el valor proporcional como descuento.
+                          {selectedMethod === 'mercadopago' 
+                            ? ' Aplicamos el valor proporcional como descuento.'
+                            : ' Este descuento solo aplica con Mercado Pago.'}
                         </p>
                       </div>
                     )}
