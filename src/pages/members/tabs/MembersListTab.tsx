@@ -65,7 +65,7 @@ export function MembersListTab() {
 
   const organizationId = userData?.organization?.id;
 
-  const { data: members = [], isLoading: membersLoading } = useQuery({
+  const { data: membersRaw = [], isLoading: membersLoading } = useQuery({
     queryKey: ['organization-members-full', organizationId],
     queryFn: async () => {
       if (!supabase || !organizationId) return [];
@@ -94,8 +94,7 @@ export function MembersListTab() {
           )
         `)
         .eq('organization_id', organizationId)
-        .eq('is_active', true)
-        .order('joined_at', { ascending: false });
+        .eq('is_active', true);
       
       if (error) {
         console.error('Error fetching members:', error);
@@ -105,6 +104,48 @@ export function MembersListTab() {
       return data || [];
     },
     enabled: !!organizationId,
+  });
+
+  const ownerId = (() => {
+    const admins = membersRaw.filter((m: any) => {
+      const role = ((Array.isArray(m.roles) ? m.roles[0] : m.roles)?.name || '').toLowerCase();
+      return role.includes('admin');
+    });
+    if (admins.length === 0) return null;
+    const sortedAdmins = [...admins].sort((a, b) => {
+      const dateA = new Date(a.joined_at || 0).getTime();
+      const dateB = new Date(b.joined_at || 0).getTime();
+      return dateA - dateB;
+    });
+    return sortedAdmins[0]?.user_id || null;
+  })();
+
+  const members = [...membersRaw].sort((a, b) => {
+    const aRole = ((Array.isArray(a.roles) ? a.roles[0] : a.roles)?.name || '').toLowerCase();
+    const bRole = ((Array.isArray(b.roles) ? b.roles[0] : b.roles)?.name || '').toLowerCase();
+    const aName = ((Array.isArray(a.users) ? a.users[0] : a.users)?.full_name || '').toLowerCase();
+    const bName = ((Array.isArray(b.users) ? b.users[0] : b.users)?.full_name || '').toLowerCase();
+    const aIsOwner = a.user_id === ownerId;
+    const bIsOwner = b.user_id === ownerId;
+    const aIsAdmin = aRole.includes('admin');
+    const bIsAdmin = bRole.includes('admin');
+    const aIsEditor = aRole.includes('editor');
+    const bIsEditor = bRole.includes('editor');
+
+    if (aIsOwner && !bIsOwner) return -1;
+    if (!aIsOwner && bIsOwner) return 1;
+
+    if (aIsAdmin && !bIsAdmin) return -1;
+    if (!aIsAdmin && bIsAdmin) return 1;
+
+    if (aIsAdmin && bIsAdmin) return aName.localeCompare(bName);
+
+    if (aIsEditor && !bIsEditor) return -1;
+    if (!aIsEditor && bIsEditor) return 1;
+
+    if (aIsEditor && bIsEditor) return aName.localeCompare(bName);
+
+    return aName.localeCompare(bName);
   });
 
   const suspendedMembersCount = members.filter((m: any) => m.is_over_limit === true).length;
