@@ -7,27 +7,27 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 
 interface Organization {
   id: string;
   name: string;
   plan_id: string | null;
-  plans?: {
+  plan?: {
+    id: string;
     name: string;
     slug: string;
   } | null;
 }
 
-interface User {
-  id: string;
-  full_name: string;
-  email: string;
-}
-
 interface OrganizationMember {
   id: string;
   user_id: string;
-  users: User;
+  user: {
+    id: string;
+    full_name: string | null;
+    email: string;
+  } | null;
 }
 
 interface ResetTestDataModalProps {
@@ -41,15 +41,64 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
   const [selectedUserId, setSelectedUserId] = useState<string>('');
 
   const { data: organizations = [], isLoading: orgsLoading } = useQuery<Organization[]>({
-    queryKey: ['/api/organizations'],
+    queryKey: ['admin-organizations-reset'],
+    queryFn: async () => {
+      if (!supabase) throw new Error('Supabase not initialized');
+
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name, plan_id')
+        .eq('is_deleted', false)
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      const planIds = Array.from(new Set((data || []).map(org => org.plan_id).filter(Boolean)));
+      
+      let plans: any[] = [];
+      if (planIds.length > 0) {
+        const { data: plansData } = await supabase
+          .from('plans')
+          .select('id, name, slug')
+          .in('id', planIds);
+        plans = plansData || [];
+      }
+
+      return (data || []).map(org => ({
+        ...org,
+        plan: plans.find(p => p.id === org.plan_id) || null
+      }));
+    },
   });
 
-  const { data: membersData, isLoading: membersLoading } = useQuery<OrganizationMember[]>({
-    queryKey: ['/api/organization-members', selectedOrgId],
+  const { data: members = [], isLoading: membersLoading } = useQuery<OrganizationMember[]>({
+    queryKey: ['admin-org-members-reset', selectedOrgId],
+    queryFn: async () => {
+      if (!supabase || !selectedOrgId) return [];
+
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select(`
+          id,
+          user_id,
+          user:users!organization_members_user_id_fkey (
+            id,
+            full_name,
+            email
+          )
+        `)
+        .eq('organization_id', selectedOrgId)
+        .eq('is_deleted', false);
+
+      if (error) throw error;
+      return (data || []).map((m: any) => ({
+        id: m.id,
+        user_id: m.user_id,
+        user: Array.isArray(m.user) ? m.user[0] : m.user
+      }));
+    },
     enabled: !!selectedOrgId,
   });
-
-  const members = membersData || [];
 
   useEffect(() => {
     setSelectedUserId('');
@@ -89,8 +138,8 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
           ? `Se procesaron: ${items.join(', ')}`
           : 'Operación completada (no había datos para eliminar)',
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/organizations'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-organizations-reset'] });
       onClose();
     },
     onError: (error: Error) => {
@@ -103,7 +152,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
   });
 
   const selectedOrg = organizations.find(org => org.id === selectedOrgId);
-  const isFreePlan = selectedOrg?.plans?.slug === 'free';
+  const isFreePlan = selectedOrg?.plan?.slug === 'free';
 
   const handleReset = () => {
     if (!selectedOrgId) {
@@ -140,7 +189,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
               <SelectContent>
                 {organizations.map((org) => (
                   <SelectItem key={org.id} value={org.id}>
-                    {org.name} {org.plans?.name ? `(${org.plans.name})` : ''}
+                    {org.name} {org.plan?.name ? `(${org.plan.name})` : ''}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -159,10 +208,10 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
                   <SelectValue placeholder={membersLoading ? "Cargando..." : "Selecciona un usuario (opcional)"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Ninguno</SelectItem>
+                  <SelectItem value="none">Ninguno</SelectItem>
                   {members.map((member) => (
                     <SelectItem key={member.id} value={member.user_id}>
-                      {member.users?.full_name || member.users?.email || 'Usuario sin nombre'}
+                      {member.user?.full_name || member.user?.email || 'Usuario sin nombre'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -174,7 +223,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                Esta organización tiene el plan <strong>{selectedOrg?.plans?.name}</strong>. 
+                Esta organización tiene el plan <strong>{selectedOrg?.plan?.name}</strong>. 
                 Al resetear, se cambiará al plan Free.
               </AlertDescription>
             </Alert>
@@ -189,7 +238,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
                   <li>Eventos de pago asociados</li>
                   <li>Preferencias de suscripción MercadoPago</li>
                   <li>Suscripciones activas</li>
-                  {selectedUserId && <li>Progreso de cursos del usuario</li>}
+                  {selectedUserId && selectedUserId !== 'none' && <li>Progreso de cursos del usuario</li>}
                   <li>Se reseteará el plan a Free</li>
                   <li>Se desbloquearán proyectos y miembros</li>
                 </ul>
