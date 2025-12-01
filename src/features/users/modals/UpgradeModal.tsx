@@ -193,7 +193,8 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
   const hasProration = prorationData?.hasActiveSubscription && prorationData?.credit && prorationData.credit.creditAmount > 0;
   const isAnnual = billingPeriod === 'annual';
 
-  const isConfirmDisabled = !!validationError || isManualPlan || isLoadingProration;
+  const needsProration = currentPlan.slug !== 'free';
+  const isConfirmDisabled = !!validationError || isManualPlan || (needsProration && isLoadingProration);
 
   const editPanel = (
     <div className="space-y-4">
@@ -240,61 +241,66 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
             </div>
           </div>
 
-          {isLoadingProration ? (
-            <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
-              <Skeleton className="h-4 w-40" />
-              <Skeleton className="h-6 w-32" />
-              <Skeleton className="h-4 w-48" />
-              <Skeleton className="h-8 w-24" />
-            </div>
-          ) : prorationData && (
-            <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 space-y-3">
-              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-yellow-500" />
-                Resumen de Precio
-              </h4>
-              
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Precio {targetPlan.name} ({isAnnual ? 'Anual' : 'Mensual'})
+          <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 space-y-3">
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-yellow-500" />
+              Resumen de Precio
+            </h4>
+            
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Precio {targetPlan.name} ({isAnnual ? 'Anual' : 'Mensual'})
+                </span>
+                <span className="text-gray-900 dark:text-gray-100 font-medium">
+                  USD ${(isAnnual ? targetPlan.annual_amount : targetPlan.monthly_amount).toFixed(2)}
+                </span>
+              </div>
+
+              {isLoadingProration && currentPlan.slug !== 'free' && (
+                <div className="flex justify-between items-center text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <Gift className="h-3 w-3" />
+                    Calculando crédito...
                   </span>
-                  <span className="text-gray-900 dark:text-gray-100 font-medium">
-                    USD ${prorationData.targetPlan.priceUSD.toFixed(2)}
-                  </span>
+                  <Skeleton className="h-4 w-16" />
                 </div>
+              )}
 
-                {hasProration && prorationData.credit && (
-                  <>
-                    <div className="flex justify-between text-green-600 dark:text-green-400">
-                      <span className="flex items-center gap-1">
-                        <Gift className="h-3 w-3" />
-                        Crédito por {prorationData.credit.daysRemaining} días restantes
-                      </span>
-                      <span className="font-medium">
-                        - USD ${prorationData.savings.usd.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-1.5 p-2 bg-blue-50 dark:bg-blue-950/50 rounded text-xs text-blue-700 dark:text-blue-300">
-                      <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                      <span>Este descuento aplica solo con Mercado Pago. Con PayPal se cobra el precio completo.</span>
-                    </div>
-                  </>
-                )}
-
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-900 dark:text-gray-100 font-semibold">
-                      Total a pagar {hasProration && <span className="text-xs font-normal text-muted-foreground">(con MercadoPago)</span>}
+              {!isLoadingProration && hasProration && prorationData?.credit && (
+                <>
+                  <div className="flex justify-between text-green-600 dark:text-green-400">
+                    <span className="flex items-center gap-1">
+                      <Gift className="h-3 w-3" />
+                      Crédito por {prorationData.credit.daysRemaining} días restantes
                     </span>
-                    <span className="text-xl font-bold text-green-600 dark:text-green-400">
-                      USD ${prorationData.finalPrice.usd.toFixed(2)}
+                    <span className="font-medium">
+                      - USD ${prorationData.savings.usd.toFixed(2)}
                     </span>
                   </div>
+                  <div className="flex items-start gap-1.5 p-2 bg-blue-50 dark:bg-blue-950/50 rounded text-xs text-blue-700 dark:text-blue-300">
+                    <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                    <span>Este descuento aplica solo con Mercado Pago. Con PayPal se cobra el precio completo.</span>
+                  </div>
+                </>
+              )}
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-900 dark:text-gray-100 font-semibold">
+                    Total a pagar {!isLoadingProration && hasProration && <span className="text-xs font-normal text-muted-foreground">(con MercadoPago)</span>}
+                  </span>
+                  {isLoadingProration ? (
+                    <Skeleton className="h-7 w-24" />
+                  ) : (
+                    <span className="text-xl font-bold text-green-600 dark:text-green-400">
+                      USD ${(prorationData?.finalPrice?.usd ?? (isAnnual ? targetPlan.annual_amount : targetPlan.monthly_amount)).toFixed(2)}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
-          )}
+          </div>
 
           {isAnnual && !userData?.organization?.settings?.is_founder && (
             <div className="bg-yellow-50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
