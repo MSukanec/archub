@@ -210,6 +210,117 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   // POST /api/admin/mp/sync-plans (Admin only - creates MercadoPago preapproval plans)
   app.post("/api/admin/mp/sync-plans", mpController.syncPlans);
 
+  // POST /api/dev/mp/sync-plans (DEV ONLY - no auth required for testing)
+  if (process.env.NODE_ENV !== 'production') {
+    app.post("/api/dev/mp/sync-plans", async (req, res) => {
+      try {
+        const adminClient = getAdminClient();
+        
+        // Get exchange rate
+        const { data: exchangeRate, error: exchangeError } = await adminClient
+          .from("exchange_rates")
+          .select("rate")
+          .eq("from_currency", "USD")
+          .eq("to_currency", "ARS")
+          .eq("is_active", true)
+          .single();
+
+        if (exchangeError || !exchangeRate) {
+          return res.status(500).json({ error: "Tasa de cambio USD/ARS no encontrada" });
+        }
+
+        const arsRate = Number(exchangeRate.rate);
+        console.log(`[DEV MP sync] Usando tasa de cambio USD/ARS: ${arsRate}`);
+
+        // Get paid plans (excluding free)
+        const { data: plans, error: plansError } = await adminClient
+          .from("plans")
+          .select("id, name, slug, monthly_amount, annual_amount, mp_plan_monthly_id, mp_plan_annual_id")
+          .neq("slug", "free");
+
+        console.log(`[DEV MP sync] Plans query result:`, { plans, plansError });
+
+        if (plansError) {
+          console.error(`[DEV MP sync] Error fetching plans:`, plansError);
+          return res.status(500).json({ error: plansError.message, details: plansError });
+        }
+
+        if (!plans?.length) {
+          return res.status(404).json({ error: "No se encontraron planes de pago activos", plansFound: plans });
+        }
+
+        // Import MP functions dynamically
+        const { createMPPreapprovalPlan, getMPPreapprovalPlan } = await import('../lib/handlers/checkout/mp/subscriptions-api.js');
+
+        const results = [];
+        const backUrl = 'https://0.0.0.0:5000/checkout/success';
+
+        for (const plan of plans) {
+          let monthlyPlanId = plan.mp_plan_monthly_id;
+          let annualPlanId = plan.mp_plan_annual_id;
+          let created = false;
+
+          // Check/create monthly plan
+          if (monthlyPlanId) {
+            const existing = await getMPPreapprovalPlan(monthlyPlanId);
+            if (!existing.success) monthlyPlanId = null;
+          }
+
+          if (!monthlyPlanId && plan.monthly_amount && Number(plan.monthly_amount) > 0) {
+            const priceARS = Math.round(Number(plan.monthly_amount) * arsRate * 100) / 100;
+            const result = await createMPPreapprovalPlan({
+              reason: `Seencel ${plan.name} - Mensual`,
+              auto_recurring: { frequency: 1, frequency_type: "months", transaction_amount: priceARS, currency_id: "ARS" },
+              back_url: backUrl,
+              external_reference: `seencel_plan_${plan.slug}_monthly`,
+            });
+            if (result.success) {
+              monthlyPlanId = result.planId;
+              created = true;
+              console.log(`[DEV MP sync] Created monthly plan ${monthlyPlanId} - ARS $${priceARS}`);
+            }
+          }
+
+          // Check/create annual plan
+          if (annualPlanId) {
+            const existing = await getMPPreapprovalPlan(annualPlanId);
+            if (!existing.success) annualPlanId = null;
+          }
+
+          if (!annualPlanId && plan.annual_amount && Number(plan.annual_amount) > 0) {
+            const priceARS = Math.round(Number(plan.annual_amount) * arsRate * 100) / 100;
+            const result = await createMPPreapprovalPlan({
+              reason: `Seencel ${plan.name} - Anual`,
+              auto_recurring: { frequency: 12, frequency_type: "months", transaction_amount: priceARS, currency_id: "ARS" },
+              back_url: backUrl,
+              external_reference: `seencel_plan_${plan.slug}_annual`,
+            });
+            if (result.success) {
+              annualPlanId = result.planId;
+              created = true;
+              console.log(`[DEV MP sync] Created annual plan ${annualPlanId} - ARS $${priceARS}`);
+            }
+          }
+
+          // Update DB if created
+          if (created) {
+            await adminClient
+              .from("plans")
+              .update({ mp_plan_monthly_id: monthlyPlanId, mp_plan_annual_id: annualPlanId })
+              .eq("id", plan.id);
+          }
+
+          results.push({ planSlug: plan.slug, monthlyPlanId, annualPlanId, created });
+        }
+
+        return res.json({ success: true, results });
+      } catch (error: any) {
+        console.error("[DEV MP sync] Error:", error);
+        return res.status(500).json({ error: error.message });
+      }
+    });
+  }
+
   // ==================== BANK TRANSFER ====================
   // NOTE: Bank transfer routes are now handled in server/routes/bank-transfer.ts
   // with the new architecture using image_bucket + image_path instead of receipt_url

@@ -37,13 +37,14 @@ export async function syncPayPalPlans(req: Request): Promise<SyncPlansResult> {
       return { success: false, error: "Authentication failed", status: 401 };
     }
 
-    const { data: dbUser } = await supabase
-      .from("users")
-      .select("is_admin")
+    // Verify admin using admin_users table
+    const { data: adminCheck } = await supabase
+      .from("admin_users")
+      .select("auth_id")
       .eq("auth_id", user.id)
       .maybeSingle();
 
-    if (!dbUser?.is_admin) {
+    if (!adminCheck) {
       return { success: false, error: "Admin access required", status: 403 };
     }
 

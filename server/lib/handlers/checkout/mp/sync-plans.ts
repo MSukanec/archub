@@ -34,13 +34,14 @@ export async function syncMPPlans(req: Request): Promise<SyncMPPlansResult> {
       return { success: false, error: "Autenticación fallida", status: 401 };
     }
 
-    const { data: dbUser } = await supabase
-      .from("users")
-      .select("is_admin")
+    // Verificar si es admin usando la tabla admin_users
+    const { data: adminCheck } = await supabase
+      .from("admin_users")
+      .select("auth_id")
       .eq("auth_id", user.id)
       .maybeSingle();
 
-    if (!dbUser?.is_admin) {
+    if (!adminCheck) {
       return { success: false, error: "Se requiere acceso de administrador", status: 403 };
     }
 
