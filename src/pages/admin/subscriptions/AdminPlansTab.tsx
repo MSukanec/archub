@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Inbox, Search, Bell, Edit, Trash2 } from 'lucide-react';
@@ -48,32 +47,7 @@ const AdminPlansTab = () => {
   }, [mobileSearchValue, isMobile]);
 
   const { data: plans = [], isLoading } = useQuery<Plan[]>({
-    queryKey: ['plans'],
-    queryFn: async () => {
-      if (!supabase) throw new Error('Supabase not available');
-
-      const { data, error } = await supabase
-        .from('plans')
-        .select(`
-          id, 
-          name, 
-          slug, 
-          is_active, 
-          billing_type, 
-          features,
-          plan_prices(
-            currency_code, 
-            monthly_amount, 
-            annual_amount, 
-            provider, 
-            is_active
-          )
-        `)
-        .order('name');
-
-      if (error) throw error;
-      return (data || []) as Plan[];
-    },
+    queryKey: ['/api/admin/plans'],
   });
 
   const filteredPlans = useMemo(() => {

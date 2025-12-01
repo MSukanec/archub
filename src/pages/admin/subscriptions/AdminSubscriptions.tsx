@@ -5,7 +5,6 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from '@/components/modal';
 import AdminSubscriptionsTab from './AdminSubscriptionsTab';
 import AdminPlansTab from './AdminPlansTab';
-import AdminPlanPricesTab from './AdminPlanPricesTab';
 
 const AdminSubscriptions = () => {
   const [activeTab, setActiveTab] = useState('subscriptions');
@@ -32,12 +31,6 @@ const AdminSubscriptions = () => {
           icon: Plus,
           onClick: () => openModal('plan', {}),
         };
-      case 'prices':
-        return {
-          label: "Nuevo Precio",
-          icon: Plus,
-          onClick: () => openModal('plan-price', {}),
-        };
       default:
         return undefined;
     }
@@ -57,11 +50,6 @@ const AdminSubscriptions = () => {
         label: 'Planes',
         isActive: activeTab === 'plans'
       },
-      {
-        id: 'prices',
-        label: 'Precios',
-        isActive: activeTab === 'prices'
-      },
     ],
     onTabChange: (tabId: string) => setActiveTab(tabId),
     actionButton: getActionButton(),
@@ -71,7 +59,6 @@ const AdminSubscriptions = () => {
     <Layout wide headerProps={headerProps}>
       {activeTab === 'subscriptions' && <AdminSubscriptionsTab />}
       {activeTab === 'plans' && <AdminPlansTab />}
-      {activeTab === 'prices' && <AdminPlanPricesTab />}
     </Layout>
   );
 };
