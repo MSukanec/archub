@@ -18,11 +18,9 @@ import {
 } from "@/components/ui/bottom-sheet";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { useProjectContext } from "@/stores/projectContext";
 import { useMobile } from "@/hooks/use-mobile";
 import { PlanUpgradeModal } from "@/features/users/modals/plans/PlanUpgradeModal";
-import { RestrictionOverlay } from "../ui/RestrictionOverlay";
 
 interface PlanRestrictedProps {
   feature?: string;
@@ -51,7 +49,6 @@ export function PlanRestricted({
 }: PlanRestrictedProps) {
   const { can, limit } = usePlanFeatures();
   const { data: userData } = useCurrentUser();
-  const isAdmin = useIsAdmin();
   const { selectedProjectId } = useProjectContext();
   const [, setLocation] = useLocation();
   const isMobile = useMobile();
