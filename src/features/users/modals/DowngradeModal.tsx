@@ -161,7 +161,7 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
     mutationFn: async () => {
       setInlineError(null);
       
-      return await apiRequest('/api/subscriptions/schedule-downgrade', 'POST', {
+      return await apiRequest('POST', '/api/subscriptions/schedule-downgrade', {
         target_plan_slug: targetPlan.slug
       });
     },
