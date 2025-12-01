@@ -351,21 +351,59 @@ export function BillingListTab() {
 
   const columns = [
     {
+      key: 'date',
+      label: 'Fecha',
+      width: '18%',
+      render: (payment: Payment) => (
+        <span className="text-sm">
+          {format(new Date(payment.created_at), 'dd MMM yyyy', { locale: es })}
+        </span>
+      ),
+    },
+    {
+      key: 'plan',
+      label: 'Plan',
+      width: '18%',
+      render: () => (
+        <span className="text-sm">{planName}</span>
+      ),
+    },
+    {
+      key: 'amount',
+      label: 'Monto',
+      width: '18%',
+      render: (payment: Payment) => (
+        <span className="text-sm font-medium">
+          {currency} ${parseFloat(payment.amount.toString()).toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      key: 'method',
+      label: 'Método',
+      width: '18%',
+      render: (payment: Payment) => (
+        <div className="flex items-center gap-2">
+          <img 
+            src={payment.provider === 'paypal' ? '/Paypal_2014_logo.png' : '/MercadoPago_logo.png'}
+            alt={payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
+            className="h-4 w-auto object-contain"
+          />
+          <span className="text-sm">
+            {payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
+          </span>
+        </div>
+      ),
+    },
+    {
       key: 'invoice',
       label: 'Factura',
-      width: '25%',
+      width: '28%',
       render: (payment: Payment) => (
         <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-sm">
-                #{payment.provider_payment_id?.slice(0, 12) || payment.id.slice(0, 12)}
-              </span>
-              <Badge variant="secondary" className="text-xs bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
-                Pagado
-              </Badge>
-            </div>
-          </div>
+          <Badge variant="secondary" className="text-xs bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
+            Pagado
+          </Badge>
           {organization && (
             <PDFDownloadLink
               document={
@@ -390,51 +428,6 @@ export function BillingListTab() {
               )}
             </PDFDownloadLink>
           )}
-        </div>
-      ),
-    },
-    {
-      key: 'date',
-      label: 'Fecha',
-      width: '20%',
-      render: (payment: Payment) => (
-        <span className="text-sm">
-          {format(new Date(payment.created_at), 'dd MMM yyyy', { locale: es })}
-        </span>
-      ),
-    },
-    {
-      key: 'amount',
-      label: 'Monto',
-      width: '15%',
-      render: (payment: Payment) => (
-        <span className="text-sm font-medium">
-          {currency} ${parseFloat(payment.amount.toString()).toFixed(2)}
-        </span>
-      ),
-    },
-    {
-      key: 'plan',
-      label: 'Plan',
-      width: '20%',
-      render: () => (
-        <span className="text-sm">{planName}</span>
-      ),
-    },
-    {
-      key: 'method',
-      label: 'Método',
-      width: '20%',
-      render: (payment: Payment) => (
-        <div className="flex items-center gap-2">
-          <img 
-            src={payment.provider === 'paypal' ? '/Paypal_2014_logo.png' : '/MercadoPago_logo.png'}
-            alt={payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
-            className="h-4 w-auto object-contain"
-          />
-          <span className="text-sm">
-            {payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
-          </span>
         </div>
       ),
     },
