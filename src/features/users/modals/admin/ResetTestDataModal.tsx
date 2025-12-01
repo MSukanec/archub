@@ -81,20 +81,24 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
         .select(`
           id,
           user_id,
-          user:users!organization_members_user_id_fkey (
+          users (
             id,
             full_name,
             email
           )
         `)
         .eq('organization_id', selectedOrgId)
-        .eq('is_deleted', false);
+        .eq('is_active', true);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching members:', error);
+        throw error;
+      }
+      
       return (data || []).map((m: any) => ({
         id: m.id,
         user_id: m.user_id,
-        user: Array.isArray(m.user) ? m.user[0] : m.user
+        user: Array.isArray(m.users) ? m.users[0] : m.users
       }));
     },
     enabled: !!selectedOrgId,
