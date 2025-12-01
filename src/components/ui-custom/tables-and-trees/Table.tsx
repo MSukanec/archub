@@ -19,6 +19,7 @@ import {
   Trash2,
   CheckSquare
 } from "lucide-react";
+import { useProjectReadOnlyContext } from "@/contexts/ProjectReadOnlyContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -282,6 +283,9 @@ export function Table<T = any>({
   inactiveSeparatorLabel = "Completados",
   showInactiveSeparator = true,
 }: TableProps<T>) {
+  // Project read-only context - ocultar acciones si el proyecto está bloqueado
+  const { shouldHideActions } = useProjectReadOnlyContext();
+  
   // Estados internos para funcionalidad estándar
   const [sortKey, setSortKey] = useState<string | null>(
     defaultSort?.key || null,
@@ -1245,7 +1249,7 @@ export function Table<T = any>({
                             </Button>
                           ) : null;
                         })()}
-                        {rowActions && (
+                        {rowActions && !shouldHideActions && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
@@ -1408,7 +1412,7 @@ export function Table<T = any>({
                         </Button>
                       ) : null;
                     })()}
-                    {rowActions && (
+                    {rowActions && !shouldHideActions && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -1541,7 +1545,7 @@ export function Table<T = any>({
               )}
               onClick={() => onCardClick?.(item)}
             >
-              {rowActions && (
+              {rowActions && !shouldHideActions && (
                 <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

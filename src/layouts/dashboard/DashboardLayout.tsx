@@ -25,6 +25,7 @@ import { InvitationModal } from "@/features/users/modals/InvitationModal";
 import { OrganizationRemovedModal } from "@/features/organization/modals/OrganizationRemovedModal";
 import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 import { useProjectReadOnly } from "@/hooks/use-project-readonly";
+import { ProjectReadOnlyProvider } from "@/contexts/ProjectReadOnlyContext";
 // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement no se usa por ahora
 // import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/components/ui-custom/layout/GlobalAnnouncement";
 import { useLocation } from "wouter";
@@ -263,47 +264,48 @@ function LayoutContent({
                     background: contentBackground
                   }}
                 >
-                {headerProps && !hideHeader ? (
-                  <PageLayout
-                    icon={headerProps.icon}
-                    title={headerProps.title}
-                    description={headerProps.description}
-                    organizationId={headerProps.organizationId}
-                    showMembers={headerProps.showMembers}
-                    showProjectSelector={headerProps.showProjectSelector}
-                    tabs={headerProps.tabs?.map((tab: Tab) => ({
-                      id: tab.id,
-                      label: tab.label,
-                      isActive: tab.isActive,
-                      onClick: () => headerProps.onTabChange?.(tab.id),
-                      badgeCount: tab.badgeCount,
-                      isDisabled: tab.disabled,
-                    }))}
-                    onTabChange={headerProps.onTabChange}
-                    showHeaderSearch={headerProps.showHeaderSearch}
-                    headerSearchValue={headerProps.headerSearchValue}
-                    onHeaderSearchChange={headerProps.onHeaderSearchChange}
-                    showCurrencySelector={headerProps.showCurrencySelector}
-                    currencyView={headerProps.currencyView}
-                    onCurrencyViewChange={headerProps.onCurrencyViewChange}
-                    actionButton={headerProps.actionButton}
-                    actions={headerProps.actions}
-                    showBackButton={headerProps.showBackButton}
-                    onBackClick={headerProps.onBackClick}
-                    backButtonText={headerProps.backButtonText}
-                    isViewMode={headerProps.isViewMode}
-                    wide={wide}
-                    showReadOnlyBanner={isProjectReadOnly}
-                    readOnlyProjectName={project?.name}
-                  >
-                    {/* PageLayout maneja el padding internamente, no aplicar padding aquí */}
-                    {children}
-                  </PageLayout>
-                ) : (
-                  <div className="h-full w-full overflow-auto">
-                    {children}
-                  </div>
-                )}
+                <ProjectReadOnlyProvider isReadOnly={isProjectReadOnly} projectName={project?.name}>
+                  {headerProps && !hideHeader ? (
+                    <PageLayout
+                      icon={headerProps.icon}
+                      title={headerProps.title}
+                      description={headerProps.description}
+                      organizationId={headerProps.organizationId}
+                      showMembers={headerProps.showMembers}
+                      showProjectSelector={headerProps.showProjectSelector}
+                      tabs={headerProps.tabs?.map((tab: Tab) => ({
+                        id: tab.id,
+                        label: tab.label,
+                        isActive: tab.isActive,
+                        onClick: () => headerProps.onTabChange?.(tab.id),
+                        badgeCount: tab.badgeCount,
+                        isDisabled: tab.disabled,
+                      }))}
+                      onTabChange={headerProps.onTabChange}
+                      showHeaderSearch={headerProps.showHeaderSearch}
+                      headerSearchValue={headerProps.headerSearchValue}
+                      onHeaderSearchChange={headerProps.onHeaderSearchChange}
+                      showCurrencySelector={headerProps.showCurrencySelector}
+                      currencyView={headerProps.currencyView}
+                      onCurrencyViewChange={headerProps.onCurrencyViewChange}
+                      actionButton={isProjectReadOnly ? undefined : headerProps.actionButton}
+                      actions={isProjectReadOnly ? undefined : headerProps.actions}
+                      showBackButton={headerProps.showBackButton}
+                      onBackClick={headerProps.onBackClick}
+                      backButtonText={headerProps.backButtonText}
+                      isViewMode={headerProps.isViewMode}
+                      wide={wide}
+                      showReadOnlyBanner={isProjectReadOnly}
+                      readOnlyProjectName={project?.name}
+                    >
+                      {children}
+                    </PageLayout>
+                  ) : (
+                    <div className="h-full w-full overflow-auto">
+                      {children}
+                    </div>
+                  )}
+                </ProjectReadOnlyProvider>
               </main>
               </div>
 
