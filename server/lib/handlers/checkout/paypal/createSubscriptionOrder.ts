@@ -160,31 +160,10 @@ export async function createSubscriptionOrder(
           planOverride = {
             billing_cycles: [
               {
-                frequency: {
-                  interval_unit: billing_period === 'monthly' ? 'MONTH' as const : 'YEAR' as const,
-                  interval_count: 1,
-                },
-                tenure_type: 'TRIAL' as const,
                 sequence: 1,
-                total_cycles: 1,
                 pricing_scheme: {
                   fixed_price: {
                     value: proratedPrice.toFixed(2),
-                    currency_code: 'USD',
-                  },
-                },
-              },
-              {
-                frequency: {
-                  interval_unit: billing_period === 'monthly' ? 'MONTH' as const : 'YEAR' as const,
-                  interval_count: 1,
-                },
-                tenure_type: 'REGULAR' as const,
-                sequence: 2,
-                total_cycles: 0,
-                pricing_scheme: {
-                  fixed_price: {
-                    value: regularPrice.toFixed(2),
                     currency_code: 'USD',
                   },
                 },

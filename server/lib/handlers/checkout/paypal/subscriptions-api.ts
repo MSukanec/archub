@@ -160,14 +160,14 @@ export async function createPayPalSubscription(params: {
   brandName?: string;
   planOverride?: {
     billing_cycles: Array<{
-      frequency: {
+      frequency?: {
         interval_unit: "DAY" | "WEEK" | "MONTH" | "YEAR";
         interval_count: number;
       };
-      tenure_type: "TRIAL" | "REGULAR";
+      tenure_type?: "TRIAL" | "REGULAR";
       sequence: number;
-      total_cycles: number;
-      pricing_scheme: {
+      total_cycles?: number;
+      pricing_scheme?: {
         fixed_price: {
           value: string;
           currency_code: string;
