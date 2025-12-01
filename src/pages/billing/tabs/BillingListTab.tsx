@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, RefreshCw, Activity, ExternalLink, Clock, RotateCcw, ArrowDownCircle } from 'lucide-react';
+import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, RefreshCw, Activity, ExternalLink, Clock, RotateCcw, ArrowDownCircle, Play, Wrench } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -263,6 +263,47 @@ export function BillingListTab() {
       toast({
         title: 'Error',
         description: error.message || 'No se pudo cancelar el cambio programado',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const executeDowngradesCronMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('POST', '/api/admin/cron/execute-scheduled-downgrades');
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: 'Cron ejecutado',
+        description: `Procesados: ${data.result?.processed || 0}, Exitosos: ${data.result?.successful || 0}, Fallidos: ${data.result?.failed || 0}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
+      queryClient.invalidateQueries({ queryKey: ['organization', currentOrganizationId] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo ejecutar el cron job',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const executeNotifierCronMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('POST', '/api/admin/cron/execute-expiry-notifier');
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: 'Notificador ejecutado',
+        description: `Emails enviados: ${data.result?.sent || 0}`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo ejecutar el notificador',
         variant: 'destructive',
       });
     },

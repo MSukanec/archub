@@ -10,6 +10,8 @@ import * as enrollmentsController from '../controllers/admin/enrollments.control
 import * as resetTestDataController from '../controllers/admin/reset-test-data.controller.js';
 import * as subscriptionsController from '../controllers/admin/subscriptions.controller.js';
 import * as plansController from '../controllers/admin/plans.controller.js';
+import { runScheduledDowngradesJob } from '../cron/jobs/execute-scheduled-downgrades.js';
+import { runSubscriptionExpiryNotifier } from '../cron/jobs/subscription-expiry-notifier.js';
 
 /**
  * Register all admin-related endpoints
@@ -62,4 +64,37 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
 
   // ==================== DEV/TEST UTILITIES ====================
   app.post("/api/admin/reset-test-data", resetTestDataController.resetTestData);
+
+  // ==================== CRON JOBS (Manual Execution) ====================
+  app.post("/api/admin/cron/execute-scheduled-downgrades", async (req, res) => {
+    try {
+      console.log('[Admin] Manually executing scheduled downgrades job...');
+      const result = await runScheduledDowngradesJob();
+      console.log('[Admin] Scheduled downgrades job completed:', result);
+      res.json({ 
+        ok: true, 
+        message: 'Scheduled downgrades job executed',
+        result 
+      });
+    } catch (error: any) {
+      console.error('[Admin] Error executing scheduled downgrades job:', error);
+      res.status(500).json({ ok: false, error: error.message });
+    }
+  });
+
+  app.post("/api/admin/cron/execute-expiry-notifier", async (req, res) => {
+    try {
+      console.log('[Admin] Manually executing subscription expiry notifier...');
+      const result = await runSubscriptionExpiryNotifier();
+      console.log('[Admin] Subscription expiry notifier completed:', result);
+      res.json({ 
+        ok: true, 
+        message: 'Subscription expiry notifier executed',
+        result 
+      });
+    } catch (error: any) {
+      console.error('[Admin] Error executing subscription expiry notifier:', error);
+      res.status(500).json({ ok: false, error: error.message });
+    }
+  });
 }
