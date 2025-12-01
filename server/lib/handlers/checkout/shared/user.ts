@@ -8,12 +8,12 @@ export type UserData = {
 
 export async function getUserData(
   supabase: SupabaseClient,
-  userId: string
+  authId: string
 ): Promise<UserData> {
   const { data: userRow } = await supabase
     .from("users")
     .select("email, full_name")
-    .eq("id", userId)
+    .eq("auth_id", authId)
     .maybeSingle();
 
   const email = userRow?.email || null;

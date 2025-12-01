@@ -199,8 +199,7 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
 
     const userData = await getUserData(supabase, user_id);
 
-    const userEmail = userData.email || user.email;
-    if (!userEmail) {
+    if (!userData.email) {
       console.error('[MP create-recurring-subscription] User email not found');
       return { success: false, error: "Email del usuario no encontrado", status: 400 };
     }
@@ -251,7 +250,7 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
         preapproval_plan_id: mpPlanId,
         reason: productTitle,
         external_reference: externalReference,
-        payer_email: userEmail,
+        payer_email: userData.email,
         back_url: backUrls.success,
         status: "pending",
       });
@@ -273,7 +272,7 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
       preapprovalResult = await createMPPreapproval({
         reason: productTitle,
         external_reference: externalReference,
-        payer_email: userEmail,
+        payer_email: userData.email,
         auto_recurring: autoRecurring,
         back_url: backUrls.success,
         status: "pending",
