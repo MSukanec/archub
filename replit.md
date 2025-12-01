@@ -6,6 +6,18 @@ Seencel is a comprehensive construction management platform designed to optimize
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## CRITICAL RULES FOR AI AGENT
+**⚠️ DATABASE ACCESS**: The AI agent does NOT have direct access to the database. Only the user can execute SQL in Supabase. When database changes are needed:
+1. Generate the SQL statement
+2. Ask the user to execute it in Supabase SQL Editor
+3. NEVER attempt `db:push`, `execute_sql_tool`, or direct database connections - they will fail
+
+**⚠️ getUserData FUNCTION**: The `getUserData` function in `server/lib/handlers/checkout/shared/user.ts` searches by `auth_id` (Supabase Auth UUID), NOT by `id` (internal table UUID). This is documented in `prompts/documentation/GET_USER_FUNCTION.md`.
+
+**⚠️ PayPal vs MercadoPago Differences**:
+- PayPal subscriptions use `custom_id` field which has no size limit - no auxiliary table needed
+- MercadoPago Preapproval has 64-char limit on `external_reference` and NO metadata field - requires `mp_subscription_preferences` table for data lookup
+
 ## System Architecture
 
 ### UI/UX Decisions
