@@ -226,24 +226,8 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
 
       {!validationError && !isManualPlan && (
         <>
-          <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <ArrowUpCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" />
-              <div className="flex-1">
-                <h4 className="text-sm font-semibold text-green-900 dark:text-green-100 mb-1">
-                  Mejora tu Plan
-                </h4>
-                <p className="text-sm text-green-700 dark:text-green-300">
-                  Estás por mejorar de <strong>{currentPlan.name}</strong> a{" "}
-                  <strong>{targetPlan.name}</strong>. El cambio será inmediato.
-                </p>
-              </div>
-            </div>
-          </div>
-
           <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-4 space-y-3">
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-yellow-500" />
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               Resumen de Precio
             </h4>
             
@@ -293,7 +277,7 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
                   {isLoadingProration ? (
                     <Skeleton className="h-7 w-24" />
                   ) : (
-                    <span className="text-xl font-bold text-green-600 dark:text-green-400">
+                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
                       USD ${(prorationData?.finalPrice?.usd ?? (isAnnual ? targetPlan.annual_amount : targetPlan.monthly_amount)).toFixed(2)}
                     </span>
                   )}
@@ -303,14 +287,14 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
           </div>
 
           {isAnnual && !userData?.organization?.settings?.is_founder && (
-            <div className="bg-yellow-50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+            <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4">
               <div className="flex items-start gap-3">
-                <Gift className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+                <Gift className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" />
                 <div className="flex-1">
-                  <h4 className="text-sm font-semibold text-yellow-900 dark:text-yellow-100 mb-1">
+                  <h4 className="text-sm font-semibold text-green-900 dark:text-green-100 mb-1">
                     Beneficios de Fundador Incluidos
                   </h4>
-                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  <p className="text-sm text-green-700 dark:text-green-300">
                     Con tu suscripción anual recibirás acceso anticipado a nuevas funciones, 
                     un curso de capacitación exclusivo y más beneficios permanentes.
                   </p>
@@ -338,14 +322,6 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
             </div>
           )}
 
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Acceso Inmediato</AlertTitle>
-            <AlertDescription>
-              Una vez completado el pago, tendrás acceso inmediato a todas las 
-              funciones de {targetPlan.name}. Tu período de facturación comenzará hoy.
-            </AlertDescription>
-          </Alert>
         </>
       )}
     </div>
