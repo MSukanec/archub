@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, RefreshCw, Activity, ExternalLink } from 'lucide-react';
+import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, RefreshCw, Activity, ExternalLink, Clock, RotateCcw } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -129,7 +129,7 @@ export function BillingListTab() {
           plans!plan_id(name, slug)
         `)
         .eq('organization_id', currentOrganizationId)
-        .eq('status', 'active')
+        .in('status', ['active', 'cancelled'])
         .gt('expires_at', new Date().toISOString())
         .order('started_at', { ascending: false })
         .limit(1)
@@ -257,6 +257,17 @@ export function BillingListTab() {
   const isFreePlan = planSlug === 'free';
   const isCancelled = subscriptionStatus === 'cancelled';
   const isActive = subscriptionStatus === 'active';
+
+  const getDaysRemaining = () => {
+    if (!expiresAt) return 0;
+    const now = new Date();
+    const expDate = new Date(expiresAt);
+    const diffTime = expDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  };
+
+  const daysRemaining = getDaysRemaining();
 
   const getPlanBadgeClass = (slug: string) => {
     const classes: Record<string, string> = {
@@ -409,11 +420,21 @@ export function BillingListTab() {
         <StatCard>
           <div className="flex items-center justify-between mb-4">
             <CardTitle className="text-lg">Plan Actual</CardTitle>
-            <Badge 
-              className={`text-xs text-white ${getPlanBadgeClass(planSlug)}`}
-            >
-              {planName}
-            </Badge>
+            <div className="flex items-center gap-2">
+              {isCancelled && (
+                <Badge 
+                  variant="outline"
+                  className="text-xs bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700"
+                >
+                  Cancelada
+                </Badge>
+              )}
+              <Badge 
+                className={`text-xs text-white ${getPlanBadgeClass(planSlug)}`}
+              >
+                {planName}
+              </Badge>
+            </div>
           </div>
           <CardDescription className="mb-4">
             Tu plan de suscripción y detalles de facturación
@@ -446,10 +467,25 @@ export function BillingListTab() {
                 )}
 
                 {isCancelled && (
-                  <div className="bg-muted p-3 rounded-lg">
-                    <p className="text-xs text-muted-foreground">
-                      Tu suscripción está cancelada. Mantendrás acceso a las funciones premium hasta la fecha de expiración.
-                    </p>
+                  <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 p-4 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-1">
+                          Suscripción Cancelada
+                        </h4>
+                        <p className="text-sm text-amber-700 dark:text-amber-300 mb-2">
+                          {daysRemaining > 0 
+                            ? `Te quedan ${daysRemaining} día${daysRemaining !== 1 ? 's' : ''} de acceso a ${planName}.`
+                            : 'Tu acceso expira hoy.'
+                          }
+                        </p>
+                        <p className="text-xs text-amber-600 dark:text-amber-400">
+                          Después del {expiresAt ? format(new Date(expiresAt), 'dd MMM yyyy', { locale: es }) : 'vencimiento'}, 
+                          tu plan cambiará automáticamente a Free.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -468,7 +504,7 @@ export function BillingListTab() {
               </div>
 
               <div className="space-y-2">
-                {isActive && (
+                {isActive && !isFreePlan && (
                   <Button 
                     variant="secondary" 
                     className="w-full" 
@@ -493,8 +529,22 @@ export function BillingListTab() {
                     Cancelar Suscripción
                   </Button>
                 )}
+
+                {isCancelled && (
+                  <Button 
+                    className={cn(
+                      "w-full text-white",
+                      `plan-card-${planSlug}`
+                    )}
+                    onClick={() => setLocation('/settings/pricing-plan')}
+                    data-testid="button-reactivate-subscription"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Reactivar {planName}
+                  </Button>
+                )}
                 
-                {getNextPlan() && (
+                {getNextPlan() && !isCancelled && (
                   <Button 
                     className={cn(
                       "w-full text-white",
