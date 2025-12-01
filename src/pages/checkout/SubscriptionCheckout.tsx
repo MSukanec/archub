@@ -755,30 +755,28 @@ export default function SubscriptionCheckout() {
     
     if (selectedMethod === 'mercadopago') {
       const arsAmount = basePrice * exchangeRate;
-      const finalArs = prorationData?.finalPrice?.ars ?? arsAmount;
-      const discountArs = prorationData?.savings?.ars ?? 0;
-      
+      // MercadoPago Preapproval does NOT support different first payment
+      // All payments (including first) use the same amount
+      // So we must show and charge the full price
       return {
-        amount: finalArs.toFixed(2),
+        amount: arsAmount.toFixed(2),
         currency: 'ARS',
-        numericAmount: finalArs,
+        numericAmount: arsAmount,
         originalAmount: arsAmount,
-        hasDiscount: discountArs > 0,
-        discountAmount: discountArs
+        hasDiscount: false,
+        discountAmount: 0
       };
     }
     
-    // For PayPal or no method selected
-    const finalUsd = prorationData?.finalPrice?.usd ?? basePrice;
-    const discountUsd = prorationData?.savings?.usd ?? 0;
-    
+    // For PayPal - also uses full price for recurring subscriptions
+    // PayPal billing plans only have REGULAR cycles, first payment same as recurring
     return {
-      amount: finalUsd.toFixed(2),
+      amount: basePrice.toFixed(2),
       currency: 'USD',
-      numericAmount: finalUsd,
+      numericAmount: basePrice,
       originalAmount: basePrice,
-      hasDiscount: discountUsd > 0,
-      discountAmount: discountUsd
+      hasDiscount: false,
+      discountAmount: 0
     };
   }, [planData, billingPeriod, selectedMethod, exchangeRate, prorationData]);
 
@@ -1225,25 +1223,6 @@ export default function SubscriptionCheckout() {
 
                     <Separator />
 
-                    {prorationData?.credit && prorationData.credit.daysRemaining > 0 && (
-                      <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                            <p className="text-sm font-medium text-green-700 dark:text-green-400">
-                              Crédito por tu plan actual
-                            </p>
-                          </div>
-                          <span className="text-sm font-bold text-green-700 dark:text-green-400">
-                            {selectedMethod === 'mercadopago' ? 'ARS' : 'USD'} ${prorationData.savings[selectedMethod === 'mercadopago' ? 'ars' : 'usd']?.toLocaleString("es-AR")}
-                          </span>
-                        </div>
-                        <p className="text-xs text-green-600 dark:text-green-500">
-                          Te quedan {prorationData.credit.daysRemaining} días de {prorationData.currentPlan?.name}. 
-                          Este crédito se descuenta del precio del nuevo plan.
-                        </p>
-                      </div>
-                    )}
 
                     <div className="space-y-2">
                       {calculatePrice.hasDiscount && (
