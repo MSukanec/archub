@@ -69,7 +69,7 @@ import {
   Globe,
   HandHeart,
   FlaskConical,
-  Star
+  Award
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -506,7 +506,7 @@ export function LeftSidebar() {
                       },
                       {
                         id: 'founders' as const,
-                        icon: <Star className="h-5 w-5" />,
+                        icon: <Award className="h-5 w-5" />,
                         testId: 'button-sidebar-founders',
                         onClick: () => {
                           if (!isAdmin) return;
