@@ -550,11 +550,22 @@ export function BillingListTab() {
                       "w-full text-white",
                       `plan-card-${getNextPlan()?.slug}`
                     )}
-                    onClick={() => setLocation('/settings/pricing-plan')}
+                    onClick={() => {
+                      if (getNextPlan()?.slug === 'enterprise') {
+                        setLocation('/contact');
+                      } else {
+                        setLocation('/settings/pricing-plan');
+                      }
+                    }}
                     data-testid="button-upgrade-plan"
                   >
                     <ArrowUpCircle className="w-4 h-4 mr-2" />
-                    {isFreePlan ? 'Mejorar Plan' : `Mejorar a ${getNextPlan()?.name}`}
+                    {isFreePlan 
+                      ? 'Mejorar Plan' 
+                      : getNextPlan()?.slug === 'enterprise'
+                        ? 'Contactar para ENTERPRISE'
+                        : `Mejorar a ${getNextPlan()?.name}`
+                    }
                   </Button>
                 )}
               </div>
