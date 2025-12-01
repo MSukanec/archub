@@ -337,6 +337,7 @@ export function MembersListTab() {
             <div className="space-y-2">
               {members.map((member) => {
                 const isSuspended = member.is_over_limit === true;
+                const isOwner = member.user_id === ownerId;
                 return (
                   <Card key={member.id} className={`p-4 ${isSuspended ? 'opacity-60' : ''}`}>
                     <CardContent className="p-0">
@@ -390,21 +391,23 @@ export function MembersListTab() {
                             {(Array.isArray(member.roles) ? member.roles[0] : member.roles)?.name || 'Sin rol'}
                           </Badge>
 
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem 
-                                className="text-red-600"
-                                onClick={() => handleDeleteMember(member)}
-                              >
-                                Eliminar miembro
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          {!isOwner && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem 
+                                  className="text-red-600"
+                                  onClick={() => handleDeleteMember(member)}
+                                >
+                                  Eliminar miembro
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
                         </div>
                       </div>
                     </CardContent>
