@@ -50,8 +50,11 @@ Preferred communication style: Simple, everyday language.
   - **Recurring subscriptions** (auto-renewal) when MP plan IDs exist (stored in `plans.mp_plan_monthly_id`, `plans.mp_plan_annual_id`)
   - **Fallback to one-time payments** when plan IDs not yet synced
   - **Admin setup required**: Administrator must execute `POST /api/admin/mp/sync-plans` to create payment plans in MercadoPago and populate plan IDs in database. This is a one-time setup per plan.
+  - **Auxiliary table**: `mp_subscription_preferences` stores subscription data (user_id, org_id, plan, billing_period) because MP's `external_reference` has 64-char limit and no metadata field
+  - **Return handler**: `handleSubscriptionReturn.ts` processes user return from MP checkout with multiple fallback strategies to find subscription data
   - **Webhook handling**: Automatic renewal events processed via `subscription_preapproval` (user authorization) and `subscription_authorized_payment` (recurring charges) webhooks with idempotency checks.
-  - **Implementation files**: `server/lib/handlers/checkout/mp/subscriptions-api.ts` (MP API wrapper), `createRecurringSubscription.ts` (recurring checkout flow), `sync-plans.ts` (admin sync endpoint), `processWebhook.ts` (webhook handlers)
+  - **Implementation files**: `server/lib/handlers/checkout/mp/subscriptions-api.ts` (MP API wrapper), `createRecurringSubscription.ts` (recurring checkout flow), `handleSubscriptionReturn.ts` (return URL handler), `sync-plans.ts` (admin sync endpoint), `processWebhook.ts` (webhook handlers)
+- **Subscription Modifications (PENDING)**: Both PayPal and MercadoPago have limitations for modifying active subscriptions. Strategy documented in `prompts/documentation/Subscription_Modifications.md`. Solution: cancel current subscription + create new one with updated parameters. Affects: upgrades, TEAMS member changes.
 - **Access Control**: `PlanRestricted` component system for organization membership and subscription plans.
 - **Cost System**: Three-tier cost system (Seencel Cost, Organization Cost, Independent Cost).
 - **Media Uploads**: Unified component for image and multi-file uploads using a scalable `MEDIA_FILES` + `MEDIA_LINKS` architecture, with client-side image compression and a 3-bucket storage architecture (public-assets, private-assets, social-assets).

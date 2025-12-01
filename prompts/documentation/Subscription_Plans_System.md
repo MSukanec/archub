@@ -437,22 +437,58 @@ POST /api/subscriptions/:id/cancel
 
 ### 4.2 Mercado Pago (ARS)
 
-**Archivos:**
-- `server/lib/handlers/checkout/mp/createSubscriptionPreference.ts`
-- `server/lib/handlers/checkout/mp/processWebhook.ts`
+**Dos Modos de Pago:**
 
-**Flujo:**
-1. Frontend envía: `plan_slug`, `organization_id`, `billing_period`, `currency: 'ARS'`
-2. Backend obtiene precio USD de `plans`
-3. Convierte a ARS usando `exchange_rates`
-4. Verifica que no exista suscripción activa al mismo plan
-5. Crea preferencia MP con metadata
-6. Usuario paga en MP
-7. Webhook recibe `payment` o `merchant_order`
-8. Resuelve `auth_id` → `users.id`
-9. Inserta en `payments` (idempotente)
-10. Si es nuevo pago, llama `upgradeOrganizationPlan()` con `userId`
-11. Aplica Founders Program si es anual
+1. **Suscripciones Recurrentes (NUEVO)** - Usa Preapproval API para renovación automática
+2. **Pagos Únicos (Legacy)** - Un solo pago, renovación manual
+
+**Archivos Principales:**
+- `server/lib/handlers/checkout/mp/createRecurringSubscription.ts` - Crea suscripción recurrente
+- `server/lib/handlers/checkout/mp/createSubscriptionPreference.ts` - Crea pago único (fallback)
+- `server/lib/handlers/checkout/mp/handleSubscriptionReturn.ts` - Procesa retorno de checkout
+- `server/lib/handlers/checkout/mp/subscriptions-api.ts` - API wrapper para Preapproval
+- `server/lib/handlers/checkout/mp/sync-plans.ts` - Sincroniza planes con MP
+- `server/lib/handlers/checkout/mp/processWebhook.ts` - Procesa webhooks
+
+**Tabla Auxiliar CRÍTICA: `mp_subscription_preferences`**
+
+MercadoPago tiene un límite de 64 caracteres en `external_reference` y NO tiene campo metadata. Por eso usamos esta tabla:
+
+```sql
+CREATE TABLE mp_subscription_preferences (
+  id TEXT PRIMARY KEY,              -- "mps_xxxxxxxxxxxx" (nanoid)
+  user_id UUID NOT NULL,
+  organization_id UUID NOT NULL,
+  plan_id UUID NOT NULL,
+  plan_slug TEXT NOT NULL,
+  billing_period TEXT NOT NULL,     -- 'monthly' o 'annual'
+  preapproval_id TEXT,              -- ID de preapproval (set after creation)
+  status TEXT DEFAULT 'pending',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+**Flujo Recurrente (Preapproval API):**
+1. Admin debe ejecutar `POST /api/admin/mp/sync-plans` (una vez)
+2. Frontend envía: `plan_slug`, `organization_id`, `billing_period`, `payer_email`
+3. Backend verifica si plan tiene `mp_plan_monthly_id` o `mp_plan_annual_id`
+4. Si SÍ → Usa Preapproval API:
+   - Guarda datos en `mp_subscription_preferences`
+   - Crea preapproval en MercadoPago
+   - Retorna `initPoint` para checkout
+5. Usuario paga en MP
+6. Usuario retorna a `/api/checkout/mp/subscription-success`
+7. Return handler:
+   - Busca preferencias pendientes
+   - Verifica preapproval está `authorized`
+   - Busca datos en `mp_subscription_preferences`
+   - Activa suscripción
+   - Aplica Founders Program si es anual
+8. Webhooks procesan renovaciones automáticas
+
+**Webhooks de Suscripciones Recurrentes:**
+- `subscription_preapproval` → Autorización inicial
+- `subscription_authorized_payment` → Pagos de renovación
 
 **Conversión USD → ARS:**
 ```typescript
@@ -464,65 +500,20 @@ const { data: exchangeRate } = await supabase
   .eq("is_active", true)
   .single();
 
-unit_price = basePrice * Number(exchangeRate.rate);
-
-// Para cursos: redondeo a entero
-unit_price = Math.round(rawArsPrice);
+const priceArs = Math.round(priceUsd * Number(exchangeRate.rate) * 100) / 100;
 ```
 
-**Detalle del Webhook de MercadoPago (`processWebhook.ts`):**
+**Flujo Legacy (Pago Único) - Fallback:**
+- Se usa cuando el plan NO tiene IDs de MP configurados
+- Crea checkout preference estándar
+- Webhook recibe `payment` o `merchant_order`
+- Procesa igual que antes
 
-```typescript
-// 1. Parsear body del webhook
-const body = await parseBody(req);
-const type = body?.type || body?.topic;
-const finalId = body?.data?.id;
-
-// 2. Si es payment type y está aprobado
-if (type === "payment" && finalId) {
-  const pay = await getMPPayment(String(finalId));
-  const md = extractMetadata(pay);
-  
-  // 3. CRITICAL: Resolver auth_id → public.users.id
-  const { data: userProfile } = await supabase
-    .from("users")
-    .select("id")
-    .eq("auth_id", resolvedUserId)
-    .maybeSingle();
-  
-  const publicUserId = userProfile.id;
-
-  // 4. Si es suscripción y está aprobado
-  if (pay?.status === "approved" && productType === 'subscription') {
-    // 5. Insertar payment (idempotente)
-    const subPaymentResult = await insertPayment(supabase, "mercadopago", {
-      providerPaymentId: providerPaymentId,
-      userId: publicUserId,  // ✅ CRITICAL: Required
-      productType: 'subscription',
-      organizationId: organizationId,
-      productId: resolvedPlanId,
-    });
-
-    // 6. IDEMPOTENT: Solo upgrade si payment fue NEWLY inserted
-    if (subPaymentResult.inserted && subPaymentResult.paymentId) {
-      await upgradeOrganizationPlan(supabase, {
-        organizationId: organizationId,
-        planId: resolvedPlanId,
-        billingPeriod: billingPeriod,
-        paymentId: subPaymentResult.paymentId,
-        userId: publicUserId,  // ✅ Para Founders Program
-      });
-      // upgradeOrganizationPlan internamente llama a applyFoundersProgram()
-    }
-  }
-}
-```
-
-**Puntos Clave del Webhook:**
-- `auth_id` → `users.id` resolución obligatoria (línea 128-145 en processWebhook.ts)
-- `userId` pasado a `upgradeOrganizationPlan()` para que Founders Program funcione
-- Idempotencia garantizada: `subPaymentResult.inserted` previene duplicados
-- Founders Program ejecutado automáticamente dentro de `upgradeOrganizationPlan()`
+**Puntos Clave:**
+- `auth_id` → `users.id` resolución OBLIGATORIA en todos los flujos
+- `provider_subscription_id` guarda el preapproval_id para renovaciones
+- Return handler tiene múltiples fallbacks para encontrar datos
+- Founders Program ejecutado automáticamente en suscripciones anuales
 
 ---
 
