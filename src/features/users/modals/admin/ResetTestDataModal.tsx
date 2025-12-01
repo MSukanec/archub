@@ -124,18 +124,24 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
 
   const resetMutation = useMutation({
     mutationFn: async () => {
+      console.log('[ResetModal] Starting reset mutation with orgId:', selectedOrgId);
       const payload: { organizationId: string; userId?: string } = {
         organizationId: selectedOrgId,
       };
       if (selectedUserId && selectedUserId !== 'none' && selectedUserId.trim() !== '') {
         payload.userId = selectedUserId;
       }
+      console.log('[ResetModal] Sending request with payload:', payload);
       const response = await apiRequest('POST', '/api/admin/reset-test-data', payload);
+      console.log('[ResetModal] Response status:', response.status);
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('[ResetModal] Error response:', errorData);
         throw new Error(errorData.error || 'Error al resetear datos');
       }
-      return response.json();
+      const result = await response.json();
+      console.log('[ResetModal] Success response:', result);
+      return result;
     },
     onSuccess: (data) => {
       const records = data?.deletedRecords || {};
