@@ -430,7 +430,7 @@ export default function SubscriptionCheckout() {
       console.log("[MP] Creando preferencia de suscripción…", requestBody);
 
       const API_BASE = getApiBase();
-      const mpUrl = `${API_BASE}/api/mp/create-subscription-preference`;
+      const mpUrl = `${API_BASE}/api/checkout/mp/create-subscription`;
 
       const res = await fetchWithTimeout(
         mpUrl,
