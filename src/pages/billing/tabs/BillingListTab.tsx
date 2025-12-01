@@ -51,6 +51,11 @@ interface Payment {
   provider_payment_id: string;
   payer_email: string;
   created_at: string;
+  plan_id: string | null;
+  plans: {
+    name: string;
+    slug: string;
+  } | null;
 }
 
 interface NextInvoice {
@@ -175,7 +180,10 @@ export function BillingListTab() {
 
       const { data, error } = await supabase
         .from('payments')
-        .select('*')
+        .select(`
+          *,
+          plans!payments_plan_id_fkey(name, slug)
+        `)
         .eq('organization_id', currentOrganizationId)
         .eq('product_type', 'subscription')
         .order('created_at', { ascending: false });
@@ -352,8 +360,8 @@ export function BillingListTab() {
       key: 'plan',
       label: 'Plan',
       width: '20%',
-      render: () => (
-        <span className="text-sm">{planName}</span>
+      render: (payment: Payment) => (
+        <span className="text-sm">{payment.plans?.name || planName}</span>
       ),
     },
     {
