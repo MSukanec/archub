@@ -32,17 +32,27 @@ export async function resetTestData(req: Request, res: Response) {
     }
 
     // Validate Free plan exists first
-    const freePlan = await db
-      .select({ id: plans.id })
-      .from(plans)
-      .where(eq(plans.slug, 'free'))
-      .limit(1);
+    console.log('[ResetTestData] Fetching free plan...');
+    let freePlan;
+    try {
+      freePlan = await db
+        .select({ id: plans.id })
+        .from(plans)
+        .where(eq(plans.slug, 'free'))
+        .limit(1);
+      console.log('[ResetTestData] Free plan result:', freePlan);
+    } catch (dbError) {
+      console.error('[ResetTestData] DB error fetching free plan:', dbError);
+      return res.status(500).json({ error: 'Database error fetching free plan' });
+    }
 
     if (!freePlan[0]?.id) {
+      console.log('[ResetTestData] Free plan not found');
       return res.status(500).json({ error: 'Free plan not found in database' });
     }
 
     const freePlanId = freePlan[0].id;
+    console.log('[ResetTestData] Free plan ID:', freePlanId);
     const deletedRecords: Record<string, number> = {};
 
     // 1. Get all provider_payment_ids for this organization first
