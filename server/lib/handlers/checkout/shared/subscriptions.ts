@@ -148,6 +148,12 @@ export async function executeScheduledPlanSwitch(
         membersMarked: limitsResult.membersMarked,
       };
 
+      // Suspend bonus course enrollments when downgrading to FREE
+      const suspendResult = await suspendBonusCourseEnrollments(supabase, organizationId);
+      if (suspendResult.suspended > 0) {
+        console.log(`[executeScheduledPlanSwitch] Suspended ${suspendResult.suspended} bonus course enrollments`);
+      }
+
       result.error = `Downgrade to paid plan ${newPlan.name} not supported. Switched to FREE instead.`;
       result.success = true;
       return result;
@@ -217,11 +223,157 @@ export async function executeScheduledPlanSwitch(
       membersMarked: limitsResult.membersMarked,
     };
 
+    // Suspend bonus course enrollments when downgrading to FREE
+    if (isFree) {
+      const suspendResult = await suspendBonusCourseEnrollments(supabase, organizationId);
+      if (suspendResult.suspended > 0) {
+        console.log(`[executeScheduledPlanSwitch] Suspended ${suspendResult.suspended} bonus course enrollments`);
+      }
+    }
+
     result.success = true;
     return result;
 
   } catch (error: any) {
     result.error = `Unexpected error: ${error.message}`;
+    return result;
+  }
+}
+
+/**
+ * Suspend bonus course enrollments for all members of an organization.
+ * Called when organization downgrades to FREE plan.
+ * Sets enrollment status to 'suspended' - data is preserved, but access is blocked.
+ */
+export async function suspendBonusCourseEnrollments(
+  supabase: SupabaseClient,
+  organizationId: string
+): Promise<{ suspended: number; error?: string }> {
+  const result = { suspended: 0, error: undefined as string | undefined };
+
+  try {
+    // Get founder_bonus_course_id from app_settings
+    const { data: appSetting, error: settingError } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'founder_bonus_course_id')
+      .maybeSingle();
+
+    if (settingError || !appSetting?.value) {
+      console.log('[BonusCourse] No founder_bonus_course_id configured, skipping suspend');
+      return result;
+    }
+
+    const bonusCourseId = appSetting.value;
+
+    // Get all members of this organization
+    const { data: members, error: membersError } = await supabase
+      .from('organization_members')
+      .select('user_id')
+      .eq('organization_id', organizationId)
+      .eq('is_active', true);
+
+    if (membersError || !members || members.length === 0) {
+      console.log('[BonusCourse] No active members found for organization');
+      return result;
+    }
+
+    const userIds = members.map(m => m.user_id);
+
+    // Suspend all enrollments for the bonus course for these members
+    const { data: updated, error: updateError } = await supabase
+      .from('course_enrollments')
+      .update({ 
+        status: 'suspended',
+        updated_at: new Date().toISOString()
+      })
+      .eq('course_id', bonusCourseId)
+      .in('user_id', userIds)
+      .eq('status', 'active')
+      .select('id');
+
+    if (updateError) {
+      console.error('[BonusCourse] Error suspending enrollments:', updateError);
+      result.error = updateError.message;
+      return result;
+    }
+
+    result.suspended = updated?.length || 0;
+    console.log(`[BonusCourse] Suspended ${result.suspended} enrollments for org ${organizationId}`);
+    return result;
+
+  } catch (error: any) {
+    console.error('[BonusCourse] Unexpected error suspending enrollments:', error);
+    result.error = error.message;
+    return result;
+  }
+}
+
+/**
+ * Reactivate bonus course enrollments for all members of an organization.
+ * Called when organization upgrades to a paid plan.
+ * Changes 'suspended' enrollments back to 'active'.
+ */
+export async function reactivateBonusCourseEnrollments(
+  supabase: SupabaseClient,
+  organizationId: string
+): Promise<{ reactivated: number; error?: string }> {
+  const result = { reactivated: 0, error: undefined as string | undefined };
+
+  try {
+    // Get founder_bonus_course_id from app_settings
+    const { data: appSetting, error: settingError } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'founder_bonus_course_id')
+      .maybeSingle();
+
+    if (settingError || !appSetting?.value) {
+      console.log('[BonusCourse] No founder_bonus_course_id configured, skipping reactivate');
+      return result;
+    }
+
+    const bonusCourseId = appSetting.value;
+
+    // Get all members of this organization
+    const { data: members, error: membersError } = await supabase
+      .from('organization_members')
+      .select('user_id')
+      .eq('organization_id', organizationId)
+      .eq('is_active', true);
+
+    if (membersError || !members || members.length === 0) {
+      console.log('[BonusCourse] No active members found for organization');
+      return result;
+    }
+
+    const userIds = members.map(m => m.user_id);
+
+    // Reactivate all suspended enrollments for the bonus course for these members
+    const { data: updated, error: updateError } = await supabase
+      .from('course_enrollments')
+      .update({ 
+        status: 'active',
+        updated_at: new Date().toISOString()
+      })
+      .eq('course_id', bonusCourseId)
+      .in('user_id', userIds)
+      .eq('status', 'suspended')
+      .select('id');
+
+    if (updateError) {
+      console.error('[BonusCourse] Error reactivating enrollments:', updateError);
+      result.error = updateError.message;
+      return result;
+    }
+
+    result.reactivated = updated?.length || 0;
+    console.log(`[BonusCourse] Reactivated ${result.reactivated} enrollments for org ${organizationId}`);
+    return result;
+
+  } catch (error: any) {
+    console.error('[BonusCourse] Unexpected error reactivating enrollments:', error);
+    result.error = error.message;
     return result;
   }
 }
