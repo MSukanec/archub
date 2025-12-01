@@ -1160,7 +1160,7 @@ export default function SubscriptionCheckout() {
                       </div>
                     </div>
 
-                    {billingPeriod === 'annual' && (
+                    {billingPeriod === 'annual' && !userData?.organization?.settings?.is_founder && (
                       <div className="p-3 bg-accent/10 border border-accent/30 rounded-lg flex items-start gap-2">
                         <Crown className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
                         <div className="flex-1 text-xs text-accent/90">

@@ -5,6 +5,7 @@ import { buildURLContext } from "../shared/urls.js";
 import { logPayPalMode } from "./config.js";
 import { createPayPalOrder } from "./api.js";
 import { createSubscription as createPayPalSubscription } from "./subscriptions-api.js";
+import { calculateProration } from "../shared/proration.js";
 
 export type CreateSubscriptionOrderResult =
   | { success: true; orderId: string; approvalUrl: string; order: any; isRecurring?: boolean; subscriptionId?: string }
@@ -130,6 +131,71 @@ export async function createSubscriptionOrder(
       const return_url = `${returnBase}/api/checkout/paypal/capture-subscription?type=recurring`;
       const cancel_url = `${returnBase}/organization/billing?payment=cancelled`;
 
+      let planOverride = undefined;
+      
+      try {
+        const prorationResult = await calculateProration(supabase, {
+          organizationId: organization_id,
+          targetPlanSlug: plan_slug,
+          billingPeriod: billing_period as 'monthly' | 'annual',
+        });
+
+        console.log("[PayPal create-subscription-order] Proration result:", {
+          hasActiveSubscription: prorationResult.hasActiveSubscription,
+          currentPlan: prorationResult.currentPlan?.name,
+          targetPlan: prorationResult.targetPlan.name,
+          finalPriceUSD: prorationResult.finalPrice.usd,
+          savingsUSD: prorationResult.savings.usd,
+        });
+
+        if (prorationResult.hasActiveSubscription && prorationResult.savings.usd > 0) {
+          const proratedPrice = prorationResult.finalPrice.usd;
+          const regularPrice = prorationResult.targetPlan.priceUSD;
+          
+          console.log("[PayPal create-subscription-order] Applying proration override:", {
+            proratedPrice,
+            regularPrice,
+          });
+
+          planOverride = {
+            billing_cycles: [
+              {
+                frequency: {
+                  interval_unit: billing_period === 'monthly' ? 'MONTH' as const : 'YEAR' as const,
+                  interval_count: 1,
+                },
+                tenure_type: 'TRIAL' as const,
+                sequence: 1,
+                total_cycles: 1,
+                pricing_scheme: {
+                  fixed_price: {
+                    value: proratedPrice.toFixed(2),
+                    currency_code: 'USD',
+                  },
+                },
+              },
+              {
+                frequency: {
+                  interval_unit: billing_period === 'monthly' ? 'MONTH' as const : 'YEAR' as const,
+                  interval_count: 1,
+                },
+                tenure_type: 'REGULAR' as const,
+                sequence: 2,
+                total_cycles: 0,
+                pricing_scheme: {
+                  fixed_price: {
+                    value: regularPrice.toFixed(2),
+                    currency_code: 'USD',
+                  },
+                },
+              },
+            ],
+          };
+        }
+      } catch (prorationError) {
+        console.error("[PayPal create-subscription-order] Proration calculation failed, proceeding without override:", prorationError);
+      }
+
       const subscriptionResult = await createPayPalSubscription({
         planId: paypalPlanId,
         subscriber: {
@@ -142,7 +208,8 @@ export async function createSubscriptionOrder(
         customId: custom_id,
         returnUrl: return_url,
         cancelUrl: cancel_url,
-        brandName: "Seencel"
+        brandName: "Seencel",
+        planOverride,
       });
 
       if (!subscriptionResult.success) {
@@ -169,7 +236,8 @@ export async function createSubscriptionOrder(
 
       console.log("[PayPal create-subscription-order] Recurring subscription created:", {
         subscriptionId: subscription.id,
-        status: subscription.status
+        status: subscription.status,
+        hasPlanOverride: !!planOverride,
       });
 
       return {

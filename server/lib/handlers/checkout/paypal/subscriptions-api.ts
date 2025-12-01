@@ -158,6 +158,23 @@ export async function createPayPalSubscription(params: {
   returnUrl: string;
   cancelUrl: string;
   brandName?: string;
+  planOverride?: {
+    billing_cycles: Array<{
+      frequency: {
+        interval_unit: "DAY" | "WEEK" | "MONTH" | "YEAR";
+        interval_count: number;
+      };
+      tenure_type: "TRIAL" | "REGULAR";
+      sequence: number;
+      total_cycles: number;
+      pricing_scheme: {
+        fixed_price: {
+          value: string;
+          currency_code: string;
+        };
+      };
+    }>;
+  };
 }): Promise<PayPalSubscriptionResult> {
   try {
     const token = await getPayPalAccessToken();
@@ -184,6 +201,11 @@ export async function createPayPalSubscription(params: {
 
     if (params.customId) {
       body.custom_id = params.customId;
+    }
+
+    if (params.planOverride) {
+      body.plan = params.planOverride;
+      console.log("[PayPal Subscriptions API] Using plan override:", JSON.stringify(params.planOverride, null, 2));
     }
 
     const response = await fetch(`${PAYPAL_BASE_URL}/v1/billing/subscriptions`, {
