@@ -136,6 +136,7 @@ export function PricingContent({ mode }: PricingContentProps) {
           slug: plan.slug,
           monthly_amount: plan.monthly_amount,
           annual_amount: plan.annual_amount,
+          features: plan.features,
         },
         billingPeriod: billingPeriod,
         isManualPlan: isManualPlan,
