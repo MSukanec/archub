@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, RefreshCw, Activity, ExternalLink, Clock, RotateCcw } from 'lucide-react';
+import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, RefreshCw, Activity, ExternalLink, Clock, RotateCcw, ArrowDownCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -242,6 +242,27 @@ export function BillingListTab() {
       toast({
         title: 'Error',
         description: error.message || 'No se pudo cancelar la suscripción',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const cancelScheduledDowngradeMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('DELETE', '/api/subscriptions/cancel-scheduled-downgrade');
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Cambio cancelado',
+        description: 'El cambio de plan programado ha sido cancelado. Tu suscripción continuará como hasta ahora.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo cancelar el cambio programado',
         variant: 'destructive',
       });
     },
@@ -489,16 +510,46 @@ export function BillingListTab() {
                   </div>
                 )}
 
-                {subscription?.scheduled_downgrade_plan_id && subscription?.scheduled_downgrade_plan && (
-                  <div className="bg-orange-100 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 p-3 rounded-lg">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="outline" className="text-xs bg-orange-200 dark:bg-orange-900 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700">
-                        Cambio Programado
-                      </Badge>
+                {subscription?.scheduled_downgrade_plan_id && subscription?.scheduled_downgrade_plan && !isCancelled && (
+                  <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 p-4 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <ArrowDownCircle className="h-5 w-5 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="text-sm font-semibold text-orange-900 dark:text-orange-100">
+                            Cambio de Plan Programado
+                          </h4>
+                          <Badge variant="outline" className="text-xs bg-orange-200 dark:bg-orange-900 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700">
+                            {subscription.scheduled_downgrade_plan.name}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-orange-700 dark:text-orange-300 mb-2">
+                          Tu plan cambiará de <strong>{planName}</strong> a <strong>{subscription.scheduled_downgrade_plan.name}</strong> {expiresAt ? `el ${format(new Date(expiresAt), 'dd MMM yyyy', { locale: es })}` : 'al final del ciclo actual'}.
+                        </p>
+                        <p className="text-xs text-orange-600 dark:text-orange-400 mb-3">
+                          Mantendrás acceso a todas las funciones de {planName} hasta esa fecha.
+                        </p>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => cancelScheduledDowngradeMutation.mutate()}
+                          disabled={cancelScheduledDowngradeMutation.isPending}
+                          data-testid="button-cancel-scheduled-downgrade"
+                        >
+                          {cancelScheduledDowngradeMutation.isPending ? (
+                            <>
+                              <RefreshCw className="w-3 h-3 mr-1.5 animate-spin" />
+                              Cancelando...
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="w-3 h-3 mr-1.5" />
+                              Cancelar Cambio
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </div>
-                    <p className="text-xs text-orange-700 dark:text-orange-400">
-                      Tu plan cambiará a <strong>{subscription.scheduled_downgrade_plan.name}</strong> {expiresAt ? `el ${format(new Date(expiresAt), 'dd MMM yyyy', { locale: es })}` : 'al final del ciclo actual'}.
-                    </p>
                   </div>
                 )}
               </div>

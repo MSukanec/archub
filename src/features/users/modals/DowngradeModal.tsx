@@ -12,6 +12,7 @@ import { FormModalLayout } from "@/components/modal";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLocation } from "wouter";
 
 interface DowngradeModalProps {
   modalData?: {
@@ -77,6 +78,7 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
   const { currentOrganizationId } = useProjectContext();
   const { data: userData } = useCurrentUser();
   const [inlineError, setInlineError] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
 
   const { currentPlan, targetPlan, subscriptionEndDate, isManualPlan } = modalData || {
     currentPlan: { name: '', slug: '' },
@@ -162,17 +164,19 @@ export function DowngradeModal({ modalData, onClose }: DowngradeModalProps) {
       setInlineError(null);
       
       return await apiRequest('POST', '/api/subscriptions/schedule-downgrade', {
-        target_plan_slug: targetPlan.slug
+        targetPlanSlug: targetPlan.slug
       });
     },
     onSuccess: () => {
-      toast({
-        title: "Downgrade programado",
-        description: `Tu plan cambiará a ${targetPlan.name} al finalizar el período actual.`,
-      });
       queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
       queryClient.invalidateQueries({ queryKey: ['/api/subscriptions/current'] });
+      queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
       handleClose();
+      setLocation('/organization/billing');
+      toast({
+        title: "Cambio de plan programado",
+        description: `Tu plan cambiará a ${targetPlan.name} al finalizar el período de facturación actual.`,
+      });
     },
     onError: (error: any) => {
       let errorMessage = "No se pudo programar el cambio de plan";
