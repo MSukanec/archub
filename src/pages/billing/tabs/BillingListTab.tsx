@@ -13,7 +13,7 @@ import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, Refre
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import { PDFDownloadLink, pdf } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/features/pdf';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser, refreshCurrentUserCache } from '@/hooks/use-current-user';
@@ -278,43 +278,34 @@ export function BillingListTab() {
     return planHierarchy[planSlug.toLowerCase()] || null;
   };
 
+  const handleDownloadInvoice = async (payment: Payment) => {
+    if (!organization || !subscription) return;
+    try {
+      const document = (
+        <InvoicePDF
+          payment={payment}
+          subscription={subscription}
+          organization={organization}
+        />
+      );
+      const asPdf = await pdf(document).toBlob();
+      const url = URL.createObjectURL(asPdf);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `factura-${payment.provider_payment_id?.slice(0, 12) || payment.id.slice(0, 12)}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo descargar la factura',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const columns = [
-    {
-      key: 'invoice',
-      label: 'Factura',
-      width: '20%',
-      render: (payment: Payment) => (
-        <div className="flex items-center gap-3">
-          <Badge variant="secondary" className="text-xs bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
-            Pagado
-          </Badge>
-          {organization && (
-            <PDFDownloadLink
-              document={
-                <InvoicePDF
-                  payment={payment}
-                  subscription={subscription ?? null}
-                  organization={organization}
-                />
-              }
-              fileName={`factura-${payment.provider_payment_id?.slice(0, 12) || payment.id.slice(0, 12)}.pdf`}
-            >
-              {({ loading }) => (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-8 w-8 p-0"
-                  disabled={loading}
-                  data-testid={`button-download-invoice-${payment.id}`}
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              )}
-            </PDFDownloadLink>
-          )}
-        </div>
-      ),
-    },
     {
       key: 'date',
       label: 'Fecha',
@@ -358,6 +349,16 @@ export function BillingListTab() {
             {payment.provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
           </span>
         </div>
+      ),
+    },
+    {
+      key: 'invoice',
+      label: 'Factura',
+      width: '20%',
+      render: () => (
+        <Badge variant="secondary" className="text-xs bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
+          Pagado
+        </Badge>
       ),
     },
   ];
@@ -657,7 +658,7 @@ export function BillingListTab() {
           {
             icon: Download,
             label: 'Descargar',
-            onClick: () => console.log('Download invoice:', payment.id)
+            onClick: () => handleDownloadInvoice(payment)
           }
         ]}
         emptyStateConfig={{
