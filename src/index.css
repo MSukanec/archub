@@ -79,11 +79,11 @@
 
   /* Buttons - Secondary */
   --button-secondary-bg: transparent;
-  --button-secondary-text: hsl(0, 0%, 40%);
-  --button-secondary-border: hsl(0, 0%, 40%);
+  --button-secondary-text: hsl(76, 100%, 40%);
+  --button-secondary-border: hsl(76, 100%, 40%);
   --button-secondary-hover-bg: transparent;
-  --button-secondary-hover-text: hsl(0, 0%, 40%);
-  --button-secondary-hover-border: hsl(0, 0%, 40%);
+  --button-secondary-hover-text: hsl(76, 100%, 40%);
+  --button-secondary-hover-border: hsl(76, 100%, 40%);
 
   /* Buttons - Ghost */
   --button-ghost-bg: transparent;
