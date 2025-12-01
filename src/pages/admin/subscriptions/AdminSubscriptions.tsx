@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CreditCard, Plus, RotateCcw } from 'lucide-react';
 import { DashboardLayout as Layout } from "@/layouts";
-import { Button } from '@/components/ui/button';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from '@/components/modal';
 import AdminSubscriptionsTab from './AdminSubscriptionsTab';
@@ -19,17 +18,29 @@ const AdminSubscriptions = () => {
     }
   }, [setSidebarLevel, sidebarLevel]);
 
-  const handleCreatePlan = () => {
-    openModal('plan', {});
-  };
-
-  const handleCreatePrice = () => {
-    openModal('plan-price', {});
-  };
-
-  const handleResetTestData = () => {
-    console.log('[AdminSubscriptions] Opening reset-test-data modal');
-    openModal('reset-test-data', {});
+  const getActionButton = () => {
+    switch (activeTab) {
+      case 'subscriptions':
+        return {
+          label: "Resetear Test Data",
+          icon: RotateCcw,
+          onClick: () => openModal('reset-test-data', {}),
+        };
+      case 'plans':
+        return {
+          label: "Nuevo Plan",
+          icon: Plus,
+          onClick: () => openModal('plan', {}),
+        };
+      case 'prices':
+        return {
+          label: "Nuevo Precio",
+          icon: Plus,
+          onClick: () => openModal('plan-price', {}),
+        };
+      default:
+        return undefined;
+    }
   };
 
   const headerProps = {
@@ -53,42 +64,7 @@ const AdminSubscriptions = () => {
       },
     ],
     onTabChange: (tabId: string) => setActiveTab(tabId),
-    actions: [
-      activeTab === 'subscriptions' && (
-        <Button
-          key="reset-test-data"
-          variant="outline"
-          onClick={handleResetTestData}
-          className="h-8 px-3 text-xs"
-          data-testid="button-reset-test-data"
-        >
-          <RotateCcw className="w-4 h-4 mr-1" />
-          Resetear Test Data
-        </Button>
-      ),
-      activeTab === 'plans' && (
-        <Button
-          key="create-plan"
-          onClick={handleCreatePlan}
-          className="h-8 px-3 text-xs"
-          data-testid="button-create-plan"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Nuevo Plan
-        </Button>
-      ),
-      activeTab === 'prices' && (
-        <Button
-          key="create-price"
-          onClick={handleCreatePrice}
-          className="h-8 px-3 text-xs"
-          data-testid="button-create-price"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Nuevo Precio
-        </Button>
-      ),
-    ].filter(Boolean)
+    actionButton: getActionButton(),
   };
 
   return (
