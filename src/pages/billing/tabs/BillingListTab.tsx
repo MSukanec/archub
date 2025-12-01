@@ -290,7 +290,7 @@ export function BillingListTab() {
       );
       const asPdf = await pdf(document).toBlob();
       const url = URL.createObjectURL(asPdf);
-      const link = document.createElement('a');
+      const link = globalThis.document.createElement('a');
       link.href = url;
       link.download = `factura-${payment.provider_payment_id?.slice(0, 12) || payment.id.slice(0, 12)}.pdf`;
       link.click();
