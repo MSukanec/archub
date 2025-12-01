@@ -10,6 +10,7 @@ import { FormModalLayout } from "@/components/modal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation } from "wouter";
 import { supabase } from "@/lib/supabase";
+import { useQuery } from "@tanstack/react-query";
 
 interface UpgradeModalProps {
   modalData?: {
@@ -22,6 +23,13 @@ interface UpgradeModalProps {
       slug: string;
       monthly_amount: number;
       annual_amount: number;
+      features?: {
+        max_projects?: number;
+        max_storage_mb?: number;
+        max_file_size_mb?: number;
+        max_members?: number;
+        [key: string]: any;
+      };
     };
     billingPeriod: 'monthly' | 'annual';
     isManualPlan: boolean;
@@ -103,7 +111,7 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
 
   const { currentPlan, targetPlan, billingPeriod, isManualPlan } = modalData || {
     currentPlan: { name: '', slug: '' },
-    targetPlan: { name: '', slug: '', monthly_amount: 0, annual_amount: 0 },
+    targetPlan: { name: '', slug: '', monthly_amount: 0, annual_amount: 0, features: {} },
     billingPeriod: 'annual' as const,
     isManualPlan: false
   };
