@@ -4,7 +4,6 @@ import { BillingListTab } from '@/pages/billing/tabs/BillingListTab';
 import { CreditCard, Sparkles } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
 
 export default function Billing() {
@@ -40,19 +39,11 @@ export default function Billing() {
     showMembers: true,
     tabs,
     onTabChange: setActiveTab,
-    actions: [
-      <Button
-        key="view-plans"
-        variant="outline"
-        size="sm"
-        onClick={() => navigate('/settings/pricing-plan')}
-        className="gap-2"
-        data-testid="button-view-plans"
-      >
-        <Sparkles className="h-4 w-4" />
-        Ver Planes
-      </Button>
-    ]
+    actionButton: {
+      label: "Ver Planes",
+      icon: Sparkles,
+      onClick: () => navigate('/settings/pricing-plan')
+    }
   };
 
   return (

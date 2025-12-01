@@ -26,7 +26,7 @@ Preferred communication style: Simple, everyday language.
 - **Dynamic Color System**: Project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors and organic radial gradients.
 - **Modal Architecture**: Enterprise SaaS-level modal system with stacking, dirty form blocking, size variants, portal rendering, and a registry pattern.
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub with a two-level sidebar system.
-- **Layout Architecture**: Experience-based layouts (`src/layouts/`) including Dashboard Layout (authenticated app) and Marketing Layout (public-facing pages).
+- **Layout Architecture**: Experience-based layouts (`src/layouts/`) including Dashboard Layout (authenticated app) and Marketing Layout (public-facing pages). **Header Actions documentation**: `prompts/documentation/layout/DashboardLayout.md` - use `actionButton` prop for single actions, `actions` array for multiple/complex actions.
 - **Content Theming System**: Unified CSS theming layer with dynamic background switching via `useContentBackground` hook.
 
 ### Technical Implementations
