@@ -58,7 +58,7 @@ export async function runScheduledDowngradesJob(): Promise<DowngradeJobResult> {
           id,
           name
         ),
-        plans!inner (
+        plans!organization_subscriptions_plan_id_fkey (
           id,
           name,
           slug
@@ -159,7 +159,7 @@ export async function runScheduledDowngradesJob(): Promise<DowngradeJobResult> {
           name,
           plan_id
         ),
-        plans!inner (
+        plans!organization_subscriptions_plan_id_fkey (
           id,
           name,
           slug
@@ -306,7 +306,7 @@ export async function runScheduledDowngradesJob(): Promise<DowngradeJobResult> {
           name,
           plan_id
         ),
-        plans!inner (
+        plans!organization_subscriptions_plan_id_fkey (
           id,
           name,
           slug
