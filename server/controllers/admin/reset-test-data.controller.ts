@@ -19,10 +19,15 @@ interface ResetTestDataBody {
 }
 
 export async function resetTestData(req: Request, res: Response) {
+  console.log('[ResetTestData] Received request:', { body: req.body, headers: req.headers.authorization ? 'present' : 'missing' });
+  
   try {
     const { organizationId, userId } = req.body as ResetTestDataBody;
 
+    console.log('[ResetTestData] Parsed body:', { organizationId, userId });
+
     if (!organizationId) {
+      console.log('[ResetTestData] Missing organizationId');
       return res.status(400).json({ error: 'organizationId is required' });
     }
 
