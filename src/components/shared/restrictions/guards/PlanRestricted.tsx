@@ -58,12 +58,8 @@ export function PlanRestricted({
   const [open, setOpen] = useState(false);
 
   // Determine if content is restricted
+  // NOTE: Admins del sistema también están sujetos a las restricciones de plan
   const isRestricted = useMemo(() => {
-    // Admin can always access everything
-    if (isAdmin) {
-      return false;
-    }
-    
     if (reason === "general_mode") {
       return selectedProjectId === null;
     }
@@ -78,7 +74,7 @@ export function PlanRestricted({
       return !can(feature);
     }
     return false;
-  }, [isAdmin, reason, selectedProjectId, feature, current, can, limit]);
+  }, [reason, selectedProjectId, feature, current, can, limit]);
 
   if (!isRestricted) {
     return <>{children}</>;

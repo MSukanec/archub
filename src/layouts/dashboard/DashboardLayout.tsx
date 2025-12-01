@@ -24,6 +24,7 @@ import { FloatingCourseLessons } from "@/features/learning";
 import { InvitationModal } from "@/features/users/modals/InvitationModal";
 import { OrganizationRemovedModal } from "@/features/organization/modals/OrganizationRemovedModal";
 import { usePendingInvitations } from "@/hooks/use-pending-invitations";
+import { useProjectReadOnly } from "@/hooks/use-project-readonly";
 // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement no se usa por ahora
 // import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/components/ui-custom/layout/GlobalAnnouncement";
 import { useLocation } from "wouter";
@@ -193,6 +194,9 @@ function LayoutContent({
   // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement
   // const { hasActiveAnnouncement } = useAnnouncementBanner();
 
+  // Project read-only state for soft-locked projects
+  const { isReadOnly: isProjectReadOnly, project } = useProjectReadOnly();
+
   // Pending invitations modal state
   const [hasShownInvitationsModal, setHasShownInvitationsModal] = useState(false);
   const { data: pendingInvitations, isLoading: isLoadingInvitations } = usePendingInvitations();
@@ -272,8 +276,8 @@ function LayoutContent({
                       label: tab.label,
                       isActive: tab.isActive,
                       onClick: () => headerProps.onTabChange?.(tab.id),
-                      badgeCount: tab.badgeCount, // ✅ Agregar badge count a las tabs
-                      isDisabled: tab.disabled, // ✅ Pasar disabled como isDisabled
+                      badgeCount: tab.badgeCount,
+                      isDisabled: tab.disabled,
                     }))}
                     onTabChange={headerProps.onTabChange}
                     showHeaderSearch={headerProps.showHeaderSearch}
@@ -289,6 +293,8 @@ function LayoutContent({
                     backButtonText={headerProps.backButtonText}
                     isViewMode={headerProps.isViewMode}
                     wide={wide}
+                    showReadOnlyBanner={isProjectReadOnly}
+                    readOnlyProjectName={project?.name}
                   >
                     {/* PageLayout maneja el padding internamente, no aplicar padding aquí */}
                     {children}

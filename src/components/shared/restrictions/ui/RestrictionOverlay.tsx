@@ -5,6 +5,7 @@ interface RestrictionOverlayProps {
   title: string;
   description?: string;
   action?: React.ReactNode;
+  allowInteraction?: boolean;
 }
 
 export function RestrictionOverlay({
@@ -12,9 +13,10 @@ export function RestrictionOverlay({
   title,
   description,
   action,
+  allowInteraction = false,
 }: RestrictionOverlayProps) {
   return (
-    <div className="absolute inset-0 flex items-center justify-center z-10 bg-background/80 dark:bg-background/90 backdrop-blur-sm rounded-lg">
+    <div className={`absolute inset-0 flex items-center justify-center z-10 bg-background/80 dark:bg-background/90 backdrop-blur-sm rounded-lg ${allowInteraction ? 'pointer-events-none' : ''}`}>
       <div className="flex flex-col items-center justify-center gap-3 px-4 py-6 text-center">
         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-accent/10">
           {icon}

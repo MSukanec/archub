@@ -33,17 +33,6 @@ export function RoleRestricted({
     }
   }, [requiredRole, isAdmin, userData?.organization?.settings?.is_founder]);
 
-  if (hasRequiredRole) {
-    if (showAsPreview) {
-      return <div className="opacity-40">{children}</div>;
-    }
-    return <>{children}</>;
-  }
-
-  if (hideCompletely) {
-    return null;
-  }
-
   const getRoleInfo = () => {
     switch (requiredRole) {
       case "admin":
@@ -75,6 +64,32 @@ export function RoleRestricted({
 
   const roleInfo = getRoleInfo();
 
+  // Si el admin tiene acceso, mostrar con el overlay visual (estilo "Coming Soon") pero permitir interacción
+  if (hasRequiredRole) {
+    if (showAsPreview) {
+      return <div className="opacity-40">{children}</div>;
+    }
+    // Admin ve el overlay visual pero puede interactuar (sin pointer-events-none)
+    return (
+      <div className="relative w-full">
+        <div className="relative w-full opacity-50">
+          {children}
+        </div>
+        <RestrictionOverlay
+          icon={roleInfo.icon}
+          title={roleInfo.title}
+          description={roleInfo.description}
+          allowInteraction={true}
+        />
+      </div>
+    );
+  }
+
+  if (hideCompletely) {
+    return null;
+  }
+
+  // Usuarios sin acceso: overlay visual + bloqueado
   return (
     <div className="relative w-full">
       <div className="relative w-full opacity-50 pointer-events-none">
