@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { DashboardLayout as Layout } from "@/layouts";
 import { BillingListTab } from '@/pages/billing/tabs/BillingListTab';
-import { CreditCard } from 'lucide-react';
+import { CreditCard, Sparkles } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { Button } from '@/components/ui/button';
+import { useLocation } from 'wouter';
 
 export default function Billing() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
   const [activeTab, setActiveTab] = useState('list');
+  const [, navigate] = useLocation();
 
   useEffect(() => {
     setSidebarLevel('organization');
@@ -36,7 +39,20 @@ export default function Billing() {
     organizationId: organizationId ?? undefined,
     showMembers: true,
     tabs,
-    onTabChange: setActiveTab
+    onTabChange: setActiveTab,
+    actions: [
+      <Button
+        key="view-plans"
+        variant="outline"
+        size="sm"
+        onClick={() => navigate('/settings/pricing-plan')}
+        className="gap-2"
+        data-testid="button-view-plans"
+      >
+        <Sparkles className="h-4 w-4" />
+        Ver Planes
+      </Button>
+    ]
   };
 
   return (
