@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { RotateCcw, AlertTriangle } from 'lucide-react';
+import { RotateCcw, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
@@ -30,6 +31,17 @@ interface OrganizationMember {
   } | null;
 }
 
+interface ResetResult {
+  payments: number;
+  payment_events: number;
+  mp_subscription_preferences: number;
+  organization_subscriptions: number;
+  course_lesson_progress: number;
+  organization_reset: number;
+  projects_reset: number;
+  members_reset: number;
+}
+
 interface ResetTestDataModalProps {
   modalData?: any;
   onClose: () => void;
@@ -39,6 +51,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
   const { toast } = useToast();
   const [selectedOrgId, setSelectedOrgId] = useState<string>('');
   const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [resetResult, setResetResult] = useState<ResetResult | null>(null);
 
   const { data: organizations = [], isLoading: orgsLoading } = useQuery<Organization[]>({
     queryKey: ['admin-organizations-reset'],
@@ -106,6 +119,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
 
   useEffect(() => {
     setSelectedUserId('');
+    setResetResult(null);
   }, [selectedOrgId]);
 
   const resetMutation = useMutation({
@@ -113,7 +127,7 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
       const payload: { organizationId: string; userId?: string } = {
         organizationId: selectedOrgId,
       };
-      if (selectedUserId && selectedUserId.trim() !== '') {
+      if (selectedUserId && selectedUserId !== 'none' && selectedUserId.trim() !== '') {
         payload.userId = selectedUserId;
       }
       const response = await apiRequest('POST', '/api/admin/reset-test-data', payload);
@@ -125,26 +139,14 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
     },
     onSuccess: (data) => {
       const records = data?.deletedRecords || {};
-      const items: string[] = [];
+      setResetResult(records);
       
-      if (records.payments > 0) items.push(`${records.payments} pagos`);
-      if (records.payment_events > 0) items.push(`${records.payment_events} eventos de pago`);
-      if (records.mp_subscription_preferences > 0) items.push(`${records.mp_subscription_preferences} preferencias MP`);
-      if (records.organization_subscriptions > 0) items.push(`${records.organization_subscriptions} suscripciones`);
-      if (records.course_lesson_progress > 0) items.push(`${records.course_lesson_progress} progreso de cursos`);
-      if (records.organization_reset > 0) items.push('Organización reseteada a Free');
-      if (records.projects_reset > 0) items.push(`${records.projects_reset} proyectos desbloqueados`);
-      if (records.members_reset > 0) items.push(`${records.members_reset} miembros desbloqueados`);
-
       toast({
-        title: 'Datos reseteados',
-        description: items.length > 0 
-          ? `Se procesaron: ${items.join(', ')}`
-          : 'Operación completada (no había datos para eliminar)',
+        title: 'Datos reseteados exitosamente',
+        description: 'Revisa el resumen de cambios en el modal.',
       });
       queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
       queryClient.invalidateQueries({ queryKey: ['admin-organizations-reset'] });
-      onClose();
     },
     onError: (error: Error) => {
       toast({
@@ -170,6 +172,11 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
     resetMutation.mutate();
   };
 
+  const orgOptions = organizations.map(org => ({
+    value: org.id,
+    label: `${org.name}${org.plan?.name ? ` (${org.plan.name})` : ''}`
+  }));
+
   return (
     <ModalLayout onClose={onClose} size="md">
       <ModalHeader
@@ -180,83 +187,129 @@ export default function ResetTestDataModal({ onClose }: ResetTestDataModalProps)
 
       <ModalBody>
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Organización</Label>
-            <Select
-              value={selectedOrgId}
-              onValueChange={setSelectedOrgId}
-              disabled={orgsLoading}
-            >
-              <SelectTrigger data-testid="select-organization">
-                <SelectValue placeholder={orgsLoading ? "Cargando..." : "Selecciona una organización"} />
-              </SelectTrigger>
-              <SelectContent>
-                {organizations.map((org) => (
-                  <SelectItem key={org.id} value={org.id}>
-                    {org.name} {org.plan?.name ? `(${org.plan.name})` : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {selectedOrgId && (
-            <div className="space-y-2">
-              <Label>Usuario (opcional - para borrar progreso de cursos)</Label>
-              <Select
-                value={selectedUserId}
-                onValueChange={setSelectedUserId}
-                disabled={membersLoading}
-              >
-                <SelectTrigger data-testid="select-user">
-                  <SelectValue placeholder={membersLoading ? "Cargando..." : "Selecciona un usuario (opcional)"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Ninguno</SelectItem>
-                  {members.map((member) => (
-                    <SelectItem key={member.id} value={member.user_id}>
-                      {member.user?.full_name || member.user?.email || 'Usuario sin nombre'}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {resetResult ? (
+            <div className="space-y-4">
+              <Alert className="border-green-500/50 bg-green-500/10">
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <AlertDescription>
+                  <strong className="text-green-600 dark:text-green-400">Operación completada exitosamente</strong>
+                </AlertDescription>
+              </Alert>
+              
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <h4 className="font-medium text-sm mb-3">Resumen de cambios:</h4>
+                <div className="grid grid-cols-1 gap-2 text-sm">
+                  <div className="flex justify-between items-center py-1 border-b border-border/50">
+                    <span className="text-muted-foreground">Pagos eliminados</span>
+                    <span className="font-mono font-medium">{resetResult.payments || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 border-b border-border/50">
+                    <span className="text-muted-foreground">Eventos de pago eliminados</span>
+                    <span className="font-mono font-medium">{resetResult.payment_events || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 border-b border-border/50">
+                    <span className="text-muted-foreground">Preferencias MercadoPago eliminadas</span>
+                    <span className="font-mono font-medium">{resetResult.mp_subscription_preferences || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 border-b border-border/50">
+                    <span className="text-muted-foreground">Suscripciones eliminadas</span>
+                    <span className="font-mono font-medium">{resetResult.organization_subscriptions || 0}</span>
+                  </div>
+                  {resetResult.course_lesson_progress > 0 && (
+                    <div className="flex justify-between items-center py-1 border-b border-border/50">
+                      <span className="text-muted-foreground">Progreso de cursos eliminado</span>
+                      <span className="font-mono font-medium">{resetResult.course_lesson_progress}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center py-1 border-b border-border/50">
+                    <span className="text-muted-foreground">Plan reseteado a Free</span>
+                    <span className="font-mono font-medium">{resetResult.organization_reset ? 'Sí' : 'No'}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 border-b border-border/50">
+                    <span className="text-muted-foreground">Proyectos desbloqueados</span>
+                    <span className="font-mono font-medium">{resetResult.projects_reset || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1">
+                    <span className="text-muted-foreground">Miembros desbloqueados</span>
+                    <span className="font-mono font-medium">{resetResult.members_reset || 0}</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label>Organización</Label>
+                <ComboBox
+                  value={selectedOrgId}
+                  onValueChange={setSelectedOrgId}
+                  options={orgOptions}
+                  placeholder={orgsLoading ? "Cargando..." : "Buscar organización..."}
+                  searchPlaceholder="Buscar por nombre..."
+                  emptyMessage="No se encontraron organizaciones"
+                  disabled={orgsLoading}
+                />
+              </div>
 
-          {selectedOrgId && !isFreePlan && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                Esta organización tiene el plan <strong>{selectedOrg?.plan?.name}</strong>. 
-                Al resetear, se cambiará al plan Free.
-              </AlertDescription>
-            </Alert>
-          )}
+              {selectedOrgId && (
+                <div className="space-y-2">
+                  <Label>Usuario (opcional - para borrar progreso de cursos)</Label>
+                  <Select
+                    value={selectedUserId}
+                    onValueChange={setSelectedUserId}
+                    disabled={membersLoading}
+                  >
+                    <SelectTrigger data-testid="select-user">
+                      <SelectValue placeholder={membersLoading ? "Cargando..." : "Selecciona un usuario (opcional)"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Ninguno</SelectItem>
+                      {members.map((member) => (
+                        <SelectItem key={member.id} value={member.user_id}>
+                          {member.user?.full_name || 'Sin nombre'} - {member.user?.email || 'Sin email'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
-          {selectedOrgId && (
-            <Alert>
-              <AlertDescription>
-                <strong>Se eliminarán:</strong>
-                <ul className="list-disc list-inside mt-2 text-sm space-y-1">
-                  <li>Todos los pagos de la organización</li>
-                  <li>Eventos de pago asociados</li>
-                  <li>Preferencias de suscripción MercadoPago</li>
-                  <li>Suscripciones activas</li>
-                  {selectedUserId && selectedUserId !== 'none' && <li>Progreso de cursos del usuario</li>}
-                  <li>Se reseteará el plan a Free</li>
-                  <li>Se desbloquearán proyectos y miembros</li>
-                </ul>
-              </AlertDescription>
-            </Alert>
+              {selectedOrgId && !isFreePlan && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    Esta organización tiene el plan <strong>{selectedOrg?.plan?.name}</strong>. 
+                    Al resetear, se cambiará al plan Free.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {selectedOrgId && (
+                <Alert>
+                  <AlertDescription>
+                    <strong>Se eliminarán:</strong>
+                    <ul className="list-disc list-inside mt-2 text-sm space-y-1">
+                      <li>Todos los pagos de la organización</li>
+                      <li>Eventos de pago asociados</li>
+                      <li>Preferencias de suscripción MercadoPago</li>
+                      <li>Suscripciones activas</li>
+                      {selectedUserId && selectedUserId !== 'none' && <li>Progreso de cursos del usuario</li>}
+                      <li>Se reseteará el plan a Free</li>
+                      <li>Se desbloquearán proyectos y miembros</li>
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+              )}
+            </>
           )}
         </div>
       </ModalBody>
 
       <ModalFooter
-        leftLabel="Cancelar"
+        leftLabel={resetResult ? "Cerrar" : "Cancelar"}
         onLeftClick={onClose}
-        submitText="Resetear Datos"
-        onSubmit={handleReset}
+        submitText={resetResult ? undefined : "Resetear Datos"}
+        onSubmit={resetResult ? undefined : handleReset}
         isSubmitting={resetMutation.isPending}
         submitVariant="destructive"
         submitDisabled={!selectedOrgId}
