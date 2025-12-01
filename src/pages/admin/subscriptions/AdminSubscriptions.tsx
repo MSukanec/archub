@@ -28,6 +28,7 @@ const AdminSubscriptions = () => {
   };
 
   const handleResetTestData = () => {
+    console.log('[AdminSubscriptions] Opening reset-test-data modal');
     openModal('reset-test-data', {});
   };
 
