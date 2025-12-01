@@ -10,6 +10,7 @@ export { ChangelogFormModal } from './modals/admin/ChangelogFormModal';
 // Plan Modals
 export { PlanUpgradeModal } from './modals/plans/PlanUpgradeModal';
 export { DowngradeModal } from './modals/DowngradeModal';
+export { UpgradeModal } from './modals/UpgradeModal';
 
 // Auth Components
 export { AuthGuard } from './components/auth/AuthGuard';

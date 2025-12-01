@@ -107,11 +107,10 @@ export function PricingContent({ mode }: PricingContentProps) {
     const targetPlanLevel = getPlanLevel(plan.name);
     const isDowngrade = targetPlanLevel < currentPlanLevel;
     
+    const currentPlan = plans.find(p => p.name.toLowerCase() === userPlanName?.toLowerCase());
+    const isManualPlan = userData?.organization?.is_manual_plan || false;
+    
     if (isDowngrade && mode === 'dashboard') {
-      // Show downgrade modal only in dashboard mode
-      const currentPlan = plans.find(p => p.name.toLowerCase() === userPlanName?.toLowerCase());
-      const isManualPlan = userData?.organization?.is_manual_plan || false;
-      
       openModal('downgrade', {
         currentPlan: {
           name: currentPlan?.name || userPlanName || '',
@@ -126,8 +125,22 @@ export function PricingContent({ mode }: PricingContentProps) {
         subscriptionEndDate: subscriptionEndDate,
         isManualPlan: isManualPlan,
       });
+    } else if (!isDowngrade && mode === 'dashboard') {
+      openModal('upgrade', {
+        currentPlan: {
+          name: currentPlan?.name || userPlanName || '',
+          slug: currentPlan?.slug || '',
+        },
+        targetPlan: {
+          name: plan.name,
+          slug: plan.slug,
+          monthly_amount: plan.monthly_amount,
+          annual_amount: plan.annual_amount,
+        },
+        billingPeriod: billingPeriod,
+        isManualPlan: isManualPlan,
+      });
     } else {
-      // Always navigate to checkout for upgrades or any mode
       navigate(`/subscription/checkout?plan=${plan.slug}&billing=${billingPeriod}`);
     }
   };
