@@ -546,6 +546,18 @@ export function BillingListTab() {
                   </div>
                 </div>
               </div>
+              
+              {expiresAt && !isFreePlan && (
+                <div className="flex items-center justify-between text-sm py-2 border-t border-border">
+                  <span className="text-muted-foreground">
+                    {isCancelled ? 'Expira el:' : 'Próxima renovación:'}
+                  </span>
+                  <span className="font-medium">
+                    {format(new Date(expiresAt), 'dd MMM yyyy', { locale: es })}
+                  </span>
+                </div>
+              )}
+
               <Button
                 variant="secondary"
                 className="w-full"
