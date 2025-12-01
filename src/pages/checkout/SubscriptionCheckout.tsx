@@ -1222,6 +1222,20 @@ export default function SubscriptionCheckout() {
 
                     <Separator />
 
+                    {prorationData?.credit && prorationData.credit.daysRemaining > 0 && (
+                      <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg space-y-2">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                          <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                            Crédito por tu plan actual
+                          </p>
+                        </div>
+                        <p className="text-xs text-green-600 dark:text-green-500">
+                          Te quedan {prorationData.credit.daysRemaining} días de {prorationData.currentPlan?.name}. 
+                          Se aplicará como crédito a tu próxima renovación.
+                        </p>
+                      </div>
+                    )}
 
                     <div className="space-y-2">
                       {calculatePrice.hasDiscount && (
