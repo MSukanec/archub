@@ -246,7 +246,6 @@ export function LeftSidebar() {
         { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media' },
         { type: 'section-header', id: 'section-construccion', label: 'Construcción' },
         { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'coming_soon' },
-        { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel' },
         { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon' },
         { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
         { id: 'logs', label: 'Bitácora de Obra', icon: BookOpen, href: '/construction/logs' },

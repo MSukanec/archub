@@ -137,7 +137,6 @@ export const PROJECT_NAVIGATION: NavigationItem[] = [
   { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard', testId: 'nav-project-dashboard' },
   { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project', testId: 'nav-project-basic-data' },
   { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets', testId: 'nav-project-budgets' },
-  { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel', restricted: 'coming_soon', testId: 'nav-project-personnel' },
   { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', restricted: 'coming_soon', testId: 'nav-project-materials' },
   { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon', testId: 'nav-project-indirects' },
   { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon', testId: 'nav-project-subcontracts' },
