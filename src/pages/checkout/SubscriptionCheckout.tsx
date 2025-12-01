@@ -117,6 +117,7 @@ export default function SubscriptionCheckout() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [mercadopagoEmail, setMercadopagoEmail] = useState("");
   const [country, setCountry] = useState("");
   const [phone, setPhone] = useState("");
 
@@ -247,6 +248,7 @@ export default function SubscriptionCheckout() {
       setFirstName(userData.user_data?.first_name || "");
       setLastName(userData.user_data?.last_name || "");
       setEmail(userData.user?.email || "");
+      setMercadopagoEmail(userData.user?.email || "");
       setCountry(userData.user_data?.country || "");
       
       if (userData.user_data?.phone_e164) {
@@ -425,6 +427,7 @@ export default function SubscriptionCheckout() {
         is_upgrade: hasProration,
         proration_amount_ars: hasProration ? prorationData?.finalPrice?.ars : undefined,
         proration_credit_ars: hasProration ? prorationData?.savings?.ars : undefined,
+        payer_email: mercadopagoEmail || email,
       };
 
       console.log("[MP] Creando suscripción recurrente…", requestBody);
@@ -1087,6 +1090,31 @@ export default function SubscriptionCheckout() {
                       />
                     </div>
                   </div>
+
+                  {selectedMethod === "mercadopago" && (
+                    <div className="ml-8 p-4 bg-muted/30 rounded-lg border border-border/50 space-y-3">
+                      <div className="flex items-start gap-2">
+                        <div className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />
+                        <p className="text-sm text-muted-foreground">
+                          <span className="font-medium text-foreground">Importante:</span> El email debe coincidir con tu cuenta de Mercado Pago para poder completar el pago.
+                        </p>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="mercadopago-email" className="text-sm font-medium">
+                          Email de Mercado Pago
+                        </Label>
+                        <Input
+                          id="mercadopago-email"
+                          type="email"
+                          value={mercadopagoEmail}
+                          onChange={(e) => setMercadopagoEmail(e.target.value)}
+                          placeholder="tu-email@ejemplo.com"
+                          className="bg-background"
+                          data-testid="input-mercadopago-email"
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   <div
                     className={cn(

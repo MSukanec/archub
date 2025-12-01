@@ -23,7 +23,8 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
     currency = "ARS",
     is_upgrade,
     proration_amount_ars,
-    proration_credit_ars
+    proration_credit_ars,
+    payer_email: clientPayerEmail,
   } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
   if (!plan_slug || !organization_id || !billing_period) {
@@ -199,10 +200,15 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
 
     const userData = await getUserData(supabase, user_id);
 
-    if (!userData.email) {
+    // Use client-provided payer_email if available, otherwise fall back to user profile email
+    const payerEmail = clientPayerEmail?.trim() || userData.email;
+    
+    if (!payerEmail) {
       console.error('[MP create-recurring-subscription] User email not found');
       return { success: false, error: "Email del usuario no encontrado", status: 400 };
     }
+    
+    console.log('[MP create-recurring-subscription] Using payer email:', payerEmail);
 
     const tokenValidation = validateMPToken();
     if (!tokenValidation.valid) {
@@ -272,7 +278,7 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
     const preapprovalResult = await createMPPreapproval({
       reason: productTitle,
       external_reference: shortId,
-      payer_email: userData.email,
+      payer_email: payerEmail,
       auto_recurring: autoRecurring,
       back_url: backUrls.success,
       status: "pending",
