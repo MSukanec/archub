@@ -597,6 +597,12 @@ export async function upgradeOrganizationPlan(
     throw orgError;
   }
 
+  // Reactivate any suspended bonus course enrollments when upgrading to a paid plan
+  const reactivateResult = await reactivateBonusCourseEnrollments(supabase, params.organizationId);
+  if (reactivateResult.reactivated > 0) {
+    console.log(`[subscriptions] Reactivated ${reactivateResult.reactivated} bonus course enrollments`);
+  }
+
   // Apply Founders Program benefits for annual subscribers
   if (params.userId && params.billingPeriod === 'annual') {
     await applyFoundersProgram(
