@@ -28,6 +28,7 @@ import {
   HandHeart,
   Star
 } from "lucide-react";
+import { LuContact } from "react-icons/lu";
 
 export interface NavigationItem {
   id: string;
@@ -121,7 +122,7 @@ export const ORGANIZATION_NAVIGATION: NavigationEntry[] = [
   { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard', testId: 'nav-org-dashboard' },
   { id: 'basic-data', label: 'Datos Básicos', icon: Building, href: '/organization/basic-data', testId: 'nav-org-basic-data' },
   { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects', testId: 'nav-org-projects' },
-  { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts', testId: 'nav-org-contacts' },
+  { id: 'contacts', label: 'Contactos', icon: LuContact, href: '/contacts', testId: 'nav-org-contacts' },
   { id: 'members', label: 'Miembros', icon: Users, href: '/organization/members', testId: 'nav-org-members' },
   { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing', testId: 'nav-org-billing' },
   { type: 'section-header', id: 'section-finanzas', label: 'Finanzas' },

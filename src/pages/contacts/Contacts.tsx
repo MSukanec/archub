@@ -1,7 +1,8 @@
 import { DashboardLayout as Layout } from "@/layouts";
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { Users, Search, Filter, UserPlus, Bell, Settings } from 'lucide-react';
+import { Search, Filter, UserPlus, Bell, Settings } from 'lucide-react';
+import { LuContact } from 'react-icons/lu';
 import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
@@ -234,7 +235,7 @@ export default function Contacts() {
     if (contacts.length === 0 && !searchValue && filterByType === 'all') {
       return (
         <EmptyState
-          icon={<Users className="w-8 h-8 text-muted-foreground" />}
+          icon={<LuContact className="w-8 h-8 text-muted-foreground" />}
           title="Los contactos son la base de tu organización"
           description="Comienza construyendo tu red de contactos. Cada contacto que agregues puede convertirse en un cliente, socio, empleado, proveedor o subcontratista. Centraliza toda la información de las personas y empresas con las que trabajas en un solo lugar."
           action={
@@ -282,7 +283,7 @@ export default function Contacts() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <LuContact className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No hay contactos</h3>
               <p className="text-muted-foreground">Comienza agregando tu primer contacto</p>
             </div>
@@ -316,7 +317,7 @@ export default function Contacts() {
     <Layout
       wide={false}
       headerProps={{
-        icon: Users,
+        icon: LuContact,
         title: 'Contactos',
         description: 'Gestiona los contactos de tu organización',
         pageTitle: 'Contactos',
