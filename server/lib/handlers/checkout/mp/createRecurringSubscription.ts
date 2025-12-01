@@ -1,0 +1,309 @@
+import type { Request } from "express";
+import { getAuthenticatedClient } from "../shared/auth.js";
+import { verifyAdminRoleForOrganization } from "../shared/permissions.js";
+import { getUserData } from "../shared/user.js";
+import { buildURLContext, buildSubscriptionBackUrls } from "../shared/urls.js";
+import { validateMPToken, logMPMode } from "./config.js";
+import { encodeCustomData } from "./encoding.js";
+import { createMPPreapproval, type MPAutoRecurring } from "./subscriptions-api.js";
+import { calculateProration } from "../shared/proration.js";
+import { getAdminClient } from "../../../../routes/_base.js";
+
+export type CreateRecurringSubscriptionResult =
+  | { success: true; initPoint: string; preapprovalId: string }
+  | { success: false; error: string; status?: number };
+
+export async function createRecurringSubscription(req: Request): Promise<CreateRecurringSubscriptionResult> {
+  logMPMode("create-recurring-subscription");
+
+  const { 
+    plan_slug,
+    organization_id,
+    billing_period,
+    currency = "ARS",
+    is_upgrade,
+    proration_amount_ars,
+    proration_credit_ars
+  } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+
+  if (!plan_slug || !organization_id || !billing_period) {
+    return { 
+      success: false, 
+      error: "Falta plan_slug, organization_id o billing_period", 
+      status: 400 
+    };
+  }
+
+  if (billing_period !== 'monthly' && billing_period !== 'annual') {
+    return {
+      success: false,
+      error: "billing_period debe ser 'monthly' o 'annual'",
+      status: 400
+    };
+  }
+
+  const authResult = getAuthenticatedClient(req);
+  if (!authResult.success) {
+    return { success: false, error: authResult.error, status: 401 };
+  }
+
+  const { supabase } = authResult;
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    console.error('[MP create-recurring-subscription] Auth error:', userError);
+    return { success: false, error: "Autenticación fallida", status: 401 };
+  }
+
+  const user_id = user.id;
+
+  try {
+    const adminCheck = await verifyAdminRoleForOrganization(supabase, user_id, organization_id);
+    
+    if (!adminCheck.success) {
+      return { 
+        success: false, 
+        error: adminCheck.error, 
+        status: 403 
+      };
+    }
+
+    const { data: plan, error: planError } = await supabase
+      .from("plans")
+      .select("id, name, slug, is_active, monthly_amount, annual_amount, mp_plan_monthly_id, mp_plan_annual_id")
+      .eq("slug", plan_slug)
+      .eq("is_active", true)
+      .single();
+
+    if (planError || !plan) {
+      console.error('[MP create-recurring-subscription] Plan not found:', planError);
+      return { success: false, error: "Plan no encontrado o inactivo", status: 404 };
+    }
+
+    try {
+      const { data: existingSubscription, error: subCheckError } = await supabase
+        .from("organization_subscriptions")
+        .select("id, status, expires_at, plan_id")
+        .eq("organization_id", organization_id)
+        .eq("plan_id", plan.id)
+        .in("status", ["active", "trialing", "pending", "cancelled"])
+        .order("started_at", { ascending: false })
+        .maybeSingle();
+
+      if (subCheckError) {
+        console.error('[MP create-recurring-subscription] Error checking existing subscription:', subCheckError);
+        return { success: false, error: "Error verificando suscripciones existentes", status: 500 };
+      }
+
+      if (existingSubscription && !is_upgrade) {
+        const expiresAt = existingSubscription.expires_at ? new Date(existingSubscription.expires_at) : null;
+        const isStillActive = !expiresAt || expiresAt > new Date();
+
+        if (isStillActive) {
+          return { 
+            success: false, 
+            error: "Ya tienes una suscripción activa a este plan", 
+            status: 400 
+          };
+        }
+      }
+    } catch (error) {
+      console.error('[MP create-recurring-subscription] Unexpected error checking subscriptions:', error);
+      return { success: false, error: "Error inesperado verificando suscripciones", status: 500 };
+    }
+
+    let currentSubscriptionId: string | null = null;
+    if (is_upgrade) {
+      const { data: currentSub } = await supabase
+        .from("organization_subscriptions")
+        .select("id")
+        .eq("organization_id", organization_id)
+        .in("status", ["active", "trialing"])
+        .order("started_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (currentSub) {
+        currentSubscriptionId = currentSub.id;
+      }
+    }
+
+    const priceAmountUSD = billing_period === 'monthly' ? plan.monthly_amount : plan.annual_amount;
+    let basePriceUSD = Number(priceAmountUSD);
+
+    if (!Number.isFinite(basePriceUSD) || basePriceUSD <= 0) {
+      console.error('[MP create-recurring-subscription] Invalid price:', {
+        plan_slug,
+        billing_period,
+        monthly_amount: plan.monthly_amount,
+        annual_amount: plan.annual_amount
+      });
+      return { success: false, error: "Precio inválido", status: 500 };
+    }
+
+    const seats = 1;
+    let unitPriceUSD = basePriceUSD * seats;
+
+    const { data: exchangeRate, error: exchangeError } = await supabase
+      .from("exchange_rates")
+      .select("rate")
+      .eq("from_currency", "USD")
+      .eq("to_currency", "ARS")
+      .eq("is_active", true)
+      .single();
+
+    if (exchangeError || !exchangeRate) {
+      console.error('[MP create-recurring-subscription] Exchange rate not found:', exchangeError);
+      return { success: false, error: "Tasa de cambio no disponible", status: 500 };
+    }
+
+    const arsRate = Number(exchangeRate.rate);
+    let transactionAmount = unitPriceUSD * arsRate;
+
+    let serverProrationCredit = 0;
+    if (is_upgrade) {
+      try {
+        const adminClient = getAdminClient();
+        const prorationResult = await calculateProration(adminClient, {
+          organizationId: organization_id,
+          targetPlanSlug: plan_slug,
+          billingPeriod: billing_period as 'monthly' | 'annual',
+        });
+
+        if (prorationResult.hasActiveSubscription && prorationResult.savings.ars > 0) {
+          const serverProrationPrice = prorationResult.finalPrice.ars;
+          serverProrationCredit = prorationResult.savings.ars;
+          
+          console.log('[MP create-recurring-subscription] Server-calculated proration:', {
+            original_price_ars: transactionAmount,
+            server_prorated_price: serverProrationPrice,
+            server_credit: serverProrationCredit,
+            client_prorated_price: proration_amount_ars,
+            client_credit: proration_credit_ars,
+          });
+
+          transactionAmount = serverProrationPrice;
+        } else {
+          console.log('[MP create-recurring-subscription] No active subscription for proration, using full price');
+        }
+      } catch (prorationError) {
+        console.error('[MP create-recurring-subscription] Proration calculation error:', prorationError);
+      }
+    }
+
+    transactionAmount = Math.round(transactionAmount * 100) / 100;
+
+    if (transactionAmount < 1) {
+      transactionAmount = 1;
+    }
+
+    const userData = await getUserData(supabase, user_id);
+
+    if (!userData.email) {
+      console.error('[MP create-recurring-subscription] User email not found');
+      return { success: false, error: "Email del usuario no encontrado", status: 400 };
+    }
+
+    const tokenValidation = validateMPToken();
+    if (!tokenValidation.valid) {
+      return { success: false, error: tokenValidation.error, status: 500 };
+    }
+
+    const customData: Record<string, any> = {
+      user_id,
+      product_type: 'recurring_subscription',
+      plan_slug,
+      plan_id: plan.id,
+      organization_id,
+      billing_period,
+    };
+
+    if (is_upgrade) {
+      customData.is_upgrade = true;
+      if (currentSubscriptionId) {
+        customData.previous_subscription_id = currentSubscriptionId;
+      }
+      if (serverProrationCredit > 0) {
+        customData.proration_credit = serverProrationCredit;
+      }
+    }
+
+    const externalReference = encodeCustomData(customData);
+
+    const urlContext = buildURLContext(req);
+    const backUrls = buildSubscriptionBackUrls(urlContext.returnBase);
+
+    const mpPlanId = billing_period === 'monthly' 
+      ? (plan as any).mp_plan_monthly_id 
+      : (plan as any).mp_plan_annual_id;
+
+    const productTitle = is_upgrade 
+      ? `Upgrade a ${plan.name} - ${billing_period === 'monthly' ? 'Mensual' : 'Anual'}`
+      : `Suscripción ${plan.name} - ${billing_period === 'monthly' ? 'Mensual' : 'Anual'}`;
+
+    let preapprovalResult;
+
+    if (mpPlanId) {
+      console.log('[MP create-recurring-subscription] Using preapproval_plan_id:', mpPlanId);
+      
+      preapprovalResult = await createMPPreapproval({
+        preapproval_plan_id: mpPlanId,
+        reason: productTitle,
+        external_reference: externalReference,
+        payer_email: userData.email,
+        back_url: backUrls.success,
+        status: "pending",
+      });
+    } else {
+      console.log('[MP create-recurring-subscription] Creating preapproval with auto_recurring (no plan ID)');
+      
+      const frequency = billing_period === 'monthly' ? 1 : 12;
+      const frequencyType: "months" = "months";
+
+      const autoRecurring: MPAutoRecurring = {
+        frequency,
+        frequency_type: frequencyType,
+        transaction_amount: transactionAmount,
+        currency_id: "ARS",
+      };
+
+      console.log('[MP create-recurring-subscription] auto_recurring config:', autoRecurring);
+
+      preapprovalResult = await createMPPreapproval({
+        reason: productTitle,
+        external_reference: externalReference,
+        payer_email: userData.email,
+        auto_recurring: autoRecurring,
+        back_url: backUrls.success,
+        status: "pending",
+      });
+    }
+
+    if (!preapprovalResult.success) {
+      console.error("[MP create-recurring-subscription] Error de Mercado Pago:", preapprovalResult);
+      return { 
+        success: false, 
+        error: preapprovalResult.error || "Error al crear suscripción recurrente", 
+        status: preapprovalResult.status || 500 
+      };
+    }
+
+    console.log('[MP create-recurring-subscription] Preapproval created successfully:', {
+      preapprovalId: preapprovalResult.preapprovalId,
+      initPoint: preapprovalResult.initPoint,
+      plan_slug,
+      billing_period,
+      transactionAmount,
+      is_upgrade,
+    });
+
+    return { 
+      success: true, 
+      initPoint: preapprovalResult.initPoint, 
+      preapprovalId: preapprovalResult.preapprovalId 
+    };
+  } catch (e: any) {
+    console.error("[MP create-recurring-subscription] Error fatal:", e);
+    return { success: false, error: e.message || String(e), status: 500 };
+  }
+}

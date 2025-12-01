@@ -98,6 +98,9 @@ export const plans = pgTable("plans", {
   paypal_product_id: text("paypal_product_id"),
   paypal_plan_monthly_id: text("paypal_plan_monthly_id"),
   paypal_plan_annual_id: text("paypal_plan_annual_id"),
+  // MercadoPago Preapproval Plans (for recurring subscriptions)
+  mp_plan_monthly_id: text("mp_plan_monthly_id"),
+  mp_plan_annual_id: text("mp_plan_annual_id"),
 });
 
 export const insertPlanSchema = createInsertSchema(plans).omit({
