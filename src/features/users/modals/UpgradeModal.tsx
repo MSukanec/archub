@@ -68,23 +68,28 @@ interface ProrationResult {
   };
 }
 
-const PLAN_FEATURES: Record<string, string[]> = {
-  teams: [
-    "Múltiples usuarios y asientos",
-    "Gestión avanzada de equipos",
-    "Reportes personalizados",
-    "Integraciones premium",
-    "Soporte prioritario"
-  ],
-  pro: [
-    "Proyectos ilimitados",
-    "Almacenamiento extendido",
-    "Reportes básicos",
-    "Integraciones estándar",
-    "Soporte estándar"
-  ],
-  free: []
-};
+function formatLimit(value: number | null | undefined): string {
+  if (value === null || value === undefined || value === -1 || value >= 9999) return 'Ilimitados';
+  return String(value);
+}
+
+function formatStorage(mb: number | null | undefined): string {
+  if (mb === null || mb === undefined) return '—';
+  if (mb >= 1024) {
+    const gb = (mb / 1024).toFixed(0);
+    return `${gb} GB`;
+  }
+  return `${mb} MB`;
+}
+
+function formatFileSize(mb: number | null | undefined): string {
+  if (mb === null || mb === undefined) return '—';
+  if (mb >= 1024) {
+    const gb = (mb / 1024).toFixed(1);
+    return `${gb} GB`;
+  }
+  return `${mb} MB`;
+}
 
 export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
   const { toast } = useToast();
@@ -185,10 +190,6 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
     navigate(`/subscription/checkout?plan=${targetPlan.slug}&billing=${billingPeriod}`);
     onClose();
   };
-
-  const targetFeatures = PLAN_FEATURES[targetPlan.slug?.toLowerCase()] || [];
-  const currentFeatures = PLAN_FEATURES[currentPlan.slug?.toLowerCase()] || [];
-  const newFeatures = targetFeatures.filter(f => !currentFeatures.includes(f));
 
   const hasProration = prorationData?.hasActiveSubscription && prorationData?.credit && prorationData.credit.creditAmount > 0;
   const isAnnual = billingPeriod === 'annual';
@@ -303,24 +304,29 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
             </div>
           )}
 
-          {newFeatures.length > 0 && (
-            <div>
-              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                Nuevas características que obtendrás:
-              </h4>
-              <div className="space-y-2">
-                {newFeatures.map((feature, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
-                  >
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span>{feature}</span>
-                  </div>
-                ))}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+              Incluido en {targetPlan.name}:
+            </h4>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <Check className="h-4 w-4 text-green-500" />
+                <span>{formatLimit(targetPlan.features?.max_projects)} proyectos</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <Check className="h-4 w-4 text-green-500" />
+                <span>{formatStorage(targetPlan.features?.max_storage_mb)} de almacenamiento</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <Check className="h-4 w-4 text-green-500" />
+                <span>Archivos de hasta {formatFileSize(targetPlan.features?.max_file_size_mb)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <Check className="h-4 w-4 text-green-500" />
+                <span>{formatLimit(targetPlan.features?.max_members)} miembros</span>
               </div>
             </div>
-          )}
+          </div>
 
         </>
       )}
