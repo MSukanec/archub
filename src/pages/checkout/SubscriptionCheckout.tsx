@@ -768,13 +768,17 @@ export default function SubscriptionCheckout() {
       };
     }
     
+    // For PayPal or no method selected, always show USD with proration
+    const finalUsd = prorationData?.finalPrice?.usd ?? basePrice;
+    const discountUsd = prorationData?.savings?.usd ?? 0;
+    
     return {
-      amount: basePrice.toFixed(2),
+      amount: finalUsd.toFixed(2),
       currency: 'USD',
-      numericAmount: basePrice,
+      numericAmount: finalUsd,
       originalAmount: basePrice,
-      hasDiscount: false,
-      discountAmount: 0
+      hasDiscount: discountUsd > 0,
+      discountAmount: discountUsd
     };
   }, [planData, billingPeriod, selectedMethod, exchangeRate, prorationData]);
 
@@ -1231,9 +1235,7 @@ export default function SubscriptionCheckout() {
                         </div>
                         <p className="text-xs text-green-600 dark:text-green-500">
                           Te quedan {prorationData.credit.daysRemaining} días de {prorationData.currentPlan?.name}. 
-                          {selectedMethod === 'mercadopago' 
-                            ? ' Aplicamos el valor proporcional como descuento.'
-                            : ' Este descuento solo aplica con Mercado Pago.'}
+                          Aplicamos el valor proporcional como descuento.
                         </p>
                       </div>
                     )}
