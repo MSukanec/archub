@@ -324,6 +324,67 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
     });
   }
 
+  // POST /api/dev/mp/activate-pending-subscription (DEV ONLY - manually activate pending MP subscription)
+  if (process.env.NODE_ENV !== 'production') {
+    app.post("/api/dev/mp/activate-pending-subscription", async (req, res) => {
+      try {
+        const { preapproval_id, preference_id } = req.body;
+        
+        if (!preapproval_id && !preference_id) {
+          return res.status(400).json({ error: "preapproval_id or preference_id is required" });
+        }
+        
+        const { handleSubscriptionReturn } = await import('../lib/handlers/checkout/mp/handleSubscriptionReturn.js');
+        
+        const mockReq = {
+          query: {
+            preapproval_id: preapproval_id,
+          }
+        } as any;
+        
+        const result = await handleSubscriptionReturn(mockReq);
+        
+        if (result.success) {
+          return res.json({ 
+            ok: true, 
+            activated: result.activated, 
+            message: result.message 
+          });
+        } else {
+          return res.status(400).json({ 
+            ok: false, 
+            error: result.error 
+          });
+        }
+      } catch (error: any) {
+        console.error("[DEV MP activate-pending] Error:", error);
+        return res.status(500).json({ error: error.message });
+      }
+    });
+    
+    // GET /api/dev/mp/pending-subscriptions (DEV ONLY - list pending MP subscriptions)
+    app.get("/api/dev/mp/pending-subscriptions", async (req, res) => {
+      try {
+        const adminClient = getAdminClient();
+        
+        const { data, error } = await adminClient
+          .from("mp_subscription_preferences")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(10);
+        
+        if (error) {
+          return res.status(500).json({ error: error.message });
+        }
+        
+        return res.json({ ok: true, preferences: data });
+      } catch (error: any) {
+        console.error("[DEV MP pending-subs] Error:", error);
+        return res.status(500).json({ error: error.message });
+      }
+    });
+  }
+
   // ==================== BANK TRANSFER ====================
   // NOTE: Bank transfer routes are now handled in server/routes/bank-transfer.ts
   // with the new architecture using image_bucket + image_path instead of receipt_url

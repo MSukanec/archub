@@ -293,6 +293,16 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
       };
     }
 
+    // Update the preference with the preapproval_id for webhook lookup
+    const { error: updateError } = await supabase
+      .from("mp_subscription_preferences")
+      .update({ preapproval_id: preapprovalResult.preapprovalId })
+      .eq("id", shortId);
+    
+    if (updateError) {
+      console.warn('[MP create-recurring-subscription] Failed to update preference with preapproval_id:', updateError);
+    }
+
     console.log('[MP create-recurring-subscription] Preapproval created successfully:', {
       preapprovalId: preapprovalResult.preapprovalId,
       initPoint: preapprovalResult.initPoint,
@@ -300,6 +310,7 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
       billing_period,
       transactionAmount,
       is_upgrade,
+      shortId,
     });
 
     return { 

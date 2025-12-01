@@ -231,6 +231,62 @@ export async function getMPPreapproval(
   }
 }
 
+export type MPPreapprovalSearchResult =
+  | { success: true; preapprovalId: string; preapproval: any }
+  | { success: false; error: string };
+
+export async function searchMPPreapprovalByExternalRef(
+  externalReference: string
+): Promise<MPPreapprovalSearchResult> {
+  try {
+    // Search preapprovals with the given external_reference
+    const response = await fetch(
+      `${MP_BASE_URL}/preapproval/search?external_reference=${encodeURIComponent(externalReference)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("[MP Subscriptions API] Error searching preapproval:", response.status, errorData);
+      return {
+        success: false,
+        error: `Failed to search preapproval: ${response.status}`,
+      };
+    }
+
+    const data = await response.json();
+    
+    if (!data.results || data.results.length === 0) {
+      console.log("[MP Subscriptions API] No preapproval found for external_reference:", externalReference);
+      return {
+        success: false,
+        error: "No preapproval found",
+      };
+    }
+
+    // Return the first (most recent) result
+    const preapproval = data.results[0];
+    console.log("[MP Subscriptions API] Found preapproval:", preapproval.id, "status:", preapproval.status);
+
+    return {
+      success: true,
+      preapprovalId: preapproval.id,
+      preapproval,
+    };
+  } catch (error: any) {
+    console.error("[MP Subscriptions API] Fatal error searching preapproval:", error);
+    return {
+      success: false,
+      error: error.message || "Unknown error",
+    };
+  }
+}
+
 export async function updateMPPreapproval(
   preapprovalId: string,
   updates: {
