@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Receipt, Plus, Users, Home, Bell, Search, Filter } from 'lucide-react'
+import { Receipt, Plus, Home, Bell, Search, Filter } from 'lucide-react'
+import { LuHandshake } from 'react-icons/lu'
 import { DashboardLayout as Layout } from "@/layouts"
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal'
@@ -146,7 +147,7 @@ export function Clients() {
 
   const headerProps = {
     title: "Clientes",
-    icon: Users,
+    icon: LuHandshake,
     description: (
       <>
         Gestiona los clientes del proyecto. Antes de ser cliente, debe ser un{' '}

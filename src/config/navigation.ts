@@ -29,6 +29,7 @@ import {
   Star
 } from "lucide-react";
 import { LuContact } from "react-icons/lu";
+import { LuHandshake } from "react-icons/lu";
 
 export interface NavigationItem {
   id: string;
@@ -144,7 +145,7 @@ export const PROJECT_NAVIGATION: NavigationItem[] = [
   { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon', testId: 'nav-project-subcontracts' },
   { id: 'logs', label: 'Bitácora de Obra', icon: FileText, href: '/construction/logs', restricted: 'coming_soon', testId: 'nav-project-logs' },
   { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media', restricted: 'coming_soon', testId: 'nav-project-media' },
-  { id: 'clients', label: 'Clientes', icon: Users, href: '/clients', restricted: 'coming_soon', testId: 'nav-project-clients' },
+  { id: 'clients', label: 'Clientes', icon: LuHandshake, href: '/clients', restricted: 'coming_soon', testId: 'nav-project-clients' },
 ];
 
 export const ADMIN_NAVIGATION: NavigationItem[] = [
