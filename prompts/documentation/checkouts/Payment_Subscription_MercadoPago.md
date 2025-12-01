@@ -361,19 +361,76 @@ This ensures subscription activation even when MercadoPago doesn't return expect
 
 ---
 
+## 🔄 NATIVE SUBSCRIPTION MODIFICATION (UPGRADE IN-PLACE)
+
+### Overview
+
+MercadoPago Preapproval API supports **updating existing subscriptions** without canceling them. This is done via `PUT /preapproval/{id}` with the new `auto_recurring.transaction_amount`.
+
+### Endpoint
+
+**POST** `/api/checkout/mp/update-subscription`
+
+**Request Body:**
+```json
+{
+  "organization_id": "uuid...",
+  "new_plan_slug": "teams",
+  "billing_period": "monthly"  // optional, defaults to current
+}
+```
+
+**Response (Success):**
+```json
+{
+  "ok": true,
+  "message": "Plan actualizado exitosamente de Pro a Teams",
+  "details": {
+    "old_plan": "Pro",
+    "new_plan": "Teams",
+    "new_amount_ars": 21000,
+    "preapproval_id": "4fa77df54a054db2ae25b2f69d0e9264"
+  }
+}
+```
+
+### How It Works
+
+1. **Validates** user is admin of the organization
+2. **Fetches** current active subscription with `provider_subscription_id`
+3. **Verifies** preapproval is `authorized` in MercadoPago
+4. **Gets** new plan price and converts USD → ARS
+5. **Calls** `PUT /preapproval/{id}` with new amount
+6. **Updates** local database "in-place":
+   - `organization_subscriptions.plan_id` → new plan
+   - `organization_subscriptions.amount` → new ARS amount
+   - `organizations.plan_id` → new plan
+
+### Key File
+
+`server/lib/handlers/checkout/mp/updateSubscription.ts`
+
+### Important Notes
+
+- Only works for subscriptions with `provider_subscription_id` (recurring via Preapproval)
+- MercadoPago will charge the new amount starting from the **next billing cycle**
+- The current cycle remains unchanged
+- No proration is applied (next cycle charges full new price)
+
+---
+
 ## ⚠️ KNOWN LIMITATIONS
 
-### Proration - TEMPORARILY DISABLED for MercadoPago Recurring
+### Proration - NOT APPLIED for Native Updates
 
-**Problem:** MercadoPago Preapproval Plans have a single REGULAR billing cycle. If you override the first payment price for proration, it affects ALL future payments.
+When using the native `PUT /preapproval` update, MercadoPago does NOT support prorated amounts. The new price takes effect from the next billing cycle.
 
-**Current State:** Proration is calculated and displayed but NOT applied to MercadoPago recurring subscriptions.
+For prorated upgrades (charging a reduced first payment), use the "cancel and recreate" strategy instead.
 
-**Solution (TODO):** Rebuild MP plans with TRIAL + REGULAR cycles so only the TRIAL (first) payment can be discounted.
+### PayPal vs MercadoPago
 
-### Modification of Active Subscriptions
-
-Both PayPal and MercadoPago have limitations for modifying active subscriptions (upgrades, adding members). See section below.
+- **MercadoPago**: Supports native `PUT /preapproval` updates ✅
+- **PayPal**: Does NOT support changing the billing plan of an active subscription. Must cancel and recreate.
 
 ---
 

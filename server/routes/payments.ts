@@ -212,6 +212,9 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
 
   // POST /api/admin/mp/sync-plans (Admin only - creates MercadoPago preapproval plans)
   app.post("/api/admin/mp/sync-plans", mpController.syncPlans);
+  
+  // POST /api/checkout/mp/update-subscription (Authenticated - updates existing MP subscription in-place)
+  app.post("/api/checkout/mp/update-subscription", mpController.updateSubscription);
 
   // POST /api/dev/mp/sync-plans (DEV ONLY - no auth required for testing)
   if (process.env.NODE_ENV !== 'production') {

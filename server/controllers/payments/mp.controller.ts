@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { createCoursePreference } from "../../lib/handlers/checkout/mp/createCoursePreference.js";
 import { createSubscriptionPreference } from "../../lib/handlers/checkout/mp/createSubscriptionPreference.js";
 import { createRecurringSubscription } from "../../lib/handlers/checkout/mp/createRecurringSubscription.js";
+import { updateMPSubscription } from "../../lib/handlers/checkout/mp/updateSubscription.js";
 import { syncMPPlans } from "../../lib/handlers/checkout/mp/sync-plans.js";
 import { processWebhook } from "../../lib/handlers/checkout/mp/processWebhook.js";
 import { handleCorsPreflight } from "../../lib/handlers/checkout/shared/cors.js";
@@ -172,6 +173,31 @@ export async function syncPlans(req: Request, res: Response) {
     return res.status(500).json({
       ok: false,
       error: error.message || "Failed to sync plans with MercadoPago"
+    });
+  }
+}
+
+export async function updateSubscription(req: Request, res: Response) {
+  try {
+    const result = await updateMPSubscription(req as any);
+    
+    if (!result.success) {
+      return res.status(result.status || 400).json({
+        ok: false,
+        error: result.error
+      });
+    }
+    
+    return res.json({
+      ok: true,
+      message: result.message,
+      details: result.details
+    });
+  } catch (error: any) {
+    console.error("[MP update-subscription controller] Error:", error);
+    return res.status(500).json({
+      ok: false,
+      error: error.message || "Failed to update subscription"
     });
   }
 }

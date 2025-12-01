@@ -1,0 +1,72 @@
+ASUNTO: Implementación de Lógica de Modificación (Upgrade/Downgrade) de Suscripciones NATIVA para Mercado Pago.
+
+CONTEXTO: Actualmente, la documentación (Subscription_Modifications.md) sugiere una estrategia unificada de "Cancelar y Recrear" para los cambios de plan. Sin embargo, para Mercado Pago (ARS), hemos decidido usar una estrategia más eficiente: aprovechar su capacidad nativa para actualizar suscripciones existentes sin cancelarlas.
+
+OBJETIVO TÉCNICO: Crear un nuevo manejador (handler) en el backend encargado específicamente de procesar un cambio de plan para una organización que ya tiene una suscripción activa con Mercado Pago.
+
+REQUISITOS ESPECÍFICOS:
+
+1. Nuevo Endpoint/Handler:
+
+Crea una función o endpoint en el backend (ej. en server/lib/handlers/checkout/mp/updateSubscription.ts) que reciba:
+
+organizationId
+
+newPlanSlug (el plan al que se quieren cambiar)
+
+2. Lógica del Handler (Paso a Paso):
+
+A. Validaciones Previas:
+
+Verificar que la organización tenga una suscripción active con payment_provider = 'mercadopago'.
+
+Obtener el ID de preaprobación de MP (payment_id o un campo externo almacenado en la suscripción actual).
+
+Obtener los detalles del nuevo plan (newPlanSlug) de la DB.
+
+Obtener el precio en ARS del nuevo plan usando la tabla exchange_rates (igual que al crear una nueva).
+
+B. Llamada a la API de Mercado Pago (PUT):
+
+Utiliza el SDK de Mercado Pago o una llamada fetch directa para actualizar la preaprobación existente.
+
+Endpoint de MP: PUT https://api.mercadopago.com/preapproval/{id_preaprobacion_actual}
+
+Body del request (ejemplo):
+
+JSON
+
+{
+  "auto_recurring": {
+    "transaction_amount": NUEVO_MONTO_EN_ARS,
+    "currency_id": "ARS"
+  },
+  "reason": "Upgrade a Plan " + NOMBRE_NUEVO_PLAN
+}
+Nota: Esta acción hace que MP ajuste los cobros futuros automáticamente.
+
+C. Actualización Local en Base de Datos (CRÍTICO):
+
+Si la llamada a MP es exitosa, debemos actualizar nuestra base de datos inmediatamente.
+
+A diferencia del flujo de "creación", aquí NO debemos cancelar la suscripción anterior y crear una nueva, porque en MP sigue siendo la misma entidad.
+
+Debes realizar un UPDATE en la fila activa de la tabla organization_subscriptions para esa organización:
+
+Actualizar plan_id al nuevo plan.
+
+Actualizar amount al nuevo monto en ARS.
+
+Actualizar updated_at.
+
+También actualizar plan_id en la tabla principal organizations.
+
+D. Respuesta:
+
+Devolver éxito al frontend para que muestre que el plan ha sido actualizado.
+
+ENTREGABLES:
+
+El nuevo archivo del handler de actualización MP (server/lib/handlers/checkout/mp/updateSubscription.ts o similar).
+
+La lógica de base de datos para actualizar la suscripción existente "in-place" en lugar de rotarla.

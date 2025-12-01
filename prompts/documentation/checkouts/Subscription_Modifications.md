@@ -1,16 +1,30 @@
 # Modificaciones de Suscripciones - Análisis y Estrategia
 
-## 🎯 ESTADO: PENDIENTE DE IMPLEMENTACIÓN
+## 🎯 ESTADO: PARCIALMENTE IMPLEMENTADO ✅
 
 **Última actualización:** 1 de Diciembre 2025
 
-Este documento analiza las limitaciones de PayPal y MercadoPago para modificar suscripciones activas, y propone la estrategia de implementación.
+### Resumen del Estado
+
+| Gateway | Upgrade Nativo | Estado |
+|---------|----------------|--------|
+| **MercadoPago** | ✅ `PUT /preapproval` | ✅ **IMPLEMENTADO** |
+| **PayPal** | ❌ No soportado | ⏳ Pendiente (cancel + recreate) |
+
+### Endpoint Implementado (MercadoPago)
+
+```
+POST /api/checkout/mp/update-subscription
+Body: { organization_id, new_plan_slug, billing_period? }
+```
+
+Este endpoint actualiza la suscripción "in-place" en MercadoPago sin cancelarla.
 
 ---
 
 ## 📋 EL PROBLEMA
 
-Tanto PayPal como MercadoPago tienen **limitaciones importantes** para modificar suscripciones activas:
+PayPal y MercadoPago tienen **diferentes capacidades** para modificar suscripciones activas:
 
 ### Casos que requieren modificación:
 
@@ -63,13 +77,13 @@ Si querés aplicar un ajuste único (prorrateo), no funciona bien.
 
 **Documentación:** https://www.mercadopago.com.ar/developers/es/reference/subscriptions
 
-**Limitaciones:**
+**Capacidades:**
+- ✅ **SÍ se puede modificar** `auto_recurring.transaction_amount` via `PUT /preapproval/{id}`
 - ❌ NO se puede cambiar el `preapproval_plan_id` de una suscripción activa
-- ❌ NO se puede modificar el `auto_recurring.transaction_amount` después de creado
 - ✅ Se puede pausar la suscripción (`status: paused`)
 - ✅ Se puede cancelar la suscripción (`status: cancelled`)
 
-**Para actualizar:**
+**Para actualizar el monto (IMPLEMENTADO):**
 ```
 PUT /preapproval/{id}
 {
