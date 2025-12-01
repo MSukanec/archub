@@ -163,10 +163,10 @@ const AdminSubscriptionsTab = () => {
       render: (sub: OrganizationSubscription) => (
         <div className="flex items-center gap-1">
           <Badge variant="outline" className="text-xs font-mono">
-            {sub.currency}
+            {sub.currency || 'USD'}
           </Badge>
           <span className="text-sm font-medium">
-            ${parseFloat(sub.amount.toString()).toFixed(2)}
+            ${sub.amount != null ? parseFloat(sub.amount.toString()).toFixed(2) : '0.00'}
           </span>
         </div>
       ),
@@ -179,11 +179,11 @@ const AdminSubscriptionsTab = () => {
         <div className="flex flex-col gap-0.5">
           <span className="text-xs">
             <span className="text-muted-foreground">Inicio: </span>
-            {format(new Date(sub.started_at), 'dd/MM/yyyy', { locale: es })}
+            {sub.started_at ? format(new Date(sub.started_at), 'dd/MM/yyyy', { locale: es }) : '-'}
           </span>
           <span className="text-xs">
             <span className="text-muted-foreground">Expira: </span>
-            {format(new Date(sub.expires_at), 'dd/MM/yyyy', { locale: es })}
+            {sub.expires_at ? format(new Date(sub.expires_at), 'dd/MM/yyyy', { locale: es }) : '-'}
           </span>
         </div>
       ),
