@@ -1,6 +1,5 @@
 import type { Request } from "express";
 import { getAuthenticatedClient } from "../shared/auth.js";
-import { createServiceSupabaseClient } from "../shared/auth.js";
 import {
   createMPPreapprovalPlan,
   getMPPreapprovalPlan,
@@ -20,37 +19,29 @@ export type SyncMPPlansResult =
 
 export async function syncMPPlans(req: Request): Promise<SyncMPPlansResult> {
   try {
-    // In development, use service client; in production, require admin auth
-    let supabase;
-    
-    if (process.env.NODE_ENV === 'production') {
-      const authResult = getAuthenticatedClient(req);
-      if (!authResult.success) {
-        return { success: false, error: authResult.error, status: 401 };
-      }
+    const authResult = getAuthenticatedClient(req);
+    if (!authResult.success) {
+      return { success: false, error: authResult.error, status: 401 };
+    }
 
-      const {
-        data: { user },
-        error: userError,
-      } = await authResult.supabase.auth.getUser();
-      if (userError || !user) {
-        return { success: false, error: "Autenticación fallida", status: 401 };
-      }
+    const { supabase } = authResult;
 
-      const { data: dbUser } = await authResult.supabase
-        .from("users")
-        .select("is_admin")
-        .eq("auth_id", user.id)
-        .maybeSingle();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { success: false, error: "Autenticación fallida", status: 401 };
+    }
 
-      if (!dbUser?.is_admin) {
-        return { success: false, error: "Se requiere acceso de administrador", status: 403 };
-      }
-      
-      supabase = authResult.supabase;
-    } else {
-      // In development, use service role client (no auth required)
-      supabase = createServiceSupabaseClient();
+    const { data: dbUser } = await supabase
+      .from("users")
+      .select("is_admin")
+      .eq("auth_id", user.id)
+      .maybeSingle();
+
+    if (!dbUser?.is_admin) {
+      return { success: false, error: "Se requiere acceso de administrador", status: 403 };
     }
 
     const { data: exchangeRate, error: exchangeError } = await supabase
