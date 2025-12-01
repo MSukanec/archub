@@ -139,6 +139,7 @@ export interface UserData {
     organization_id: string
     organization_name: string
     is_active: boolean
+    is_over_limit: boolean
     joined_at: string
     last_active_at: string
     role: {

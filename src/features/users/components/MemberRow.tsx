@@ -1,10 +1,11 @@
-import React from 'react';
 import DataRowCard from '@/components/ui-custom/general/DataRowCard';
 import { Badge } from "@/components/ui/badge";
+import { Lock } from "lucide-react";
 
 // Interface para el miembro (usando la estructura real de la app)
 interface Member {
   id: string;
+  is_over_limit?: boolean;
   users?: {
     full_name?: string;
     email?: string;
@@ -21,6 +22,7 @@ interface MemberRowProps {
   selected?: boolean;
   density?: 'compact' | 'normal' | 'comfortable';
   className?: string;
+  isOverLimit?: boolean;
 }
 
 // Helper para obtener las iniciales del miembro
@@ -55,17 +57,25 @@ export default function MemberRow({
   onClick, 
   selected, 
   density = 'normal',
-  className 
+  className,
+  isOverLimit
 }: MemberRowProps) {
+  
+  const isSuspended = isOverLimit || member.is_over_limit === true;
   
   // Contenido interno del card usando el nuevo sistema
   const cardContent = (
     <>
       {/* Columna de contenido (principal) - solo ocupa el espacio disponible */}
-      <div className="flex-1 min-w-0">
+      <div className={`flex-1 min-w-0 ${isSuspended ? 'opacity-60' : ''}`}>
         {/* Primera fila - Nombre del miembro */}
-        <div className="font-medium text-sm truncate">
-          {member.users?.full_name || 'Sin nombre'}
+        <div className="flex items-center gap-2">
+          {isSuspended && (
+            <Lock className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
+          )}
+          <span className="font-medium text-sm truncate">
+            {member.users?.full_name || 'Sin nombre'}
+          </span>
         </div>
 
         {/* Segunda fila - Email */}
@@ -74,8 +84,16 @@ export default function MemberRow({
         </div>
       </div>
 
-      {/* Columna derecha - Badge del rol */}
-      <div className="shrink-0 ml-3">
+      {/* Columna derecha - Badges */}
+      <div className="shrink-0 ml-3 flex items-center gap-2">
+        {isSuspended && (
+          <Badge 
+            variant="outline"
+            className="bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 text-[10px] px-1.5 py-0"
+          >
+            Suspendido
+          </Badge>
+        )}
         <Badge 
           variant={getRoleBadgeVariant(member.roles?.name || '')}
           className={getRoleBadgeClassName(member.roles?.name || '')}

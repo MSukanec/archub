@@ -5,12 +5,15 @@ import {
   Users, 
   UserCheck, 
   Clock, 
-  MoreHorizontal
+  MoreHorizontal,
+  Lock,
+  ArrowUpCircle
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -28,6 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useGlobalModalStore } from "@/components/modal";
 import { useMobile } from "@/hooks/use-mobile";
+import { useLocation } from "wouter";
 
 function getInitials(name: string): string {
   return name
@@ -57,6 +61,7 @@ export function MembersListTab() {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const isMobile = useMobile();
+  const [, navigate] = useLocation();
 
   const organizationId = userData?.organization?.id;
 
@@ -75,6 +80,7 @@ export function MembersListTab() {
           joined_at,
           last_active_at,
           is_active,
+          is_over_limit,
           users (
             id,
             email,
@@ -100,6 +106,8 @@ export function MembersListTab() {
     },
     enabled: !!organizationId,
   });
+
+  const suspendedMembersCount = members.filter((m: any) => m.is_over_limit === true).length;
 
   const { data: pendingInvites = [], isLoading: invitesLoading } = useQuery({
     queryKey: ['organization-invitations', organizationId],
@@ -227,6 +235,29 @@ export function MembersListTab() {
 
   return (
     <div className="space-y-6">
+      {suspendedMembersCount > 0 && (
+        <Alert className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/30">
+          <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          <AlertTitle className="text-amber-800 dark:text-amber-200 font-medium">
+            Miembros suspendidos
+          </AlertTitle>
+          <AlertDescription className="text-amber-700 dark:text-amber-300 flex items-center justify-between">
+            <span>
+              {suspendedMembersCount} {suspendedMembersCount === 1 ? 'miembro está suspendido' : 'miembros están suspendidos'} por exceder los límites de tu plan actual.
+            </span>
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="ml-4 border-amber-500 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900"
+              onClick={() => navigate('/billing')}
+              data-testid="button-upgrade-plan-members"
+            >
+              <ArrowUpCircle className="h-4 w-4 mr-2" />
+              Mejorar Plan
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
           <div className="flex items-center gap-2 mb-6">
@@ -263,67 +294,82 @@ export function MembersListTab() {
             </div>
           ) : (
             <div className="space-y-2">
-              {members.map((member) => (
-                <Card key={member.id} className="p-4">
-                  <CardContent className="p-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={(Array.isArray(member.users) ? member.users[0] : member.users)?.avatar_url} />
-                          <AvatarFallback>
-                            {getInitials((Array.isArray(member.users) ? member.users[0] : member.users)?.full_name || (Array.isArray(member.users) ? member.users[0] : member.users)?.email || 'U')}
-                          </AvatarFallback>
-                        </Avatar>
-                        
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium text-sm">
-                              {(Array.isArray(member.users) ? member.users[0] : member.users)?.full_name || 'Sin nombre'}
-                            </h4>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {(Array.isArray(member.users) ? member.users[0] : member.users)?.email}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <div className="text-xs text-muted-foreground text-right">
-                          <div>
-                            {member.joined_at && !isNaN(new Date(member.joined_at).getTime()) 
-                              ? format(new Date(member.joined_at), 'MMM dd, yyyy', { locale: es })
-                              : 'Fecha no disponible'
-                            }
+              {members.map((member) => {
+                const isSuspended = member.is_over_limit === true;
+                return (
+                  <Card key={member.id} className={`p-4 ${isSuspended ? 'opacity-60' : ''}`}>
+                    <CardContent className="p-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={(Array.isArray(member.users) ? member.users[0] : member.users)?.avatar_url} />
+                            <AvatarFallback>
+                              {getInitials((Array.isArray(member.users) ? member.users[0] : member.users)?.full_name || (Array.isArray(member.users) ? member.users[0] : member.users)?.email || 'U')}
+                            </AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              {isSuspended && (
+                                <Lock className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
+                              )}
+                              <h4 className="font-medium text-sm">
+                                {(Array.isArray(member.users) ? member.users[0] : member.users)?.full_name || 'Sin nombre'}
+                              </h4>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {(Array.isArray(member.users) ? member.users[0] : member.users)?.email}
+                            </p>
                           </div>
                         </div>
 
-                        <Badge 
-                          variant={getRoleBadgeVariant((Array.isArray(member.roles) ? member.roles[0] : member.roles)?.name || '')}
-                          className={getRoleBadgeClassName((Array.isArray(member.roles) ? member.roles[0] : member.roles)?.name || '')}
-                        >
-                          {(Array.isArray(member.roles) ? member.roles[0] : member.roles)?.name || 'Sin rol'}
-                        </Badge>
+                        <div className="flex items-center gap-4">
+                          <div className="text-xs text-muted-foreground text-right">
+                            <div>
+                              {member.joined_at && !isNaN(new Date(member.joined_at).getTime()) 
+                                ? format(new Date(member.joined_at), 'MMM dd, yyyy', { locale: es })
+                                : 'Fecha no disponible'
+                              }
+                            </div>
+                          </div>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem 
-                              className="text-red-600"
-                              onClick={() => handleDeleteMember(member)}
+                          {isSuspended && (
+                            <Badge 
+                              variant="outline"
+                              className="bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 text-[10px] px-1.5 py-0"
                             >
-                              Eliminar miembro
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                              Suspendido
+                            </Badge>
+                          )}
+
+                          <Badge 
+                            variant={getRoleBadgeVariant((Array.isArray(member.roles) ? member.roles[0] : member.roles)?.name || '')}
+                            className={getRoleBadgeClassName((Array.isArray(member.roles) ? member.roles[0] : member.roles)?.name || '')}
+                          >
+                            {(Array.isArray(member.roles) ? member.roles[0] : member.roles)?.name || 'Sin rol'}
+                          </Badge>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem 
+                                className="text-red-600"
+                                onClick={() => handleDeleteMember(member)}
+                              >
+                                Eliminar miembro
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
 
               {members.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">

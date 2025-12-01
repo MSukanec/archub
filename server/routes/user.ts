@@ -197,6 +197,26 @@ export function registerUserRoutes(app: Express, deps: RouteDeps): void {
         }
       }
       
+      // Enhance memberships with is_over_limit flag for soft-lock functionality
+      if (userData.memberships && Array.isArray(userData.memberships) && userData.user?.id) {
+        const { data: membershipLimits, error: limitsError } = await authenticatedSupabase
+          .from('organization_members')
+          .select('id, organization_id, is_over_limit')
+          .eq('user_id', userData.user.id)
+          .eq('is_active', true);
+        
+        if (!limitsError && membershipLimits) {
+          const limitsMap = new Map(
+            membershipLimits.map((m: any) => [m.organization_id, m.is_over_limit || false])
+          );
+          
+          userData.memberships = userData.memberships.map((m: any) => ({
+            ...m,
+            is_over_limit: limitsMap.get(m.organization_id) || false
+          }));
+        }
+      }
+      
       // User data retrieved successfully
       res.json(userData);
     } catch (error) {

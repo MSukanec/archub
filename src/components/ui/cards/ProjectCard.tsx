@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,9 +11,11 @@ import {
   Users,
   Star,
   Trash2,
-  Edit
+  Edit,
+  Lock
 } from 'lucide-react';
 import { SwipeableCard } from '@/layouts';
+import { cn } from '@/lib/utils';
 
 // Project status configurations
 const projectStatuses = {
@@ -34,10 +35,11 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project, onEdit, onDelete, onSelect }: ProjectCardProps) {
   const statusConfig = projectStatuses[project.status as keyof typeof projectStatuses] || projectStatuses.planning;
+  const isOverLimit = project.is_over_limit === true;
 
-  return (
-    <SwipeableCard
-      actions={[
+  const swipeActions = isOverLimit 
+    ? [] 
+    : [
         {
           label: "Favorito",
           icon: <Star className="w-4 h-4" />,
@@ -56,25 +58,42 @@ export default function ProjectCard({ project, onEdit, onDelete, onSelect }: Pro
           variant: "destructive" as const,
           onClick: () => onDelete(project)
         }
-      ]}
-    >
+      ];
+
+  return (
+    <SwipeableCard actions={swipeActions}>
       <Card 
-        className="w-full cursor-pointer hover:shadow-md transition-shadow duration-200"
+        className={cn(
+          "w-full cursor-pointer hover:shadow-md transition-all duration-200",
+          isOverLimit && "opacity-60 grayscale"
+        )}
         onClick={() => onSelect(project)}
+        data-testid={`card-project-${project.id}`}
       >
         <CardContent className="p-3">
 
         {/* Row 2: Project name and status (inline) */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <Building className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            {isOverLimit ? (
+              <Lock className="h-4 w-4 text-amber-500 flex-shrink-0" />
+            ) : (
+              <Building className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            )}
             <h3 className="font-medium text-sm text-foreground truncate">
               {project.name}
             </h3>
           </div>
-          <Badge variant={statusConfig.variant} className="text-xs ml-2 flex-shrink-0">
-            {statusConfig.label}
-          </Badge>
+          <div className="flex items-center gap-1.5 ml-2">
+            {isOverLimit && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700">
+                Solo Lectura
+              </Badge>
+            )}
+            <Badge variant={statusConfig.variant} className="text-xs flex-shrink-0">
+              {statusConfig.label}
+            </Badge>
+          </div>
         </div>
 
         {/* Row 3: Location and dates */}

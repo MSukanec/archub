@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/popover";
 import { PlanRestricted } from "@/features/users";
 import { ExpandableAvatarGroup } from "@/components/ui-custom/ExpandableAvatarGroup";
+import { ReadOnlyBanner } from "@/components/ui-custom/ReadOnlyBanner";
 import { ContextSelector } from "./components/Topbar/ContextSelector";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
@@ -180,6 +181,10 @@ interface PageLayoutProps {
   // Control de ancho - debe coincidir con el contenido
   wide?: WidthProp;
   
+  // Read-only mode banner (for soft-locked projects)
+  showReadOnlyBanner?: boolean;
+  readOnlyProjectName?: string;
+  
   // Contenido de la página
   children: React.ReactNode;
 }
@@ -212,6 +217,8 @@ export function PageLayout({
   currencyView = 'discriminado',
   onCurrencyViewChange,
   wide = false,
+  showReadOnlyBanner = false,
+  readOnlyProjectName,
   children,
 }: PageLayoutProps) {
   const [searchInputValue, setSearchInputValue] = useState(headerSearchValue);
@@ -645,6 +652,7 @@ export function PageLayout({
           const mode = resolveWidthMode(wide);
           return `${getContainerClasses(mode)} ${getContentPaddingClasses(mode)} pt-6 pb-6 min-h-0 overflow-x-hidden`;
         })()}>
+          <ReadOnlyBanner show={showReadOnlyBanner} projectName={readOnlyProjectName} />
           {children}
         </div>
       </div>

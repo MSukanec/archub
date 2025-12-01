@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Lock } from 'lucide-react';
 import chroma from 'chroma-js';
 import { useQuery } from '@tanstack/react-query';
 import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
@@ -15,6 +15,7 @@ interface Project {
   created_by: string;
   organization_id: string;
   is_active: boolean;
+  is_over_limit?: boolean;
   
   project_data?: {
     client_name?: string;
@@ -71,6 +72,7 @@ export default function ProjectItemCard({
   projectColor = 'var(--accent)'
 }: ProjectItemCardProps) {
   const statusText = getStatusText(project.status);
+  const isOverLimit = project.is_over_limit === true;
 
   // Generate image URL on-demand from bucket+path with React Query
   // Data comes from projects_view which includes image_bucket, image_path, is_public
@@ -122,6 +124,7 @@ export default function ProjectItemCard({
         overflow-hidden
         relative
         ${selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
+        ${isOverLimit ? 'grayscale opacity-70' : ''}
         ${className || ''}
       `}
       style={{ 
@@ -129,6 +132,7 @@ export default function ProjectItemCard({
         height: '480px'
       }}
       onClick={onClick}
+      data-testid={`card-project-${project.id}`}
     >
       {/* Imagen de fondo - SIEMPRE 100% de altura */}
       <div className="absolute inset-0">
@@ -177,13 +181,18 @@ export default function ProjectItemCard({
       {/* Contenido - SIEMPRE en el mismo lugar (parte inferior) */}
       <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
         <div className="space-y-4">
-          {/* Nombre del proyecto + Badge activo (si aplica) */}
+          {/* Nombre del proyecto + Badge activo/bloqueado (si aplica) */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
+              {isOverLimit && (
+                <div className="w-5 h-5 rounded-full flex items-center justify-center bg-amber-500">
+                  <Lock className="h-3 w-3 text-white" />
+                </div>
+              )}
               <h3 className="font-semibold text-lg leading-tight project-card-title">
                 {project.name}
               </h3>
-              {isActive && (
+              {isActive && !isOverLimit && (
                 <div 
                   className="w-5 h-5 rounded-full flex items-center justify-center"
                   style={{ backgroundColor: actualProjectColor }}
@@ -192,6 +201,11 @@ export default function ProjectItemCard({
                 </div>
               )}
             </div>
+            {isOverLimit && (
+              <Badge className="bg-amber-500/20 text-amber-300 border-0 text-xs">
+                Solo Lectura
+              </Badge>
+            )}
           </div>
 
           {/* Descripción */}
@@ -226,33 +240,35 @@ export default function ProjectItemCard({
 
           {/* Botones - abajo - SOLO EN HOVER */}
           <div className="flex justify-end gap-2">
-            <Button 
-              variant="secondary"
-              size="sm"
-              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ 
-                borderColor: isActive ? 'white' : actualProjectColor,
-                color: isActive ? 'white' : actualProjectColor
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit?.();
-              }}
-              data-testid="button-edit-project"
-            >
-              Editar
-            </Button>
+            {!isOverLimit && (
+              <Button 
+                variant="secondary"
+                size="sm"
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ 
+                  borderColor: isActive ? 'white' : actualProjectColor,
+                  color: isActive ? 'white' : actualProjectColor
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.();
+                }}
+                data-testid="button-edit-project"
+              >
+                Editar
+              </Button>
+            )}
             <Button 
               size="sm"
               className="text-white border-0 text-sm font-medium shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ backgroundColor: actualProjectColor }}
+              style={{ backgroundColor: isOverLimit ? '#d97706' : actualProjectColor }}
               onClick={(e) => {
                 e.stopPropagation();
                 onNavigateToProject?.();
               }}
               data-testid="button-navigate-project"
             >
-              Ir al Proyecto
+              {isOverLimit ? 'Ver Proyecto' : 'Ir al Proyecto'}
             </Button>
           </div>
         </div>
