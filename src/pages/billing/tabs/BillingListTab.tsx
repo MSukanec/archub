@@ -450,6 +450,14 @@ export function BillingListTab() {
                   Cancelada
                 </Badge>
               )}
+              {subscription?.scheduled_downgrade_plan_id && !isCancelled && (
+                <Badge 
+                  variant="outline"
+                  className="text-xs bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700"
+                >
+                  Cambio Programado → {subscription?.scheduled_downgrade_plan?.name}
+                </Badge>
+              )}
               <Badge 
                 className={`text-xs text-white ${getPlanBadgeClass(planSlug)}`}
               >
