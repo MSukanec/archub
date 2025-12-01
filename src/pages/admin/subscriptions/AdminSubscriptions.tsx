@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CreditCard, Plus } from 'lucide-react';
+import { CreditCard, Plus, RotateCcw } from 'lucide-react';
 import { DashboardLayout as Layout } from "@/layouts";
 import { Button } from '@/components/ui/button';
 import { useNavigationStore } from '@/stores/navigationStore';
@@ -27,6 +27,10 @@ const AdminSubscriptions = () => {
     openModal('plan-price', {});
   };
 
+  const handleResetTestData = () => {
+    openModal('reset-test-data', {});
+  };
+
   const headerProps = {
     title: "Suscripciones",
     icon: CreditCard,
@@ -49,6 +53,18 @@ const AdminSubscriptions = () => {
     ],
     onTabChange: (tabId: string) => setActiveTab(tabId),
     actions: [
+      activeTab === 'subscriptions' && (
+        <Button
+          key="reset-test-data"
+          variant="outline"
+          onClick={handleResetTestData}
+          className="h-8 px-3 text-xs"
+          data-testid="button-reset-test-data"
+        >
+          <RotateCcw className="w-4 h-4 mr-1" />
+          Resetear Test Data
+        </Button>
+      ),
       activeTab === 'plans' && (
         <Button
           key="create-plan"

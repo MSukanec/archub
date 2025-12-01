@@ -15,7 +15,7 @@ import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConf
 import { default as PaymentFeedbackModal } from '@/components/forms/PaymentFeedbackModal';
 import { UniversalImportForm } from '@/features/imports';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal, MaterialPaymentForm, PurchaseOrderForm, MaterialPurchaseForm } from '@/features/materials';
-import { UserFormModal, ChangelogFormModal, NotificationFormModal, AnnouncementFormModal, SupportConversationStartModal, PlanFormModal, PlanPriceFormModal, DowngradeModal, UpgradeModal } from '@/features/users';
+import { UserFormModal, ChangelogFormModal, NotificationFormModal, AnnouncementFormModal, SupportConversationStartModal, PlanFormModal, PlanPriceFormModal, DowngradeModal, UpgradeModal, ResetTestDataModal } from '@/features/users';
 import SiteLogForm from '@/features/sitelog/forms/SiteLogForm';
 import { SiteLogTypeForm } from '@/features/sitelog/forms/SiteLogTypeForm';
 import { ProjectTypeForm } from '@/features/projects/forms/ProjectTypeForm';
@@ -322,6 +322,7 @@ export function initializeModalRegistry(): void {
   registerModal('plan-price', PlanPriceFormModal as any, adminConfig);
   registerModal('downgrade', DowngradeModal as any, adminConfig);
   registerModal('upgrade', UpgradeModal as any, adminConfig);
+  registerModal('reset-test-data', ResetTestDataModal as any, { ...adminConfig, size: 'md' });
   
   registerModal('pdf-exporter', PDFExporterModal as any, { ...generalConfig, size: 'full' });
   

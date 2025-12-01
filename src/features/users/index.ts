@@ -6,6 +6,7 @@ export { NotificationFormModal } from './modals/admin/NotificationFormModal';
 export { SupportConversationStartModal } from './modals/admin/SupportConversationStartModal';
 export { AnnouncementFormModal } from './modals/admin/AnnouncementFormModal';
 export { ChangelogFormModal } from './modals/admin/ChangelogFormModal';
+export { default as ResetTestDataModal } from './modals/admin/ResetTestDataModal';
 
 // Plan Modals
 export { PlanUpgradeModal } from './modals/plans/PlanUpgradeModal';
