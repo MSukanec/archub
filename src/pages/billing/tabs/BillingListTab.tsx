@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, RefreshCw, Activity } from 'lucide-react';
+import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, RefreshCw, Activity, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -528,22 +528,38 @@ export function BillingListTab() {
               No hay método de pago configurado para el plan Free
             </div>
           ) : payments.length > 0 ? (
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-16 rounded-md bg-white dark:bg-gray-800 border border-border flex items-center justify-center p-1">
-                <img 
-                  src={payments[0].provider === 'paypal' ? '/Paypal_2014_logo.png' : '/MercadoPago_logo.png'}
-                  alt={payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="flex-1">
-                <div className="font-medium text-sm">
-                  {payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-16 rounded-md bg-white dark:bg-gray-800 border border-border flex items-center justify-center p-1">
+                  <img 
+                    src={payments[0].provider === 'paypal' ? '/Paypal_2014_logo.png' : '/MercadoPago_logo.png'}
+                    alt={payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  {payments[0].payer_email}
+                <div className="flex-1">
+                  <div className="font-medium text-sm">
+                    {payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {payments[0].payer_email}
+                  </div>
                 </div>
               </div>
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={() => {
+                  const url = payments[0].provider === 'paypal' 
+                    ? 'https://www.paypal.com/myaccount/autopay'
+                    : 'https://www.mercadopago.com.ar/subscriptions';
+                  window.open(url, '_blank', 'noopener,noreferrer');
+                }}
+                data-testid="button-manage-payment-method"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Gestionar en {payments[0].provider === 'paypal' ? 'PayPal' : 'MercadoPago'}
+              </Button>
             </div>
           ) : (
             <div className="text-sm text-muted-foreground">
