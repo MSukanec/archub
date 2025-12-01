@@ -1,10 +1,10 @@
 import type { Request } from "express";
+import { nanoid } from "nanoid";
 import { getAuthenticatedClient } from "../shared/auth.js";
 import { verifyAdminRoleForOrganization } from "../shared/permissions.js";
 import { getUserData } from "../shared/user.js";
 import { buildURLContext, buildSubscriptionBackUrls } from "../shared/urls.js";
 import { validateMPToken, logMPMode } from "./config.js";
-import { encodeCustomData } from "./encoding.js";
 import { createMPPreapproval, type MPAutoRecurring } from "./subscriptions-api.js";
 import { calculateProration } from "../shared/proration.js";
 import { getAdminClient } from "../../../../routes/_base.js";
@@ -209,28 +209,36 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
       return { success: false, error: tokenValidation.error, status: 500 };
     }
 
-    const customData: Record<string, any> = {
-      user_id,
-      product_type: 'recurring_subscription',
-      plan_slug,
-      plan_id: plan.id,
-      organization_id,
-      billing_period,
-    };
-
-    if (is_upgrade) {
-      customData.is_upgrade = true;
-      if (currentSubscriptionId) {
-        customData.previous_subscription_id = currentSubscriptionId;
-      }
-      if (serverProrationCredit > 0) {
-        customData.proration_credit = serverProrationCredit;
-      }
-    }
-
-    const externalReference = encodeCustomData(customData);
+    // Generate short ID for external_reference (max 64 chars, alphanumeric)
+    // Same pattern as course payments in Payment_Course_MercadoPago.md
+    const shortId = `mps_${nanoid(12)}`;
 
     const urlContext = buildURLContext(req);
+
+    // Save subscription preference data to database for webhook lookup
+    // Using admin client to bypass RLS
+    const adminClient = getAdminClient();
+    const { error: insertError } = await adminClient
+      .from("mp_subscription_preferences")
+      .insert({
+        id: shortId,
+        user_id: user_id,
+        organization_id,
+        plan_id: plan.id,
+        plan_slug,
+        billing_period,
+        amount_ars: String(Math.round(transactionAmount)),
+        is_upgrade: is_upgrade || false,
+        previous_subscription_id: currentSubscriptionId || null,
+        proration_credit: serverProrationCredit > 0 ? String(serverProrationCredit) : null,
+      });
+
+    if (insertError) {
+      console.error("[MP create-recurring-subscription] Error saving preference to DB:", insertError);
+      // Continue anyway - webhook can fallback to getMPPreapproval
+    } else {
+      console.log("[MP create-recurring-subscription] Preference saved with short ID:", shortId);
+    }
     const backUrls = buildSubscriptionBackUrls(urlContext.returnBase);
 
     const productTitle = is_upgrade 
@@ -263,7 +271,7 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
 
     const preapprovalResult = await createMPPreapproval({
       reason: productTitle,
-      external_reference: externalReference,
+      external_reference: shortId,
       payer_email: userData.email,
       auto_recurring: autoRecurring,
       back_url: backUrls.success,

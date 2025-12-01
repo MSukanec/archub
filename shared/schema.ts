@@ -1777,3 +1777,27 @@ export const insertMpCoursePreferenceSchema = createInsertSchema(mp_course_prefe
 
 export type MpCoursePreference = typeof mp_course_preferences.$inferSelect;
 export type InsertMpCoursePreference = z.infer<typeof insertMpCoursePreferenceSchema>;
+
+// MP Subscription Preferences (short external_reference, data stored in DB)
+export const mp_subscription_preferences = pgTable("mp_subscription_preferences", {
+  id: varchar("id", { length: 64 }).primaryKey(), // mps_xxxxx (short ID)
+  preapproval_id: text("preapproval_id"), // Mercado Pago preapproval ID
+  user_id: uuid("user_id").notNull(), // auth_id from Supabase Auth
+  organization_id: uuid("organization_id").notNull(),
+  plan_id: uuid("plan_id").notNull(),
+  plan_slug: text("plan_slug").notNull(),
+  billing_period: text("billing_period", { enum: ["monthly", "annual"] }).notNull(),
+  amount_ars: numeric("amount_ars", { precision: 10, scale: 2 }),
+  is_upgrade: boolean("is_upgrade").default(false),
+  previous_subscription_id: uuid("previous_subscription_id"),
+  proration_credit: numeric("proration_credit", { precision: 10, scale: 2 }),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+export const insertMpSubscriptionPreferenceSchema = createInsertSchema(mp_subscription_preferences).omit({
+  id: true,
+  created_at: true,
+});
+
+export type MpSubscriptionPreference = typeof mp_subscription_preferences.$inferSelect;
+export type InsertMpSubscriptionPreference = z.infer<typeof insertMpSubscriptionPreferenceSchema>;
