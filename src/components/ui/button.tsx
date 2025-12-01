@@ -10,13 +10,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-accent text-white hover:bg-accent/90 rounded-lg px-3 py-1.5 md:py-1.5 py-3 gap-2 text-sm font-medium [&_svg]:size-4",
+          "bg-accent text-white hover:bg-accent/90 rounded-lg px-3 py-1.5 md:py-1.5 py-3 gap-2 text-sm font-medium [&_svg]:size-4 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
         destructive:
           "bg-destructive text-[var(--destructive-text)] hover:bg-destructive/80 rounded-lg px-3 py-1.5 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
         outline:
           "border border-border bg-background hover:bg-accent hover:text-accent-foreground rounded-md px-3 py-1.5 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
         secondary:
-          "bg-transparent text-accent border border-accent hover:bg-accent/10 rounded-lg px-3 py-1.5 md:py-1.5 py-3 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
+          "bg-[var(--button-secondary-bg)] text-[var(--button-secondary-text)] border border-[var(--button-secondary-border)] hover:bg-[var(--button-secondary-hover-bg)] hover:text-[var(--button-secondary-hover-text)] hover:border-[var(--button-secondary-hover-border)] rounded-lg px-3 py-1.5 md:py-1.5 py-3 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
         ghost:
           "bg-transparent text-[var(--button-ghost-hover-text)] hover:bg-transparent hover:text-[var(--button-ghost-hover-text)] rounded-lg px-2 py-2 [&_svg]:size-5",
         link: "text-accent underline-offset-4 hover:underline px-2 py-1",
