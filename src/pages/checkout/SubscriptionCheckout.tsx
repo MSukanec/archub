@@ -755,30 +755,27 @@ export default function SubscriptionCheckout() {
     
     if (selectedMethod === 'mercadopago') {
       const arsAmount = basePrice * exchangeRate;
-      const finalArs = prorationData?.finalPrice?.ars ?? arsAmount;
-      const discountArs = prorationData?.savings?.ars ?? 0;
-      
+      // MercadoPago subscriptions use full price for all payments (including upgrades)
+      // Proration is NOT applied to avoid setting wrong recurring amount
       return {
-        amount: finalArs.toFixed(2),
+        amount: arsAmount.toFixed(2),
         currency: 'ARS',
-        numericAmount: finalArs,
+        numericAmount: arsAmount,
         originalAmount: arsAmount,
-        hasDiscount: discountArs > 0,
-        discountAmount: discountArs
+        hasDiscount: false,
+        discountAmount: 0
       };
     }
     
-    // For PayPal or no method selected, always show USD with proration
-    const finalUsd = prorationData?.finalPrice?.usd ?? basePrice;
-    const discountUsd = prorationData?.savings?.usd ?? 0;
-    
+    // For PayPal or no method selected - no proration applied
+    // MercadoPago/PayPal subscriptions use full price for all payments
     return {
-      amount: finalUsd.toFixed(2),
+      amount: basePrice.toFixed(2),
       currency: 'USD',
-      numericAmount: finalUsd,
+      numericAmount: basePrice,
       originalAmount: basePrice,
-      hasDiscount: discountUsd > 0,
-      discountAmount: discountUsd
+      hasDiscount: false,
+      discountAmount: 0
     };
   }, [planData, billingPeriod, selectedMethod, exchangeRate, prorationData]);
 
@@ -1225,20 +1222,6 @@ export default function SubscriptionCheckout() {
 
                     <Separator />
 
-                    {prorationData?.credit && prorationData.credit.daysRemaining > 0 && (
-                      <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg space-y-2">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                          <p className="text-sm font-medium text-green-700 dark:text-green-400">
-                            Crédito por tu plan actual
-                          </p>
-                        </div>
-                        <p className="text-xs text-green-600 dark:text-green-500">
-                          Te quedan {prorationData.credit.daysRemaining} días de {prorationData.currentPlan?.name}. 
-                          Aplicamos el valor proporcional como descuento.
-                        </p>
-                      </div>
-                    )}
 
                     <div className="space-y-2">
                       {calculatePrice.hasDiscount && (

@@ -160,8 +160,11 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
 
     const arsRate = Number(exchangeRate.rate);
     let transactionAmount = unitPriceUSD * arsRate;
+    const fullPriceArs = transactionAmount; // Store full price for recurring subscription
 
     let serverProrationCredit = 0;
+    let firstPaymentAmount = transactionAmount;
+    
     if (is_upgrade) {
       try {
         const adminClient = getAdminClient();
@@ -176,14 +179,19 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
           serverProrationCredit = prorationResult.savings.ars;
           
           console.log('[MP create-recurring-subscription] Server-calculated proration:', {
-            original_price_ars: transactionAmount,
+            full_price_ars: fullPriceArs,
             server_prorated_price: serverProrationPrice,
             server_credit: serverProrationCredit,
             client_prorated_price: proration_amount_ars,
             client_credit: proration_credit_ars,
           });
 
-          transactionAmount = serverProrationPrice;
+          // IMPORTANT: For MercadoPago recurring subscriptions, we must use FULL PRICE
+          // because MP uses the same amount for all future payments.
+          // The proration is tracked but NOT applied to the subscription amount.
+          // This ensures users pay full price on renewal.
+          console.log('[MP create-recurring-subscription] Using FULL PRICE for recurring subscription (proration only for reference)');
+          firstPaymentAmount = serverProrationPrice; // Only used for logging/display
         } else {
           console.log('[MP create-recurring-subscription] No active subscription for proration, using full price');
         }
@@ -192,6 +200,9 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
       }
     }
 
+    // CRITICAL: Always use full price for the subscription, not prorated amount
+    // MercadoPago uses this amount for ALL recurring payments
+    transactionAmount = fullPriceArs;
     transactionAmount = Math.round(transactionAmount * 100) / 100;
 
     if (transactionAmount < 1) {

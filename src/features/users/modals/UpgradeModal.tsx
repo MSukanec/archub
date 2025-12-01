@@ -260,30 +260,15 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
                 </div>
               )}
 
-              {!isLoadingProration && hasProration && prorationData?.credit && (
-                <div className="flex justify-between text-green-600 dark:text-green-400">
-                  <span className="flex items-center gap-1">
-                    <Gift className="h-3 w-3" />
-                    Crédito por {prorationData.credit.daysRemaining} días restantes
-                  </span>
-                  <span className="font-medium">
-                    - USD ${prorationData.savings.usd.toFixed(2)}
-                  </span>
-                </div>
-              )}
 
               <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-900 dark:text-gray-100 font-semibold">
                     Total a pagar
                   </span>
-                  {isLoadingProration ? (
-                    <Skeleton className="h-7 w-24" />
-                  ) : (
-                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                      USD ${(prorationData?.finalPrice?.usd ?? (isAnnual ? targetPlan.annual_amount : targetPlan.monthly_amount)).toFixed(2)}
-                    </span>
-                  )}
+                  <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    USD ${(isAnnual ? targetPlan.annual_amount : targetPlan.monthly_amount).toFixed(2)}
+                  </span>
                 </div>
               </div>
             </div>
