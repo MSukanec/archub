@@ -176,8 +176,11 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   // POST /api/checkout/mp/create-recurring (NEW - recurring subscription via Preapproval API)
   app.post("/api/checkout/mp/create-recurring", mpController.createRecurring);
   
-  // GET /api/checkout/mp/success-handler (NO auth required - redirect endpoint)
+  // GET /api/checkout/mp/success-handler (NO auth required - redirect endpoint for courses)
   app.get("/api/checkout/mp/success-handler", mpController.successHandler);
+  
+  // GET /api/checkout/mp/subscription-success (NO auth required - redirect endpoint for subscriptions)
+  app.get("/api/checkout/mp/subscription-success", mpController.subscriptionSuccessHandler);
   
   // POST /api/checkout/mp/webhook (NO auth required - webhook endpoint)
   app.post("/api/checkout/mp/webhook", mpController.webhook);

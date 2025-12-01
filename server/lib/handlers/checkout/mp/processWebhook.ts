@@ -486,7 +486,33 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       const preapproval = preapprovalResult.preapproval;
       const preapprovalStatus = preapproval.status; // 'pending', 'authorized', 'paused', 'cancelled'
       const externalRef = preapproval.external_reference || "";
-      const fromExt = decodeExternalReference(externalRef);
+      
+      // NEW: Lookup subscription data from mp_subscription_preferences if short ID format (mps_...)
+      let fromDb: any = null;
+      if (externalRef.startsWith("mps_")) {
+        console.log("[MP webhook preapproval] Looking up subscription preference:", externalRef);
+        const { data: prefData, error: prefError } = await supabase
+          .from("mp_subscription_preferences")
+          .select("*")
+          .eq("id", externalRef)
+          .maybeSingle();
+        
+        if (prefData && !prefError) {
+          fromDb = {
+            user_id: prefData.user_id,
+            organization_id: prefData.organization_id,
+            plan_slug: prefData.plan_slug,
+            billing_period: prefData.billing_period,
+            product_type: 'subscription',
+          };
+          console.log("[MP webhook preapproval] Found preference data:", fromDb);
+        } else {
+          console.warn("[MP webhook preapproval] ⚠️ No preference data found:", prefError);
+        }
+      }
+      
+      // Fallback to old Base64 method if no DB data
+      const fromExt = fromDb || decodeExternalReference(externalRef);
       
       const resolvedUserId = fromExt.user_id || null;
       const organizationId = fromExt.organization_id;
@@ -494,6 +520,15 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       const billingPeriod = fromExt.billing_period;
       const amount = preapproval.auto_recurring?.transaction_amount || 0;
       const currency = preapproval.auto_recurring?.currency_id || "ARS";
+      
+      console.log("[MP webhook preapproval] Resolved data:", {
+        externalRef,
+        resolvedUserId,
+        organizationId,
+        planSlug,
+        billingPeriod,
+        preapprovalStatus,
+      });
       
       // Resolve public user ID
       let publicUserId: string | null = null;

@@ -42,10 +42,18 @@ export function buildCourseBackUrls(
   }
 }
 
-export function buildSubscriptionBackUrls(returnBase: string): CourseBackUrls {
-  return {
-    success: `${returnBase}/organization/billing?payment=success`,
-    failure: `${returnBase}/organization/billing?payment=failed`,
-    pending: `${returnBase}/organization/billing?payment=pending`,
-  };
+export function buildSubscriptionBackUrls(returnBase: string, provider: "mp" | "paypal" = "mp"): CourseBackUrls {
+  if (provider === "mp") {
+    return {
+      success: `${returnBase}/api/checkout/mp/subscription-success`,
+      failure: `${returnBase}/organization/billing?payment=failed`,
+      pending: `${returnBase}/organization/billing?payment=pending`,
+    };
+  } else {
+    return {
+      success: `${returnBase}/organization/billing?payment=success`,
+      failure: `${returnBase}/organization/billing?payment=failed`,
+      pending: `${returnBase}/organization/billing?payment=pending`,
+    };
+  }
 }

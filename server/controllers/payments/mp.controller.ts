@@ -79,6 +79,24 @@ export async function successHandler(req: Request, res: Response) {
   }
 }
 
+export async function subscriptionSuccessHandler(req: Request, res: Response) {
+  const { handleSubscriptionReturn } = await import("../../lib/handlers/checkout/mp/handleSubscriptionReturn.js");
+  
+  try {
+    const result = await handleSubscriptionReturn(req);
+    
+    if (result.success) {
+      return res.redirect(`/organization/billing?payment=success&activated=${result.activated}`);
+    } else {
+      console.error("[MP subscription-success-handler] Error:", result.error);
+      return res.redirect(`/organization/billing?payment=pending&reason=${encodeURIComponent(result.error || 'unknown')}`);
+    }
+  } catch (e: any) {
+    console.error("[MP subscription-success-handler] Fatal error:", e);
+    return res.redirect(`/organization/billing?payment=error`);
+  }
+}
+
 export async function webhook(req: Request, res: Response) {
   if (req.method === "OPTIONS") {
     return handleCorsPreflight(res as any);
