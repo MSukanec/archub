@@ -42,6 +42,7 @@ const couponSchema = z.object({
   min_order_total: z.number().min(0).optional().nullable(),
   currency: z.enum(['ARS', 'USD', 'EUR']).optional().nullable(),
   applies_to_all: z.boolean().default(true),
+  applies_to: z.enum(['courses', 'subscriptions', 'all']).default('courses'),
 });
 
 type CouponFormData = z.infer<typeof couponSchema>;
@@ -59,6 +60,7 @@ interface Coupon {
   min_order_total?: number;
   currency?: string;
   applies_to_all: boolean;
+  applies_to?: 'courses' | 'subscriptions' | 'all';
   created_at: string;
 }
 
@@ -66,6 +68,13 @@ interface Course {
   id: string;
   slug: string;
   title: string;
+}
+
+interface Plan {
+  id: string;
+  slug: string;
+  name: string;
+  is_active: boolean;
 }
 
 interface CouponFormModalProps {
@@ -83,6 +92,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [selectedPlans, setSelectedPlans] = useState<string[]>([]);
 
   const { data: courses = [] } = useQuery({
     queryKey: ['courses'],
@@ -91,8 +101,8 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
       
       const { data, error } = await supabase
         .from('courses')
-        .eq('is_deleted', false)
         .select('id, slug, title')
+        .eq('is_deleted', false)
         .order('title', { ascending: true });
       
       if (error) throw error;
@@ -116,11 +126,49 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
     enabled: !!coupon?.id
   });
 
+  const { data: plans = [] } = useQuery({
+    queryKey: ['plans'],
+    queryFn: async () => {
+      if (!supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('plans')
+        .select('id, slug, name, is_active')
+        .eq('is_active', true)
+        .order('name', { ascending: true });
+      
+      if (error) throw error;
+      return data as Plan[];
+    }
+  });
+
+  const { data: couponPlans = [] } = useQuery({
+    queryKey: ['coupon-plans', coupon?.id],
+    queryFn: async () => {
+      if (!coupon?.id || !supabase) return [];
+      
+      const { data, error } = await supabase
+        .from('coupon_plans')
+        .select('plan_id')
+        .eq('coupon_id', coupon.id);
+      
+      if (error) throw error;
+      return data.map(cp => cp.plan_id);
+    },
+    enabled: !!coupon?.id
+  });
+
   useEffect(() => {
     if (couponCourses.length > 0) {
       setSelectedCourses(couponCourses);
     }
   }, [couponCourses]);
+
+  useEffect(() => {
+    if (couponPlans.length > 0) {
+      setSelectedPlans(couponPlans);
+    }
+  }, [couponPlans]);
 
   const form = useForm<CouponFormData>({
     resolver: zodResolver(couponSchema),
@@ -136,6 +184,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
       min_order_total: coupon?.min_order_total || null,
       currency: coupon?.currency as any || null,
       applies_to_all: coupon?.applies_to_all ?? true,
+      applies_to: coupon?.applies_to || 'courses',
     }
   });
 
@@ -153,6 +202,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
         min_order_total: coupon.min_order_total || null,
         currency: coupon.currency as any || null,
         applies_to_all: coupon.applies_to_all ?? true,
+        applies_to: coupon.applies_to || 'courses',
       });
     } else {
       form.reset({
@@ -167,6 +217,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
         min_order_total: null,
         currency: null,
         applies_to_all: true,
+        applies_to: 'courses',
       });
     }
     setPanel('edit');
@@ -175,14 +226,24 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
   const handleClose = () => {
     form.reset();
     setSelectedCourses([]);
+    setSelectedPlans([]);
     onClose();
+  };
+
+  const togglePlan = (planId: string) => {
+    setSelectedPlans(prev =>
+      prev.includes(planId)
+        ? prev.filter(id => id !== planId)
+        : [...prev, planId]
+    );
   };
 
   const createCouponMutation = useMutation({
     mutationFn: async (data: CouponFormData) => {
       const response = await apiRequest('POST', '/api/admin/coupons', {
         couponData: data,
-        selectedCourses
+        selectedCourses,
+        selectedPlans
       });
       
       return response;
@@ -209,7 +270,8 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
     mutationFn: async (data: CouponFormData) => {
       const response = await apiRequest('PATCH', `/api/admin/coupons/${coupon!.id}`, {
         couponData: data,
-        selectedCourses
+        selectedCourses,
+        selectedPlans
       });
       
       return response;
@@ -217,6 +279,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['coupons'] });
       queryClient.invalidateQueries({ queryKey: ['coupon-courses', coupon?.id] });
+      queryClient.invalidateQueries({ queryKey: ['coupon-plans', coupon?.id] });
       toast({
         title: 'Cupón actualizado',
         description: 'Los cambios se guardaron correctamente.'
@@ -406,7 +469,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
                         <Calendar
                           mode="single"
                           selected={field.value ? new Date(field.value) : undefined}
-                          onSelect={(date) => field.onChange(date?.toISOString())}
+                          onSelect={(date: Date | undefined) => field.onChange(date?.toISOString())}
                           initialFocus
                           locale={es}
                         />
@@ -445,7 +508,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
                         <Calendar
                           mode="single"
                           selected={field.value ? new Date(field.value) : undefined}
-                          onSelect={(date) => field.onChange(date?.toISOString())}
+                          onSelect={(date: Date | undefined) => field.onChange(date?.toISOString())}
                           initialFocus
                           locale={es}
                         />
@@ -547,33 +610,91 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
 
         <Separator />
 
-        <div>
-          <h3 className="text-sm font-semibold mb-3">Cursos Aplicables</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Si no seleccionás ningún curso, el cupón será válido para todos los cursos
-          </p>
-          
-          <div className="space-y-2 max-h-64 overflow-y-auto border rounded-lg p-3">
-            {courses.map((course) => (
-              <div
-                key={course.id}
-                className="flex items-center space-x-2 p-2 hover:bg-accent/5 rounded cursor-pointer"
-                onClick={() => toggleCourse(course.id)}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedCourses.includes(course.id)}
-                  onChange={() => toggleCourse(course.id)}
-                  className="h-4 w-4"
-                />
-                <label className="text-sm cursor-pointer flex-1">
-                  {course.title}
-                  <span className="text-xs text-muted-foreground ml-2">({course.slug})</span>
-                </label>
-              </div>
-            ))}
+        <FormField
+          control={form.control}
+          name="applies_to"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Producto</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger data-testid="select-coupon-applies-to">
+                    <SelectValue placeholder="Selecciona tipo de producto" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="courses">Solo Cursos</SelectItem>
+                  <SelectItem value="subscriptions">Solo Suscripciones</SelectItem>
+                  <SelectItem value="all">Cursos y Suscripciones</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription className="text-xs">
+                Define si el cupón aplica a cursos, suscripciones o ambos
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {(form.watch('applies_to') === 'courses' || form.watch('applies_to') === 'all') && (
+          <div>
+            <h3 className="text-sm font-semibold mb-3">Cursos Aplicables</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Si no seleccionás ningún curso, el cupón será válido para todos los cursos
+            </p>
+            
+            <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
+              {courses.map((course) => (
+                <div
+                  key={course.id}
+                  className="flex items-center space-x-2 p-2 hover:bg-accent/5 rounded cursor-pointer"
+                  onClick={() => toggleCourse(course.id)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedCourses.includes(course.id)}
+                    onChange={() => toggleCourse(course.id)}
+                    className="h-4 w-4"
+                  />
+                  <label className="text-sm cursor-pointer flex-1">
+                    {course.title}
+                    <span className="text-xs text-muted-foreground ml-2">({course.slug})</span>
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {(form.watch('applies_to') === 'subscriptions' || form.watch('applies_to') === 'all') && (
+          <div>
+            <h3 className="text-sm font-semibold mb-3">Planes de Suscripción</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Si no seleccionás ningún plan, el cupón será válido para todos los planes
+            </p>
+            
+            <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
+              {plans.map((plan) => (
+                <div
+                  key={plan.id}
+                  className="flex items-center space-x-2 p-2 hover:bg-accent/5 rounded cursor-pointer"
+                  onClick={() => togglePlan(plan.id)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedPlans.includes(plan.id)}
+                    onChange={() => togglePlan(plan.id)}
+                    className="h-4 w-4"
+                  />
+                  <label className="text-sm cursor-pointer flex-1">
+                    {plan.name}
+                    <span className="text-xs text-muted-foreground ml-2">({plan.slug})</span>
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <FormField
           control={form.control}

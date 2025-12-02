@@ -12,7 +12,7 @@ import { supabase } from '@/lib/supabase'
 import AdminCourseCouponRow from '@/features/learning/components/admin/AdminCourseCouponRow'
 import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 
 interface Coupon {
   id: string;
@@ -122,40 +122,49 @@ export default function AdminPaymentCoupons() {
     })
   }, [coupons, searchValue, filterByStatus, filterByType])
 
-  // Configure mobile action bar
+  const handleCreateCouponCallback = useCallback(() => {
+    openModal('coupon', {});
+  }, [openModal]);
+
+  const handleClearFilters = useCallback(() => {
+    setSearchValue("")
+    setMobileSearchValue("")
+    setFilterByStatus("all")
+    setFilterByType("all")
+  }, [setMobileSearchValue]);
+
+  // Track if mobile action bar has been configured
+  const mobileConfiguredRef = useRef(false);
+
+  // Configure mobile action bar - only once when isMobile changes
   useEffect(() => {
-    if (isMobile) {
+    if (isMobile && !mobileConfiguredRef.current) {
+      mobileConfiguredRef.current = true;
       setActions({
         search: {
           id: 'search',
           icon: Search,
           label: 'Buscar',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
+          onClick: () => {},
         },
         create: {
           id: 'create',
           icon: Plus,
           label: 'Crear Cupón',
-          onClick: () => handleCreateCoupon(),
+          onClick: handleCreateCouponCallback,
           variant: 'primary'
         },
         filter: {
           id: 'filter',
           icon: Filter,
           label: 'Filtros',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
+          onClick: () => {},
         },
         notifications: {
           id: 'notifications',
           icon: Bell,
           label: 'Notificaciones',
-          onClick: () => {
-            // Popover is handled in MobileActionBar
-          },
+          onClick: () => {},
         },
       })
       setShowActionBar(true)
@@ -163,52 +172,62 @@ export default function AdminPaymentCoupons() {
 
     // Cleanup when component unmounts
     return () => {
-      if (isMobile) {
+      if (mobileConfiguredRef.current) {
+        mobileConfiguredRef.current = false;
         clearActions()
       }
     }
-  }, [isMobile, setActions, setShowActionBar, clearActions])
+  }, [isMobile, setActions, setShowActionBar, clearActions, handleCreateCouponCallback])
 
-  // Separate effect for filter configuration
+  // Memoize filter options to avoid re-creating on each render
+  const filterStatusOptions = useMemo(() => [
+    { value: 'active', label: 'Activo' },
+    { value: 'inactive', label: 'Inactivo' },
+    { value: 'expired', label: 'Vencido' },
+    { value: 'scheduled', label: 'Programado' },
+    { value: 'limit_reached', label: 'Límite alcanzado' }
+  ], []);
+
+  const filterTypeOptions = useMemo(() => [
+    { value: 'percent', label: 'Porcentaje' },
+    { value: 'fixed', label: 'Monto Fijo' }
+  ], []);
+
+  // Separate effect for filter configuration - use ref to track previous values
+  const prevFilterValuesRef = useRef({ status: filterByStatus, type: filterByType });
+  
   useEffect(() => {
-    if (isMobile) {
-      setFilterConfig({
-        filters: [
-          {
-            label: 'Filtrar por estado',
-            value: filterByStatus,
-            onChange: setFilterByStatus,
-            placeholder: 'Todos los estados',
-            allOptionLabel: 'Todos los estados',
-            options: [
-              { value: 'active', label: 'Activo' },
-              { value: 'inactive', label: 'Inactivo' },
-              { value: 'expired', label: 'Vencido' },
-              { value: 'scheduled', label: 'Programado' },
-              { value: 'limit_reached', label: 'Límite alcanzado' }
-            ]
-          },
-          {
-            label: 'Filtrar por tipo',
-            value: filterByType,
-            onChange: setFilterByType,
-            placeholder: 'Todos los tipos',
-            allOptionLabel: 'Todos los tipos',
-            options: [
-              { value: 'percent', label: 'Porcentaje' },
-              { value: 'fixed', label: 'Monto Fijo' }
-            ]
-          }
-        ],
-        onClearFilters: () => {
-          setSearchValue("")
-          setMobileSearchValue("")
-          setFilterByStatus("all")
-          setFilterByType("all")
-        }
-      })
+    if (!isMobile) return;
+    
+    // Only update if filter values actually changed
+    const prevValues = prevFilterValuesRef.current;
+    if (prevValues.status === filterByStatus && prevValues.type === filterByType) {
+      return;
     }
-  }, [filterByStatus, filterByType, isMobile])
+    prevFilterValuesRef.current = { status: filterByStatus, type: filterByType };
+    
+    setFilterConfig({
+      filters: [
+        {
+          label: 'Filtrar por estado',
+          value: filterByStatus,
+          onChange: setFilterByStatus,
+          placeholder: 'Todos los estados',
+          allOptionLabel: 'Todos los estados',
+          options: filterStatusOptions
+        },
+        {
+          label: 'Filtrar por tipo',
+          value: filterByType,
+          onChange: setFilterByType,
+          placeholder: 'Todos los tipos',
+          allOptionLabel: 'Todos los tipos',
+          options: filterTypeOptions
+        }
+      ],
+      onClearFilters: handleClearFilters
+    })
+  }, [filterByStatus, filterByType, isMobile, setFilterConfig, filterStatusOptions, filterTypeOptions, handleClearFilters])
 
   const handleCreateCoupon = () => {
     openModal('coupon', {});

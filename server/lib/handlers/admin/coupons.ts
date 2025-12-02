@@ -38,14 +38,25 @@ export async function listCoupons(
 }
 
 /**
- * Create new coupon with course associations
+ * Create new coupon with course and plan associations
  */
 export async function createCoupon(
   ctx: AdminContext,
   data: any
 ): Promise<AdminHandlerResult> {
   try {
-    const { couponData, selectedCourses } = data;
+    const { couponData, selectedCourses, selectedPlans } = data;
+    
+    // Determine applies_to_all based on selected items
+    const hasSelectedCourses = selectedCourses && selectedCourses.length > 0;
+    const hasSelectedPlans = selectedPlans && selectedPlans.length > 0;
+    const appliesTo = couponData.applies_to || 'courses';
+    
+    // applies_to_all should be true only if no specific items are selected
+    let appliesToAll = true;
+    if (appliesTo === 'courses' && hasSelectedCourses) appliesToAll = false;
+    if (appliesTo === 'subscriptions' && hasSelectedPlans) appliesToAll = false;
+    if (appliesTo === 'all' && (hasSelectedCourses || hasSelectedPlans)) appliesToAll = false;
     
     // Create coupon using service role (bypasses RLS)
     const { data: newCoupon, error: couponError } = await ctx.supabase
@@ -61,7 +72,8 @@ export async function createCoupon(
         per_user_limit: couponData.per_user_limit || 1,
         min_order_total: couponData.min_order_total || null,
         currency: couponData.currency || null,
-        applies_to_all: selectedCourses?.length === 0,
+        applies_to_all: appliesToAll,
+        applies_to: appliesTo,
       })
       .select()
       .single();
@@ -71,19 +83,35 @@ export async function createCoupon(
       return error("Failed to create coupon");
     }
     
-    // Create course associations if any
-    if (selectedCourses && selectedCourses.length > 0) {
-      const associations = selectedCourses.map((courseId: string) => ({
+    // Create course associations if any (for 'courses' or 'all')
+    if ((appliesTo === 'courses' || appliesTo === 'all') && hasSelectedCourses) {
+      const courseAssociations = selectedCourses.map((courseId: string) => ({
         coupon_id: newCoupon.id,
         course_id: courseId
       }));
       
       const { error: assocError } = await ctx.supabase
         .from('coupon_courses')
-        .insert(associations);
+        .insert(courseAssociations);
       
       if (assocError) {
-        console.error('Error creating coupon associations:', assocError);
+        console.error('Error creating coupon course associations:', assocError);
+      }
+    }
+    
+    // Create plan associations if any (for 'subscriptions' or 'all')
+    if ((appliesTo === 'subscriptions' || appliesTo === 'all') && hasSelectedPlans) {
+      const planAssociations = selectedPlans.map((planId: string) => ({
+        coupon_id: newCoupon.id,
+        plan_id: planId
+      }));
+      
+      const { error: planAssocError } = await ctx.supabase
+        .from('coupon_plans')
+        .insert(planAssociations);
+      
+      if (planAssocError) {
+        console.error('Error creating coupon plan associations:', planAssocError);
       }
     }
     
@@ -95,7 +123,7 @@ export async function createCoupon(
 }
 
 /**
- * Update coupon and its course associations
+ * Update coupon and its course/plan associations
  */
 export async function updateCoupon(
   ctx: AdminContext,
@@ -103,7 +131,18 @@ export async function updateCoupon(
   data: any
 ): Promise<AdminHandlerResult> {
   try {
-    const { couponData, selectedCourses } = data;
+    const { couponData, selectedCourses, selectedPlans } = data;
+    
+    // Determine applies_to_all based on selected items
+    const hasSelectedCourses = selectedCourses && selectedCourses.length > 0;
+    const hasSelectedPlans = selectedPlans && selectedPlans.length > 0;
+    const appliesTo = couponData.applies_to || 'courses';
+    
+    // applies_to_all should be true only if no specific items are selected
+    let appliesToAll = true;
+    if (appliesTo === 'courses' && hasSelectedCourses) appliesToAll = false;
+    if (appliesTo === 'subscriptions' && hasSelectedPlans) appliesToAll = false;
+    if (appliesTo === 'all' && (hasSelectedCourses || hasSelectedPlans)) appliesToAll = false;
     
     // Update coupon using service role (bypasses RLS)
     const { data: updatedCoupon, error: updateError } = await ctx.supabase
@@ -119,7 +158,8 @@ export async function updateCoupon(
         per_user_limit: couponData.per_user_limit || 1,
         min_order_total: couponData.min_order_total || null,
         currency: couponData.currency || null,
-        applies_to_all: selectedCourses?.length === 0,
+        applies_to_all: appliesToAll,
+        applies_to: appliesTo,
       })
       .eq('id', params.id)
       .select()
@@ -131,25 +171,48 @@ export async function updateCoupon(
     }
     
     // Update course associations
-    // First, delete all existing associations
+    // First, delete all existing course associations
     await ctx.supabase
       .from('coupon_courses')
       .delete()
       .eq('coupon_id', params.id);
     
-    // Then create new associations if any
-    if (selectedCourses && selectedCourses.length > 0) {
-      const associations = selectedCourses.map((courseId: string) => ({
+    // Create new course associations if any (for 'courses' or 'all')
+    if ((appliesTo === 'courses' || appliesTo === 'all') && hasSelectedCourses) {
+      const courseAssociations = selectedCourses.map((courseId: string) => ({
         coupon_id: params.id,
         course_id: courseId
       }));
       
       const { error: assocError } = await ctx.supabase
         .from('coupon_courses')
-        .insert(associations);
+        .insert(courseAssociations);
       
       if (assocError) {
-        console.error('Error updating coupon associations:', assocError);
+        console.error('Error updating coupon course associations:', assocError);
+      }
+    }
+    
+    // Update plan associations
+    // First, delete all existing plan associations
+    await ctx.supabase
+      .from('coupon_plans')
+      .delete()
+      .eq('coupon_id', params.id);
+    
+    // Create new plan associations if any (for 'subscriptions' or 'all')
+    if ((appliesTo === 'subscriptions' || appliesTo === 'all') && hasSelectedPlans) {
+      const planAssociations = selectedPlans.map((planId: string) => ({
+        coupon_id: params.id,
+        plan_id: planId
+      }));
+      
+      const { error: planAssocError } = await ctx.supabase
+        .from('coupon_plans')
+        .insert(planAssociations);
+      
+      if (planAssocError) {
+        console.error('Error updating coupon plan associations:', planAssocError);
       }
     }
     
@@ -161,7 +224,7 @@ export async function updateCoupon(
 }
 
 /**
- * Delete coupon and its course associations
+ * Delete coupon and its course/plan associations
  */
 export async function deleteCoupon(
   ctx: AdminContext,
@@ -171,6 +234,12 @@ export async function deleteCoupon(
     // Delete coupon associations first (cascade)
     await ctx.supabase
       .from('coupon_courses')
+      .delete()
+      .eq('coupon_id', params.id);
+    
+    // Delete plan associations (cascade)
+    await ctx.supabase
+      .from('coupon_plans')
       .delete()
       .eq('coupon_id', params.id);
     
