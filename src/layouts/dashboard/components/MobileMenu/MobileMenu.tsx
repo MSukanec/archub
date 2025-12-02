@@ -203,81 +203,23 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       return null;
                     }
 
-                    if (contextButton.id === 'general') {
-                      const isActive = contextButton.href ? isButtonActive(contextButton.href) : false;
-                      return (
-                        <MobileMenuButton
-                          key={contextButton.id}
-                          icon={contextButton.icon}
-                          label={contextButton.label}
-                          onClick={() => {
-                            if (contextButton.href) {
-                              navigate(contextButton.href);
-                              handleCloseMenu();
-                            }
-                          }}
-                          isActive={isActive}
-                          showChevron={false}
-                          testId={contextButton.testId.replace('sidebar', 'mobile')}
-                        />
-                      );
-                    }
+                    const hasProjects = projectsData && projectsData.length > 0;
 
                     if (contextButton.id === 'project') {
-                      const hasProjects = projectsData && projectsData.length > 0;
+                      if (!hasProjects || !selectedProjectId) {
+                        return null;
+                      }
                       const isActive = contextButton.href ? isButtonActive(contextButton.href) : 
                         location.startsWith('/project') || location.startsWith('/budgets') || 
                         location.startsWith('/construction') || location.startsWith('/clients');
                       
-                      const button = (
-                        <MobileMenuButton
-                          key={contextButton.id}
-                          icon={contextButton.icon}
-                          label={contextButton.label}
-                          onClick={() => {
-                            if (!hasProjects) {
-                              toast({
-                                title: "No hay proyectos creados",
-                                description: "Crea un proyecto primero desde Organización",
-                                variant: "destructive"
-                              });
-                              return;
-                            }
-                            if (!selectedProjectId) {
-                              toast({
-                                title: "No hay proyecto seleccionado",
-                                description: "Selecciona un proyecto primero",
-                                variant: "destructive"
-                              });
-                              return;
-                            }
-                            setSidebarLevel('project');
-                            if (contextButton.href) {
-                              navigate(contextButton.href);
-                              handleCloseMenu();
-                            }
-                          }}
-                          isActive={isActive}
-                          showChevron={true}
-                          disabled={!hasProjects}
-                          testId={contextButton.testId.replace('sidebar', 'mobile')}
-                        />
-                      );
-
-                      return button;
-                    }
-
-                    if (contextButton.id === 'organization') {
-                      const isActive = contextButton.href ? isButtonActive(contextButton.href) :
-                        location.startsWith('/organization');
-
                       return (
                         <MobileMenuButton
                           key={contextButton.id}
                           icon={contextButton.icon}
                           label={contextButton.label}
                           onClick={() => {
-                            setSidebarLevel('organization');
+                            setSidebarLevel('project');
                             if (contextButton.href) {
                               navigate(contextButton.href);
                               handleCloseMenu();
@@ -373,9 +315,20 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       );
                     }
                     
+                    if ('type' in entry && entry.type === 'section-header') {
+                      return (
+                        <div key={`header-${entry.id}`} className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-[var(--main-sidebar-fg)] opacity-60">
+                          {entry.label}
+                        </div>
+                      );
+                    }
+                    
+                    if ('type' in entry && entry.type === 'spacer') {
+                      return <div key={`spacer-${entry.id}`} className="h-2" />;
+                    }
+                    
                     const item = entry as NavigationItem;
                     const isActive = isButtonActive(item.href);
-                    const dividerInfo = getDividerInfo(sidebarLevel as SidebarLevel, item, index);
                     const isExternal = item.href.startsWith('http');
                     
                     const button = (
@@ -399,12 +352,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     
                     return (
                       <div key={item.id}>
-                        {dividerInfo.show && (
-                          <div className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-[var(--main-sidebar-fg)] opacity-60">
-                            {dividerInfo.text}
-                          </div>
-                        )}
-                        
                         {item.restricted === "coming_soon" ? (
                           <ComingSoonRestricted>
                             {button}

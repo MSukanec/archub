@@ -362,7 +362,7 @@ export function LeftSidebar() {
       case 'community': return 'Comunidad';
       case 'learning': return 'Capacitaciones';
       case 'admin': return 'Administración';
-      case 'settings': return 'Ajustes';
+      case 'founders': return 'Fundadores';
       default: return '';
     }
   };
@@ -511,7 +511,7 @@ export function LeftSidebar() {
                         onClick: () => {
                           if (!isAdmin) return;
                           setSidebarLevel('founders');
-                          navigate('/founders/dashboard');
+                          navigate('/founders');
                         },
                         shouldRender: () => true,
                         wrapper: (children: React.ReactNode) => (

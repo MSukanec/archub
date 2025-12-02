@@ -26,7 +26,9 @@ import {
   Bell,
   Globe,
   HandHeart,
-  Star
+  Award,
+  Mail,
+  FlaskConical
 } from "lucide-react";
 import { LuContact } from "react-icons/lu";
 import { LuHandshake } from "react-icons/lu";
@@ -61,13 +63,14 @@ export interface NavigationSectionHeader {
 export type NavigationEntry = NavigationItem | NavigationSection | NavigationSpacer | NavigationSectionHeader;
 
 export interface ContextButton {
-  id: 'general' | 'community' | 'organization' | 'project' | 'learning' | 'admin' | 'founders';
+  id: 'organization' | 'project' | 'founders' | 'community' | 'learning' | 'admin';
   label: string;
   icon: React.ComponentType<any>;
   testId: string;
   href?: string;
   restricted?: "coming_soon" | string;
   adminOnly?: boolean;
+  requiresProject?: boolean;
 }
 
 export const CONTEXT_BUTTONS: ContextButton[] = [
@@ -84,11 +87,12 @@ export const CONTEXT_BUTTONS: ContextButton[] = [
     icon: FolderOpen,
     testId: 'button-sidebar-project',
     href: '/project/dashboard',
+    requiresProject: true,
   },
   {
     id: 'founders',
     label: 'Fundadores',
-    icon: Star,
+    icon: Award,
     testId: 'button-sidebar-founders',
     href: '/founders',
     adminOnly: true,
@@ -135,17 +139,19 @@ export const ORGANIZATION_NAVIGATION: NavigationEntry[] = [
   { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'lab_user', testId: 'nav-org-capital' },
 ];
 
-export const PROJECT_NAVIGATION: NavigationItem[] = [
+export const PROJECT_NAVIGATION: NavigationEntry[] = [
+  { type: 'section-header', id: 'section-gestion', label: 'Gestión' },
   { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard', testId: 'nav-project-dashboard' },
   { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project', testId: 'nav-project-basic-data' },
-  { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets', testId: 'nav-project-budgets' },
+  { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media', testId: 'nav-project-media' },
+  { type: 'section-header', id: 'section-construccion', label: 'Construcción' },
   { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel', restricted: 'coming_soon', testId: 'nav-project-personnel' },
   { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', testId: 'nav-project-materials' },
-  { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon', testId: 'nav-project-indirects' },
   { id: 'subcontracts', label: 'Subcontratos', icon: FileText, href: '/construction/subcontracts', restricted: 'coming_soon', testId: 'nav-project-subcontracts' },
-  { id: 'logs', label: 'Bitácora de Obra', icon: FileText, href: '/construction/logs', restricted: 'coming_soon', testId: 'nav-project-logs' },
-  { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media', restricted: 'coming_soon', testId: 'nav-project-media' },
-  { id: 'clients', label: 'Clientes', icon: LuHandshake, href: '/clients', restricted: 'coming_soon', testId: 'nav-project-clients' },
+  { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon', testId: 'nav-project-indirects' },
+  { id: 'logs', label: 'Bitácora de Obra', icon: BookOpen, href: '/construction/logs', testId: 'nav-project-logs' },
+  { type: 'section-header', id: 'section-comercializacion', label: 'Comercialización y Venta' },
+  { id: 'clients', label: 'Clientes', icon: Users, href: '/clients', testId: 'nav-project-clients' },
 ];
 
 export const ADMIN_NAVIGATION: NavigationItem[] = [
@@ -155,11 +161,14 @@ export const ADMIN_NAVIGATION: NavigationItem[] = [
   { id: 'subscriptions', label: 'Suscripciones', icon: CreditCard, href: '/admin/subscriptions', testId: 'nav-admin-subscriptions' },
   { id: 'payments', label: 'Pagos', icon: Wallet, href: '/admin/payments', testId: 'nav-admin-payments' },
   { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses', testId: 'nav-admin-courses' },
+  { id: 'email-templates', label: 'Plantillas de Email', icon: Mail, href: '/admin/email-templates', testId: 'nav-admin-email-templates' },
   { id: 'layout', label: 'Layout', icon: Layers, href: '/admin/layout', testId: 'nav-admin-layout' },
   { id: 'general', label: 'General', icon: Settings, href: '/admin/general', testId: 'nav-admin-general' },
   { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks', testId: 'nav-admin-tasks' },
   { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs', testId: 'nav-admin-costs' },
   { id: 'products', label: 'Productos', icon: Package, href: '/providers/products', testId: 'nav-admin-products' },
+  { id: 'lab-clients', label: 'Lab - Clientes', icon: FlaskConical, href: '/lab/financial-lattice', testId: 'nav-admin-lab-clients' },
+  { id: 'lab-contacts', label: 'Lab - Contactos', icon: FlaskConical, href: '/lab/contacts', testId: 'nav-admin-lab-contacts' },
 ];
 
 export const COMMUNITY_NAVIGATION: NavigationItem[] = [

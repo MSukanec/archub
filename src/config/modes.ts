@@ -3,7 +3,7 @@
 
 export type UserMode = 'professional' | 'learner' | 'provider' | 'worker';
 
-export type SidebarContext = 'general' | 'organization' | 'project' | 'learning' | 'community' | 'admin' | 'user';
+export type SidebarContext = 'general' | 'organization' | 'project' | 'learning' | 'community' | 'admin' | 'user' | 'founders';
 
 export interface ModeConfig {
   leftSidebar: {
