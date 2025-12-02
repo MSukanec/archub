@@ -35,7 +35,13 @@ export async function insertPayment(
   }
 
   if (data.productType === 'subscription') {
-    paymentData.user_id = data.userId; // ✅ CRITICAL: user_id is required even for subscriptions
+    paymentData.user_id = data.userId;
+    paymentData.organization_id = data.organizationId;
+    paymentData.product_id = data.productId;
+  }
+
+  if (data.productType === 'subscription_upgrade') {
+    paymentData.user_id = data.userId;
     paymentData.organization_id = data.organizationId;
     paymentData.product_id = data.productId;
   }
