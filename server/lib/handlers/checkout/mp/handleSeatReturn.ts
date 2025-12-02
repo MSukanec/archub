@@ -3,6 +3,7 @@ import { supabaseAdmin } from "../../../supabase/admin.js";
 import { decodeExternalReference, extractMetadata } from "./encoding.js";
 import { getMPPayment } from "./api.js";
 import { sendInvitationEmail } from "../../../email/sendInvitationEmail.js";
+import { updateSubscriptionForNewSeat } from "./updateSeatSubscription.js";
 
 export async function handleSeatReturn(req: Request, res: Response) {
   const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
@@ -32,6 +33,8 @@ export async function handleSeatReturn(req: Request, res: Response) {
     const inviteeEmail = (payment.metadata?.invitee_email || decoded.invitee_email) as string | null;
     const roleId = (payment.metadata?.role_id || decoded.role_id) as string | null;
     const productType = decoded.product_type || metadata.product_type || null;
+    const subscriptionId = (payment.metadata?.subscription_id || decoded.subscription_id) as string | null;
+    const billingPeriod = (payment.metadata?.billing_period || decoded.billing_period || 'monthly') as 'monthly' | 'annual';
 
     console.log('[MP seat-return] Decoded data:', { 
       authId, 
@@ -184,6 +187,25 @@ export async function handleSeatReturn(req: Request, res: Response) {
         });
       }
 
+      if (subscriptionId) {
+        console.log('[MP seat-return] Updating subscription for reinvited seat:', { subscriptionId, billingPeriod });
+        const updateResult = await updateSubscriptionForNewSeat({
+          supabase: supabaseAdmin,
+          subscriptionId,
+          organizationId,
+          billingPeriod,
+        });
+        
+        if (!updateResult.success) {
+          console.error('[MP seat-return] Failed to update subscription for reinvite (non-fatal):', updateResult.error);
+        } else {
+          console.log('[MP seat-return] Subscription updated for reinvite:', {
+            oldAmount: updateResult.oldAmount,
+            newAmount: updateResult.newAmount,
+          });
+        }
+      }
+
       return res.redirect(`${baseUrl}/organization/members?payment=success&invited=${encodeURIComponent(inviteeEmail)}`);
     }
 
@@ -229,6 +251,26 @@ export async function handleSeatReturn(req: Request, res: Response) {
         roleName: role.name,
         invitationId: invitation.id,
       });
+    }
+
+    if (subscriptionId) {
+      console.log('[MP seat-return] Updating subscription for new seat:', { subscriptionId, billingPeriod });
+      const updateResult = await updateSubscriptionForNewSeat({
+        supabase: supabaseAdmin,
+        subscriptionId,
+        organizationId,
+        billingPeriod,
+      });
+      
+      if (!updateResult.success) {
+        console.error('[MP seat-return] Failed to update subscription (non-fatal):', updateResult.error);
+      } else {
+        console.log('[MP seat-return] Subscription updated successfully:', {
+          oldAmount: updateResult.oldAmount,
+          newAmount: updateResult.newAmount,
+          seats: updateResult.seats,
+        });
+      }
     }
 
     return res.redirect(`${baseUrl}/organization/members?payment=success&invited=${encodeURIComponent(inviteeEmail)}`);
