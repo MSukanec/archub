@@ -90,7 +90,7 @@ export const CONTEXT_BUTTONS: ContextButton[] = [
     label: 'Fundadores',
     icon: Star,
     testId: 'button-sidebar-founders',
-    href: '/founders/dashboard',
+    href: '/founders',
     adminOnly: true,
   },
   {
