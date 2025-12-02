@@ -131,6 +131,12 @@ export async function calculateSeatProration(
     .limit(1)
     .maybeSingle();
 
+  console.log('[seat-proration] Subscription query:', { 
+    organizationId, 
+    subscription: subscription ? 'found' : 'not found',
+    subError: subError?.message || null 
+  });
+
   if (subError || !subscription) {
     return { 
       ...baseResult, 
