@@ -417,6 +417,65 @@ export default function SubscriptionCheckout() {
 
       const hasProration = prorationData?.hasActiveSubscription && (prorationData?.savings?.ars ?? 0) > 0;
 
+      const API_BASE = getApiBase();
+
+      if (hasProration) {
+        const upgradeBody = {
+          plan_slug: planSlug,
+          organization_id: organizationId,
+          billing_period: billingPeriod,
+          payer_email: mercadopagoEmail || email,
+        };
+
+        console.log("[MP] Creando preferencia de upgrade híbrido (pago único + recurrente)…", upgradeBody);
+
+        const mpUrl = `${API_BASE}/api/checkout/mp/create-upgrade-preference`;
+
+        const res = await fetchWithTimeout(
+          mpUrl,
+          {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify(upgradeBody),
+          },
+          15000
+        );
+
+        const text = await res.text();
+        let payload: any;
+        try {
+          payload = JSON.parse(text);
+        } catch {
+          payload = { error: text };
+        }
+
+        console.log("[MP] Respuesta create-upgrade-preference:", {
+          status: res.status,
+          ok: res.ok,
+          data: payload,
+        });
+
+        if (!res.ok) {
+          console.error("[MP] Error al crear preferencia de upgrade:", payload);
+          throw new Error(
+            payload?.error
+              ? `No se pudo crear la preferencia: ${String(payload.error)}`
+              : `create-upgrade-preference falló: status=${res.status}`
+          );
+        }
+
+        if (!payload?.init_point) {
+          throw new Error("La preferencia no tiene init_point");
+        }
+
+        console.log("[MP] Redirigiendo a pago único de upgrade:", payload.init_point);
+        window.location.assign(payload.init_point);
+        return;
+      }
+
       const requestBody = {
         user_id: userRecord.id,
         product_type: 'subscription',
@@ -424,15 +483,12 @@ export default function SubscriptionCheckout() {
         organization_id: organizationId,
         billing_period: billingPeriod,
         currency: "ARS",
-        is_upgrade: hasProration,
-        proration_amount_ars: hasProration ? prorationData?.finalPrice?.ars : undefined,
-        proration_credit_ars: hasProration ? prorationData?.savings?.ars : undefined,
+        is_upgrade: false,
         payer_email: mercadopagoEmail || email,
       };
 
-      console.log("[MP] Creando suscripción recurrente…", requestBody);
+      console.log("[MP] Creando suscripción recurrente (nueva)…", requestBody);
 
-      const API_BASE = getApiBase();
       const mpUrl = `${API_BASE}/api/checkout/mp/create-recurring`;
 
       const res = await fetchWithTimeout(
@@ -755,9 +811,19 @@ export default function SubscriptionCheckout() {
     
     if (selectedMethod === 'mercadopago') {
       const arsAmount = basePrice * exchangeRate;
-      // MercadoPago Preapproval does NOT support different first payment
-      // All payments (including first) use the same amount
-      // So we must show and charge the full price
+      
+      const hasProration = prorationData?.hasActiveSubscription && (prorationData?.savings?.ars ?? 0) > 0;
+      if (hasProration && prorationData?.finalPrice?.ars !== undefined) {
+        return {
+          amount: prorationData.finalPrice.ars.toFixed(2),
+          currency: 'ARS',
+          numericAmount: prorationData.finalPrice.ars,
+          originalAmount: arsAmount,
+          hasDiscount: true,
+          discountAmount: prorationData.savings.ars
+        };
+      }
+      
       return {
         amount: arsAmount.toFixed(2),
         currency: 'ARS',
@@ -768,8 +834,6 @@ export default function SubscriptionCheckout() {
       };
     }
     
-    // For PayPal - also uses full price for recurring subscriptions
-    // PayPal billing plans only have REGULAR cycles, first payment same as recurring
     return {
       amount: basePrice.toFixed(2),
       currency: 'USD',
@@ -1201,6 +1265,26 @@ export default function SubscriptionCheckout() {
                             <ExternalLink className="h-3 w-3" />
                           </button>
                         </div>
+                      </div>
+                    )}
+
+                    {prorationData?.credit && prorationData.credit.daysRemaining > 0 && selectedMethod === 'mercadopago' && (
+                      <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                            <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                              Crédito por tu plan actual
+                            </p>
+                          </div>
+                          <span className="text-sm font-bold text-green-700 dark:text-green-400">
+                            ARS ${prorationData.savings.ars?.toLocaleString("es-AR")}
+                          </span>
+                        </div>
+                        <p className="text-xs text-green-600 dark:text-green-500">
+                          Te quedan {prorationData.credit.daysRemaining} días de {prorationData.currentPlan?.name}. 
+                          Este crédito se descuenta del precio del nuevo plan.
+                        </p>
                       </div>
                     )}
 
