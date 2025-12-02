@@ -182,6 +182,12 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   // GET /api/checkout/mp/subscription-success (NO auth required - redirect endpoint for subscriptions)
   app.get("/api/checkout/mp/subscription-success", mpController.subscriptionSuccessHandler);
   
+  // POST /api/checkout/mp/create-upgrade-preference (Authenticated - create hybrid upgrade preference)
+  app.post("/api/checkout/mp/create-upgrade-preference", mpController.createUpgrade);
+  
+  // GET /api/checkout/mp/upgrade-success (NO auth required - redirect endpoint for upgrades)
+  app.get("/api/checkout/mp/upgrade-success", mpController.upgradeSuccessHandler);
+  
   // POST /api/checkout/mp/webhook (NO auth required - webhook endpoint)
   app.post("/api/checkout/mp/webhook", mpController.webhook);
   app.options("/api/checkout/mp/webhook", mpController.webhook);

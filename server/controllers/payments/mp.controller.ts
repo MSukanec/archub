@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { createCoursePreference } from "../../lib/handlers/checkout/mp/createCoursePreference.js";
 import { createSubscriptionPreference } from "../../lib/handlers/checkout/mp/createSubscriptionPreference.js";
 import { createRecurringSubscription } from "../../lib/handlers/checkout/mp/createRecurringSubscription.js";
+import { createUpgradePreference } from "../../lib/handlers/checkout/mp/createUpgradePreference.js";
 import { updateMPSubscription } from "../../lib/handlers/checkout/mp/updateSubscription.js";
 import { syncMPPlans } from "../../lib/handlers/checkout/mp/sync-plans.js";
 import { processWebhook } from "../../lib/handlers/checkout/mp/processWebhook.js";
@@ -199,5 +200,52 @@ export async function updateSubscription(req: Request, res: Response) {
       ok: false,
       error: error.message || "Failed to update subscription"
     });
+  }
+}
+
+export async function createUpgrade(req: Request, res: Response) {
+  try {
+    const result = await createUpgradePreference(req as any);
+    
+    if (!result.success) {
+      return res.status(result.status || 400).json({
+        ok: false,
+        error: result.error
+      });
+    }
+    
+    return res.json({
+      ok: true,
+      init_point: result.initPoint,
+      preference_id: result.preferenceId,
+      is_free_upgrade: result.isFreeUpgrade || false
+    });
+  } catch (error: any) {
+    console.error("[MP create-upgrade controller] Error:", error);
+    return res.status(500).json({
+      ok: false,
+      error: error.message || "Failed to create upgrade preference"
+    });
+  }
+}
+
+export async function upgradeSuccessHandler(req: Request, res: Response) {
+  const { handleUpgradeReturn } = await import("../../lib/handlers/checkout/mp/handleUpgradeReturn.js");
+  
+  try {
+    const result = await handleUpgradeReturn(req);
+    
+    if (result.success) {
+      if (result.redirectUrl && result.redirectUrl.startsWith('http')) {
+        return res.redirect(result.redirectUrl);
+      }
+      return res.redirect(`/organization/billing?payment=success&upgrade=true&activated=${result.activated}`);
+    } else {
+      console.error("[MP upgrade-success-handler] Error:", result.error);
+      return res.redirect(`/organization/billing?payment=failed&reason=${encodeURIComponent(result.error || 'unknown')}`);
+    }
+  } catch (e: any) {
+    console.error("[MP upgrade-success-handler] Fatal error:", e);
+    return res.redirect(`/organization/billing?payment=error`);
   }
 }

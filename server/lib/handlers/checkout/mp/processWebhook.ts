@@ -84,8 +84,29 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       const externalRef = md.external_reference || "";
       
       // NUEVO: Buscar datos en mp_course_preferences si es un ID corto (empieza con "mp_")
+      // UPGRADE: Buscar datos en mp_subscription_preferences si es un ID corto (empieza con "mpu_")
       let fromDb: any = null;
-      if (externalRef.startsWith("mp_")) {
+      if (externalRef.startsWith("mpu_")) {
+        console.log("[MP webhook] Looking up upgrade preference:", externalRef);
+        const { data: prefData, error: prefError } = await supabase
+          .from("mp_subscription_preferences")
+          .select("*")
+          .eq("id", externalRef)
+          .maybeSingle();
+        
+        if (prefData && !prefError) {
+          fromDb = {
+            user_id: prefData.user_id,
+            organization_id: prefData.organization_id,
+            plan_slug: prefData.plan_slug,
+            billing_period: prefData.billing_period,
+            product_type: prefData.product_type || 'subscription_upgrade',
+          };
+          console.log("[MP webhook] Found upgrade preference data:", fromDb);
+        } else {
+          console.warn("[MP webhook] ⚠️ No upgrade preference data found:", prefError);
+        }
+      } else if (externalRef.startsWith("mp_")) {
         const { data: prefData, error: prefError } = await supabase
           .from("mp_course_preferences")
           .select("*, courses!inner(slug)")
@@ -162,6 +183,40 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
 
       // 2. Si está aprobado, procesar según product_type
       if (status === "approved") {
+        // UPGRADE: Handle subscription_upgrade - just record payment, actual upgrade happens in handleUpgradeReturn
+        if (productType === 'subscription_upgrade') {
+          console.log("[MP webhook] Processing subscription upgrade payment:", {
+            externalRef,
+            organizationId,
+            planSlug,
+            amount,
+          });
+          
+          let resolvedPlanId: string | null = null;
+          if (planSlug) {
+            resolvedPlanId = await getPlanIdBySlug(supabase, planSlug);
+          }
+          
+          const upgradePaymentResult = await insertPayment(supabase, "mercadopago", {
+            providerPaymentId: providerPaymentId,
+            userId: publicUserId,
+            amount: amount || null,
+            currency: currency,
+            status: "completed",
+            productType: 'subscription_upgrade',
+            organizationId: organizationId || undefined,
+            productId: resolvedPlanId || undefined,
+          });
+          
+          if (upgradePaymentResult.inserted) {
+            console.log("[MP webhook] ✅ Upgrade payment recorded:", upgradePaymentResult.paymentId);
+          } else {
+            console.log("[MP webhook] Upgrade payment already existed (duplicate webhook)");
+          }
+          
+          return { success: true, processed: "subscription_upgrade_payment", id: finalId };
+        }
+        
         if (productType === 'subscription') {
           if (organizationId && billingPeriod) {
             let resolvedPlanId = planIdFromMetadata;
@@ -272,8 +327,29 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       const externalRefMo = md.external_reference || "";
       
       // NUEVO: Buscar datos en mp_course_preferences si es un ID corto (empieza con "mp_")
+      // UPGRADE: Buscar datos en mp_subscription_preferences si es un ID corto (empieza con "mpu_")
       let fromDbMo: any = null;
-      if (externalRefMo.startsWith("mp_")) {
+      if (externalRefMo.startsWith("mpu_")) {
+        console.log("[MP webhook MO] Looking up upgrade preference:", externalRefMo);
+        const { data: prefDataMo, error: prefErrorMo } = await supabase
+          .from("mp_subscription_preferences")
+          .select("*")
+          .eq("id", externalRefMo)
+          .maybeSingle();
+        
+        if (prefDataMo && !prefErrorMo) {
+          fromDbMo = {
+            user_id: prefDataMo.user_id,
+            organization_id: prefDataMo.organization_id,
+            plan_slug: prefDataMo.plan_slug,
+            billing_period: prefDataMo.billing_period,
+            product_type: prefDataMo.product_type || 'subscription_upgrade',
+          };
+          console.log("[MP webhook MO] Found upgrade preference data:", fromDbMo);
+        } else {
+          console.warn("[MP webhook MO] ⚠️ No upgrade preference data found:", prefErrorMo);
+        }
+      } else if (externalRefMo.startsWith("mp_")) {
         const { data: prefDataMo, error: prefErrorMo } = await supabase
           .from("mp_course_preferences")
           .select("*, courses!inner(slug)")
@@ -359,6 +435,40 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
         const providerPaymentId = approvedPayment ? String(approvedPayment.id) : null;
 
         if (providerPaymentId) {
+          // UPGRADE: Handle subscription_upgrade (MO) - just record payment, actual upgrade happens in handleUpgradeReturn
+          if (productType === 'subscription_upgrade') {
+            console.log("[MP webhook MO] Processing subscription upgrade payment:", {
+              externalRef: externalRefMo,
+              organizationId,
+              planSlug,
+              amount,
+            });
+            
+            let resolvedPlanId: string | null = null;
+            if (planSlug) {
+              resolvedPlanId = await getPlanIdBySlug(supabase, planSlug);
+            }
+            
+            const upgradePaymentResult = await insertPayment(supabase, "mercadopago", {
+              providerPaymentId: providerPaymentId,
+              userId: moPublicUserId,
+              amount: amount || null,
+              currency: "ARS",
+              status: "completed",
+              productType: 'subscription_upgrade',
+              organizationId: organizationId || undefined,
+              productId: resolvedPlanId || undefined,
+            });
+            
+            if (upgradePaymentResult.inserted) {
+              console.log("[MP webhook MO] ✅ Upgrade payment recorded:", upgradePaymentResult.paymentId);
+            } else {
+              console.log("[MP webhook MO] Upgrade payment already existed (duplicate webhook)");
+            }
+            
+            return { success: true, processed: "subscription_upgrade_mo", id: finalId };
+          }
+          
           if (productType === 'subscription') {
             if (organizationId && billingPeriod) {
               let resolvedPlanId = planIdFromMetadata;
