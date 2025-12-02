@@ -231,12 +231,15 @@ export async function inviteMember(
     }
 
     // Obtener el member_id del invitador para guardarlo, junto con su nombre
-    const { data: inviterMember } = await supabaseAdmin
+    const { data: inviterMember, error: inviterError } = await supabaseAdmin
       .from("organization_members")
       .select("id, users!left(first_name, last_name)")
       .eq("user_id", userId)
       .eq("organization_id", organizationId)
+      .eq("is_active", true)
       .maybeSingle();
+
+    console.log('[inviteMember] Inviter lookup:', { userId, organizationId, inviterMember, inviterError });
 
     // Obtener el nombre del rol para el email
     const { data: roleData } = await supabaseAdmin
