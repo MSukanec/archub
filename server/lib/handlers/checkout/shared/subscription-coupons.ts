@@ -8,7 +8,7 @@ export type SubscriptionCouponValidationResult =
       couponData: {
         coupon_id: string;
         coupon_code: string;
-        type: 'percentage' | 'fixed';
+        type: 'percent' | 'fixed';
         amount: number;
         discount: number;
         is_free: boolean;

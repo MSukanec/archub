@@ -114,7 +114,7 @@ BEGIN
   END IF;
 
   -- Calcular descuento
-  IF v_coupon.type = 'percentage' THEN
+  IF v_coupon.type = 'percent' THEN
     v_discount := p_price * (v_coupon.amount / 100);
   ELSE
     v_discount := v_coupon.amount;
