@@ -387,6 +387,7 @@ export type SubscriptionUpgradeParams = {
   currency: string;
   userId?: string | null;
   providerSubscriptionId?: string | null;
+  payerEmail?: string | null; // Email used for MP payments (for seat billing)
 };
 
 /**
@@ -506,6 +507,10 @@ export async function upgradeOrganizationPlan(
 
   if (params.providerSubscriptionId) {
     subscriptionInsert.provider_subscription_id = params.providerSubscriptionId;
+  }
+
+  if (params.payerEmail) {
+    subscriptionInsert.payer_email = params.payerEmail;
   }
 
   const { data: subscription, error: subError } = await supabase

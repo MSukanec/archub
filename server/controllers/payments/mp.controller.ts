@@ -317,13 +317,16 @@ export async function createSeat(req: Request, res: Response) {
     // If not, this is a "gifted" org that needs a NEW subscription for seats
     const { data: subscription, error: subError } = await adminClient
       .from('organization_subscriptions')
-      .select('id, provider_subscription_id, expires_at')
+      .select('id, provider_subscription_id, expires_at, payer_email')
       .eq('id', subscription_id)
       .single();
 
     if (subError || !subscription) {
       return res.status(400).json({ ok: false, error: "Suscripción no encontrada" });
     }
+
+    // Use saved payer_email from subscription if available, fallback to user's email
+    const payerEmail = subscription.payer_email || dbUser.email;
 
     // CASE: Gifted org (no provider_subscription_id) - need to CREATE new MP subscription
     if (!subscription.provider_subscription_id) {
@@ -338,7 +341,7 @@ export async function createSeat(req: Request, res: Response) {
         roleId: role_id,
         seatAmountARS: prorated_amount_ars,
         billingPeriod: billing_period,
-        payerEmail: dbUser.email,
+        payerEmail: payerEmail,
         subscriptionExpiresAt: subscription.expires_at,
       });
 

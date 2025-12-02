@@ -279,6 +279,7 @@ export async function handleUpgradeReturn(req: Request): Promise<HandleUpgradeRe
         amount: prorationAmountNum,
         currency: "ARS",
         userId: publicUserId,
+        payerEmail: userEmail, // Save MP email for seat billing
       });
     }
 
@@ -317,6 +318,7 @@ export async function handleUpgradeReturn(req: Request): Promise<HandleUpgradeRe
       currency: "ARS",
       userId: publicUserId,
       providerSubscriptionId: preapprovalResult.preapprovalId,
+      payerEmail: userEmail, // Save MP email for seat billing
     });
   }
 

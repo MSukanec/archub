@@ -1485,6 +1485,10 @@ export const organization_subscriptions = pgTable("organization_subscriptions", 
   // Provider subscription tracking (for PayPal/MercadoPago recurring subscriptions)
   provider: text("provider"), // 'paypal' | 'mercadopago' | 'bank_transfer'
   provider_subscription_id: text("provider_subscription_id"), // PayPal subscription ID or MP preapproval ID
+  payer_email: text("payer_email"), // Email used for MP payments (required for seat billing)
+  // Coupon tracking
+  coupon_id: uuid("coupon_id"),
+  coupon_code: text("coupon_code"),
 });
 
 export const insertOrganizationSubscriptionSchema = createInsertSchema(organization_subscriptions).omit({
@@ -1796,6 +1800,7 @@ export const mp_subscription_preferences = pgTable("mp_subscription_preferences"
   invitee_email: text("invitee_email"), // for seat payments
   role_id: uuid("role_id"), // for seat payments
   subscription_id: uuid("subscription_id"), // for seat payments (existing subscription to update)
+  payer_email: text("payer_email"), // Email used for MP payments (persisted for seat billing)
   created_at: timestamp("created_at").defaultNow(),
 });
 

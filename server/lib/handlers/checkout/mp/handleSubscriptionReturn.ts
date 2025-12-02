@@ -148,7 +148,7 @@ export async function handleSubscriptionReturn(req: Request): Promise<HandleSubs
     return { success: false, error: "Subscription preference not found" };
   }
   
-  const { user_id, organization_id, plan_slug, billing_period } = prefData;
+  const { user_id, organization_id, plan_slug, billing_period, payer_email } = prefData;
   
   if (!organization_id || !plan_slug || !billing_period) {
     console.error("[MP subscription-return] Missing data in preference:", prefData);
@@ -200,6 +200,9 @@ export async function handleSubscriptionReturn(req: Request): Promise<HandleSubs
   });
   
   if (paymentResult.inserted && paymentResult.paymentId) {
+    // Use payer_email from preference, fallback to preapproval payer_email
+    const finalPayerEmail = payer_email || preapproval.payer_email;
+    
     await upgradeOrganizationPlan(supabase, {
       organizationId: organization_id,
       planId: planId,
@@ -209,9 +212,10 @@ export async function handleSubscriptionReturn(req: Request): Promise<HandleSubs
       currency: currency,
       userId: publicUserId,
       providerSubscriptionId: preapprovalId,
+      payerEmail: finalPayerEmail,
     });
     
-    console.log("[MP subscription-return] ✅ Subscription activated for org:", organization_id);
+    console.log("[MP subscription-return] ✅ Subscription activated for org:", organization_id, "payer_email:", finalPayerEmail);
     return { success: true, activated: true, message: "Subscription activated successfully" };
   } else if (!paymentResult.inserted) {
     console.log("[MP subscription-return] Payment already exists, subscription should be active");

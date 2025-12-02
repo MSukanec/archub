@@ -19,6 +19,7 @@ export interface SeatProrationResult {
     currentSeats: number;
     maxSeats: number;
     paymentProvider: 'mercadopago' | 'paypal' | 'bank_transfer' | null;
+    payerEmail: string | null; // Email used for MP payments (for seat billing)
   } | null;
   
   pricing: {
@@ -124,7 +125,7 @@ export async function calculateSeatProration(
 
   const { data: subscription, error: subError } = await supabase
     .from('organization_subscriptions')
-    .select('id, billing_period, started_at, expires_at, amount, currency')
+    .select('id, billing_period, started_at, expires_at, amount, currency, payer_email')
     .eq('organization_id', organizationId)
     .eq('status', 'active')
     .order('created_at', { ascending: false })
@@ -185,6 +186,7 @@ export async function calculateSeatProration(
         currentSeats,
         maxSeats,
         paymentProvider,
+        payerEmail: subscription.payer_email || null,
       }
     };
   }
@@ -235,6 +237,7 @@ export async function calculateSeatProration(
       currentSeats,
       maxSeats: maxSeats === -1 ? Infinity : maxSeats,
       paymentProvider,
+      payerEmail: subscription.payer_email || null,
     },
     pricing: {
       seatPriceUSD,

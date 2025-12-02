@@ -331,6 +331,7 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
         is_upgrade: is_upgrade || false,
         previous_subscription_id: currentSubscriptionId || null,
         proration_credit: serverProrationCredit > 0 ? String(serverProrationCredit) : null,
+        payer_email: payerEmail, // Save for seat billing
       });
 
     if (insertError) {

@@ -46,6 +46,7 @@ interface SeatPricingData {
     currentSeats: number;
     maxSeats: number;
     paymentProvider: 'mercadopago' | 'paypal' | 'bank_transfer' | null;
+    payerEmail: string | null;
   } | null;
   pricing: {
     seatPriceUSD: number;
@@ -513,6 +514,14 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
                       {formatPrice(pricingData.pricing.proratedAmountARS, pricingData.pricing.proratedAmountUSD)}
                     </span>
                   </div>
+
+                  {!isPayPal && pricingData.subscription.payerEmail && (
+                    <div className="mt-3 p-2 rounded bg-blue-500/10 border border-blue-500/20 text-xs">
+                      <span className="text-blue-600 dark:text-blue-400">
+                        El pago se procesará con el email de MercadoPago: <strong>{pricingData.subscription.payerEmail}</strong>
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {pricingData.nextBilling && (
