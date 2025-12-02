@@ -27,17 +27,19 @@ type MemberFormData = z.infer<typeof memberSchema>;
 
 interface MemberModalProps {
   editingMember?: any;
+  defaultEmail?: string;
   onClose: () => void;
 }
 
-export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
+export function MemberFormModal({ editingMember, defaultEmail, onClose }: MemberModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();
   const { currentPanel, setPanel } = useModalPanelStore();
   const { closeModal } = useGlobalModalStore();
   const [isLoading, setIsLoading] = useState(false);
-
+  
+  const isReinvite = !!defaultEmail;
   const organizationId = userData?.preferences?.last_organization_id;
 
   // Query to get available roles
@@ -63,7 +65,7 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
     },
   });
 
-  // Reset form when editing member changes
+  // Reset form when editing member changes or defaultEmail is provided
   useEffect(() => {
     if (editingMember) {
       form.reset({
@@ -73,12 +75,12 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
       setPanel('edit');
     } else {
       form.reset({
-        email: '',
+        email: defaultEmail || '',
         roleId: '',
       });
       setPanel('edit');
     }
-  }, [editingMember, form, setPanel]);
+  }, [editingMember, defaultEmail, form, setPanel]);
 
   const createMemberMutation = useMutation({
     mutationFn: async (memberData: MemberFormData) => {
@@ -96,12 +98,13 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
       queryClient.invalidateQueries({ queryKey: ['organization-members'] });
       queryClient.invalidateQueries({ queryKey: ['organization-members-full'] });
       queryClient.invalidateQueries({ queryKey: ['organization-invitations'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-former-members'] });
       queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
       toast({
-        title: 'Miembro invitado',
+        title: isReinvite ? 'Miembro reinvitado' : 'Miembro invitado',
         description: data.isNewUser 
           ? 'La invitación ha sido enviada por email' 
-          : 'El usuario existente ha sido agregado a la organización',
+          : 'El usuario recibirá una notificación para unirse nuevamente',
       });
       handleClose();
     },
@@ -179,7 +182,7 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
                     {...field}
                     type="email"
                     placeholder="Ingresa el email del miembro"
-                    disabled={!!editingMember}
+                    disabled={!!editingMember || !!defaultEmail}
                   />
                 </FormControl>
                 <FormMessage />
@@ -214,13 +217,15 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
         </form>
       </Form>
   );
-
+  
   const headerContent = (
     <FormModalHeader
-      title={editingMember ? 'Editar Miembro' : 'Invitar Miembro'}
+      title={editingMember ? 'Editar Miembro' : (isReinvite ? 'Reinvitar Miembro' : 'Invitar Miembro')}
       description={editingMember 
         ? 'Actualiza el rol y permisos del miembro en tu organización.' 
-        : 'Ingresa el email del nuevo miembro. Si no tiene cuenta, recibirá una invitación por correo.'
+        : isReinvite 
+          ? 'Selecciona el rol para reinvitar a este miembro anterior.'
+          : 'Ingresa el email del nuevo miembro. Si no tiene cuenta, recibirá una invitación por correo.'
       }
       icon={editingMember ? Users : UserPlus}
     />
@@ -230,7 +235,7 @@ export function MemberFormModal({ editingMember, onClose }: MemberModalProps) {
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
-      rightLabel={editingMember ? 'Actualizar' : 'Invitar'}
+      rightLabel={editingMember ? 'Actualizar' : (isReinvite ? 'Reinvitar' : 'Invitar')}
       onRightClick={form.handleSubmit(handleSubmit)}
       isSubmitting={isLoading}
     />
