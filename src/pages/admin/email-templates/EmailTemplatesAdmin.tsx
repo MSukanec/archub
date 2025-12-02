@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 
 interface EmailPreview {
-  type: 'registration' | 'purchase' | 'bank-transfer-admin';
+  type: 'registration' | 'purchase' | 'bank-transfer-admin' | 'invitation';
   html: string;
   preview: {
     subject: string;
@@ -33,6 +33,7 @@ function EmailTemplatesContent() {
   const [registrationEmail, setRegistrationEmail] = useState<EmailPreview | null>(null);
   const [purchaseEmail, setPurchaseEmail] = useState<EmailPreview | null>(null);
   const [bankTransferAdminEmail, setBankTransferAdminEmail] = useState<EmailPreview | null>(null);
+  const [invitationEmail, setInvitationEmail] = useState<EmailPreview | null>(null);
   const [loading, setLoading] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -44,6 +45,12 @@ function EmailTemplatesContent() {
   // Editable fields for purchase email
   const [purUserName, setPurUserName] = useState('Jorge Benitest');
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
+
+  // Editable fields for invitation email
+  const [invOrganizationName, setInvOrganizationName] = useState('Constructora ABC');
+  const [invInviterName, setInvInviterName] = useState('Juan Pérez');
+  const [invRoleName, setInvRoleName] = useState('Miembro');
+  const [invInviteeEmail, setInvInviteeEmail] = useState('invitado@example.com');
 
   useEffect(() => {
     loadCourses();
@@ -110,6 +117,22 @@ function EmailTemplatesContent() {
       if (btaRes.ok) {
         const data = await btaRes.json();
         setBankTransferAdminEmail(data);
+      }
+
+      const invRes = await fetch('/api/admin/email-preview/invitation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          inviteeEmail: invInviteeEmail,
+          organizationName: invOrganizationName,
+          inviterName: invInviterName,
+          roleName: invRoleName,
+          adminName: 'El Equipo de Seencel',
+        })
+      });
+      if (invRes.ok) {
+        const data = await invRes.json();
+        setInvitationEmail(data);
       }
     } catch (error) {
       console.error('Error loading emails:', error);
@@ -350,13 +373,112 @@ function EmailTemplatesContent() {
     </div>
   );
 
+  const InvitationEmailEditor = () => (
+    <div className="space-y-6">
+      <Card className="border-purple-200 bg-purple-50 dark:border-purple-900 dark:bg-purple-950/30">
+        <CardHeader>
+          <CardTitle className="text-base">Personalizar Email de Invitación</CardTitle>
+          <CardDescription>Este email se envía cuando invitas a un usuario que NO tiene cuenta en Seencel</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label className="text-sm font-medium">Nombre de la Organización</label>
+            <Input 
+              value={invOrganizationName} 
+              onChange={(e) => setInvOrganizationName(e.target.value)}
+              placeholder="Ej: Constructora ABC"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Nombre de quien invita</label>
+            <Input 
+              value={invInviterName} 
+              onChange={(e) => setInvInviterName(e.target.value)}
+              placeholder="Ej: Juan Pérez"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Rol asignado</label>
+            <Input 
+              value={invRoleName} 
+              onChange={(e) => setInvRoleName(e.target.value)}
+              placeholder="Ej: Miembro"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Email del invitado</label>
+            <Input 
+              value={invInviteeEmail} 
+              onChange={(e) => setInvInviteeEmail(e.target.value)}
+              placeholder="Ej: invitado@example.com"
+              className="mt-1"
+            />
+          </div>
+          <Button 
+            onClick={loadEmails} 
+            disabled={loading}
+            className="w-full"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Actualizar Vista Previa
+          </Button>
+        </CardContent>
+      </Card>
+
+      {invitationEmail && (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Asunto
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(invitationEmail.preview.subject, 'inv-subject')}
+                >
+                  {copiedCode === 'inv-subject' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground font-mono">{invitationEmail.preview.subject}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Vista Previa del Email</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-lg overflow-hidden bg-white">
+                <iframe
+                  srcDoc={invitationEmail.html}
+                  title="Email Preview"
+                  className="w-full h-[600px] border-0"
+                  sandbox="allow-same-origin"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="registration" className="w-full">
-        <TabsList className="w-full justify-start">
-          <TabsTrigger value="registration" data-testid="tab-registration-email">✉️ Email de Registro</TabsTrigger>
-          <TabsTrigger value="purchase" data-testid="tab-purchase-email">💳 Email de Compra</TabsTrigger>
-          <TabsTrigger value="bank-transfer-admin" data-testid="tab-bank-transfer-admin-email">🏦 Alerta Admin - Transferencia</TabsTrigger>
+        <TabsList className="w-full justify-start flex-wrap">
+          <TabsTrigger value="registration" data-testid="tab-registration-email">✉️ Registro</TabsTrigger>
+          <TabsTrigger value="purchase" data-testid="tab-purchase-email">💳 Compra</TabsTrigger>
+          <TabsTrigger value="invitation" data-testid="tab-invitation-email">👥 Invitación</TabsTrigger>
+          <TabsTrigger value="bank-transfer-admin" data-testid="tab-bank-transfer-admin-email">🏦 Transferencia</TabsTrigger>
         </TabsList>
 
         <TabsContent value="registration" className="mt-6">
@@ -365,6 +487,10 @@ function EmailTemplatesContent() {
 
         <TabsContent value="purchase" className="mt-6">
           <PurchaseEmailEditor />
+        </TabsContent>
+
+        <TabsContent value="invitation" className="mt-6">
+          <InvitationEmailEditor />
         </TabsContent>
 
         <TabsContent value="bank-transfer-admin" className="mt-6">
