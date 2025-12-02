@@ -2,6 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { HttpError } from "../../auth/helpers.js";
 import { registerMemberEvent } from "../../billing/events.js";
 import { suspendUserBonusCourseEnrollment } from "../checkout/shared/user-enrollments.js";
+import { isPrivilegedRole, isOwnerRole } from "./roleHelpers.js";
 
 export interface RemoveMemberParams {
   organizationId: string;
@@ -43,12 +44,12 @@ export async function removeMember(
     .single();
 
   if (authError || !performingMember) {
-    throw new HttpError(403, "You don't have permission to remove members from this organization");
+    throw new HttpError(403, "No tienes permiso para eliminar miembros de esta organización");
   }
 
-  const performingRole = (performingMember.roles as any)?.name?.toLowerCase() || '';
-  if (!performingRole.includes('owner') && !performingRole.includes('admin')) {
-    throw new HttpError(403, "Only organization owners and admins can remove members");
+  const performingRoleName = (performingMember.roles as any)?.name || '';
+  if (!isPrivilegedRole(performingRoleName)) {
+    throw new HttpError(403, "Solo los propietarios y administradores pueden eliminar miembros");
   }
 
   const { data: member, error: memberError } = await supabase
@@ -59,7 +60,7 @@ export async function removeMember(
     .single();
 
   if (memberError || !member) {
-    throw new HttpError(404, "Member not found");
+    throw new HttpError(404, "Miembro no encontrado");
   }
 
   if (!member.is_active) {
@@ -72,8 +73,36 @@ export async function removeMember(
     .eq('id', member.role_id)
     .single();
 
-  if (role?.name === 'Owner') {
-    throw new HttpError(400, "Cannot remove the organization owner");
+  const memberRoleName = role?.name || '';
+  
+  if (isOwnerRole(memberRoleName)) {
+    throw new HttpError(400, "No se puede eliminar al propietario de la organización");
+  }
+
+  if (isPrivilegedRole(memberRoleName)) {
+    const { data: activeAdmins, error: adminsError } = await supabase
+      .from('organization_members')
+      .select(`
+        id,
+        roles!inner (name)
+      `)
+      .eq('organization_id', organizationId)
+      .eq('is_active', true)
+      .neq('id', memberId);
+
+    if (adminsError) {
+      console.error('[removeMember] Error checking active admins:', adminsError);
+      throw new HttpError(500, 'Error verificando estado de administradores');
+    }
+
+    const remainingAdmins = activeAdmins?.filter((m: any) => {
+      const mRoleName = (m.roles as any)?.name || '';
+      return isPrivilegedRole(mRoleName);
+    }) || [];
+
+    if (remainingAdmins.length === 0) {
+      throw new HttpError(400, "No se puede eliminar al último administrador. Promueve a otro miembro primero.");
+    }
   }
 
   const { error: updateError } = await supabase
@@ -86,7 +115,7 @@ export async function removeMember(
 
   if (updateError) {
     console.error('[removeMember] Error deactivating member:', updateError);
-    throw new HttpError(500, 'Failed to remove member');
+    throw new HttpError(500, 'Error al eliminar miembro');
   }
 
   const enrollmentResult = await suspendUserBonusCourseEnrollment(
