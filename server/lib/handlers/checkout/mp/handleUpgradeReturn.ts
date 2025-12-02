@@ -217,9 +217,22 @@ export async function handleUpgradeReturn(req: Request): Promise<HandleUpgradeRe
     productId: resolvedPlanId,
   });
 
+  // If payment already exists (webhook processed it), get the existing payment ID and continue
+  // We still need to activate the plan and create the recurring subscription
   if (!prorationPaymentResult.inserted && !isFreeUpgrade) {
-    console.log("[MP upgrade-return] Proration payment already exists, upgrade should be processed");
-    return { success: true, activated: true, message: "Pago de prorrateo ya procesado" };
+    console.log("[MP upgrade-return] Proration payment already exists, continuing with activation...");
+    // The paymentId is returned even when not inserted (from the duplicate check)
+    if (!prorationPaymentResult.paymentId) {
+      // Try to find the existing payment
+      const { data: existingPayment } = await supabase
+        .from("payments")
+        .select("id")
+        .eq("provider_payment_id", paymentId)
+        .maybeSingle();
+      if (existingPayment) {
+        prorationPaymentResult.paymentId = existingPayment.id;
+      }
+    }
   }
 
   const frequency = billing_period === 'monthly' ? 1 : 12;
