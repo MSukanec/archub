@@ -140,10 +140,22 @@ export async function createRecurring(req: Request, res: Response) {
       });
     }
     
+    // Handle gifted subscription (100% discount coupon - no payment gateway)
+    if ('gifted' in result && result.gifted) {
+      const giftedResult = result as { success: true; gifted: true; subscriptionId: string; message: string };
+      return res.json({
+        ok: true,
+        gifted: true,
+        subscription_id: giftedResult.subscriptionId,
+        message: giftedResult.message
+      });
+    }
+    
+    const normalResult = result as { success: true; initPoint: string; preapprovalId: string };
     return res.json({
       ok: true,
-      init_point: result.initPoint,
-      preapproval_id: result.preapprovalId
+      init_point: normalResult.initPoint,
+      preapproval_id: normalResult.preapprovalId
     });
   } catch (error: any) {
     console.error("[MP create-recurring controller] Error:", error);
