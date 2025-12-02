@@ -160,6 +160,7 @@ export async function inviteMember(
           role_id: roleId,
           accepted_at: null,
           updated_at: new Date().toISOString(),
+          user_id: existingUser?.id || null, // CRITICAL: Update user_id for RLS to work on accept
         })
         .eq("id", existingInvitation.id);
 
