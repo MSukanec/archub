@@ -640,7 +640,7 @@ export default function SubscriptionCheckout() {
           title: "¡Suscripción activada!",
           description: "Tu cupón de 100% descuento ha sido aplicado. Tu suscripción está activa.",
         });
-        navigate("/settings/pricing-plan?subscription=success");
+        navigate("/organization/billing?subscription=success");
         return;
       }
 
@@ -779,7 +779,7 @@ export default function SubscriptionCheckout() {
           title: "¡Suscripción activada!",
           description: "Tu cupón de 100% descuento ha sido aplicado. Tu suscripción está activa.",
         });
-        navigate("/settings/pricing-plan?subscription=success");
+        navigate("/organization/billing?subscription=success");
         return;
       }
 

@@ -156,6 +156,7 @@ export async function createSubscriptionOrder(
           couponId: couponResult.couponId!,
           couponCode: couponResult.couponCode!,
           userId: userData.id,
+          currency: 'USD',
         });
 
         if (!giftedResult.success) {

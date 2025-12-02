@@ -316,6 +316,7 @@ export type CreateGiftedSubscriptionParams = {
   couponId: string;
   couponCode: string;
   userId: string;
+  currency: 'USD' | 'ARS';
 };
 
 export type CreateGiftedSubscriptionResult = 
@@ -332,7 +333,7 @@ export type CreateGiftedSubscriptionResult =
 export async function createGiftedSubscription(
   params: CreateGiftedSubscriptionParams
 ): Promise<CreateGiftedSubscriptionResult> {
-  const { supabase, authId, organizationId, planId, planSlug, billingPeriod, couponId, couponCode, userId } = params;
+  const { supabase, authId, organizationId, planId, planSlug, billingPeriod, couponId, couponCode, userId, currency } = params;
   
   console.log('[subscription-coupons] Creating gifted subscription:', {
     organizationId,
@@ -358,7 +359,7 @@ export async function createGiftedSubscription(
         started_at: now.toISOString(),
         expires_at: expiresAt.toISOString(),
         amount: 0,
-        currency: 'USD',
+        currency: currency,
         coupon_id: couponId,
         coupon_code: couponCode,
         // provider_subscription_id is NULL - this is a gifted subscription
@@ -410,7 +411,7 @@ export async function createGiftedSubscription(
         subscription_id: subscriptionId,
         plan_id: planId,
         amount_saved: 0, // Full price was saved, but we'll compute it later if needed
-        currency: 'USD',
+        currency: currency,
       });
 
     if (redemptionError) {
