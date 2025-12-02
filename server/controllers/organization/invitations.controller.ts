@@ -88,7 +88,10 @@ export async function handleInviteMember(req: Request, res: Response) {
 
     const { email, roleId, organizationId } = req.body;
 
+    console.log('[inviteMember] Request received:', { email, roleId, organizationId, userId });
+
     if (!email || !roleId || !organizationId) {
+      console.log('[inviteMember] Missing required fields');
       return res.status(400).json({ error: 'Missing required fields: email, roleId, organizationId' });
     }
 
@@ -102,9 +105,12 @@ export async function handleInviteMember(req: Request, res: Response) {
 
     const result = await inviteMember(ctx, params);
 
+    console.log('[inviteMember] Result:', JSON.stringify(result, null, 2));
+
     if (result.success) {
       return res.status(200).json(result.data);
     } else {
+      console.log('[inviteMember] Returning 400 with error:', result.error);
       return res.status(400).json({ error: result.error });
     }
   } catch (error: any) {
