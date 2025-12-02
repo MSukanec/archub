@@ -290,7 +290,7 @@ export function MembersListTab() {
               size="sm" 
               variant="outline"
               className="ml-4 border-amber-500 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900"
-              onClick={() => navigate('/billing')}
+              onClick={() => navigate('/organization/billing')}
               data-testid="button-upgrade-plan-members"
             >
               <ArrowUpCircle className="h-4 w-4 mr-2" />
