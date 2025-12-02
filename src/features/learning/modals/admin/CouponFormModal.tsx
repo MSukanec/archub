@@ -416,8 +416,8 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
               <FormItem>
                 <FormLabel>Moneda</FormLabel>
                 <Select 
-                  onValueChange={field.onChange} 
-                  value={field.value || undefined}
+                  onValueChange={(val) => field.onChange(val === "ALL" ? null : val)} 
+                  value={field.value || "ALL"}
                 >
                   <FormControl>
                     <SelectTrigger data-testid="select-coupon-currency">
@@ -425,7 +425,7 @@ export function CouponFormModal({ modalData, onClose }: CouponFormModalProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="null">Todas las monedas</SelectItem>
+                    <SelectItem value="ALL">Todas las monedas</SelectItem>
                     <SelectItem value="ARS">ARS</SelectItem>
                     <SelectItem value="USD">USD</SelectItem>
                     <SelectItem value="EUR">EUR</SelectItem>
