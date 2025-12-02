@@ -62,6 +62,51 @@ export async function inviteMember(
       };
     }
 
+    // Verificar límite de miembros del plan
+    const { data: orgData } = await supabaseAdmin
+      .from("organizations")
+      .select("id, name, plan_id, plans(id, name, slug, features)")
+      .eq("id", organizationId)
+      .single();
+
+    if (!orgData) {
+      return {
+        success: false,
+        error: "Organization not found"
+      };
+    }
+
+    const planData = (orgData as any).plans;
+    const features = planData?.features || {};
+    const maxMembers = features.max_members ?? 1; // Default to 1 if not set
+
+    // -1 means unlimited
+    if (maxMembers !== -1) {
+      // Count current active members
+      const { count: activeMembersCount } = await supabaseAdmin
+        .from("organization_members")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", organizationId)
+        .eq("is_active", true);
+
+      // Count pending invitations (these will become members if accepted)
+      const { count: pendingInvitationsCount } = await supabaseAdmin
+        .from("organization_invitations")
+        .select("id", { count: "exact", head: true })
+        .eq("organization_id", organizationId)
+        .eq("status", "pending");
+
+      const currentCount = (activeMembersCount || 0) + (pendingInvitationsCount || 0);
+
+      if (currentCount >= maxMembers) {
+        const planName = planData?.name || "actual";
+        return {
+          success: false,
+          error: `Has alcanzado el límite de ${maxMembers} ${maxMembers === 1 ? 'miembro' : 'miembros'} para el plan ${planName}. Mejora tu plan para agregar más miembros.`
+        };
+      }
+    }
+
     // Buscar usuario existente por email (using admin client)
     const { data: existingUser } = await supabaseAdmin
       .from("users")
