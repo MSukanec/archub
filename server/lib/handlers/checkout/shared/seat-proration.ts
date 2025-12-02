@@ -18,6 +18,7 @@ export interface SeatProrationResult {
     expiresAt: string;
     currentSeats: number;
     maxSeats: number;
+    paymentProvider: 'mercadopago' | 'paypal' | 'bank_transfer' | null;
   } | null;
   
   pricing: {
@@ -28,6 +29,15 @@ export interface SeatProrationResult {
     percentageRemaining: number;
     proratedAmountUSD: number;
     proratedAmountARS: number;
+  } | null;
+  
+  nextBilling: {
+    date: string;
+    totalSeats: number;
+    amountPerSeatUSD: number;
+    amountPerSeatARS: number;
+    totalAmountUSD: number;
+    totalAmountARS: number;
   } | null;
   
   invitation: {
@@ -54,6 +64,7 @@ export async function calculateSeatProration(
     organization: null,
     subscription: null,
     pricing: null,
+    nextBilling: null,
     invitation: {
       email: inviteeEmail,
       roleId: roleId,
