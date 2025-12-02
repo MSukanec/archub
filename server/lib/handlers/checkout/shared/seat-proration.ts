@@ -124,18 +124,12 @@ export async function calculateSeatProration(
 
   const { data: subscription, error: subError } = await supabase
     .from('organization_subscriptions')
-    .select('id, billing_period, started_at, expires_at, amount, currency, provider')
+    .select('id, billing_period, started_at, expires_at, amount, currency')
     .eq('organization_id', organizationId)
     .eq('status', 'active')
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
-
-  console.log('[seat-proration] Subscription query:', { 
-    organizationId, 
-    subscription: subscription ? 'found' : 'not found',
-    subError: subError?.message || null 
-  });
 
   if (subError || !subscription) {
     return { 
@@ -149,6 +143,10 @@ export async function calculateSeatProration(
       }
     };
   }
+
+  const paymentProvider: 'mercadopago' | 'paypal' | null = 
+    (subscription.currency === 'ARS' || subscription.currency === 'ars') ? 'mercadopago' : 
+    (subscription.currency === 'USD' || subscription.currency === 'usd') ? 'paypal' : null;
 
   const { count: activeMembers } = await supabase
     .from('organization_members')
@@ -165,8 +163,6 @@ export async function calculateSeatProration(
   const currentSeats = (activeMembers || 0) + (pendingInvitations || 0);
   const features = plan.features || {};
   const maxSeats: number = features.max_members !== undefined ? features.max_members : 1;
-  
-  const paymentProvider = (subscription.provider as 'mercadopago' | 'paypal' | 'bank_transfer') || null;
 
   if (maxSeats !== -1 && currentSeats >= maxSeats) {
     return {
