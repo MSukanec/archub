@@ -8,6 +8,7 @@ import PurchaseEmail from '../../src/emails/PurchaseEmail';
 import ContactEmail from '../../src/emails/ContactEmail';
 import AdminBankTransferAlert from '../../src/emails/AdminBankTransferAlert';
 import InvitationEmail from '../../src/emails/InvitationEmail';
+import { sendInvitationEmail } from '../lib/email/sendInvitationEmail';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
@@ -386,16 +387,11 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
   });
 
   // POST /api/email/send-invitation - Send organization invitation email
+  // NOTE: This endpoint is called internally from inviteMember handler.
+  // It uses the shared sendInvitationEmail function.
+  // For security, this endpoint should only be called from authenticated contexts.
   app.post('/api/email/send-invitation', async (req, res) => {
     try {
-      if (!RESEND_API_KEY) {
-        console.error('❌ RESEND_API_KEY not configured');
-        return res.status(500).json({
-          ok: false,
-          error: 'Email service not configured'
-        });
-      }
-
       const { 
         inviteeEmail,
         organizationName,
@@ -404,51 +400,27 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         invitationId,
       } = req.body;
 
-      if (!inviteeEmail || !organizationName || !invitationId) {
-        return res.status(400).json({
-          ok: false,
-          error: 'Missing required fields: inviteeEmail, organizationName, invitationId'
-        });
-      }
-
-      const resend = new Resend(RESEND_API_KEY);
-      
-      const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
-      const invitationLink = `${baseUrl}/register?invitation=${invitationId}`;
-
-      const emailHtml = await render(
-        InvitationEmail({
-          inviteeEmail,
-          organizationName,
-          inviterName: inviterName || 'Un administrador',
-          roleName,
-          invitationLink,
-          adminName: 'El Equipo de Seencel',
-        }) as any
-      );
-
-      const result = await resend.emails.send({
-        from: 'Seencel <sistema@seencel.com>',
-        to: inviteeEmail,
-        subject: `Te invitaron a unirte a ${organizationName} en Seencel`,
-        html: emailHtml
+      const result = await sendInvitationEmail({
+        inviteeEmail,
+        organizationName,
+        inviterName: inviterName || 'Un administrador',
+        roleName,
+        invitationId,
       });
 
-      if (result.error) {
-        console.error('❌ Resend error (invitation email):', result.error);
+      if (!result.success) {
         return res.status(500).json({
           ok: false,
-          error: result.error.message
+          error: result.error
         });
       }
 
-      console.log('✅ Invitation email sent to:', inviteeEmail);
       return res.json({
         ok: true,
-        emailId: result.data?.id
+        emailId: result.emailId
       });
     } catch (error: any) {
-      console.error('❌ Invitation email error:', error);
+      console.error('❌ Invitation email endpoint error:', error);
       return res.status(500).json({
         ok: false,
         error: error.message || 'Failed to send invitation email'

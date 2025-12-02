@@ -1,7 +1,7 @@
 // server/lib/handlers/organization/inviteMember.ts
 import { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "../../supabase/admin.js";
-import { env } from "../../env.js";
+import { sendInvitationEmail } from "../../email/sendInvitationEmail.js";
 
 export interface InviteMemberParams {
   email: string;
@@ -52,8 +52,8 @@ export async function inviteMember(
 
     // Check if user is admin by role name
     const roles = Array.isArray(member.roles) ? member.roles[0] : member.roles;
-    const roleName = roles?.name?.toLowerCase() || '';
-    const isAdmin = roleName.includes("admin");
+    const inviterRoleName = roles?.name?.toLowerCase() || '';
+    const isAdmin = inviterRoleName.includes("admin");
 
     if (!isAdmin) {
       return {
@@ -149,13 +149,26 @@ export async function inviteMember(
       };
     }
 
-    // Obtener el member_id del invitador para guardarlo
+    // Obtener el member_id del invitador para guardarlo, junto con su nombre
     const { data: inviterMember } = await supabaseAdmin
       .from("organization_members")
-      .select("id")
+      .select("id, users!left(first_name, last_name)")
       .eq("user_id", userId)
       .eq("organization_id", organizationId)
       .maybeSingle();
+
+    // Obtener el nombre del rol para el email
+    const { data: roleData } = await supabaseAdmin
+      .from("roles")
+      .select("name")
+      .eq("id", roleId)
+      .maybeSingle();
+
+    const inviterUser = (inviterMember as any)?.users;
+    const inviterName = inviterUser?.first_name && inviterUser?.last_name 
+      ? `${inviterUser.first_name} ${inviterUser.last_name}`
+      : inviterUser?.first_name || 'Un administrador';
+    const roleName = roleData?.name || 'Miembro';
 
     // Crear la invitación
     const { data: invitationData, error: invitationError } = await supabaseAdmin
@@ -204,17 +217,18 @@ export async function inviteMember(
       }
     }
 
-    // Si el usuario NO existe en Seencel, enviar invitación por email de Supabase Auth
+    // Si el usuario NO existe en Seencel, enviar invitación por email usando Resend
     if (!existingUser) {
-      const { error: authInviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
-        email,
-        {
-          redirectTo: `${env.SUPABASE_URL}/auth/v1/verify`,
-        }
-      );
+      const emailResult = await sendInvitationEmail({
+        inviteeEmail: email.toLowerCase(),
+        organizationName: orgData?.name || 'una organización',
+        inviterName,
+        roleName,
+        invitationId: invitationData.id,
+      });
 
-      if (authInviteError) {
-        console.warn("Auth invitation email failed (user can still register manually):", authInviteError);
+      if (!emailResult.success) {
+        console.warn("Invitation email failed:", emailResult.error);
         // No retornamos error porque la invitación ya fue creada en la DB
       }
     }
