@@ -5,3 +5,4 @@ export { useOrganizationWallets } from './use-organization-wallets';
 export { useUserOrganizationPreferences } from './use-user-organization-preferences';
 export { useUpdateUserOrganizationPreferences } from './use-update-user-organization-preferences';
 export { useOrganizationActivityLogs } from './use-organization-activity-logs';
+export { useMemberActionConfirmation } from './useMemberActionConfirmation';
