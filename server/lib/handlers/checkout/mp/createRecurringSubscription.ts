@@ -117,19 +117,42 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
     }
 
     // ============================================================
+    // FETCH EXCHANGE RATE EARLY (needed for coupon validation in ARS)
+    // ============================================================
+    const { data: exchangeRate, error: exchangeError } = await supabase
+      .from("exchange_rates")
+      .select("rate")
+      .eq("from_currency", "USD")
+      .eq("to_currency", "ARS")
+      .eq("is_active", true)
+      .single();
+
+    if (exchangeError || !exchangeRate) {
+      console.error('[MP create-recurring-subscription] Exchange rate not found:', exchangeError);
+      return { success: false, error: "Tasa de cambio no disponible", status: 500 };
+    }
+
+    const arsRate = Number(exchangeRate.rate);
+
+    // ============================================================
     // COUPON VALIDATION & GIFTED SUBSCRIPTION HANDLING
     // ============================================================
     if (coupon_code) {
       console.log('[MP create-recurring-subscription] Validating coupon:', coupon_code);
       
       const priceAmountUSD = billing_period === 'monthly' ? plan.monthly_amount : plan.annual_amount;
+      const priceARS = Number(priceAmountUSD) * arsRate;
+      
+      // Get internal user ID for per-user limit validation
+      const userData = await getUserData(supabase, user_id);
       
       const couponResult = await validateSubscriptionCoupon({
         supabase,
         couponCode: coupon_code,
         planId: plan.id,
-        priceUSD: Number(priceAmountUSD),
-        currency: 'USD',
+        price: priceARS,
+        currency: 'ARS',
+        userId: userData.id,
       });
 
       if (!couponResult.valid) {
@@ -181,7 +204,7 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
       // For now, log it and continue with full price (future enhancement)
       console.log('[MP create-recurring-subscription] Partial discount coupon - proceeding with discounted price:', {
         discount: couponResult.discount,
-        finalPrice: couponResult.finalPriceUSD,
+        finalPrice: couponResult.finalPrice,
       });
     }
 
@@ -217,20 +240,7 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
     const seats = 1;
     let unitPriceUSD = basePriceUSD * seats;
 
-    const { data: exchangeRate, error: exchangeError } = await supabase
-      .from("exchange_rates")
-      .select("rate")
-      .eq("from_currency", "USD")
-      .eq("to_currency", "ARS")
-      .eq("is_active", true)
-      .single();
-
-    if (exchangeError || !exchangeRate) {
-      console.error('[MP create-recurring-subscription] Exchange rate not found:', exchangeError);
-      return { success: false, error: "Tasa de cambio no disponible", status: 500 };
-    }
-
-    const arsRate = Number(exchangeRate.rate);
+    // arsRate is already fetched above for coupon validation
     let transactionAmount = unitPriceUSD * arsRate;
     const fullPriceArs = transactionAmount; // Store full price for recurring subscription
 

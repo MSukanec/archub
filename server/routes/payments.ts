@@ -248,6 +248,234 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
     }
   });
 
+  // ==================== SUBSCRIPTION COUPON VALIDATION ====================
+  
+  // POST /api/checkout/validate-subscription-coupon - Validate coupon for subscription checkout
+  app.post("/api/checkout/validate-subscription-coupon", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith("Bearer ")) {
+        return res.status(401).json({ ok: false, error: "No autorizado" });
+      }
+
+      const token = authHeader.substring(7);
+      const authSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { persistSession: false } }
+      );
+
+      const { data: { user: authUser }, error: authError } = await authSupabase.auth.getUser(token);
+      if (authError || !authUser) {
+        return res.status(401).json({ ok: false, error: "Token inválido o expirado" });
+      }
+
+      const { coupon_code, plan_id, billing_period, currency = 'USD' } = req.body;
+
+      if (!coupon_code || !plan_id || !billing_period) {
+        return res.status(400).json({ 
+          ok: false,
+          error: "Faltan parámetros: coupon_code, plan_id, billing_period" 
+        });
+      }
+
+      const adminClient = getAdminClient();
+
+      // Get user ID from users table
+      const { data: dbUser, error: userError } = await adminClient
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .single();
+
+      if (userError || !dbUser) {
+        console.error('[validate-subscription-coupon] User lookup error:', userError);
+        return res.status(401).json({ ok: false, error: "Usuario no encontrado" });
+      }
+
+      // Get plan data
+      const { data: plan, error: planError } = await adminClient
+        .from('plans')
+        .select('id, name, slug, monthly_amount, annual_amount')
+        .eq('id', plan_id)
+        .single();
+
+      if (planError || !plan) {
+        return res.status(404).json({ ok: false, error: "Plan no encontrado" });
+      }
+
+      // Calculate base price in USD
+      const priceUSD = billing_period === 'monthly' 
+        ? Number(plan.monthly_amount) 
+        : Number(plan.annual_amount);
+
+      // Get exchange rate for ARS calculations
+      const { data: exchangeRate, error: exchangeError } = await adminClient
+        .from('exchange_rates')
+        .select('rate')
+        .eq('from_currency', 'USD')
+        .eq('to_currency', 'ARS')
+        .eq('is_active', true)
+        .single();
+
+      const arsRate = exchangeError || !exchangeRate ? 1500 : Number(exchangeRate.rate);
+      const priceARS = Math.round(priceUSD * arsRate);
+
+      // Determine which price and currency to use for validation
+      const validationPrice = currency === 'ARS' ? priceARS : priceUSD;
+      const validationCurrency = currency === 'ARS' ? 'ARS' : 'USD';
+
+      // Validate coupon using the RPC function
+      const { data: validationResult, error: couponError } = await adminClient.rpc(
+        'validate_subscription_coupon', 
+        {
+          p_code: coupon_code.trim(),
+          p_plan_id: plan_id,
+          p_price: validationPrice,
+          p_currency: validationCurrency
+        }
+      );
+
+      if (couponError) {
+        console.error('[validate-subscription-coupon] Error validating coupon:', couponError);
+        return res.status(400).json({ 
+          ok: false, 
+          error: "Error validando cupón" 
+        });
+      }
+
+      if (!validationResult || !validationResult.ok) {
+        const reasonMap: Record<string, string> = {
+          'COUPON_NOT_FOUND': 'Cupón no válido o expirado',
+          'PLAN_NOT_ELIGIBLE': 'Este cupón no aplica para este plan',
+          'MAX_REDEMPTIONS_REACHED': 'Este cupón alcanzó su límite de usos',
+          'CURRENCY_MISMATCH': 'Este cupón no aplica para esta moneda',
+          'MIN_ORDER_NOT_MET': 'El precio no alcanza el mínimo requerido',
+        };
+
+        const reason = validationResult?.reason || 'UNKNOWN';
+        console.log('[validate-subscription-coupon] Cupón inválido:', { coupon_code, reason });
+
+        return res.status(400).json({ 
+          ok: false,
+          error: reasonMap[reason] || "Cupón inválido"
+        });
+      }
+
+      // Get coupon details for per_user_limit and currency validation
+      const couponId = validationResult.coupon_id;
+      const { data: couponDetails, error: couponDetailsError } = await adminClient
+        .from('coupons')
+        .select('per_user_limit, currency, type')
+        .eq('id', couponId)
+        .single();
+
+      if (couponDetailsError) {
+        console.error('[validate-subscription-coupon] Error fetching coupon details:', couponDetailsError);
+        return res.status(400).json({ ok: false, error: "Error validando cupón" });
+      }
+
+      // Check per-user limit
+      if (couponDetails.per_user_limit !== null) {
+        const { count: userRedemptions, error: redemptionError } = await adminClient
+          .from('coupon_redemptions')
+          .select('*', { count: 'exact', head: true })
+          .eq('coupon_id', couponId)
+          .eq('user_id', dbUser.id);
+
+        if (redemptionError) {
+          console.error('[validate-subscription-coupon] Error checking redemptions:', redemptionError);
+          return res.status(400).json({ ok: false, error: "Error validando cupón" });
+        }
+
+        const currentRedemptions = userRedemptions || 0;
+        if (currentRedemptions >= couponDetails.per_user_limit) {
+          console.log('[validate-subscription-coupon] Per-user limit exceeded:', { 
+            coupon_code, 
+            userId: dbUser.id, 
+            currentRedemptions, 
+            limit: couponDetails.per_user_limit 
+          });
+          return res.status(400).json({ 
+            ok: false, 
+            error: "Has alcanzado el límite de usos para este cupón" 
+          });
+        }
+      }
+
+      // Validate currency for fixed-type coupons
+      if (couponDetails.type === 'fixed' && couponDetails.currency !== null) {
+        if (couponDetails.currency !== currency) {
+          console.log('[validate-subscription-coupon] Currency mismatch for fixed coupon:', { 
+            coupon_code, 
+            couponCurrency: couponDetails.currency, 
+            requestedCurrency: currency 
+          });
+          return res.status(400).json({ 
+            ok: false, 
+            error: `Este cupón solo es válido para pagos en ${couponDetails.currency}` 
+          });
+        }
+      }
+
+      // Calculate final prices based on validation currency
+      const discountInValidationCurrency = Number(validationResult.discount);
+      const finalPriceInValidationCurrency = Number(validationResult.final_price);
+      const isFullDiscount = validationResult.is_free === true || finalPriceInValidationCurrency <= 0;
+      
+      // Convert to both currencies for frontend
+      let discountUSD: number;
+      let discountARS: number;
+      let finalPriceUSD: number;
+      let finalPriceARS: number;
+
+      if (validationCurrency === 'ARS') {
+        // Validation was in ARS, convert to USD
+        discountARS = discountInValidationCurrency;
+        finalPriceARS = finalPriceInValidationCurrency;
+        discountUSD = Math.round((discountInValidationCurrency / arsRate) * 100) / 100;
+        finalPriceUSD = Math.round((finalPriceInValidationCurrency / arsRate) * 100) / 100;
+      } else {
+        // Validation was in USD, convert to ARS
+        discountUSD = discountInValidationCurrency;
+        finalPriceUSD = finalPriceInValidationCurrency;
+        discountARS = Math.round(discountInValidationCurrency * arsRate);
+        finalPriceARS = Math.round(finalPriceInValidationCurrency * arsRate);
+      }
+
+      console.log('[validate-subscription-coupon] Coupon validated:', {
+        coupon_code,
+        validationCurrency,
+        type: validationResult.type,
+        amount: validationResult.amount,
+        discountUSD,
+        discountARS,
+        finalPriceUSD,
+        finalPriceARS,
+        isFullDiscount,
+      });
+
+      return res.json({
+        ok: true,
+        data: {
+          valid: true,
+          coupon_id: validationResult.coupon_id,
+          code: validationResult.coupon_code,
+          type: validationResult.type,
+          amount: Number(validationResult.amount),
+          discount_usd: discountUSD,
+          discount_ars: discountARS,
+          final_price_usd: finalPriceUSD,
+          final_price_ars: finalPriceARS,
+          is_full_discount: isFullDiscount,
+        }
+      });
+    } catch (error: any) {
+      console.error('[validate-subscription-coupon] Error:', error);
+      return res.status(500).json({ ok: false, error: error.message || "Error interno" });
+    }
+  });
+
   // ==================== MERCADO PAGO CHECKOUT & WEBHOOKS ====================
   
   // POST /api/checkout/mp/create-course

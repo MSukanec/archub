@@ -29,6 +29,8 @@ import {
   Crown,
   Check,
   ExternalLink,
+  Tag,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getApiBase } from "@/utils/apiBase";
@@ -55,6 +57,19 @@ interface ProrationData {
   };
   finalPrice: { usd: number; ars: number };
   savings: { usd: number; ars: number };
+}
+
+interface ValidatedCoupon {
+  valid: boolean;
+  coupon_id: string;
+  code: string;
+  type: 'percentage' | 'fixed';
+  amount: number;
+  discount_usd: number;
+  discount_ars: number;
+  final_price_usd: number;
+  final_price_ars: number;
+  is_full_discount: boolean;
 }
 
 async function fetchWithTimeout(url: string, init: RequestInit = {}, ms = 15000) {
@@ -131,6 +146,11 @@ export default function SubscriptionCheckout() {
   const [billingAddress, setBillingAddress] = useState("");
   const [billingCity, setBillingCity] = useState("");
   const [billingPostcode, setBillingPostcode] = useState("");
+
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [validatedCoupon, setValidatedCoupon] = useState<ValidatedCoupon | null>(null);
 
   useEffect(() => {
     if (planSlug) {
@@ -386,6 +406,76 @@ export default function SubscriptionCheckout() {
     };
   };
 
+  const handleValidateCoupon = async () => {
+    if (!couponCode.trim() || !planData?.id) return;
+
+    if (!selectedMethod) {
+      setCouponError("Seleccioná un método de pago antes de aplicar un cupón");
+      return;
+    }
+
+    setCouponLoading(true);
+    setCouponError(null);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        setCouponError("Debes iniciar sesión para aplicar un cupón");
+        return;
+      }
+
+      const currency = selectedMethod === 'paypal' ? 'USD' : 'ARS';
+
+      const API_BASE = getApiBase();
+      const res = await fetch(`${API_BASE}/api/checkout/validate-subscription-coupon`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          coupon_code: couponCode.trim(),
+          plan_id: planData.id,
+          billing_period: billingPeriod,
+          currency,
+        }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || !result.ok) {
+        setCouponError(result.error || "Cupón inválido");
+        setValidatedCoupon(null);
+        return;
+      }
+
+      setValidatedCoupon(result.data);
+      setCouponCode("");
+      
+      toast({
+        title: "Cupón aplicado",
+        description: `Descuento de ${result.data.type === 'percentage' ? `${result.data.amount}%` : `$${result.data.discount_usd} USD`} aplicado correctamente`,
+      });
+    } catch (error: any) {
+      console.error('[Coupon] Error validating:', error);
+      setCouponError("Error al validar el cupón");
+      setValidatedCoupon(null);
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setValidatedCoupon(null);
+    setCouponCode("");
+    setCouponError(null);
+    
+    toast({
+      title: "Cupón removido",
+      description: "El cupón ha sido removido de tu pedido",
+    });
+  };
+
   const handleMercadoPagoPayment = async () => {
     try {
       setLoading(true);
@@ -485,6 +575,7 @@ export default function SubscriptionCheckout() {
         currency: "ARS",
         is_upgrade: false,
         payer_email: mercadopagoEmail || email,
+        ...(validatedCoupon && { coupon_code: validatedCoupon.code }),
       };
 
       console.log("[MP] Creando suscripción recurrente (nueva)…", requestBody);
@@ -525,6 +616,15 @@ export default function SubscriptionCheckout() {
             ? `No se pudo crear la preferencia: ${String(payload.error)}`
             : `create-preference falló: status=${res.status}`
         );
+      }
+
+      if (payload?.gifted) {
+        toast({
+          title: "¡Suscripción activada!",
+          description: "Tu cupón de 100% descuento ha sido aplicado. Tu suscripción está activa.",
+        });
+        navigate("/settings/pricing-plan?subscription=success");
+        return;
       }
 
       if (!payload?.init_point) {
@@ -601,6 +701,7 @@ export default function SubscriptionCheckout() {
         is_upgrade: isUpgrade,
         proration_credit: 0,
         ...(billing && { billing }),
+        ...(validatedCoupon && { coupon_code: validatedCoupon.code }),
       };
 
       console.log("[PayPal] Creando orden de suscripción…", requestBody);
@@ -638,6 +739,15 @@ export default function SubscriptionCheckout() {
       if (!res.ok || !payload?.ok) {
         console.error("[PayPal] Error al crear orden:", payload);
         throw new Error(payload?.error || `HTTP ${res.status}`);
+      }
+
+      if (payload?.gifted) {
+        toast({
+          title: "¡Suscripción activada!",
+          description: "Tu cupón de 100% descuento ha sido aplicado. Tu suscripción está activa.",
+        });
+        navigate("/settings/pricing-plan?subscription=success");
+        return;
       }
 
       const approvalUrl = payload.approval_url;
@@ -801,8 +911,11 @@ export default function SubscriptionCheckout() {
       currency: 'USD', 
       numericAmount: 0,
       originalAmount: 0,
-      hasDiscount: false,
-      discountAmount: 0
+      hasProrationDiscount: false,
+      prorationDiscountAmount: 0,
+      hasCouponDiscount: false,
+      couponDiscountAmount: 0,
+      isFullDiscount: false
     };
     
     const basePrice = billingPeriod === 'annual' 
@@ -813,24 +926,59 @@ export default function SubscriptionCheckout() {
       const arsAmount = basePrice * exchangeRate;
       
       const hasProration = prorationData?.hasActiveSubscription && (prorationData?.savings?.ars ?? 0) > 0;
+      
+      let priceAfterProration = arsAmount;
+      let prorationDiscount = 0;
+      
       if (hasProration && prorationData?.finalPrice?.ars !== undefined) {
+        priceAfterProration = prorationData.finalPrice.ars;
+        prorationDiscount = prorationData.savings.ars;
+      }
+      
+      if (validatedCoupon) {
+        const couponDiscountARS = validatedCoupon.discount_ars;
+        const finalPriceARS = Math.max(0, priceAfterProration - couponDiscountARS);
+        
         return {
-          amount: prorationData.finalPrice.ars.toFixed(2),
+          amount: finalPriceARS.toFixed(2),
           currency: 'ARS',
-          numericAmount: prorationData.finalPrice.ars,
+          numericAmount: finalPriceARS,
           originalAmount: arsAmount,
-          hasDiscount: true,
-          discountAmount: prorationData.savings.ars
+          hasProrationDiscount: hasProration,
+          prorationDiscountAmount: prorationDiscount,
+          hasCouponDiscount: true,
+          couponDiscountAmount: couponDiscountARS,
+          isFullDiscount: validatedCoupon.is_full_discount || finalPriceARS === 0
         };
       }
       
       return {
-        amount: arsAmount.toFixed(2),
+        amount: priceAfterProration.toFixed(2),
         currency: 'ARS',
-        numericAmount: arsAmount,
+        numericAmount: priceAfterProration,
         originalAmount: arsAmount,
-        hasDiscount: false,
-        discountAmount: 0
+        hasProrationDiscount: hasProration,
+        prorationDiscountAmount: prorationDiscount,
+        hasCouponDiscount: false,
+        couponDiscountAmount: 0,
+        isFullDiscount: false
+      };
+    }
+    
+    if (validatedCoupon) {
+      const couponDiscountUSD = validatedCoupon.discount_usd;
+      const finalPriceUSD = Math.max(0, basePrice - couponDiscountUSD);
+      
+      return {
+        amount: finalPriceUSD.toFixed(2),
+        currency: 'USD',
+        numericAmount: finalPriceUSD,
+        originalAmount: basePrice,
+        hasProrationDiscount: false,
+        prorationDiscountAmount: 0,
+        hasCouponDiscount: true,
+        couponDiscountAmount: couponDiscountUSD,
+        isFullDiscount: validatedCoupon.is_full_discount || finalPriceUSD === 0
       };
     }
     
@@ -839,10 +987,13 @@ export default function SubscriptionCheckout() {
       currency: 'USD',
       numericAmount: basePrice,
       originalAmount: basePrice,
-      hasDiscount: false,
-      discountAmount: 0
+      hasProrationDiscount: false,
+      prorationDiscountAmount: 0,
+      hasCouponDiscount: false,
+      couponDiscountAmount: 0,
+      isFullDiscount: false
     };
-  }, [planData, billingPeriod, selectedMethod, exchangeRate, prorationData]);
+  }, [planData, billingPeriod, selectedMethod, exchangeRate, prorationData, validatedCoupon]);
 
   const finalPrice = calculatePrice.numericAmount;
 
@@ -1307,9 +1458,83 @@ export default function SubscriptionCheckout() {
 
                     <Separator />
 
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Tag className="h-4 w-4 text-accent" />
+                        <span className="text-sm font-medium">¿Tenés un cupón?</span>
+                      </div>
+                      
+                      {validatedCoupon ? (
+                        <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              <div>
+                                <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                                  Cupón aplicado: {validatedCoupon.code}
+                                </p>
+                                <p className="text-xs text-green-600 dark:text-green-500">
+                                  {validatedCoupon.type === 'percentage' 
+                                    ? `${validatedCoupon.amount}% de descuento`
+                                    : `$${validatedCoupon.discount_usd} USD de descuento`
+                                  }
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleRemoveCoupon}
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                              data-testid="button-remove-coupon"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <Input
+                              value={couponCode}
+                              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                              placeholder="Ingresá tu código"
+                              className="flex-1"
+                              disabled={couponLoading}
+                              data-testid="input-coupon-code"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  handleValidateCoupon();
+                                }
+                              }}
+                            />
+                            <Button
+                              variant="outline"
+                              onClick={handleValidateCoupon}
+                              disabled={!couponCode.trim() || couponLoading || !planData?.id}
+                              data-testid="button-apply-coupon"
+                            >
+                              {couponLoading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                "Aplicar"
+                              )}
+                            </Button>
+                          </div>
+                          {couponError && (
+                            <p className="text-sm text-destructive" data-testid="text-coupon-error">
+                              {couponError}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <Separator />
 
                     <div className="space-y-2">
-                      {calculatePrice.hasDiscount && (
+                      {(calculatePrice.hasProrationDiscount || calculatePrice.hasCouponDiscount) && (
                         <>
                           <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Precio {planData?.name}</span>
@@ -1317,12 +1542,27 @@ export default function SubscriptionCheckout() {
                               {calculatePrice.currency} ${calculatePrice.originalAmount.toLocaleString("es-AR")}
                             </span>
                           </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-green-600 dark:text-green-400">Crédito aplicado</span>
-                            <span className="text-green-600 dark:text-green-400">
-                              - {calculatePrice.currency} ${calculatePrice.discountAmount.toLocaleString("es-AR")}
-                            </span>
-                          </div>
+                          
+                          {calculatePrice.hasProrationDiscount && (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-green-600 dark:text-green-400">Crédito de prorrateo</span>
+                              <span className="text-green-600 dark:text-green-400">
+                                - {calculatePrice.currency} ${calculatePrice.prorationDiscountAmount.toLocaleString("es-AR")}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {calculatePrice.hasCouponDiscount && (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-green-600 dark:text-green-400">
+                                Cupón ({validatedCoupon?.code})
+                              </span>
+                              <span className="text-green-600 dark:text-green-400">
+                                - {calculatePrice.currency} ${calculatePrice.couponDiscountAmount.toLocaleString("es-AR")}
+                              </span>
+                            </div>
+                          )}
+                          
                           <Separator className="my-2" />
                         </>
                       )}
@@ -1330,13 +1570,26 @@ export default function SubscriptionCheckout() {
                       <div className="flex justify-between items-baseline">
                         <span className="text-lg font-semibold">Total a pagar</span>
                         <div className="text-right">
-                          <p className="text-2xl font-bold">
-                            {calculatePrice.currency} ${parseFloat(calculatePrice.amount).toLocaleString("es-AR")}
-                          </p>
-                          {selectedMethod && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {selectedMethod === "paypal" ? "Pago en USD" : "Pago en ARS"}
-                            </p>
+                          {calculatePrice.isFullDiscount ? (
+                            <>
+                              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                ¡GRATIS!
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Cupón de 100% descuento aplicado
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-2xl font-bold">
+                                {calculatePrice.currency} ${parseFloat(calculatePrice.amount).toLocaleString("es-AR")}
+                              </p>
+                              {selectedMethod && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {selectedMethod === "paypal" ? "Pago en USD" : "Pago en ARS"}
+                                </p>
+                              )}
+                            </>
                           )}
                         </div>
                       </div>

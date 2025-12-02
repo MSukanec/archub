@@ -25,12 +25,13 @@ export type ValidateSubscriptionCouponParams = {
   supabase: SupabaseClient;
   couponCode: string;
   planId: string;
-  priceUSD: number;
-  currency: string;
+  price: number;
+  currency: 'USD' | 'ARS';
+  userId?: string;
 };
 
 export type ValidateSubscriptionCouponResult = 
-  | { valid: true; isFree: boolean; couponId?: string; couponCode?: string; discount?: number; finalPriceUSD?: number }
+  | { valid: true; isFree: boolean; couponId?: string; couponCode?: string; discount?: number; finalPrice?: number }
   | { valid: false; reason?: string };
 
 /**
@@ -189,16 +190,16 @@ export async function markSubscriptionCouponAsUsed(
 export async function validateSubscriptionCoupon(
   params: ValidateSubscriptionCouponParams
 ): Promise<ValidateSubscriptionCouponResult> {
-  const { supabase, couponCode, planId, priceUSD, currency } = params;
+  const { supabase, couponCode, planId, price, currency, userId } = params;
   
-  console.log('[subscription-coupons] Validating coupon (new API):', { couponCode, planId, priceUSD, currency });
+  console.log('[subscription-coupons] Validating coupon (new API):', { couponCode, planId, price, currency, userId });
 
   const { data: validationResult, error: couponError } = await supabase.rpc(
     'validate_subscription_coupon', 
     {
       p_code: couponCode.trim(),
       p_plan_id: planId,
-      p_price: priceUSD,
+      p_price: price,
       p_currency: currency
     }
   );
@@ -226,13 +227,71 @@ export async function validateSubscriptionCoupon(
     };
   }
 
-  const finalPrice = Number(validationResult.final_price);
-  const isFree = validationResult.is_free === true || finalPrice <= 0;
+  const couponId = validationResult.coupon_id;
+
+  // Get coupon details for per_user_limit and currency validation
+  const { data: couponDetails, error: couponDetailsError } = await supabase
+    .from('coupons')
+    .select('per_user_limit, currency, type')
+    .eq('id', couponId)
+    .single();
+
+  if (couponDetailsError) {
+    console.error('[subscription-coupons] Error fetching coupon details:', couponDetailsError);
+    return { valid: false, reason: "Error validando cupón" };
+  }
+
+  // Check per-user limit if userId is provided
+  if (userId && couponDetails.per_user_limit !== null) {
+    const { count: userRedemptions, error: redemptionError } = await supabase
+      .from('coupon_redemptions')
+      .select('*', { count: 'exact', head: true })
+      .eq('coupon_id', couponId)
+      .eq('user_id', userId);
+
+    if (redemptionError) {
+      console.error('[subscription-coupons] Error checking redemptions:', redemptionError);
+      return { valid: false, reason: "Error validando cupón" };
+    }
+
+    const currentRedemptions = userRedemptions || 0;
+    if (currentRedemptions >= couponDetails.per_user_limit) {
+      console.log('[subscription-coupons] Per-user limit exceeded:', { 
+        couponCode, 
+        userId, 
+        currentRedemptions, 
+        limit: couponDetails.per_user_limit 
+      });
+      return { 
+        valid: false, 
+        reason: "Has alcanzado el límite de usos para este cupón" 
+      };
+    }
+  }
+
+  // Validate currency for fixed-type coupons
+  if (couponDetails.type === 'fixed' && couponDetails.currency !== null) {
+    if (couponDetails.currency !== currency) {
+      console.log('[subscription-coupons] Currency mismatch for fixed coupon:', { 
+        couponCode, 
+        couponCurrency: couponDetails.currency, 
+        requestedCurrency: currency 
+      });
+      return { 
+        valid: false, 
+        reason: `Este cupón solo es válido para pagos en ${couponDetails.currency}` 
+      };
+    }
+  }
+
+  const finalPriceValue = Number(validationResult.final_price);
+  const isFree = validationResult.is_free === true || finalPriceValue <= 0;
   
   console.log('[subscription-coupons] Coupon validated successfully:', {
     couponCode,
-    priceUSD,
-    finalPrice,
+    price,
+    currency,
+    finalPrice: finalPriceValue,
     isFree,
     discount: validationResult.discount,
   });
@@ -243,7 +302,7 @@ export async function validateSubscriptionCoupon(
     couponId: validationResult.coupon_id,
     couponCode: validationResult.coupon_code,
     discount: validationResult.discount,
-    finalPriceUSD: finalPrice,
+    finalPrice: finalPriceValue,
   };
 }
 

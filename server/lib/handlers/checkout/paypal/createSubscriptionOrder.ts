@@ -118,12 +118,16 @@ export async function createSubscriptionOrder(
     if (coupon_code) {
       console.log('[PayPal create-subscription-order] Validating coupon:', coupon_code);
       
+      // Get internal user ID for per-user limit validation
+      const userData = await getUserData(supabase, user_id);
+      
       const couponResult = await validateSubscriptionCoupon({
         supabase,
         couponCode: coupon_code,
         planId: plan.id,
-        priceUSD: basePrice,
+        price: basePrice,
         currency: 'USD',
+        userId: userData.id,
       });
 
       if (!couponResult.valid) {
@@ -173,7 +177,7 @@ export async function createSubscriptionOrder(
       // Partial discount: log for now (PayPal recurring subscriptions don't support dynamic pricing easily)
       console.log('[PayPal create-subscription-order] Partial discount coupon - proceeding with discounted price:', {
         discount: couponResult.discount,
-        finalPrice: couponResult.finalPriceUSD,
+        finalPrice: couponResult.finalPrice,
       });
     }
 
