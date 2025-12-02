@@ -155,6 +155,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       if (productType === 'subscription_upgrade') {
         // For upgrades, user_id from the preference IS the public.users.id (no conversion needed)
         publicUserId = resolvedUserId;
+        console.log('[MP webhook] ✅ Using direct user_id for upgrade:', { resolvedUserId, publicUserId });
       } else if (resolvedUserId) {
         // For courses and regular subscriptions, convert auth_id to public.users.id
         const { data: userProfile, error: profileError } = await supabase
@@ -402,6 +403,7 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       if (productType === 'subscription_upgrade') {
         // For upgrades, user_id from the preference IS the public.users.id (no conversion needed)
         moPublicUserId = resolvedUserId;
+        console.log('[MP webhook MO] ✅ Using direct user_id for upgrade:', { resolvedUserId, moPublicUserId });
       } else if (resolvedUserId) {
         // For courses and regular subscriptions, convert auth_id to public.users.id
         const { data: userProfile, error: profileError } = await supabase
