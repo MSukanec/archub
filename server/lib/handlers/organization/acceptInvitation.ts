@@ -15,7 +15,7 @@ export async function acceptInvitation(
   // IDEMPOTENCY: Check if member already exists (in case of retry)
   const { data: invitation, error: invError } = await supabase
     .from('organization_invitations')
-    .select('id, organization_id, role_id, user_id, status')
+    .select('id, organization_id, role_id, user_id, status, invited_by')
     .eq('id', invitationId)
     .eq('user_id', userId)
     .maybeSingle();
@@ -121,6 +121,7 @@ export async function acceptInvitation(
       organization_id: invitation.organization_id,
       user_id: userId,
       role_id: invitation.role_id,
+      invited_by: invitation.invited_by,
       is_active: true,
       is_billable: true,
     })
