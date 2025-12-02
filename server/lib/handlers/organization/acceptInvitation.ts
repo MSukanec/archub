@@ -2,7 +2,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { HttpError } from "../../auth/helpers.js";
 import { registerMemberEvent } from "../../billing/events.js";
-import { supabaseAdmin } from "../../supabase/admin.js";
 
 export async function acceptInvitation(
   supabase: SupabaseClient,
@@ -14,8 +13,7 @@ export async function acceptInvitation(
   }
 
   // IDEMPOTENCY: Check if member already exists (in case of retry)
-  // Use admin client to bypass RLS - user may not be able to see their own invitation
-  const { data: invitation, error: invError } = await supabaseAdmin
+  const { data: invitation, error: invError } = await supabase
     .from('organization_invitations')
     .select('id, organization_id, role_id, user_id, status')
     .eq('id', invitationId)
@@ -28,7 +26,7 @@ export async function acceptInvitation(
 
   // If already accepted, check if member exists
   if (invitation.status === 'accepted') {
-    const { data: existingMember } = await supabaseAdmin
+    const { data: existingMember } = await supabase
       .from('organization_members')
       .select('id')
       .eq('user_id', userId)
@@ -46,8 +44,8 @@ export async function acceptInvitation(
   }
 
   // Check for existing membership before creating (prevents duplicates)
-  // Use admin client to see inactive members too (RLS may hide them from user)
-  const { data: existingMember } = await supabaseAdmin
+  // RLS must allow users to see their own records (even inactive) for this to work
+  const { data: existingMember } = await supabase
     .from('organization_members')
     .select('id, is_active, is_billable')
     .eq('user_id', userId)
@@ -57,8 +55,8 @@ export async function acceptInvitation(
   if (existingMember) {
     // Member record exists - reactivate if inactive, or just mark accepted
     if (!existingMember.is_active) {
-      // Reactivate the inactive member with new role using admin client
-      const { error: reactivateError } = await supabaseAdmin
+      // Reactivate the inactive member with new role
+      const { error: reactivateError } = await supabase
         .from('organization_members')
         .update({ 
           is_active: true,
@@ -73,7 +71,7 @@ export async function acceptInvitation(
       }
 
       // Register billing event for reactivation
-      await registerMemberEvent(supabaseAdmin, {
+      await registerMemberEvent(supabase, {
         organizationId: invitation.organization_id,
         memberId: existingMember.id,
         userId: userId,
@@ -84,8 +82,8 @@ export async function acceptInvitation(
       });
     }
 
-    // Mark invitation as accepted using admin client
-    const { error: updateError } = await supabaseAdmin
+    // Mark invitation as accepted
+    const { error: updateError } = await supabase
       .from('organization_invitations')
       .update({ 
         status: 'accepted',
@@ -102,8 +100,7 @@ export async function acceptInvitation(
 
   // TRANSACTIONAL: Update status FIRST, then create member
   // This prevents duplicate accepts since status check happens first
-  // Use admin client to bypass RLS
-  const { error: updateError } = await supabaseAdmin
+  const { error: updateError } = await supabase
     .from('organization_invitations')
     .update({ 
       status: 'accepted',
@@ -117,8 +114,8 @@ export async function acceptInvitation(
     throw new HttpError(500, 'Failed to update invitation status');
   }
 
-  // Create organization member AFTER status update using admin client
-  const { data: newMember, error: memberError } = await supabaseAdmin
+  // Create organization member AFTER status update
+  const { data: newMember, error: memberError } = await supabase
     .from('organization_members')
     .insert({
       organization_id: invitation.organization_id,
@@ -138,7 +135,7 @@ export async function acceptInvitation(
   }
 
   // Register member_added event for billing
-  await registerMemberEvent(supabaseAdmin, {
+  await registerMemberEvent(supabase, {
     organizationId: invitation.organization_id,
     memberId: newMember.id,
     userId: userId,
