@@ -386,15 +386,20 @@ export async function createGiftedSubscription(
     }
 
     // 3. Update organization with new plan
-    const { error: orgError } = await supabase
+    console.log('[subscription-coupons] Updating organization plan:', { organizationId, planId });
+    
+    const { data: orgUpdate, error: orgError } = await supabase
       .from('organizations')
       .update({ plan_id: planId })
-      .eq('id', organizationId);
+      .eq('id', organizationId)
+      .select('id, plan_id');
 
     if (orgError) {
       console.error('[subscription-coupons] Error updating organization plan:', orgError);
       return { success: false, error: orgError.message };
     }
+    
+    console.log('[subscription-coupons] Organization plan updated:', orgUpdate);
 
     // 4. Record coupon redemption
     const { error: redemptionError } = await supabase
