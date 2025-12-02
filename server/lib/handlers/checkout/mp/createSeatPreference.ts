@@ -73,15 +73,17 @@ export async function createSeatPreference(
 
     const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
     
+    const roundedAmount = Math.round(proratedAmountARS);
+
     const prefBody = {
       items: [
         {
           id: `seat-${organizationId}`,
-          category_id: 'seat',
+          category_id: 'services',
           title: `Nuevo miembro - ${org.name}`,
           description: `Agregar ${inviteeEmail} como ${roleName}`,
           quantity: 1,
-          unit_price: proratedAmountARS,
+          unit_price: roundedAmount,
           currency_id: 'ARS',
         }
       ],
@@ -98,7 +100,7 @@ export async function createSeatPreference(
         pending: `${baseUrl}/organization/members?payment=pending`,
       },
       auto_return: 'approved',
-      binary_mode: true,
+      binary_mode: false,
       statement_descriptor: 'SEENCEL',
       metadata: {
         user_id: userId,
