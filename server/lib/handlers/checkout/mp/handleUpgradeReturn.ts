@@ -111,6 +111,36 @@ export async function handleUpgradeReturn(req: Request): Promise<HandleUpgradeRe
     return { success: false, error: "Plan no encontrado" };
   }
 
+  let subscriptionStartDate: string | null = null;
+  if (previous_subscription_id) {
+    const { data: prevSub } = await supabase
+      .from("organization_subscriptions")
+      .select("expires_at")
+      .eq("id", previous_subscription_id)
+      .maybeSingle();
+    
+    if (prevSub?.expires_at) {
+      subscriptionStartDate = prevSub.expires_at;
+      console.log('[MP upgrade-return] Using previous subscription expiry as start_date:', subscriptionStartDate);
+    }
+  }
+
+  if (!subscriptionStartDate) {
+    const { data: activeSub } = await supabase
+      .from("organization_subscriptions")
+      .select("expires_at")
+      .eq("organization_id", organization_id)
+      .eq("status", "active")
+      .order("expires_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    if (activeSub?.expires_at) {
+      subscriptionStartDate = activeSub.expires_at;
+      console.log('[MP upgrade-return] Using active subscription expiry as start_date:', subscriptionStartDate);
+    }
+  }
+
   const { data: exchangeRate } = await supabase
     .from("exchange_rates")
     .select("rate")
@@ -131,6 +161,7 @@ export async function handleUpgradeReturn(req: Request): Promise<HandleUpgradeRe
     billing_period,
     fullPriceARS,
     prorationPaid: amount_ars,
+    subscriptionStartDate,
   });
 
   let userEmail: string | null = null;
@@ -178,6 +209,7 @@ export async function handleUpgradeReturn(req: Request): Promise<HandleUpgradeRe
     frequency_type: frequencyType,
     transaction_amount: fullPriceARS,
     currency_id: "ARS",
+    ...(subscriptionStartDate && { start_date: subscriptionStartDate }),
   };
 
   const productTitle = `Suscripción ${plan.name} - ${billing_period === 'monthly' ? 'Mensual' : 'Anual'}`;
@@ -189,6 +221,7 @@ export async function handleUpgradeReturn(req: Request): Promise<HandleUpgradeRe
     fullPriceARS,
     frequency,
     email: userEmail,
+    startDate: subscriptionStartDate || 'immediate',
   });
 
   const preapprovalResult = await createMPPreapproval({
