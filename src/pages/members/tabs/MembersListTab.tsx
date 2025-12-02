@@ -3,11 +3,12 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { 
   Users, 
-  UserCheck, 
+  UserMinus,
   Clock, 
   MoreHorizontal,
   Lock,
-  ArrowUpCircle
+  ArrowUpCircle,
+  UserPlus
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -188,7 +189,49 @@ export function MembersListTab() {
     enabled: !!organizationId,
   });
 
-  const guests: any[] = [];
+  // Query para miembros anteriores (inactivos)
+  const { data: formerMembersRaw = [] } = useQuery({
+    queryKey: ['organization-former-members', organizationId],
+    queryFn: async () => {
+      if (!supabase || !organizationId) return [];
+      
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select(`
+          id,
+          user_id,
+          organization_id,
+          role_id,
+          joined_at,
+          updated_at,
+          is_active,
+          users (
+            id,
+            email,
+            full_name,
+            avatar_url
+          ),
+          roles (
+            id,
+            name,
+            type
+          )
+        `)
+        .eq('organization_id', organizationId)
+        .eq('is_active', false)
+        .order('updated_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching former members:', error);
+        return [];
+      }
+      
+      return data || [];
+    },
+    enabled: !!organizationId,
+  });
+
+  const formerMembers = formerMembersRaw;
 
   const revokeInviteMutation = useMutation({
     mutationFn: async (invitationId: string) => {
@@ -432,116 +475,11 @@ export function MembersListTab() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
           <div className="flex items-center gap-2 mb-6">
-            <UserCheck className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Invitados</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Las cuentas de invitados permiten a tus socios externos colaborar y comunicarse contigo aquí en Archub.
-          </p>
-        </div>
-
-        <div>
-          {isMobile ? (
-            <div className="space-y-3">
-              {guests.map((guest) => (
-                <MemberRow
-                  key={guest.id} 
-                  member={guest}
-                  onClick={() => {}}
-                  density="normal"
-                />
-              ))}
-              {guests.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                  <p className="text-sm">No hay invitados en esta organización.</p>
-                  <p className="text-xs">Los invitados pueden colaborar en proyectos específicos.</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {guests.map((guest) => (
-                <Card key={guest.id} className="p-4">
-                  <CardContent className="p-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={guest.users?.avatar_url} />
-                          <AvatarFallback>
-                            {getInitials(guest.users?.full_name || guest.users?.email || 'G')}
-                          </AvatarFallback>
-                        </Avatar>
-                        
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium text-sm">
-                              {guest.users?.full_name || 'Sin nombre'}
-                            </h4>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {guest.users?.email}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <div className="text-xs text-muted-foreground text-right">
-                          <div>
-                            {guest.joined_at && !isNaN(new Date(guest.joined_at).getTime()) 
-                              ? format(new Date(guest.joined_at), 'MMM dd, yyyy', { locale: es })
-                              : 'Fecha no disponible'
-                            }
-                          </div>
-                        </div>
-
-                        <Badge variant="secondary">
-                          {guest.roles?.name || 'Invitado'}
-                        </Badge>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem 
-                              className="text-red-600"
-                              onClick={() => handleDeleteMember(guest)}
-                            >
-                              Eliminar invitado
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-              {guests.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                  <p className="text-sm">No hay invitados en esta organización.</p>
-                  <p className="text-xs">Los invitados pueden colaborar en proyectos específicos.</p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <hr className="border-t border-[var(--section-divider)] my-8" />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
-          <div className="flex items-center gap-2 mb-6">
             <Clock className="h-5 w-5 text-[var(--accent)]" />
             <h2 className="text-lg font-semibold">Invitaciones Pendientes</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Las cuentas de invitados permiten a tus socios externos colaborar y comunicarse contigo aquí en Archub.
+            Personas que han sido invitadas pero aún no han aceptado unirse a tu organización.
           </p>
         </div>
 
@@ -666,6 +604,96 @@ export function MembersListTab() {
           )}
         </div>
       </div>
+
+      {/* Sección de Miembros Anteriores - Solo mostrar si hay miembros inactivos */}
+      {formerMembers.length > 0 && (
+        <>
+          <hr className="border-t border-[var(--section-divider)] my-8" />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+              <div className="flex items-center gap-2 mb-6">
+                <UserMinus className="h-5 w-5 text-muted-foreground" />
+                <h2 className="text-lg font-semibold text-muted-foreground">Miembros Anteriores</h2>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Personas que formaron parte de tu organización pero ya no están activas. Puedes volver a invitarlos si es necesario.
+              </p>
+            </div>
+
+            <div>
+              <div className="space-y-2">
+                {formerMembers.map((member) => {
+                  const userData = Array.isArray(member.users) ? member.users[0] : member.users;
+                  const roleData = Array.isArray(member.roles) ? member.roles[0] : member.roles;
+                  
+                  return (
+                    <Card key={member.id} className="p-4 opacity-70">
+                      <CardContent className="p-0">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10 grayscale">
+                              <AvatarImage src={userData?.avatar_url} />
+                              <AvatarFallback>
+                                {getInitials(userData?.full_name || userData?.email || 'U')}
+                              </AvatarFallback>
+                            </Avatar>
+                            
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-medium text-sm text-muted-foreground">
+                                  {userData?.full_name || 'Sin nombre'}
+                                </h4>
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                {userData?.email}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            <div className="text-xs text-muted-foreground text-right">
+                              <div className="text-[10px] uppercase tracking-wide">Fue miembro</div>
+                              <div>
+                                {member.joined_at && !isNaN(new Date(member.joined_at).getTime()) 
+                                  ? format(new Date(member.joined_at), 'MMM yyyy', { locale: es })
+                                  : '—'
+                                }
+                                {member.updated_at && ' - '}
+                                {member.updated_at && !isNaN(new Date(member.updated_at).getTime()) 
+                                  ? format(new Date(member.updated_at), 'MMM yyyy', { locale: es })
+                                  : ''
+                                }
+                              </div>
+                            </div>
+
+                            <Badge variant="outline" className="text-muted-foreground">
+                              {roleData?.name || 'Sin rol'}
+                            </Badge>
+
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => openModal('member', { 
+                                editingMember: null,
+                                defaultEmail: userData?.email 
+                              })}
+                              data-testid={`button-reinvite-${member.id}`}
+                            >
+                              <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                              Reinvitar
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
