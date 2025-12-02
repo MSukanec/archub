@@ -148,11 +148,14 @@ export async function calculateSeatProration(
     (subscription.currency === 'ARS' || subscription.currency === 'ars') ? 'mercadopago' : 
     (subscription.currency === 'USD' || subscription.currency === 'usd') ? 'paypal' : null;
 
+  // Solo contar miembros BILLABLE (is_billable = true)
+  // Miembros con is_billable = false son "gratis" y no cuentan para el billing
   const { count: activeMembers } = await supabase
     .from('organization_members')
     .select('id', { count: 'exact', head: true })
     .eq('organization_id', organizationId)
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .eq('is_billable', true);
 
   const { count: pendingInvitations } = await supabase
     .from('organization_invitations')

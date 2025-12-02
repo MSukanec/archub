@@ -149,11 +149,13 @@ export async function updateSubscriptionForNewSeat(
       console.error('[MP updateSeatSubscription] Failed to update local subscription:', updateSubError);
     }
 
+    // Solo contar miembros BILLABLE para el reporte
     const { count: activeSeats } = await supabase
       .from('organization_members')
       .select('id', { count: 'exact', head: true })
       .eq('organization_id', organizationId)
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .eq('is_billable', true);
 
     const { count: pendingSeats } = await supabase
       .from('organization_invitations')
@@ -161,6 +163,7 @@ export async function updateSubscriptionForNewSeat(
       .eq('organization_id', organizationId)
       .eq('status', 'pending');
 
+    // Solo seats facturables
     const totalSeats = (activeSeats || 0) + (pendingSeats || 0);
 
     console.log('[MP updateSeatSubscription] Subscription updated successfully:', {
