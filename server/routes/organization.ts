@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import type { RouteDeps } from "./_base";
-import { handleGetOrganizationMembers } from '../controllers/organization/members.controller.js';
+import { handleGetOrganizationMembers, handleRemoveMember } from '../controllers/organization/members.controller.js';
 import {
   handleGetPendingInvitations,
   handleAcceptInvitation,
@@ -26,6 +26,9 @@ export function registerOrganizationRoutes(app: Express, deps: RouteDeps): void 
   
   // GET /api/organization-members/:organizationId - Get all members of an organization
   app.get("/api/organization-members/:organizationId", handleGetOrganizationMembers);
+  
+  // DELETE /api/organizations/:organizationId/members/:memberId - Remove a member from an organization
+  app.delete("/api/organizations/:organizationId/members/:memberId", handleRemoveMember);
 
   // ========== ORGANIZATION - USAGE STATS ENDPOINTS ==========
   

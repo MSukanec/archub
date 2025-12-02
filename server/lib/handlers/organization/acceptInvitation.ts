@@ -2,6 +2,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { HttpError } from "../../auth/helpers.js";
 import { registerMemberEvent } from "../../billing/events.js";
+import { reactivateUserBonusCourseEnrollment } from "../checkout/shared/user-enrollments.js";
 
 export async function acceptInvitation(
   supabase: SupabaseClient,
@@ -68,6 +69,16 @@ export async function acceptInvitation(
       if (reactivateError) {
         console.error('Error reactivating member:', reactivateError);
         throw new HttpError(500, 'Failed to reactivate member');
+      }
+
+      // Reactivate suspended bonus course enrollment if org is founder
+      const enrollmentResult = await reactivateUserBonusCourseEnrollment(
+        supabase,
+        userId,
+        invitation.organization_id
+      );
+      if (enrollmentResult.reactivated) {
+        console.log(`[acceptInvitation] Reactivated bonus course enrollment for user ${userId}`);
       }
 
       // Register billing event for reactivation

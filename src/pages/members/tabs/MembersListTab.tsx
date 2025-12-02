@@ -273,19 +273,29 @@ export function MembersListTab() {
 
   const removeMemberMutation = useMutation({
     mutationFn: async (memberId: string) => {
-      if (!supabase) throw new Error('Supabase not initialized');
+      if (!organizationId) throw new Error('Organization not found');
       
-      const { error } = await supabase
-        .from('organization_members')
-        .update({ is_active: false })
-        .eq('id', memberId);
+      const response = await fetch(`/api/organizations/${organizationId}/members/${memberId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase?.auth.getSession())?.data.session?.access_token}`,
+        },
+      });
       
-      if (error) throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to remove member');
+      }
+      
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Miembro eliminado",
-        description: "El miembro ha sido eliminado de la organización.",
+        description: data.enrollmentSuspended 
+          ? "El miembro ha sido eliminado y su acceso al curso bonus ha sido suspendido."
+          : "El miembro ha sido eliminado de la organización.",
       });
       queryClient.invalidateQueries({ queryKey: ['organization-members-full'] });
       queryClient.invalidateQueries({ queryKey: ['organization-members'] });
