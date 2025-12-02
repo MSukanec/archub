@@ -33,6 +33,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useGlobalModalStore } from "@/components/modal";
 import { useMobile } from "@/hooks/use-mobile";
 import { useLocation } from "wouter";
+import { useMemberActionConfirmation } from "@/features/organization/hooks/useMemberActionConfirmation";
 
 function getInitials(name: string): string {
   return name
@@ -61,6 +62,7 @@ export function MembersListTab() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
+  const { showRevokeInvitationConfirmation, showRemoveMemberConfirmation } = useMemberActionConfirmation();
   const isMobile = useMobile();
   const [, navigate] = useLocation();
 
@@ -297,15 +299,32 @@ export function MembersListTab() {
     },
   });
 
-  const handleDeleteMember = (member: any) => {
-    openModal('delete-confirmation', {
-      mode: 'dangerous',
-      title: 'Eliminar miembro',
-      description: 'Esta acción eliminará permanentemente el miembro de la organización. Perderá acceso a todos los proyectos y datos.',
-      itemName: member.user_data?.full_name || member.email || 'Miembro',
-      destructiveActionText: 'Eliminar',
+  const handleRemoveMember = (member: any) => {
+    const memberUser = Array.isArray(member.users) ? member.users[0] : member.users;
+    const memberRole = Array.isArray(member.roles) ? member.roles[0] : member.roles;
+    
+    showRemoveMemberConfirmation({
+      memberName: memberUser?.full_name || member.user_data?.full_name || '',
+      memberEmail: memberUser?.email || member.email || '',
+      memberRole: memberRole?.name,
+      billingInfo: {
+        hasPaidForSeat: false,
+      },
       onConfirm: () => removeMemberMutation.mutate(member.id),
-      isLoading: removeMemberMutation.isPending
+      isLoading: removeMemberMutation.isPending,
+    });
+  };
+
+  const handleRevokeInvitation = (invite: any) => {
+    showRevokeInvitationConfirmation({
+      memberName: invite.user_data?.full_name || '',
+      memberEmail: invite.email,
+      memberRole: invite.role_data?.name,
+      billingInfo: {
+        hasPaidForSeat: false,
+      },
+      onConfirm: () => revokeInviteMutation.mutate(invite.id),
+      isLoading: revokeInviteMutation.isPending,
     });
   };
 
@@ -444,7 +463,7 @@ export function MembersListTab() {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem 
                                   className="text-red-600"
-                                  onClick={() => handleDeleteMember(member)}
+                                  onClick={() => handleRemoveMember(member)}
                                 >
                                   Eliminar miembro
                                 </DropdownMenuItem>
@@ -523,7 +542,7 @@ export function MembersListTab() {
                         <Button 
                           variant="destructive" 
                           size="sm"
-                          onClick={() => revokeInviteMutation.mutate(invite.id)}
+                          onClick={() => handleRevokeInvitation(invite)}
                         >
                           Revocar
                         </Button>
@@ -583,7 +602,7 @@ export function MembersListTab() {
                           <Button 
                             variant="destructive" 
                             size="sm"
-                            onClick={() => revokeInviteMutation.mutate(invite.id)}
+                            onClick={() => handleRevokeInvitation(invite)}
                           >
                             Revocar
                           </Button>
