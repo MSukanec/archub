@@ -16,12 +16,21 @@ export async function handleUpgradeReturn(req: Request): Promise<HandleUpgradeRe
   const supabase = createServiceSupabaseClient();
   const adminClient = getAdminClient();
   
-  const preferenceId = req.query.preference_id as string;
+  const preferenceIdRaw = req.query.preference_id;
   const isFreeUpgrade = req.query.free === 'true';
   const paymentId = req.query.payment_id as string;
   const paymentStatus = req.query.status as string;
   
+  let preferenceId: string | null = null;
+  if (Array.isArray(preferenceIdRaw)) {
+    const found = preferenceIdRaw.find((id) => typeof id === 'string' && id.startsWith('mpu_'));
+    preferenceId = typeof found === 'string' ? found : (typeof preferenceIdRaw[0] === 'string' ? preferenceIdRaw[0] : null);
+  } else if (typeof preferenceIdRaw === 'string') {
+    preferenceId = preferenceIdRaw;
+  }
+  
   console.log("[MP upgrade-return] Processing upgrade return:", {
+    preferenceIdRaw,
     preferenceId,
     isFreeUpgrade,
     paymentId,
