@@ -43,7 +43,13 @@ export function initializeModalRegistry(): void {
   if (initialized) return;
   initialized = true;
 
-  registerModal('member', MemberFormModal as any, organizationConfig);
+  registerModal('member', MemberFormModal as any, {
+    ...organizationConfig,
+    mapDataToProps: (data) => ({
+      editingMember: data?.editingMember,
+      defaultEmail: data?.defaultEmail,
+    }),
+  });
   registerModal('partner', PartnerModal as any, organizationConfig);
   registerModal('board', BoardFormModal as any, organizationConfig);
   registerModal('card', CardFormModal as any, organizationConfig);
