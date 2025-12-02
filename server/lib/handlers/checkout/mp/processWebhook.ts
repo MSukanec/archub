@@ -152,12 +152,9 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       // For other types (courses): user_id might be auth_id and needs conversion
       let publicUserId: string | null = null;
       
-      if (productType === 'subscription_upgrade') {
-        // For upgrades, user_id from the preference IS the public.users.id (no conversion needed)
-        publicUserId = resolvedUserId;
-        console.log('[MP webhook] ✅ Using direct user_id for upgrade:', { resolvedUserId, publicUserId });
-      } else if (resolvedUserId) {
-        // For courses and regular subscriptions, convert auth_id to public.users.id
+      // ALL flows store auth_id as user_id - we must convert to public.users.id
+      if (resolvedUserId) {
+        console.log('[MP webhook] Converting auth_id to user_id:', { auth_id: resolvedUserId, productType });
         const { data: userProfile, error: profileError } = await supabase
           .from("users")
           .select("id")
@@ -167,11 +164,15 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
         if (profileError || !userProfile) {
           console.error('[MP webhook] ❌ Failed to resolve auth_id to user_id:', {
             auth_id: resolvedUserId,
-            error: profileError
+            error: profileError,
+            productType
           });
         } else {
           publicUserId = userProfile.id;
+          console.log('[MP webhook] ✅ Resolved user_id:', { publicUserId });
         }
+      } else {
+        console.error('[MP webhook] ❌ No resolvedUserId available:', { fromDb, fromExt: fromDb ? 'fromDb' : 'decoded', productType });
       }
 
       // 1. Insertar en payment_events
@@ -400,12 +401,9 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       // For other types (courses): user_id might be auth_id and needs conversion
       let moPublicUserId: string | null = null;
       
-      if (productType === 'subscription_upgrade') {
-        // For upgrades, user_id from the preference IS the public.users.id (no conversion needed)
-        moPublicUserId = resolvedUserId;
-        console.log('[MP webhook MO] ✅ Using direct user_id for upgrade:', { resolvedUserId, moPublicUserId });
-      } else if (resolvedUserId) {
-        // For courses and regular subscriptions, convert auth_id to public.users.id
+      // ALL flows store auth_id as user_id - we must convert to public.users.id
+      if (resolvedUserId) {
+        console.log('[MP webhook MO] Converting auth_id to user_id:', { auth_id: resolvedUserId, productType });
         const { data: userProfile, error: profileError } = await supabase
           .from("users")
           .select("id")
@@ -413,13 +411,17 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
           .maybeSingle();
 
         if (profileError || !userProfile) {
-          console.error('[MP webhook] ❌ Failed to resolve auth_id to user_id (MO):', {
+          console.error('[MP webhook MO] ❌ Failed to resolve auth_id to user_id:', {
             auth_id: resolvedUserId,
-            error: profileError
+            error: profileError,
+            productType
           });
         } else {
           moPublicUserId = userProfile.id;
+          console.log('[MP webhook MO] ✅ Resolved user_id:', { moPublicUserId });
         }
+      } else {
+        console.error('[MP webhook MO] ❌ No resolvedUserId available');
       }
 
       // ¿Hay pago aprobado?

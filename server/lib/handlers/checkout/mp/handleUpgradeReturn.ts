@@ -75,9 +75,27 @@ export async function handleUpgradeReturn(req: Request): Promise<HandleUpgradeRe
     return { success: false, error: "Datos incompletos en la preferencia" };
   }
 
-  // IMPORTANT: user_id from mp_subscription_preferences is ALREADY the public.users.id
-  // because createUpgradePreference saves req.user.id which is the database user ID (not auth_id)
-  const publicUserId = user_id || null;
+  // user_id from mp_subscription_preferences is the auth_id (from supabase.auth.getUser())
+  // We need to convert it to public.users.id
+  let publicUserId: string | null = null;
+  if (user_id) {
+    console.log('[MP upgrade-return] Converting auth_id to user_id:', { auth_id: user_id });
+    const { data: userProfile, error: profileError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("auth_id", user_id)
+      .maybeSingle();
+    
+    if (profileError || !userProfile) {
+      console.error('[MP upgrade-return] ❌ Failed to resolve auth_id to user_id:', {
+        auth_id: user_id,
+        error: profileError
+      });
+    } else {
+      publicUserId = userProfile.id;
+      console.log('[MP upgrade-return] ✅ Resolved user_id:', { publicUserId });
+    }
+  }
 
   const resolvedPlanId = plan_id || await getPlanIdBySlug(supabase, plan_slug);
   
