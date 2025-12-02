@@ -330,7 +330,24 @@ begin
   return new;
 end;
 
----------- FUNCION handle_registered_invitation:
+---------- FUNCION sync_contact_on_user_update:
+
+
+begin
+  -- Solo si cambian full_name o email
+  if (old.full_name is distinct from new.full_name)
+     or (old.email     is distinct from new.email) then
+
+    update public.contacts c
+    set full_name  = coalesce(new.full_name, c.full_name),
+        email      = coalesce(new.email, c.email),
+        updated_at = now()
+    where c.linked_user_id = new.id;
+  end if;
+
+  return new;
+end;
+
 
 
 
