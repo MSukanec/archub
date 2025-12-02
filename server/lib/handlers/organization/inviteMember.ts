@@ -15,6 +15,7 @@ export interface InviteMemberResult {
   data?: {
     invitation: any;
     message: string;
+    isNewUser?: boolean;
   };
   error?: string;
 }
@@ -133,19 +134,98 @@ export async function inviteMember(
       }
     }
 
-    // Verificar si ya existe una invitación pendiente
+    // Verificar si ya existe una invitación para este email en esta organización
     const { data: existingInvitation } = await supabaseAdmin
       .from("organization_invitations")
       .select("id, status")
       .eq("email", email.toLowerCase())
       .eq("organization_id", organizationId)
-      .eq("status", "pending")
-      .single();
+      .maybeSingle();
 
     if (existingInvitation) {
+      if (existingInvitation.status === "pending") {
+        return {
+          success: false,
+          error: "There is already a pending invitation for this email"
+        };
+      }
+      
+      // Si la invitación está en otro estado (accepted, rejected, registered)
+      // y el usuario ya no es miembro activo, podemos re-invitarlo
+      // reseteando la invitación existente
+      const { error: resetError } = await supabaseAdmin
+        .from("organization_invitations")
+        .update({
+          status: "pending",
+          role_id: roleId,
+          accepted_at: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", existingInvitation.id);
+
+      if (resetError) {
+        console.error("Error resetting invitation:", resetError);
+        return {
+          success: false,
+          error: "Failed to reset previous invitation"
+        };
+      }
+
+      // Obtener datos para la notificación/email
+      const inviterMemberData = await supabaseAdmin
+        .from("organization_members")
+        .select("id, users!left(first_name, last_name)")
+        .eq("user_id", userId)
+        .eq("organization_id", organizationId)
+        .maybeSingle();
+
+      const roleDataForReinvite = await supabaseAdmin
+        .from("roles")
+        .select("name")
+        .eq("id", roleId)
+        .maybeSingle();
+
+      const inviterUserData = (inviterMemberData?.data as any)?.users;
+      const inviterNameReinvite = inviterUserData?.first_name && inviterUserData?.last_name 
+        ? `${inviterUserData.first_name} ${inviterUserData.last_name}`
+        : inviterUserData?.first_name || 'Un administrador';
+      const roleNameReinvite = roleDataForReinvite?.data?.name || 'Miembro';
+
+      // Si el usuario existe, crear notificación in-app
+      if (existingUser) {
+        await supabaseAdmin
+          .from("notifications")
+          .insert({
+            type: "organization_invitation",
+            title: `Te invitaron nuevamente a ${orgData?.name || 'una organización'}`,
+            body: `Has sido invitado a unirte a la organización "${orgData?.name || 'una organización'}". Aceptá la invitación para comenzar a colaborar.`,
+            data: {
+              invitation_id: existingInvitation.id,
+              organization_id: organizationId,
+              organization_name: orgData?.name,
+              user_id: existingUser.id,
+            },
+            audience: "direct",
+            created_by: userId,
+          });
+      } else {
+        // Si el usuario NO existe, enviar email
+        await sendInvitationEmail({
+          inviteeEmail: email.toLowerCase(),
+          organizationName: orgData?.name || 'una organización',
+          inviterName: inviterNameReinvite,
+          roleName: roleNameReinvite,
+          invitationId: existingInvitation.id,
+        });
+      }
+
       return {
-        success: false,
-        error: "There is already a pending invitation for this email"
+        success: true,
+        data: {
+          invitation: { id: existingInvitation.id },
+          message: "Invitation resent successfully",
+          isNewUser: !existingUser,
+        }
       };
     }
 
