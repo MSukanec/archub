@@ -13,6 +13,7 @@ import { ClientScheduleItemForm } from '@/features/clients/forms/ClientScheduleI
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
 import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
 import { default as PaymentFeedbackModal } from '@/components/forms/PaymentFeedbackModal';
+import { default as MemberActionConfirmationForm } from '@/features/organization/forms/MemberActionConfirmationForm';
 import { UniversalImportForm } from '@/features/imports';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal, MaterialPaymentForm, PurchaseOrderForm, MaterialPurchaseForm } from '@/features/materials';
 import { UserFormModal, ChangelogFormModal, NotificationFormModal, AnnouncementFormModal, SupportConversationStartModal, PlanFormModal, PlanPriceFormModal, DowngradeModal, UpgradeModal, ResetTestDataModal } from '@/features/users';
@@ -335,6 +336,12 @@ export function initializeModalRegistry(): void {
   registerModal('delete-confirmation', DeleteConfirmationForm as any, { 
     ...generalConfig, 
     size: 'sm',
+    preventCloseOnBackdrop: true,
+  });
+  
+  registerModal('member-action-confirmation', MemberActionConfirmationForm as any, { 
+    ...organizationConfig, 
+    size: 'md',
     preventCloseOnBackdrop: true,
   });
   
