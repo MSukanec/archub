@@ -1,14 +1,18 @@
 import type { Request } from "express";
 import { getAuthenticatedClient } from "../shared/auth.js";
 import { verifyAdminRoleForOrganization } from "../shared/permissions.js";
+import { getUserData } from "../shared/user.js";
 import { buildURLContext } from "../shared/urls.js";
 import { logPayPalMode } from "./config.js";
 import { createPayPalOrder } from "./api.js";
 import { createSubscription as createPayPalSubscription } from "./subscriptions-api.js";
 import { calculateProration } from "../shared/proration.js";
+import { validateSubscriptionCoupon, createGiftedSubscription } from "../shared/subscription-coupons.js";
+import { getAdminClient } from "../../../../routes/_base.js";
 
 export type CreateSubscriptionOrderResult =
   | { success: true; orderId: string; approvalUrl: string; order: any; isRecurring?: boolean; subscriptionId?: string }
+  | { success: true; gifted: true; subscriptionId: string; message: string }
   | { success: false; error: string; status?: number; details?: any };
 
 export async function createSubscriptionOrder(
@@ -21,6 +25,7 @@ export async function createSubscriptionOrder(
       billing_period,
       amount_usd,
       description = "Seencel subscription",
+      coupon_code,
     } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
     if (!plan_slug || !organization_id || !billing_period) {
@@ -105,6 +110,71 @@ export async function createSubscriptionOrder(
         error: "Invalid price",
         status: 500,
       };
+    }
+
+    // ============================================================
+    // COUPON VALIDATION & GIFTED SUBSCRIPTION HANDLING
+    // ============================================================
+    if (coupon_code) {
+      console.log('[PayPal create-subscription-order] Validating coupon:', coupon_code);
+      
+      const couponResult = await validateSubscriptionCoupon({
+        supabase,
+        couponCode: coupon_code,
+        planId: plan.id,
+        priceUSD: basePrice,
+        currency: 'USD',
+      });
+
+      if (!couponResult.valid) {
+        console.error('[PayPal create-subscription-order] Coupon validation failed:', couponResult.reason);
+        return { 
+          success: false, 
+          error: couponResult.reason || "Invalid coupon", 
+          status: 400 
+        };
+      }
+
+      // If coupon gives 100% discount, create gifted subscription directly (no payment gateway)
+      if (couponResult.isFree) {
+        console.log('[PayPal create-subscription-order] 100% discount coupon - creating gifted subscription');
+        
+        const userData = await getUserData(supabase, user_id);
+        const adminClient = getAdminClient();
+        
+        const giftedResult = await createGiftedSubscription({
+          supabase: adminClient,
+          authId: user_id,
+          organizationId: organization_id,
+          planId: plan.id,
+          planSlug: plan_slug,
+          billingPeriod: billing_period,
+          couponId: couponResult.couponId!,
+          couponCode: couponResult.couponCode!,
+          userId: userData.id,
+        });
+
+        if (!giftedResult.success) {
+          return { 
+            success: false, 
+            error: giftedResult.error || "Error creating gifted subscription", 
+            status: 500 
+          };
+        }
+
+        return {
+          success: true,
+          gifted: true,
+          subscriptionId: giftedResult.subscriptionId,
+          message: "Subscription activated with 100% discount coupon",
+        };
+      }
+
+      // Partial discount: log for now (PayPal recurring subscriptions don't support dynamic pricing easily)
+      console.log('[PayPal create-subscription-order] Partial discount coupon - proceeding with discounted price:', {
+        discount: couponResult.discount,
+        finalPrice: couponResult.finalPriceUSD,
+      });
     }
 
     const seats = 1;

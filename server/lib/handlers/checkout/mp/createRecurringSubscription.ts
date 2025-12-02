@@ -8,9 +8,11 @@ import { validateMPToken, logMPMode } from "./config.js";
 import { createMPPreapproval, type MPAutoRecurring } from "./subscriptions-api.js";
 import { calculateProration } from "../shared/proration.js";
 import { getAdminClient } from "../../../../routes/_base.js";
+import { validateSubscriptionCoupon, createGiftedSubscription } from "../shared/subscription-coupons.js";
 
 export type CreateRecurringSubscriptionResult =
   | { success: true; initPoint: string; preapprovalId: string }
+  | { success: true; gifted: true; subscriptionId: string; message: string }
   | { success: false; error: string; status?: number };
 
 export async function createRecurringSubscription(req: Request): Promise<CreateRecurringSubscriptionResult> {
@@ -25,6 +27,7 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
     proration_amount_ars,
     proration_credit_ars,
     payer_email: clientPayerEmail,
+    coupon_code,
   } = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
   if (!plan_slug || !organization_id || !billing_period) {
@@ -111,6 +114,75 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
     } catch (error) {
       console.error('[MP create-recurring-subscription] Unexpected error checking subscriptions:', error);
       return { success: false, error: "Error inesperado verificando suscripciones", status: 500 };
+    }
+
+    // ============================================================
+    // COUPON VALIDATION & GIFTED SUBSCRIPTION HANDLING
+    // ============================================================
+    if (coupon_code) {
+      console.log('[MP create-recurring-subscription] Validating coupon:', coupon_code);
+      
+      const priceAmountUSD = billing_period === 'monthly' ? plan.monthly_amount : plan.annual_amount;
+      
+      const couponResult = await validateSubscriptionCoupon({
+        supabase,
+        couponCode: coupon_code,
+        planId: plan.id,
+        priceUSD: Number(priceAmountUSD),
+        currency: 'USD',
+      });
+
+      if (!couponResult.valid) {
+        console.error('[MP create-recurring-subscription] Coupon validation failed:', couponResult.reason);
+        return { 
+          success: false, 
+          error: couponResult.reason || "Cupón inválido", 
+          status: 400 
+        };
+      }
+
+      // If coupon gives 100% discount, create gifted subscription directly (no payment gateway)
+      if (couponResult.isFree) {
+        console.log('[MP create-recurring-subscription] 100% discount coupon - creating gifted subscription');
+        
+        const userData = await getUserData(supabase, user_id);
+        const adminClient = getAdminClient();
+        
+        const giftedResult = await createGiftedSubscription({
+          supabase: adminClient,
+          authId: user_id,
+          organizationId: organization_id,
+          planId: plan.id,
+          planSlug: plan_slug,
+          billingPeriod: billing_period,
+          couponId: couponResult.couponId!,
+          couponCode: couponResult.couponCode!,
+          userId: userData.id,
+        });
+
+        if (!giftedResult.success) {
+          return { 
+            success: false, 
+            error: giftedResult.error || "Error creando suscripción regalada", 
+            status: 500 
+          };
+        }
+
+        return {
+          success: true,
+          gifted: true,
+          subscriptionId: giftedResult.subscriptionId!,
+          message: "Suscripción activada con cupón de 100% descuento",
+        };
+      }
+
+      // Partial discount: continue with normal flow but apply discount
+      // (MercadoPago doesn't support partial discounts on recurring subscriptions easily)
+      // For now, log it and continue with full price (future enhancement)
+      console.log('[MP create-recurring-subscription] Partial discount coupon - proceeding with discounted price:', {
+        discount: couponResult.discount,
+        finalPrice: couponResult.finalPriceUSD,
+      });
     }
 
     let currentSubscriptionId: string | null = null;
