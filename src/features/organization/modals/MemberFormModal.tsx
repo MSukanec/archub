@@ -372,10 +372,21 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
   const selectedRole = roles.find(r => r.id === watchedRoleId);
 
   const formatPrice = (amountARS: number, amountUSD: number) => {
+    // Use Intl.NumberFormat with currency style for proper locale formatting
+    // Always show 2 decimals for consistency with payment provider receipts
+    const formatAmount = (amount: number, currency: 'USD' | 'ARS') => {
+      return new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(amount);
+    };
+    
     if (isPayPal) {
-      return `USD ${formatCurrency(amountUSD)}`;
+      return formatAmount(amountUSD, 'USD');
     }
-    return `ARS ${formatCurrency(amountARS)}`;
+    return formatAmount(amountARS, 'ARS');
   };
 
   const formPanel = (

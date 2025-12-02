@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { getUserByAuthId } from "@/lib/supabase-helpers";
+import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -619,6 +620,22 @@ export default function SubscriptionCheckout() {
       }
 
       if (payload?.gifted) {
+        // Invalidate all subscription-related queries to refresh UI immediately
+        // Use predicate to match all variants of organization and billing queries
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['current-user'] }),
+          queryClient.invalidateQueries({ queryKey: ['/api/current-user'] }),
+          // Invalidate all organization-related queries (matches all suffixes)
+          queryClient.invalidateQueries({ 
+            predicate: (query) => {
+              const key = query.queryKey;
+              if (!Array.isArray(key)) return false;
+              const first = key[0] as string;
+              return first.includes('organization') || first.includes('billing') || first.includes('members');
+            }
+          }),
+        ]);
+        
         toast({
           title: "¡Suscripción activada!",
           description: "Tu cupón de 100% descuento ha sido aplicado. Tu suscripción está activa.",
@@ -742,6 +759,22 @@ export default function SubscriptionCheckout() {
       }
 
       if (payload?.gifted) {
+        // Invalidate all subscription-related queries to refresh UI immediately
+        // Use predicate to match all variants of organization and billing queries
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['current-user'] }),
+          queryClient.invalidateQueries({ queryKey: ['/api/current-user'] }),
+          // Invalidate all organization-related queries (matches all suffixes)
+          queryClient.invalidateQueries({ 
+            predicate: (query) => {
+              const key = query.queryKey;
+              if (!Array.isArray(key)) return false;
+              const first = key[0] as string;
+              return first.includes('organization') || first.includes('billing') || first.includes('members');
+            }
+          }),
+        ]);
+        
         toast({
           title: "¡Suscripción activada!",
           description: "Tu cupón de 100% descuento ha sido aplicado. Tu suscripción está activa.",
