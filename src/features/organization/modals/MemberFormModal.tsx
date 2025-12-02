@@ -11,17 +11,14 @@ import { FormModalHeader } from '@/components/modal';
 import { FormModalFooter } from '@/components/modal';
 import { FormModalLayout } from '@/components/modal';
 import { useModalPanelStore } from '@/components/modal';
-import { useGlobalModalStore } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Users, UserPlus, CreditCard, Calculator, ArrowLeft, Calendar, DollarSign, Loader2, ExternalLink, Building2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Users, UserPlus, Calendar, DollarSign, Loader2, Building2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/currency-formatter';
-import { SiMercadopago } from 'react-icons/si';
 
 const memberSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -69,17 +66,15 @@ interface MemberModalProps {
   onClose: () => void;
 }
 
-type ModalStep = 'form' | 'pricing' | 'paying';
-
 export function MemberFormModal({ editingMember, defaultEmail, onClose }: MemberModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();
   const { setPanel } = useModalPanelStore();
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState<ModalStep>('form');
   const [pricingData, setPricingData] = useState<SeatPricingData | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [hasCalculated, setHasCalculated] = useState(false);
   
   const isReinvite = !!defaultEmail;
   const organizationId = userData?.preferences?.last_organization_id;
@@ -107,6 +102,9 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
     },
   });
 
+  const watchedEmail = form.watch('email');
+  const watchedRoleId = form.watch('roleId');
+
   useEffect(() => {
     if (editingMember) {
       form.reset({
@@ -122,6 +120,15 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       setPanel('edit');
     }
   }, [editingMember, defaultEmail, form, setPanel]);
+
+  useEffect(() => {
+    if (!isEditing && watchedEmail && watchedRoleId && !hasCalculated) {
+      const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedEmail);
+      if (isValidEmail) {
+        calculateSeatCost({ email: watchedEmail, roleId: watchedRoleId });
+      }
+    }
+  }, [watchedEmail, watchedRoleId, isEditing, hasCalculated]);
 
   const calculateSeatCost = useCallback(async (data: MemberFormData): Promise<SeatPricingData | null> => {
     if (!organizationId) return null;
@@ -152,18 +159,17 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
         throw new Error(result.error || 'Error calculando costo');
       }
 
-      return result.data as SeatPricingData;
+      const pricingResult = result.data as SeatPricingData;
+      setPricingData(pricingResult);
+      setHasCalculated(true);
+      return pricingResult;
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+      console.error('Error calculating seat cost:', error);
       return null;
     } finally {
       setIsCalculating(false);
     }
-  }, [organizationId, toast]);
+  }, [organizationId]);
 
   const createMemberMutation = useMutation({
     mutationFn: async (memberData: MemberFormData) => {
@@ -234,8 +240,8 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
 
   const handleClose = () => {
     form.reset();
-    setStep('form');
     setPricingData(null);
+    setHasCalculated(false);
     setPanel('view');
     onClose();
   };
@@ -251,10 +257,12 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       return;
     }
 
-    const pricing = await calculateSeatCost(data);
+    let pricing = pricingData;
+    if (!pricing) {
+      pricing = await calculateSeatCost(data);
+    }
+    
     if (!pricing) return;
-
-    setPricingData(pricing);
 
     if (!pricing.canAddSeat) {
       toast({
@@ -268,7 +276,7 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
     const needsPayment = pricing.pricing && pricing.pricing.proratedAmountARS > 0;
     
     if (needsPayment) {
-      setStep('pricing');
+      await handleProceedToPayment(pricing);
     } else {
       setIsLoading(true);
       try {
@@ -279,10 +287,9 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
     }
   };
 
-  const handlePayWithMP = async () => {
-    if (!pricingData?.subscription || !pricingData?.pricing) return;
+  const handleProceedToPayment = async (pricing: SeatPricingData) => {
+    if (!pricing?.subscription || !pricing?.pricing) return;
     
-    setStep('paying');
     setIsLoading(true);
     
     try {
@@ -303,9 +310,9 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
           organization_id: organizationId,
           invitee_email: formData.email,
           role_id: formData.roleId,
-          prorated_amount_ars: pricingData.pricing.proratedAmountARS,
-          subscription_id: pricingData.subscription.id,
-          billing_period: pricingData.subscription.billingPeriod,
+          prorated_amount_ars: pricing.pricing.proratedAmountARS,
+          subscription_id: pricing.subscription.id,
+          billing_period: pricing.subscription.billingPeriod,
         }),
       });
 
@@ -322,11 +329,12 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
         description: error.message,
         variant: 'destructive',
       });
-      setStep('pricing');
-    } finally {
       setIsLoading(false);
     }
   };
+
+  const needsPayment = pricingData?.pricing && pricingData.pricing.proratedAmountARS > 0;
+  const selectedRole = roles.find(r => r.id === watchedRoleId);
 
   const formPanel = (
     <Form {...form}>
@@ -379,192 +387,136 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
             </FormItem>
           )}
         />
+
+        {!isEditing && watchedEmail && watchedRoleId && (
+          <>
+            <Separator className="my-4" />
+            
+            {isCalculating ? (
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-20 w-full" />
+              </div>
+            ) : pricingData && pricingData.pricing && pricingData.subscription ? (
+              <div className="space-y-3 p-4 rounded-lg bg-muted/50 border">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="h-4 w-4 text-primary" />
+                  <span className="font-medium text-sm">Costo del nuevo miembro</span>
+                </div>
+
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Miembro:</span>
+                    <span className="font-medium">{pricingData.invitation.email}</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Rol:</span>
+                    <Badge variant="secondary" className="text-xs">{selectedRole?.name || pricingData.invitation.roleName}</Badge>
+                  </div>
+
+                  <Separator className="my-2" />
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <Building2 className="h-3 w-3" />
+                      <span>Plan:</span>
+                    </div>
+                    <Badge variant="outline" className="text-xs">{pricingData.organization?.planName}</Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      <span>Período:</span>
+                    </div>
+                    <span>{pricingData.subscription.billingPeriod === 'monthly' ? 'Mensual' : 'Anual'}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Días restantes:</span>
+                    <span>{pricingData.pricing.daysRemaining} de {pricingData.pricing.totalDays}</span>
+                  </div>
+
+                  <Separator className="my-2" />
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Precio asiento completo:</span>
+                    <span>ARS {formatCurrency(pricingData.pricing.seatPriceARS)}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Porcentaje prorrateado:</span>
+                    <span>{pricingData.pricing.percentageRemaining}%</span>
+                  </div>
+
+                  <Separator className="my-2" />
+
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="font-semibold">Total a pagar ahora:</span>
+                    <span className="text-lg font-bold text-primary">
+                      ARS {formatCurrency(pricingData.pricing.proratedAmountARS)}
+                    </span>
+                  </div>
+
+                  <div className="text-xs text-muted-foreground text-right">
+                    ≈ USD {formatCurrency(pricingData.pricing.proratedAmountUSD)}
+                  </div>
+                </div>
+
+                <p className="text-xs text-muted-foreground mt-2">
+                  El próximo cobro incluirá automáticamente el costo completo de este asiento.
+                </p>
+              </div>
+            ) : pricingData && !pricingData.canAddSeat ? (
+              <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
+                {pricingData.error || 'No se puede agregar este miembro'}
+              </div>
+            ) : null}
+          </>
+        )}
       </form>
     </Form>
   );
-
-  const pricingPanel = pricingData && pricingData.pricing && pricingData.subscription && (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setStep('form')}
-          className="h-auto p-0"
-          data-testid="button-back-to-form"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Volver
-        </Button>
-      </div>
-
-      <Card className="border-primary/20 bg-primary/5">
-        <CardHeader className="pb-2">
-          <div className="flex items-center gap-2">
-            <Calculator className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">Costo del nuevo miembro</CardTitle>
-          </div>
-          <CardDescription>
-            Pago prorrateado hasta el final del período actual
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Miembro a invitar:</span>
-            <span className="font-medium">{pricingData.invitation.email}</span>
-          </div>
-          
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Rol:</span>
-            <Badge variant="secondary">{pricingData.invitation.roleName}</Badge>
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Building2 className="h-4 w-4" />
-              <span>Plan actual:</span>
-            </div>
-            <Badge variant="outline">{pricingData.organization?.planName}</Badge>
-          </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              <span>Período de facturación:</span>
-            </div>
-            <span>{pricingData.subscription.billingPeriod === 'monthly' ? 'Mensual' : 'Anual'}</span>
-          </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Días restantes del ciclo:</span>
-            <span>{pricingData.pricing.daysRemaining} de {pricingData.pricing.totalDays} días</span>
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Precio del asiento completo:</span>
-            <span>ARS {formatCurrency(pricingData.pricing.seatPriceARS)}</span>
-          </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Porcentaje prorrateado:</span>
-            <span>{pricingData.pricing.percentageRemaining}%</span>
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <DollarSign className="h-5 w-5 text-primary" />
-              <span className="font-semibold">Total a pagar ahora:</span>
-            </div>
-            <span className="text-xl font-bold text-primary">
-              ARS {formatCurrency(pricingData.pricing.proratedAmountARS)}
-            </span>
-          </div>
-
-          <div className="text-xs text-muted-foreground text-center">
-            ≈ USD {formatCurrency(pricingData.pricing.proratedAmountUSD)}
-          </div>
-
-          <p className="text-xs text-muted-foreground mt-2">
-            El próximo cobro incluirá automáticamente el costo completo de este asiento.
-          </p>
-        </CardContent>
-      </Card>
-
-      <div className="pt-2">
-        <Button
-          className="w-full gap-2"
-          size="lg"
-          onClick={handlePayWithMP}
-          disabled={isLoading}
-          data-testid="button-pay-mercadopago"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Redirigiendo a MercadoPago...
-            </>
-          ) : (
-            <>
-              <SiMercadopago className="h-5 w-5" />
-              Pagar con MercadoPago
-              <ExternalLink className="h-4 w-4" />
-            </>
-          )}
-        </Button>
-      </div>
-    </div>
-  );
-
-  const payingPanel = (
-    <div className="flex flex-col items-center justify-center py-8 space-y-4">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      <p className="text-muted-foreground">Redirigiendo al pago...</p>
-      <p className="text-xs text-muted-foreground">
-        Serás redirigido a MercadoPago para completar el pago de forma segura.
-      </p>
-    </div>
-  );
-
-  const getCurrentPanel = () => {
-    if (isEditing) return formPanel;
-    
-    switch (step) {
-      case 'pricing':
-        return pricingPanel;
-      case 'paying':
-        return payingPanel;
-      default:
-        return formPanel;
-    }
-  };
   
   const headerContent = (
     <FormModalHeader
       title={
         isEditing 
           ? 'Editar Miembro' 
-          : step === 'pricing' || step === 'paying'
-            ? 'Confirmar invitación'
-            : (isReinvite ? 'Reinvitar Miembro' : 'Invitar Miembro')
+          : (isReinvite ? 'Reinvitar Miembro' : 'Invitar Miembro')
       }
       description={
         isEditing 
           ? 'Actualiza el rol y permisos del miembro en tu organización.' 
-          : step === 'pricing'
-            ? 'Revisa el costo prorrateado y confirma el pago para enviar la invitación.'
-            : step === 'paying'
-              ? 'Completando el pago...'
-              : isReinvite 
-                ? 'Selecciona el rol para reinvitar a este miembro anterior.'
-                : 'Ingresa el email del nuevo miembro. Si no tiene cuenta, recibirá una invitación por correo.'
+          : isReinvite 
+            ? 'Selecciona el rol para reinvitar a este miembro anterior.'
+            : 'Ingresa el email del nuevo miembro. Si no tiene cuenta, recibirá una invitación por correo.'
       }
-      icon={step === 'pricing' ? CreditCard : (isEditing ? Users : UserPlus)}
+      icon={isEditing ? Users : UserPlus}
     />
   );
 
-  const showFooter = step === 'form';
-
-  const footerContent = showFooter ? (
+  const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={handleClose}
       rightLabel={
-        isCalculating 
-          ? 'Calculando...' 
-          : isEditing 
-            ? 'Actualizar' 
-            : (isReinvite ? 'Reinvitar' : 'Continuar')
+        isLoading 
+          ? (needsPayment ? 'Redirigiendo...' : 'Procesando...')
+          : isCalculating 
+            ? 'Calculando...' 
+            : isEditing 
+              ? 'Actualizar' 
+              : needsPayment
+                ? 'Proceder al Pago'
+                : (isReinvite ? 'Reinvitar' : 'Invitar')
       }
       onRightClick={form.handleSubmit(handleFormSubmit)}
       isSubmitting={isLoading || isCalculating}
+      rightIcon={isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}
     />
-  ) : null;
+  );
 
   const viewPanel = editingMember ? (
     <div className="space-y-4">
@@ -587,7 +539,7 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
     <FormModalLayout
       columns={1}
       viewPanel={viewPanel}
-      editPanel={getCurrentPanel()}
+      editPanel={formPanel}
       headerContent={headerContent}
       footerContent={footerContent}
       onClose={handleClose}
