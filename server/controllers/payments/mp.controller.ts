@@ -331,6 +331,14 @@ export async function createSeat(req: Request, res: Response) {
 }
 
 export async function seatSuccessHandler(req: Request, res: Response) {
-  const { handleSeatReturn } = await import("../../lib/handlers/checkout/mp/handleSeatReturn.js");
-  return handleSeatReturn(req, res);
+  const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
+  
+  try {
+    console.log('[MP seat-success-handler] Starting...');
+    const { handleSeatReturn } = await import("../../lib/handlers/checkout/mp/handleSeatReturn.js");
+    return await handleSeatReturn(req, res);
+  } catch (e: any) {
+    console.error("[MP seat-success-handler] Fatal error:", e);
+    return res.redirect(`${baseUrl}/organization/members?payment=error&reason=${encodeURIComponent(e.message || 'unknown')}`);
+  }
 }
