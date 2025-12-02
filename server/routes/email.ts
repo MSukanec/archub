@@ -7,6 +7,7 @@ import WelcomeEmail from '../../src/emails/WelcomeEmail';
 import PurchaseEmail from '../../src/emails/PurchaseEmail';
 import ContactEmail from '../../src/emails/ContactEmail';
 import AdminBankTransferAlert from '../../src/emails/AdminBankTransferAlert';
+import InvitationEmail from '../../src/emails/InvitationEmail';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
@@ -341,6 +342,117 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
     } catch (error: any) {
       console.error('❌ Preview error:', error);
       return res.status(500).json({ error: error.message });
+    }
+  });
+
+  // POST /api/admin/email-preview/invitation - Preview organization invitation email
+  app.post('/api/admin/email-preview/invitation', async (req, res) => {
+    try {
+      const {
+        inviteeEmail = 'invitado@example.com',
+        organizationName = 'Constructora ABC',
+        inviterName = 'Juan Pérez',
+        roleName = 'Miembro',
+        adminName = 'El Equipo de Seencel',
+      } = req.body;
+
+      const invitationLink = `https://seencel.com/register?invitation=preview-token`;
+      
+      const emailHtml = await render(
+        InvitationEmail({
+          inviteeEmail,
+          organizationName,
+          inviterName,
+          roleName,
+          invitationLink,
+          adminName,
+        }) as any
+      );
+
+      return res.json({
+        ok: true,
+        type: 'invitation',
+        html: emailHtml,
+        preview: {
+          subject: `Te invitaron a unirte a ${organizationName} en Seencel`,
+          from: 'Seencel <sistema@seencel.com>',
+          to: inviteeEmail,
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ Preview error:', error);
+      return res.status(500).json({ error: error.message });
+    }
+  });
+
+  // POST /api/email/send-invitation - Send organization invitation email
+  app.post('/api/email/send-invitation', async (req, res) => {
+    try {
+      if (!RESEND_API_KEY) {
+        console.error('❌ RESEND_API_KEY not configured');
+        return res.status(500).json({
+          ok: false,
+          error: 'Email service not configured'
+        });
+      }
+
+      const { 
+        inviteeEmail,
+        organizationName,
+        inviterName,
+        roleName = 'Miembro',
+        invitationId,
+      } = req.body;
+
+      if (!inviteeEmail || !organizationName || !invitationId) {
+        return res.status(400).json({
+          ok: false,
+          error: 'Missing required fields: inviteeEmail, organizationName, invitationId'
+        });
+      }
+
+      const resend = new Resend(RESEND_API_KEY);
+      
+      const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
+      const invitationLink = `${baseUrl}/register?invitation=${invitationId}`;
+
+      const emailHtml = await render(
+        InvitationEmail({
+          inviteeEmail,
+          organizationName,
+          inviterName: inviterName || 'Un administrador',
+          roleName,
+          invitationLink,
+          adminName: 'El Equipo de Seencel',
+        }) as any
+      );
+
+      const result = await resend.emails.send({
+        from: 'Seencel <sistema@seencel.com>',
+        to: inviteeEmail,
+        subject: `Te invitaron a unirte a ${organizationName} en Seencel`,
+        html: emailHtml
+      });
+
+      if (result.error) {
+        console.error('❌ Resend error (invitation email):', result.error);
+        return res.status(500).json({
+          ok: false,
+          error: result.error.message
+        });
+      }
+
+      console.log('✅ Invitation email sent to:', inviteeEmail);
+      return res.json({
+        ok: true,
+        emailId: result.data?.id
+      });
+    } catch (error: any) {
+      console.error('❌ Invitation email error:', error);
+      return res.status(500).json({
+        ok: false,
+        error: error.message || 'Failed to send invitation email'
+      });
     }
   });
 
