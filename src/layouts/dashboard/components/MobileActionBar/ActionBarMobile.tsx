@@ -176,7 +176,7 @@ export function ActionBarMobile() {
       >
         <div className={`flex items-center justify-between ${actions.create ? 'px-4' : 'px-8'}`}>
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/organization/dashboard')}
             className="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-colors group"
           >
             <Home 

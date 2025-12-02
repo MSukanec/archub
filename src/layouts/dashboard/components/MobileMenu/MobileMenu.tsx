@@ -252,6 +252,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                               return;
                             }
                             setSidebarLevel('project');
+                            if (contextButton.href) {
+                              navigate(contextButton.href);
+                              handleCloseMenu();
+                            }
                           }}
                           isActive={isActive}
                           showChevron={true}
@@ -263,11 +267,38 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       return button;
                     }
 
+                    if (contextButton.id === 'organization') {
+                      const isActive = contextButton.href ? isButtonActive(contextButton.href) :
+                        location.startsWith('/organization');
+
+                      return (
+                        <MobileMenuButton
+                          key={contextButton.id}
+                          icon={contextButton.icon}
+                          label={contextButton.label}
+                          onClick={() => {
+                            setSidebarLevel('organization');
+                            if (contextButton.href) {
+                              navigate(contextButton.href);
+                              handleCloseMenu();
+                            }
+                          }}
+                          isActive={isActive}
+                          showChevron={true}
+                          testId={contextButton.testId.replace('sidebar', 'mobile')}
+                        />
+                      );
+                    }
+
                     const isActive = contextButton.href ? isButtonActive(contextButton.href) :
                       location.startsWith(`/${contextButton.id}`);
 
                     const handleClick = () => {
                       setSidebarLevel(contextButton.id);
+                      if (contextButton.href) {
+                        navigate(contextButton.href);
+                        handleCloseMenu();
+                      }
                     };
 
                     const button = (
@@ -459,7 +490,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 </div>
               )}
 
-              {(sidebarLevel === 'admin' || sidebarLevel === 'community' || sidebarLevel === 'learning' || sidebarLevel === 'general' || sidebarLevel === 'settings') && (
+              {(sidebarLevel === 'admin' || sidebarLevel === 'community' || sidebarLevel === 'learning' || sidebarLevel === 'general' || sidebarLevel === 'founders') && (
                 <div className="flex-1" />
               )}
 
