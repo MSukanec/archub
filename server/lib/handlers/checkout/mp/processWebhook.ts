@@ -147,9 +147,16 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       const couponCode = md.coupon_code || fromExt.coupon_code || null;
       const couponId = md.coupon_id || fromExt.coupon_id || null;
 
-      // CRITICAL: Convert auth_id to public.users.id (required for both courses AND subscriptions)
+      // CRITICAL: Get user_id for payment record
+      // For subscription_upgrade: user_id from mp_subscription_preferences is ALREADY public.users.id
+      // For other types (courses): user_id might be auth_id and needs conversion
       let publicUserId: string | null = null;
-      if (resolvedUserId) {
+      
+      if (productType === 'subscription_upgrade') {
+        // For upgrades, user_id from the preference IS the public.users.id (no conversion needed)
+        publicUserId = resolvedUserId;
+      } else if (resolvedUserId) {
+        // For courses and regular subscriptions, convert auth_id to public.users.id
         const { data: userProfile, error: profileError } = await supabase
           .from("users")
           .select("id")
@@ -387,9 +394,16 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       const couponCode = md.coupon_code || fromExt.coupon_code || null;
       const couponId = md.coupon_id || fromExt.coupon_id || null;
 
-      // CRITICAL: Convert auth_id to public.users.id (required for both courses AND subscriptions - merchant_order)
+      // CRITICAL: Get user_id for payment record (merchant_order)
+      // For subscription_upgrade: user_id from mp_subscription_preferences is ALREADY public.users.id
+      // For other types (courses): user_id might be auth_id and needs conversion
       let moPublicUserId: string | null = null;
-      if (resolvedUserId) {
+      
+      if (productType === 'subscription_upgrade') {
+        // For upgrades, user_id from the preference IS the public.users.id (no conversion needed)
+        moPublicUserId = resolvedUserId;
+      } else if (resolvedUserId) {
+        // For courses and regular subscriptions, convert auth_id to public.users.id
         const { data: userProfile, error: profileError } = await supabase
           .from("users")
           .select("id")

@@ -75,15 +75,9 @@ export async function handleUpgradeReturn(req: Request): Promise<HandleUpgradeRe
     return { success: false, error: "Datos incompletos en la preferencia" };
   }
 
-  let publicUserId: string | null = null;
-  if (user_id) {
-    const { data: userProfile } = await supabase
-      .from("users")
-      .select("id")
-      .eq("auth_id", user_id)
-      .maybeSingle();
-    publicUserId = userProfile?.id || null;
-  }
+  // IMPORTANT: user_id from mp_subscription_preferences is ALREADY the public.users.id
+  // because createUpgradePreference saves req.user.id which is the database user ID (not auth_id)
+  const publicUserId = user_id || null;
 
   const resolvedPlanId = plan_id || await getPlanIdBySlug(supabase, plan_slug);
   
