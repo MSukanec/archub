@@ -8,8 +8,9 @@ import * as mpController from '../controllers/payments/mp.controller.js';
 import * as paypalController from '../controllers/payments/paypal.controller.js';
 import * as bankTransferController from '../controllers/payments/bankTransfer.controller.js';
 
-// Import proration calculator
+// Import proration calculators
 import { calculateProration } from '../lib/handlers/checkout/shared/proration.js';
+import { calculateSeatProration } from '../lib/handlers/checkout/shared/seat-proration.js';
 
 /**
  * Helper function to verify admin access
@@ -165,6 +166,88 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
     }
   });
 
+  // POST /api/checkout/calculate-seat-proration - Calculate cost for adding a new seat/member
+  app.post("/api/checkout/calculate-seat-proration", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "No autorizado" });
+      }
+
+      const token = authHeader.substring(7);
+      const authSupabase = createClient(
+        process.env.VITE_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { persistSession: false } }
+      );
+
+      const { data: { user: authUser }, error: authError } = await authSupabase.auth.getUser(token);
+      if (authError || !authUser) {
+        return res.status(401).json({ error: "Token inválido o expirado" });
+      }
+
+      const { organization_id, invitee_email, role_id } = req.body;
+
+      if (!organization_id || !invitee_email || !role_id) {
+        return res.status(400).json({ 
+          error: "Faltan parámetros: organization_id, invitee_email, role_id" 
+        });
+      }
+
+      const adminClient = getAdminClient();
+      const { data: dbUser, error: userError } = await adminClient
+        .from('users')
+        .select('id')
+        .eq('auth_id', authUser.id)
+        .single();
+
+      if (userError || !dbUser) {
+        console.error('[seat-proration] User lookup error:', userError);
+        return res.status(401).json({ error: "Usuario no encontrado" });
+      }
+
+      // SECURITY: Verify user is admin of the organization
+      const { data: membership, error: membershipError } = await adminClient
+        .from('organization_members')
+        .select(`
+          id, 
+          role_id,
+          roles!inner (name)
+        `)
+        .eq('user_id', dbUser.id)
+        .eq('organization_id', organization_id)
+        .eq('is_active', true)
+        .single();
+
+      if (membershipError || !membership) {
+        return res.status(403).json({ error: "No tienes acceso a esta organización" });
+      }
+
+      const roleName = (membership.roles as any)?.name?.toLowerCase() || '';
+      if (!roleName.includes('admin') && !roleName.includes('owner')) {
+        return res.status(403).json({ error: "Solo los administradores pueden invitar miembros" });
+      }
+
+      const result = await calculateSeatProration(adminClient, {
+        organizationId: organization_id,
+        inviteeEmail: invitee_email,
+        roleId: role_id,
+      });
+
+      console.log('[seat-proration] Calculated:', {
+        canAddSeat: result.canAddSeat,
+        organization: result.organization?.name,
+        pricing: result.pricing,
+        invitation: result.invitation,
+      });
+
+      return res.json({ ok: true, data: result });
+    } catch (error: any) {
+      console.error('[seat-proration] Error:', error);
+      return res.status(500).json({ error: error.message || "Error interno" });
+    }
+  });
+
   // ==================== MERCADO PAGO CHECKOUT & WEBHOOKS ====================
   
   // POST /api/checkout/mp/create-course
@@ -187,6 +270,12 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   
   // GET /api/checkout/mp/upgrade-success (NO auth required - redirect endpoint for upgrades)
   app.get("/api/checkout/mp/upgrade-success", mpController.upgradeSuccessHandler);
+  
+  // POST /api/checkout/mp/create-seat (Authenticated - create seat payment for new member invitation)
+  app.post("/api/checkout/mp/create-seat", mpController.createSeat);
+  
+  // GET /api/checkout/mp/seat-success (NO auth required - redirect endpoint for seat payments)
+  app.get("/api/checkout/mp/seat-success", mpController.seatSuccessHandler);
   
   // POST /api/checkout/mp/webhook (NO auth required - webhook endpoint)
   app.post("/api/checkout/mp/webhook", mpController.webhook);

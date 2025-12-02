@@ -249,3 +249,88 @@ export async function upgradeSuccessHandler(req: Request, res: Response) {
     return res.redirect(`/organization/billing?payment=error`);
   }
 }
+
+export async function createSeat(req: Request, res: Response) {
+  try {
+    const { createSeatPreference } = await import("../../lib/handlers/checkout/mp/createSeatPreference.js");
+    const { createClient } = await import("@supabase/supabase-js");
+    const { getAdminClient } = await import("../../routes/_base.js");
+    
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ ok: false, error: "No autorizado" });
+    }
+    
+    const token = authHeader.substring(7);
+    const authSupabase = createClient(
+      process.env.VITE_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { persistSession: false } }
+    );
+    
+    const { data: { user: authUser }, error: authError } = await authSupabase.auth.getUser(token);
+    if (authError || !authUser) {
+      return res.status(401).json({ ok: false, error: "Token inválido o expirado" });
+    }
+    
+    const { 
+      organization_id, 
+      invitee_email, 
+      role_id, 
+      prorated_amount_ars,
+      subscription_id,
+      billing_period 
+    } = req.body;
+    
+    if (!organization_id || !invitee_email || !role_id || !prorated_amount_ars || !subscription_id || !billing_period) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: "Faltan parámetros requeridos" 
+      });
+    }
+    
+    const adminClient = getAdminClient();
+    const { data: dbUser, error: userError } = await adminClient
+      .from('users')
+      .select('id')
+      .eq('auth_id', authUser.id)
+      .single();
+    
+    if (userError || !dbUser) {
+      return res.status(401).json({ ok: false, error: "Usuario no encontrado" });
+    }
+    
+    const result = await createSeatPreference({
+      supabase: adminClient,
+      userId: dbUser.id,
+      authId: authUser.id,
+      organizationId: organization_id,
+      inviteeEmail: invitee_email,
+      roleId: role_id,
+      proratedAmountARS: prorated_amount_ars,
+      subscriptionId: subscription_id,
+      billingPeriod: billing_period,
+    });
+    
+    if (!result.success) {
+      return res.status(400).json({ ok: false, error: result.error });
+    }
+    
+    return res.json({
+      ok: true,
+      init_point: result.preferenceUrl,
+      preference_id: result.preferenceId,
+    });
+  } catch (error: any) {
+    console.error("[MP create-seat controller] Error:", error);
+    return res.status(500).json({
+      ok: false,
+      error: error.message || "Failed to create seat payment preference"
+    });
+  }
+}
+
+export async function seatSuccessHandler(req: Request, res: Response) {
+  const { handleSeatReturn } = await import("../../lib/handlers/checkout/mp/handleSeatReturn.js");
+  return handleSeatReturn(req, res);
+}
