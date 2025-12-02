@@ -277,6 +277,9 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   // GET /api/checkout/mp/seat-success (NO auth required - redirect endpoint for seat payments)
   app.get("/api/checkout/mp/seat-success", mpController.seatSuccessHandler);
   
+  // GET /api/checkout/mp/seat-subscription-success (NO auth required - redirect for first seat subscription on gifted orgs)
+  app.get("/api/checkout/mp/seat-subscription-success", mpController.seatSubscriptionSuccessHandler);
+  
   // POST /api/checkout/mp/webhook (NO auth required - webhook endpoint)
   app.post("/api/checkout/mp/webhook", mpController.webhook);
   app.options("/api/checkout/mp/webhook", mpController.webhook);

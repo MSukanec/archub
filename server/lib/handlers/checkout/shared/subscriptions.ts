@@ -624,3 +624,167 @@ export async function upgradeOrganizationPlan(
     );
   }
 }
+
+/**
+ * Create a gifted subscription (100% discount coupon).
+ * This creates a subscription WITHOUT going through MP/PayPal.
+ * The owner is marked as non-billable.
+ * 
+ * IMPORTANT: When the org later adds paid members, the system must
+ * detect that there's no provider_subscription_id and CREATE a new
+ * MP subscription instead of trying to UPDATE one that doesn't exist.
+ */
+export type CreateGiftedSubscriptionParams = {
+  organizationId: string;
+  planId: string;
+  billingPeriod: 'monthly' | 'annual';
+  userId: string;
+  couponId: string;
+  couponCode: string;
+  originalAmount: number;
+  currency: string;
+};
+
+export type CreateGiftedSubscriptionResult = {
+  success: boolean;
+  subscriptionId?: string;
+  error?: string;
+};
+
+export async function createGiftedSubscription(
+  supabase: SupabaseClient,
+  params: CreateGiftedSubscriptionParams
+): Promise<CreateGiftedSubscriptionResult> {
+  console.log('[subscriptions] Creating gifted subscription with coupon:', {
+    organizationId: params.organizationId,
+    planId: params.planId,
+    billingPeriod: params.billingPeriod,
+    couponCode: params.couponCode,
+  });
+
+  try {
+    // 1. Cancel any existing active subscriptions
+    const { error: cancelError } = await supabase
+      .from('organization_subscriptions')
+      .update({ 
+        status: 'expired', 
+        cancelled_at: new Date().toISOString() 
+      })
+      .eq('organization_id', params.organizationId)
+      .eq('status', 'active');
+    
+    if (cancelError) {
+      console.error('[subscriptions] Error cancelling previous subscription:', cancelError);
+    }
+
+    // 2. Calculate expiration date
+    const expiresAt = new Date();
+    if (params.billingPeriod === 'monthly') {
+      expiresAt.setMonth(expiresAt.getMonth() + 1);
+    } else {
+      expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+    }
+
+    // 3. Create the subscription WITHOUT provider_subscription_id
+    // This is the key difference - no MP/PayPal subscription is created
+    const { data: subscription, error: subError } = await supabase
+      .from('organization_subscriptions')
+      .insert({
+        organization_id: params.organizationId,
+        plan_id: params.planId,
+        payment_id: null, // No payment for gifted subscriptions
+        provider_subscription_id: null, // KEY: No external subscription
+        status: 'active',
+        billing_period: params.billingPeriod,
+        started_at: new Date().toISOString(),
+        expires_at: expiresAt.toISOString(),
+        amount: 0, // Free with coupon
+        currency: params.currency,
+        coupon_id: params.couponId,
+        coupon_code: params.couponCode,
+      })
+      .select()
+      .single();
+
+    if (subError || !subscription) {
+      console.error('[subscriptions] Error creating gifted subscription:', subError);
+      return { success: false, error: subError?.message || 'Error creating subscription' };
+    }
+
+    console.log('[subscriptions] Gifted subscription created:', subscription.id);
+
+    // 4. Update organization's plan
+    const { error: orgError } = await supabase
+      .from('organizations')
+      .update({ plan_id: params.planId })
+      .eq('id', params.organizationId);
+
+    if (orgError) {
+      console.error('[subscriptions] Error updating organization plan:', orgError);
+      // Rollback the subscription
+      await supabase
+        .from('organization_subscriptions')
+        .delete()
+        .eq('id', subscription.id);
+      return { success: false, error: 'Error updating organization' };
+    }
+
+    // 5. Mark the owner as NON-BILLABLE
+    // This ensures the owner doesn't count toward seat billing
+    const { error: memberError } = await supabase
+      .from('organization_members')
+      .update({ is_billable: false })
+      .eq('organization_id', params.organizationId)
+      .eq('user_id', params.userId)
+      .eq('is_active', true);
+
+    if (memberError) {
+      console.error('[subscriptions] Error marking owner as non-billable:', memberError);
+      // Non-fatal, continue
+    } else {
+      console.log('[subscriptions] Owner marked as non-billable');
+    }
+
+    // 6. Get plan name for limits
+    const { data: plan } = await supabase
+      .from('plans')
+      .select('name')
+      .eq('id', params.planId)
+      .single();
+
+    const planName = plan?.name || 'Pro';
+
+    // 7. Apply plan limits
+    const limitsResult = await applyPlanLimits(supabase, params.organizationId, planName);
+    console.log('[subscriptions] Plan limits applied:', limitsResult);
+
+    // 8. Reactivate any suspended bonus course enrollments
+    const reactivateResult = await reactivateBonusCourseEnrollments(supabase, params.organizationId);
+    if (reactivateResult.reactivated > 0) {
+      console.log(`[subscriptions] Reactivated ${reactivateResult.reactivated} bonus course enrollments`);
+    }
+
+    // 9. Apply Founders Program for annual subscriptions
+    if (params.billingPeriod === 'annual') {
+      await applyFoundersProgram(
+        supabase,
+        params.organizationId,
+        params.userId,
+        params.billingPeriod
+      );
+    }
+
+    console.log('[subscriptions] Gifted subscription setup complete:', {
+      subscriptionId: subscription.id,
+      planId: params.planId,
+      billingPeriod: params.billingPeriod,
+      expiresAt: expiresAt.toISOString(),
+    });
+
+    return { success: true, subscriptionId: subscription.id };
+
+  } catch (error: any) {
+    console.error('[subscriptions] Unexpected error creating gifted subscription:', error);
+    return { success: false, error: error.message || 'Unexpected error' };
+  }
+}

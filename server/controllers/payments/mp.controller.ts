@@ -253,6 +253,7 @@ export async function upgradeSuccessHandler(req: Request, res: Response) {
 export async function createSeat(req: Request, res: Response) {
   try {
     const { createSeatPreference } = await import("../../lib/handlers/checkout/mp/createSeatPreference.js");
+    const { createSeatSubscription } = await import("../../lib/handlers/checkout/mp/createSeatSubscription.js");
     const { createClient } = await import("@supabase/supabase-js");
     const { getAdminClient } = await import("../../routes/_base.js");
     
@@ -292,14 +293,56 @@ export async function createSeat(req: Request, res: Response) {
     const adminClient = getAdminClient();
     const { data: dbUser, error: userError } = await adminClient
       .from('users')
-      .select('id')
+      .select('id, email')
       .eq('auth_id', authUser.id)
       .single();
     
     if (userError || !dbUser) {
       return res.status(401).json({ ok: false, error: "Usuario no encontrado" });
     }
-    
+
+    // Check if this org has a provider_subscription_id (came from MP payment)
+    // If not, this is a "gifted" org that needs a NEW subscription for seats
+    const { data: subscription, error: subError } = await adminClient
+      .from('organization_subscriptions')
+      .select('id, provider_subscription_id, expires_at')
+      .eq('id', subscription_id)
+      .single();
+
+    if (subError || !subscription) {
+      return res.status(400).json({ ok: false, error: "Suscripción no encontrada" });
+    }
+
+    // CASE: Gifted org (no provider_subscription_id) - need to CREATE new MP subscription
+    if (!subscription.provider_subscription_id) {
+      console.log('[MP create-seat] Gifted org detected - creating new seat subscription');
+      
+      const result = await createSeatSubscription({
+        supabase: adminClient,
+        userId: dbUser.id,
+        organizationId: organization_id,
+        subscriptionId: subscription_id,
+        inviteeEmail: invitee_email,
+        roleId: role_id,
+        seatAmountARS: prorated_amount_ars,
+        billingPeriod: billing_period,
+        payerEmail: dbUser.email,
+        subscriptionExpiresAt: subscription.expires_at,
+      });
+
+      if (!result.success) {
+        return res.status(400).json({ ok: false, error: result.error });
+      }
+
+      return res.json({
+        ok: true,
+        init_point: result.initPoint,
+        preference_id: result.shortId,
+        is_new_subscription: true,
+      });
+    }
+
+    // NORMAL CASE: Existing MP subscription - create one-time payment preference
     const result = await createSeatPreference({
       supabase: adminClient,
       userId: dbUser.id,
@@ -339,6 +382,19 @@ export async function seatSuccessHandler(req: Request, res: Response) {
     return await handleSeatReturn(req, res);
   } catch (e: any) {
     console.error("[MP seat-success-handler] Fatal error:", e);
+    return res.redirect(`${baseUrl}/organization/members?payment=error&reason=${encodeURIComponent(e.message || 'unknown')}`);
+  }
+}
+
+export async function seatSubscriptionSuccessHandler(req: Request, res: Response) {
+  const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
+  
+  try {
+    console.log('[MP seat-subscription-success-handler] Starting...');
+    const { handleSeatSubscriptionReturn } = await import("../../lib/handlers/checkout/mp/handleSeatSubscriptionReturn.js");
+    return await handleSeatSubscriptionReturn(req, res);
+  } catch (e: any) {
+    console.error("[MP seat-subscription-success-handler] Fatal error:", e);
     return res.redirect(`${baseUrl}/organization/members?payment=error&reason=${encodeURIComponent(e.message || 'unknown')}`);
   }
 }

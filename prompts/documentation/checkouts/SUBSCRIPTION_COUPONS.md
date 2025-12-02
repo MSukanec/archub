@@ -17,8 +17,11 @@ El usuario debe ejecutar este SQL en Supabase:
 -- 1. Agregar campo applies_to a la tabla coupons
 -- Valores: 'courses' (default), 'subscriptions', 'all'
 ALTER TABLE coupons 
-ADD COLUMN IF NOT EXISTS applies_to text DEFAULT 'courses'
-CHECK (applies_to IN ('courses', 'subscriptions', 'all'));
+ADD COLUMN IF NOT EXISTS applies_to text DEFAULT 'courses';
+
+-- Agregar CHECK constraint (si falla, ignorar)
+-- ALTER TABLE coupons ADD CONSTRAINT coupons_applies_to_check 
+-- CHECK (applies_to IN ('courses', 'subscriptions', 'all'));
 
 -- 2. Crear tabla coupon_plans (asocia cupones a planes específicos)
 CREATE TABLE IF NOT EXISTS coupon_plans (
@@ -38,11 +41,19 @@ ADD COLUMN IF NOT EXISTS subscription_id uuid REFERENCES organization_subscripti
 ALTER TABLE coupon_redemptions 
 ADD COLUMN IF NOT EXISTS plan_id uuid REFERENCES plans(id);
 
--- 4. Agregar índices para performance
+-- 4. Agregar columnas de cupón a organization_subscriptions
+ALTER TABLE organization_subscriptions
+ADD COLUMN IF NOT EXISTS coupon_id uuid REFERENCES coupons(id);
+
+ALTER TABLE organization_subscriptions
+ADD COLUMN IF NOT EXISTS coupon_code text;
+
+-- 5. Agregar índices para performance
 CREATE INDEX IF NOT EXISTS idx_coupon_plans_plan_id ON coupon_plans(plan_id);
 CREATE INDEX IF NOT EXISTS idx_coupon_redemptions_subscription_id ON coupon_redemptions(subscription_id);
+CREATE INDEX IF NOT EXISTS idx_org_subscriptions_coupon ON organization_subscriptions(coupon_id);
 
--- 5. RPC para validar cupones de suscripción
+-- 6. RPC para validar cupones de suscripción
 CREATE OR REPLACE FUNCTION validate_subscription_coupon(
   p_code text,
   p_plan_id uuid,
