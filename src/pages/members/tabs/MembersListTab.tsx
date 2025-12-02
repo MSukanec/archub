@@ -8,7 +8,8 @@ import {
   MoreHorizontal,
   Lock,
   ArrowUpCircle,
-  UserPlus
+  UserPlus,
+  Trash2
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -466,15 +467,20 @@ export function MembersListTab() {
                           {!isOwner && (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="">
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  className="h-6 w-6"
+                                >
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
+                              <DropdownMenuContent align="end" className="w-48">
                                 <DropdownMenuItem 
-                                  className="text-red-600"
                                   onClick={() => handleRemoveMember(member)}
+                                  className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-red-600 dark:hover:text-red-500 transition-colors"
                                 >
+                                  <Trash2 className="h-4 w-4" />
                                   Eliminar miembro
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
