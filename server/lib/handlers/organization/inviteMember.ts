@@ -65,7 +65,7 @@ export async function inviteMember(
     // Verificar límite de miembros del plan
     const { data: orgData } = await supabaseAdmin
       .from("organizations")
-      .select("id, name, plan_id, plans(id, name, slug, features)")
+      .select("id, name, plan_id, plans!left(id, name, slug, features)")
       .eq("id", organizationId)
       .single();
 
@@ -78,9 +78,11 @@ export async function inviteMember(
 
     const planData = (orgData as any).plans;
     const features = planData?.features || {};
-    const maxMembers = features.max_members ?? 1; // Default to 1 if not set
+    // If no plan or no max_members defined, default to 1 (FREE plan behavior)
+    // -1 means unlimited (typically PRO and above)
+    const maxMembers: number = features.max_members !== undefined ? features.max_members : 1;
 
-    // -1 means unlimited
+    // -1 means unlimited, skip limit check
     if (maxMembers !== -1) {
       // Count current active members
       const { count: activeMembersCount } = await supabaseAdmin
@@ -179,22 +181,17 @@ export async function inviteMember(
 
     // Si el usuario existe en Seencel, crear notificación in-app
     if (existingUser) {
-      const { data: orgData } = await supabaseAdmin
-        .from("organizations")
-        .select("name")
-        .eq("id", organizationId)
-        .single();
-
+      const orgName = orgData?.name || 'una organización';
       const { error: notificationError } = await supabaseAdmin
         .from("notifications")
         .insert({
           type: "organization_invitation",
-          title: `Te invitaron a ${orgData?.name || 'una organización'}`,
-          body: `Has sido invitado a unirte a la organización "${orgData?.name || 'sin nombre'}". Aceptá la invitación para comenzar a colaborar.`,
+          title: `Te invitaron a ${orgName}`,
+          body: `Has sido invitado a unirte a la organización "${orgName}". Aceptá la invitación para comenzar a colaborar.`,
           data: {
             invitation_id: invitationData.id,
             organization_id: organizationId,
-            organization_name: orgData?.name,
+            organization_name: orgName,
             user_id: existingUser.id,
           },
           audience: "direct",
