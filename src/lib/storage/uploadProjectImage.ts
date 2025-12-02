@@ -95,6 +95,7 @@ export async function uploadProjectImage(
 
 /**
  * Get project image URL by loading bucket+path from DB and generating URL on-demand
+ * Returns null silently if the file doesn't exist in storage
  */
 export async function getProjectImageUrl(projectId: string): Promise<string | null> {
   const { data, error } = await supabase
@@ -107,11 +108,17 @@ export async function getProjectImageUrl(projectId: string): Promise<string | nu
     return null;
   }
   
-  return await getFileUrl(data.image_bucket as BucketName, data.image_path, 3600, supabase);
+  try {
+    return await getFileUrl(data.image_bucket as BucketName, data.image_path, 3600, supabase);
+  } catch (err) {
+    // File might have been deleted from storage - return null silently
+    return null;
+  }
 }
 
 /**
  * Get project image URL from existing project data (avoids DB query)
+ * Returns null silently if the file doesn't exist in storage
  */
 export async function getProjectImageUrlFromData(
   project: { image_bucket?: string | null; image_path?: string | null }
@@ -120,7 +127,12 @@ export async function getProjectImageUrlFromData(
     return null;
   }
   
-  return await getFileUrl(project.image_bucket as BucketName, project.image_path, 3600, supabase);
+  try {
+    return await getFileUrl(project.image_bucket as BucketName, project.image_path, 3600, supabase);
+  } catch (error) {
+    // File might have been deleted from storage - return null silently
+    return null;
+  }
 }
 
 /**
