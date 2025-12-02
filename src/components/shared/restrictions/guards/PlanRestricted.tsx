@@ -66,7 +66,9 @@ export function PlanRestricted({
     if (feature) {
       if (current !== undefined) {
         const featureLimit = limit(feature);
-        return featureLimit !== Infinity && current >= featureLimit;
+        const restricted = featureLimit !== Infinity && current >= featureLimit;
+        console.log(`[PlanRestricted] feature=${feature}, current=${current}, limit=${featureLimit}, restricted=${restricted}`);
+        return restricted;
       }
       return !can(feature);
     }
