@@ -1,6 +1,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
+import { nanoid } from "nanoid";
 import { createMPPreference } from "./api.js";
-import { encodeCustomData } from "./encoding.js";
+import { MP_WEBHOOK_SECRET } from "./config.js";
+import { getAdminClient } from "../../../../routes/_base.js";
 
 export interface CreateSeatPreferenceParams {
   supabase: SupabaseClient;
@@ -61,19 +63,38 @@ export async function createSeatPreference(
       .eq('id', userId)
       .single();
 
-    const customData = encodeCustomData({
-      auth_id: authId,
-      product_type: 'seat',
-      organization_id: organizationId,
-      subscription_id: subscriptionId,
-      billing_period: billingPeriod,
-      invitee_email: inviteeEmail,
-      role_id: roleId,
-    });
+    const payerEmail = user?.email;
+    if (!payerEmail) {
+      return { success: false, error: 'Email del usuario no encontrado' };
+    }
+
+    let amount = Math.round(proratedAmountARS);
+    if (amount < 1) amount = 1;
+
+    const shortId = `mps_${nanoid(12)}`;
+    const adminClient = getAdminClient();
+
+    const { error: insertError } = await adminClient
+      .from("mp_subscription_preferences")
+      .insert({
+        id: shortId,
+        user_id: userId,
+        organization_id: organizationId,
+        billing_period: billingPeriod,
+        amount_ars: String(amount),
+        product_type: 'seat',
+        invitee_email: inviteeEmail,
+        role_id: roleId,
+        subscription_id: subscriptionId,
+      });
+
+    if (insertError) {
+      console.error("[createSeatPreference] Error saving preference to DB:", insertError);
+    } else {
+      console.log("[createSeatPreference] Preference saved with short ID:", shortId);
+    }
 
     const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
-    
-    const roundedAmount = Math.round(proratedAmountARS);
 
     const prefBody = {
       items: [
@@ -83,25 +104,25 @@ export async function createSeatPreference(
           title: `Nuevo miembro - ${org.name}`,
           description: `Agregar ${inviteeEmail} como ${roleName}`,
           quantity: 1,
-          unit_price: roundedAmount,
+          unit_price: amount,
           currency_id: 'ARS',
         }
       ],
-      external_reference: customData,
+      external_reference: shortId,
       payer: {
-        email: user?.email || null,
+        email: payerEmail,
         first_name: user?.full_name?.split(' ')[0] || 'Usuario',
-        last_name: user?.full_name?.split(' ').slice(1).join(' ') || '',
+        last_name: user?.full_name?.split(' ').slice(1).join(' ') || 'Seencel',
       },
-      notification_url: `${baseUrl}/api/checkout/mp/webhook`,
+      notification_url: `${baseUrl}/api/checkout/mp/webhook?secret=${MP_WEBHOOK_SECRET}`,
       back_urls: {
-        success: `${baseUrl}/api/checkout/mp/seat-success`,
+        success: `${baseUrl}/api/checkout/mp/seat-success?preference_id=${shortId}`,
         failure: `${baseUrl}/organization/members?payment=failed`,
         pending: `${baseUrl}/organization/members?payment=pending`,
       },
       auto_return: 'approved',
-      binary_mode: false,
-      statement_descriptor: 'SEENCEL',
+      binary_mode: true,
+      statement_descriptor: 'SEENCEL SEAT',
       metadata: {
         user_id: userId,
         auth_id: authId,
@@ -111,8 +132,16 @@ export async function createSeatPreference(
         role_id: roleId,
         product_type: 'seat',
         billing_period: billingPeriod,
+        amount_ars: amount,
       },
     };
+
+    console.log('[createSeatPreference] Creating preference:', {
+      shortId,
+      inviteeEmail,
+      amount,
+      organizationId,
+    });
 
     const result = await createMPPreference(prefBody);
 
@@ -121,11 +150,21 @@ export async function createSeatPreference(
       return { success: false, error: result.error || 'Error al crear preferencia de pago' };
     }
 
+    const { error: updateError } = await adminClient
+      .from("mp_subscription_preferences")
+      .update({ preference_id: result.preferenceId })
+      .eq("id", shortId);
+    
+    if (updateError) {
+      console.warn('[createSeatPreference] Failed to update preference with preference_id:', updateError);
+    }
+
     console.log('[createSeatPreference] Created preference:', {
       id: result.preferenceId,
       init_point: result.initPoint,
+      shortId,
       inviteeEmail,
-      amount: proratedAmountARS,
+      amount,
     });
 
     return {

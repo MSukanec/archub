@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { supabaseAdmin } from "../../../supabase/admin.js";
-import { decodeExternalReference, extractMetadata } from "./encoding.js";
 import { getMPPayment } from "./api.js";
 import { sendInvitationEmail } from "../../../email/sendInvitationEmail.js";
 import { updateSubscriptionForNewSeat } from "./updateSeatSubscription.js";
@@ -9,62 +8,93 @@ export async function handleSeatReturn(req: Request, res: Response) {
   const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
   
   try {
-    const { payment_id, status, external_reference } = req.query;
+    const { payment_id, status, preference_id, external_reference } = req.query;
+    
+    const shortId = preference_id || external_reference;
 
-    console.log('[MP seat-return] Received:', { payment_id, status, external_reference });
+    console.log('[MP seat-return] Received:', { payment_id, status, shortId });
 
-    if (status !== 'approved' || !payment_id) {
-      console.log('[MP seat-return] Payment not approved or missing ID');
-      return res.redirect(`${baseUrl}/organization/members?payment=failed`);
+    if (!shortId) {
+      console.log('[MP seat-return] Missing preference_id/external_reference');
+      return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=missing_id`);
     }
 
-    const payment = await getMPPayment(String(payment_id));
-    
-    if (!payment || payment.status !== 'approved') {
-      console.log('[MP seat-return] Payment not approved:', payment?.status);
-      return res.redirect(`${baseUrl}/organization/members?payment=failed`);
+    const { data: prefData, error: prefError } = await supabaseAdmin
+      .from('mp_subscription_preferences')
+      .select('*')
+      .eq('id', String(shortId))
+      .maybeSingle();
+
+    if (prefError || !prefData) {
+      console.error('[MP seat-return] Preference not found:', shortId, prefError);
+      return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=preference_not_found`);
     }
 
-    const decoded = decodeExternalReference(String(external_reference || payment.external_reference)) as any;
-    const metadata = extractMetadata(payment);
-    
-    const authId = decoded.auth_id || decoded.user_id || metadata.user_id || null;
-    const organizationId = decoded.organization_id || metadata.organization_id || null;
-    const inviteeEmail = (payment.metadata?.invitee_email || decoded.invitee_email) as string | null;
-    const roleId = (payment.metadata?.role_id || decoded.role_id) as string | null;
-    const productType = decoded.product_type || metadata.product_type || null;
-    const subscriptionId = (payment.metadata?.subscription_id || decoded.subscription_id) as string | null;
-    const billingPeriod = (payment.metadata?.billing_period || decoded.billing_period || 'monthly') as 'monthly' | 'annual';
-
-    console.log('[MP seat-return] Decoded data:', { 
-      authId, 
-      organizationId, 
-      inviteeEmail, 
-      roleId,
-      productType 
+    console.log('[MP seat-return] Found preference data:', {
+      id: prefData.id,
+      userId: prefData.user_id,
+      organizationId: prefData.organization_id,
+      inviteeEmail: prefData.invitee_email,
+      roleId: prefData.role_id,
+      productType: prefData.product_type,
     });
 
-    if (productType !== 'seat' || !organizationId || !inviteeEmail || !roleId) {
-      console.error('[MP seat-return] Missing required data');
+    if (prefData.product_type !== 'seat') {
+      console.error('[MP seat-return] Wrong product type:', prefData.product_type);
+      return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=wrong_type`);
+    }
+
+    const organizationId = prefData.organization_id;
+    const inviteeEmail = prefData.invitee_email;
+    const roleId = prefData.role_id;
+    const subscriptionId = prefData.subscription_id;
+    const billingPeriod = (prefData.billing_period || 'monthly') as 'monthly' | 'annual';
+
+    if (!organizationId || !inviteeEmail || !roleId) {
+      console.error('[MP seat-return] Missing required data in preference');
       return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=missing_data`);
     }
 
-    const { data: existingPayment, error: existingError } = await supabaseAdmin
-      .from('payments')
-      .select('id')
-      .eq('gateway', 'mercadopago')
-      .eq('gateway_payment_id', String(payment_id))
-      .maybeSingle();
+    let paymentApproved = status === 'approved';
+    let paymentAmount = parseFloat(prefData.amount_ars) || 0;
+    let gatewayPaymentId = String(payment_id || '');
 
-    if (existingPayment) {
-      console.log('[MP seat-return] Payment already processed:', existingPayment.id);
-      return res.redirect(`${baseUrl}/organization/members?payment=success`);
+    if (payment_id) {
+      const payment = await getMPPayment(String(payment_id));
+      
+      if (payment && payment.status === 'approved') {
+        paymentApproved = true;
+        paymentAmount = payment.transaction_amount || paymentAmount;
+        gatewayPaymentId = String(payment_id);
+      } else if (payment) {
+        console.log('[MP seat-return] Payment status from MP:', payment.status);
+        paymentApproved = false;
+      }
+    }
+
+    if (!paymentApproved) {
+      console.log('[MP seat-return] Payment not approved');
+      return res.redirect(`${baseUrl}/organization/members?payment=failed`);
+    }
+
+    if (gatewayPaymentId) {
+      const { data: existingPayment } = await supabaseAdmin
+        .from('payments')
+        .select('id')
+        .eq('gateway', 'mercadopago')
+        .eq('gateway_payment_id', gatewayPaymentId)
+        .maybeSingle();
+
+      if (existingPayment) {
+        console.log('[MP seat-return] Payment already processed:', existingPayment.id);
+        return res.redirect(`${baseUrl}/organization/members?payment=success`);
+      }
     }
 
     const { data: dbUser, error: userError } = await supabaseAdmin
       .from('users')
       .select('id')
-      .eq('auth_id', authId)
+      .eq('id', prefData.user_id)
       .single();
 
     if (userError || !dbUser) {
@@ -94,28 +124,31 @@ export async function handleSeatReturn(req: Request, res: Response) {
       return res.redirect(`${baseUrl}/organization/members?payment=failed&reason=role_not_found`);
     }
 
-    const { error: paymentError } = await supabaseAdmin
-      .from('payments')
-      .insert({
-        user_id: dbUser.id,
-        organization_id: organizationId,
-        product_type: 'seat',
-        product_id: roleId,
-        gateway: 'mercadopago',
-        gateway_payment_id: String(payment_id),
-        amount: payment.transaction_amount,
-        currency: payment.currency_id || 'ARS',
-        status: 'completed',
-        metadata: {
-          invitee_email: inviteeEmail,
-          role_id: roleId,
-          role_name: role.name,
-          organization_name: org.name,
-        },
-      });
+    if (gatewayPaymentId) {
+      const { error: paymentError } = await supabaseAdmin
+        .from('payments')
+        .insert({
+          user_id: dbUser.id,
+          organization_id: organizationId,
+          product_type: 'seat',
+          product_id: roleId,
+          gateway: 'mercadopago',
+          gateway_payment_id: gatewayPaymentId,
+          amount: paymentAmount,
+          currency: 'ARS',
+          status: 'completed',
+          metadata: {
+            invitee_email: inviteeEmail,
+            role_id: roleId,
+            role_name: role.name,
+            organization_name: org.name,
+            preference_id: shortId,
+          },
+        });
 
-    if (paymentError) {
-      console.error('[MP seat-return] Payment insert failed:', paymentError);
+      if (paymentError) {
+        console.error('[MP seat-return] Payment insert failed:', paymentError);
+      }
     }
 
     const { data: existingUser } = await supabaseAdmin
@@ -137,7 +170,7 @@ export async function handleSeatReturn(req: Request, res: Response) {
       ? `${inviterUser.first_name} ${inviterUser.last_name}`
       : inviterUser?.first_name || 'Un administrador';
 
-    const { data: existingInvitation, error: invitationCheckError } = await supabaseAdmin
+    const { data: existingInvitation } = await supabaseAdmin
       .from('organization_invitations')
       .select('id, status')
       .eq('email', inviteeEmail.toLowerCase())

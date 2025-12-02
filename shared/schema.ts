@@ -1779,18 +1779,24 @@ export type MpCoursePreference = typeof mp_course_preferences.$inferSelect;
 export type InsertMpCoursePreference = z.infer<typeof insertMpCoursePreferenceSchema>;
 
 // MP Subscription Preferences (short external_reference, data stored in DB)
+// Used for: subscriptions, subscription upgrades, and seat payments
 export const mp_subscription_preferences = pgTable("mp_subscription_preferences", {
-  id: varchar("id", { length: 64 }).primaryKey(), // mps_xxxxx (short ID)
-  preapproval_id: text("preapproval_id"), // Mercado Pago preapproval ID
-  user_id: uuid("user_id").notNull(), // auth_id from Supabase Auth
+  id: varchar("id", { length: 64 }).primaryKey(), // mps_xxxxx, mpu_xxxxx, or mpseat_xxxxx (short ID)
+  preference_id: text("preference_id"), // Mercado Pago preference ID
+  preapproval_id: text("preapproval_id"), // Mercado Pago preapproval ID (for recurring)
+  user_id: uuid("user_id").notNull(), // users.id (internal table ID)
   organization_id: uuid("organization_id").notNull(),
-  plan_id: uuid("plan_id").notNull(),
-  plan_slug: text("plan_slug").notNull(),
+  plan_id: uuid("plan_id"), // null for seat payments
+  plan_slug: text("plan_slug"), // null for seat payments
   billing_period: text("billing_period", { enum: ["monthly", "annual"] }).notNull(),
   amount_ars: numeric("amount_ars", { precision: 10, scale: 2 }),
   is_upgrade: boolean("is_upgrade").default(false),
   previous_subscription_id: uuid("previous_subscription_id"),
   proration_credit: numeric("proration_credit", { precision: 10, scale: 2 }),
+  product_type: text("product_type"), // 'subscription' | 'subscription_upgrade' | 'seat'
+  invitee_email: text("invitee_email"), // for seat payments
+  role_id: uuid("role_id"), // for seat payments
+  subscription_id: uuid("subscription_id"), // for seat payments (existing subscription to update)
   created_at: timestamp("created_at").defaultNow(),
 });
 
