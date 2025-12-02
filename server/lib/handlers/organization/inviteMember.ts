@@ -117,16 +117,16 @@ export async function inviteMember(
       .eq("email", email.toLowerCase())
       .maybeSingle();
 
-    // Si el usuario existe, verificar que no sea ya miembro
+    // Si el usuario existe, verificar que no sea ya miembro ACTIVO
     if (existingUser) {
       const { data: existingMembership } = await supabaseAdmin
         .from("organization_members")
-        .select("id")
+        .select("id, is_active")
         .eq("user_id", existingUser.id)
         .eq("organization_id", organizationId)
         .maybeSingle();
 
-      if (existingMembership) {
+      if (existingMembership && existingMembership.is_active) {
         return {
           success: false,
           error: "User is already a member of this organization"

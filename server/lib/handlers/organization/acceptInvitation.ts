@@ -46,13 +46,42 @@ export async function acceptInvitation(
   // Check for existing membership before creating (prevents duplicates)
   const { data: existingMember } = await supabase
     .from('organization_members')
-    .select('id')
+    .select('id, is_active, is_billable')
     .eq('user_id', userId)
     .eq('organization_id', invitation.organization_id)
     .maybeSingle();
 
   if (existingMember) {
-    // Member already exists - just mark invitation as accepted
+    // Member record exists - reactivate if inactive, or just mark accepted
+    if (!existingMember.is_active) {
+      // Reactivate the inactive member with new role
+      const { error: reactivateError } = await supabase
+        .from('organization_members')
+        .update({ 
+          is_active: true,
+          role_id: invitation.role_id,
+          joined_at: new Date().toISOString(),
+        })
+        .eq('id', existingMember.id);
+
+      if (reactivateError) {
+        console.error('Error reactivating member:', reactivateError);
+        throw new HttpError(500, 'Failed to reactivate member');
+      }
+
+      // Register billing event for reactivation
+      await registerMemberEvent(supabase, {
+        organizationId: invitation.organization_id,
+        memberId: existingMember.id,
+        userId: userId,
+        eventType: 'member_added',
+        wasBillable: null,
+        isBillable: existingMember.is_billable,
+        performedBy: userId,
+      });
+    }
+
+    // Mark invitation as accepted
     const { error: updateError } = await supabase
       .from('organization_invitations')
       .update({ 
