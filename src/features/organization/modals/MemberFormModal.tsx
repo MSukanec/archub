@@ -17,8 +17,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Users, UserPlus, Calendar, DollarSign, Loader2, Building2 } from 'lucide-react';
+import { Users, UserPlus, Calendar, DollarSign, Loader2, CalendarClock } from 'lucide-react';
 import { formatCurrency } from '@/lib/currency-formatter';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const memberSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -43,6 +45,7 @@ interface SeatPricingData {
     expiresAt: string;
     currentSeats: number;
     maxSeats: number;
+    paymentProvider: 'mercadopago' | 'paypal' | 'bank_transfer' | null;
   } | null;
   pricing: {
     seatPriceUSD: number;
@@ -52,6 +55,14 @@ interface SeatPricingData {
     percentageRemaining: number;
     proratedAmountUSD: number;
     proratedAmountARS: number;
+  } | null;
+  nextBilling: {
+    date: string;
+    totalSeats: number;
+    amountPerSeatUSD: number;
+    amountPerSeatARS: number;
+    totalAmountUSD: number;
+    totalAmountARS: number;
   } | null;
   invitation: {
     email: string;
@@ -64,6 +75,22 @@ interface MemberModalProps {
   editingMember?: any;
   defaultEmail?: string;
   onClose: () => void;
+}
+
+const planColors: Record<string, string> = {
+  free: 'var(--plan-free-bg)',
+  pro: 'var(--plan-pro-bg)',
+  teams: 'var(--plan-teams-bg)',
+  enterprise: 'var(--plan-enterprise-bg)',
+};
+
+function getPlanColor(planSlug: string | undefined): string {
+  if (!planSlug) return planColors.free;
+  const normalized = planSlug.toLowerCase();
+  if (normalized.includes('enterprise')) return planColors.enterprise;
+  if (normalized.includes('teams')) return planColors.teams;
+  if (normalized.includes('pro')) return planColors.pro;
+  return planColors.free;
 }
 
 export function MemberFormModal({ editingMember, defaultEmail, onClose }: MemberModalProps) {
@@ -273,7 +300,11 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       return;
     }
 
-    const needsPayment = pricing.pricing && pricing.pricing.proratedAmountARS > 0;
+    const isPayPal = pricing.subscription?.paymentProvider === 'paypal';
+    const needsPayment = pricing.pricing && (isPayPal 
+      ? pricing.pricing.proratedAmountUSD > 0 
+      : pricing.pricing.proratedAmountARS > 0
+    );
     
     if (needsPayment) {
       await handleProceedToPayment(pricing);
@@ -333,8 +364,19 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
     }
   };
 
-  const needsPayment = pricingData?.pricing && pricingData.pricing.proratedAmountARS > 0;
+  const isPayPal = pricingData?.subscription?.paymentProvider === 'paypal';
+  const needsPayment = pricingData?.pricing && (isPayPal 
+    ? pricingData.pricing.proratedAmountUSD > 0 
+    : pricingData.pricing.proratedAmountARS > 0
+  );
   const selectedRole = roles.find(r => r.id === watchedRoleId);
+
+  const formatPrice = (amountARS: number, amountUSD: number) => {
+    if (isPayPal) {
+      return `USD ${formatCurrency(amountUSD)}`;
+    }
+    return `ARS ${formatCurrency(amountARS)}`;
+  };
 
   const formPanel = (
     <Form {...form}>
@@ -418,11 +460,13 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
                   <Separator className="my-2" />
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Building2 className="h-3 w-3" />
-                      <span>Plan:</span>
-                    </div>
-                    <Badge variant="outline" className="text-xs">{pricingData.organization?.planName}</Badge>
+                    <span className="text-muted-foreground">Plan:</span>
+                    <Badge 
+                      className="text-xs text-white border-0"
+                      style={{ backgroundColor: getPlanColor(pricingData.organization?.planSlug) }}
+                    >
+                      {pricingData.organization?.planName}
+                    </Badge>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -442,7 +486,7 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
 
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Precio asiento completo:</span>
-                    <span>ARS {formatCurrency(pricingData.pricing.seatPriceARS)}</span>
+                    <span>{formatPrice(pricingData.pricing.seatPriceARS, pricingData.pricing.seatPriceUSD)}</span>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -455,18 +499,33 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
                   <div className="flex items-center justify-between pt-1">
                     <span className="font-semibold">Total a pagar ahora:</span>
                     <span className="text-lg font-bold text-primary">
-                      ARS {formatCurrency(pricingData.pricing.proratedAmountARS)}
+                      {formatPrice(pricingData.pricing.proratedAmountARS, pricingData.pricing.proratedAmountUSD)}
                     </span>
-                  </div>
-
-                  <div className="text-xs text-muted-foreground text-right">
-                    ≈ USD {formatCurrency(pricingData.pricing.proratedAmountUSD)}
                   </div>
                 </div>
 
-                <p className="text-xs text-muted-foreground mt-2">
-                  El próximo cobro incluirá automáticamente el costo completo de este asiento.
-                </p>
+                {pricingData.nextBilling && (
+                  <div className="mt-4 p-3 rounded-md bg-background border">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium text-sm">Próximo cobro</span>
+                    </div>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Fecha:</span>
+                        <span className="font-medium">
+                          {format(new Date(pricingData.nextBilling.date), "d 'de' MMMM, yyyy", { locale: es })}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Asientos ({pricingData.nextBilling.totalSeats}):</span>
+                        <span className="font-medium">
+                          {formatPrice(pricingData.nextBilling.totalAmountARS, pricingData.nextBilling.totalAmountUSD)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : pricingData && !pricingData.canAddSeat ? (
               <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
@@ -514,7 +573,6 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       }
       onRightClick={form.handleSubmit(handleFormSubmit)}
       isSubmitting={isLoading || isCalculating}
-      rightIcon={isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}
     />
   );
 

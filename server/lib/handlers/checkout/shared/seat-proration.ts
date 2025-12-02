@@ -124,7 +124,7 @@ export async function calculateSeatProration(
 
   const { data: subscription, error: subError } = await supabase
     .from('organization_subscriptions')
-    .select('id, billing_period, started_at, expires_at, amount, currency')
+    .select('id, billing_period, started_at, expires_at, amount, currency, provider')
     .eq('organization_id', organizationId)
     .eq('status', 'active')
     .order('created_at', { ascending: false })
@@ -160,6 +160,8 @@ export async function calculateSeatProration(
   const features = plan.features || {};
   const maxSeats: number = features.max_members !== undefined ? features.max_members : 1;
   
+  const paymentProvider = (subscription.provider as 'mercadopago' | 'paypal' | 'bank_transfer') || null;
+
   if (maxSeats !== -1 && currentSeats >= maxSeats) {
     return {
       ...baseResult,
@@ -177,6 +179,7 @@ export async function calculateSeatProration(
         expiresAt: subscription.expires_at,
         currentSeats,
         maxSeats,
+        paymentProvider,
       }
     };
   }
@@ -207,6 +210,10 @@ export async function calculateSeatProration(
   const proratedAmountUSD = Math.round(seatPriceUSD * percentageRemaining * 100) / 100;
   const proratedAmountARS = Math.round(seatPriceARS * percentageRemaining * 100) / 100;
 
+  const nextSeats = currentSeats + 1;
+  const nextTotalUSD = seatPriceUSD * nextSeats;
+  const nextTotalARS = seatPriceARS * nextSeats;
+
   return {
     canAddSeat: true,
     organization: {
@@ -222,6 +229,7 @@ export async function calculateSeatProration(
       expiresAt: subscription.expires_at,
       currentSeats,
       maxSeats: maxSeats === -1 ? Infinity : maxSeats,
+      paymentProvider,
     },
     pricing: {
       seatPriceUSD,
@@ -231,6 +239,14 @@ export async function calculateSeatProration(
       percentageRemaining: Math.round(percentageRemaining * 100),
       proratedAmountUSD,
       proratedAmountARS,
+    },
+    nextBilling: {
+      date: subscription.expires_at,
+      totalSeats: nextSeats,
+      amountPerSeatUSD: seatPriceUSD,
+      amountPerSeatARS: seatPriceARS,
+      totalAmountUSD: Math.round(nextTotalUSD * 100) / 100,
+      totalAmountARS: Math.round(nextTotalARS * 100) / 100,
     },
     invitation: {
       email: inviteeEmail,
