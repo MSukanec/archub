@@ -252,7 +252,6 @@ export const project_data = pgTable("project_data", {
   project_modality_id: uuid("project_modality_id"),
   
   // Image (cover image only - 1:1 relationship)
-  project_image_url: text("project_image_url"),
   image_bucket: text("image_bucket"),
   image_path: text("image_path"),
   is_public: boolean("is_public").notNull().default(true), // RLS: controls storage access

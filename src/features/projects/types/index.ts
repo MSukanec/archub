@@ -27,7 +27,6 @@ export interface Project {
 export interface ProjectData {
   project_type_id?: string;
   project_modality_id?: string;
-  project_image_url?: string;
   image_bucket?: string;
   image_path?: string;
   city?: string;

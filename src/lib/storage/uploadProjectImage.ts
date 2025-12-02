@@ -149,7 +149,6 @@ export async function deleteProjectImage(
       .update({
         image_bucket: null,
         image_path: null,
-        project_image_url: null,
         is_public: true // Reset to default
       })
       .eq('project_id', projectId);
@@ -183,8 +182,7 @@ export async function updateProjectImageUrl(
       .from('project_data')
       .upsert({
         project_id: projectId,
-        organization_id: projectData.organization_id,
-        project_image_url: imageUrl
+        organization_id: projectData.organization_id
       }, {
         onConflict: 'project_id'
       });

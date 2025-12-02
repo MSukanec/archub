@@ -9,7 +9,8 @@ interface Project {
   name: string;
   color?: string | null;
   project_data?: {
-    project_image_url?: string;
+    image_bucket?: string;
+    image_path?: string;
   };
 }
 

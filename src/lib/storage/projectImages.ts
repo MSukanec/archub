@@ -80,13 +80,14 @@ function extractBaseUrl(url: string): string | null {
 /**
  * Generates an optimized image URL using Supabase Storage transformations.
  * 
- * @param imageUrl - The original image URL (from project_data.project_image_url)
+ * @param imageUrl - The image URL (use getProjectImageUrlFromData to get signed URL first)
  * @param variant - The image variant to generate (thumbnail, card, hero, or original)
  * @returns Optimized image URL or original URL if transformations can't be applied
  * 
  * @example
  * ```tsx
- * const cardImage = getProjectImageUrl(project.project_data?.project_image_url, 'card');
+ * const signedUrl = await getProjectImageUrlFromData(project.project_data);
+ * const cardImage = getProjectImageUrl(signedUrl, 'card');
  * <img src={cardImage} alt={project.name} loading="lazy" />
  * ```
  */
@@ -136,7 +137,8 @@ export function getProjectImageUrl(
  * 
  * @example
  * ```tsx
- * const placeholder = getProjectImagePlaceholder(project.project_data?.project_image_url);
+ * const signedUrl = await getProjectImageUrlFromData(project.project_data);
+ * const placeholder = getProjectImagePlaceholder(signedUrl);
  * // Use as background while loading full image
  * ```
  */
