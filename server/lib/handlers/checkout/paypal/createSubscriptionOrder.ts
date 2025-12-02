@@ -157,6 +157,7 @@ export async function createSubscriptionOrder(
           couponCode: couponResult.couponCode!,
           userId: userData.id,
           currency: 'USD',
+          payerEmail: user.email ?? undefined,
         });
 
         if (!giftedResult.success) {

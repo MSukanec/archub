@@ -182,6 +182,7 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
           couponCode: couponResult.couponCode!,
           userId: userData.id,
           currency: 'ARS',
+          payerEmail: clientPayerEmail,
         });
 
         if (!giftedResult.success) {
