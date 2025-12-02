@@ -5,6 +5,8 @@ import { sendInvitationEmail } from "../../../email/sendInvitationEmail.js";
 import { updateSubscriptionForNewSeat } from "./updateSeatSubscription.js";
 
 export async function handleSeatReturn(req: Request, res: Response) {
+  console.log('[MP seat-return] Handler called with query:', req.query);
+  
   const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
   
   try {
