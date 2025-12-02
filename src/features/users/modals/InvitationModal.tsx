@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useNavigationStore } from '@/stores/navigationStore';
 import { ChevronLeft, ChevronRight, Mail, Building2 } from 'lucide-react';
 import { FormModalLayout } from '@/components/modal';
 import { FormModalHeader } from '@/components/modal';
@@ -23,6 +26,8 @@ export function InvitationModal({ invitations, open, onClose }: InvitationModalP
   const [currentIndex, setCurrentIndex] = useState(0);
   const { toast } = useToast();
   const { data: user } = useCurrentUser();
+  const [, navigate] = useLocation();
+  const setCurrentProject = useNavigationStore((state) => state.setCurrentProject);
   
   const currentInvitation = invitations[currentIndex];
   const hasMultiple = invitations.length > 1;
@@ -34,7 +39,9 @@ export function InvitationModal({ invitations, open, onClose }: InvitationModalP
       const response = await apiRequest('POST', '/api/accept-invitation', { invitationId });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async (_data, invitationId) => {
+      const acceptedInvitation = invitations.find(inv => inv.id === invitationId);
+      
       toast({
         title: '¡Invitación aceptada!',
         description: 'Te uniste exitosamente a la organización',
@@ -47,6 +54,16 @@ export function InvitationModal({ invitations, open, onClose }: InvitationModalP
         setCurrentIndex(currentIndex + 1);
       } else {
         onClose();
+        if (acceptedInvitation && user?.user?.id) {
+          await supabase
+            .from('user_preferences')
+            .update({ last_organization_id: acceptedInvitation.organization_id })
+            .eq('user_id', user.user.id);
+          
+          setCurrentProject(null);
+          queryClient.invalidateQueries({ queryKey: ['current-user'] });
+          navigate('/organization/dashboard');
+        }
       }
     },
     onError: (error: Error) => {
