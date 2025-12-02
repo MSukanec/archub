@@ -178,12 +178,12 @@ export function BillingListTab() {
     queryFn: async () => {
       if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
 
-      // Get payments for subscriptions
+      // Get payments for subscriptions (including upgrades)
       const { data: paymentsData, error } = await supabase
         .from('payments')
         .select('*')
         .eq('organization_id', currentOrganizationId)
-        .eq('product_type', 'subscription')
+        .in('product_type', ['subscription', 'subscription_upgrade'])
         .order('created_at', { ascending: false });
 
       if (error) throw error;
