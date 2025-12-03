@@ -1013,35 +1013,43 @@ export default function SubscriptionCheckout() {
     
     const hasPayPalProration = prorationData?.hasActiveSubscription && (prorationData?.savings?.usd ?? 0) > 0;
     
+    let priceAfterProrationUSD = basePrice;
+    let prorationDiscountUSD = 0;
+    
+    if (hasPayPalProration && prorationData?.finalPrice?.usd !== undefined) {
+      priceAfterProrationUSD = prorationData.finalPrice.usd;
+      prorationDiscountUSD = prorationData.savings.usd;
+    }
+    
     if (validatedCoupon) {
       const couponDiscountUSD = validatedCoupon.discount_usd;
-      const finalPriceUSD = Math.max(0, basePrice - couponDiscountUSD);
+      const finalPriceUSD = Math.max(0, priceAfterProrationUSD - couponDiscountUSD);
       
       return {
         amount: finalPriceUSD.toFixed(2),
         currency: 'USD',
         numericAmount: finalPriceUSD,
         originalAmount: basePrice,
-        hasProrationDiscount: false,
-        prorationDiscountAmount: 0,
+        hasProrationDiscount: hasPayPalProration,
+        prorationDiscountAmount: prorationDiscountUSD,
         hasCouponDiscount: true,
         couponDiscountAmount: couponDiscountUSD,
         isFullDiscount: validatedCoupon.is_full_discount || finalPriceUSD === 0,
-        paypalProrationNote: hasPayPalProration
+        isUpgrade: hasPayPalProration
       };
     }
     
     return {
-      amount: basePrice.toFixed(2),
+      amount: priceAfterProrationUSD.toFixed(2),
       currency: 'USD',
-      numericAmount: basePrice,
+      numericAmount: priceAfterProrationUSD,
       originalAmount: basePrice,
-      hasProrationDiscount: false,
-      prorationDiscountAmount: 0,
+      hasProrationDiscount: hasPayPalProration,
+      prorationDiscountAmount: prorationDiscountUSD,
       hasCouponDiscount: false,
       couponDiscountAmount: 0,
       isFullDiscount: false,
-      paypalProrationNote: hasPayPalProration
+      isUpgrade: hasPayPalProration
     };
   }, [planData, billingPeriod, selectedMethod, exchangeRate, prorationData, validatedCoupon]);
 
@@ -1465,24 +1473,21 @@ export default function SubscriptionCheckout() {
                     )}
 
                     {prorationData?.credit && prorationData.credit.daysRemaining > 0 && selectedMethod === 'paypal' && (
-                      <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg space-y-2">
-                        <div className="flex items-center gap-2">
-                          <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0" />
-                          <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                            Prorrateo requiere asistencia
-                          </p>
+                      <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                            <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                              Crédito por tu plan actual
+                            </p>
+                          </div>
+                          <span className="text-sm font-bold text-green-700 dark:text-green-400">
+                            USD ${prorationData.savings.usd?.toFixed(2)}
+                          </span>
                         </div>
-                        <p className="text-xs text-amber-600 dark:text-amber-500">
-                          Tu crédito de USD ${prorationData.savings.usd?.toFixed(2)} por los {prorationData.credit.daysRemaining} días 
-                          restantes de {prorationData.currentPlan?.name} requiere asistencia para aplicarse.{' '}
-                          <a 
-                            href="/contact" 
-                            target="_blank"
-                            className="underline hover:text-amber-700 dark:hover:text-amber-300 font-medium"
-                          >
-                            Contactanos
-                          </a>{' '}
-                          para procesar tu upgrade con el crédito aplicado.
+                        <p className="text-xs text-green-600 dark:text-green-500">
+                          Te quedan {prorationData.credit.daysRemaining} días de {prorationData.currentPlan?.name}. 
+                          Este crédito se descuenta del precio del nuevo plan.
                         </p>
                       </div>
                     )}
