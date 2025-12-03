@@ -79,9 +79,9 @@ function CourseCardContent({ course }: { course: Course }) {
 export function CourseCard({ course }: CourseCardProps) {
   const status = (course.status || 'available') as ItemStatus;
   const isAdmin = useIsAdmin();
-  const isClickable = status === 'available' || isAdmin;
+  const isBlocking = status !== 'available' && !isAdmin;
 
-  if (status !== 'available' && !isAdmin) {
+  if (isBlocking) {
     return (
       <ComingSoonCard status={status}>
         <CourseCardContent course={course} />

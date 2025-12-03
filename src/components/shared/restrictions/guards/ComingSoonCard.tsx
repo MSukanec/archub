@@ -1,4 +1,4 @@
-import { Clock, Wrench } from "lucide-react";
+import { Clock, Wrench, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
@@ -8,19 +8,27 @@ interface ComingSoonCardProps {
   status: ItemStatus;
   children: React.ReactNode;
   className?: string;
+  showBadge?: boolean;
 }
 
 const statusConfig = {
-  available: null,
+  available: {
+    icon: CheckCircle,
+    label: "Disponible",
+    badgeClass: "bg-green-500 text-white border-0",
+    isBlocking: false,
+  },
   coming_soon: {
     icon: Clock,
     label: "Próximamente",
-    badgeClass: "bg-amber-500/90 text-white border-0",
+    badgeClass: "bg-blue-500 text-white border-0",
+    isBlocking: true,
   },
   maintenance: {
     icon: Wrench,
     label: "En mantenimiento",
-    badgeClass: "bg-slate-500/90 text-white border-0",
+    badgeClass: "bg-amber-500 text-white border-0",
+    isBlocking: true,
   },
 } as const;
 
@@ -28,6 +36,7 @@ export function ComingSoonCard({
   status,
   children,
   className,
+  showBadge = true,
 }: ComingSoonCardProps) {
   const isAdmin = useIsAdmin();
   const config = statusConfig[status];
@@ -37,11 +46,17 @@ export function ComingSoonCard({
   }
 
   const Icon = config.icon;
+  const isBlocking = config.isBlocking && !isAdmin;
 
-  if (isAdmin) {
-    return (
-      <div className={cn("relative", className)}>
+  return (
+    <div
+      className={cn("relative", isBlocking && "select-none", className)}
+      data-testid={`card-${status}`}
+    >
+      <div className={cn(isBlocking && "opacity-50 pointer-events-none grayscale-[30%]")}>
         {children}
+      </div>
+      {showBadge && (
         <Badge
           className={cn(
             "absolute top-3 right-3 z-10 text-xs px-2 py-1 shadow-lg pointer-events-none",
@@ -50,30 +65,10 @@ export function ComingSoonCard({
           data-testid={`badge-${status}`}
         >
           <Icon className="w-3 h-3 mr-1" />
-          {config.label} (Admin)
+          {config.label}
+          {isAdmin && config.isBlocking && " (Admin)"}
         </Badge>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={cn("relative select-none", className)}
-      data-testid={`card-${status}`}
-    >
-      <div className="opacity-50 pointer-events-none grayscale-[30%]">
-        {children}
-      </div>
-      <Badge
-        className={cn(
-          "absolute top-3 right-3 z-10 text-xs px-2 py-1 shadow-lg",
-          config.badgeClass
-        )}
-        data-testid={`badge-${status}`}
-      >
-        <Icon className="w-3 h-3 mr-1" />
-        {config.label}
-      </Badge>
+      )}
     </div>
   );
 }
