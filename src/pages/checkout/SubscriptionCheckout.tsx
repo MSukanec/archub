@@ -1518,7 +1518,7 @@ export default function SubscriptionCheckout() {
                               }}
                             />
                             <Button
-                              variant="outline"
+                              variant="secondary"
                               onClick={handleValidateCoupon}
                               disabled={!couponCode.trim() || couponLoading || !planData?.id}
                               data-testid="button-apply-coupon"
