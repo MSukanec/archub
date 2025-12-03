@@ -106,6 +106,30 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
         } else {
           console.warn("[MP webhook] ⚠️ No upgrade preference data found:", prefError);
         }
+      } else if (externalRef.startsWith("mps_")) {
+        // SEAT PAYMENT: Lookup seat preference data
+        console.log("[MP webhook] Looking up seat preference:", externalRef);
+        const { data: prefData, error: prefError } = await supabase
+          .from("mp_subscription_preferences")
+          .select("*")
+          .eq("id", externalRef)
+          .maybeSingle();
+        
+        if (prefData && !prefError) {
+          fromDb = {
+            user_id: prefData.user_id,
+            organization_id: prefData.organization_id,
+            invitee_email: prefData.invitee_email,
+            role_id: prefData.role_id,
+            subscription_id: prefData.subscription_id,
+            billing_period: prefData.billing_period,
+            product_type: prefData.product_type || 'seat',
+            amount_ars: prefData.amount_ars,
+          };
+          console.log("[MP webhook] Found seat preference data:", fromDb);
+        } else {
+          console.warn("[MP webhook] ⚠️ No seat preference data found:", prefError);
+        }
       } else if (externalRef.startsWith("mp_")) {
         const { data: prefData, error: prefError } = await supabase
           .from("mp_course_preferences")
@@ -224,6 +248,230 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
           }
           
           return { success: true, processed: "subscription_upgrade_payment", id: finalId };
+        }
+
+        // SEAT PAYMENT: Handle seat purchase - record payment and create invitation
+        if (productType === 'seat') {
+          const inviteeEmail = fromExt.invitee_email;
+          const roleId = fromExt.role_id;
+          const subscriptionId = fromExt.subscription_id;
+          const seatBillingPeriod = fromExt.billing_period;
+
+          console.log("[MP webhook] Processing seat payment:", {
+            externalRef,
+            organizationId,
+            inviteeEmail,
+            roleId,
+            amount,
+          });
+
+          if (!organizationId || !inviteeEmail || !roleId) {
+            console.error("[MP webhook] ❌ Missing seat data:", { organizationId, inviteeEmail, roleId });
+            return { success: true, processed: "seat_missing_data", id: finalId };
+          }
+
+          // Check for duplicate payment
+          const { data: existingPayment } = await supabase
+            .from('payments')
+            .select('id')
+            .eq('gateway', 'mercadopago')
+            .eq('gateway_payment_id', providerPaymentId)
+            .maybeSingle();
+
+          if (existingPayment) {
+            console.log("[MP webhook] Seat payment already processed (duplicate webhook):", existingPayment.id);
+            return { success: true, processed: "seat_duplicate", id: finalId };
+          }
+
+          // Get organization and role info
+          const { data: org } = await supabase
+            .from('organizations')
+            .select('id, name')
+            .eq('id', organizationId)
+            .single();
+
+          const { data: role } = await supabase
+            .from('roles')
+            .select('id, name')
+            .eq('id', roleId)
+            .single();
+
+          if (!org || !role) {
+            console.error("[MP webhook] ❌ Org or role not found:", { org, role });
+            return { success: true, processed: "seat_org_role_not_found", id: finalId };
+          }
+
+          // Insert payment
+          const { error: paymentError } = await supabase
+            .from('payments')
+            .insert({
+              user_id: publicUserId,
+              organization_id: organizationId,
+              product_type: 'seat',
+              product_id: roleId,
+              gateway: 'mercadopago',
+              gateway_payment_id: providerPaymentId,
+              amount: amount,
+              currency: currency,
+              status: 'completed',
+              metadata: {
+                invitee_email: inviteeEmail,
+                role_id: roleId,
+                role_name: role.name,
+                organization_name: org.name,
+                preference_id: externalRef,
+              },
+            });
+
+          if (paymentError) {
+            console.error('[MP webhook] ❌ Seat payment insert failed:', paymentError);
+          } else {
+            console.log('[MP webhook] ✅ Seat payment recorded');
+          }
+
+          // Check if invitee already exists as user
+          const { data: existingUser } = await supabase
+            .from('users')
+            .select('id, auth_id')
+            .eq('email', inviteeEmail.toLowerCase())
+            .maybeSingle();
+
+          // Get inviter info
+          const { data: inviterMember } = await supabase
+            .from('organization_members')
+            .select('id, users!left(first_name, last_name)')
+            .eq('user_id', publicUserId)
+            .eq('organization_id', organizationId)
+            .eq('is_active', true)
+            .maybeSingle();
+
+          const inviterUser = (inviterMember as any)?.users;
+          const inviterName = inviterUser?.first_name && inviterUser?.last_name 
+            ? `${inviterUser.first_name} ${inviterUser.last_name}`
+            : inviterUser?.first_name || 'Un administrador';
+
+          // Check for existing invitation
+          const { data: existingInvitation } = await supabase
+            .from('organization_invitations')
+            .select('id, status')
+            .eq('email', inviteeEmail.toLowerCase())
+            .eq('organization_id', organizationId)
+            .maybeSingle();
+
+          if (existingInvitation) {
+            // Reset existing invitation to pending
+            await supabase
+              .from('organization_invitations')
+              .update({
+                status: 'pending',
+                role_id: roleId,
+                accepted_at: null,
+                updated_at: new Date().toISOString(),
+                user_id: existingUser?.id || null,
+              })
+              .eq('id', existingInvitation.id);
+
+            console.log('[MP webhook] ✅ Existing invitation reset to pending:', existingInvitation.id);
+
+            if (existingUser) {
+              await supabase.from('notifications').insert({
+                type: 'organization_invitation',
+                title: `Te invitaron nuevamente a ${org.name}`,
+                body: `Has sido invitado a unirte a la organización "${org.name}". Aceptá la invitación para comenzar a colaborar.`,
+                data: {
+                  invitation_id: existingInvitation.id,
+                  organization_id: organizationId,
+                  organization_name: org.name,
+                  user_id: existingUser.id,
+                },
+                audience: 'direct',
+                created_by: publicUserId,
+              });
+            } else {
+              // Send invitation email for new users
+              const { sendInvitationEmail } = await import("../../../email/sendInvitationEmail.js");
+              await sendInvitationEmail({
+                inviteeEmail: inviteeEmail.toLowerCase(),
+                organizationName: org.name,
+                inviterName,
+                roleName: role.name,
+                invitationId: existingInvitation.id,
+              });
+            }
+          } else {
+            // Create new invitation
+            const { data: invitation, error: invitationError } = await supabase
+              .from('organization_invitations')
+              .insert({
+                organization_id: organizationId,
+                email: inviteeEmail.toLowerCase(),
+                role_id: roleId,
+                user_id: existingUser?.id || null,
+                invited_by: inviterMember?.id || null,
+                status: 'pending',
+              })
+              .select()
+              .single();
+
+            if (invitationError || !invitation) {
+              console.error('[MP webhook] ❌ Invitation creation failed:', invitationError);
+              return { success: true, processed: "seat_invitation_failed", id: finalId };
+            }
+
+            console.log('[MP webhook] ✅ Invitation created:', invitation.id);
+
+            if (existingUser) {
+              await supabase.from('notifications').insert({
+                type: 'organization_invitation',
+                title: `Te invitaron a ${org.name}`,
+                body: `Has sido invitado a unirte a la organización "${org.name}". Aceptá la invitación para comenzar a colaborar.`,
+                data: {
+                  invitation_id: invitation.id,
+                  organization_id: organizationId,
+                  organization_name: org.name,
+                  user_id: existingUser.id,
+                },
+                audience: 'direct',
+                created_by: publicUserId,
+              });
+            } else {
+              // Send invitation email for new users
+              const { sendInvitationEmail } = await import("../../../email/sendInvitationEmail.js");
+              await sendInvitationEmail({
+                inviteeEmail: inviteeEmail.toLowerCase(),
+                organizationName: org.name,
+                inviterName,
+                roleName: role.name,
+                invitationId: invitation.id,
+              });
+            }
+          }
+
+          // Update subscription for new seat if applicable
+          if (subscriptionId && seatBillingPeriod) {
+            try {
+              const { updateSubscriptionForNewSeat } = await import("./updateSeatSubscription.js");
+              const updateResult = await updateSubscriptionForNewSeat({
+                supabase,
+                subscriptionId,
+                organizationId,
+                billingPeriod: seatBillingPeriod as 'monthly' | 'annual',
+              });
+              
+              if (!updateResult.success) {
+                console.error('[MP webhook] ⚠️ Failed to update subscription for seat (non-fatal):', updateResult.error);
+              } else {
+                console.log('[MP webhook] ✅ Subscription updated for new seat:', {
+                  oldAmount: updateResult.oldAmount,
+                  newAmount: updateResult.newAmount,
+                });
+              }
+            } catch (e) {
+              console.error('[MP webhook] ⚠️ Error updating subscription (non-fatal):', e);
+            }
+          }
+
+          return { success: true, processed: "seat_payment", id: finalId };
         }
         
         if (productType === 'subscription') {
