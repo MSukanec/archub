@@ -26,8 +26,7 @@ import { OrganizationRemovedModal } from "@/features/organization/modals/Organiz
 import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 import { useProjectReadOnly } from "@/hooks/use-project-readonly";
 import { ProjectReadOnlyProvider } from "@/contexts/ProjectReadOnlyContext";
-// TEMPORALMENTE DESHABILITADO - GlobalAnnouncement no se usa por ahora
-// import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/components/ui-custom/layout/GlobalAnnouncement";
+import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/features/users/components/announcements/GlobalAnnouncement";
 import { useLocation } from "wouter";
 import { type WidthProp, resolveWidthMode, getContainerClasses, getContentPaddingClasses } from "./layoutWidth";
 
@@ -161,20 +160,21 @@ export function Layout({ children, wide = false, hideHeader = false, headerProps
   }, [data?.preferences?.theme]);
 
   return (
-    // TEMPORALMENTE DESHABILITADO - AnnouncementProvider wrapper
-    <LayoutContent 
-      children={children}
-      wide={wide}
-      hideHeader={hideHeader}
-      headerProps={headerProps}
-      isMobile={isMobile}
-      isDark={isDark}
-      showActionBar={showActionBar}
-      isDocked={isDocked}
-      shouldShowAIChat={shouldShowAIChat}
-      contentBackground={contentBackground}
-      userMode={userMode}
-    />
+    <AnnouncementProvider>
+      <LayoutContent 
+        children={children}
+        wide={wide}
+        hideHeader={hideHeader}
+        headerProps={headerProps}
+        isMobile={isMobile}
+        isDark={isDark}
+        showActionBar={showActionBar}
+        isDocked={isDocked}
+        shouldShowAIChat={shouldShowAIChat}
+        contentBackground={contentBackground}
+        userMode={userMode}
+      />
+    </AnnouncementProvider>
   );
 }
 
@@ -192,8 +192,7 @@ function LayoutContent({
   contentBackground,
   userMode
 }: any) {
-  // TEMPORALMENTE DESHABILITADO - GlobalAnnouncement
-  // const { hasActiveAnnouncement } = useAnnouncementBanner();
+  const { hasActiveAnnouncement } = useAnnouncementBanner();
 
   // Project read-only state for soft-locked projects
   const { isReadOnly: isProjectReadOnly, project } = useProjectReadOnly();
@@ -211,16 +210,15 @@ function LayoutContent({
 
   return (
     <>
-      {/* TEMPORALMENTE DESHABILITADO - Global Announcements Banner */}
-      {/* <GlobalAnnouncement /> */}
+      {/* Global Announcements Banner - Fixed at top */}
+      <GlobalAnnouncement />
       
       <div 
         className={isMobile ? "min-h-screen flex flex-col" : "h-screen flex flex-col overflow-hidden"}
-        // TEMPORALMENTE DESHABILITADO - Padding dinámico del announcement
-        // style={{
-        //   paddingTop: hasActiveAnnouncement ? `${ANNOUNCEMENT_HEIGHT}px` : '0',
-        //   transition: 'padding-top 0.2s ease-out'
-        // }}
+        style={{
+          paddingTop: hasActiveAnnouncement ? `${ANNOUNCEMENT_HEIGHT}px` : '0',
+          transition: 'padding-top 0.2s ease-out'
+        }}
       >
         <div
           className={isMobile ? "flex flex-col" : "flex-1 flex flex-col min-h-0"}
