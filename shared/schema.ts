@@ -83,6 +83,10 @@ export const insertUserPreferencesSchema = createInsertSchema(user_preferences).
   last_organization_id: true,
 });
 
+// Status enum for courses and plans
+export const itemStatusEnum = ['available', 'coming_soon', 'maintenance'] as const;
+export type ItemStatus = typeof itemStatusEnum[number];
+
 // Plans Table
 export const plans = pgTable("plans", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -93,6 +97,7 @@ export const plans = pgTable("plans", {
   monthly_amount: numeric("monthly_amount", { precision: 10, scale: 2 }),
   annual_amount: numeric("annual_amount", { precision: 10, scale: 2 }),
   is_active: boolean("is_active").default(true),
+  status: text("status").notNull().default("available"), // available | coming_soon | maintenance
   billing_type: text("billing_type").default("per_user"),
   // PayPal Billing Plans (for recurring subscriptions)
   paypal_product_id: text("paypal_product_id"),
@@ -1184,6 +1189,7 @@ export const courses = pgTable("courses", {
   short_description: text("short_description"),
   cover_url: text("cover_url"), // LEGACY - will be removed after media migration
   is_active: boolean("is_active").notNull().default(true),
+  status: text("status").notNull().default("available"), // available | coming_soon | maintenance
   visibility: text("visibility").notNull().default("public"),
   created_by: uuid("created_by"),
   created_at: timestamp("created_at").notNull().defaultNow(),
