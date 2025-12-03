@@ -12,6 +12,7 @@ import CourseContentTab from './view/CourseContentTab';
 import CoursePlayerTab from './view/CoursePlayerTab';
 import CourseNotesTab from './view/CourseNotesTab';
 import CourseMarkersTab from './view/CourseMarkersTab';
+import CourseFeedbackTab from './view/CourseFeedbackTab';
 
 export default function CourseView() {
   const { id } = useParams<{ id: string }>();
@@ -128,6 +129,11 @@ export default function CourseView() {
       id: 'Marcadores',
       label: 'Marcadores',
       isActive: activeTab === 'Marcadores'
+    },
+    {
+      id: 'Feedback',
+      label: 'Feedback',
+      isActive: activeTab === 'Feedback'
     }
   ];
 
@@ -265,6 +271,8 @@ export default function CourseView() {
         return <CourseNotesTab courseId={course?.id} courseSlug={id} />;
       case 'Marcadores':
         return <CourseMarkersTab courseId={course?.id} courseSlug={id} />;
+      case 'Feedback':
+        return <CourseFeedbackTab courseId={course?.id} />;
       default:
         return null;
     }

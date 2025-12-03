@@ -1933,4 +1933,188 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       res.status(500).json({ error: "Failed to fetch dashboard data" });
     }
   });
+
+  // ========== COURSE FEEDBACK/TESTIMONIAL ENDPOINTS ==========
+
+  // GET /api/courses/:courseId/my-feedback - Get user's own testimonial for a course
+  app.get("/api/courses/:courseId/my-feedback", async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.json(null);
+      }
+      
+      // Find user's testimonial for this course (not deleted)
+      const { data: testimonial, error: testimonialError } = await authenticatedSupabase
+        .from('testimonials')
+        .select('*')
+        .eq('user_id', dbUser.id)
+        .eq('course_id', courseId)
+        .eq('is_deleted', false)
+        .maybeSingle();
+      
+      if (testimonialError) {
+        console.error('Error fetching testimonial:', testimonialError);
+        return res.status(500).json({ error: "Failed to fetch testimonial" });
+      }
+      
+      res.json(testimonial || null);
+    } catch (error) {
+      console.error('Error in my-feedback endpoint:', error);
+      res.status(500).json({ error: "Failed to fetch testimonial" });
+    }
+  });
+
+  // POST /api/courses/:courseId/feedback - Create user's testimonial
+  app.post("/api/courses/:courseId/feedback", async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      const { content, rating, author_name } = req.body;
+      
+      // Validate required fields
+      if (!content || typeof content !== 'string' || content.trim().length === 0) {
+        return res.status(400).json({ error: "Content is required" });
+      }
+      
+      if (!rating || typeof rating !== 'number' || rating < 1 || rating > 5) {
+        return res.status(400).json({ error: "Rating must be between 1 and 5" });
+      }
+      
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id, full_name, avatar_url')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Check if user already has a testimonial for this course
+      const { data: existingTestimonial } = await authenticatedSupabase
+        .from('testimonials')
+        .select('id')
+        .eq('user_id', dbUser.id)
+        .eq('course_id', courseId)
+        .eq('is_deleted', false)
+        .maybeSingle();
+      
+      if (existingTestimonial) {
+        return res.status(409).json({ error: "You already have a review for this course" });
+      }
+      
+      // Create the testimonial
+      const { data: testimonial, error: insertError } = await authenticatedSupabase
+        .from('testimonials')
+        .insert({
+          user_id: dbUser.id,
+          course_id: courseId,
+          content: content.trim(),
+          rating,
+          author_name: author_name || dbUser.full_name || 'Usuario',
+          author_avatar_url: dbUser.avatar_url,
+          is_active: false, // Requires review before publishing
+          is_featured: false
+        })
+        .select()
+        .single();
+      
+      if (insertError) {
+        console.error('Error creating testimonial:', insertError);
+        return res.status(500).json({ error: "Failed to create testimonial" });
+      }
+      
+      res.json(testimonial);
+    } catch (error) {
+      console.error('Error in create feedback endpoint:', error);
+      res.status(500).json({ error: "Failed to create testimonial" });
+    }
+  });
+
+  // DELETE /api/courses/:courseId/feedback - Soft-delete user's testimonial
+  app.delete("/api/courses/:courseId/feedback", async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const authenticatedSupabase = createAuthenticatedClient(token);
+      const { data: { user }, error: userError } = await authenticatedSupabase.auth.getUser();
+      
+      if (userError || !user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { data: dbUser } = await authenticatedSupabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .maybeSingle();
+      
+      if (!dbUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Soft-delete the testimonial
+      const { data: testimonial, error: deleteError } = await authenticatedSupabase
+        .from('testimonials')
+        .update({
+          is_deleted: true,
+          deleted_at: new Date().toISOString()
+        })
+        .eq('user_id', dbUser.id)
+        .eq('course_id', courseId)
+        .eq('is_deleted', false)
+        .select()
+        .maybeSingle();
+      
+      if (deleteError) {
+        console.error('Error deleting testimonial:', deleteError);
+        return res.status(500).json({ error: "Failed to delete testimonial" });
+      }
+      
+      if (!testimonial) {
+        return res.status(404).json({ error: "Testimonial not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error in delete feedback endpoint:', error);
+      res.status(500).json({ error: "Failed to delete testimonial" });
+    }
+  });
 }

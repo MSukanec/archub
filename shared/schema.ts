@@ -1299,6 +1299,7 @@ export const course_faqs = pgTable("course_faqs", {
 
 export const testimonials = pgTable("testimonials", {
   id: uuid("id").primaryKey().defaultRandom(),
+  user_id: uuid("user_id"),
   course_id: uuid("course_id"),
   organization_id: uuid("organization_id"),
   product_id: uuid("product_id"),
