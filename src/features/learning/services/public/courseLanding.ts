@@ -148,16 +148,24 @@ export async function fetchCourseLandingBySlug(slug: string) {
 
   if (faqsError) throw new Error(`FAQs fetch error: ${faqsError.message}`);
 
-  // 5. Fetch Testimonials
-  const { data: testimonials, error: testimonialsError } = await supabase
-    .from('testimonials')
-    .select('*')
-    .eq('course_id', course.id)
-    .eq('is_active', true)
-    .eq('is_deleted', false)
-    .order('sort_index', { ascending: true });
+  // 5. Fetch Testimonials (graceful fallback if table doesn't exist yet)
+  let testimonials: any[] = [];
+  try {
+    const { data: testimonialsData, error: testimonialsError } = await supabase
+      .from('testimonials')
+      .select('*')
+      .eq('course_id', course.id)
+      .eq('is_active', true)
+      .eq('is_deleted', false)
+      .order('sort_index', { ascending: true });
 
-  if (testimonialsError) throw new Error(`Testimonials fetch error: ${testimonialsError.message}`);
+    if (!testimonialsError && testimonialsData) {
+      testimonials = testimonialsData;
+    }
+  } catch {
+    // Table might not exist yet - continue with empty testimonials
+    console.log('Testimonials table not available yet');
+  }
 
   return {
     course: course as Course,
