@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
+import { GlobalAnnouncement, AnnouncementProvider, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT } from "@/features/users/components/announcements/GlobalAnnouncement";
 
 interface SEOProps {
   title: string;
@@ -28,7 +29,29 @@ export function MarketingLayout({
   heroSlot,
   stickyContent
 }: MarketingLayoutProps) {
+  return (
+    <AnnouncementProvider>
+      <MarketingLayoutContent
+        headerNavigation={headerNavigation}
+        seo={seo}
+        heroSlot={heroSlot}
+        stickyContent={stickyContent}
+      >
+        {children}
+      </MarketingLayoutContent>
+    </AnnouncementProvider>
+  );
+}
+
+function MarketingLayoutContent({ 
+  children, 
+  headerNavigation,
+  seo,
+  heroSlot,
+  stickyContent
+}: MarketingLayoutProps) {
   const [location] = useLocation();
+  const { hasActiveAnnouncement } = useAnnouncementBanner();
 
   // Handle hash scrolling after SPA navigation
   useEffect(() => {
@@ -144,42 +167,62 @@ export function MarketingLayout({
   // Special layout with hero section (for course landing pages)
   if (heroSlot) {
     return (
-      <div className="min-h-screen overflow-x-hidden">
-        <Header navigation={headerNavigation} />
-        
-        {/* Floating Sticky Card - Desktop only, positioned absolutely */}
-        {stickyContent && (
-          <div 
-            className="hidden lg:block fixed top-24 z-40"
-            style={{
-              width: '368px',
-              right: 'max(32px, calc((100vw - 1472px) / 2))'
-            }}
-          >
-            <div className="sticky top-24">
-              {stickyContent}
+      <>
+        <GlobalAnnouncement />
+        <div 
+          className="min-h-screen overflow-x-hidden"
+          style={{
+            paddingTop: hasActiveAnnouncement ? `${ANNOUNCEMENT_HEIGHT}px` : '0',
+            transition: 'padding-top 0.2s ease-out'
+          }}
+        >
+          <Header navigation={headerNavigation} />
+          
+          {/* Floating Sticky Card - Desktop only, positioned absolutely */}
+          {stickyContent && (
+            <div 
+              className="hidden lg:block fixed z-40"
+              style={{
+                top: hasActiveAnnouncement ? `calc(96px + ${ANNOUNCEMENT_HEIGHT}px)` : '96px',
+                width: '368px',
+                right: 'max(32px, calc((100vw - 1472px) / 2))',
+                transition: 'top 0.2s ease-out'
+              }}
+            >
+              <div className="sticky top-24">
+                {stickyContent}
+              </div>
             </div>
-          </div>
-        )}
-        
-        <main className="overflow-x-hidden">
-          {heroSlot}
-          {children}
-        </main>
-        
-        <Footer />
-      </div>
+          )}
+          
+          <main className="overflow-x-hidden">
+            {heroSlot}
+            {children}
+          </main>
+          
+          <Footer />
+        </div>
+      </>
     );
   }
 
   // Normal layout (for standard marketing pages)
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
-      <Header navigation={headerNavigation} />
-      <div className="container mx-auto px-6 py-12 flex-1">
-        {children}
+    <>
+      <GlobalAnnouncement />
+      <div 
+        className="min-h-screen bg-background flex flex-col overflow-x-hidden"
+        style={{
+          paddingTop: hasActiveAnnouncement ? `${ANNOUNCEMENT_HEIGHT}px` : '0',
+          transition: 'padding-top 0.2s ease-out'
+        }}
+      >
+        <Header navigation={headerNavigation} />
+        <div className="container mx-auto px-6 py-12 flex-1">
+          {children}
+        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
+    </>
   );
 }
