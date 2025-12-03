@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 
 interface EmailPreview {
-  type: 'registration' | 'purchase' | 'bank-transfer-admin' | 'invitation';
+  type: 'registration' | 'purchase' | 'bank-transfer-admin' | 'invitation' | 'transfer-pending';
   html: string;
   preview: {
     subject: string;
@@ -32,6 +32,7 @@ interface Course {
 function EmailTemplatesContent() {
   const [registrationEmail, setRegistrationEmail] = useState<EmailPreview | null>(null);
   const [purchaseEmail, setPurchaseEmail] = useState<EmailPreview | null>(null);
+  const [transferPendingEmail, setTransferPendingEmail] = useState<EmailPreview | null>(null);
   const [bankTransferAdminEmail, setBankTransferAdminEmail] = useState<EmailPreview | null>(null);
   const [invitationEmail, setInvitationEmail] = useState<EmailPreview | null>(null);
   const [loading, setLoading] = useState(false);
@@ -100,6 +101,21 @@ function EmailTemplatesContent() {
       if (purRes.ok) {
         const data = await purRes.json();
         setPurchaseEmail(data);
+      }
+
+      const tpRes = await fetch('/api/admin/email-preview/transfer-pending', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userName: 'Jorge Benitest',
+          courseName: 'Curso Avanzado de Construcción',
+          amount: '$85,000 ARS',
+          transferId: 'TRF-20241128-001',
+        })
+      });
+      if (tpRes.ok) {
+        const data = await tpRes.json();
+        setTransferPendingEmail(data);
       }
 
       const btaRes = await fetch('/api/admin/email-preview/bank-transfer-admin', {
@@ -328,6 +344,52 @@ function EmailTemplatesContent() {
     </div>
   );
 
+  const TransferPendingEmailEditor = () => (
+    <div className="space-y-4">
+      {transferPendingEmail && (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Asunto
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(transferPendingEmail.preview.subject, 'tp-subject')}
+                >
+                  {copiedCode === 'tp-subject' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground font-mono">{transferPendingEmail.preview.subject}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Vista Previa del Email</CardTitle>
+              <CardDescription>Este email se envía al usuario cuando sube un comprobante de transferencia</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-lg overflow-hidden bg-white">
+                <iframe
+                  srcDoc={transferPendingEmail.html}
+                  title="Email Preview"
+                  className="w-full h-[600px] border-0"
+                  sandbox="allow-same-origin"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
+    </div>
+  );
+
   const BankTransferAdminEmailEditor = () => (
     <div className="space-y-4">
       {bankTransferAdminEmail && (
@@ -478,7 +540,8 @@ function EmailTemplatesContent() {
           <TabsTrigger value="registration" data-testid="tab-registration-email">✉️ Registro</TabsTrigger>
           <TabsTrigger value="purchase" data-testid="tab-purchase-email">💳 Compra</TabsTrigger>
           <TabsTrigger value="invitation" data-testid="tab-invitation-email">👥 Invitación</TabsTrigger>
-          <TabsTrigger value="bank-transfer-admin" data-testid="tab-bank-transfer-admin-email">🏦 Transferencia</TabsTrigger>
+          <TabsTrigger value="transfer-pending" data-testid="tab-transfer-pending-email">⏳ Pendiente</TabsTrigger>
+          <TabsTrigger value="bank-transfer-admin" data-testid="tab-bank-transfer-admin-email">🏦 Admin</TabsTrigger>
         </TabsList>
 
         <TabsContent value="registration" className="mt-6">
@@ -491,6 +554,10 @@ function EmailTemplatesContent() {
 
         <TabsContent value="invitation" className="mt-6">
           <InvitationEmailEditor />
+        </TabsContent>
+
+        <TabsContent value="transfer-pending" className="mt-6">
+          <TransferPendingEmailEditor />
         </TabsContent>
 
         <TabsContent value="bank-transfer-admin" className="mt-6">

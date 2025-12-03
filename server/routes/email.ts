@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import type { RouteDeps } from './_base';
 import WelcomeEmail from '../../src/emails/WelcomeEmail';
 import PurchaseEmail from '../../src/emails/PurchaseEmail';
+import TransferPendingEmail from '../../src/emails/TransferPendingEmail';
 import ContactEmail from '../../src/emails/ContactEmail';
 import AdminBankTransferAlert from '../../src/emails/AdminBankTransferAlert';
 import InvitationEmail from '../../src/emails/InvitationEmail';
@@ -176,6 +177,15 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
             transactionId: transactionId || 'N/A',
           }) as any
         );
+      } else if (template === 'transfer_pending') {
+        emailHtml = await render(
+          TransferPendingEmail({
+            userName: userName || 'Cliente',
+            courseName: courseName || 'Curso',
+            amount: amount || '$0',
+            transferId: transactionId || 'N/A',
+          }) as any
+        );
       } else if (html) {
         emailHtml = html;
       } else {
@@ -297,6 +307,41 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         html: emailHtml,
         preview: {
           subject: `Confirmación de Compra: ${courseName}`,
+          from: 'Seencel <sistema@seencel.com>',
+          to: 'student@example.com',
+        }
+      });
+    } catch (error: any) {
+      console.error('❌ Preview error:', error);
+      return res.status(500).json({ error: error.message });
+    }
+  });
+
+  // POST /api/admin/email-preview/transfer-pending - Preview transfer pending email (user)
+  app.post('/api/admin/email-preview/transfer-pending', async (req, res) => {
+    try {
+      const {
+        userName = 'Jorge Benitest',
+        courseName = 'Curso Avanzado de Construcción',
+        amount = '$85,000 ARS',
+        transferId = 'TRF-20241128-001',
+      } = req.body;
+      
+      const emailHtml = await render(
+        TransferPendingEmail({
+          userName,
+          courseName,
+          amount,
+          transferId,
+        }) as any
+      );
+
+      return res.json({
+        ok: true,
+        type: 'transfer-pending',
+        html: emailHtml,
+        preview: {
+          subject: `Comprobante Recibido - Pendiente de Revisión`,
           from: 'Seencel <sistema@seencel.com>',
           to: 'student@example.com',
         }
