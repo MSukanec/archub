@@ -220,7 +220,7 @@ export function GlobalAnnouncement() {
                     size="sm"
                     variant="outline"
                     onClick={() => window.open(normalizeUrl(activeAnnouncement.secondary_button_url!), '_blank')}
-                    className="h-8 px-4 text-xs font-medium bg-transparent border-white text-white hover:bg-white/10"
+                    className="h-8 px-4 text-xs font-medium rounded-lg bg-transparent border-white text-white hover:bg-white/10 hover:text-white"
                   >
                     {activeAnnouncement.secondary_button_text}
                   </Button>
