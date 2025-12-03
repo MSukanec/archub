@@ -577,16 +577,16 @@ export function PageLayout({
                     <div className="w-px h-6 bg-[var(--card-border)] mx-1" />
                   )}
 
-                  {/* Additional Button (appears first/left) */}
+                  {/* Secondary Button (left - green) */}
                   {actionButton?.additionalButton && (
                     <Button
-                      variant={actionButton.additionalButton.variant || "ghost"}
+                      variant="secondary"
                       size="sm"
                       onClick={actionButton.additionalButton.onClick}
-                      className="h-8 px-3 text-xs font-normal"
+                      className="h-8 px-3 text-xs font-medium"
                     >
                       {actionButton.additionalButton.icon && (
-                        <actionButton.additionalButton.icon className="w-4 h-4 mr-1" />
+                        <actionButton.additionalButton.icon className="w-4 h-4 mr-1.5" />
                       )}
                       {actionButton.additionalButton.label}
                     </Button>
@@ -599,7 +599,7 @@ export function PageLayout({
                     </div>
                   ))}
 
-                  {/* Main Action Button */}
+                  {/* Main Action Button (right - accent/yellow) */}
                   {actionButton && (
                     <>
                       {actionButton.dropdown ? (
@@ -608,10 +608,10 @@ export function PageLayout({
                             <Button
                               variant="default"
                               size="sm"
-                              className="h-8 px-3 text-xs font-normal"
+                              className="h-8 px-3 text-xs font-medium"
                             >
                               {actionButton.icon && (
-                                <actionButton.icon className="w-4 h-4 mr-1" />
+                                <actionButton.icon className="w-4 h-4 mr-1.5" />
                               )}
                               {actionButton.label}
                               <ChevronDown className="w-3 h-3 ml-1" />
@@ -630,10 +630,10 @@ export function PageLayout({
                           variant="default"
                           size="sm"
                           onClick={actionButton.onClick}
-                          className="h-8 px-3 text-xs font-normal"
+                          className="h-8 px-3 text-xs font-medium"
                         >
                           {actionButton.icon && (
-                            <actionButton.icon className="w-4 h-4 mr-1" />
+                            <actionButton.icon className="w-4 h-4 mr-1.5" />
                           )}
                           {actionButton.label}
                         </Button>
