@@ -1457,13 +1457,20 @@ export default function SubscriptionCheckout() {
                         <div className="flex items-center gap-2">
                           <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0" />
                           <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                            Prorrateo no disponible con PayPal
+                            Prorrateo requiere asistencia
                           </p>
                         </div>
                         <p className="text-xs text-amber-600 dark:text-amber-500">
                           Tu crédito de USD ${prorationData.savings.usd?.toFixed(2)} por los {prorationData.credit.daysRemaining} días 
-                          restantes de {prorationData.currentPlan?.name} no puede aplicarse automáticamente con PayPal. 
-                          Para obtener el precio prorrateado, usá Mercado Pago.
+                          restantes de {prorationData.currentPlan?.name} requiere asistencia para aplicarse.{' '}
+                          <a 
+                            href="/contact" 
+                            target="_blank"
+                            className="underline hover:text-amber-700 dark:hover:text-amber-300 font-medium"
+                          >
+                            Contactanos
+                          </a>{' '}
+                          para procesar tu upgrade con el crédito aplicado.
                         </p>
                       </div>
                     )}
