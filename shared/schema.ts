@@ -1842,3 +1842,28 @@ export const insertPaypalUpgradePreferenceSchema = createInsertSchema(paypal_upg
 
 export type PaypalUpgradePreference = typeof paypal_upgrade_preferences.$inferSelect;
 export type InsertPaypalUpgradePreference = z.infer<typeof insertPaypalUpgradePreferenceSchema>;
+
+// PayPal Seat Preferences (for prorated seat payments when adding organization members)
+export const paypal_seat_preferences = pgTable("paypal_seat_preferences", {
+  id: varchar("id", { length: 64 }).primaryKey(), // pps_xxxxx (short ID)
+  order_id: text("order_id"), // PayPal order ID (filled after order created)
+  user_id: uuid("user_id").notNull(), // users.id (internal table ID)
+  organization_id: uuid("organization_id").notNull(),
+  invitee_email: text("invitee_email").notNull(),
+  role_id: uuid("role_id").notNull(),
+  subscription_id: uuid("subscription_id"), // existing subscription to update
+  prorated_amount_usd: numeric("prorated_amount_usd", { precision: 10, scale: 2 }).notNull(),
+  billing_period: text("billing_period", { enum: ["monthly", "annual"] }).notNull(),
+  status: text("status", { enum: ["pending", "completed"] }).default("pending"),
+  created_at: timestamp("created_at").defaultNow(),
+  captured_at: timestamp("captured_at"),
+});
+
+export const insertPaypalSeatPreferenceSchema = createInsertSchema(paypal_seat_preferences).omit({
+  id: true,
+  created_at: true,
+  captured_at: true,
+});
+
+export type PaypalSeatPreference = typeof paypal_seat_preferences.$inferSelect;
+export type InsertPaypalSeatPreference = z.infer<typeof insertPaypalSeatPreferenceSchema>;

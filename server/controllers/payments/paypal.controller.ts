@@ -14,6 +14,8 @@ import { logPaymentEvent } from "../../lib/handlers/checkout/shared/events.js";
 import { markCouponAsUsed } from "../../lib/handlers/checkout/shared/coupons.js";
 import { createUpgradeOrder } from "../../lib/handlers/checkout/paypal/createUpgradeOrder.js";
 import { handleUpgradeCapture } from "../../lib/handlers/checkout/paypal/handleUpgradeCapture.js";
+import { createSeatOrder } from "../../lib/handlers/checkout/paypal/createSeatOrder.js";
+import { handleSeatCapture } from "../../lib/handlers/checkout/paypal/handleSeatCapture.js";
 
 export async function createCourse(req: Request, res: Response) {
   try {
@@ -448,5 +450,41 @@ export async function captureUpgrade(req: Request, res: Response) {
     console.error("[PayPal capture-upgrade controller] Fatal error:", error);
     const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
     return res.redirect(`${baseUrl}/organization/billing?payment=error&reason=internal_error`);
+  }
+}
+
+export async function createSeat(req: Request, res: Response) {
+  try {
+    const result = await createSeatOrder(req as any);
+    
+    if (!result.success) {
+      return res.status(result.status || 400).json({
+        ok: false,
+        error: result.error
+      });
+    }
+    
+    return res.json({
+      ok: true,
+      order_id: result.orderId,
+      approval_url: result.approvalUrl,
+      preference_id: result.preferenceId
+    });
+  } catch (error: any) {
+    console.error("[PayPal create-seat controller] Error:", error);
+    return res.status(500).json({
+      ok: false,
+      error: error.message || "Failed to create seat order"
+    });
+  }
+}
+
+export async function captureSeat(req: Request, res: Response) {
+  try {
+    await handleSeatCapture(req, res);
+  } catch (error: any) {
+    console.error("[PayPal capture-seat controller] Fatal error:", error);
+    const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
+    return res.redirect(`${baseUrl}/organization/members?payment=error&reason=internal_error`);
   }
 }

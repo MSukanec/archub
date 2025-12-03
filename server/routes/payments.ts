@@ -538,6 +538,12 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   
   // GET /api/checkout/paypal/upgrade-capture (NO auth required - redirect endpoint for upgrades)
   app.get("/api/checkout/paypal/upgrade-capture", paypalController.captureUpgrade);
+  
+  // POST /api/checkout/paypal/create-seat (Authenticated - create seat payment for new member invitation)
+  app.post("/api/checkout/paypal/create-seat", paypalController.createSeat);
+  
+  // GET /api/checkout/paypal/seat-capture (NO auth required - redirect endpoint for seat payments)
+  app.get("/api/checkout/paypal/seat-capture", paypalController.captureSeat);
 
   // POST /api/admin/paypal/sync-plans (Admin only - creates PayPal products and billing plans)
   app.post("/api/admin/paypal/sync-plans", paypalController.syncPlans);
