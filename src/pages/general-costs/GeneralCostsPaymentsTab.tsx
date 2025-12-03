@@ -21,7 +21,7 @@ import { parseLocalDate } from '@/lib/date-utils';
 import { useOrganizationWallets } from '@/features/organization/hooks';
 import { useGeneralCosts, useCreateGeneralCostPayment } from '@/features/general-costs';
 import { useToast } from '@/hooks/use-toast';
-import type { TargetField, ImportConfig, ProjectContext } from '@/features/imports/types';
+import type { TargetField, ImportConfig } from '@/features/imports/types';
 
 export default function GeneralCostsPaymentsTab() {
   const { data: userData } = useCurrentUser();
@@ -332,26 +332,12 @@ export default function GeneralCostsPaymentsTab() {
       general_cost_name: generalCostValueMap,
     };
 
-    const projectContext: ProjectContext = { 
-      type: 'organization', 
-      organizationId: organizationId!,
-      organizationName: userData?.organization?.name || undefined
-    };
-
-    const availableGeneralCosts = generalCostsData.map(gc => ({
-      id: gc.id,
-      name: gc.name,
-    }));
-
     openModal('universal-import', {
       config: {
         entityName: 'Pago de Gasto General',
         entityNamePlural: 'Pagos de Gastos Generales',
         targetSchema,
         valueMapConfig,
-        projectContext,
-        availableProjects: [],
-        availableClients: availableGeneralCosts,
         fieldHelpMessages: {
           wallet_name: {
             message: 'Las billeteras que no se encuentran deben agregarse primero en la configuración de tu organización.',
