@@ -64,10 +64,10 @@ export function ModulesSection({
                   <div className="p-6">
                     {/* Module Header - vertical layout on mobile */}
                     <div className="mb-4 space-y-2">
-                      <span className="font-bold block" style={{ fontSize: '16px', color: 'var(--accent)' }}>
+                      <span className="font-bold block text-sm sm:text-base text-accent">
                         MÓDULO {String(idx + 1).padStart(2, '0')}
                       </span>
-                      <div className="flex items-center gap-3" style={{ fontSize: '14px', color: 'var(--accent)' }}>
+                      <div className="flex items-center gap-3 text-xs sm:text-sm text-accent">
                         <span className="flex items-center gap-1">
                           <BookOpen className="w-4 h-4" />
                           {module.lessons?.length || 0} lecciones
@@ -80,8 +80,8 @@ export function ModulesSection({
                       </div>
                     </div>
 
-                    {/* Module Title - 36px */}
-                    <h3 className="font-semibold mb-4 group-hover:text-primary transition-colors" style={{ fontSize: '36px', lineHeight: '1.2' }}>
+                    {/* Module Title - responsive sizing */}
+                    <h3 className="font-semibold mb-4 group-hover:text-primary transition-colors text-xl sm:text-2xl md:text-3xl leading-tight">
                       {module.title}
                     </h3>
 

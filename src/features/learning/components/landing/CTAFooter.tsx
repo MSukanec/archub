@@ -14,11 +14,11 @@ export function CTAFooter({ course }: CTAFooterProps) {
   return (
     <section className="py-20 bg-gradient-to-br from-primary/10 via-primary/5 to-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto text-center space-y-8">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+        <div className="max-w-3xl mx-auto text-center space-y-6 sm:space-y-8">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground">
             ¿Listo para comenzar?
           </h2>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
             Únete hoy y transforma tu forma de trabajar
           </p>
 

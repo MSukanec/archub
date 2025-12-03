@@ -31,10 +31,10 @@ export function CourseDetailsSection({
               {/* Left Card - Course Details */}
               <div className="bg-background rounded-lg border shadow-sm p-6 space-y-4">
                 <div className="space-y-2">
-                  <p className="text-xs sm:text-base uppercase tracking-wide font-semibold" style={{ color: '#9EFF00' }}>
+                  <p className="text-xs sm:text-sm md:text-base uppercase tracking-wide font-semibold text-accent">
                     INFORMACIÓN DEL CURSO
                   </p>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-white">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
                     Detalles Completos
                   </h3>
                 </div>
@@ -78,10 +78,10 @@ export function CourseDetailsSection({
               {/* Right Card - Access Info */}
               <div className="bg-background rounded-lg border shadow-sm p-6 space-y-4">
                 <div className="space-y-2">
-                  <p className="text-xs sm:text-base uppercase tracking-wide font-semibold" style={{ color: '#9EFF00' }}>
+                  <p className="text-xs sm:text-sm md:text-base uppercase tracking-wide font-semibold text-accent">
                     ACCESO Y DURACIÓN
                   </p>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-white">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
                     Tu Suscripción
                   </h3>
                 </div>

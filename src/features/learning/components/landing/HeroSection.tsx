@@ -37,11 +37,11 @@ export function HeroSection({ course, stats, isEnrolled = false, progressPercent
             </Badge>
           )}
 
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-6 !text-white">
+          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-6 text-white">
             {course.title}
           </h1>
 
-          <p className="text-[18px] leading-relaxed mb-8 text-[rgb(220,220,220)]">
+          <p className="text-base sm:text-lg leading-relaxed mb-8 text-gray-200">
             {course.short_description}
           </p>
 
@@ -49,26 +49,26 @@ export function HeroSection({ course, stats, isEnrolled = false, progressPercent
           {isEnrolled && (
             <div className="mb-8 max-w-xs space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-[rgb(220,220,220)]">Progreso</span>
-                <span className="font-semibold text-[rgb(220,220,220)]">{progressPercentage}%</span>
+                <span className="text-gray-200">Progreso</span>
+                <span className="font-semibold text-gray-200">{progressPercentage}%</span>
               </div>
               <Progress value={progressPercentage} className="h-2" data-testid="hero-progress-bar" />
             </div>
           )}
 
           {/* Stats */}
-          <div className="flex flex-wrap gap-6">
-            <div className="flex items-center gap-2 text-sm sm:text-base">
-              <BookOpen className="w-5 h-5 text-accent" />
-              <span className="font-semibold text-[rgb(220,220,220)]">{stats.total_modules} Módulos</span>
+          <div className="flex flex-wrap gap-4 sm:gap-6">
+            <div className="flex items-center gap-2 text-xs sm:text-sm md:text-base">
+              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
+              <span className="font-semibold text-gray-200">{stats.total_modules} Módulos</span>
             </div>
-            <div className="flex items-center gap-2 text-sm sm:text-base">
-              <CheckCircle className="w-5 h-5 text-accent" />
-              <span className="font-semibold text-[rgb(220,220,220)]">{stats.total_lessons} Lecciones</span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm md:text-base">
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
+              <span className="font-semibold text-gray-200">{stats.total_lessons} Lecciones</span>
             </div>
-            <div className="flex items-center gap-2 text-sm sm:text-base">
-              <Clock className="w-5 h-5 text-accent" />
-              <span className="font-semibold text-[rgb(220,220,220)]">{stats.total_duration_formatted} de Contenido</span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm md:text-base">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
+              <span className="font-semibold text-gray-200">{stats.total_duration_formatted} de Contenido</span>
             </div>
           </div>
         </div>
