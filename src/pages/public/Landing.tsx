@@ -134,7 +134,7 @@ const capabilities = [
 function HeroSectionComponent() {
   return (
     <section 
-      className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 -mx-6 relative"
+      className="min-h-screen flex flex-col items-center justify-center px-6 sm:px-8 md:px-12 lg:px-20 -mx-6 relative"
       style={{
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(/hero-landing-1080.jpg)`,
         backgroundSize: 'cover',
@@ -142,34 +142,28 @@ function HeroSectionComponent() {
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <div className="text-center max-w-5xl mx-auto relative">
-        <h1 
-          style={{ 
-            color: '#ffffff',
-            fontSize: '3.5rem',
-            fontWeight: 700,
-            marginBottom: '2rem',
-            lineHeight: 1.2,
-            letterSpacing: '-0.022em'
-          } as any}
-        >
+      <div className="text-center max-w-5xl mx-auto relative px-2">
+        {/* H1: Mobile-first - texto grande pero legible, crece en desktop */}
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 md:mb-8 leading-tight tracking-tight">
           La plataforma integral para arquitectura y construcción
         </h1>
         
-        <p style={{ color: '#d0d0d0', fontSize: '1.25rem', marginBottom: '3rem', maxWidth: '56rem', marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.5 } as any}>
+        {/* Subtítulo: Mobile-first - lectura cómoda, crece sutilmente en desktop */}
+        <p className="text-base sm:text-lg md:text-xl text-gray-200 mb-8 md:mb-12 max-w-3xl mx-auto leading-relaxed">
           Gestiona todo el ciclo de vida de tus proyectos: desde diseño y planificación, 
           pasando por ventas y marketing, hasta construcción y entrega. Con IA integrada, 
           capacitación continua y conexión con las herramientas que ya usas.
         </p>
         
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        {/* Botones: Stack en mobile, row en tablet+ */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
           <Link href="/register">
-            <Button size="lg" variant="secondary" className="px-8 py-4 text-lg font-medium" data-testid="button-hero-register">
+            <Button size="lg" variant="secondary" className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium" data-testid="button-hero-register">
               Comenzar Gratis
             </Button>
           </Link>
           <Link href="/founders">
-            <Button size="lg" className="px-8 py-4 text-lg font-medium" data-testid="button-hero-founders">
+            <Button size="lg" className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium" data-testid="button-hero-founders">
               Ser Fundador
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
