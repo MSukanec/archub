@@ -149,14 +149,14 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
   const handleDelete = (generalCost: GeneralCost) => {
     // Contar cuántos pagos están asociados a este concepto
     const associatedPayments = payments.filter(p => p.general_cost_id === generalCost.id);
-    const hasReplacements = generalCosts.filter(gc => gc.id !== generalCost.id).length > 0;
+    const otherGeneralCosts = generalCosts.filter(gc => gc.id !== generalCost.id);
+    const hasReplacements = otherGeneralCosts.length > 0;
     
-    // Determinar el modo: si hay pagos y hay otros conceptos disponibles, usar 'replace'
-    const mode = associatedPayments.length > 0 && hasReplacements ? 'replace' : 'delete';
+    // Siempre usar modo 'replace' si hay otros gastos disponibles
+    const mode = hasReplacements ? 'replace' : 'delete';
     
     // Preparar opciones de reemplazo (ordenadas alfabéticamente)
-    const replacementOptions = generalCosts
-      .filter(gc => gc.id !== generalCost.id)
+    const replacementOptions = otherGeneralCosts
       .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
       .map(gc => ({
         label: gc.name,
@@ -166,12 +166,8 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
     // Preparar consecuencias
     const consequences: string[] = [];
     if (associatedPayments.length > 0) {
-      consequences.push(`${associatedPayments.length} pago${associatedPayments.length === 1 ? '' : 's'} están asociado${associatedPayments.length === 1 ? '' : 's'} a este concepto`);
-      if (mode === 'replace') {
-        consequences.push('Puedes reemplazarlos con otro concepto o dejarlos sin referencia');
-      } else {
-        consequences.push('Los pagos quedarán sin referencia a ningún concepto');
-      }
+      consequences.push(`${associatedPayments.length} pago${associatedPayments.length === 1 ? '' : 's'} está${associatedPayments.length === 1 ? '' : 'n'} asociado${associatedPayments.length === 1 ? '' : 's'} a este concepto`);
+      consequences.push('Puedes reemplazarlos con otro concepto o eliminar sin reemplazar');
     }
     
     openModal('delete-confirmation', {
