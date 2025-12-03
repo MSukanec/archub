@@ -331,30 +331,57 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       }
 
       const formData = form.getValues();
+      const isPayPalProvider = pricing.subscription.paymentProvider === 'paypal';
       
-      const response = await fetch('/api/checkout/mp/create-seat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionData.session.access_token}`,
-        },
-        body: JSON.stringify({
-          organization_id: organizationId,
-          invitee_email: formData.email,
-          role_id: formData.roleId,
-          prorated_amount_ars: pricing.pricing.proratedAmountARS,
-          subscription_id: pricing.subscription.id,
-          billing_period: pricing.subscription.billingPeriod,
-        }),
-      });
+      if (isPayPalProvider) {
+        const response = await fetch('/api/checkout/paypal/create-seat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`,
+          },
+          body: JSON.stringify({
+            organization_id: organizationId,
+            invitee_email: formData.email,
+            role_id: formData.roleId,
+            prorated_amount_usd: pricing.pricing.proratedAmountUSD,
+            subscription_id: pricing.subscription.id,
+            billing_period: pricing.subscription.billingPeriod,
+          }),
+        });
 
-      const result = await response.json();
-      
-      if (!response.ok || !result.ok) {
-        throw new Error(result.error || 'Error creando preferencia de pago');
+        const result = await response.json();
+        
+        if (!response.ok || !result.ok) {
+          throw new Error(result.error || 'Error creando orden de pago');
+        }
+
+        window.location.href = result.approval_url;
+      } else {
+        const response = await fetch('/api/checkout/mp/create-seat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionData.session.access_token}`,
+          },
+          body: JSON.stringify({
+            organization_id: organizationId,
+            invitee_email: formData.email,
+            role_id: formData.roleId,
+            prorated_amount_ars: pricing.pricing.proratedAmountARS,
+            subscription_id: pricing.subscription.id,
+            billing_period: pricing.subscription.billingPeriod,
+          }),
+        });
+
+        const result = await response.json();
+        
+        if (!response.ok || !result.ok) {
+          throw new Error(result.error || 'Error creando preferencia de pago');
+        }
+
+        window.location.href = result.init_point;
       }
-
-      window.location.href = result.init_point;
     } catch (error: any) {
       toast({
         title: 'Error',
