@@ -11,6 +11,7 @@ export interface CourseData {
   cover_url: string | null;
   is_active: boolean;
   visibility: string;
+  status: string;
 }
 
 /**

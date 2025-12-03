@@ -188,7 +188,12 @@ export function UnifiedCourseCard({
           </>
         ) : (
           <div className="w-full flex justify-between items-center">
-            {course.price ? (
+            {isBlocking ? (
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold text-muted-foreground">$—</span>
+                <span className="text-xs text-muted-foreground">No disponible</span>
+              </div>
+            ) : course.price ? (
               <div className="flex flex-col">
                 <span className="text-2xl font-bold">${course.price}</span>
                 <span className="text-xs text-muted-foreground">USD / año</span>
@@ -197,7 +202,7 @@ export function UnifiedCourseCard({
               <span className="text-lg font-semibold text-primary">Gratis</span>
             )}
             <span className="text-sm text-primary font-medium group-hover:underline">
-              Ver más →
+              {isBlocking ? '' : 'Ver más →'}
             </span>
           </div>
         )}

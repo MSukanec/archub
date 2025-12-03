@@ -11,6 +11,7 @@ export interface Course {
   short_description: string | null;
   is_active: boolean;
   visibility: string;
+  status: string;
   cover_url: string | null;
 }
 
@@ -53,7 +54,7 @@ export async function getCoursesFull(
       // Get all active courses
       supabase
         .from('courses')
-        .select('id, slug, title, short_description, is_active, visibility')
+        .select('id, slug, title, short_description, is_active, visibility, status')
         .eq('is_deleted', false)
         .eq('is_active', true)
         .neq('visibility', 'draft'),

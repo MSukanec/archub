@@ -49,7 +49,7 @@ export function PricingContent({ mode }: PricingContentProps) {
         // is_active filter removed - handled by frontend BlockedRestricted
       const { data, error } = await supabase
           .from('plans')
-          .select('id, name, slug, features, billing_type, is_active, monthly_amount, annual_amount');
+          .select('id, name, slug, features, billing_type, is_active, status, monthly_amount, annual_amount');
 
         if (error) throw error;
         
@@ -60,6 +60,7 @@ export function PricingContent({ mode }: PricingContentProps) {
           features: plan.features || {},
           billing_type: plan.billing_type,
           is_active: plan.is_active,
+          status: plan.status || 'available',
           monthly_amount: parseFloat(plan.monthly_amount) || 0,
           annual_amount: parseFloat(plan.annual_amount) || 0
         }));

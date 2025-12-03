@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getPlanConfig } from "../data/plans-config";
 import { BlockedRestricted, ComingSoonCard } from "@/components/shared/restrictions";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import type { Plan, BillingPeriod, PricingMode } from "../types";
 
 interface PlanCardProps {
@@ -27,9 +28,14 @@ export function PlanCard({
 }: PlanCardProps) {
   const config = getPlanConfig(plan.name);
   const Icon = config.icon;
+  const isAdmin = useIsAdmin();
   const isPopular = plan.name.toLowerCase() === 'pro';
   const isFree = plan.name.toLowerCase() === 'free';
   const isTeams = plan.name.toLowerCase() === 'teams';
+  
+  // Determine if status blocks the card (coming_soon or maintenance)
+  const status = plan.status || 'available';
+  const isStatusBlocking = status !== 'available' && !isAdmin;
 
   const getMonthlyEquivalent = () => {
     if (billingPeriod === 'annual') {
@@ -56,9 +62,6 @@ export function PlanCard({
   
   // Block if plan is not active (based on is_active field from database)
   const isBlocked = plan.is_active === false;
-  
-  // Get status for coming soon/maintenance states
-  const status = plan.status || 'available';
 
   const getButtonColor = () => {
     if (isCurrentPlan) return undefined;
@@ -119,7 +122,22 @@ export function PlanCard({
         </div>
 
         <div className="py-2">
-          {isFree ? (
+          {isStatusBlocking ? (
+            <div className="flex items-baseline gap-1">
+              <span className={cn(
+                "text-5xl font-bold tracking-tight",
+                isPopular ? "text-gray-500" : "text-muted-foreground"
+              )}>
+                $—
+              </span>
+              <span className={cn(
+                "text-sm ml-2",
+                isPopular ? "text-gray-500" : "text-muted-foreground"
+              )}>
+                No disponible
+              </span>
+            </div>
+          ) : isFree ? (
             <div className="flex items-baseline gap-1">
               <span className={cn(
                 "text-5xl font-bold tracking-tight",
