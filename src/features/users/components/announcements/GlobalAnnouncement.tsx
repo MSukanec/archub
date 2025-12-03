@@ -172,12 +172,12 @@ export function GlobalAnnouncement() {
         transition={{ duration: 0.2, ease: 'easeOut' }}
         className="fixed top-0 left-0 right-0 w-full z-[100]"
         style={{
-          background: 'linear-gradient(to right, #b8ad1a, #71c932)',
+          background: 'linear-gradient(to right, #71c932, #b8ad1a)',
           height: '44px'
         }}
       >
-        <div className="w-full px-4 sm:px-6 py-1.5">
-          <div className="flex items-center gap-3 max-w-screen-2xl mx-auto">
+        <div className="w-full py-1.5" style={{ paddingLeft: 'min(100px, 5vw)', paddingRight: 'min(100px, 5vw)' }}>
+          <div className="flex items-center gap-3">
             {/* Icon - Centrado verticalmente */}
             <div className="flex-shrink-0 text-white">
               {getTypeIcon(activeAnnouncement.type)}
@@ -214,24 +214,24 @@ export function GlobalAnnouncement() {
             {/* Buttons - Inline a la derecha */}
             {(activeAnnouncement.primary_button_text || activeAnnouncement.secondary_button_text) && (
               <div className="flex items-center gap-2 flex-shrink-0">
-                {/* Secundario PRIMERO */}
+                {/* Secundario PRIMERO (izquierda) */}
                 {activeAnnouncement.secondary_button_text && activeAnnouncement.secondary_button_url && (
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant="secondary"
                     onClick={() => window.open(normalizeUrl(activeAnnouncement.secondary_button_url!), '_blank')}
-                    className="h-7 text-xs rounded-md bg-transparent hover:bg-white/10 text-white border border-white"
+                    className="h-7 text-xs rounded-md"
                   >
                     {activeAnnouncement.secondary_button_text}
                   </Button>
                 )}
-                {/* Primario DESPUÉS */}
+                {/* Primario DESPUÉS (derecha) */}
                 {activeAnnouncement.primary_button_text && activeAnnouncement.primary_button_url && (
                   <Button
                     size="sm"
                     variant="default"
                     onClick={() => window.open(normalizeUrl(activeAnnouncement.primary_button_url!), '_blank')}
-                    className="h-7 text-xs rounded-md bg-white hover:bg-gray-100 text-black border border-white"
+                    className="h-7 text-xs rounded-md"
                   >
                     {activeAnnouncement.primary_button_text}
                   </Button>
