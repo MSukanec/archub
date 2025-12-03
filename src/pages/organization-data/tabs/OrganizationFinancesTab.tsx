@@ -142,9 +142,11 @@ export function OrganizationFinancesTab() {
 
   const updateSecondaryCurrenciesMutation = useMutation({
     mutationFn: async (currencyIds: string[]) => {
-      const currenciesToRemove = organizationCurrencies
-        ?.filter(c => !c.is_default && !currencyIds.includes(c.currency_id))
-        .map(c => c.currency_id) || [];
+      const currentSecondary = organizationCurrencies?.filter(c => !c.is_default) || [];
+      const currentSecondaryIds = currentSecondary.map(c => c.currency_id);
+      
+      const currenciesToRemove = currentSecondaryIds.filter(id => !currencyIds.includes(id));
+      const currenciesToAdd = currencyIds.filter(id => !currentSecondaryIds.includes(id));
       
       if (currenciesToRemove.length > 0) {
         const { data: movementsUsingCurrency, error: checkError } = await supabase
@@ -161,23 +163,25 @@ export function OrganizationFinancesTab() {
             'No puedes eliminar monedas que tienen movimientos registrados. Primero elimina o modifica los movimientos que usan estas monedas.'
           );
         }
+        
+        const { error: deleteError } = await supabase
+          .from('organization_currencies')
+          .delete()
+          .eq('organization_id', userData?.organization?.id)
+          .in('currency_id', currenciesToRemove);
+        
+        if (deleteError) throw deleteError;
       }
-      
-      await supabase
-        .from('organization_currencies')
-        .delete()
-        .eq('organization_id', userData?.organization?.id)
-        .eq('is_default', false);
 
-      if (currencyIds.length > 0) {
+      if (currenciesToAdd.length > 0) {
         const { error } = await supabase
           .from('organization_currencies')
-          .insert(currencyIds.map(id => ({
+          .upsert(currenciesToAdd.map(id => ({
             organization_id: userData?.organization?.id!,
             currency_id: id,
             is_default: false,
             is_active: true
-          })));
+          })), { onConflict: 'organization_id,currency_id' });
 
         if (error) throw error;
       }
@@ -200,8 +204,11 @@ export function OrganizationFinancesTab() {
 
   const updateSecondaryWalletsMutation = useMutation({
     mutationFn: async (walletIds: string[]) => {
-      const walletsToRemove = organizationWallets
-        ?.filter(w => !w.is_default && !walletIds.includes(w.wallet_id)) || [];
+      const currentSecondary = organizationWallets?.filter(w => !w.is_default) || [];
+      const currentSecondaryIds = currentSecondary.map(w => w.wallet_id);
+      
+      const walletsToRemove = currentSecondary.filter(w => !walletIds.includes(w.wallet_id));
+      const walletIdsToAdd = walletIds.filter(id => !currentSecondaryIds.includes(id));
       
       if (walletsToRemove.length > 0) {
         const walletIdsToCheck = walletsToRemove.map(w => w.id);
@@ -219,23 +226,25 @@ export function OrganizationFinancesTab() {
             'No puedes eliminar billeteras que tienen movimientos registrados. Primero elimina o reasigna los movimientos que usan estas billeteras.'
           );
         }
+        
+        const { error: deleteError } = await supabase
+          .from('organization_wallets')
+          .delete()
+          .eq('organization_id', userData?.organization?.id)
+          .in('wallet_id', walletsToRemove.map(w => w.wallet_id));
+        
+        if (deleteError) throw deleteError;
       }
-      
-      await supabase
-        .from('organization_wallets')
-        .delete()
-        .eq('organization_id', userData?.organization?.id)
-        .eq('is_default', false);
 
-      if (walletIds.length > 0) {
+      if (walletIdsToAdd.length > 0) {
         const { error } = await supabase
           .from('organization_wallets')
-          .insert(walletIds.map(id => ({
+          .upsert(walletIdsToAdd.map(id => ({
             organization_id: userData?.organization?.id!,
             wallet_id: id,
             is_default: false,
             is_active: true
-          })));
+          })), { onConflict: 'organization_id,wallet_id' });
 
         if (error) throw error;
       }
