@@ -7,9 +7,8 @@ import {
   Container,
   Heading,
   Text,
-  Hr,
-  Section,
   Link,
+  Hr,
 } from '@react-email/components';
 
 interface TransferPendingEmailProps {
@@ -17,6 +16,7 @@ interface TransferPendingEmailProps {
   courseName?: string;
   amount?: string;
   transferId?: string;
+  adminName?: string;
 }
 
 export const TransferPendingEmail = ({
@@ -24,61 +24,45 @@ export const TransferPendingEmail = ({
   courseName = 'Curso',
   amount = '$0',
   transferId = 'TRF-000000',
+  adminName = 'El Equipo de Seencel',
 }: TransferPendingEmailProps) => {
   return (
     <Html>
       <Head />
-      <Preview>Tu comprobante de transferencia está siendo revisado</Preview>
+      <Preview>Recibimos tu comprobante de transferencia</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Section style={logoSection}>
-            <Text style={logo}>Seencel</Text>
-          </Section>
-          
-          <Heading style={h1}>📋 Comprobante Recibido</Heading>
+          <Heading style={h1}>Hola {userName},</Heading>
           
           <Text style={text}>
-            Hola <strong>{userName}</strong>,
+            Recibimos tu comprobante de transferencia bancaria. Nuestro equipo lo está revisando.
           </Text>
           
-          <Text style={text}>
-            Hemos recibido tu comprobante de transferencia bancaria. Nuestro equipo lo está revisando y te notificaremos cuando tu pago sea confirmado.
+          <Text style={textDetails}>
+            <strong>Curso:</strong> {courseName}<br />
+            <strong>Monto:</strong> {amount}<br />
+            <strong>ID de Transferencia:</strong> {transferId}<br />
+            <strong>Fecha de envío:</strong> {new Date().toLocaleDateString('es-ES')}
           </Text>
 
-          <Section style={orderSection}>
-            <Text style={sectionTitle}>🔍 Estado de tu Pago</Text>
-            <Text style={statusBadge}>⏳ PENDIENTE DE REVISIÓN</Text>
-            <Text style={orderItem}>
-              <strong>Curso:</strong> {courseName}
-            </Text>
-            <Text style={orderItem}>
-              <strong>Monto:</strong> {amount}
-            </Text>
-            <Text style={orderItem}>
-              <strong>ID de Transferencia:</strong> {transferId}
-            </Text>
-            <Text style={orderItem}>
-              <strong>Fecha de envío:</strong> {new Date().toLocaleDateString('es-ES')}
-            </Text>
-          </Section>
-
-          <Section style={infoSection}>
-            <Text style={infoTitle}>⏱️ ¿Cuánto tarda?</Text>
-            <Text style={infoText}>
-              Normalmente revisamos los comprobantes en un plazo de <strong>24 a 48 horas hábiles</strong>. Te enviaremos un email de confirmación una vez que tu pago sea aprobado.
-            </Text>
-          </Section>
+          <Text style={textHighlight}>
+            Normalmente revisamos los comprobantes en <strong>24 a 48 horas hábiles</strong>. 
+            Te enviaremos un email de confirmación cuando tu pago sea aprobado.
+          </Text>
 
           <Text style={text}>
-            Si tienes alguna pregunta sobre tu pago, no dudes en contactarnos respondiendo a este email o a través del chat de soporte.
+            Si tienes alguna pregunta sobre tu pago, responde este email.
           </Text>
 
           <Hr style={hr} />
 
           <Text style={footer}>
-            <strong>Seencel Inc.</strong> - Educación en Construcción
-            <br />
-            <Link href="https://seencel.com" style={link}>www.seencel.com</Link>
+            Saludos,<br />
+            <strong>{adminName}</strong>
+          </Text>
+          
+          <Text style={footerSmall}>
+            <Link href="https://seencel.com" style={link}>seencel.com</Link>
           </Text>
         </Container>
       </Body>
@@ -87,121 +71,75 @@ export const TransferPendingEmail = ({
 };
 
 const main = {
-  backgroundColor: '#f6f9fc',
+  backgroundColor: '#ffffff',
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  padding: '40px 0',
 };
 
 const container = {
-  backgroundColor: '#ffffff',
+  maxWidth: '465px',
   margin: '0 auto',
-  padding: '20px 0 48px',
-  marginBottom: '64px',
-  maxWidth: '580px',
-  borderRadius: '8px',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-};
-
-const logoSection = {
-  textAlign: 'center' as const,
   padding: '20px',
 };
 
-const logo = {
-  fontSize: '28px',
-  fontWeight: 'bold',
-  color: '#000',
-  margin: '0',
-};
-
 const h1 = {
-  color: '#f59e0b',
+  color: '#000',
   fontSize: '24px',
-  fontWeight: 'bold',
-  textAlign: 'center' as const,
-  margin: '30px 0 20px',
-  padding: '0 48px',
+  fontWeight: '600',
+  lineHeight: '1.3',
+  margin: '0 0 15px 0',
 };
 
 const text = {
   color: '#555',
-  fontSize: '16px',
+  fontSize: '14px',
+  lineHeight: '22px',
+  margin: '0 0 15px 0',
+};
+
+const textDetails = {
+  color: '#555',
+  fontSize: '14px',
   lineHeight: '24px',
-  textAlign: 'left' as const,
-  padding: '0 48px',
-  margin: '15px 0',
-};
-
-const sectionTitle = {
-  color: '#333',
-  fontSize: '16px',
-  fontWeight: 'bold',
-  margin: '0 0 15px',
-};
-
-const orderSection = {
+  margin: '0 0 15px 0',
   backgroundColor: '#fffbeb',
-  margin: '20px 48px',
-  padding: '20px',
-  borderRadius: '5px',
+  padding: '15px',
+  borderRadius: '6px',
   border: '1px solid #fde68a',
 };
 
-const statusBadge = {
-  backgroundColor: '#fef3c7',
-  color: '#92400e',
-  fontSize: '14px',
-  fontWeight: 'bold',
-  padding: '8px 16px',
-  borderRadius: '20px',
-  display: 'inline-block',
-  margin: '0 0 15px',
-};
-
-const orderItem = {
+const textHighlight = {
   color: '#555',
   fontSize: '14px',
   lineHeight: '22px',
-  margin: '8px 0',
-};
-
-const infoSection = {
+  margin: '0 0 15px 0',
   backgroundColor: '#f0f9ff',
-  margin: '20px 48px',
-  padding: '20px',
-  borderRadius: '5px',
+  padding: '15px',
+  borderRadius: '6px',
   border: '1px solid #bae6fd',
 };
 
-const infoTitle = {
-  color: '#0369a1',
-  fontSize: '14px',
-  fontWeight: 'bold',
-  margin: '0 0 10px',
-};
-
-const infoText = {
-  color: '#0c4a6e',
-  fontSize: '14px',
-  lineHeight: '20px',
-  margin: '0',
-};
-
 const hr = {
-  borderColor: '#e6ebf1',
-  margin: '20px 0',
+  borderColor: '#e5e5e5',
+  margin: '30px 0',
 };
 
 const footer = {
-  color: '#8898aa',
+  color: '#555',
+  fontSize: '14px',
+  lineHeight: '22px',
+  margin: '0 0 10px 0',
+};
+
+const footerSmall = {
+  color: '#999',
   fontSize: '12px',
   lineHeight: '16px',
-  textAlign: 'center' as const,
-  padding: '0 48px',
-  margin: '10px 0',
+  margin: '0',
 };
 
 const link = {
-  color: '#555',
+  color: '#0066cc',
   textDecoration: 'underline',
 };
 

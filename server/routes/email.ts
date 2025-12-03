@@ -142,8 +142,10 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         template,
         userName,
         courseName,
+        courseSlug,
         amount,
         transactionId,
+        adminName,
         from = 'Seencel <sistema@seencel.com>', 
         notifyAdmin = false 
       } = req.body;
@@ -173,8 +175,10 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
           PurchaseEmail({
             userName: userName || 'Estudiante',
             courseName: courseName || 'Curso',
+            courseSlug: courseSlug || '',
             amount: amount || '$0',
             transactionId: transactionId || 'N/A',
+            adminName: adminName || 'El Equipo de Seencel',
           }) as any
         );
       } else if (template === 'transfer_pending') {
@@ -184,6 +188,7 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
             courseName: courseName || 'Curso',
             amount: amount || '$0',
             transferId: transactionId || 'N/A',
+            adminName: adminName || 'El Equipo de Seencel',
           }) as any
         );
       } else if (html) {
@@ -288,16 +293,20 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
       const {
         userName = 'Jorge Benitest',
         courseName = 'Curso Avanzado de Construcción',
+        courseSlug = 'curso-avanzado-construccion',
         amount = '$99.99',
         transactionId = 'TXN-20241128-001',
+        adminName = 'El Equipo de Seencel',
       } = req.body;
       
       const emailHtml = await render(
         PurchaseEmail({
           userName,
           courseName,
+          courseSlug,
           amount,
           transactionId,
+          adminName,
         }) as any
       );
 
@@ -325,6 +334,7 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         courseName = 'Curso Avanzado de Construcción',
         amount = '$85,000 ARS',
         transferId = 'TRF-20241128-001',
+        adminName = 'El Equipo de Seencel',
       } = req.body;
       
       const emailHtml = await render(
@@ -333,6 +343,7 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
           courseName,
           amount,
           transferId,
+          adminName,
         }) as any
       );
 
@@ -341,7 +352,7 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         type: 'transfer-pending',
         html: emailHtml,
         preview: {
-          subject: `Comprobante Recibido - Pendiente de Revisión`,
+          subject: `Recibimos tu comprobante de transferencia`,
           from: 'Seencel <sistema@seencel.com>',
           to: 'student@example.com',
         }
@@ -380,7 +391,7 @@ export function registerEmailRoutes(app: Express, deps: RouteDeps): void {
         type: 'bank-transfer-admin',
         html: emailHtml,
         preview: {
-          subject: `🏦 Nueva Transferencia Pendiente - ${userName}`,
+          subject: `Nueva Transferencia Pendiente - ${userName}`,
           from: 'Seencel <sistema@seencel.com>',
           to: 'contacto@seencel.com',
         }

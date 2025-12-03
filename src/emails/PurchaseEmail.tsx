@@ -7,81 +7,79 @@ import {
   Container,
   Heading,
   Text,
-  Button,
-  Hr,
-  Section,
   Link,
+  Hr,
+  Button,
+  Section,
 } from '@react-email/components';
 
 interface PurchaseEmailProps {
   userName?: string;
   courseName?: string;
+  courseSlug?: string;
   amount?: string;
   transactionId?: string;
+  adminName?: string;
 }
 
 export const PurchaseEmail = ({
   userName = 'Estudiante',
   courseName = 'Curso de Construcción Avanzada',
+  courseSlug = '',
   amount = '$99.99',
   transactionId = 'TXN-000000',
+  adminName = 'El Equipo de Seencel',
 }: PurchaseEmailProps) => {
+  const courseUrl = courseSlug 
+    ? `https://seencel.com/learning/courses/${courseSlug}`
+    : 'https://seencel.com/learning/courses';
+
   return (
     <Html>
       <Head />
-      <Preview>Confirmación de tu compra en Seencel</Preview>
+      <Preview>Confirmación de tu compra: {courseName}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Section style={logoSection}>
-            <Text style={logo}>Seencel</Text>
-          </Section>
-          
-          <Heading style={h1}>¡Compra Confirmada!</Heading>
+          <Heading style={h1}>Hola {userName},</Heading>
           
           <Text style={text}>
-            Hola <strong>{userName}</strong>,
+            Gracias por tu compra. Tu acceso al curso <strong>{courseName}</strong> ya está activo.
           </Text>
           
-          <Text style={text}>
-            Gracias por tu compra. Hemos procesado exitosamente tu acceso al curso.
+          <Text style={textDetails}>
+            <strong>Monto:</strong> {amount}<br />
+            <strong>ID de Transacción:</strong> {transactionId}<br />
+            <strong>Fecha:</strong> {new Date().toLocaleDateString('es-ES')}
           </Text>
 
-          <Section style={orderSection}>
-            <Text style={sectionTitle}>📋 Detalles de tu Compra</Text>
-            <Text style={orderItem}>
-              <strong>Curso:</strong> {courseName}
-            </Text>
-            <Text style={orderItem}>
-              <strong>Monto:</strong> {amount}
-            </Text>
-            <Text style={orderItem}>
-              <strong>ID de Transacción:</strong> {transactionId}
-            </Text>
-            <Text style={orderItem}>
-              <strong>Fecha:</strong> {new Date().toLocaleDateString('es-ES')}
-            </Text>
-          </Section>
-
-          <Text style={text}>
-            Ya puedes acceder al contenido completo del curso desde tu dashboard. Los materiales, videos y recursos están disponibles de inmediato.
-          </Text>
-
-          <Section style={btnContainer}>
-            <Button style={button} href="https://seencel.com/learning/courses">
-              Ver mi Curso
+          <Section style={buttonContainer}>
+            <Button style={button} href={courseUrl}>
+              Ir a mi Curso
             </Button>
           </Section>
 
+          <Text style={textSmall}>
+            Si el botón no funciona, copia y pega este enlace en tu navegador:
+          </Text>
+          <Text style={linkText}>
+            <Link href={courseUrl} style={link}>
+              {courseUrl}
+            </Link>
+          </Text>
+
           <Text style={text}>
-            Si tienes problemas al acceder o necesitas ayuda, contáctanos a través del chat de soporte.
+            Si tienes alguna pregunta, responde este email. Leo y respondo cada mensaje.
           </Text>
 
           <Hr style={hr} />
 
           <Text style={footer}>
-            <strong>Seencel Inc.</strong> - Educación en Construcción
-            <br />
-            <Link href="https://seencel.com" style={link}>www.seencel.com</Link>
+            Saludos,<br />
+            <strong>{adminName}</strong>
+          </Text>
+          
+          <Text style={footerSmall}>
+            <Link href="https://seencel.com" style={link}>seencel.com</Link>
           </Text>
         </Container>
       </Body>
@@ -90,106 +88,96 @@ export const PurchaseEmail = ({
 };
 
 const main = {
-  backgroundColor: '#f6f9fc',
+  backgroundColor: '#ffffff',
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  padding: '40px 0',
 };
 
 const container = {
-  backgroundColor: '#ffffff',
+  maxWidth: '465px',
   margin: '0 auto',
-  padding: '20px 0 48px',
-  marginBottom: '64px',
-  maxWidth: '580px',
-  borderRadius: '8px',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-};
-
-const logoSection = {
-  textAlign: 'center' as const,
   padding: '20px',
 };
 
-const logo = {
-  fontSize: '28px',
-  fontWeight: 'bold',
-  color: '#000',
-  margin: '0',
-};
-
 const h1 = {
-  color: '#28a745',
+  color: '#000',
   fontSize: '24px',
-  fontWeight: 'bold',
-  textAlign: 'center' as const,
-  margin: '30px 0 20px',
-  padding: '0 48px',
+  fontWeight: '600',
+  lineHeight: '1.3',
+  margin: '0 0 15px 0',
 };
 
 const text = {
   color: '#555',
-  fontSize: '16px',
-  lineHeight: '24px',
-  textAlign: 'left' as const,
-  padding: '0 48px',
-  margin: '15px 0',
-};
-
-const sectionTitle = {
-  color: '#333',
-  fontSize: '16px',
-  fontWeight: 'bold',
-  padding: '0 48px',
-  margin: '20px 0 15px',
-};
-
-const orderSection = {
-  backgroundColor: '#f9f9f9',
-  margin: '20px 48px',
-  padding: '20px',
-  borderRadius: '5px',
-  border: '1px solid #e6ebf1',
-};
-
-const orderItem = {
-  color: '#555',
   fontSize: '14px',
   lineHeight: '22px',
-  margin: '8px 0',
+  margin: '0 0 15px 0',
 };
 
-const btnContainer = {
+const textDetails = {
+  color: '#555',
+  fontSize: '14px',
+  lineHeight: '24px',
+  margin: '0 0 15px 0',
+  backgroundColor: '#f9f9f9',
+  padding: '15px',
+  borderRadius: '6px',
+  border: '1px solid #eee',
+};
+
+const textSmall = {
+  color: '#888',
+  fontSize: '12px',
+  lineHeight: '18px',
+  margin: '20px 0 5px 0',
+};
+
+const linkText = {
+  color: '#0066cc',
+  fontSize: '12px',
+  lineHeight: '18px',
+  margin: '0 0 15px 0',
+  wordBreak: 'break-all' as const,
+};
+
+const buttonContainer = {
   textAlign: 'center' as const,
-  padding: '30px 20px',
+  margin: '25px 0',
 };
 
 const button = {
-  backgroundColor: '#28a745',
-  borderRadius: '5px',
+  backgroundColor: '#000',
+  borderRadius: '6px',
   color: '#fff',
-  fontSize: '16px',
-  fontWeight: 'bold',
+  fontSize: '14px',
+  fontWeight: '600',
   textDecoration: 'none',
   textAlign: 'center' as const,
   display: 'inline-block',
-  padding: '12px 32px',
+  padding: '12px 24px',
 };
 
 const hr = {
-  borderColor: '#e6ebf1',
-  margin: '20px 0',
+  borderColor: '#e5e5e5',
+  margin: '30px 0',
 };
 
 const footer = {
-  color: '#8898aa',
+  color: '#555',
+  fontSize: '14px',
+  lineHeight: '22px',
+  margin: '0 0 10px 0',
+};
+
+const footerSmall = {
+  color: '#999',
   fontSize: '12px',
   lineHeight: '16px',
-  textAlign: 'center' as const,
-  padding: '0 48px',
-  margin: '10px 0',
+  margin: '0',
 };
 
 const link = {
-  color: '#555',
+  color: '#0066cc',
   textDecoration: 'underline',
 };
 

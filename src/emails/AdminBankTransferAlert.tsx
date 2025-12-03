@@ -7,10 +7,10 @@ import {
   Container,
   Heading,
   Text,
-  Button,
-  Hr,
-  Section,
   Link,
+  Hr,
+  Button,
+  Section,
 } from '@react-email/components';
 
 interface AdminBankTransferAlertProps {
@@ -39,66 +39,50 @@ export const AdminBankTransferAlert = ({
   return (
     <Html>
       <Head />
-      <Preview>Nueva transferencia bancaria pendiente de aprobación</Preview>
+      <Preview>Nueva transferencia pendiente de {userName}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Section style={logoSection}>
-            <Text style={logo}>Seencel</Text>
-          </Section>
-          
-          <Section style={alertBanner}>
-            <Text style={alertEmoji}>🏦</Text>
-            <Heading style={h1}>Nueva Transferencia Pendiente</Heading>
-          </Section>
+          <Heading style={h1}>Nueva Transferencia Pendiente</Heading>
           
           <Text style={text}>
-            Se ha registrado un nuevo pago por transferencia bancaria que requiere tu aprobación.
+            Se registró un pago por transferencia bancaria que requiere tu aprobación.
+          </Text>
+          
+          <Text style={textDetails}>
+            <strong>Cliente:</strong> {userName}<br />
+            <strong>Email:</strong> {userEmail}<br />
+            <strong>Curso:</strong> {courseName}<br />
+            <strong>Monto:</strong> {formattedAmount}<br />
+            <strong>ID Transferencia:</strong> {transferId}<br />
+            <strong>Fecha:</strong> {new Date().toLocaleDateString('es-ES', { 
+              day: '2-digit', 
+              month: '2-digit', 
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
           </Text>
 
-          <Section style={detailsSection}>
-            <Text style={sectionTitle}>📋 Detalles del Pago</Text>
-            <Text style={detailItem}>
-              <strong>Cliente:</strong> {userName}
-            </Text>
-            <Text style={detailItem}>
-              <strong>Email:</strong> {userEmail}
-            </Text>
-            <Text style={detailItem}>
-              <strong>Curso:</strong> {courseName}
-            </Text>
-            <Text style={detailItem}>
-              <strong>Monto:</strong> {formattedAmount}
-            </Text>
-            <Text style={detailItem}>
-              <strong>ID Transferencia:</strong> {transferId}
-            </Text>
-            <Text style={detailItem}>
-              <strong>Fecha:</strong> {new Date().toLocaleDateString('es-ES', { 
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </Text>
-          </Section>
-
-          <Text style={text}>
-            Haz clic en el botón para revisar el comprobante y aprobar o rechazar el pago.
-          </Text>
-
-          <Section style={btnContainer}>
-            <Button style={button} href="https://seencel.com/admin/payments/transfers">
+          <Section style={buttonContainer}>
+            <Button style={button} href="https://seencel.com/admin/payments">
               Revisar Transferencia
             </Button>
           </Section>
 
+          <Text style={textSmall}>
+            Si el botón no funciona, copia y pega este enlace en tu navegador:
+          </Text>
+          <Text style={linkText}>
+            <Link href="https://seencel.com/admin/payments" style={link}>
+              https://seencel.com/admin/payments
+            </Link>
+          </Text>
+
           <Hr style={hr} />
 
-          <Text style={footer}>
-            Este es un email automático de notificación para administradores.
-            <br />
-            <Link href="https://seencel.com" style={link}>Seencel</Link> - Sistema de Gestión
+          <Text style={footerSmall}>
+            Email automático de notificación para administradores.<br />
+            <Link href="https://seencel.com" style={link}>seencel.com</Link>
           </Text>
         </Container>
       </Body>
@@ -107,119 +91,89 @@ export const AdminBankTransferAlert = ({
 };
 
 const main = {
-  backgroundColor: '#f6f9fc',
+  backgroundColor: '#ffffff',
   fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  padding: '40px 0',
 };
 
 const container = {
-  backgroundColor: '#ffffff',
+  maxWidth: '465px',
   margin: '0 auto',
-  padding: '20px 0 48px',
-  marginBottom: '64px',
-  maxWidth: '580px',
-  borderRadius: '8px',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-};
-
-const logoSection = {
-  textAlign: 'center' as const,
   padding: '20px',
-};
-
-const logo = {
-  fontSize: '28px',
-  fontWeight: 'bold',
-  color: '#000',
-  margin: '0',
-};
-
-const alertBanner = {
-  backgroundColor: '#fef3c7',
-  padding: '20px',
-  textAlign: 'center' as const,
-  margin: '0 20px',
-  borderRadius: '8px',
-  border: '1px solid #f59e0b',
-};
-
-const alertEmoji = {
-  fontSize: '40px',
-  margin: '0 0 10px 0',
-  textAlign: 'center' as const,
 };
 
 const h1 = {
-  color: '#92400e',
-  fontSize: '22px',
-  fontWeight: 'bold',
-  textAlign: 'center' as const,
-  margin: '0',
+  color: '#000',
+  fontSize: '24px',
+  fontWeight: '600',
+  lineHeight: '1.3',
+  margin: '0 0 15px 0',
 };
 
 const text = {
   color: '#555',
-  fontSize: '16px',
-  lineHeight: '24px',
-  textAlign: 'left' as const,
-  padding: '0 48px',
-  margin: '20px 0',
-};
-
-const sectionTitle = {
-  color: '#333',
-  fontSize: '16px',
-  fontWeight: 'bold',
+  fontSize: '14px',
+  lineHeight: '22px',
   margin: '0 0 15px 0',
 };
 
-const detailsSection = {
-  backgroundColor: '#f9fafb',
-  margin: '20px 48px',
-  padding: '20px',
-  borderRadius: '8px',
-  border: '1px solid #e5e7eb',
-};
-
-const detailItem = {
+const textDetails = {
   color: '#555',
   fontSize: '14px',
-  lineHeight: '22px',
-  margin: '8px 0',
+  lineHeight: '24px',
+  margin: '0 0 15px 0',
+  backgroundColor: '#fffbeb',
+  padding: '15px',
+  borderRadius: '6px',
+  border: '1px solid #fde68a',
 };
 
-const btnContainer = {
+const textSmall = {
+  color: '#888',
+  fontSize: '12px',
+  lineHeight: '18px',
+  margin: '20px 0 5px 0',
+};
+
+const linkText = {
+  color: '#0066cc',
+  fontSize: '12px',
+  lineHeight: '18px',
+  margin: '0 0 15px 0',
+  wordBreak: 'break-all' as const,
+};
+
+const buttonContainer = {
   textAlign: 'center' as const,
-  padding: '20px',
+  margin: '25px 0',
 };
 
 const button = {
-  backgroundColor: '#f59e0b',
+  backgroundColor: '#000',
   borderRadius: '6px',
   color: '#fff',
-  fontSize: '16px',
-  fontWeight: 'bold',
+  fontSize: '14px',
+  fontWeight: '600',
   textDecoration: 'none',
   textAlign: 'center' as const,
   display: 'inline-block',
-  padding: '14px 32px',
+  padding: '12px 24px',
 };
 
 const hr = {
-  borderColor: '#e6ebf1',
-  margin: '20px 0',
+  borderColor: '#e5e5e5',
+  margin: '30px 0',
 };
 
-const footer = {
-  color: '#8898aa',
+const footerSmall = {
+  color: '#999',
   fontSize: '12px',
-  lineHeight: '18px',
-  textAlign: 'center' as const,
-  padding: '0 48px',
-  margin: '10px 0',
+  lineHeight: '16px',
+  margin: '0',
 };
 
 const link = {
-  color: '#555',
+  color: '#0066cc',
   textDecoration: 'underline',
 };
 
