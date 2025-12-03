@@ -26,6 +26,9 @@ const courseSchema = z.object({
   visibility: z.enum(['public', 'private', 'draft'], {
     required_error: 'La visibilidad es requerida'
   }),
+  status: z.enum(['available', 'coming_soon', 'maintenance'], {
+    required_error: 'El estado es requerido'
+  }),
   is_active: z.boolean().default(true),
 });
 
@@ -38,6 +41,7 @@ interface Course {
   short_description?: string;
   price?: number;
   visibility: string;
+  status?: string;
   is_active: boolean;
   created_at: string;
   created_by?: string;
@@ -65,6 +69,7 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
       short_description: '',
       price: '0',
       visibility: 'draft',
+      status: 'available',
       is_active: true,
     }
   });
@@ -77,6 +82,7 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
         short_description: course.short_description || '',
         price: course.price?.toString() || '0',
         visibility: (course.visibility as any) || 'draft',
+        status: (course.status as any) || 'available',
         is_active: course.is_active ?? true,
       });
     } else {
@@ -86,6 +92,7 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
         short_description: '',
         price: '0',
         visibility: 'draft',
+        status: 'available',
         is_active: true,
       });
     }
@@ -105,6 +112,7 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
         short_description: data.short_description || null,
         price: parseFloat(data.price),
         visibility: data.visibility,
+        status: data.status,
         is_active: data.is_active,
       };
 
@@ -204,8 +212,8 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
           />
         </div>
 
-        {/* Precio y Visibilidad - Dos columnas en desktop */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Precio, Visibilidad y Estado - Tres columnas en desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
             name="price"
@@ -236,6 +244,29 @@ export function CourseModal({ modalData, onClose }: CourseModalProps) {
                     <SelectItem value="public">Público</SelectItem>
                     <SelectItem value="private">Privado</SelectItem>
                     <SelectItem value="draft">Borrador</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estado</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger data-testid="select-status">
+                      <SelectValue placeholder="Seleccionar estado" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="available">Disponible</SelectItem>
+                    <SelectItem value="coming_soon">Próximamente</SelectItem>
+                    <SelectItem value="maintenance">En mantenimiento</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

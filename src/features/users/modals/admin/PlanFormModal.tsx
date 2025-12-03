@@ -23,6 +23,9 @@ const planSchema = z.object({
   billing_type: z.enum(['per_user', 'flat_rate'], {
     required_error: 'El tipo de facturación es requerido'
   }),
+  status: z.enum(['available', 'coming_soon', 'maintenance'], {
+    required_error: 'El estado es requerido'
+  }),
   is_active: z.boolean(),
 });
 
@@ -34,6 +37,7 @@ interface Plan {
   slug: string;
   features: any;
   billing_type: string;
+  status?: string;
   is_active: boolean;
 }
 
@@ -67,6 +71,7 @@ export function PlanFormModal({ modalData, onClose }: PlanFormModalProps) {
       slug: plan?.slug || '',
       features: plan?.features ? JSON.stringify(plan.features, null, 2) : '',
       billing_type: (plan?.billing_type as 'per_user' | 'flat_rate') || 'per_user',
+      status: (plan?.status as any) || 'available',
       is_active: plan?.is_active ?? true,
     }
   });
@@ -78,6 +83,7 @@ export function PlanFormModal({ modalData, onClose }: PlanFormModalProps) {
         slug: plan.slug || '',
         features: plan.features ? JSON.stringify(plan.features, null, 2) : '',
         billing_type: (plan.billing_type as 'per_user' | 'flat_rate') || 'per_user',
+        status: (plan.status as any) || 'available',
         is_active: plan.is_active ?? true,
       });
     } else {
@@ -86,6 +92,7 @@ export function PlanFormModal({ modalData, onClose }: PlanFormModalProps) {
         slug: '',
         features: '',
         billing_type: 'per_user',
+        status: 'available',
         is_active: true,
       });
     }
@@ -118,6 +125,7 @@ export function PlanFormModal({ modalData, onClose }: PlanFormModalProps) {
           slug: data.slug,
           features: featuresData,
           billing_type: data.billing_type,
+          status: data.status,
           is_active: data.is_active,
         });
       
@@ -161,6 +169,7 @@ export function PlanFormModal({ modalData, onClose }: PlanFormModalProps) {
           slug: data.slug,
           features: featuresData,
           billing_type: data.billing_type,
+          status: data.status,
           is_active: data.is_active,
         })
         .eq('id', plan!.id);
@@ -250,27 +259,52 @@ export function PlanFormModal({ modalData, onClose }: PlanFormModalProps) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="billing_type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de Facturación</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger data-testid="select-billing-type">
-                    <SelectValue placeholder="Selecciona el tipo de facturación" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="per_user">Por Usuario</SelectItem>
-                  <SelectItem value="flat_rate">Tarifa Fija</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="billing_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Facturación</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger data-testid="select-billing-type">
+                      <SelectValue placeholder="Selecciona el tipo de facturación" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="per_user">Por Usuario</SelectItem>
+                    <SelectItem value="flat_rate">Tarifa Fija</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Estado</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger data-testid="select-plan-status">
+                      <SelectValue placeholder="Seleccionar estado" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="available">Disponible</SelectItem>
+                    <SelectItem value="coming_soon">Próximamente</SelectItem>
+                    <SelectItem value="maintenance">En mantenimiento</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
