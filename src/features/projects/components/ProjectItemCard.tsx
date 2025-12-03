@@ -53,6 +53,7 @@ interface ProjectItemCardProps {
 const getStatusText = (status: string): string => {
   const statusMap: { [key: string]: string } = {
     'active': 'En proceso',
+    'inactive': 'Inactivo',
     'completed': 'Completado',
     'paused': 'Pausado',
     'cancelled': 'Cancelado',
