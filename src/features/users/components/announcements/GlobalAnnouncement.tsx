@@ -2,6 +2,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Info, AlertTriangle, XCircle, CheckCircle } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { supabase } from '@/lib/supabase';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Button } from '@/components/ui/button';
@@ -121,6 +122,23 @@ export function AnnouncementProvider({ children }: { children: React.ReactNode }
 // Banner component that ONLY renders (reads from context)
 export function GlobalAnnouncement() {
   const { activeAnnouncement, handleDismiss } = useAnnouncementBanner();
+  const [, navigate] = useLocation();
+
+  // Check if URL is internal (starts with / and not //)
+  const isInternalUrl = (url: string): boolean => {
+    const normalized = url.trim();
+    return normalized.startsWith('/') && !normalized.startsWith('//');
+  };
+
+  // Handle button click - navigate internally or open external
+  const handleButtonClick = (url: string) => {
+    const normalizedUrl = normalizeUrl(url);
+    if (isInternalUrl(url)) {
+      navigate(url);
+    } else {
+      window.open(normalizedUrl, '_blank');
+    }
+  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -219,7 +237,7 @@ export function GlobalAnnouncement() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => window.open(normalizeUrl(activeAnnouncement.secondary_button_url!), '_blank')}
+                    onClick={() => handleButtonClick(activeAnnouncement.secondary_button_url!)}
                     className="h-8 px-4 text-xs font-medium rounded-lg bg-transparent border-white text-white hover:bg-white/10 hover:text-white"
                   >
                     {activeAnnouncement.secondary_button_text}
@@ -230,7 +248,7 @@ export function GlobalAnnouncement() {
                   <Button
                     size="sm"
                     variant="default"
-                    onClick={() => window.open(normalizeUrl(activeAnnouncement.primary_button_url!), '_blank')}
+                    onClick={() => handleButtonClick(activeAnnouncement.primary_button_url!)}
                     className="h-8 px-4 text-xs font-medium"
                   >
                     {activeAnnouncement.primary_button_text}
