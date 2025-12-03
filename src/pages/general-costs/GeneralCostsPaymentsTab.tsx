@@ -14,10 +14,14 @@ import { useGeneralCostsPayments, useDeleteGeneralCostPayment, type GeneralCostP
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import GeneralCostPaymentRow from '@/features/finances/components/GeneralCostPaymentRow';
-import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { useOrganizationDefaultCurrency, useOrganizationCurrencies } from '@/hooks/use-currencies';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { parseLocalDate } from '@/lib/date-utils';
+import { useOrganizationWallets } from '@/features/organization/hooks';
+import { useGeneralCosts, useCreateGeneralCostPayment } from '@/features/general-costs';
+import { useToast } from '@/hooks/use-toast';
+import type { TargetField, ImportConfig, ProjectContext } from '@/features/imports/types';
 
 export default function GeneralCostsPaymentsTab() {
   const { data: userData } = useCurrentUser();
@@ -36,6 +40,12 @@ export default function GeneralCostsPaymentsTab() {
   const { data: allPayments = [], isLoading } = useGeneralCostsPayments(organizationId);
   const deletePaymentMutation = useDeleteGeneralCostPayment();
   const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
+  
+  const { data: organizationWallets = [] } = useOrganizationWallets(organizationId);
+  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(organizationId);
+  const { data: generalCostsData = [] } = useGeneralCosts(organizationId ?? null);
+  const createPaymentMutation = useCreateGeneralCostPayment();
+  const { toast } = useToast();
 
   // Mobile Action Bar
   const {
@@ -167,6 +177,295 @@ export default function GeneralCostsPaymentsTab() {
     if (!organizationId) return;
     openModal('general-costs-payment', {
       organizationId,
+    });
+  };
+
+  const handleImport = () => {
+    if (!organizationId || !userData?.user?.id) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo cargar la información requerida',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const targetSchema: TargetField[] = [
+      {
+        field: 'payment_date',
+        label: 'Fecha de Pago',
+        type: 'date',
+        required: true,
+        description: 'Ej: 2024-01-15',
+      },
+      {
+        field: 'general_cost_name',
+        label: 'Gasto General (Nombre)',
+        type: 'foreign-key',
+        required: true,
+        description: 'Ej: Expensas, Servicios, Alquiler',
+        foreignKeyConfig: {
+          entityName: 'general_cost',
+          labelKey: 'label',
+          valueKey: 'value',
+          options: generalCostsData.map(gc => ({
+            label: gc.name,
+            value: gc.id,
+          })),
+        },
+      },
+      {
+        field: 'amount',
+        label: 'Monto',
+        type: 'number',
+        required: true,
+        description: 'Ej: 5000',
+      },
+      {
+        field: 'currency_code',
+        label: 'Moneda (Código)',
+        type: 'foreign-key',
+        required: true,
+        description: 'Ej: USD, ARS, EUR',
+        foreignKeyConfig: {
+          entityName: 'currency',
+          labelKey: 'label',
+          valueKey: 'value',
+          options: organizationCurrencies.map(oc => ({
+            label: `${oc.currency?.code || ''} - ${oc.currency?.name || 'Sin nombre'}`,
+            value: oc.currency_id,
+          })),
+        },
+      },
+      {
+        field: 'exchange_rate',
+        label: 'Cotización (opcional)',
+        type: 'number',
+        required: false,
+        description: 'Ej: 1000',
+      },
+      {
+        field: 'wallet_name',
+        label: 'Billetera (opcional)',
+        type: 'foreign-key',
+        required: false,
+        description: 'Ej: Efectivo, Banco, Tarjeta',
+        foreignKeyConfig: {
+          entityName: 'wallet',
+          labelKey: 'label',
+          valueKey: 'value',
+          options: organizationWallets.map(ow => ({
+            label: ow.wallets?.name || 'Sin nombre',
+            value: ow.id,
+          })),
+        },
+      },
+      {
+        field: 'status',
+        label: 'Estado (opcional)',
+        type: 'foreign-key',
+        required: false,
+        description: 'Ej: Confirmado, Pendiente',
+        foreignKeyConfig: {
+          entityName: 'status',
+          labelKey: 'label',
+          valueKey: 'value',
+          options: [
+            { label: 'Confirmado', value: 'confirmed' },
+            { label: 'Pendiente', value: 'pending' },
+            { label: 'Rechazado', value: 'rejected' },
+            { label: 'Anulado', value: 'void' },
+          ],
+        },
+      },
+      {
+        field: 'reference',
+        label: 'Referencia (opcional)',
+        type: 'string',
+        required: false,
+        description: 'Ej: Cheque #123, Transferencia ABC',
+      },
+      {
+        field: 'notes',
+        label: 'Notas (opcional)',
+        type: 'string',
+        required: false,
+        description: 'Observaciones adicionales',
+      },
+    ];
+
+    const walletValueMap: Record<string, string> = {};
+    organizationWallets.forEach(ow => {
+      if (ow.wallets?.name && ow.id) {
+        const normalizedName = ow.wallets.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+        walletValueMap[normalizedName] = ow.id;
+      }
+    });
+
+    const currencyValueMap: Record<string, string> = {};
+    organizationCurrencies.forEach(oc => {
+      if (oc.currency?.code && oc.currency_id) {
+        const normalizedCode = oc.currency.code.toLowerCase().trim();
+        currencyValueMap[normalizedCode] = oc.currency_id;
+        if (oc.currency.name) {
+          const normalizedName = oc.currency.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+          currencyValueMap[normalizedName] = oc.currency_id;
+        }
+      }
+    });
+
+    const generalCostValueMap: Record<string, string> = {};
+    generalCostsData.forEach(gc => {
+      const normalizedName = gc.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+      generalCostValueMap[normalizedName] = gc.id;
+    });
+
+    const valueMapConfig: Record<string, Record<string, string>> = {
+      currency_code: currencyValueMap,
+      status: {
+        'confirmado': 'confirmed',
+        'pendiente': 'pending',
+        'rechazado': 'rejected',
+        'anulado': 'void',
+      },
+      wallet_name: walletValueMap,
+      general_cost_name: generalCostValueMap,
+    };
+
+    const projectContext: ProjectContext = { 
+      type: 'organization', 
+      organizationId: organizationId!,
+      organizationName: userData?.organization?.name || undefined
+    };
+
+    const availableGeneralCosts = generalCostsData.map(gc => ({
+      id: gc.id,
+      name: gc.name,
+    }));
+
+    openModal('universal-import', {
+      config: {
+        entityName: 'Pago de Gasto General',
+        entityNamePlural: 'Pagos de Gastos Generales',
+        targetSchema,
+        valueMapConfig,
+        projectContext,
+        availableProjects: [],
+        availableClients: availableGeneralCosts,
+        fieldHelpMessages: {
+          wallet_name: {
+            message: 'Las billeteras que no se encuentran deben agregarse primero en la configuración de tu organización.',
+            linkText: 'Ir a Configuración de Finanzas',
+            linkPath: '/settings/finances',
+          },
+          currency_code: {
+            message: 'Las monedas que no se encuentran deben agregarse primero en la configuración de tu organización.',
+            linkText: 'Ir a Configuración de Finanzas',
+            linkPath: '/settings/finances',
+          },
+          general_cost_name: {
+            message: 'Los gastos generales que no se encuentran deben agregarse primero.',
+            linkText: 'Ir a Gastos Generales',
+            linkPath: '/general-costs',
+          },
+        },
+        onImport: async (rows: any[]) => {
+          const generalCostsMap = new Map<string, string>();
+          generalCostsData.forEach(gc => {
+            generalCostsMap.set(gc.name.toLowerCase(), gc.id);
+          });
+
+          const currenciesMap = new Map<string, string>();
+          organizationCurrencies.forEach(oc => {
+            if (oc.currency?.code && oc.currency_id) {
+              currenciesMap.set(oc.currency.code.toLowerCase(), oc.currency_id);
+            }
+          });
+
+          const walletsMap = new Map<string, string>();
+          let defaultWalletId: string | null = null;
+          
+          organizationWallets.forEach(ow => {
+            if (ow.wallets?.name && ow.id) {
+              const normalizedName = ow.wallets.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+              walletsMap.set(normalizedName, ow.id);
+              if (!defaultWalletId && ow.is_default) {
+                defaultWalletId = ow.id;
+              }
+            }
+          });
+          if (!defaultWalletId && organizationWallets.length > 0) {
+            defaultWalletId = organizationWallets[0].id;
+          }
+
+          const invalidRows: Array<{ index: number; reason: string }> = [];
+          const validRowsToImport: typeof rows = [];
+
+          rows.forEach((row, idx) => {
+            const generalCostId = row.general_cost_name;
+            if (!generalCostId) {
+              invalidRows.push({ index: idx + 1, reason: 'Sin gasto general asignado' });
+              return;
+            }
+
+            const currencyId = row.currency_code;
+            if (!currencyId) {
+              invalidRows.push({ index: idx + 1, reason: 'Sin moneda asignada' });
+              return;
+            }
+
+            validRowsToImport.push(row);
+          });
+
+          if (invalidRows.length > 0) {
+            toast({
+              title: `${invalidRows.length} filas no se pudieron importar`,
+              description: invalidRows.slice(0, 3).map(r => `Fila ${r.index}: ${r.reason}`).join('. ') + (invalidRows.length > 3 ? '...' : ''),
+              variant: 'destructive',
+            });
+          }
+
+          let successCount = 0;
+          let failCount = 0;
+
+          for (const row of validRowsToImport) {
+            try {
+              const walletId = row.wallet_name || defaultWalletId;
+
+              await createPaymentMutation.mutateAsync({
+                organization_id: organizationId!,
+                payment_date: row.payment_date,
+                amount: parseFloat(String(row.amount).replace(/[^0-9.-]/g, '')),
+                currency_id: row.currency_code,
+                exchange_rate: row.exchange_rate ? parseFloat(String(row.exchange_rate).replace(/[^0-9.-]/g, '')) : undefined,
+                wallet_id: walletId || undefined,
+                general_cost_id: row.general_cost_name,
+                status: row.status || 'confirmed',
+                reference: row.reference || undefined,
+                notes: row.notes || undefined,
+                created_by: userData?.user?.id,
+              });
+              successCount++;
+            } catch (error) {
+              console.error('Error importing row:', error);
+              failCount++;
+            }
+          }
+
+          if (failCount > 0) {
+            toast({
+              title: 'Importación parcial',
+              description: `Se importaron ${successCount} de ${validRowsToImport.length} pagos. ${failCount} fallaron.`,
+              variant: 'destructive',
+            });
+          } else if (successCount > 0) {
+            toast({
+              title: 'Importación exitosa',
+              description: `Se importaron ${successCount} pagos correctamente.`,
+            });
+          }
+        },
+      } as ImportConfig,
     });
   };
 
@@ -474,6 +773,8 @@ export default function GeneralCostsPaymentsTab() {
           showFilter: true,
           isFilterActive,
           onClearFilters: handleClearFilters,
+          showImport: true,
+          onImport: handleImport,
           renderFilterContent: () => (
             <div className="space-y-3 p-2 min-w-[200px]">
               {/* Filter by General Cost */}
