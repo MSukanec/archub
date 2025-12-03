@@ -175,6 +175,7 @@ export async function getAllPublicCourses() {
       short_description,
       price,
       is_active,
+      status,
       course_details (
         badge_text,
         instructor_name,
@@ -240,6 +241,7 @@ export async function getAllPublicCourses() {
     return {
       ...course,
       cover_url,
+      status: (course as any).status || 'available',
       badge_text: courseDetails?.badge_text || null,
       instructor_name: courseDetails?.instructor_name || null,
       instructor_title: courseDetails?.instructor_title || null,

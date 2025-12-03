@@ -56,7 +56,7 @@ export function ComingSoonCard({
       <div className={cn(isBlocking && "opacity-50 pointer-events-none grayscale-[30%]")}>
         {children}
       </div>
-      {showBadge && (
+      {showBadge && status !== 'available' && (
         <Badge
           className={cn(
             "absolute top-3 right-3 z-10 text-xs px-2 py-1 shadow-lg pointer-events-none",
@@ -66,7 +66,6 @@ export function ComingSoonCard({
         >
           <Icon className="w-3 h-3 mr-1" />
           {config.label}
-          {isAdmin && config.isBlocking && " (Admin)"}
         </Badge>
       )}
     </div>

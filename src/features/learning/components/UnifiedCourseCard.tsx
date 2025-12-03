@@ -106,7 +106,7 @@ export function UnifiedCourseCard({
             </Badge>
           </div>
         )}
-        {config && StatusIcon && (
+        {config && StatusIcon && status !== 'available' && (
           <div className="absolute top-3 right-3">
             <Badge 
               className={cn("px-2 py-1 shadow-lg", config.badgeClass)}
@@ -114,7 +114,6 @@ export function UnifiedCourseCard({
             >
               <StatusIcon className="w-3 h-3 mr-1" />
               {config.label}
-              {isAdmin && config.isBlocking && " (Admin)"}
             </Badge>
           </div>
         )}
