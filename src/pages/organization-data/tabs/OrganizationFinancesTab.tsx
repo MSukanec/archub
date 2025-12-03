@@ -85,7 +85,7 @@ export function OrganizationFinancesTab() {
     },
     onSuccess: () => {
       toast({ title: 'Moneda por defecto actualizada', description: 'La configuración se ha guardado exitosamente.' });
-      queryClient.invalidateQueries({ queryKey: ['organizationCurrencies', userData?.organization?.id] });
+      queryClient.invalidateQueries({ queryKey: ['organization-currencies', userData?.organization?.id] });
     },
     onError: (error) => {
       toast({ 
@@ -128,7 +128,7 @@ export function OrganizationFinancesTab() {
     },
     onSuccess: () => {
       toast({ title: 'Billetera por defecto actualizada', description: 'La configuración se ha guardado exitosamente.' });
-      queryClient.invalidateQueries({ queryKey: ['organizationWallets', userData?.organization?.id] });
+      queryClient.invalidateQueries({ queryKey: ['organization-wallets', userData?.organization?.id] });
     },
     onError: (error) => {
       const errorMessage = error instanceof Error ? error.message : 'No se pudo actualizar la billetera por defecto.';
@@ -187,7 +187,7 @@ export function OrganizationFinancesTab() {
         title: 'Monedas secundarias actualizadas', 
         description: 'La configuración de monedas se ha guardado exitosamente.' 
       });
-      queryClient.invalidateQueries({ queryKey: ['organizationCurrencies', userData?.organization?.id] });
+      queryClient.invalidateQueries({ queryKey: ['organization-currencies', userData?.organization?.id] });
     },
     onError: (error: any) => {
       toast({ 
@@ -245,7 +245,7 @@ export function OrganizationFinancesTab() {
         title: 'Billeteras secundarias actualizadas', 
         description: 'La configuración de billeteras se ha guardado exitosamente.' 
       });
-      queryClient.invalidateQueries({ queryKey: ['organizationWallets', userData?.organization?.id] });
+      queryClient.invalidateQueries({ queryKey: ['organization-wallets', userData?.organization?.id] });
     },
     onError: (error: any) => {
       toast({ 
