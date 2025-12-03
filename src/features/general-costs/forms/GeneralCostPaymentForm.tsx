@@ -206,10 +206,23 @@ export default function GeneralCostPaymentForm({
         savedPaymentId = result.id
       }
 
+      console.log('[GeneralCostPaymentForm] Upload check:', { 
+        filesToUploadLength: filesToUpload.length, 
+        savedPaymentId,
+        files: filesToUpload.map(f => ({ name: f.file?.name, size: f.file?.size }))
+      })
+      
       if (filesToUpload.length > 0 && savedPaymentId) {
+        console.log('[GeneralCostPaymentForm] Starting file upload...')
         for (const fileInput of filesToUpload) {
           try {
-            await uploadFile(fileInput.file, {
+            console.log('[GeneralCostPaymentForm] Uploading file:', {
+              fileName: fileInput.file?.name,
+              entity: 'general_cost_payment_attachment',
+              organization_id: userData.organization.id,
+              paymentId: savedPaymentId
+            })
+            const uploadResult = await uploadFile(fileInput.file, {
               entity: 'general_cost_payment_attachment',
               organization_id: userData.organization.id,
               created_by_member_id: currentMember.id,
@@ -217,12 +230,16 @@ export default function GeneralCostPaymentForm({
               category: 'attachment',
               description: fileInput.description || fileInput.file.name,
             })
+            console.log('[GeneralCostPaymentForm] Upload success:', uploadResult)
           } catch (uploadError: any) {
+            console.error('[GeneralCostPaymentForm] Upload error:', uploadError)
             toast({ title: 'Error al subir archivo', description: uploadError.message, variant: 'destructive' })
           }
         }
         queryClient.invalidateQueries({ queryKey: ['general-cost-payment-media', savedPaymentId] })
         setFilesToUpload([])
+      } else {
+        console.log('[GeneralCostPaymentForm] Skipping upload - no files or no payment id')
       }
 
       toast({
