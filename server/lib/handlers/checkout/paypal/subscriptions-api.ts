@@ -464,6 +464,72 @@ export async function listPayPalSubscriptionTransactions(
   }
 }
 
+export type PayPalUpdatePricingResult =
+  | { success: true }
+  | { success: false; error: string; status?: number; details?: any };
+
+export async function updatePayPalBillingPlanPricing(params: {
+  planId: string;
+  billingCycleSequence: number;
+  amount: string;
+  currencyCode?: string;
+}): Promise<PayPalUpdatePricingResult> {
+  try {
+    const token = await getPayPalAccessToken();
+    const currencyCode = params.currencyCode || "USD";
+
+    console.log(`[PayPal Subscriptions API] Updating pricing for plan ${params.planId}:`, {
+      sequence: params.billingCycleSequence,
+      amount: params.amount,
+      currency: currencyCode,
+    });
+
+    const response = await fetch(
+      `${PAYPAL_BASE_URL}/v1/billing/plans/${params.planId}/update-pricing-schemes`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pricing_schemes: [
+            {
+              billing_cycle_sequence: params.billingCycleSequence,
+              pricing_scheme: {
+                fixed_price: {
+                  value: params.amount,
+                  currency_code: currencyCode,
+                },
+              },
+            },
+          ],
+        }),
+      }
+    );
+
+    if (response.status === 204) {
+      console.log(`[PayPal Subscriptions API] ✅ Successfully updated pricing for plan ${params.planId}`);
+      return { success: true };
+    }
+
+    const data = await response.json().catch(() => ({}));
+    console.error("[PayPal Subscriptions API] Error updating pricing:", data);
+    return {
+      success: false,
+      error: data.message || `Failed to update pricing: ${response.status}`,
+      status: response.status,
+      details: data,
+    };
+  } catch (error: any) {
+    console.error("[PayPal Subscriptions API] Fatal error updating pricing:", error);
+    return {
+      success: false,
+      error: error.message || "Unknown error",
+    };
+  }
+}
+
 export const createSubscription = createPayPalSubscription;
 export const getSubscription = getPayPalSubscription;
 export const cancelSubscription = cancelPayPalSubscription;

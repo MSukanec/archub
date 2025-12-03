@@ -5,6 +5,7 @@ import {
   createPayPalBillingPlan,
   getPayPalProduct,
   getPayPalBillingPlan,
+  updatePayPalBillingPlanPricing,
 } from "./subscriptions-api.js";
 
 export type SyncPlansResult =
@@ -115,6 +116,22 @@ export async function syncPayPalPlans(req: Request): Promise<SyncPlansResult> {
         if (!existingPlan.success) {
           console.log(`[PayPal sync-plans] Monthly plan ${monthlyPlanId} not found, creating new one`);
           monthlyPlanId = null;
+        } else {
+          const currentPrice = existingPlan.plan?.billing_cycles?.[0]?.pricing_scheme?.fixed_price?.value;
+          const dbPrice = String(plan.monthly_amount);
+          if (currentPrice !== dbPrice) {
+            console.log(`[PayPal sync-plans] Monthly plan price mismatch: PayPal=$${currentPrice}, DB=$${dbPrice}. Updating...`);
+            const updateResult = await updatePayPalBillingPlanPricing({
+              planId: monthlyPlanId,
+              billingCycleSequence: 1,
+              amount: dbPrice,
+            });
+            if (updateResult.success) {
+              console.log(`[PayPal sync-plans] ✅ Updated monthly plan pricing to $${dbPrice}`);
+            } else {
+              console.error(`[PayPal sync-plans] Failed to update monthly plan pricing:`, updateResult.error);
+            }
+          }
         }
       }
 
@@ -161,6 +178,22 @@ export async function syncPayPalPlans(req: Request): Promise<SyncPlansResult> {
         if (!existingPlan.success) {
           console.log(`[PayPal sync-plans] Annual plan ${annualPlanId} not found, creating new one`);
           annualPlanId = null;
+        } else {
+          const currentPrice = existingPlan.plan?.billing_cycles?.[0]?.pricing_scheme?.fixed_price?.value;
+          const dbPrice = String(plan.annual_amount);
+          if (currentPrice !== dbPrice) {
+            console.log(`[PayPal sync-plans] Annual plan price mismatch: PayPal=$${currentPrice}, DB=$${dbPrice}. Updating...`);
+            const updateResult = await updatePayPalBillingPlanPricing({
+              planId: annualPlanId,
+              billingCycleSequence: 1,
+              amount: dbPrice,
+            });
+            if (updateResult.success) {
+              console.log(`[PayPal sync-plans] ✅ Updated annual plan pricing to $${dbPrice}`);
+            } else {
+              console.error(`[PayPal sync-plans] Failed to update annual plan pricing:`, updateResult.error);
+            }
+          }
         }
       }
 
