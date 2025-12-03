@@ -41,7 +41,7 @@ export function PlatformSection({
                   href="https://vimeo.com/es/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-[#9EFF00] font-semibold hover:underline inline-flex items-center gap-1"
+                  className="text-accent font-semibold hover:underline inline-flex items-center gap-1"
                 >
                   Vimeo Pro
                   <ExternalLink className="w-4 h-4" />
