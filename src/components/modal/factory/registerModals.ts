@@ -204,7 +204,15 @@ export function initializeModalRegistry(): void {
   registerModal('movement-concept', MovementConceptFormModal as any, { ...financeConfig, size: 'md' });
   registerModal('movement-import', MovementImportStepModal as any, { ...financeConfig, size: 'xl' });
   registerModal('payment', PaymentFormModal as any, financeConfig);
-  registerModal('bank-transfer-receipt', BankTransferReceiptModal as any, { ...financeConfig, size: 'md' });
+  registerModal('bank-transfer-receipt', BankTransferReceiptModal as any, { 
+    ...financeConfig, 
+    size: 'md',
+    mapDataToProps: (data) => ({
+      btpId: data?.btpId,
+      paymentId: data?.paymentId,
+      hasReceipt: data?.hasReceipt ?? true,
+    })
+  });
   
   registerModal('universal-import', UniversalImportForm as any, {
     ...generalConfig,
