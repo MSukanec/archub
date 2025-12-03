@@ -50,10 +50,10 @@ export async function createUpgradeOrder(req: Request): Promise<CreateUpgradeOrd
     return { success: false, error: "Autenticación fallida", status: 401 };
   }
 
-  const user_id = user.id;
+  const authId = user.id;
 
   try {
-    const adminCheck = await verifyAdminRoleForOrganization(supabase, user_id, organization_id);
+    const adminCheck = await verifyAdminRoleForOrganization(supabase, authId, organization_id);
     
     if (!adminCheck.success) {
       return { 
@@ -62,6 +62,21 @@ export async function createUpgradeOrder(req: Request): Promise<CreateUpgradeOrd
         status: 403 
       };
     }
+
+    const adminClient = getAdminClient();
+    
+    const { data: dbUser, error: dbUserError } = await adminClient
+      .from("users")
+      .select("id")
+      .eq("auth_id", authId)
+      .single();
+
+    if (dbUserError || !dbUser) {
+      console.error('[PayPal create-upgrade-order] User not found:', dbUserError);
+      return { success: false, error: "Usuario no encontrado", status: 404 };
+    }
+
+    const userId = dbUser.id;
 
     const { data: plan, error: planError } = await supabase
       .from("plans")
@@ -75,7 +90,6 @@ export async function createUpgradeOrder(req: Request): Promise<CreateUpgradeOrd
       return { success: false, error: "Plan no encontrado o inactivo", status: 404 };
     }
 
-    const adminClient = getAdminClient();
     const prorationResult = await calculateProration(adminClient, {
       organizationId: organization_id,
       targetPlanSlug: plan_slug,
@@ -115,7 +129,7 @@ export async function createUpgradeOrder(req: Request): Promise<CreateUpgradeOrd
         .from("paypal_upgrade_preferences")
         .insert({
           id: shortId,
-          user_id: user_id,
+          user_id: userId,
           organization_id,
           plan_id: plan.id,
           plan_slug,
@@ -150,7 +164,7 @@ export async function createUpgradeOrder(req: Request): Promise<CreateUpgradeOrd
       .from("paypal_upgrade_preferences")
       .insert({
         id: shortId,
-        user_id: user_id,
+        user_id: userId,
         organization_id,
         plan_id: plan.id,
         plan_slug,
@@ -171,7 +185,7 @@ export async function createUpgradeOrder(req: Request): Promise<CreateUpgradeOrd
 
     const { returnBase } = buildURLContext(req);
     const uniqueInvoiceId = `upgrade_${organization_id}_${Date.now()}`;
-    const custom_id = `${user_id}|${plan.id}|${organization_id}|${billing_period}|upgrade|${shortId}`;
+    const custom_id = `${userId}|${plan.id}|${organization_id}|${billing_period}|upgrade|${shortId}`;
 
     const return_url = `${returnBase}/api/checkout/paypal/upgrade-capture?preference_id=${shortId}`;
     const cancel_url = `${returnBase}/organization/billing?payment=cancelled`;
