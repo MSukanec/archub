@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getPlanConfig } from "../data/plans-config";
-import { BlockedRestricted } from "@/components/shared/restrictions";
+import { BlockedRestricted, ComingSoonCard } from "@/components/shared/restrictions";
 import type { Plan, BillingPeriod, PricingMode } from "../types";
 
 interface PlanCardProps {
@@ -56,6 +56,9 @@ export function PlanCard({
   
   // Block if plan is not active (based on is_active field from database)
   const isBlocked = plan.is_active === false;
+  
+  // Get status for coming soon/maintenance states
+  const status = plan.status || 'available';
 
   const getButtonColor = () => {
     if (isCurrentPlan) return undefined;
@@ -66,15 +69,16 @@ export function PlanCard({
   };
 
   return (
-    <div
-      className={cn(
-        "relative rounded-2xl overflow-hidden transition-all duration-300",
-        isPopular 
-          ? "bg-[#1a1a1a] dark:bg-[#1a1a1a] scale-105 shadow-2xl" 
-          : "bg-card border border-[var(--border-default)] hover:shadow-lg"
-      )}
-    >
-      {isPopular && (
+    <ComingSoonCard status={status}>
+      <div
+        className={cn(
+          "relative rounded-2xl overflow-hidden transition-all duration-300",
+          isPopular 
+            ? "bg-[#1a1a1a] dark:bg-[#1a1a1a] scale-105 shadow-2xl" 
+            : "bg-card border border-[var(--border-default)] hover:shadow-lg"
+        )}
+      >
+        {isPopular && (
         <div className="absolute top-4 right-4 z-10">
           <Badge className="bg-accent text-accent-foreground text-[9px] font-bold px-3 py-1 uppercase">
             Más Popular
@@ -256,6 +260,7 @@ export function PlanCard({
           </ul>
         </div>
       </div>
-    </div>
+      </div>
+    </ComingSoonCard>
   );
 }

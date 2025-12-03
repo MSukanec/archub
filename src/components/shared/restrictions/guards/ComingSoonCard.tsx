@@ -41,12 +41,10 @@ export function ComingSoonCard({
   if (isAdmin) {
     return (
       <div className={cn("relative", className)}>
-        <div className="opacity-60">
-          {children}
-        </div>
+        {children}
         <Badge
           className={cn(
-            "absolute top-3 right-3 z-10 text-xs px-2 py-1 shadow-lg",
+            "absolute top-3 right-3 z-10 text-xs px-2 py-1 shadow-lg pointer-events-none",
             config.badgeClass
           )}
           data-testid={`badge-${status}`}

@@ -2,8 +2,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { BookOpen, Clock, CheckCircle, MessageCircle, Shield } from 'lucide-react';
-import { BlockedRestricted } from '@/components/shared/restrictions';
+import { BlockedRestricted, ComingSoonCard } from '@/components/shared/restrictions';
 import type { CoursesMode } from '../types';
+import type { ItemStatus } from '@shared/schema';
 
 interface CourseStickyCardWithModeProps {
   mode: CoursesMode;
@@ -28,6 +29,8 @@ export function CourseStickyCardWithMode({
     ? 'max(32px, calc((100vw - 1472px) / 2 - 72px))'
     : 'max(32px, calc((100vw - 1472px) / 2))';
   
+  const status = (course.status || 'available') as ItemStatus;
+  
   return (
     <div 
       className="hidden lg:block fixed top-24 z-40"
@@ -37,7 +40,8 @@ export function CourseStickyCardWithMode({
       }}
     >
       <div className="sticky top-24">
-        <Card className="overflow-hidden shadow-xl border-2" data-testid="card-course-sticky">
+        <ComingSoonCard status={status}>
+          <Card className="overflow-hidden shadow-xl border-2" data-testid="card-course-sticky">
           {course.cover_url && (
             <div className="aspect-video w-full overflow-hidden">
               <img
@@ -124,6 +128,7 @@ export function CourseStickyCardWithMode({
             </div>
           </CardContent>
         </Card>
+        </ComingSoonCard>
       </div>
     </div>
   );

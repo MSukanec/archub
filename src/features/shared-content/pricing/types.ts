@@ -23,6 +23,7 @@ export interface Plan {
   features: PlanFeatures;
   billing_type: string;
   is_active?: boolean;
+  status?: 'available' | 'coming_soon' | 'maintenance';
 }
 
 export interface PlanFeatures {
