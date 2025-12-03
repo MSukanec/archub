@@ -532,6 +532,12 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
   // POST /api/checkout/paypal/webhook (NO auth required - webhook endpoint)
   app.post("/api/checkout/paypal/webhook", paypalController.webhook);
   app.options("/api/checkout/paypal/webhook", paypalController.webhook);
+  
+  // POST /api/checkout/paypal/create-upgrade (Authenticated - create prorated upgrade order)
+  app.post("/api/checkout/paypal/create-upgrade", paypalController.createUpgrade);
+  
+  // GET /api/checkout/paypal/upgrade-capture (NO auth required - redirect endpoint for upgrades)
+  app.get("/api/checkout/paypal/upgrade-capture", paypalController.captureUpgrade);
 
   // POST /api/admin/paypal/sync-plans (Admin only - creates PayPal products and billing plans)
   app.post("/api/admin/paypal/sync-plans", paypalController.syncPlans);

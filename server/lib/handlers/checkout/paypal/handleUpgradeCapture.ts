@@ -1,0 +1,332 @@
+import type { Request } from "express";
+import { createServiceSupabaseClient } from "../shared/auth.js";
+import { getAdminClient } from "../../../../routes/_base.js";
+import { getUserData } from "../shared/user.js";
+import { insertPayment } from "../shared/payments.js";
+import { upgradeOrganizationPlan } from "../shared/subscriptions.js";
+import { buildURLContext } from "../shared/urls.js";
+import { capturePayPalOrder, getPayPalOrder } from "./api.js";
+import { createPayPalSubscription, cancelPayPalSubscription } from "./subscriptions-api.js";
+import { logPayPalMode } from "./config.js";
+
+export type HandleUpgradeCaptureResult =
+  | { success: true; activated: boolean; message: string; redirectUrl: string; approvalUrl?: string }
+  | { success: false; error: string; redirectUrl?: string };
+
+export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeCaptureResult> {
+  logPayPalMode("upgrade-capture");
+  
+  const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
+  const supabase = createServiceSupabaseClient();
+  const adminClient = getAdminClient();
+  
+  const preferenceIdRaw = req.query.preference_id;
+  const isFreeUpgrade = req.query.free === 'true';
+  const token = req.query.token as string; // PayPal token (order ID)
+  
+  let preferenceId: string | null = null;
+  if (Array.isArray(preferenceIdRaw)) {
+    const found = preferenceIdRaw.find((id) => typeof id === 'string' && id.startsWith('ppu_'));
+    preferenceId = typeof found === 'string' ? found : (typeof preferenceIdRaw[0] === 'string' ? preferenceIdRaw[0] : null);
+  } else if (typeof preferenceIdRaw === 'string') {
+    preferenceId = preferenceIdRaw;
+  }
+  
+  console.log("[PayPal upgrade-capture] Processing upgrade capture:", {
+    preferenceIdRaw,
+    preferenceId,
+    isFreeUpgrade,
+    token,
+  });
+
+  if (!preferenceId) {
+    console.error("[PayPal upgrade-capture] No preference_id in query");
+    return { success: false, error: "Missing preference_id", redirectUrl: `${baseUrl}/organization/billing?payment=error&reason=missing_preference` };
+  }
+
+  const { data: prefData, error: prefError } = await adminClient
+    .from("paypal_upgrade_preferences")
+    .select("*")
+    .eq("id", preferenceId)
+    .maybeSingle();
+
+  if (prefError || !prefData) {
+    console.error("[PayPal upgrade-capture] Preference not found:", prefError);
+    return { success: false, error: "Preference not found", redirectUrl: `${baseUrl}/organization/billing?payment=error&reason=preference_not_found` };
+  }
+
+  const { 
+    user_id, 
+    organization_id, 
+    plan_slug, 
+    plan_id,
+    billing_period,
+    amount_usd,
+    previous_subscription_id,
+    proration_credit,
+    target_paypal_plan_id,
+    order_id,
+  } = prefData;
+
+  if (!organization_id || !plan_slug || !billing_period) {
+    console.error("[PayPal upgrade-capture] Missing data in preference:", prefData);
+    return { success: false, error: "Incomplete data", redirectUrl: `${baseUrl}/organization/billing?payment=error&reason=incomplete_data` };
+  }
+
+  // Get public user ID from auth_id
+  let publicUserId: string | null = null;
+  if (user_id) {
+    console.log('[PayPal upgrade-capture] Converting auth_id to user_id:', { auth_id: user_id });
+    const { data: userProfile, error: profileError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("auth_id", user_id)
+      .maybeSingle();
+    
+    if (profileError || !userProfile) {
+      console.error('[PayPal upgrade-capture] Could not find user by auth_id:', profileError);
+    } else {
+      publicUserId = userProfile.id;
+      console.log('[PayPal upgrade-capture] Found user_id:', publicUserId);
+    }
+  }
+
+  // Get plan data
+  let resolvedPlanId = plan_id;
+  let plan: any = null;
+  
+  if (plan_id) {
+    const { data: planData } = await supabase
+      .from("plans")
+      .select("id, name, slug, monthly_amount, annual_amount, paypal_plan_monthly_id, paypal_plan_annual_id")
+      .eq("id", plan_id)
+      .maybeSingle();
+    plan = planData;
+  } else if (plan_slug) {
+    const { data: planData } = await supabase
+      .from("plans")
+      .select("id, name, slug, monthly_amount, annual_amount, paypal_plan_monthly_id, paypal_plan_annual_id")
+      .eq("slug", plan_slug)
+      .eq("is_active", true)
+      .maybeSingle();
+    plan = planData;
+    if (planData) resolvedPlanId = planData.id;
+  }
+
+  if (!plan) {
+    console.error("[PayPal upgrade-capture] Plan not found");
+    return { success: false, error: "Plan not found", redirectUrl: `${baseUrl}/organization/billing?payment=error&reason=plan_not_found` };
+  }
+
+  // For free upgrades, skip payment capture
+  let paymentId: string | null = null;
+  let captureData: any = null;
+  
+  if (!isFreeUpgrade) {
+    // Capture the PayPal order
+    const orderIdToCapture = order_id || token;
+    if (!orderIdToCapture) {
+      console.error("[PayPal upgrade-capture] No order_id to capture");
+      return { success: false, error: "No order ID", redirectUrl: `${baseUrl}/organization/billing?payment=error&reason=no_order_id` };
+    }
+
+    try {
+      // First check order status
+      const orderDetails = await getPayPalOrder(orderIdToCapture);
+      console.log('[PayPal upgrade-capture] Order status:', orderDetails.status);
+      
+      if (orderDetails.status === 'COMPLETED') {
+        console.log('[PayPal upgrade-capture] Order already captured');
+        captureData = orderDetails;
+      } else if (orderDetails.status === 'APPROVED') {
+        console.log('[PayPal upgrade-capture] Capturing order:', orderIdToCapture);
+        captureData = await capturePayPalOrder(orderIdToCapture);
+        console.log('[PayPal upgrade-capture] Capture result:', captureData.status);
+      } else {
+        console.error('[PayPal upgrade-capture] Order not approved:', orderDetails.status);
+        return { success: false, error: "Order not approved", redirectUrl: `${baseUrl}/organization/billing?payment=error&reason=order_not_approved` };
+      }
+    } catch (captureError: any) {
+      console.error("[PayPal upgrade-capture] Error capturing order:", captureError);
+      return { success: false, error: "Capture failed", redirectUrl: `${baseUrl}/organization/billing?payment=error&reason=capture_failed` };
+    }
+
+    // Insert payment record
+    const prorationAmountNum = parseFloat(amount_usd) || 0;
+    const payPalPaymentId = captureData?.purchase_units?.[0]?.payments?.captures?.[0]?.id || 
+                           `upgrade_proration_${preferenceId}`;
+    
+    const paymentResult = await insertPayment(supabase, "paypal", {
+      providerPaymentId: payPalPaymentId,
+      userId: publicUserId,
+      amount: prorationAmountNum,
+      currency: "USD",
+      status: "completed",
+      productType: 'subscription_upgrade',
+      organizationId: organization_id,
+      productId: resolvedPlanId,
+    });
+
+    paymentId = paymentResult.paymentId;
+    console.log('[PayPal upgrade-capture] Payment recorded:', paymentId);
+  }
+
+  // Get user email for creating new subscription
+  let userEmail: string | null = null;
+  if (user_id) {
+    const userData = await getUserData(supabase, user_id);
+    userEmail = userData.email;
+  }
+
+  if (!userEmail && publicUserId) {
+    const { data: userRow } = await adminClient
+      .from("users")
+      .select("email")
+      .eq("id", publicUserId)
+      .maybeSingle();
+    userEmail = userRow?.email || null;
+  }
+
+  if (!userEmail) {
+    console.error('[PayPal upgrade-capture] No email found for user');
+    return { success: false, error: "No email found", redirectUrl: `${baseUrl}/organization/billing?payment=error&reason=no_email` };
+  }
+
+  // Cancel the old PayPal subscription if exists
+  const { data: oldSub } = await supabase
+    .from("organization_subscriptions")
+    .select("id, provider_subscription_id, payment_provider")
+    .eq("id", previous_subscription_id)
+    .maybeSingle();
+
+  if (oldSub?.provider_subscription_id && oldSub.payment_provider === 'paypal') {
+    console.log('[PayPal upgrade-capture] Cancelling old PayPal subscription:', oldSub.provider_subscription_id);
+    try {
+      const cancelResult = await cancelPayPalSubscription(oldSub.provider_subscription_id, "Upgrade to new plan");
+      if (cancelResult.success) {
+        console.log('[PayPal upgrade-capture] Old subscription cancelled successfully');
+      } else {
+        console.warn('[PayPal upgrade-capture] Failed to cancel old subscription:', cancelResult.error);
+      }
+    } catch (e) {
+      console.warn('[PayPal upgrade-capture] Error cancelling old subscription:', e);
+    }
+  }
+
+  // Mark old subscription as cancelled in DB
+  if (previous_subscription_id) {
+    const { error: cancelError } = await supabase
+      .from("organization_subscriptions")
+      .update({ 
+        status: 'cancelled',
+        cancelled_at: new Date().toISOString(),
+        scheduled_downgrade_plan_id: null,
+      })
+      .eq("id", previous_subscription_id);
+
+    if (cancelError) {
+      console.warn("[PayPal upgrade-capture] Failed to cancel previous subscription in DB:", cancelError);
+    } else {
+      console.log("[PayPal upgrade-capture] Previous subscription cancelled:", previous_subscription_id);
+    }
+  }
+
+  // Create new PayPal recurring subscription
+  const paypalPlanId = target_paypal_plan_id || 
+                       (billing_period === 'monthly' ? plan.paypal_plan_monthly_id : plan.paypal_plan_annual_id);
+
+  let newSubscriptionId: string | null = null;
+  
+  if (paypalPlanId) {
+    console.log('[PayPal upgrade-capture] Creating new recurring subscription with plan:', paypalPlanId);
+    
+    const { returnBase } = buildURLContext(req);
+    const custom_id = `${user_id}|${resolvedPlanId}|${organization_id}|${billing_period}`;
+    const return_url = `${returnBase}/api/checkout/paypal/capture-subscription?type=recurring`;
+    const cancel_url = `${returnBase}/organization/billing?payment=cancelled`;
+
+    const subscriptionResult = await createPayPalSubscription({
+      planId: paypalPlanId,
+      subscriber: {
+        email_address: userEmail,
+      },
+      customId: custom_id,
+      returnUrl: return_url,
+      cancelUrl: cancel_url,
+      brandName: "Seencel",
+    });
+
+    if (subscriptionResult.success) {
+      newSubscriptionId = subscriptionResult.subscriptionId;
+      console.log('[PayPal upgrade-capture] New subscription created:', newSubscriptionId);
+      
+      // Activate the new plan immediately (subscription will be confirmed when user approves)
+      const prorationAmountNum = parseFloat(amount_usd) || 0;
+      await upgradeOrganizationPlan(supabase, {
+        organizationId: organization_id,
+        planId: resolvedPlanId,
+        billingPeriod: billing_period as 'monthly' | 'annual',
+        paymentId: paymentId || `upgrade_${preferenceId}`,
+        amount: prorationAmountNum,
+        currency: "USD",
+        userId: publicUserId,
+        payerEmail: userEmail,
+        providerSubscriptionId: newSubscriptionId,
+      });
+
+      // Redirect user to approve the new subscription
+      console.log('[PayPal upgrade-capture] Redirecting to subscription approval:', subscriptionResult.approvalUrl);
+      return { 
+        success: true, 
+        activated: true, 
+        message: "Upgrade activado, redirigiendo a PayPal para confirmar suscripción",
+        redirectUrl: subscriptionResult.approvalUrl,
+        approvalUrl: subscriptionResult.approvalUrl,
+      };
+    } else {
+      console.error('[PayPal upgrade-capture] Failed to create new subscription:', subscriptionResult.error);
+      
+      // Still activate the plan, but without recurring subscription
+      const prorationAmountNum = parseFloat(amount_usd) || 0;
+      await upgradeOrganizationPlan(supabase, {
+        organizationId: organization_id,
+        planId: resolvedPlanId,
+        billingPeriod: billing_period as 'monthly' | 'annual',
+        paymentId: paymentId || `upgrade_${preferenceId}`,
+        amount: prorationAmountNum,
+        currency: "USD",
+        userId: publicUserId,
+        payerEmail: userEmail,
+      });
+
+      return { 
+        success: true, 
+        activated: true, 
+        message: "Upgrade activado pero la suscripción recurrente requiere configuración manual",
+        redirectUrl: `${baseUrl}/organization/billing?payment=success&recurring=pending`,
+      };
+    }
+  } else {
+    // No PayPal plan ID available, just activate without recurring
+    console.log('[PayPal upgrade-capture] No PayPal plan ID, activating without recurring');
+    
+    const prorationAmountNum = parseFloat(amount_usd) || 0;
+    await upgradeOrganizationPlan(supabase, {
+      organizationId: organization_id,
+      planId: resolvedPlanId,
+      billingPeriod: billing_period as 'monthly' | 'annual',
+      paymentId: paymentId || `upgrade_${preferenceId}`,
+      amount: prorationAmountNum,
+      currency: "USD",
+      userId: publicUserId,
+      payerEmail: userEmail,
+    });
+
+    return { 
+      success: true, 
+      activated: true, 
+      message: "Upgrade completado exitosamente",
+      redirectUrl: `${baseUrl}/organization/billing?payment=success`,
+    };
+  }
+}

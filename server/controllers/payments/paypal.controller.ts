@@ -12,6 +12,8 @@ import { insertPayment } from "../../lib/handlers/checkout/shared/payments.js";
 import { upsertEnrollment } from "../../lib/handlers/checkout/shared/enrollments.js";
 import { logPaymentEvent } from "../../lib/handlers/checkout/shared/events.js";
 import { markCouponAsUsed } from "../../lib/handlers/checkout/shared/coupons.js";
+import { createUpgradeOrder } from "../../lib/handlers/checkout/paypal/createUpgradeOrder.js";
+import { handleUpgradeCapture } from "../../lib/handlers/checkout/paypal/handleUpgradeCapture.js";
 
 export async function createCourse(req: Request, res: Response) {
   try {
@@ -395,5 +397,56 @@ export async function syncPlans(req: Request, res: Response) {
       ok: false,
       error: error.message || "Failed to sync PayPal plans"
     });
+  }
+}
+
+export async function createUpgrade(req: Request, res: Response) {
+  try {
+    const result = await createUpgradeOrder(req as any);
+    
+    if (!result.success) {
+      return res.status(result.status || 400).json({
+        ok: false,
+        error: result.error
+      });
+    }
+    
+    if (result.isFreeUpgrade) {
+      return res.json({
+        ok: true,
+        freeUpgrade: true,
+        order_id: result.orderId,
+        approval_url: result.approvalUrl
+      });
+    }
+    
+    return res.json({
+      ok: true,
+      order_id: result.orderId,
+      approval_url: result.approvalUrl
+    });
+  } catch (error: any) {
+    console.error("[PayPal create-upgrade controller] Error:", error);
+    return res.status(500).json({
+      ok: false,
+      error: error.message || "Failed to create upgrade order"
+    });
+  }
+}
+
+export async function captureUpgrade(req: Request, res: Response) {
+  try {
+    const result = await handleUpgradeCapture(req as any);
+    
+    if (!result.success) {
+      console.error("[PayPal capture-upgrade controller] Error:", result.error);
+      return res.redirect(result.redirectUrl || '/organization/billing?payment=error');
+    }
+    
+    return res.redirect(result.redirectUrl);
+  } catch (error: any) {
+    console.error("[PayPal capture-upgrade controller] Fatal error:", error);
+    const baseUrl = process.env.VITE_APP_URL || 'https://seencel.com';
+    return res.redirect(`${baseUrl}/organization/billing?payment=error&reason=internal_error`);
   }
 }

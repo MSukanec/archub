@@ -1817,3 +1817,28 @@ export const insertMpSubscriptionPreferenceSchema = createInsertSchema(mp_subscr
 
 export type MpSubscriptionPreference = typeof mp_subscription_preferences.$inferSelect;
 export type InsertMpSubscriptionPreference = z.infer<typeof insertMpSubscriptionPreferenceSchema>;
+
+// PayPal Upgrade Preferences (for prorated upgrade payments)
+export const paypal_upgrade_preferences = pgTable("paypal_upgrade_preferences", {
+  id: varchar("id", { length: 64 }).primaryKey(), // ppu_xxxxx (short ID)
+  order_id: text("order_id"), // PayPal order ID
+  user_id: uuid("user_id").notNull(), // auth_id from supabase.auth.getUser()
+  organization_id: uuid("organization_id").notNull(),
+  plan_id: uuid("plan_id"),
+  plan_slug: text("plan_slug"),
+  billing_period: text("billing_period", { enum: ["monthly", "annual"] }).notNull(),
+  amount_usd: numeric("amount_usd", { precision: 10, scale: 2 }),
+  previous_subscription_id: uuid("previous_subscription_id"),
+  proration_credit: numeric("proration_credit", { precision: 10, scale: 2 }),
+  full_price_usd: numeric("full_price_usd", { precision: 10, scale: 2 }),
+  target_paypal_plan_id: text("target_paypal_plan_id"), // PayPal billing plan ID for new subscription
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+export const insertPaypalUpgradePreferenceSchema = createInsertSchema(paypal_upgrade_preferences).omit({
+  id: true,
+  created_at: true,
+});
+
+export type PaypalUpgradePreference = typeof paypal_upgrade_preferences.$inferSelect;
+export type InsertPaypalUpgradePreference = z.infer<typeof insertPaypalUpgradePreferenceSchema>;

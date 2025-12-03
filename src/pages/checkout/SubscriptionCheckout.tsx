@@ -722,10 +722,13 @@ export default function SubscriptionCheckout() {
         ...(validatedCoupon && { coupon_code: validatedCoupon.code }),
       };
 
-      console.log("[PayPal] Creando orden de suscripción…", requestBody);
-
       const API_BASE = getApiBase();
-      const paypalUrl = `${API_BASE}/api/checkout/paypal/create-subscription`;
+      
+      const paypalUrl = isUpgrade
+        ? `${API_BASE}/api/checkout/paypal/create-upgrade`
+        : `${API_BASE}/api/checkout/paypal/create-subscription`;
+      
+      console.log(`[PayPal] ${isUpgrade ? 'Creando orden de upgrade prorrateado' : 'Creando orden de suscripción'}…`, requestBody);
 
       const res = await fetchWithTimeout(
         paypalUrl,
