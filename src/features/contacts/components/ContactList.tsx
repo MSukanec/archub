@@ -113,12 +113,12 @@ export default function ContactList({
         return (
           <div className="flex flex-wrap gap-1">
             {contact.contact_types.slice(0, 2).map((type) => (
-              <Badge key={type.id} variant="secondary" className="text-xs">
+              <Badge key={type.id} className="text-xs bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90">
                 {type.name}
               </Badge>
             ))}
             {contact.contact_types.length > 2 && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge className="text-xs bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90">
                 +{contact.contact_types.length - 2}
               </Badge>
             )}
