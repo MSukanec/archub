@@ -49,12 +49,12 @@ export function useWallets(organizationId: string | undefined) {
         throw new Error('Supabase client not initialized')
       }
 
-      // First get organization wallets
+      // First get organization wallets (filter soft-deleted)
       const { data: orgWallets, error: orgError } = await supabase
         .from('organization_wallets')
         .select('*')
         .eq('organization_id', organizationId)
-        .eq('is_active', true)
+        .eq('is_deleted', false)
         .order('is_default', { ascending: false })
 
       if (orgError) throw orgError

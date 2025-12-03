@@ -49,6 +49,7 @@ export const useOrganizationCurrencies = (organizationId?: string) => {
           currency:currencies(*)
         `)
         .eq('organization_id', organizationId)
+        .eq('is_deleted', false)
         .order('is_default', { ascending: false })
       
       if (error) throw error

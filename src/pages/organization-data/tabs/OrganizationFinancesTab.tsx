@@ -142,17 +142,21 @@ export function OrganizationFinancesTab() {
 
   const updateSecondaryCurrenciesMutation = useMutation({
     mutationFn: async (currencyIds: string[]) => {
+      const orgId = userData?.organization?.id;
+      if (!orgId) throw new Error('Organización no encontrada');
+      
       const currentSecondary = organizationCurrencies?.filter(c => !c.is_default) || [];
       const currentSecondaryIds = currentSecondary.map(c => c.currency_id);
       
       const currenciesToRemove = currentSecondaryIds.filter(id => !currencyIds.includes(id));
       const currenciesToAdd = currencyIds.filter(id => !currentSecondaryIds.includes(id));
       
+      // Soft-delete currencies being removed
       if (currenciesToRemove.length > 0) {
         const { data: movementsUsingCurrency, error: checkError } = await supabase
           .from('movements')
           .select('id')
-          .eq('organization_id', userData?.organization?.id)
+          .eq('organization_id', orgId)
           .in('currency_id', currenciesToRemove)
           .limit(1);
         
@@ -164,26 +168,55 @@ export function OrganizationFinancesTab() {
           );
         }
         
-        const { error: deleteError } = await supabase
+        const { error: softDeleteError } = await supabase
           .from('organization_currencies')
-          .delete()
-          .eq('organization_id', userData?.organization?.id)
+          .update({ 
+            is_deleted: true, 
+            deleted_at: new Date().toISOString(),
+            is_active: false 
+          })
+          .eq('organization_id', orgId)
           .in('currency_id', currenciesToRemove);
         
-        if (deleteError) throw deleteError;
+        if (softDeleteError) throw softDeleteError;
       }
 
-      if (currenciesToAdd.length > 0) {
-        const { error } = await supabase
+      // Add new currencies (or reactivate soft-deleted ones)
+      for (const currencyId of currenciesToAdd) {
+        // Check if this currency was previously soft-deleted
+        const { data: existingRecord } = await supabase
           .from('organization_currencies')
-          .upsert(currenciesToAdd.map(id => ({
-            organization_id: userData?.organization?.id!,
-            currency_id: id,
-            is_default: false,
-            is_active: true
-          })), { onConflict: 'organization_id,currency_id' });
-
-        if (error) throw error;
+          .select('id, is_deleted')
+          .eq('organization_id', orgId)
+          .eq('currency_id', currencyId)
+          .single();
+        
+        if (existingRecord) {
+          // Reactivate the soft-deleted record
+          const { error: reactivateError } = await supabase
+            .from('organization_currencies')
+            .update({ 
+              is_deleted: false, 
+              deleted_at: null,
+              is_active: true 
+            })
+            .eq('id', existingRecord.id);
+          
+          if (reactivateError) throw reactivateError;
+        } else {
+          // Insert new record
+          const { error: insertError } = await supabase
+            .from('organization_currencies')
+            .insert({
+              organization_id: orgId,
+              currency_id: currencyId,
+              is_default: false,
+              is_active: true,
+              is_deleted: false
+            });
+          
+          if (insertError) throw insertError;
+        }
       }
     },
     onSuccess: () => {
@@ -204,12 +237,16 @@ export function OrganizationFinancesTab() {
 
   const updateSecondaryWalletsMutation = useMutation({
     mutationFn: async (walletIds: string[]) => {
+      const orgId = userData?.organization?.id;
+      if (!orgId) throw new Error('Organización no encontrada');
+      
       const currentSecondary = organizationWallets?.filter(w => !w.is_default) || [];
       const currentSecondaryIds = currentSecondary.map(w => w.wallet_id);
       
       const walletsToRemove = currentSecondary.filter(w => !walletIds.includes(w.wallet_id));
       const walletIdsToAdd = walletIds.filter(id => !currentSecondaryIds.includes(id));
       
+      // Soft-delete wallets being removed
       if (walletsToRemove.length > 0) {
         const walletIdsToCheck = walletsToRemove.map(w => w.id);
         
@@ -227,26 +264,55 @@ export function OrganizationFinancesTab() {
           );
         }
         
-        const { error: deleteError } = await supabase
+        const { error: softDeleteError } = await supabase
           .from('organization_wallets')
-          .delete()
-          .eq('organization_id', userData?.organization?.id)
+          .update({ 
+            is_deleted: true, 
+            deleted_at: new Date().toISOString(),
+            is_active: false 
+          })
+          .eq('organization_id', orgId)
           .in('wallet_id', walletsToRemove.map(w => w.wallet_id));
         
-        if (deleteError) throw deleteError;
+        if (softDeleteError) throw softDeleteError;
       }
 
-      if (walletIdsToAdd.length > 0) {
-        const { error } = await supabase
+      // Add new wallets (or reactivate soft-deleted ones)
+      for (const walletId of walletIdsToAdd) {
+        // Check if this wallet was previously soft-deleted
+        const { data: existingRecord } = await supabase
           .from('organization_wallets')
-          .upsert(walletIdsToAdd.map(id => ({
-            organization_id: userData?.organization?.id!,
-            wallet_id: id,
-            is_default: false,
-            is_active: true
-          })), { onConflict: 'organization_id,wallet_id' });
-
-        if (error) throw error;
+          .select('id, is_deleted')
+          .eq('organization_id', orgId)
+          .eq('wallet_id', walletId)
+          .single();
+        
+        if (existingRecord) {
+          // Reactivate the soft-deleted record
+          const { error: reactivateError } = await supabase
+            .from('organization_wallets')
+            .update({ 
+              is_deleted: false, 
+              deleted_at: null,
+              is_active: true 
+            })
+            .eq('id', existingRecord.id);
+          
+          if (reactivateError) throw reactivateError;
+        } else {
+          // Insert new record
+          const { error: insertError } = await supabase
+            .from('organization_wallets')
+            .insert({
+              organization_id: orgId,
+              wallet_id: walletId,
+              is_default: false,
+              is_active: true,
+              is_deleted: false
+            });
+          
+          if (insertError) throw insertError;
+        }
       }
     },
     onSuccess: () => {
