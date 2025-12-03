@@ -861,13 +861,32 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
 
         if (error) throw error;
 
-        await supabase
+        // Actualizar tipos de contacto usando lógica inteligente (solo agregar nuevos, eliminar los que ya no están)
+        const newTypeIds = data.contact_type_ids || [];
+        
+        // Obtener tipos actuales
+        const { data: currentLinks } = await supabase
           .from('contact_type_links')
-          .delete()
+          .select('id, contact_type_id')
           .eq('contact_id', editingContact.id);
-
-        if (data.contact_type_ids && data.contact_type_ids.length > 0) {
-          const typeLinks = data.contact_type_ids.map(typeId => ({
+        
+        const currentTypeIds = (currentLinks || []).map(link => link.contact_type_id);
+        
+        // Calcular qué agregar y qué eliminar
+        const typesToAdd = newTypeIds.filter(id => !currentTypeIds.includes(id));
+        const linksToRemove = (currentLinks || []).filter(link => !newTypeIds.includes(link.contact_type_id));
+        
+        // Eliminar los que ya no están (si falla, continuar)
+        for (const link of linksToRemove) {
+          await supabase
+            .from('contact_type_links')
+            .delete()
+            .eq('id', link.id);
+        }
+        
+        // Solo insertar los nuevos
+        if (typesToAdd.length > 0) {
+          const typeLinks = typesToAdd.map(typeId => ({
             contact_id: editingContact.id,
             contact_type_id: typeId,
             organization_id: organizationId,
