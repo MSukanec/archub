@@ -89,13 +89,6 @@ export function PlanCard({
         </div>
       )}
       
-      {isCurrentPlan && isAuthenticated && (
-        <div className="absolute top-4 left-4 z-10">
-          <Badge className="bg-green-500 text-white text-[9px] font-bold px-3 py-1 uppercase">
-            Plan Actual
-          </Badge>
-        </div>
-      )}
       
       
       <div className="p-8 space-y-6">
