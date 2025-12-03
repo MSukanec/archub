@@ -103,6 +103,7 @@ const CourseView = lazy(() => import("@/pages/learning/courses/CourseView"));
 const CourseLandingPrivate = lazy(() => import("@/pages/professional/learning/CourseLanding"));
 const PaymentReturn = lazy(() => import("@/pages/learning/PaymentReturn"));
 const CheckoutPage = lazy(() => import("@/pages/checkout/CheckoutPage"));
+const MPSeatSubscriptionSuccess = lazy(() => import("@/pages/MPSeatSubscriptionSuccess"));
 const SubscriptionCheckout = lazy(() => import("@/pages/checkout/SubscriptionCheckout"));
 
 // Finances Pages
@@ -276,6 +277,13 @@ function Router() {
         <Route path="/subscription/checkout">
           <Suspense fallback={<LazyLoadFallback />}>
             <SubscriptionCheckout />
+          </Suspense>
+        </Route>
+        
+        {/* MP Payment Return Routes - Redirect to API endpoints */}
+        <Route path="/mp/seat-subscription-success">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <MPSeatSubscriptionSuccess />
           </Suspense>
         </Route>
 
