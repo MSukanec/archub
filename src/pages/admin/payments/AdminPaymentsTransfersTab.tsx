@@ -111,18 +111,10 @@ const AdminPaymentsTransfersTab = () => {
   }, [payments]);
 
   const handleViewReceipt = (payment: BankTransferPayment) => {
-    if (!payment.image_bucket || !payment.image_path) {
-      toast({
-        title: 'Sin comprobante',
-        description: 'Este pago no tiene comprobante adjunto',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
     openModal('bank-transfer-receipt', {
       btpId: payment.id,
       paymentId: payment.id,
+      hasReceipt: !!(payment.image_bucket && payment.image_path),
     });
   };
 
