@@ -1297,6 +1297,25 @@ export const course_faqs = pgTable("course_faqs", {
   updated_at: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const testimonials = pgTable("testimonials", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  course_id: uuid("course_id"),
+  organization_id: uuid("organization_id"),
+  product_id: uuid("product_id"),
+  author_name: text("author_name").notNull(),
+  author_title: text("author_title"),
+  author_avatar_url: text("author_avatar_url"),
+  content: text("content").notNull(),
+  rating: integer("rating"),
+  is_featured: boolean("is_featured").notNull().default(false),
+  is_active: boolean("is_active").notNull().default(true),
+  sort_index: integer("sort_index").notNull().default(0),
+  created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  is_deleted: boolean("is_deleted").notNull().default(false),
+  deleted_at: timestamp("deleted_at", { withTimezone: true }),
+});
+
 // Schemas for courses
 export const insertCourseSchema = createInsertSchema(courses).omit({
   id: true,
@@ -1343,6 +1362,14 @@ export const insertCourseFaqSchema = createInsertSchema(course_faqs).omit({
   updated_at: true,
 });
 
+export const insertTestimonialSchema = createInsertSchema(testimonials).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  is_deleted: true,
+  deleted_at: true,
+});
+
 // Landing Sections Schema
 export const landingSectionSchema = z.object({
   title: z.string().optional(),
@@ -1376,6 +1403,8 @@ export type CourseLessonNote = typeof course_lesson_notes.$inferSelect;
 export type InsertCourseLessonNote = z.infer<typeof insertCourseLessonNoteSchema>;
 export type CourseFaq = typeof course_faqs.$inferSelect;
 export type InsertCourseFaq = z.infer<typeof insertCourseFaqSchema>;
+export type Testimonial = typeof testimonials.$inferSelect;
+export type InsertTestimonial = z.infer<typeof insertTestimonialSchema>;
 
 // Payment Tables
 export const payments = pgTable("payments", {
