@@ -284,6 +284,15 @@ export default function SubscriptionCheckout() {
   }, [userData]);
 
   useEffect(() => {
+    if (country && selectedMethod === null) {
+      const isArgentina = country === 'Argentina' || country === 'argentina' || country === 'AR' || country === 'ARG';
+      const defaultMethod: PaymentMethod = isArgentina ? 'mercadopago' : 'paypal';
+      console.log('[Checkout] Auto-selecting payment method:', defaultMethod, 'for country:', country);
+      setSelectedMethod(defaultMethod);
+    }
+  }, [country, selectedMethod]);
+
+  useEffect(() => {
     if (!needsInvoice || !userData?.user?.id) {
       return;
     }
