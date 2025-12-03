@@ -227,7 +227,7 @@ export default function GeneralCostPaymentForm({
               organization_id: userData.organization.id,
               created_by_member_id: currentMember.id,
               link_to: { general_cost_payment_id: savedPaymentId },
-              category: 'attachment',
+              category: 'document',
               description: fileInput.description || fileInput.file.name,
             })
             console.log('[GeneralCostPaymentForm] Upload success:', uploadResult)
