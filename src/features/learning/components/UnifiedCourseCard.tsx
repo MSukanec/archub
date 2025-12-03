@@ -3,9 +3,33 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Award, Eye } from 'lucide-react';
+import { BookOpen, Award, Eye, CheckCircle, Clock, Wrench } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useIsAdmin } from '@/hooks/use-admin-permissions';
+import type { ItemStatus } from '@shared/schema';
 
 type CourseMode = 'public' | 'dashboard';
+
+const statusConfig = {
+  available: {
+    icon: CheckCircle,
+    label: "Disponible",
+    badgeClass: "bg-green-500 text-white border-0",
+    isBlocking: false,
+  },
+  coming_soon: {
+    icon: Clock,
+    label: "Próximamente",
+    badgeClass: "bg-blue-500 text-white border-0",
+    isBlocking: true,
+  },
+  maintenance: {
+    icon: Wrench,
+    label: "En mantenimiento",
+    badgeClass: "bg-amber-500 text-white border-0",
+    isBlocking: true,
+  },
+} as const;
 
 interface UnifiedCourseCardProps {
   course: {
@@ -18,6 +42,7 @@ interface UnifiedCourseCardProps {
     instructor_name?: string | null;
     instructor_title?: string | null;
     badge_text?: string | null;
+    status?: string | null;
   };
   mode?: CourseMode;
   isEnrolled?: boolean;
@@ -37,7 +62,13 @@ export function UnifiedCourseCard({
   onViewCourse,
 }: UnifiedCourseCardProps) {
   const [, navigate] = useLocation();
+  const isAdmin = useIsAdmin();
   const hasProgress = progress && progress.percentage > 0;
+  
+  const status = (course.status || 'available') as ItemStatus;
+  const config = statusConfig[status];
+  const StatusIcon = config?.icon;
+  const isBlocking = config?.isBlocking && !isAdmin;
   
   const courseInfoUrl = mode === 'public' 
     ? `/cursos/${course.slug}` 
@@ -49,7 +80,10 @@ export function UnifiedCourseCard({
   
   const cardContent = (
     <Card 
-      className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden"
+      className={cn(
+        "h-full hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden",
+        isBlocking && "opacity-50 grayscale-[30%]"
+      )}
       data-testid={`card-course-${course.id}`}
     >
       <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
@@ -69,6 +103,18 @@ export function UnifiedCourseCard({
             <Badge variant="secondary" className="px-3 py-1 shadow-md">
               <Award className="w-3 h-3 mr-1.5 inline" />
               {course.badge_text}
+            </Badge>
+          </div>
+        )}
+        {config && StatusIcon && (
+          <div className="absolute top-3 right-3">
+            <Badge 
+              className={cn("px-2 py-1 shadow-lg", config.badgeClass)}
+              data-testid={`badge-status-${course.id}`}
+            >
+              <StatusIcon className="w-3 h-3 mr-1" />
+              {config.label}
+              {isAdmin && config.isBlocking && " (Admin)"}
             </Badge>
           </div>
         )}
@@ -158,6 +204,11 @@ export function UnifiedCourseCard({
       </CardFooter>
     </Card>
   );
+
+  // Si el curso está bloqueado, no permitir navegación
+  if (isBlocking) {
+    return <div className="select-none pointer-events-none">{cardContent}</div>;
+  }
 
   // Si NO está inscrito → llevar a la landing page del curso (para ver info y comprar)
   // Si SÍ está inscrito → llevar al CourseView (para ver el contenido)
