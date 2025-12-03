@@ -1381,6 +1381,7 @@ export const landingSectionsSchema = z.object({
   instructor: landingSectionSchema.optional(),
   modules: landingSectionSchema.optional(),
   features: landingSectionSchema.optional(),
+  testimonials: landingSectionSchema.optional(),
   faq: landingSectionSchema.optional(),
 }).optional();
 

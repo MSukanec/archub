@@ -134,6 +134,12 @@ export const ENTITY_CONFIG: Record<EntityType, EntityConfig> = {
     basePath: 'marketplace/receipts/{course_id}/{user_id}',
     compressionPreset: 'document',
     visibility: 'private'
+  },
+  'testimonial_avatar': {
+    bucket: 'public-assets',
+    basePath: 'marketplace/testimonials',
+    compressionPreset: 'avatar',
+    visibility: 'public'
   }
 };
 

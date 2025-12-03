@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type { Course, CourseDetails, CourseModule, Lesson, CourseFaq } from '@shared/schema';
+import type { Course, CourseDetails, CourseModule, Lesson, CourseFaq, Testimonial } from '@shared/schema';
 
 /**
  * Fetch public course data by slug (NO AUTH required)
@@ -148,11 +148,23 @@ export async function fetchCourseLandingBySlug(slug: string) {
 
   if (faqsError) throw new Error(`FAQs fetch error: ${faqsError.message}`);
 
+  // 5. Fetch Testimonials
+  const { data: testimonials, error: testimonialsError } = await supabase
+    .from('testimonials')
+    .select('*')
+    .eq('course_id', course.id)
+    .eq('is_active', true)
+    .eq('is_deleted', false)
+    .order('sort_index', { ascending: true });
+
+  if (testimonialsError) throw new Error(`Testimonials fetch error: ${testimonialsError.message}`);
+
   return {
     course: course as Course,
     modules: (modules || []) as CourseModule[],
     lessons: (lessons || []) as Lesson[],
     faqs: (faqs || []) as CourseFaq[],
+    testimonials: (testimonials || []) as Testimonial[],
   };
 }
 

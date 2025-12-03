@@ -82,6 +82,7 @@ export default function CourseInfo() {
           course={data.course}
           modules={data.modules}
           faqs={data.faqs}
+          testimonials={data.testimonials}
           stats={data.stats}
           isEnrolled={isEnrolled}
           progressPercentage={progressPercentage}

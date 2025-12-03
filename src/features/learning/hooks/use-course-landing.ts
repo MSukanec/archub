@@ -25,6 +25,7 @@ export function useCourseLanding(slug: string) {
         course: rawData.course,
         modules: modulesWithLessons,
         faqs: rawData.faqs,
+        testimonials: rawData.testimonials,
         stats,
       };
     },

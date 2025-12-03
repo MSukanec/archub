@@ -14,6 +14,7 @@ export { ModulesSection } from './landing/ModulesSection.tsx';
 export { LessonsSection } from './landing/LessonsSection';
 export { CourseDetailsSection } from './landing/CourseDetailsSection';
 export { FAQSection } from './landing/FAQSection';
+export { TestimonialsSection } from './landing/TestimonialsSection';
 export { CTAFooter } from './landing/CTAFooter';
 export { CourseCard } from './landing/CourseCard';
 export { CourseGrid } from './landing/CourseGrid';

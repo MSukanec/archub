@@ -6,16 +6,19 @@ import {
   LessonsSection,
   CourseDetailsSection,
   FAQSection,
+  TestimonialsSection,
   CTAFooter,
 } from '@/features/learning';
 import type { CoursesMode } from './types';
 import { CourseStickyCardWithMode } from './components/CourseStickyCardWithMode';
+import type { Testimonial } from '@shared/schema';
 
 interface CourseLandingShellProps {
   mode: CoursesMode;
   course: any;
   modules: any[];
   faqs: any[];
+  testimonials: Testimonial[];
   stats: any;
   isEnrolled: boolean;
   progressPercentage: number;
@@ -28,6 +31,7 @@ export function CourseLandingShell({
   course, 
   modules, 
   faqs, 
+  testimonials,
   stats, 
   isEnrolled, 
   progressPercentage,
@@ -70,6 +74,12 @@ export function CourseLandingShell({
         />
         <LessonsSection modules={modules} />
         <CourseDetailsSection course={course} />
+        <TestimonialsSection 
+          testimonials={testimonials}
+          title={landingSections?.testimonials?.title}
+          subtitle={landingSections?.testimonials?.subtitle}
+          description={landingSections?.testimonials?.description}
+        />
         <FAQSection 
           faqs={faqs}
           title={landingSections?.faq?.title}

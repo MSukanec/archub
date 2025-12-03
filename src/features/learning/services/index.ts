@@ -50,3 +50,8 @@ export { getCoursePricing } from './student/getCoursePricing';
 export { createCourseFaq } from './admin/createCourseFaq';
 export { updateCourseFaq } from './admin/updateCourseFaq';
 export { deleteCourseFaq } from './admin/deleteCourseFaq';
+
+// ========== ADMIN SERVICES - TESTIMONIALS ==========
+export { createTestimonial } from './admin/createTestimonial';
+export { updateTestimonial } from './admin/updateTestimonial';
+export { deleteTestimonial } from './admin/deleteTestimonial';

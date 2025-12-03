@@ -199,7 +199,7 @@ export function getLessonStatus(progress?: CourseLessonProgress): 'not_started' 
 
 // ========== PUBLIC LANDING TYPES (from course-landing) ==========
 
-import type { CourseFaq } from '@shared/schema';
+import type { CourseFaq, Testimonial } from '@shared/schema';
 
 /**
  * Course landing page data (public-facing)
@@ -208,6 +208,7 @@ export interface CourseLandingData {
   course: Course;
   modules: ModuleWithLessons[];
   faqs: CourseFaq[];
+  testimonials: Testimonial[];
   stats: CourseStats;
 }
 

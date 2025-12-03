@@ -19,7 +19,8 @@ export type EntityType =
   | 'project_photo'
   | 'sitelog_photo'
   | 'project_document'
-  | 'course_purchase_receipt';
+  | 'course_purchase_receipt'
+  | 'testimonial_avatar';
 
 export type BucketName = 'public-assets' | 'private-assets' | 'social-assets';
 
@@ -42,6 +43,7 @@ export interface UploadContext {
     client_payment_id?: string;
     material_payment_id?: string;
     material_purchase_id?: string;
+    testimonial_id?: string;
   };
   category?: string;
   description?: string;
