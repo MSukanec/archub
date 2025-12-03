@@ -14,6 +14,7 @@ import { useOrganizationMembers } from '@/features/organization'
 import { useCreateGeneralCost } from '../hooks/use-create-general-cost'
 import { useUpdateGeneralCost } from '../hooks/use-update-general-cost'
 import { useGeneralCost } from '../hooks/use-general-cost'
+import { useGeneralCosts } from '../hooks/use-general-costs'
 import { generalCostSchema, type GeneralCostFormData } from '../schemas'
 
 interface GeneralCostFormProps {
@@ -35,6 +36,7 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
   const { data: existingGeneralCost, isLoading } = useGeneralCost(
     mode === 'edit' ? modalData?.generalCostId || null : null
   )
+  const { data: allGeneralCosts = [] } = useGeneralCosts(organizationId || null)
 
   const form = useForm<GeneralCostFormData>({
     resolver: zodResolver(generalCostSchema),
@@ -58,6 +60,23 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
       toast({
         title: 'Error',
         description: 'Faltan datos de organización',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    // Verificar si ya existe un gasto general con el mismo nombre
+    const normalizedName = data.name.trim().toLowerCase()
+    const duplicate = allGeneralCosts.find((gc: any) => {
+      const isSameName = gc.name.trim().toLowerCase() === normalizedName
+      const isDifferentId = mode === 'edit' ? gc.id !== modalData?.generalCostId : true
+      return isSameName && isDifferentId
+    })
+
+    if (duplicate) {
+      toast({
+        title: 'Nombre duplicado',
+        description: `Ya existe un gasto general llamado "${duplicate.name}". Por favor, usa un nombre diferente.`,
         variant: 'destructive'
       })
       return
