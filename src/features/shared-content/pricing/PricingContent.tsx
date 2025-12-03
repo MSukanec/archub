@@ -46,10 +46,10 @@ export function PricingContent({ mode }: PricingContentProps) {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const { data, error } = await supabase
+        // is_active filter removed - handled by frontend BlockedRestricted
+      const { data, error } = await supabase
           .from('plans')
-          .select('id, name, slug, features, billing_type, is_active, monthly_amount, annual_amount')
-          .eq('is_active', true);
+          .select('id, name, slug, features, billing_type, is_active, monthly_amount, annual_amount');
 
         if (error) throw error;
         
@@ -59,6 +59,7 @@ export function PricingContent({ mode }: PricingContentProps) {
           slug: plan.slug,
           features: plan.features || {},
           billing_type: plan.billing_type,
+          is_active: plan.is_active,
           monthly_amount: parseFloat(plan.monthly_amount) || 0,
           annual_amount: parseFloat(plan.annual_amount) || 0
         }));

@@ -6,3 +6,4 @@ export { EmptyStateBlock } from './ui/EmptyStateBlock';
 export { PlanRestricted } from './guards/PlanRestricted';
 export { RoleRestricted } from './guards/RoleRestricted';
 export { ContextRestricted } from './guards/ContextRestricted';
+export { BlockedRestricted } from './guards/BlockedRestricted';

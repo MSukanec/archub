@@ -1385,12 +1385,11 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       
       // 🚀 Execute ALL queries in parallel for maximum speed
       const [coursesResult, enrollmentsResult, progressResult] = await Promise.all([
-        // Get all active courses
+        // Get all courses (is_active check removed - handled by frontend BlockedRestricted)
         authenticatedSupabase
           .from('courses')
           .select('id, slug, title, short_description, is_active, visibility')
           .eq('is_deleted', false)
-          .eq('is_active', true)
           .neq('visibility', 'draft'),
         
         // Get user's enrollments

@@ -10,7 +10,7 @@ export async function fetchCourseLandingBySlug(slug: string) {
     throw new Error('Supabase client not initialized');
   }
 
-  // 1. Fetch course with details
+  // 1. Fetch course with details (is_active check removed - handled by frontend BlockedRestricted)
   const { data: course, error: courseError } = await supabase
     .from('courses')
     .select(`
@@ -18,7 +18,6 @@ export async function fetchCourseLandingBySlug(slug: string) {
       course_details (*)
     `)
     .eq('slug', slug)
-    .eq('is_active', true)
     .eq('visibility', 'public')
     .eq('is_deleted', false)
     .single();
@@ -166,6 +165,7 @@ export async function getAllPublicCourses() {
     throw new Error('Supabase client not initialized');
   }
 
+  // is_active check removed - handled by frontend BlockedRestricted
   const { data: courses, error } = await supabase
     .from('courses')
     .select(`
@@ -174,6 +174,7 @@ export async function getAllPublicCourses() {
       title,
       short_description,
       price,
+      is_active,
       course_details (
         badge_text,
         instructor_name,
@@ -182,7 +183,6 @@ export async function getAllPublicCourses() {
         image_path
       )
     `)
-    .eq('is_active', true)
     .eq('visibility', 'public')
     .eq('is_deleted', false)
     .order('created_at', { ascending: false });

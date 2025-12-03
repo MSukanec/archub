@@ -2,9 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { getPlanConfig } from "../data/plans-config";
-import { ComingSoonRestricted } from "@/components/shared/restrictions/guards/ComingSoonRestricted";
+import { BlockedRestricted } from "@/components/shared/restrictions";
 import type { Plan, BillingPeriod, PricingMode } from "../types";
 
 interface PlanCardProps {
@@ -27,7 +26,6 @@ export function PlanCard({
   onSelect
 }: PlanCardProps) {
   const config = getPlanConfig(plan.name);
-  const isAdmin = useIsAdmin();
   const Icon = config.icon;
   const isPopular = plan.name.toLowerCase() === 'pro';
   const isFree = plan.name.toLowerCase() === 'free';
@@ -56,8 +54,8 @@ export function PlanCard({
     return `Cambiar a ${plan.name}`;
   };
   
-  // Only show as coming soon if NOT admin
-  const isComingSoon = !isAdmin && (plan.name.toLowerCase() === 'pro' || isTeams);
+  // Block if plan is not active (based on is_active field from database)
+  const isBlocked = plan.is_active === false;
 
   const getButtonColor = () => {
     if (isCurrentPlan) return undefined;
@@ -181,21 +179,11 @@ export function PlanCard({
           )}
         </div>
 
-        {isComingSoon && !isCurrentPlan ? (
-          <ComingSoonRestricted>
-            <Button
-              className={cn(
-                "w-full h-11 font-medium rounded-lg",
-                getButtonColor() ? "text-white hover:opacity-90" : ""
-              )}
-              style={getButtonColor() ? { backgroundColor: getButtonColor() } : undefined}
-              variant="default"
-              data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
-            >
-              {getButtonText()}
-            </Button>
-          </ComingSoonRestricted>
-        ) : (
+        <BlockedRestricted
+          isBlocked={isBlocked && !isCurrentPlan}
+          title="Plan no disponible"
+          message="Este plan no está disponible para suscripción en este momento."
+        >
           <Button
             className={cn(
               "w-full h-11 font-medium rounded-lg",
@@ -213,7 +201,7 @@ export function PlanCard({
           >
             {getButtonText()}
           </Button>
-        )}
+        </BlockedRestricted>
 
         <div className="space-y-3 pt-4 border-t border-white/10">
           <div className={cn(

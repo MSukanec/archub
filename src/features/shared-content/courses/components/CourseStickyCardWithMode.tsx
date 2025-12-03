@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { BookOpen, Clock, CheckCircle, MessageCircle, Shield } from 'lucide-react';
-import { ComingSoonRestricted } from '@/components/shared/restrictions/guards/ComingSoonRestricted';
+import { BlockedRestricted } from '@/components/shared/restrictions';
 import type { CoursesMode } from '../types';
 
 interface CourseStickyCardWithModeProps {
@@ -107,27 +107,20 @@ export function CourseStickyCardWithMode({
             </div>
 
             <div className="pt-2">
-              {isEnrolled ? (
+              <BlockedRestricted 
+                isBlocked={!isEnrolled && course.is_active === false}
+                title="Curso no disponible"
+                message="Este curso no está disponible para inscripción en este momento."
+              >
                 <Button 
                   size="lg" 
                   className="w-full text-base font-semibold"
                   onClick={onCTAClick}
-                  data-testid="button-continue"
+                  data-testid={isEnrolled ? "button-continue" : "button-enroll"}
                 >
                   {ctaButtonText}
                 </Button>
-              ) : (
-                <ComingSoonRestricted>
-                  <Button 
-                    size="lg" 
-                    className="w-full text-base font-semibold"
-                    onClick={onCTAClick}
-                    data-testid="button-enroll"
-                  >
-                    {ctaButtonText}
-                  </Button>
-                </ComingSoonRestricted>
-              )}
+              </BlockedRestricted>
             </div>
           </CardContent>
         </Card>

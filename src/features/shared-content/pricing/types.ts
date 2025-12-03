@@ -22,6 +22,7 @@ export interface Plan {
   annual_amount: number;
   features: PlanFeatures;
   billing_type: string;
+  is_active?: boolean;
 }
 
 export interface PlanFeatures {
