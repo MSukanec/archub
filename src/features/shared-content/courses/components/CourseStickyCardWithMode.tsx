@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { BookOpen, Clock, CheckCircle, MessageCircle, Shield } from 'lucide-react';
+import { ComingSoonRestricted } from '@/components/shared/restrictions/guards/ComingSoonRestricted';
 import type { CoursesMode } from '../types';
 
 interface CourseStickyCardWithModeProps {
@@ -106,14 +107,27 @@ export function CourseStickyCardWithMode({
             </div>
 
             <div className="pt-2">
-              <Button 
-                size="lg" 
-                className="w-full text-base font-semibold"
-                onClick={onCTAClick}
-                data-testid={isEnrolled ? "button-continue" : "button-enroll"}
-              >
-                {ctaButtonText}
-              </Button>
+              {isEnrolled ? (
+                <Button 
+                  size="lg" 
+                  className="w-full text-base font-semibold"
+                  onClick={onCTAClick}
+                  data-testid="button-continue"
+                >
+                  {ctaButtonText}
+                </Button>
+              ) : (
+                <ComingSoonRestricted>
+                  <Button 
+                    size="lg" 
+                    className="w-full text-base font-semibold"
+                    onClick={onCTAClick}
+                    data-testid="button-enroll"
+                  >
+                    {ctaButtonText}
+                  </Button>
+                </ComingSoonRestricted>
+              )}
             </div>
           </CardContent>
         </Card>
