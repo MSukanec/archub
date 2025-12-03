@@ -8,6 +8,7 @@ import { DashboardLayout as Layout } from "@/layouts";
 import AdminCourseDataTab from './view/AdminCourseDataTab';
 import AdminCourseContentTab from './view/AdminCourseContentTab';
 import AdminCourseMarketingTab from './view/AdminCourseMarketingTab';
+import AdminCourseTestimonialsTab from './view/AdminCourseTestimonialsTab';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
 
@@ -114,6 +115,11 @@ export default function AdminCourseView() {
       id: 'Contenido del Curso',
       label: 'Contenido del Curso',
       isActive: activeTab === 'Contenido del Curso'
+    },
+    {
+      id: 'Testimonios',
+      label: 'Testimonios',
+      isActive: activeTab === 'Testimonios'
     }
   ];
 
@@ -182,6 +188,8 @@ export default function AdminCourseView() {
         return <AdminCourseMarketingTab courseId={id} />;
       case 'Contenido del Curso':
         return <AdminCourseContentTab courseId={id} modules={modules} lessons={lessons} />;
+      case 'Testimonios':
+        return <AdminCourseTestimonialsTab courseId={id} />;
       default:
         return <AdminCourseDataTab courseId={id} />;
     }
