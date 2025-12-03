@@ -1,0 +1,126 @@
+
+declare
+  replit_url text := 'https://seencel.com/api/email/send';
+  email_subject text;
+  user_email text;
+  user_name text;
+begin
+  --------------------------------------------------------------------
+  -- 1) NUEVO USUARIO REGISTRADO (auth.users)
+  --------------------------------------------------------------------
+  IF TG_TABLE_NAME = 'users' AND TG_TABLE_SCHEMA = 'auth' AND TG_OP = 'INSERT' THEN
+
+    user_email := NEW.email;
+    user_name := coalesce(NEW.raw_user_meta_data->>'full_name', 'Arquitecto');
+
+    email_subject := '¡Bienvenido a Seencel! 🏗️';
+
+    PERFORM extensions.http((
+      'POST',
+      replit_url,
+      ARRAY[extensions.http_header('Content-Type', 'application/json')],
+      'application/json',
+      jsonb_build_object(
+        'to', user_email,
+        'subject', email_subject,
+        'template', 'welcome',
+        'userName', user_name,
+        'notifyAdmin', true
+      )::text
+    )::extensions.http_request);
+
+    RETURN NEW;
+
+  --------------------------------------------------------------------
+  -- 2) NUEVO PAGO COMPLETADO (payments) - PayPal, MP, etc.
+  --------------------------------------------------------------------
+  ELSIF TG_TABLE_NAME = 'payments' AND TG_TABLE_SCHEMA = 'public' AND TG_OP = 'INSERT' THEN
+
+    -- Buscar email del usuario
+    SELECT u.email INTO user_email 
+    FROM public.users u
+    WHERE u.id = NEW.user_id;
+
+    -- Buscar nombre del usuario
+    SELECT coalesce(u.full_name, 'Cliente') INTO user_name
+    FROM public.users u
+    WHERE u.id = NEW.user_id;
+
+    -- Determinar nombre del producto
+    DECLARE
+      v_product_name text := 'Producto';
+    BEGIN
+      IF NEW.product_type = 'course' AND NEW.course_id IS NOT NULL THEN
+        SELECT c.title INTO v_product_name
+        FROM courses c
+        WHERE c.id = NEW.course_id;
+      ELSIF NEW.product_type = 'subscription' THEN
+        v_product_name := 'Suscripción';
+      END IF;
+
+      email_subject := 'Confirmación de Pago: ' || coalesce(v_product_name, 'Producto');
+
+      PERFORM extensions.http((
+        'POST',
+        replit_url,
+        ARRAY[extensions.http_header('Content-Type', 'application/json')],
+        'application/json',
+        jsonb_build_object(
+          'to', user_email,
+          'subject', email_subject,
+          'template', 'purchase',
+          'userName', user_name,
+          'courseName', coalesce(v_product_name, 'Producto'),
+          'amount', '$' || NEW.amount || ' ' || NEW.currency,
+          'transactionId', NEW.id::text,
+          'notifyAdmin', true
+        )::text
+      )::extensions.http_request);
+    END;
+
+    RETURN NEW;
+
+  --------------------------------------------------------------------
+  -- 3) NUEVA TRANSFERENCIA BANCARIA (bank_transfer_payments)
+  --    SOLO notifica al admin
+  --------------------------------------------------------------------
+  ELSIF TG_TABLE_NAME = 'bank_transfer_payments' AND TG_TABLE_SCHEMA = 'public' AND TG_OP = 'INSERT' THEN
+
+    -- Buscar email del usuario
+    SELECT u.email INTO user_email
+    FROM public.users u 
+    WHERE u.id = NEW.user_id;
+
+    user_name := coalesce(NEW.payer_name, 'Cliente');
+
+    DECLARE
+      v_course_name text := 'Curso';
+    BEGIN
+      SELECT c.title INTO v_course_name
+      FROM course_prices cp
+      JOIN courses c ON c.id = cp.course_id
+      WHERE cp.id = NEW.course_price_id;
+
+      -- Endpoint especial que SOLO notifica al admin
+      PERFORM extensions.http((
+        'POST',
+        'https://seencel.com/api/email/admin-bank-transfer-alert',
+        ARRAY[extensions.http_header('Content-Type', 'application/json')],
+        'application/json',
+        jsonb_build_object(
+          'userName', user_name,
+          'userEmail', user_email,
+          'courseName', coalesce(v_course_name, 'Curso'),
+          'amount', NEW.amount::text,
+          'currency', NEW.currency,
+          'transferId', NEW.id::text
+        )::text
+      )::extensions.http_request);
+    END;
+
+    RETURN NEW;
+
+  END IF;
+
+  RETURN NEW;
+END;
