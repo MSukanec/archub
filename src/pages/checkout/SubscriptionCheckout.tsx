@@ -32,6 +32,7 @@ import {
   ExternalLink,
   Tag,
   X,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getApiBase } from "@/utils/apiBase";
@@ -998,6 +999,8 @@ export default function SubscriptionCheckout() {
       };
     }
     
+    const hasPayPalProration = prorationData?.hasActiveSubscription && (prorationData?.savings?.usd ?? 0) > 0;
+    
     if (validatedCoupon) {
       const couponDiscountUSD = validatedCoupon.discount_usd;
       const finalPriceUSD = Math.max(0, basePrice - couponDiscountUSD);
@@ -1011,7 +1014,8 @@ export default function SubscriptionCheckout() {
         prorationDiscountAmount: 0,
         hasCouponDiscount: true,
         couponDiscountAmount: couponDiscountUSD,
-        isFullDiscount: validatedCoupon.is_full_discount || finalPriceUSD === 0
+        isFullDiscount: validatedCoupon.is_full_discount || finalPriceUSD === 0,
+        paypalProrationNote: hasPayPalProration
       };
     }
     
@@ -1024,7 +1028,8 @@ export default function SubscriptionCheckout() {
       prorationDiscountAmount: 0,
       hasCouponDiscount: false,
       couponDiscountAmount: 0,
-      isFullDiscount: false
+      isFullDiscount: false,
+      paypalProrationNote: hasPayPalProration
     };
   }, [planData, billingPeriod, selectedMethod, exchangeRate, prorationData, validatedCoupon]);
 
@@ -1443,6 +1448,22 @@ export default function SubscriptionCheckout() {
                         <p className="text-xs text-green-600 dark:text-green-500">
                           Te quedan {prorationData.credit.daysRemaining} días de {prorationData.currentPlan?.name}. 
                           Este crédito se descuenta del precio del nuevo plan.
+                        </p>
+                      </div>
+                    )}
+
+                    {prorationData?.credit && prorationData.credit.daysRemaining > 0 && selectedMethod === 'paypal' && (
+                      <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg space-y-2">
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0" />
+                          <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+                            Prorrateo no disponible con PayPal
+                          </p>
+                        </div>
+                        <p className="text-xs text-amber-600 dark:text-amber-500">
+                          Tu crédito de USD ${prorationData.savings.usd?.toFixed(2)} por los {prorationData.credit.daysRemaining} días 
+                          restantes de {prorationData.currentPlan?.name} no puede aplicarse automáticamente con PayPal. 
+                          Para obtener el precio prorrateado, usá Mercado Pago.
                         </p>
                       </div>
                     )}
