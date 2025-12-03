@@ -214,24 +214,24 @@ export function GlobalAnnouncement() {
             {/* Buttons - Inline a la derecha */}
             {(activeAnnouncement.primary_button_text || activeAnnouncement.secondary_button_text) && (
               <div className="flex items-center gap-2 flex-shrink-0">
-                {/* Secundario PRIMERO (izquierda) */}
+                {/* Secundario PRIMERO (izquierda) - borde y texto blanco */}
                 {activeAnnouncement.secondary_button_text && activeAnnouncement.secondary_button_url && (
                   <Button
                     size="sm"
-                    variant="secondary"
+                    variant="outline"
                     onClick={() => window.open(normalizeUrl(activeAnnouncement.secondary_button_url!), '_blank')}
-                    className="h-7 text-xs rounded-md"
+                    className="h-8 px-4 text-xs font-medium bg-transparent border-white text-white hover:bg-white/10"
                   >
                     {activeAnnouncement.secondary_button_text}
                   </Button>
                 )}
-                {/* Primario DESPUÉS (derecha) */}
+                {/* Primario DESPUÉS (derecha) - estilo default del tema */}
                 {activeAnnouncement.primary_button_text && activeAnnouncement.primary_button_url && (
                   <Button
                     size="sm"
                     variant="default"
                     onClick={() => window.open(normalizeUrl(activeAnnouncement.primary_button_url!), '_blank')}
-                    className="h-7 text-xs rounded-md"
+                    className="h-8 px-4 text-xs font-medium"
                   >
                     {activeAnnouncement.primary_button_text}
                   </Button>
