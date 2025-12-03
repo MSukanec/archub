@@ -1341,31 +1341,6 @@ export default function SubscriptionCheckout() {
                     </div>
                   </div>
 
-                  {selectedMethod === "mercadopago" && (
-                    <div className="ml-8 p-4 bg-muted/30 rounded-lg border border-border/50 space-y-3">
-                      <div className="flex items-start gap-2">
-                        <div className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />
-                        <p className="text-sm text-muted-foreground">
-                          <span className="font-medium text-foreground">Importante:</span> El email debe coincidir con tu cuenta de Mercado Pago para poder completar el pago.
-                        </p>
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="mercadopago-email" className="text-sm font-medium">
-                          Email de Mercado Pago
-                        </Label>
-                        <Input
-                          id="mercadopago-email"
-                          type="email"
-                          value={mercadopagoEmail}
-                          onChange={(e) => setMercadopagoEmail(e.target.value)}
-                          placeholder="tu-email@ejemplo.com"
-                          className="bg-background"
-                          data-testid="input-mercadopago-email"
-                        />
-                      </div>
-                    </div>
-                  )}
-
                   <div
                     className={cn(
                       "relative flex items-start space-x-4 rounded-lg border-2 p-4 cursor-pointer transition-all hover:border-accent/50",
@@ -1692,6 +1667,31 @@ export default function SubscriptionCheckout() {
                         </label>
                       </div>
                     </div>
+
+                    {selectedMethod === "mercadopago" && (
+                      <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg mt-4">
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />
+                          <p className="text-sm text-amber-800 dark:text-amber-200">
+                            <span className="font-semibold">Importante:</span> El email debe coincidir con tu cuenta de Mercado Pago para completar el pago.
+                          </p>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="mercadopago-email" className="text-sm font-medium text-amber-900 dark:text-amber-100">
+                            Email de Mercado Pago
+                          </Label>
+                          <Input
+                            id="mercadopago-email"
+                            type="email"
+                            value={mercadopagoEmail}
+                            onChange={(e) => setMercadopagoEmail(e.target.value)}
+                            placeholder="tu-email@ejemplo.com"
+                            className="bg-white dark:bg-background border-amber-300 dark:border-amber-700 focus:border-amber-500 focus:ring-amber-500"
+                            data-testid="input-mercadopago-email"
+                          />
+                        </div>
+                      </div>
+                    )}
 
                     <Button
                       onClick={handleContinue}
