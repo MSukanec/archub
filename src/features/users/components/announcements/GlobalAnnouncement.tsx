@@ -10,7 +10,8 @@ import { cn } from '@/lib/utils';
 import type { GlobalAnnouncement as AnnouncementType } from '@shared/schema';
 
 const STORAGE_KEY = 'dismissed-announcements';
-const ANNOUNCEMENT_HEIGHT = 44;
+const ANNOUNCEMENT_HEIGHT = 44; // Desktop height
+const ANNOUNCEMENT_HEIGHT_MOBILE = 80; // Approximate mobile height (text + buttons stacked)
 
 // Context type
 interface AnnouncementContextType {
@@ -182,6 +183,8 @@ export function GlobalAnnouncement() {
 
   if (!activeAnnouncement) return null;
 
+  const hasButtons = activeAnnouncement.primary_button_text || activeAnnouncement.secondary_button_text;
+
   return (
     <AnimatePresence>
       <motion.div
@@ -191,54 +194,70 @@ export function GlobalAnnouncement() {
         className="fixed top-0 left-0 right-0 w-full z-[100]"
         style={{
           background: 'linear-gradient(to right, #71c932, #b8ad1a)',
-          height: '44px'
         }}
       >
-        <div className="w-full py-1.5" style={{ paddingLeft: 'min(100px, 5vw)', paddingRight: 'min(100px, 5vw)' }}>
-          <div className="flex items-center gap-3">
-            {/* Icon - Centrado verticalmente */}
-            <div className="flex-shrink-0 text-white">
-              {getTypeIcon(activeAnnouncement.type)}
-            </div>
+        {/* Container con padding responsive */}
+        <div className="relative w-full px-4 py-2 md:py-1.5 md:px-6 lg:px-[min(100px,5vw)]">
+          
+          {/* Close button - Posición absoluta en esquina superior derecha */}
+          <button
+            onClick={() => handleDismiss(activeAnnouncement.id)}
+            className="absolute top-2 right-3 p-1 rounded-md hover:bg-white/10 transition-colors text-white z-10"
+            aria-label="Cerrar anuncio"
+            data-testid="button-close-announcement"
+          >
+            <X className="h-4 w-4" />
+          </button>
 
-            {/* Content - Una sola línea */}
-            <div className="flex-1 min-w-0 flex items-center gap-2">
-              <p className="text-sm text-white leading-tight line-clamp-1">
-                {activeAnnouncement.title && (
-                  <span className="font-semibold">
-                    {activeAnnouncement.title}
+          {/* Layout: Columna en mobile, fila en desktop */}
+          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 pr-8 md:pr-6">
+            
+            {/* Fila superior mobile / Izquierda desktop: Icono + Texto */}
+            <div className="flex items-start md:items-center gap-2 md:gap-3 flex-1 min-w-0">
+              {/* Icon */}
+              <div className="flex-shrink-0 text-white mt-0.5 md:mt-0">
+                {getTypeIcon(activeAnnouncement.type)}
+              </div>
+
+              {/* Content - Texto completo en mobile, una línea en desktop */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-white leading-snug md:leading-tight md:line-clamp-1">
+                  {activeAnnouncement.title && (
+                    <span className="font-semibold">
+                      {activeAnnouncement.title}
+                    </span>
+                  )}
+                  {activeAnnouncement.title && ' '}
+                  <span className="text-gray-100">
+                    {activeAnnouncement.message}
                   </span>
-                )}
-                {activeAnnouncement.title && ' '}
-                <span className="text-gray-100">
-                  {activeAnnouncement.message}
-                </span>
-                {activeAnnouncement.link_text && activeAnnouncement.link_url && (
-                  <>
-                    {' '}
-                    <a
-                      href={normalizeUrl(activeAnnouncement.link_url)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline hover:opacity-80 transition-opacity font-medium"
-                    >
-                      {activeAnnouncement.link_text}
-                    </a>
-                  </>
-                )}
-              </p>
+                  {activeAnnouncement.link_text && activeAnnouncement.link_url && (
+                    <>
+                      {' '}
+                      <a
+                        href={normalizeUrl(activeAnnouncement.link_url)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:opacity-80 transition-opacity font-medium"
+                      >
+                        {activeAnnouncement.link_text}
+                      </a>
+                    </>
+                  )}
+                </p>
+              </div>
             </div>
 
-            {/* Buttons - Inline a la derecha */}
-            {(activeAnnouncement.primary_button_text || activeAnnouncement.secondary_button_text) && (
-              <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Botones - Debajo del texto en mobile, a la derecha en desktop */}
+            {hasButtons && (
+              <div className="flex items-center gap-2 flex-shrink-0 ml-7 md:ml-0">
                 {/* Secundario PRIMERO (izquierda) - borde y texto blanco */}
                 {activeAnnouncement.secondary_button_text && activeAnnouncement.secondary_button_url && (
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => handleButtonClick(activeAnnouncement.secondary_button_url!)}
-                    className="h-8 px-4 text-xs font-medium rounded-lg bg-transparent border-white text-white hover:bg-white/10 hover:text-white"
+                    className="h-7 md:h-8 px-3 md:px-4 text-xs font-medium rounded-lg bg-transparent border-white text-white hover:bg-white/10 hover:text-white"
                   >
                     {activeAnnouncement.secondary_button_text}
                   </Button>
@@ -249,23 +268,13 @@ export function GlobalAnnouncement() {
                     size="sm"
                     variant="default"
                     onClick={() => handleButtonClick(activeAnnouncement.primary_button_url!)}
-                    className="h-8 px-4 text-xs font-medium"
+                    className="h-7 md:h-8 px-3 md:px-4 text-xs font-medium"
                   >
                     {activeAnnouncement.primary_button_text}
                   </Button>
                 )}
               </div>
             )}
-
-            {/* Close button */}
-            <button
-              onClick={() => handleDismiss(activeAnnouncement.id)}
-              className="flex-shrink-0 p-1 rounded-md hover:bg-white/10 transition-colors text-white"
-              aria-label="Cerrar anuncio"
-              data-testid="button-close-announcement"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
         </div>
       </motion.div>
@@ -273,5 +282,5 @@ export function GlobalAnnouncement() {
   );
 }
 
-// Export height constant for layout compensation
-export { ANNOUNCEMENT_HEIGHT };
+// Export height constants for layout compensation
+export { ANNOUNCEMENT_HEIGHT, ANNOUNCEMENT_HEIGHT_MOBILE };

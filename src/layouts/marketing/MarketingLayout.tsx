@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
-import { GlobalAnnouncement, AnnouncementProvider, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT } from "@/features/users/components/announcements/GlobalAnnouncement";
+import { GlobalAnnouncement, AnnouncementProvider, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, ANNOUNCEMENT_HEIGHT_MOBILE } from "@/features/users/components/announcements/GlobalAnnouncement";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface SEOProps {
   title: string;
@@ -52,6 +53,8 @@ function MarketingLayoutContent({
 }: MarketingLayoutProps) {
   const [location] = useLocation();
   const { hasActiveAnnouncement } = useAnnouncementBanner();
+  const isMobile = useMobile();
+  const announcementHeight = isMobile ? ANNOUNCEMENT_HEIGHT_MOBILE : ANNOUNCEMENT_HEIGHT;
 
   // Handle hash scrolling after SPA navigation
   useEffect(() => {
@@ -172,7 +175,7 @@ function MarketingLayoutContent({
         <div 
           className="min-h-screen overflow-x-hidden"
           style={{
-            paddingTop: hasActiveAnnouncement ? `${ANNOUNCEMENT_HEIGHT}px` : '0',
+            paddingTop: hasActiveAnnouncement ? `${announcementHeight}px` : '0',
             transition: 'padding-top 0.2s ease-out'
           }}
         >
@@ -183,7 +186,7 @@ function MarketingLayoutContent({
             <div 
               className="hidden lg:block fixed z-40"
               style={{
-                top: hasActiveAnnouncement ? `calc(96px + ${ANNOUNCEMENT_HEIGHT}px)` : '96px',
+                top: hasActiveAnnouncement ? `calc(96px + ${announcementHeight}px)` : '96px',
                 width: '368px',
                 right: 'max(32px, calc((100vw - 1472px) / 2))',
                 transition: 'top 0.2s ease-out'
@@ -213,7 +216,7 @@ function MarketingLayoutContent({
       <div 
         className="min-h-screen bg-background flex flex-col overflow-x-hidden"
         style={{
-          paddingTop: hasActiveAnnouncement ? `${ANNOUNCEMENT_HEIGHT}px` : '0',
+          paddingTop: hasActiveAnnouncement ? `${announcementHeight}px` : '0',
           transition: 'padding-top 0.2s ease-out'
         }}
       >

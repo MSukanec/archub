@@ -26,7 +26,7 @@ import { OrganizationRemovedModal } from "@/features/organization/modals/Organiz
 import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 import { useProjectReadOnly } from "@/hooks/use-project-readonly";
 import { ProjectReadOnlyProvider } from "@/contexts/ProjectReadOnlyContext";
-import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, AnnouncementProvider } from "@/features/users/components/announcements/GlobalAnnouncement";
+import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, ANNOUNCEMENT_HEIGHT_MOBILE, AnnouncementProvider } from "@/features/users/components/announcements/GlobalAnnouncement";
 import { useLocation } from "wouter";
 import { type WidthProp, resolveWidthMode, getContainerClasses, getContentPaddingClasses } from "./layoutWidth";
 
@@ -216,7 +216,9 @@ function LayoutContent({
       <div 
         className={isMobile ? "min-h-screen flex flex-col" : "h-screen flex flex-col overflow-hidden"}
         style={{
-          paddingTop: hasActiveAnnouncement ? `${ANNOUNCEMENT_HEIGHT}px` : '0',
+          paddingTop: hasActiveAnnouncement 
+            ? `${isMobile ? ANNOUNCEMENT_HEIGHT_MOBILE : ANNOUNCEMENT_HEIGHT}px` 
+            : '0',
           transition: 'padding-top 0.2s ease-out'
         }}
       >
