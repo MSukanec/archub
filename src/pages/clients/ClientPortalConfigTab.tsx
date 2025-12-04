@@ -100,6 +100,12 @@ export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps)
       
       return { previousSettings };
     },
+    onSuccess: () => {
+      toast({
+        title: 'Guardado',
+        duration: 1500,
+      });
+    },
     onError: (error: Error, _variables, context) => {
       if (context?.previousSettings) {
         queryClient.setQueryData(queryKey, context.previousSettings);
