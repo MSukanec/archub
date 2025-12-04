@@ -69,7 +69,8 @@ import {
   Globe,
   HandHeart,
   FlaskConical,
-  Award
+  Award,
+  Eye
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -528,6 +529,21 @@ export function LeftSidebar() {
                           navigate('/community/dashboard');
                         },
                         shouldRender: () => true,
+                        wrapper: (children: React.ReactNode) => (
+                          <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>{children}</RoleRestricted>
+                        ),
+                      },
+                      {
+                        id: 'client-portal' as const,
+                        icon: <Eye className="h-5 w-5" />,
+                        testId: 'button-sidebar-client-portal',
+                        onClick: () => {
+                          if (!isAdmin) return;
+                          if (selectedProjectId) {
+                            window.open(`/portal/${selectedProjectId}`, '_blank');
+                          }
+                        },
+                        shouldRender: () => hasProjects && !!selectedProjectId,
                         wrapper: (children: React.ReactNode) => (
                           <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>{children}</RoleRestricted>
                         ),

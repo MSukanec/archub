@@ -10,8 +10,8 @@ interface AuthGuardProps {
 }
 
 // Define route types for clarity
-const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password', '/privacy'];
-const PUBLIC_ROUTE_PREFIXES = ['/cursos'];
+const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password', '/privacy', '/precios', '/founders', '/contact'];
+const PUBLIC_ROUTE_PREFIXES = ['/cursos', '/portal'];
 const ONBOARDING_ROUTES = ['/onboarding', '/select-mode'];
 // Routes where authenticated users should be redirected to /home
 const AUTH_REDIRECT_ROUTES = ['/login', '/register', '/forgot-password'];

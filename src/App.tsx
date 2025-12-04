@@ -146,17 +146,24 @@ function Router() {
   return (
     <AuthGuard>
       <Switch>
+        {/* Client Portal Route - Public via AuthGuard config */}
+        <Route path="/portal/:projectId">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <ClientPortal />
+          </Suspense>
+        </Route>
+
         {/* Public Routes */}
         <Route path="/" component={Landing} />
-        <Route path="/precios" component={PricingPlanPublic} />
-        <Route path="/founders" component={FoundersPage} />
-        <Route path="/cursos" component={CourseCatalog} />
-        <Route path="/cursos/:slug" component={CourseLanding} />
-        <Route path="/privacy" component={Privacy} />
-        <Route path="/contact" component={Contact} />
-        <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
-        <Route path="/forgot-password" component={ForgotPassword} />
+          <Route path="/precios" component={PricingPlanPublic} />
+          <Route path="/founders" component={FoundersPage} />
+          <Route path="/cursos" component={CourseCatalog} />
+          <Route path="/cursos/:slug" component={CourseLanding} />
+          <Route path="/privacy" component={Privacy} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
+          <Route path="/forgot-password" component={ForgotPassword} />
 
         {/* Onboarding and Mode Selection Routes */}
         <Route path="/onboarding" component={Onboarding} />
@@ -442,13 +449,6 @@ function Router() {
         <Route path="/lab/contacts">
           <Suspense fallback={<LazyLoadFallback />}>
             <ContactsLabPage />
-          </Suspense>
-        </Route>
-
-        {/* Client Portal Routes - Portal para clientes externos (sin auth por ahora) */}
-        <Route path="/portal/:projectId">
-          <Suspense fallback={<LazyLoadFallback />}>
-            <ClientPortal />
           </Suspense>
         </Route>
 
