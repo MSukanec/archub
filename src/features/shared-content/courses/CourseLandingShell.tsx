@@ -108,36 +108,53 @@ interface ClientsSectionProps {
   images: { id: string; url: string }[];
   title?: string;
   subtitle?: string;
+  description?: string;
 }
 
-function ClientsSection({ images, title, subtitle }: ClientsSectionProps) {
+function ClientsSection({ 
+  images, 
+  title = "TRABAJOS REALIZADOS",
+  subtitle = "ALGUNOS DE NUESTROS CLIENTES",
+  description = "Nuestro enfoque no es solo teórico: está basado en la práctica profesional real. En esta sección podés ver algunos de los proyectos desarrollados por nuestro estudio y por alumnos que aplicaron directamente lo aprendido en el curso. Modelados completos, documentación ejecutiva, detalles BIM y cómputos generados íntegramente en ArchiCAD."
+}: ClientsSectionProps) {
   const carouselItems = images.map((img) => ({
     id: img.id,
     src: img.url,
-    alt: 'Cliente',
+    alt: 'Proyecto realizado',
   }));
 
   return (
-    <section className="py-16 bg-muted/30" data-testid="section-clients">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="text-center space-y-4">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            {title || 'Nuestros Clientes'}
-          </h2>
-          {subtitle && (
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              {subtitle}
-            </p>
-          )}
+    <section className="py-16 sm:py-20" data-testid="section-clients">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-0">
+          <div className="lg:col-span-3 space-y-12">
+            <div className="mb-12 space-y-4 text-left">
+              <p className="text-xs sm:text-sm md:text-base uppercase tracking-wide font-semibold text-accent dark:text-accent">
+                {subtitle}
+              </p>
+              <h2 className="text-3xl sm:text-5xl lg:text-7xl font-bold uppercase tracking-tight leading-tight text-foreground">
+                {title}
+              </h2>
+              <p className="text-sm sm:text-base lg:text-lg max-w-3xl leading-relaxed text-muted-foreground">
+                Nuestro enfoque no es solo teórico: está basado en la práctica profesional real.
+              </p>
+              <p className="text-sm sm:text-base lg:text-lg max-w-3xl leading-relaxed text-muted-foreground">
+                En esta sección podés ver algunos de los <span className="text-accent font-medium">proyectos desarrollados por nuestro estudio</span> y por alumnos que aplicaron directamente lo aprendido en el curso. Modelados completos, documentación ejecutiva, detalles BIM y cómputos generados íntegramente en ArchiCAD.
+              </p>
+            </div>
+          </div>
+          <div className="hidden lg:block" />
         </div>
-        
+      </div>
+      
+      <div className="w-full overflow-hidden mt-8">
         <InfiniteCarousel
           items={carouselItems}
           direction="left"
-          speed={40}
-          height={120}
-          visibleItems={6}
-          gap={16}
+          speed={30}
+          height={280}
+          visibleItems={5}
+          gap={0}
           pauseOnHover={true}
         />
       </div>
