@@ -152,7 +152,7 @@ function ClientsSection({
           items={carouselItems}
           direction="left"
           speed={30}
-          height={280}
+          height={700}
           visibleItems={5}
           gap={0}
           pauseOnHover={true}
