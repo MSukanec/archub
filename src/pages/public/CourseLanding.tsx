@@ -154,6 +154,7 @@ export default function CourseLanding() {
         progressPercentage={progressPercentage}
         onCTAClick={handleCTAClick}
         ctaButtonText={ctaButtonText}
+        clientGallery={data.clientGallery}
       />
       
       <Footer />
