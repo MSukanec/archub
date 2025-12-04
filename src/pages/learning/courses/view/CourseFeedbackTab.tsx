@@ -35,7 +35,12 @@ export default function CourseFeedbackTab({ courseId }: CourseFeedbackTabProps) 
   const createFeedbackMutation = useMutation({
     mutationFn: async (data: { content: string; rating: number; author_name: string }) => {
       const response = await apiRequest('POST', `/api/courses/${courseId}/feedback`, data);
-      return response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error al enviar valoración');
+      }
+      const text = await response.text();
+      return text ? JSON.parse(text) : null;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/courses/${courseId}/my-feedback`] });
@@ -58,7 +63,12 @@ export default function CourseFeedbackTab({ courseId }: CourseFeedbackTabProps) 
   const deleteFeedbackMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest('DELETE', `/api/courses/${courseId}/feedback`);
-      return response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error al eliminar valoración');
+      }
+      const text = await response.text();
+      return text ? JSON.parse(text) : null;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/courses/${courseId}/my-feedback`] });
