@@ -10,7 +10,7 @@ import { useAutoSave } from '@/hooks/useAutoSave';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info, GraduationCap, FileText, Palette, Search, HelpCircle, Plus, Pencil, Trash2, Upload, Users, X, Loader2 } from 'lucide-react';
 import { CourseFaqFormModal } from '@/features/learning';
-import { uploadMediaFileV2 } from '@/features/media/services/uploadMediaFileV2';
+import { uploadFile } from '@/lib/storage';
 import type { LandingSections, LandingSection, CourseFaq } from '@shared/schema';
 
 interface ClientGalleryImage {
@@ -269,11 +269,12 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           throw new Error(`${file.name} no es una imagen válida`);
         }
         
-        return uploadMediaFileV2({
-          file,
+        return uploadFile(file, {
+          entity: 'course_client_gallery',
           course_id: courseId,
-          bucket: 'public-assets',
-          visibility: 'public',
+          link_to: {
+            course_id: courseId
+          },
           category: 'client_gallery',
           description: file.name
         });
