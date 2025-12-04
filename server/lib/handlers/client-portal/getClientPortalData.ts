@@ -203,6 +203,8 @@ export async function getClientPortalData(
   };
 
   if (selectedClient) {
+    console.log('[ClientPortal] Selected client:', selectedClient.id, 'project_client_id:', selectedClient.project_client_id);
+    
     const { data: commitmentData, error: commitmentError } = await supabase
       .from('client_commitments')
       .select(`
@@ -215,7 +217,7 @@ export async function getClientPortalData(
         )
       `)
       .eq('project_id', projectId)
-      .eq('client_id', selectedClient.id)
+      .eq('client_id', selectedClient.project_client_id)
       .eq('organization_id', organizationId)
       .eq('is_deleted', false)
       .maybeSingle();
@@ -290,7 +292,7 @@ export async function getClientPortalData(
         )
       `)
       .eq('project_id', projectId)
-      .eq('client_id', selectedClient.id)
+      .eq('client_id', selectedClient.project_client_id)
       .eq('organization_id', organizationId)
       .eq('status', 'confirmed')
       .order('payment_date', { ascending: false });
