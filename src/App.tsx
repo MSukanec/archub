@@ -95,6 +95,9 @@ import GeneralCosts from "@/pages/general-costs/GeneralCosts";
 import Community from "@/pages/community/Community";
 import CommunityMap from "@/pages/community/CommunityMap";
 
+// Client Portal Pages (Lazy Loaded - para clientes externos)
+const ClientPortal = lazy(() => import("@/pages/client-portal/ClientPortal"));
+
 // Learning Pages (Lazy Loaded - incluye reproductor Vimeo pesado)
 const LearningDashboard = lazy(() => import("@/pages/learning/dashboard/LearningDashboard"));
 const CourseList = lazy(() => import("@/pages/learning/courses/CourseList"));
@@ -439,6 +442,13 @@ function Router() {
         <Route path="/lab/contacts">
           <Suspense fallback={<LazyLoadFallback />}>
             <ContactsLabPage />
+          </Suspense>
+        </Route>
+
+        {/* Client Portal Routes - Portal para clientes externos (sin auth por ahora) */}
+        <Route path="/portal/:projectId">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <ClientPortal />
           </Suspense>
         </Route>
 
