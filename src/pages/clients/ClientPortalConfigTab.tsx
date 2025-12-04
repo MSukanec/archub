@@ -1,8 +1,7 @@
-import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Building2, Calendar, Receipt, BookOpen, Settings, Info, Loader2 } from 'lucide-react';
+import { Building2, Calendar, Receipt, BookOpen, Settings, Info, Check } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -61,9 +60,10 @@ interface ClientPortalConfigTabProps {
 
 export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps) {
   const { toast } = useToast();
+  const queryKey = ['/api/client-portal', projectId, 'config'];
 
   const { data: settings, isLoading, error } = useQuery<PortalSettings>({
-    queryKey: ['/api/client-portal', projectId, 'config'],
+    queryKey,
     queryFn: async () => {
       const response = await apiRequest('GET', `/api/client-portal/${projectId}/config`);
       return response.json();
@@ -87,19 +87,31 @@ export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps)
       const response = await apiRequest('PUT', `/api/client-portal/${projectId}/config`, fullSettings);
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/client-portal', projectId, 'config'] });
-      toast({
-        title: 'Configuración guardada',
-        description: 'Los cambios se aplicarán inmediatamente en el portal.',
-      });
+    onMutate: async (newSettings) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousSettings = queryClient.getQueryData<PortalSettings>(queryKey);
+      
+      if (previousSettings) {
+        queryClient.setQueryData<PortalSettings>(queryKey, {
+          ...previousSettings,
+          ...newSettings,
+        });
+      }
+      
+      return { previousSettings };
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousSettings) {
+        queryClient.setQueryData(queryKey, context.previousSettings);
+      }
       toast({
         title: 'Error al guardar',
         description: error.message || 'No se pudo guardar la configuración.',
         variant: 'destructive',
       });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -151,7 +163,9 @@ export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps)
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             Secciones del Portal
-            {updateMutation.isPending && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+            {updateMutation.isSuccess && !updateMutation.isPending && (
+              <Check className="h-4 w-4 text-green-500" />
+            )}
           </CardTitle>
           <CardDescription>
             Activa o desactiva las secciones que los clientes podrán ver en su portal.
@@ -185,7 +199,6 @@ export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps)
                   id={`section-${section.id}`}
                   checked={settings[section.id]}
                   onCheckedChange={(checked) => handleToggle(section.id, checked)}
-                  disabled={updateMutation.isPending}
                   data-testid={`switch-portal-section-${section.id}`}
                 />
               </div>
@@ -215,7 +228,6 @@ export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps)
               id="show-amounts"
               checked={settings.show_amounts}
               onCheckedChange={(checked) => handleToggle('show_amounts', checked)}
-              disabled={updateMutation.isPending}
               data-testid="switch-portal-show-amounts"
             />
           </div>
@@ -233,7 +245,6 @@ export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps)
               id="show-progress"
               checked={settings.show_progress}
               onCheckedChange={(checked) => handleToggle('show_progress', checked)}
-              disabled={updateMutation.isPending}
               data-testid="switch-portal-show-progress"
             />
           </div>
@@ -251,7 +262,6 @@ export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps)
               id="allow-comments"
               checked={settings.allow_comments}
               onCheckedChange={(checked) => handleToggle('allow_comments', checked)}
-              disabled={updateMutation.isPending}
               data-testid="switch-portal-allow-comments"
             />
           </div>
