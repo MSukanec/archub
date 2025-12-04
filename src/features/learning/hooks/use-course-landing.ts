@@ -27,6 +27,7 @@ export function useCourseLanding(slug: string) {
         faqs: rawData.faqs,
         testimonials: rawData.testimonials,
         stats,
+        clientGallery: rawData.clientGallery,
       };
     },
     enabled: !!slug,
