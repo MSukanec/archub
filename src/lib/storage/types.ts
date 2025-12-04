@@ -3,6 +3,7 @@ export type EntityType =
   | 'org_logo' 
   | 'course_cover_public'
   | 'course_module_image'
+  | 'course_client_gallery'
   | 'ui_asset'
   | 'invoice'
   | 'budget'
