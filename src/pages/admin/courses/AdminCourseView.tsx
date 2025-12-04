@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
-import { BookOpen, FolderPlus, FileVideo } from 'lucide-react';
+import { BookOpen, FolderPlus, FileVideo, Plus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
@@ -100,6 +100,52 @@ export default function AdminCourseView() {
     openModal('lesson', { courseId: id });
   };
 
+  const handleCreateTestimonial = () => {
+    if (!id) return;
+    openModal('testimonial', { courseId: id });
+  };
+
+  const getHeaderActions = () => {
+    if (activeTab === 'Contenido del Curso') {
+      return [
+        <Button
+          key="create-module"
+          onClick={handleCreateModule}
+          className="h-8 px-3 text-xs"
+          data-testid="button-create-module"
+        >
+          <FolderPlus className="w-4 h-4 mr-1" />
+          Agregar Módulo
+        </Button>,
+        <Button
+          key="create-lesson"
+          onClick={handleCreateLesson}
+          className="h-8 px-3 text-xs"
+          data-testid="button-create-lesson"
+        >
+          <FileVideo className="w-4 h-4 mr-1" />
+          Agregar Lección
+        </Button>
+      ];
+    }
+    
+    if (activeTab === 'Testimonios') {
+      return [
+        <Button
+          key="create-testimonial"
+          onClick={handleCreateTestimonial}
+          className="h-8 px-3 text-xs"
+          data-testid="button-create-testimonial"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Agregar Testimonio
+        </Button>
+      ];
+    }
+    
+    return [];
+  };
+
   const headerTabs = [
     {
       id: 'Datos del Curso',
@@ -133,26 +179,7 @@ export default function AdminCourseView() {
     isViewMode: true,
     tabs: headerTabs,
     onTabChange: setActiveTab,
-    actions: [
-      <Button
-        key="create-module"
-        onClick={handleCreateModule}
-        className="h-8 px-3 text-xs"
-        data-testid="button-create-module"
-      >
-        <FolderPlus className="w-4 h-4 mr-1" />
-        Agregar Módulo
-      </Button>,
-      <Button
-        key="create-lesson"
-        onClick={handleCreateLesson}
-        className="h-8 px-3 text-xs"
-        data-testid="button-create-lesson"
-      >
-        <FileVideo className="w-4 h-4 mr-1" />
-        Agregar Lección
-      </Button>
-    ]
+    actions: getHeaderActions()
   };
 
   if (isLoading) {
