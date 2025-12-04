@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Receipt, Plus, Home, Bell, Search, Filter } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Plus, Home, Bell, Search, Filter, ExternalLink } from 'lucide-react'
 import { LuHandshake } from 'react-icons/lu'
 import { DashboardLayout as Layout } from "@/layouts"
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -10,6 +10,7 @@ import ClientObligationsTab from './ClientObligationsTab'
 import ClientPaymentsTab from './ClientPaymentsTab'
 import ClientScheduleTab from './ClientScheduleTab'
 import ClientSettingsTab from './ClientSettingsTab'
+import { ClientPortalConfigTab } from './ClientPortalConfigTab'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
@@ -123,6 +124,11 @@ export function Clients() {
       isActive: activeTab === "details"
     },
     {
+      id: "portal",
+      label: "Portal",
+      isActive: activeTab === "portal"
+    },
+    {
       id: "schedule",
       label: "Cronograma de Pagos",
       isActive: activeTab === "schedule",
@@ -208,6 +214,13 @@ export function Clients() {
           mode: 'create'
         })
       }
+    }),
+    ...(activeTab === "portal" && projectId && {
+      actionButton: {
+        label: "Ver Portal",
+        icon: ExternalLink,
+        onClick: () => window.open(`/portal/${projectId}`, '_blank')
+      }
     })
   }
 
@@ -244,6 +257,12 @@ export function Clients() {
 
         {activeTab === "schedule" && (
           <ClientScheduleTab 
+            projectId={projectId || undefined}
+          />
+        )}
+
+        {activeTab === "portal" && (
+          <ClientPortalConfigTab 
             projectId={projectId || undefined}
           />
         )}
