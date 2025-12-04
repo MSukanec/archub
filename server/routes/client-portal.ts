@@ -70,7 +70,7 @@ async function verifyProjectMembership(token: string, projectId: string) {
   return { 
     authorized: true, 
     isAdmin,
-    userId: dbUser.id, 
+    memberId: membership.id,
     organizationId: project.organization_id 
   };
 }
@@ -139,7 +139,7 @@ export function registerClientPortalRoutes(app: Express, deps: RouteDeps) {
         return res.status(401).json({ error: "Authentication required" });
       }
       
-      const { authorized, userId, organizationId } = await verifyProjectMembership(token, projectId);
+      const { authorized, memberId, organizationId } = await verifyProjectMembership(token, projectId);
       
       if (!authorized) {
         return res.status(403).json({ error: "Not authorized to update portal settings" });
@@ -160,7 +160,7 @@ export function registerClientPortalRoutes(app: Express, deps: RouteDeps) {
           organization_id: organizationId,
           ...parseResult.data,
           updated_at: new Date().toISOString(),
-          updated_by: userId,
+          updated_by: memberId,
         }, {
           onConflict: 'project_id'
         })
