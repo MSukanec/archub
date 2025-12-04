@@ -2052,8 +2052,18 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
         .single();
       
       if (insertError) {
-        console.error('Error creating testimonial:', insertError);
-        return res.status(500).json({ error: "Failed to create testimonial" });
+        console.error('Error creating testimonial:', {
+          code: insertError.code,
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          userId: dbUser.id,
+          authId: user.id
+        });
+        return res.status(500).json({ 
+          error: "Failed to create testimonial",
+          details: insertError.message 
+        });
       }
       
       res.json(testimonial);
