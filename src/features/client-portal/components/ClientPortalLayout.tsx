@@ -1,9 +1,21 @@
-import { Tabs } from '@/components/ui-custom/Tabs';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Building2, CreditCard, BookOpen, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { Badge } from '@/components/ui/badge';
 import type { ClientPortalTab, ClientPortalProject } from '../types';
+
+interface Tab {
+  id: ClientPortalTab;
+  label: string;
+  icon: typeof Building2;
+}
+
+const PORTAL_TABS: Tab[] = [
+  { id: 'dashboard', label: 'Mi Proyecto', icon: Building2 },
+  { id: 'payments', label: 'Mis Pagos', icon: CreditCard },
+  { id: 'logs', label: 'Avances', icon: BookOpen },
+];
 
 interface ClientPortalLayoutProps {
   project: ClientPortalProject;
@@ -22,11 +34,29 @@ export function ClientPortalLayout({
   isAdminPreview = false,
   adminPreviewSlot,
 }: ClientPortalLayoutProps) {
-  const tabs = [
-    { value: 'dashboard', label: 'Mi Proyecto', icon: Building2 },
-    { value: 'payments', label: 'Mis Pagos', icon: CreditCard },
-    { value: 'logs', label: 'Avances', icon: BookOpen },
-  ];
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const [underlineStyle, setUnderlineStyle] = useState<{ width: number; left: number }>({ width: 0, left: 0 });
+
+  useEffect(() => {
+    const updateUnderlinePosition = () => {
+      if (!tabsContainerRef.current) return;
+      
+      const tabButton = tabsContainerRef.current?.querySelector(`[data-tab-id="${activeTab}"]`) as HTMLElement;
+      if (tabButton && tabsContainerRef.current) {
+        const tabOffsetLeft = tabButton.offsetLeft;
+        const tabWidth = tabButton.offsetWidth;
+        const buttonPadding = 4;
+        
+        const left = tabOffsetLeft + buttonPadding;
+        const width = tabWidth - (buttonPadding * 2);
+        
+        setUnderlineStyle({ width, left });
+      }
+    };
+    
+    updateUnderlinePosition();
+    requestAnimationFrame(updateUnderlinePosition);
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -59,13 +89,13 @@ export function ClientPortalLayout({
                   <span className="hidden sm:inline">Volver</span>
                 </Button>
               </Link>
-              <div className="h-6 w-px bg-border" />
+              <div className="h-6 w-px bg-border hidden sm:block" />
               <div className="flex items-center gap-3">
                 {project.image_url && (
                   <img
                     src={project.image_url}
                     alt={project.name}
-                    className="h-8 w-8 rounded-md object-cover"
+                    className="h-8 w-8 rounded-md object-cover hidden sm:block"
                   />
                 )}
                 <div>
@@ -89,18 +119,71 @@ export function ClientPortalLayout({
               />
             </div>
           </div>
+
+          {/* Desktop Tabs - Con underline animado */}
+          <div className="hidden sm:block">
+            <div className="h-[45px] flex items-center relative overflow-hidden border-t border-border/30">
+              <div ref={tabsContainerRef} className="flex items-center relative" style={{ gap: '24px' }}>
+                {PORTAL_TABS.map((tab) => (
+                  <button
+                    key={tab.id}
+                    data-tab-id={tab.id}
+                    onClick={() => onTabChange(tab.id)}
+                    className={`relative text-sm flex items-center gap-2 px-1 h-[45px] flex-shrink-0 min-w-0 transition-colors ${
+                      tab.id === activeTab
+                        ? "text-foreground font-medium"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    data-testid={`tab-${tab.id}`}
+                  >
+                    <tab.icon className="h-4 w-4" />
+                    {tab.label}
+                  </button>
+                ))}
+                
+                {/* Subrayado animado */}
+                <div
+                  className="absolute bottom-0 h-[2px] bg-primary transition-all duration-300 ease-out pointer-events-none"
+                  style={{
+                    width: `${underlineStyle.width}px`,
+                    transform: `translateX(${underlineStyle.left}px)`,
+                    opacity: underlineStyle.width > 0 ? 1 : 0,
+                    left: 0
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Tabs - Chips horizontales scrollables */}
+        <div className="sm:hidden border-t border-border/30">
+          <div className="px-4 py-3">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {PORTAL_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => onTabChange(tab.id)}
+                  className={`
+                    px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 
+                    transition-all duration-200 flex items-center gap-2
+                    ${tab.id === activeTab 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-muted text-muted-foreground border border-border hover:bg-muted/80'
+                    }
+                  `}
+                  data-testid={`tab-mobile-${tab.id}`}
+                >
+                  <tab.icon className="h-4 w-4" />
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="mb-6">
-          <Tabs
-            tabs={tabs.map(t => ({ value: t.value, label: t.label }))}
-            value={activeTab}
-            onValueChange={(value) => onTabChange(value as ClientPortalTab)}
-          />
-        </div>
-
         <main data-testid="client-portal-content">
           {children}
         </main>
