@@ -76,6 +76,16 @@ export interface ClientPortalStats {
   project_progress: number;
 }
 
+export interface ClientPortalSettings {
+  show_dashboard: boolean;
+  show_installments: boolean;
+  show_payments: boolean;
+  show_logs: boolean;
+  show_amounts: boolean;
+  show_progress: boolean;
+  allow_comments: boolean;
+}
+
 export interface ClientPortalData {
   project: ClientPortalProject;
   client: ClientPortalClient | null;
@@ -86,4 +96,5 @@ export interface ClientPortalData {
   payments: ClientPortalPayment[];
   site_logs: ClientPortalSiteLog[];
   is_admin_preview: boolean;
+  settings: ClientPortalSettings;
 }

@@ -82,15 +82,17 @@ export default function ClientPortal() {
   };
 
   const renderTabContent = () => {
+    const { settings } = data;
+    
     switch (activeTab) {
       case 'dashboard':
-        return <PortalDashboardTab data={data} />;
+        return settings.show_dashboard ? <PortalDashboardTab data={data} /> : null;
       case 'installments':
-        return <PortalInstallmentsTab data={data} />;
+        return settings.show_installments ? <PortalInstallmentsTab data={data} /> : null;
       case 'payments':
-        return <PortalPaymentsTab data={data} />;
+        return settings.show_payments ? <PortalPaymentsTab data={data} /> : null;
       case 'logs':
-        return <PortalLogsTab data={data} />;
+        return settings.show_logs ? <PortalLogsTab data={data} /> : null;
       default:
         return null;
     }
@@ -102,6 +104,7 @@ export default function ClientPortal() {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       isAdminPreview={data.is_admin_preview}
+      settings={data.settings}
       adminPreviewSlot={
         data.is_admin_preview && data.clients.length > 1 ? (
           <div className="flex items-center gap-2">

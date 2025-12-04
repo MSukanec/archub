@@ -76,6 +76,16 @@ export interface ClientPortalStats {
   project_progress: number;
 }
 
+export interface ClientPortalSettings {
+  show_dashboard: boolean;
+  show_installments: boolean;
+  show_payments: boolean;
+  show_logs: boolean;
+  show_amounts: boolean;
+  show_progress: boolean;
+  allow_comments: boolean;
+}
+
 export interface ClientPortalData {
   project: ClientPortalProject;
   client: ClientPortalClient | null;
@@ -86,6 +96,7 @@ export interface ClientPortalData {
   payments: ClientPortalPayment[];
   site_logs: ClientPortalSiteLog[];
   is_admin_preview: boolean;
+  settings: ClientPortalSettings;
 }
 
 interface GetClientPortalDataParams {
@@ -371,6 +382,22 @@ export async function getClientPortalData(
     creator_name: log.creator?.user?.full_name || null,
   }));
 
+  const { data: portalSettings } = await supabase
+    .from('client_portal_settings')
+    .select('*')
+    .eq('project_id', projectId)
+    .maybeSingle();
+
+  const settings: ClientPortalSettings = {
+    show_dashboard: portalSettings?.show_dashboard ?? true,
+    show_installments: portalSettings?.show_installments ?? true,
+    show_payments: portalSettings?.show_payments ?? true,
+    show_logs: portalSettings?.show_logs ?? true,
+    show_amounts: portalSettings?.show_amounts ?? true,
+    show_progress: portalSettings?.show_progress ?? true,
+    allow_comments: portalSettings?.allow_comments ?? false,
+  };
+
   return {
     project: {
       id: project.id,
@@ -392,5 +419,6 @@ export async function getClientPortalData(
     payments,
     site_logs,
     is_admin_preview: isAdminPreview,
+    settings,
   };
 }

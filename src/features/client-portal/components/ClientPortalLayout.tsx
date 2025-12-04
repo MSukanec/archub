@@ -1,21 +1,22 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { ArrowLeft, Building2, CreditCard, Calendar, Receipt, BookOpen, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { Badge } from '@/components/ui/badge';
-import type { ClientPortalTab, ClientPortalProject } from '../types';
+import type { ClientPortalTab, ClientPortalProject, ClientPortalSettings } from '../types';
 
 interface Tab {
   id: ClientPortalTab;
   label: string;
   icon: typeof Building2;
+  settingsKey: keyof Pick<ClientPortalSettings, 'show_dashboard' | 'show_installments' | 'show_payments' | 'show_logs'>;
 }
 
 const PORTAL_TABS: Tab[] = [
-  { id: 'dashboard', label: 'Visión General', icon: Building2 },
-  { id: 'installments', label: 'Cuotas', icon: Calendar },
-  { id: 'payments', label: 'Mis Pagos', icon: Receipt },
-  { id: 'logs', label: 'Avances', icon: BookOpen },
+  { id: 'dashboard', label: 'Visión General', icon: Building2, settingsKey: 'show_dashboard' },
+  { id: 'installments', label: 'Cuotas', icon: Calendar, settingsKey: 'show_installments' },
+  { id: 'payments', label: 'Mis Pagos', icon: Receipt, settingsKey: 'show_payments' },
+  { id: 'logs', label: 'Avances', icon: BookOpen, settingsKey: 'show_logs' },
 ];
 
 interface ClientPortalLayoutProps {
@@ -25,7 +26,18 @@ interface ClientPortalLayoutProps {
   children: React.ReactNode;
   isAdminPreview?: boolean;
   adminPreviewSlot?: React.ReactNode;
+  settings?: ClientPortalSettings;
 }
+
+const DEFAULT_SETTINGS: ClientPortalSettings = {
+  show_dashboard: true,
+  show_installments: true,
+  show_payments: true,
+  show_logs: true,
+  show_amounts: true,
+  show_progress: true,
+  allow_comments: false,
+};
 
 export function ClientPortalLayout({
   project,
@@ -34,9 +46,20 @@ export function ClientPortalLayout({
   children,
   isAdminPreview = false,
   adminPreviewSlot,
+  settings = DEFAULT_SETTINGS,
 }: ClientPortalLayoutProps) {
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const [underlineStyle, setUnderlineStyle] = useState<{ width: number; left: number }>({ width: 0, left: 0 });
+
+  const visibleTabs = useMemo(() => {
+    return PORTAL_TABS.filter(tab => settings[tab.settingsKey]);
+  }, [settings]);
+
+  useEffect(() => {
+    if (visibleTabs.length > 0 && !visibleTabs.find(t => t.id === activeTab)) {
+      onTabChange(visibleTabs[0].id);
+    }
+  }, [visibleTabs, activeTab, onTabChange]);
 
   useEffect(() => {
     const updateUnderlinePosition = () => {
@@ -57,7 +80,7 @@ export function ClientPortalLayout({
     
     updateUnderlinePosition();
     requestAnimationFrame(updateUnderlinePosition);
-  }, [activeTab]);
+  }, [activeTab, visibleTabs]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -125,7 +148,7 @@ export function ClientPortalLayout({
           <div className="hidden sm:block">
             <div className="h-[45px] flex items-center relative overflow-hidden border-t border-border/30">
               <div ref={tabsContainerRef} className="flex items-center relative" style={{ gap: '24px' }}>
-                {PORTAL_TABS.map((tab) => (
+                {visibleTabs.map((tab) => (
                   <button
                     key={tab.id}
                     data-tab-id={tab.id}
@@ -161,7 +184,7 @@ export function ClientPortalLayout({
         <div className="sm:hidden border-t border-border/30">
           <div className="px-4 py-3">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-              {PORTAL_TABS.map((tab) => (
+              {visibleTabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => onTabChange(tab.id)}
