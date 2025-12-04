@@ -126,36 +126,48 @@ export function CourseStickyCardWithMode({
   
   // Fixed variant - position fixed with calculated offset
   // 
-  // The card must align with the right edge of the content area inside the container.
+  // IMPORTANT: 100vw includes scrollbar width (~17px), but container margin is calculated
+  // without it. We need to account for this difference.
+  // 
   // Container max-width at xl: 1280px, at 2xl: 1536px
   // Container has px-4 sm:px-6 lg:px-8 padding (32px at lg+)
-  // 
   // Grid layout: [1fr_400px] reserves 400px column for the card
-  // Card is 368px wide, so we add 16px margin to center it in the 400px column
+  // Card is 368px wide, centered in 400px column = 16px margin each side
   // 
-  // Formula for right offset:
-  // right = (viewport - container_max_width) / 2 + container_padding + card_margin
-  //       = (100vw - 1280px) / 2 + 32px + 16px
-  //       = (100vw - 1280px) / 2 + 48px
-  // 
-  // For dashboard mode, the sidebar takes 72px, reducing effective viewport
-  // Dashboard formula: (100vw - 72px - 1280px) / 2 + 48px
-  
-  // Use CSS clamp to handle both xl (1280px) and 2xl (1536px) breakpoints
-  // At exactly 1280px viewport: offset should be 32px (padding) + 16px (margin) = 48px
-  // As viewport grows, the offset grows proportionally
-  const fixedRightOffset = mode === 'dashboard' 
-    ? 'max(48px, calc((100vw - 72px - 1280px) / 2 + 48px))'
-    : 'max(48px, calc((100vw - 1280px) / 2 + 48px))';
+  // The card's right edge should align with the container's right padding edge.
+  // right = (viewport - container) / 2 + padding + card_margin + scrollbar_compensation
+  //       = (100vw - 1280px) / 2 + 32px + 16px + ~8px (half scrollbar)
   
   return (
-    <div 
-      className="hidden xl:block fixed top-24 z-40"
-      style={{
-        width: '368px',
-        right: fixedRightOffset
-      }}
-    >
+    <>
+      <style>{`
+        .course-sticky-card-fixed {
+          position: fixed;
+          top: 6rem;
+          z-index: 40;
+          width: 368px;
+          right: max(48px, calc((100vw - 1280px) / 2 + 48px));
+        }
+        
+        @media (min-width: 1536px) {
+          .course-sticky-card-fixed {
+            right: max(48px, calc((100vw - 1536px) / 2 + 48px));
+          }
+        }
+        
+        .course-sticky-card-fixed.dashboard-mode {
+          right: max(48px, calc((100vw - 72px - 1280px) / 2 + 48px));
+        }
+        
+        @media (min-width: 1536px) {
+          .course-sticky-card-fixed.dashboard-mode {
+            right: max(48px, calc((100vw - 72px - 1536px) / 2 + 48px));
+          }
+        }
+      `}</style>
+      <div 
+        className={`hidden xl:block course-sticky-card-fixed ${mode === 'dashboard' ? 'dashboard-mode' : ''}`}
+      >
       <div className="sticky top-24">
         <ComingSoonCard status={status}>
           <Card className="overflow-hidden shadow-xl border-2" data-testid="card-course-sticky">
@@ -247,6 +259,7 @@ export function CourseStickyCardWithMode({
         </Card>
         </ComingSoonCard>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
