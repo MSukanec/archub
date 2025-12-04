@@ -453,12 +453,12 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
               {faqs.map((faq) => (
                 <div
                   key={faq.id}
-                  className="flex items-center justify-between gap-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors overflow-hidden"
+                  className="flex items-start justify-between gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                   data-testid={`faq-item-${faq.id}`}
                 >
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    <p className="font-medium text-sm truncate">{faq.question}</p>
-                    <p className="text-xs text-muted-foreground truncate mt-1">
+                  <div className="flex-1 min-w-0 pr-2">
+                    <p className="font-medium text-sm line-clamp-1">{faq.question}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mt-1">
                       {faq.answer}
                     </p>
                   </div>
