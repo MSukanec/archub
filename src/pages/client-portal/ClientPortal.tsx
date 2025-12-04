@@ -1,14 +1,10 @@
 import { useState } from 'react';
 import { useRoute } from 'wouter';
-import { 
-  ClientPortalLayout, 
-  ProjectOverviewCard, 
-  PaymentsList, 
-  UpcomingInstallments, 
-  SiteLogsFeed,
-  useClientPortalData
-} from '@/features/client-portal';
+import { ClientPortalLayout, useClientPortalData } from '@/features/client-portal';
 import type { ClientPortalTab, ClientPortalClient } from '@/features/client-portal';
+import { PortalDashboardTab } from './PortalDashboardTab';
+import { PortalPaymentsTab } from './PortalPaymentsTab';
+import { PortalLogsTab } from './PortalLogsTab';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle, Users } from 'lucide-react';
@@ -87,22 +83,11 @@ export default function ClientPortal() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return (
-          <ProjectOverviewCard 
-            project={data.project} 
-            stats={data.stats}
-            client={data.client}
-          />
-        );
+        return <PortalDashboardTab data={data} />;
       case 'payments':
-        return (
-          <div className="space-y-6">
-            <UpcomingInstallments schedules={data.schedule} />
-            <PaymentsList payments={data.payments} />
-          </div>
-        );
+        return <PortalPaymentsTab data={data} />;
       case 'logs':
-        return <SiteLogsFeed logs={data.site_logs} />;
+        return <PortalLogsTab data={data} />;
       default:
         return null;
     }
