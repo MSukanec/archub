@@ -113,11 +113,11 @@ export default function CourseFeedbackTab({ courseId }: CourseFeedbackTabProps) 
 
   const handleDelete = () => {
     openModal('delete-confirmation', {
-      mode: 'simple',
+      mode: 'delete',
       title: 'Eliminar Valoración',
       description: '¿Estás seguro de que querés eliminar tu valoración? Esta acción no se puede deshacer.',
       itemName: 'Tu valoración del curso',
-      onConfirm: () => deleteFeedbackMutation.mutate()
+      onDelete: () => deleteFeedbackMutation.mutate()
     });
   };
 
