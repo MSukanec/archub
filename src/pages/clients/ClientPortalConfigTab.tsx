@@ -1,62 +1,110 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Building2, Calendar, Receipt, BookOpen, Settings, Info } from 'lucide-react';
+import { Building2, Calendar, Receipt, BookOpen, Settings, Info, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+
+interface PortalSettings {
+  project_id: string;
+  organization_id: string;
+  show_dashboard: boolean;
+  show_installments: boolean;
+  show_payments: boolean;
+  show_logs: boolean;
+  show_amounts: boolean;
+  show_progress: boolean;
+  allow_comments: boolean;
+}
 
 interface PortalSectionConfig {
-  id: string;
+  id: keyof Pick<PortalSettings, 'show_dashboard' | 'show_installments' | 'show_payments' | 'show_logs'>;
   label: string;
   description: string;
   icon: typeof Building2;
-  enabled: boolean;
 }
+
+const SECTION_CONFIGS: PortalSectionConfig[] = [
+  {
+    id: 'show_dashboard',
+    label: 'Visión General',
+    description: 'Muestra el resumen del proyecto, estadísticas de pagos y próximas cuotas.',
+    icon: Building2,
+  },
+  {
+    id: 'show_installments',
+    label: 'Cuotas',
+    description: 'Muestra el cronograma de cuotas pendientes y próximos vencimientos.',
+    icon: Calendar,
+  },
+  {
+    id: 'show_payments',
+    label: 'Mis Pagos',
+    description: 'Muestra el historial completo de pagos realizados por el cliente.',
+    icon: Receipt,
+  },
+  {
+    id: 'show_logs',
+    label: 'Avances',
+    description: 'Muestra las entradas de la bitácora de obra visibles para clientes.',
+    icon: BookOpen,
+  },
+];
 
 interface ClientPortalConfigTabProps {
   projectId?: string;
 }
 
 export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps) {
-  const [sections, setSections] = useState<PortalSectionConfig[]>([
-    {
-      id: 'dashboard',
-      label: 'Visión General',
-      description: 'Muestra el resumen del proyecto, estadísticas de pagos y próximas cuotas.',
-      icon: Building2,
-      enabled: true,
-    },
-    {
-      id: 'installments',
-      label: 'Cuotas',
-      description: 'Muestra el cronograma de cuotas pendientes y próximos vencimientos.',
-      icon: Calendar,
-      enabled: true,
-    },
-    {
-      id: 'payments',
-      label: 'Mis Pagos',
-      description: 'Muestra el historial completo de pagos realizados por el cliente.',
-      icon: Receipt,
-      enabled: true,
-    },
-    {
-      id: 'logs',
-      label: 'Avances',
-      description: 'Muestra las entradas de la bitácora de obra visibles para clientes.',
-      icon: BookOpen,
-      enabled: true,
-    },
-  ]);
+  const { toast } = useToast();
 
-  const handleToggleSection = (sectionId: string) => {
-    setSections(prev => 
-      prev.map(section => 
-        section.id === sectionId 
-          ? { ...section, enabled: !section.enabled }
-          : section
-      )
-    );
+  const { data: settings, isLoading, error } = useQuery<PortalSettings>({
+    queryKey: ['/api/client-portal', projectId, 'config'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/client-portal/${projectId}/config`);
+      return response.json();
+    },
+    enabled: !!projectId,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (newSettings: Partial<PortalSettings>) => {
+      if (!settings) return;
+      const fullSettings = {
+        show_dashboard: settings.show_dashboard,
+        show_installments: settings.show_installments,
+        show_payments: settings.show_payments,
+        show_logs: settings.show_logs,
+        show_amounts: settings.show_amounts,
+        show_progress: settings.show_progress,
+        allow_comments: settings.allow_comments,
+        ...newSettings,
+      };
+      const response = await apiRequest('PUT', `/api/client-portal/${projectId}/config`, fullSettings);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/client-portal', projectId, 'config'] });
+      toast({
+        title: 'Configuración guardada',
+        description: 'Los cambios se aplicarán inmediatamente en el portal.',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error al guardar',
+        description: error.message || 'No se pudo guardar la configuración.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const handleToggle = (key: keyof PortalSettings, value: boolean) => {
+    updateMutation.mutate({ [key]: value });
   };
 
   if (!projectId) {
@@ -70,25 +118,47 @@ export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps)
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error || !settings) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center text-muted-foreground">
+          <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p>Error al cargar la configuración del portal.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
           Configura qué secciones estarán visibles en el portal de clientes de este proyecto. 
-          Los cambios se guardarán automáticamente.
+          Los cambios se guardan automáticamente.
         </AlertDescription>
       </Alert>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Secciones del Portal</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            Secciones del Portal
+            {updateMutation.isPending && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+          </CardTitle>
           <CardDescription>
             Activa o desactiva las secciones que los clientes podrán ver en su portal.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {sections.map((section) => {
+          {SECTION_CONFIGS.map((section) => {
             const Icon = section.icon;
             return (
               <div 
@@ -113,8 +183,9 @@ export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps)
                 </div>
                 <Switch
                   id={`section-${section.id}`}
-                  checked={section.enabled}
-                  onCheckedChange={() => handleToggleSection(section.id)}
+                  checked={settings[section.id]}
+                  onCheckedChange={(checked) => handleToggle(section.id, checked)}
+                  disabled={updateMutation.isPending}
                   data-testid={`switch-portal-section-${section.id}`}
                 />
               </div>
@@ -142,7 +213,9 @@ export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps)
             </div>
             <Switch
               id="show-amounts"
-              defaultChecked={true}
+              checked={settings.show_amounts}
+              onCheckedChange={(checked) => handleToggle('show_amounts', checked)}
+              disabled={updateMutation.isPending}
               data-testid="switch-portal-show-amounts"
             />
           </div>
@@ -158,7 +231,9 @@ export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps)
             </div>
             <Switch
               id="show-progress"
-              defaultChecked={true}
+              checked={settings.show_progress}
+              onCheckedChange={(checked) => handleToggle('show_progress', checked)}
+              disabled={updateMutation.isPending}
               data-testid="switch-portal-show-progress"
             />
           </div>
@@ -174,7 +249,9 @@ export function ClientPortalConfigTab({ projectId }: ClientPortalConfigTabProps)
             </div>
             <Switch
               id="allow-comments"
-              defaultChecked={false}
+              checked={settings.allow_comments}
+              onCheckedChange={(checked) => handleToggle('allow_comments', checked)}
+              disabled={updateMutation.isPending}
               data-testid="switch-portal-allow-comments"
             />
           </div>
