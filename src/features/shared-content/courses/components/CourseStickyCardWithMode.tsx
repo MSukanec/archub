@@ -125,25 +125,28 @@ export function CourseStickyCardWithMode({
   }
   
   // Fixed variant - position fixed with calculated offset
-  // Container uses max-width from Tailwind's container class
-  // At xl (1280px+): max-width is 1280px with px-8 (32px) padding = 1216px content
-  // At 2xl (1536px+): max-width is 1536px with px-8 (32px) padding = 1472px content
   // 
-  // The card should align with the right edge of the container's content area
-  // Grid layout: [1fr_400px] means we reserve 400px for the card column
-  // Card is 368px wide, centered in 400px = 16px offset from grid column edge
+  // The card must align with the right edge of the content area inside the container.
+  // Container max-width at xl: 1280px, at 2xl: 1536px
+  // Container has px-4 sm:px-6 lg:px-8 padding (32px at lg+)
   // 
-  // Right offset = (viewport - container_max_width) / 2 + container_padding + card_margin
-  // For xl: right = (100vw - 1280px) / 2 + 32px (padding) + 16px (center in column)
-  // Simplified: right = (100vw - 1280px) / 2 + 16px (align card to right edge of 400px column)
-  const containerMaxWidth = '1280px';
-  const containerPadding = '32px'; // px-4 sm:px-6 lg:px-8 = 32px at lg+
-  const cardMarginFromEdge = '16px'; // (400px - 368px) / 2 = center card in column
+  // Grid layout: [1fr_400px] reserves 400px column for the card
+  // Card is 368px wide, so we add 16px margin to center it in the 400px column
+  // 
+  // Formula for right offset:
+  // right = (viewport - container_max_width) / 2 + container_padding + card_margin
+  //       = (100vw - 1280px) / 2 + 32px + 16px
+  //       = (100vw - 1280px) / 2 + 48px
+  // 
+  // For dashboard mode, the sidebar takes 72px, reducing effective viewport
+  // Dashboard formula: (100vw - 72px - 1280px) / 2 + 48px
   
-  // For dashboard mode, subtract sidebar width (72px for collapsed sidebar)
-  const sidebarOffset = mode === 'dashboard' ? ' - 72px' : '';
-  
-  const fixedRightOffset = `max(${containerPadding}, calc((100vw - ${containerMaxWidth}${sidebarOffset}) / 2 + ${cardMarginFromEdge}))`;
+  // Use CSS clamp to handle both xl (1280px) and 2xl (1536px) breakpoints
+  // At exactly 1280px viewport: offset should be 32px (padding) + 16px (margin) = 48px
+  // As viewport grows, the offset grows proportionally
+  const fixedRightOffset = mode === 'dashboard' 
+    ? 'max(48px, calc((100vw - 72px - 1280px) / 2 + 48px))'
+    : 'max(48px, calc((100vw - 1280px) / 2 + 48px))';
   
   return (
     <div 
