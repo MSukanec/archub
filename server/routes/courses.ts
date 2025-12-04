@@ -1988,7 +1988,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
   app.post("/api/courses/:courseId/feedback", async (req, res) => {
     try {
       const { courseId } = req.params;
-      const { content, rating, author_name } = req.body;
+      const { content, rating, author_name, author_title } = req.body;
       
       // Validate required fields
       if (!content || typeof content !== 'string' || content.trim().length === 0) {
@@ -2043,6 +2043,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
           content: content.trim(),
           rating,
           author_name: author_name || dbUser.full_name || 'Usuario',
+          author_title: author_title?.trim() || null,
           author_avatar_url: dbUser.avatar_url,
           is_active: false, // Requires review before publishing
           is_featured: false

@@ -28,7 +28,7 @@ import GeneralCostForm from '@/features/general-costs/forms/GeneralCostForm';
 import GeneralCostView from '@/features/general-costs/forms/GeneralCostView';
 import GeneralCostPaymentForm from '@/features/general-costs/forms/GeneralCostPaymentForm';
 import GeneralCostPaymentView from '@/features/general-costs/forms/GeneralCostPaymentView';
-import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal } from '@/features/learning';
+import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal, TestimonialForm } from '@/features/learning';
 import { HeroSectionForm } from '@/features/layout';
 
 const organizationConfig: ModalConfig = { category: 'organization', size: 'md' };
@@ -326,6 +326,17 @@ export function initializeModalRegistry(): void {
   registerModal('course-enrollment', CourseEnrollmentModal as any, learningConfig);
   registerModal('coupon', CouponFormModal as any, learningConfig);
   registerModal('payment-method', PaymentMethodModal as any, { ...learningConfig, size: 'md' });
+  registerModal('testimonial', TestimonialForm as any, {
+    ...learningConfig,
+    size: 'md',
+    mapDataToProps: (data) => ({
+      modalData: {
+        courseId: data?.courseId,
+        testimonial: data?.testimonial,
+      },
+      mode: data?.testimonial ? 'edit' : 'create',
+    }),
+  });
   
   registerModal('admin-user', UserFormModal as any, adminConfig);
   registerModal('admin-organization', OrganizationFormModal as any, { ...adminConfig, size: 'lg' });

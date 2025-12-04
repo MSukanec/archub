@@ -6,3 +6,4 @@ export { CourseFaqFormModal } from './admin/CourseFaqFormModal';
 export { TestimonialFormModal } from './admin/TestimonialFormModal';
 export { CouponFormModal } from './admin/CouponFormModal';
 export { default as PaymentMethodModal } from './PaymentMethodModal';
+export { TestimonialForm } from '../forms/TestimonialForm';

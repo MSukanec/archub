@@ -3,6 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Star, MessageSquareQuote, Trash2, Send, Info, Clock } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -26,6 +27,7 @@ export default function CourseFeedbackTab({ courseId }: CourseFeedbackTabProps) 
   const [rating, setRating] = useState<number>(0);
   const [hoveredRating, setHoveredRating] = useState<number>(0);
   const [content, setContent] = useState<string>('');
+  const [authorTitle, setAuthorTitle] = useState<string>('');
 
   const { data: testimonial, isLoading } = useQuery<Testimonial | null>({
     queryKey: [`/api/courses/${courseId}/my-feedback`],
@@ -33,7 +35,7 @@ export default function CourseFeedbackTab({ courseId }: CourseFeedbackTabProps) 
   });
 
   const createFeedbackMutation = useMutation({
-    mutationFn: async (data: { content: string; rating: number; author_name: string }) => {
+    mutationFn: async (data: { content: string; rating: number; author_name: string; author_title?: string }) => {
       const response = await apiRequest('POST', `/api/courses/${courseId}/feedback`, data);
       if (!response.ok) {
         const errorText = await response.text();
@@ -50,6 +52,7 @@ export default function CourseFeedbackTab({ courseId }: CourseFeedbackTabProps) 
       });
       setRating(0);
       setContent('');
+      setAuthorTitle('');
     },
     onError: (error: any) => {
       toast({
@@ -99,7 +102,8 @@ export default function CourseFeedbackTab({ courseId }: CourseFeedbackTabProps) 
     createFeedbackMutation.mutate({
       content: content.trim(),
       rating,
-      author_name: userData?.user?.full_name || 'Usuario'
+      author_name: userData?.user?.full_name || 'Usuario',
+      author_title: authorTitle.trim() || undefined
     });
   };
 
@@ -267,6 +271,22 @@ export default function CourseFeedbackTab({ courseId }: CourseFeedbackTabProps) 
             />
             <p className="text-xs text-muted-foreground">
               {content.length} caracteres
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="feedback-author-title" className="text-sm font-medium">
+              Profesión (opcional)
+            </label>
+            <Input
+              id="feedback-author-title"
+              placeholder="Ej: Arquitecto, Ingeniero Civil, Estudiante de Construcción..."
+              value={authorTitle}
+              onChange={(e) => setAuthorTitle(e.target.value)}
+              data-testid="input-feedback-author-title"
+            />
+            <p className="text-xs text-muted-foreground">
+              Esta información se mostrará junto a tu nombre en el testimonio público.
             </p>
           </div>
 

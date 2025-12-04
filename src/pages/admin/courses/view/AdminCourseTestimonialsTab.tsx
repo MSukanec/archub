@@ -2,11 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Pencil, Trash2, Star, MessageSquareQuote, User, Clock } from 'lucide-react';
+import { Pencil, Trash2, MessageSquareQuote, Clock } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { TestimonialCard } from '@/components/shared/TestimonialCard';
 import type { Testimonial } from '@shared/schema';
 
 interface AdminCourseTestimonialsTabProps {
@@ -67,10 +65,15 @@ export default function AdminCourseTestimonialsTab({ courseId }: AdminCourseTest
     openModal('testimonial', { courseId, testimonial });
   };
 
-  const handleDeleteTestimonial = async (testimonialId: string) => {
-    if (confirm('¿Estás seguro de que deseas eliminar este testimonio?')) {
-      await deleteTestimonialMutation.mutateAsync(testimonialId);
-    }
+  const handleDeleteTestimonial = (testimonial: Testimonial) => {
+    openModal('delete-confirmation', {
+      mode: 'delete',
+      title: 'Eliminar Testimonio',
+      description: 'Esta acción eliminará el testimonio de forma permanente.',
+      itemName: testimonial.author_name,
+      itemDetails: testimonial.content?.slice(0, 100) + (testimonial.content && testimonial.content.length > 100 ? '...' : ''),
+      onDelete: () => deleteTestimonialMutation.mutate(testimonial.id)
+    });
   };
 
   if (isLoading) {
@@ -105,77 +108,46 @@ export default function AdminCourseTestimonialsTab({ courseId }: AdminCourseTest
       {testimonials.map((testimonial) => (
         <div
           key={testimonial.id}
-          className="bg-card border rounded-lg p-6"
+          className="relative group"
           data-testid={`testimonial-card-${testimonial.id}`}
         >
-          <div className="flex items-start gap-4">
-            <Avatar className="w-12 h-12 flex-shrink-0">
-              <AvatarImage src={testimonial.author_avatar_url || undefined} alt={testimonial.author_name} />
-              <AvatarFallback>
-                <User className="w-5 h-5" />
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="font-semibold">{testimonial.author_name}</h4>
-                    {testimonial.rating && testimonial.rating > 0 && (
-                      <div className="flex items-center gap-0.5">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star 
-                            key={i} 
-                            className={`w-4 h-4 ${i < testimonial.rating! ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground/30'}`}
-                          />
-                        ))}
-                      </div>
-                    )}
-                    {!testimonial.is_active && (
-                      <span className="text-xs bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        Pendiente de revisión
-                      </span>
-                    )}
-                    {testimonial.is_featured && (
-                      <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full">
-                        Destacado
-                      </span>
-                    )}
-                  </div>
-                  {testimonial.author_title && (
-                    <p className="text-sm text-muted-foreground mt-0.5">{testimonial.author_title}</p>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEditTestimonial(testimonial)}
-                    data-testid={`button-edit-testimonial-${testimonial.id}`}
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDeleteTestimonial(testimonial.id)}
-                    data-testid={`button-delete-testimonial-${testimonial.id}`}
-                  >
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
-                </div>
-              </div>
-              
-              <p className="text-sm mt-3 leading-relaxed">{testimonial.content}</p>
-              
-              {testimonial.created_at && (
-                <p className="text-xs text-muted-foreground mt-3">
-                  Creado el {format(new Date(testimonial.created_at), "d 'de' MMMM, yyyy", { locale: es })}
-                </p>
-              )}
-            </div>
+          <TestimonialCard
+            authorName={testimonial.author_name}
+            authorTitle={testimonial.author_title || undefined}
+            authorAvatarUrl={testimonial.author_avatar_url || undefined}
+            content={testimonial.content}
+          />
+          
+          <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {!testimonial.is_active && (
+              <span className="text-xs bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full flex items-center gap-1 mr-2">
+                <Clock className="w-3 h-3" />
+                Pendiente
+              </span>
+            )}
+            {testimonial.is_featured && (
+              <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full mr-2">
+                Destacado
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => handleEditTestimonial(testimonial)}
+              data-testid={`button-edit-testimonial-${testimonial.id}`}
+            >
+              <Pencil className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => handleDeleteTestimonial(testimonial)}
+              data-testid={`button-delete-testimonial-${testimonial.id}`}
+            >
+              <Trash2 className="w-4 h-4 text-destructive" />
+            </Button>
           </div>
         </div>
       ))}
