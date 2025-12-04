@@ -167,12 +167,47 @@ export async function fetchCourseLandingBySlug(slug: string) {
     console.log('Testimonials table not available yet');
   }
 
+  // 6. Fetch Client Gallery images
+  let clientGallery: { id: string; url: string }[] = [];
+  try {
+    const { data: galleryLinks, error: galleryError } = await supabase
+      .from('media_links')
+      .select(`
+        id,
+        media_files!inner (
+          file_url,
+          is_deleted
+        )
+      `)
+      .eq('course_id', course.id)
+      .eq('category', 'client_gallery')
+      .eq('media_files.is_deleted', false)
+      .order('position', { ascending: true });
+
+    if (!galleryError && galleryLinks) {
+      clientGallery = galleryLinks
+        .map((link: any) => {
+          const mediaFile = Array.isArray(link.media_files) 
+            ? link.media_files[0] 
+            : link.media_files;
+          return {
+            id: link.id,
+            url: mediaFile?.file_url || null,
+          };
+        })
+        .filter((item: any) => item.url !== null);
+    }
+  } catch {
+    console.log('Client gallery fetch failed - continuing without');
+  }
+
   return {
     course: course as Course,
     modules: (modules || []) as CourseModule[],
     lessons: (lessons || []) as Lesson[],
     faqs: (faqs || []) as CourseFaq[],
     testimonials: (testimonials || []) as Testimonial[],
+    clientGallery,
   };
 }
 

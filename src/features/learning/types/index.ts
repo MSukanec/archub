@@ -210,6 +210,7 @@ export interface CourseLandingData {
   faqs: CourseFaq[];
   testimonials: Testimonial[];
   stats: CourseStats;
+  clientGallery?: { id: string; url: string }[];
 }
 
 /**

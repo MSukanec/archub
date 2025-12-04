@@ -12,6 +12,7 @@ import {
   LessonsSection,
   FAQSection,
 } from '@/features/learning';
+import { InfiniteCarousel } from '@/components/shared/InfiniteCarousel';
 import type { CourseLandingContentProps } from './types';
 
 export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) {
@@ -52,7 +53,7 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
     );
   }
 
-  const { course, modules, faqs, stats } = data;
+  const { course, modules, faqs, stats, clientGallery } = data;
 
   const handleCTAClick = () => {
     if (isEnrolled) {
@@ -100,6 +101,14 @@ export function CourseLandingContent({ mode, slug }: CourseLandingContentProps) 
           subtitle={(course.landing_sections as any)?.faq?.subtitle}
           description={(course.landing_sections as any)?.faq?.description}
         />
+        
+        {clientGallery && clientGallery.length > 0 && (
+          <ClientsSection 
+            images={clientGallery}
+            title={(course.landing_sections as any)?.clients?.title}
+            subtitle={(course.landing_sections as any)?.clients?.subtitle}
+          />
+        )}
         
         {mode === 'public' && (
           <PublicCTAFooter 
@@ -252,5 +261,44 @@ function DashboardCTAFooter({ onCTAClick, ctaButtonText }: DashboardCTAFooterPro
         {ctaButtonText}
       </Button>
     </div>
+  );
+}
+
+interface ClientsSectionProps {
+  images: { id: string; url: string }[];
+  title?: string;
+  subtitle?: string;
+}
+
+function ClientsSection({ images, title, subtitle }: ClientsSectionProps) {
+  const carouselItems = images.map((img) => ({
+    id: img.id,
+    src: img.url,
+    alt: 'Cliente',
+  }));
+
+  return (
+    <section className="space-y-8" data-testid="section-clients">
+      <div className="text-center space-y-4">
+        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+          {title || 'Nuestros Clientes'}
+        </h2>
+        {subtitle && (
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            {subtitle}
+          </p>
+        )}
+      </div>
+      
+      <InfiniteCarousel
+        items={carouselItems}
+        direction="left"
+        speed={40}
+        height={120}
+        visibleItems={6}
+        gap={16}
+        pauseOnHover={true}
+      />
+    </section>
   );
 }
