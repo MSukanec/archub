@@ -296,6 +296,33 @@ export const project_data = pgTable("project_data", {
 export type ProjectData = typeof project_data.$inferSelect;
 export type InsertProjectData = typeof project_data.$inferInsert;
 
+// Client Portal Settings Table (per-project configuration)
+export const client_portal_settings = pgTable("client_portal_settings", {
+  project_id: uuid("project_id").primaryKey().notNull(),
+  organization_id: uuid("organization_id").notNull(),
+  
+  // Visible sections
+  show_dashboard: boolean("show_dashboard").notNull().default(true),
+  show_installments: boolean("show_installments").notNull().default(true),
+  show_payments: boolean("show_payments").notNull().default(true),
+  show_logs: boolean("show_logs").notNull().default(true),
+  
+  // Additional options
+  show_amounts: boolean("show_amounts").notNull().default(true),
+  show_progress: boolean("show_progress").notNull().default(true),
+  allow_comments: boolean("allow_comments").notNull().default(false),
+  
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  updated_by: uuid("updated_by"),
+});
+
+export const insertClientPortalSettingsSchema = createInsertSchema(client_portal_settings).omit({
+  updated_at: true,
+});
+
+export type ClientPortalSettings = typeof client_portal_settings.$inferSelect;
+export type InsertClientPortalSettings = typeof client_portal_settings.$inferInsert;
+
 // Project Types Table
 export const project_types = pgTable("project_types", {
   id: uuid("id").primaryKey().defaultRandom(),
