@@ -1,4 +1,4 @@
-export type ClientPortalTab = 'dashboard' | 'payments' | 'logs';
+export type ClientPortalTab = 'dashboard' | 'installments' | 'payments' | 'logs';
 
 export interface ClientPortalProject {
   id: string;

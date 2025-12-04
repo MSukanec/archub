@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Building2, CreditCard, BookOpen, Eye } from 'lucide-react';
+import { ArrowLeft, Building2, CreditCard, Calendar, Receipt, BookOpen, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { Badge } from '@/components/ui/badge';
@@ -12,8 +12,9 @@ interface Tab {
 }
 
 const PORTAL_TABS: Tab[] = [
-  { id: 'dashboard', label: 'Mi Proyecto', icon: Building2 },
-  { id: 'payments', label: 'Mis Pagos', icon: CreditCard },
+  { id: 'dashboard', label: 'Visión General', icon: Building2 },
+  { id: 'installments', label: 'Cuotas', icon: Calendar },
+  { id: 'payments', label: 'Mis Pagos', icon: Receipt },
   { id: 'logs', label: 'Avances', icon: BookOpen },
 ];
 
