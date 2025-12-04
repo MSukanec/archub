@@ -34,7 +34,7 @@ export function registerClientPortalRoutes(app: Express, deps: RouteDeps) {
             .eq('auth_id', user.id)
             .single();
 
-          console.log('[ClientPortal] DB user found:', !!dbUser);
+          console.log('[ClientPortal] DB user found:', !!dbUser, 'id:', dbUser?.id);
 
           if (dbUser) {
             const { data: project } = await supabase
@@ -46,15 +46,16 @@ export function registerClientPortalRoutes(app: Express, deps: RouteDeps) {
             console.log('[ClientPortal] Project org:', project?.organization_id);
 
             if (project) {
-              const { data: membership } = await supabase
+              const { data: membership, error: membershipError } = await supabase
                 .from('organization_members')
-                .select('id, role')
+                .select('id, role_id')
                 .eq('organization_id', project.organization_id)
                 .eq('user_id', dbUser.id)
                 .eq('is_active', true)
-                .single();
+                .maybeSingle();
 
-              console.log('[ClientPortal] Membership found:', !!membership);
+              console.log('[ClientPortal] Membership query - org:', project.organization_id, 'user:', dbUser.id);
+              console.log('[ClientPortal] Membership found:', !!membership, 'error:', membershipError?.message);
 
               if (membership) {
                 isAdminPreview = true;
