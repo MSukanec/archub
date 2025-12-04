@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Input } from '@/components/ui/input';
@@ -8,9 +8,17 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info, GraduationCap, FileText, BookOpen, Palette, Search, HelpCircle, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Info, GraduationCap, FileText, Palette, Search, HelpCircle, Plus, Pencil, Trash2, Upload, Users, X, Loader2 } from 'lucide-react';
 import { CourseFaqFormModal } from '@/features/learning';
+import { uploadMediaFileV2 } from '@/features/media/services/uploadMediaFileV2';
 import type { LandingSections, LandingSection, CourseFaq } from '@shared/schema';
+
+interface ClientGalleryImage {
+  id: string;
+  file_url: string;
+  file_name: string;
+  media_file_id: string;
+}
 
 interface AdminCourseMarketingTabProps {
   courseId: string;
@@ -41,6 +49,9 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
 
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
   const [selectedFaq, setSelectedFaq] = useState<CourseFaq | null>(null);
+  
+  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const { data: courseData } = useQuery({
     queryKey: ['/api/admin/courses', courseId],
@@ -80,6 +91,43 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       }
 
       return data || [];
+    },
+    enabled: !!courseId && !!supabase
+  });
+
+  const { data: clientGalleryImages = [] } = useQuery<ClientGalleryImage[]>({
+    queryKey: ['course-client-gallery', courseId],
+    queryFn: async () => {
+      if (!courseId || !supabase) return [];
+
+      const { data, error } = await supabase
+        .from('media_links')
+        .select(`
+          id,
+          media_file_id,
+          media_files!inner (
+            id,
+            file_url,
+            file_name,
+            is_deleted
+          )
+        `)
+        .eq('course_id', courseId)
+        .eq('category', 'client_gallery')
+        .eq('media_files.is_deleted', false)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching client gallery:', error);
+        return [];
+      }
+
+      return (data || []).map((item: any) => ({
+        id: item.id,
+        media_file_id: item.media_file_id,
+        file_url: item.media_files.file_url,
+        file_name: item.media_files.file_name
+      }));
     },
     enabled: !!courseId && !!supabase
   });
@@ -207,6 +255,75 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
   const handleDeleteFaq = async (faqId: string) => {
     if (confirm('¿Estás seguro de que deseas eliminar esta FAQ?')) {
       await deleteFaqMutation.mutateAsync(faqId);
+    }
+  };
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploadingGallery(true);
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        if (!file.type.startsWith('image/')) {
+          throw new Error(`${file.name} no es una imagen válida`);
+        }
+        
+        return uploadMediaFileV2({
+          file,
+          course_id: courseId,
+          bucket: 'public-assets',
+          visibility: 'public',
+          category: 'client_gallery',
+          description: file.name
+        });
+      });
+
+      await Promise.all(uploadPromises);
+      
+      queryClient.invalidateQueries({ queryKey: ['course-client-gallery', courseId] });
+      toast({
+        title: "Imágenes subidas",
+        description: `Se subieron ${files.length} imagen(es) a la galería de clientes`
+      });
+    } catch (error: any) {
+      console.error('Error uploading gallery images:', error);
+      toast({
+        title: "Error al subir",
+        description: error.message || "No se pudieron subir las imágenes",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploadingGallery(false);
+      if (galleryInputRef.current) {
+        galleryInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDeleteGalleryImage = async (mediaFileId: string) => {
+    if (!supabase) return;
+    
+    try {
+      const { error } = await supabase
+        .from('media_files')
+        .update({ is_deleted: true })
+        .eq('id', mediaFileId);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['course-client-gallery', courseId] });
+      toast({
+        title: "Imagen eliminada",
+        description: "La imagen se eliminó de la galería"
+      });
+    } catch (error: any) {
+      console.error('Error deleting gallery image:', error);
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo eliminar la imagen",
+        variant: "destructive"
+      });
     }
   };
 
@@ -424,6 +541,75 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
             </p>
           </div>
         </div>
+      </div>
+
+      {/* GALERÍA DE CLIENTES */}
+      <div className="bg-card border rounded-lg p-6 space-y-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-accent flex-shrink-0" />
+            <h3 className="text-lg font-semibold">Galería de Clientes</h3>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleGalleryUpload}
+              className="hidden"
+              id="gallery-upload"
+              data-testid="input-gallery-upload"
+            />
+            <Button
+              onClick={() => galleryInputRef.current?.click()}
+              size="sm"
+              disabled={isUploadingGallery}
+              data-testid="button-upload-gallery"
+            >
+              {isUploadingGallery ? (
+                <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+              ) : (
+                <Upload className="w-4 h-4 mr-1" />
+              )}
+              {isUploadingGallery ? 'Subiendo...' : 'Subir Imágenes'}
+            </Button>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Imágenes de clientes que se mostrarán en un carrusel en la landing del curso
+        </p>
+
+        {clientGalleryImages.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-8">
+            No hay imágenes en la galería. Haz clic en "Subir Imágenes" para agregar.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {clientGalleryImages.map((image) => (
+              <div
+                key={image.id}
+                className="relative group aspect-square rounded-lg overflow-hidden border"
+                data-testid={`gallery-image-${image.id}`}
+              >
+                <img
+                  src={image.file_url}
+                  alt={image.file_name}
+                  className="w-full h-full object-cover"
+                />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => handleDeleteGalleryImage(image.media_file_id)}
+                  data-testid={`button-delete-gallery-${image.id}`}
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* FAQs */}
