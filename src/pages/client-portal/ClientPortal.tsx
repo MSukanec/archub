@@ -7,7 +7,7 @@ import { PortalPaymentsTab } from './PortalPaymentsTab';
 import { PortalLogsTab } from './PortalLogsTab';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, Users } from 'lucide-react';
+import { AlertCircle, Users, Loader2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -23,7 +23,7 @@ export default function ClientPortal() {
   const [activeTab, setActiveTab] = useState<ClientPortalTab>('dashboard');
   const [selectedClientId, setSelectedClientId] = useState<string | undefined>();
 
-  const { data, isLoading, error } = useClientPortalData({
+  const { data, isLoading, isFetching, error } = useClientPortalData({
     projectId: projectId || '',
     clientId: selectedClientId,
   });
@@ -135,6 +135,7 @@ export default function ClientPortal() {
                 ))}
               </SelectContent>
             </Select>
+            {isFetching && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
           </div>
         ) : null
       }

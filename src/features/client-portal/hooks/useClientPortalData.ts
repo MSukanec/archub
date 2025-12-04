@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { ClientPortalData } from '../types';
 
@@ -45,5 +45,6 @@ export function useClientPortalData({ projectId, clientId }: UseClientPortalData
     enabled: !!projectId,
     staleTime: 1000 * 60 * 5,
     retry: 1,
+    placeholderData: keepPreviousData,
   });
 }
