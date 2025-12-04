@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Star, MessageSquareQuote, Trash2, Send, Info, Clock } from 'lucide-react';
+import { Star, MessageSquareQuote, Trash2, Send, MoreHorizontal } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGlobalModalStore } from '@/components/modal';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { StatCard, StatCardTitle, StatCardMeta } from '@/components/ui-custom/KPICard';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { Testimonial } from '@shared/schema';
 
 interface CourseFeedbackTabProps {
@@ -117,9 +121,10 @@ export default function CourseFeedbackTab({ courseId }: CourseFeedbackTabProps) 
     });
   };
 
-  const renderStars = (currentRating: number, interactive: boolean = false) => {
+  const renderStars = (currentRating: number, interactive: boolean = false, size: 'sm' | 'md' = 'md') => {
+    const sizeClasses = size === 'sm' ? 'w-4 h-4' : 'w-5 h-5';
     return (
-      <div className="flex gap-1" data-testid="star-rating-container">
+      <div className="flex gap-0.5" data-testid="star-rating-container">
         {[1, 2, 3, 4, 5].map((star) => {
           const isFilled = interactive 
             ? star <= (hoveredRating || rating)
@@ -137,10 +142,10 @@ export default function CourseFeedbackTab({ courseId }: CourseFeedbackTabProps) 
               data-testid={`star-${star}`}
             >
               <Star
-                className={`w-6 h-6 ${
+                className={`${sizeClasses} ${
                   isFilled 
                     ? 'fill-yellow-400 text-yellow-400' 
-                    : 'text-muted-foreground'
+                    : 'text-muted-foreground/40'
                 }`}
               />
             </button>
@@ -154,154 +159,122 @@ export default function CourseFeedbackTab({ courseId }: CourseFeedbackTabProps) 
     return (
       <div className="space-y-3">
         <div className="h-32 bg-muted/20 rounded-lg animate-pulse" />
-        <div className="h-48 bg-muted/20 rounded-lg animate-pulse" />
       </div>
     );
   }
 
   if (testimonial) {
     return (
-      <div className="space-y-6" data-testid="course-feedback-tab">
-        <Card data-testid="card-existing-feedback">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <MessageSquareQuote className="w-5 h-5" />
+      <div data-testid="course-feedback-tab">
+        <StatCard data-testid="card-existing-feedback" className="relative">
+          <div className="absolute top-3 right-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  data-testid="button-feedback-actions"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={handleDelete}
+                  disabled={deleteFeedbackMutation.isPending}
+                  className="flex items-center gap-2 text-sm cursor-pointer text-foreground hover:text-red-600 dark:hover:text-red-500 transition-colors"
+                  data-testid="button-delete-feedback"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {deleteFeedbackMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <StatCardTitle showArrow={false} className="flex items-center gap-2">
+              <MessageSquareQuote className="w-4 h-4" />
               Tu Valoración
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              {renderStars(testimonial.rating || 0)}
-              <span className="text-sm text-muted-foreground ml-2">
-                {testimonial.rating} de 5 estrellas
+            </StatCardTitle>
+            {renderStars(testimonial.rating || 0, false, 'sm')}
+            {!testimonial.is_active && (
+              <span className="text-[10px] text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-1.5 py-0.5 rounded">
+                Pendiente
               </span>
-            </div>
-            
-            <div className="p-4 bg-muted/30 rounded-lg">
-              <p className="text-sm whitespace-pre-wrap" data-testid="text-feedback-content">
-                {testimonial.content}
-              </p>
-            </div>
+            )}
+          </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock className="w-3 h-3" />
-                <span>
-                  Enviado el {format(new Date(testimonial.created_at), "d 'de' MMMM 'de' yyyy", { locale: es })}
-                </span>
-              </div>
-              
-              {!testimonial.is_active && (
-                <span className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-2 py-1 rounded">
-                  Pendiente de revisión
-                </span>
-              )}
-            </div>
+          <div className="mt-3 p-3 bg-muted/30 rounded-lg">
+            <p className="text-sm whitespace-pre-wrap" data-testid="text-feedback-content">
+              {testimonial.content}
+            </p>
+          </div>
 
-            <Alert>
-              <Info className="w-4 h-4" />
-              <AlertDescription className="text-sm">
-                Una vez enviada, la valoración no puede editarse. Si deseas modificarla, deberás eliminarla y crear una nueva.
-              </AlertDescription>
-            </Alert>
-
-            <div className="flex justify-end pt-2">
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDelete}
-                disabled={deleteFeedbackMutation.isPending}
-                data-testid="button-delete-feedback"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                {deleteFeedbackMutation.isPending ? 'Eliminando...' : 'Eliminar Valoración'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          <StatCardMeta className="mt-2">
+            Enviado el {format(new Date(testimonial.created_at), "d 'de' MMMM 'de' yyyy", { locale: es })}
+          </StatCardMeta>
+        </StatCard>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6" data-testid="course-feedback-tab">
-      <Card data-testid="card-create-feedback">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <MessageSquareQuote className="w-5 h-5" />
+    <div data-testid="course-feedback-tab">
+      <StatCard data-testid="card-create-feedback">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <StatCardTitle showArrow={false} className="flex items-center gap-2">
+            <MessageSquareQuote className="w-4 h-4" />
             Deja tu Valoración
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Alert>
-            <Info className="w-4 h-4" />
-            <AlertDescription className="text-sm">
-              Tu opinión es muy valiosa y será visible públicamente en la página del curso. 
-              Esto ayuda a futuros estudiantes a tomar mejores decisiones. 
-              Tu valoración será revisada por el equipo docente antes de publicarse.
-            </AlertDescription>
-          </Alert>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Puntuación</label>
-            {renderStars(rating, true)}
+          </StatCardTitle>
+          <div className="flex items-center gap-2">
+            {renderStars(rating, true, 'md')}
             {rating > 0 && (
-              <p className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {rating === 1 && 'Muy malo'}
                 {rating === 2 && 'Malo'}
                 {rating === 3 && 'Regular'}
                 {rating === 4 && 'Bueno'}
                 {rating === 5 && 'Excelente'}
-              </p>
+              </span>
             )}
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <label htmlFor="feedback-content" className="text-sm font-medium">
-              Tu opinión
-            </label>
-            <Textarea
-              id="feedback-content"
-              placeholder="Comparte tu experiencia con el curso. ¿Qué te gustó? ¿Qué aprendiste? ¿Lo recomendarías?"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={5}
-              className="resize-none"
-              data-testid="textarea-feedback-content"
-            />
-            <p className="text-xs text-muted-foreground">
+        <div className="mt-4 space-y-3">
+          <Input
+            placeholder="¿Cuál es tu profesión? Ej: Arquitecto, Ingeniero Civil, Estudiante..."
+            value={authorTitle}
+            onChange={(e) => setAuthorTitle(e.target.value)}
+            data-testid="input-feedback-author-title"
+          />
+
+          <Textarea
+            placeholder="Comparte tu experiencia con el curso. ¿Qué te gustó? ¿Qué aprendiste? ¿Lo recomendarías?"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={4}
+            className="resize-none"
+            data-testid="textarea-feedback-content"
+          />
+
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] text-muted-foreground">
               {content.length} caracteres
             </p>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="feedback-author-title" className="text-sm font-medium">
-              Profesión (opcional)
-            </label>
-            <Input
-              id="feedback-author-title"
-              placeholder="Ej: Arquitecto, Ingeniero Civil, Estudiante de Construcción..."
-              value={authorTitle}
-              onChange={(e) => setAuthorTitle(e.target.value)}
-              data-testid="input-feedback-author-title"
-            />
-            <p className="text-xs text-muted-foreground">
-              Esta información se mostrará junto a tu nombre en el testimonio público.
-            </p>
-          </div>
-
-          <div className="flex justify-end pt-2">
             <Button
+              size="sm"
               onClick={handleSubmit}
               disabled={createFeedbackMutation.isPending || !content.trim() || rating === 0}
               data-testid="button-submit-feedback"
             >
-              <Send className="w-4 h-4 mr-2" />
-              {createFeedbackMutation.isPending ? 'Enviando...' : 'Enviar Valoración'}
+              <Send className="w-3.5 h-3.5 mr-1.5" />
+              {createFeedbackMutation.isPending ? 'Enviando...' : 'Enviar'}
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </StatCard>
     </div>
   );
 }
