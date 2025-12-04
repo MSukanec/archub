@@ -540,7 +540,7 @@ export function LeftSidebar() {
                         onClick: () => {
                           if (!isAdmin) return;
                           if (selectedProjectId) {
-                            window.open(`/portal/${selectedProjectId}`, '_blank');
+                            navigate(`/portal/${selectedProjectId}`);
                           }
                         },
                         shouldRender: () => hasProjects && !!selectedProjectId,
