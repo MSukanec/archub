@@ -1,16 +1,24 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle } from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
 import type { FoundersSectionProps } from "../types";
 
 export function FinalCTASection({ mode }: FoundersSectionProps) {
-  const ctaHref = mode === 'public' 
-    ? '/register?plan=annual' 
-    : '/settings/plan?billing=annual';
+  const { user } = useAuthStore();
+  const isAuthenticated = !!user;
 
-  const ctaText = mode === 'public' 
-    ? 'Suscribirme al Plan Anual' 
-    : 'Actualizar a Plan Anual';
+  const ctaHref = mode === 'dashboard' 
+    ? '/settings/plan?billing=annual'
+    : isAuthenticated 
+      ? '/settings/plan?billing=annual' 
+      : '/register?plan=annual';
+
+  const ctaText = mode === 'dashboard' 
+    ? 'Actualizar a Plan Anual' 
+    : isAuthenticated 
+      ? 'Ver Planes Anuales'
+      : 'Suscribirme al Plan Anual';
 
   return (
     <section

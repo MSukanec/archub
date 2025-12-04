@@ -1,12 +1,18 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star } from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
 import type { FoundersSectionProps } from "../types";
 
 export function HeroSection({ mode }: FoundersSectionProps) {
-  const ctaHref = mode === 'public' 
-    ? '/register?plan=annual' 
-    : '/settings/plan?billing=annual';
+  const { user } = useAuthStore();
+  const isAuthenticated = !!user;
+
+  const ctaHref = mode === 'dashboard' 
+    ? '/settings/plan?billing=annual'
+    : isAuthenticated 
+      ? '/settings/plan?billing=annual' 
+      : '/register?plan=annual';
 
   return (
     <section
