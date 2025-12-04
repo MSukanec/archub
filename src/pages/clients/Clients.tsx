@@ -124,15 +124,15 @@ export function Clients() {
       isActive: activeTab === "details"
     },
     {
-      id: "portal",
-      label: "Portal",
-      isActive: activeTab === "portal"
-    },
-    {
       id: "schedule",
       label: "Cronograma de Pagos",
       isActive: activeTab === "schedule",
       disabled: true
+    },
+    {
+      id: "portal",
+      label: "Portal",
+      isActive: activeTab === "portal"
     },
     {
       id: "settings",
