@@ -413,6 +413,66 @@ All upload functions:
 
 5. **Use `created_by_member_id`** with organization_member.id (NOT user.id)
 
+---
+
+## ⚠️ CRITICAL: Adding New MediaCategory Types
+
+**This is a recurring issue!** When adding a new `category` value for `media_links`, you MUST update BOTH:
+
+### Checklist for New Categories
+
+- [ ] **1. TypeScript types** (`src/features/media/types/index.ts`)
+  - Add to `MediaCategory` type
+
+- [ ] **2. PostgreSQL constraint** (`prompts/tables/media.md`)
+  - Add to `media_links_category_check` array
+  - **Generate SQL migration for user to execute in Supabase**
+
+### Current Valid Categories (PostgreSQL)
+
+```
+dni_front, dni_back, document, photo, other, general, technical,
+financial, legal, course_cover, instructor_photo, module_image,
+section_background, testimonial_logo, project_photo, og_image,
+client_gallery
+```
+
+### SQL to Add a New Category
+
+```sql
+-- Replace the constraint with the updated list
+ALTER TABLE public.media_links
+DROP CONSTRAINT media_links_category_check;
+
+ALTER TABLE public.media_links
+ADD CONSTRAINT media_links_category_check CHECK (
+  (category IS NULL) OR (
+    category = ANY (ARRAY[
+      'dni_front'::text,
+      'dni_back'::text,
+      'document'::text,
+      'photo'::text,
+      'other'::text,
+      'general'::text,
+      'technical'::text,
+      'financial'::text,
+      'legal'::text,
+      'course_cover'::text,
+      'instructor_photo'::text,
+      'module_image'::text,
+      'section_background'::text,
+      'testimonial_logo'::text,
+      'project_photo'::text,
+      'og_image'::text,
+      'client_gallery'::text,
+      'NEW_CATEGORY_HERE'::text  -- Add new category here
+    ])
+  )
+);
+```
+
+**Remember:** The AI agent cannot execute SQL directly. Always provide the SQL to the user for execution in Supabase SQL Editor.
+
 ### Testing Checklist
 
 When adding new entity types or modifying upload logic:

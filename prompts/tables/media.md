@@ -105,7 +105,8 @@ create table public.media_links (
             'section_background'::text,
             'testimonial_logo'::text,
             'project_photo'::text,
-            'og_image'::text
+            'og_image'::text,
+            'client_gallery'::text
           ]
         )
       )
