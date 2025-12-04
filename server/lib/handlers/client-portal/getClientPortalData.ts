@@ -142,7 +142,6 @@ export async function getClientPortalData(
     .select(`
       id,
       contact_id,
-      unit,
       is_primary,
       client_role:client_roles (
         name
@@ -165,6 +164,8 @@ export async function getClientPortalData(
     console.error('Error fetching project clients:', clientsError);
   }
 
+  console.log('[ClientPortal] isAdminPreview:', isAdminPreview, 'clients found:', projectClients?.length || 0);
+
   const clients: ClientPortalClient[] = (projectClients || []).map((pc: any) => ({
     id: pc.contact?.id || '',
     project_client_id: pc.id,
@@ -174,7 +175,7 @@ export async function getClientPortalData(
     full_name: pc.contact?.full_name,
     email: pc.contact?.email,
     phone: pc.contact?.phone,
-    unit: pc.unit,
+    unit: null,
     is_primary: pc.is_primary,
     role_name: pc.client_role?.name || null,
   }));
