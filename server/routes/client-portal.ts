@@ -54,7 +54,6 @@ async function verifyProjectMembership(token: string, projectId: string) {
     .eq('organization_id', project.organization_id)
     .eq('user_id', dbUser.id)
     .eq('is_active', true)
-    .eq('is_deleted', false)
     .maybeSingle();
   
   console.log('[ClientPortal Config] Membership query result:', { membership, error: membershipError?.message });
