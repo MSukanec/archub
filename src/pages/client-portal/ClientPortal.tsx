@@ -5,94 +5,32 @@ import {
   ProjectOverviewCard, 
   PaymentsList, 
   UpcomingInstallments, 
-  SiteLogsFeed 
+  SiteLogsFeed,
+  useClientPortalData
 } from '@/features/client-portal';
-import type { 
-  ClientPortalTab, 
-  ClientPortalProject, 
-  ClientPortalPayment, 
-  ClientPortalSchedule, 
-  ClientPortalSiteLog,
-  ClientPortalStats 
-} from '@/features/client-portal';
+import type { ClientPortalTab, ClientPortalClient } from '@/features/client-portal';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Users } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function ClientPortal() {
   const [, params] = useRoute('/portal/:projectId');
   const projectId = params?.projectId;
   
   const [activeTab, setActiveTab] = useState<ClientPortalTab>('dashboard');
+  const [selectedClientId, setSelectedClientId] = useState<string | undefined>();
 
-  const mockProject: ClientPortalProject = {
-    id: projectId || '1',
-    name: 'Residencial Los Álamos',
-    status: 'En construcción',
-    image_url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800',
-    city: 'Buenos Aires',
-    country: 'Argentina',
-    start_date: '2024-01-15',
-    estimated_end: '2025-06-30',
-    project_type_name: 'Residencial',
-    project_modality_name: 'Construcción Nueva',
-  };
-
-  const mockStats: ClientPortalStats = {
-    total_commitment: 15000000,
-    total_paid: 9000000,
-    total_pending: 6000000,
-    next_due_date: '2024-02-15',
-    next_due_amount: 1500000,
-    currency_code: 'ARS',
-  };
-
-  const mockPayments: ClientPortalPayment[] = [
-    { id: '1', amount: 3000000, currency_code: 'ARS', payment_date: '2024-01-15', status: 'confirmed', reference: 'TRF-001' },
-    { id: '2', amount: 3000000, currency_code: 'ARS', payment_date: '2024-02-15', status: 'confirmed', reference: 'TRF-002' },
-    { id: '3', amount: 3000000, currency_code: 'ARS', payment_date: '2024-03-15', status: 'confirmed', reference: 'TRF-003' },
-  ];
-
-  const mockSchedules: ClientPortalSchedule[] = [
-    { id: '1', amount: 1500000, currency_code: 'ARS', due_date: '2024-04-15', status: 'pending' },
-    { id: '2', amount: 1500000, currency_code: 'ARS', due_date: '2024-05-15', status: 'pending' },
-    { id: '3', amount: 1500000, currency_code: 'ARS', due_date: '2024-06-15', status: 'pending' },
-    { id: '4', amount: 1500000, currency_code: 'ARS', due_date: '2024-07-15', status: 'pending' },
-  ];
-
-  const mockLogs: ClientPortalSiteLog[] = [
-    {
-      id: '1',
-      log_date: '2024-03-20',
-      weather: 'sunny',
-      entry_type_name: 'Avance de obra',
-      ai_summary: 'Se completó la instalación de las estructuras metálicas del segundo piso. El avance general del proyecto es del 45%.',
-      comments: 'Hoy se terminaron de soldar las vigas principales del segundo nivel. El equipo trabajó con normalidad y sin contratiempos.',
-      images: [
-        'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400',
-        'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400',
-      ],
-    },
-    {
-      id: '2',
-      log_date: '2024-03-18',
-      weather: 'cloudy',
-      entry_type_name: 'Inspección',
-      ai_summary: 'Inspección de calidad aprobada para los trabajos de mampostería del primer piso.',
-      comments: 'Se realizó la inspección técnica de los trabajos de mampostería. Todos los muros cumplen con las especificaciones del proyecto.',
-    },
-    {
-      id: '3',
-      log_date: '2024-03-15',
-      weather: 'sunny',
-      entry_type_name: 'Avance de obra',
-      ai_summary: 'Inicio de trabajos de instalaciones eléctricas en planta baja.',
-      comments: 'El equipo de electricistas comenzó con el tendido de cañerías para la instalación eléctrica. Se estima completar la planta baja en 5 días.',
-      images: [
-        'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400',
-      ],
-    },
-  ];
+  const { data, isLoading, error } = useClientPortalData({
+    projectId: projectId || '',
+    clientId: selectedClientId,
+  });
 
   if (!projectId) {
     return (
@@ -112,24 +50,59 @@ export default function ClientPortal() {
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 text-destructive mb-4">
+              <AlertCircle className="h-6 w-6" />
+              <h2 className="font-semibold">Error al cargar</h2>
+            </div>
+            <p className="text-muted-foreground text-sm">
+              {error instanceof Error ? error.message : 'No se pudieron cargar los datos del portal.'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const getClientDisplayName = (client: ClientPortalClient) => {
+    if (client.full_name) return client.full_name;
+    if (client.first_name || client.last_name) {
+      return `${client.first_name || ''} ${client.last_name || ''}`.trim();
+    }
+    return client.email || 'Cliente sin nombre';
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return (
           <ProjectOverviewCard 
-            project={mockProject} 
-            stats={mockStats} 
+            project={data.project} 
+            stats={data.stats}
+            client={data.client}
           />
         );
       case 'payments':
         return (
           <div className="space-y-6">
-            <UpcomingInstallments schedules={mockSchedules} />
-            <PaymentsList payments={mockPayments} />
+            <UpcomingInstallments schedules={data.schedule} />
+            <PaymentsList payments={data.payments} />
           </div>
         );
       case 'logs':
-        return <SiteLogsFeed logs={mockLogs} />;
+        return <SiteLogsFeed logs={data.site_logs} />;
       default:
         return null;
     }
@@ -137,9 +110,49 @@ export default function ClientPortal() {
 
   return (
     <ClientPortalLayout
-      project={mockProject}
+      project={data.project}
       activeTab={activeTab}
       onTabChange={setActiveTab}
+      isAdminPreview={data.is_admin_preview}
+      adminPreviewSlot={
+        data.is_admin_preview && data.clients.length > 1 ? (
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-muted-foreground" />
+            <Select
+              value={selectedClientId || data.client?.id || ''}
+              onValueChange={(value) => setSelectedClientId(value)}
+            >
+              <SelectTrigger 
+                className="w-[200px] h-8 text-xs"
+                data-testid="select-client-preview"
+              >
+                <SelectValue placeholder="Seleccionar cliente" />
+              </SelectTrigger>
+              <SelectContent>
+                {data.clients.map((client) => (
+                  <SelectItem 
+                    key={client.id} 
+                    value={client.id}
+                    data-testid={`select-client-${client.id}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>{getClientDisplayName(client)}</span>
+                      {client.unit && (
+                        <span className="text-muted-foreground">({client.unit})</span>
+                      )}
+                      {client.is_primary && (
+                        <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                          Principal
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null
+      }
     >
       {renderTabContent()}
     </ClientPortalLayout>

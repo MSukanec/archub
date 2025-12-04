@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Cloud, Sun, CloudRain, CloudSnow, Wind } from 'lucide-react';
+import { BookOpen, Cloud, Sun, CloudRain, CloudSnow, Wind, Image, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { ClientPortalSiteLog } from '../types';
@@ -10,13 +10,29 @@ interface SiteLogsFeedProps {
   isLoading?: boolean;
 }
 
-const weatherIcons: Record<string, React.ComponentType<any>> = {
+const weatherIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   sunny: Sun,
+  partly_cloudy: Cloud,
   cloudy: Cloud,
-  rainy: CloudRain,
-  snowy: CloudSnow,
+  rain: CloudRain,
+  storm: CloudRain,
+  snow: CloudSnow,
+  fog: Cloud,
   windy: Wind,
+  hail: CloudRain,
   none: Cloud,
+};
+
+const weatherLabels: Record<string, string> = {
+  sunny: 'Soleado',
+  partly_cloudy: 'Parcialmente nublado',
+  cloudy: 'Nublado',
+  rain: 'Lluvia',
+  storm: 'Tormenta',
+  snow: 'Nieve',
+  fog: 'Niebla',
+  windy: 'Ventoso',
+  hail: 'Granizo',
 };
 
 export function SiteLogsFeed({ logs, isLoading }: SiteLogsFeedProps) {
@@ -69,6 +85,7 @@ export function SiteLogsFeed({ logs, isLoading }: SiteLogsFeedProps) {
     <div className="space-y-4" data-testid="sitelog-feed">
       {logs.map((log) => {
         const WeatherIcon = weatherIcons[log.weather || 'none'] || Cloud;
+        const weatherLabel = weatherLabels[log.weather || ''] || log.weather;
 
         return (
           <Card key={log.id} data-testid={`sitelog-item-${log.id}`}>
@@ -81,52 +98,36 @@ export function SiteLogsFeed({ logs, isLoading }: SiteLogsFeedProps) {
                   {log.weather && log.weather !== 'none' && (
                     <Badge variant="outline" className="gap-1">
                       <WeatherIcon className="h-3 w-3" />
-                      <span className="capitalize">{log.weather}</span>
+                      <span className="capitalize">{weatherLabel}</span>
                     </Badge>
                   )}
-                  {log.entry_type_name && (
-                    <Badge variant="secondary">{log.entry_type_name}</Badge>
+                  {log.type_name && (
+                    <Badge variant="secondary">{log.type_name}</Badge>
                   )}
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {log.ai_summary && (
-                <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
-                  <p className="text-sm font-medium text-primary mb-1">Resumen</p>
-                  <p className="text-sm text-muted-foreground">{log.ai_summary}</p>
-                </div>
-              )}
-
               {log.comments && (
                 <p className="text-sm text-foreground whitespace-pre-wrap">
                   {log.comments}
                 </p>
               )}
 
-              {log.images && log.images.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  {log.images.slice(0, 8).map((imageUrl, index) => (
-                    <div
-                      key={index}
-                      className="aspect-square rounded-lg overflow-hidden bg-muted"
-                    >
-                      <img
-                        src={imageUrl}
-                        alt={`Foto ${index + 1}`}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
-                      />
-                    </div>
-                  ))}
-                  {log.images.length > 8 && (
-                    <div className="aspect-square rounded-lg bg-muted flex items-center justify-center">
-                      <span className="text-sm text-muted-foreground">
-                        +{log.images.length - 8} más
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                {log.files_count > 0 && (
+                  <div className="flex items-center gap-1">
+                    <Image className="h-4 w-4" />
+                    <span>{log.files_count} {log.files_count === 1 ? 'foto' : 'fotos'}</span>
+                  </div>
+                )}
+                {log.creator_name && (
+                  <div className="flex items-center gap-1">
+                    <User className="h-4 w-4" />
+                    <span>{log.creator_name}</span>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         );

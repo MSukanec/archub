@@ -3,50 +3,87 @@ export type ClientPortalTab = 'dashboard' | 'payments' | 'logs';
 export interface ClientPortalProject {
   id: string;
   name: string;
+  code: string | null;
   status: string;
-  image_url?: string;
-  city?: string;
-  country?: string;
-  start_date?: string;
-  estimated_end?: string;
-  project_type_name?: string;
-  project_modality_name?: string;
+  color: string | null;
+  start_date: string | null;
+  estimated_end: string | null;
+  address: string | null;
+  city: string | null;
+  image_url: string | null;
+}
+
+export interface ClientPortalClient {
+  id: string;
+  project_client_id: string;
+  contact_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+  unit: string | null;
+  is_primary: boolean;
+  role_name: string | null;
+}
+
+export interface ClientPortalCommitment {
+  id: string;
+  amount: number;
+  currency_code: string;
+  currency_symbol: string;
+  commitment_method: string;
+}
+
+export interface ClientPortalScheduleItem {
+  id: string;
+  due_date: string;
+  amount: number;
+  currency_code: string;
+  currency_symbol: string;
+  status: string;
+  paid_at: string | null;
 }
 
 export interface ClientPortalPayment {
   id: string;
   amount: number;
   currency_code: string;
+  currency_symbol: string;
   payment_date: string;
+  reference: string | null;
   status: string;
-  reference?: string;
-  notes?: string;
-}
-
-export interface ClientPortalSchedule {
-  id: string;
-  amount: number;
-  currency_code: string;
-  due_date: string;
-  status: 'pending' | 'paid' | 'overdue' | 'cancelled';
-  notes?: string;
 }
 
 export interface ClientPortalSiteLog {
   id: string;
   log_date: string;
-  comments?: string;
-  weather?: string;
-  entry_type_name?: string;
-  ai_summary?: string;
-  images?: string[];
+  comments: string | null;
+  weather: string | null;
+  type_name: string | null;
+  files_count: number;
+  creator_name: string | null;
 }
 
 export interface ClientPortalStats {
   total_commitment: number;
   total_paid: number;
   total_pending: number;
-  next_due_date?: string;
-  next_due_amount?: number;
   currency_code: string;
+  currency_symbol: string;
+  next_installment_date: string | null;
+  next_installment_amount: number | null;
+  project_progress: number;
+}
+
+export interface ClientPortalData {
+  project: ClientPortalProject;
+  client: ClientPortalClient | null;
+  clients: ClientPortalClient[];
+  stats: ClientPortalStats;
+  commitment: ClientPortalCommitment | null;
+  schedule: ClientPortalScheduleItem[];
+  payments: ClientPortalPayment[];
+  site_logs: ClientPortalSiteLog[];
+  is_admin_preview: boolean;
 }

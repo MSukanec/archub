@@ -11,10 +11,10 @@ interface PaymentsListProps {
 }
 
 const statusConfig = {
-  confirmed: { label: 'Confirmado', icon: CheckCircle, variant: 'default' as const, className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-  pending: { label: 'Pendiente', icon: Clock, variant: 'secondary' as const, className: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' },
-  rejected: { label: 'Rechazado', icon: XCircle, variant: 'destructive' as const, className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
-  void: { label: 'Anulado', icon: AlertCircle, variant: 'outline' as const, className: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+  confirmed: { label: 'Confirmado', icon: CheckCircle, className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
+  pending: { label: 'Pendiente', icon: Clock, className: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' },
+  rejected: { label: 'Rechazado', icon: XCircle, className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
+  void: { label: 'Anulado', icon: AlertCircle, className: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
 };
 
 export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
@@ -26,13 +26,11 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
     }
   };
 
-  const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: currency || 'ARS',
+  const formatCurrency = (amount: number, symbol: string = '$') => {
+    return `${symbol} ${new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(amount);
+    }).format(amount)}`;
   };
 
   if (isLoading) {
@@ -97,7 +95,7 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm">
-                    {formatCurrency(payment.amount, payment.currency_code)}
+                    {formatCurrency(payment.amount, payment.currency_symbol)}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {formatDate(payment.payment_date)}

@@ -3,10 +3,10 @@ import { Badge } from '@/components/ui/badge';
 import { CalendarClock, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
 import { format, isPast, isToday, addDays, isBefore } from 'date-fns';
 import { es } from 'date-fns/locale';
-import type { ClientPortalSchedule } from '../types';
+import type { ClientPortalScheduleItem } from '../types';
 
 interface UpcomingInstallmentsProps {
-  schedules: ClientPortalSchedule[];
+  schedules: ClientPortalScheduleItem[];
   isLoading?: boolean;
 }
 
@@ -21,17 +21,15 @@ export function UpcomingInstallments({ schedules, isLoading }: UpcomingInstallme
     }
   };
 
-  const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: currency || 'ARS',
+  const formatCurrency = (amount: number, symbol: string = '$') => {
+    return `${symbol} ${new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(amount);
+    }).format(amount)}`;
   };
 
-  const getStatus = (schedule: ClientPortalSchedule) => {
-    if (schedule.status === 'paid') {
+  const getStatus = (schedule: ClientPortalScheduleItem) => {
+    if (schedule.status === 'paid' || schedule.paid_at) {
       return { label: 'Pagado', icon: CheckCircle, className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' };
     }
     if (schedule.status === 'cancelled') {
@@ -72,7 +70,7 @@ export function UpcomingInstallments({ schedules, isLoading }: UpcomingInstallme
     );
   }
 
-  const pendingSchedules = schedules.filter(s => s.status !== 'paid' && s.status !== 'cancelled');
+  const pendingSchedules = schedules.filter(s => s.status !== 'paid' && !s.paid_at && s.status !== 'cancelled');
 
   if (pendingSchedules.length === 0) {
     return (
@@ -113,7 +111,7 @@ export function UpcomingInstallments({ schedules, isLoading }: UpcomingInstallme
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm">
-                    {formatCurrency(schedule.amount, schedule.currency_code)}
+                    {formatCurrency(schedule.amount, schedule.currency_symbol)}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Vence: {formatDate(schedule.due_date)}
