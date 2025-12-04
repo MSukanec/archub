@@ -44,20 +44,29 @@ async function verifyProjectMembership(token: string, projectId: string) {
     return { authorized: false, userId: dbUser.id, organizationId: null };
   }
   
-  const { data: membership } = await supabase
+  const { data: membership, error: membershipError } = await supabase
     .from('organization_members')
-    .select('id, role_id, roles:role_id(name)')
+    .select(`
+      id, 
+      role_id,
+      role:roles!left (name)
+    `)
     .eq('organization_id', project.organization_id)
     .eq('user_id', dbUser.id)
     .eq('is_active', true)
+    .eq('is_deleted', false)
     .maybeSingle();
+  
+  console.log('[ClientPortal Config] Membership query result:', { membership, error: membershipError?.message });
     
   if (!membership) {
     return { authorized: false, userId: dbUser.id, organizationId: project.organization_id };
   }
   
-  const roleName = (membership.roles as any)?.name;
+  const roleName = (membership.role as any)?.name?.toLowerCase();
   const isAdmin = roleName === 'owner' || roleName === 'admin';
+  
+  console.log('[ClientPortal Config] User role:', roleName, 'isAdmin:', isAdmin);
   
   return { 
     authorized: true, 
