@@ -126,8 +126,9 @@ function ClientsSection({
   return (
     <section className="py-16 sm:py-20" data-testid="section-clients">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-0">
-          <div className="lg:col-span-3 space-y-12">
+        {/* Grid: content + fixed 400px space for sticky card */}
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-0">
+          <div className="space-y-12">
             <div className="mb-12 space-y-4 text-left">
               <p className="text-xs sm:text-sm md:text-base uppercase tracking-wide font-semibold text-accent dark:text-accent">
                 {subtitle}
@@ -143,7 +144,8 @@ function ClientsSection({
               </p>
             </div>
           </div>
-          <div className="hidden lg:block" />
+          {/* Empty Space for sticky card */}
+          <div className="hidden xl:block" />
         </div>
       </div>
       

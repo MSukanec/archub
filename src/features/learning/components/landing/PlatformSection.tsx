@@ -22,8 +22,9 @@ export function PlatformSection({
       }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-0">
-          <div className="lg:col-span-3 space-y-12">
+        {/* Grid: content + fixed 400px space for sticky card */}
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-0">
+          <div className="space-y-12">
             <SectionHeader
               title={title}
               subtitle={subtitle}
@@ -63,7 +64,8 @@ export function PlatformSection({
             </div>
           </div>
 
-          <div className="hidden lg:block" />
+          {/* Empty Space for sticky card */}
+          <div className="hidden xl:block" />
         </div>
       </div>
     </section>
