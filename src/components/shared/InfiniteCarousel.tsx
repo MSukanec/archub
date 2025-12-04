@@ -126,12 +126,11 @@ export function InfiniteCarousel({
           <div
             key={`${item.id}-${index}`}
             className="flex-shrink-0 h-full"
-            style={{ width: `${calculatedItemWidth}px` }}
           >
             <img
               src={item.src}
               alt={item.alt || ''}
-              className="w-full h-full object-cover rounded-lg"
+              className="h-full w-auto object-contain"
               loading="lazy"
               data-testid={`carousel-item-${item.id}`}
             />
