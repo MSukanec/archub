@@ -27,10 +27,6 @@ export function CourseStickyCardWithMode({
   ctaButtonText,
   variant = 'fixed',
 }: CourseStickyCardWithModeProps) {
-  const rightOffset = mode === 'dashboard' 
-    ? 'max(32px, calc((100vw - 1472px) / 2 - 72px))'
-    : 'max(32px, calc((100vw - 1472px) / 2))';
-  
   const status = (course.status || 'available') as ItemStatus;
   
   // When in-grid, the card is positioned by the parent grid, no fixed positioning needed
@@ -128,12 +124,26 @@ export function CourseStickyCardWithMode({
     );
   }
   
-  // Fixed variant - original behavior with position fixed
-  // Calculate right offset: container max-width is 1280px (xl), 1536px (2xl)
-  // Grid uses 400px for sticky column, so right = (100vw - container) / 2
-  const fixedRightOffset = mode === 'dashboard' 
-    ? 'max(32px, calc((100vw - 1280px) / 2 - 72px))'
-    : 'max(32px, calc((100vw - 1280px) / 2))';
+  // Fixed variant - position fixed with calculated offset
+  // Container uses max-width from Tailwind's container class
+  // At xl (1280px+): max-width is 1280px with px-8 (32px) padding = 1216px content
+  // At 2xl (1536px+): max-width is 1536px with px-8 (32px) padding = 1472px content
+  // 
+  // The card should align with the right edge of the container's content area
+  // Grid layout: [1fr_400px] means we reserve 400px for the card column
+  // Card is 368px wide, centered in 400px = 16px offset from grid column edge
+  // 
+  // Right offset = (viewport - container_max_width) / 2 + container_padding + card_margin
+  // For xl: right = (100vw - 1280px) / 2 + 32px (padding) + 16px (center in column)
+  // Simplified: right = (100vw - 1280px) / 2 + 16px (align card to right edge of 400px column)
+  const containerMaxWidth = '1280px';
+  const containerPadding = '32px'; // px-4 sm:px-6 lg:px-8 = 32px at lg+
+  const cardMarginFromEdge = '16px'; // (400px - 368px) / 2 = center card in column
+  
+  // For dashboard mode, subtract sidebar width (72px for collapsed sidebar)
+  const sidebarOffset = mode === 'dashboard' ? ' - 72px' : '';
+  
+  const fixedRightOffset = `max(${containerPadding}, calc((100vw - ${containerMaxWidth}${sidebarOffset}) / 2 + ${cardMarginFromEdge}))`;
   
   return (
     <div 

@@ -8,6 +8,7 @@ interface TestimonialsSectionProps {
   title?: string;
   subtitle?: string;
   description?: string;
+  variant?: 'default' | 'no-container';
 }
 
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
@@ -74,40 +75,46 @@ export function TestimonialsSection({
   testimonials,
   title = "OPINIONES DE ESTUDIANTES",
   subtitle = "TESTIMONIOS",
-  description = "Lo que dicen nuestros estudiantes sobre el curso"
+  description = "Lo que dicen nuestros estudiantes sobre el curso",
+  variant = 'default'
 }: TestimonialsSectionProps) {
   const activeTestimonials = testimonials.filter(t => t.is_active && !t.is_deleted);
   
   if (activeTestimonials.length === 0) return null;
 
+  const content = (
+    <div className="space-y-12">
+      <SectionHeader
+        title={title}
+        subtitle={subtitle}
+        description={description}
+      />
+
+      <div 
+        className="columns-1 sm:columns-2 lg:columns-3 gap-4"
+        data-testid="testimonials-masonry"
+      >
+        {activeTestimonials
+          .sort((a, b) => a.sort_index - b.sort_index)
+          .map((testimonial) => (
+            <TestimonialCard 
+              key={testimonial.id} 
+              testimonial={testimonial} 
+            />
+          ))}
+      </div>
+    </div>
+  );
+
+  if (variant === 'no-container') {
+    return <section className="py-16 sm:py-20" data-testid="testimonials-section">{content}</section>;
+  }
+
   return (
     <section className="py-16 sm:py-20" data-testid="testimonials-section">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Grid: content + fixed 400px space for sticky card */}
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-0">
-          <div className="space-y-12">
-            <SectionHeader
-              title={title}
-              subtitle={subtitle}
-              description={description}
-            />
-
-            <div 
-              className="columns-1 sm:columns-2 lg:columns-3 gap-4"
-              data-testid="testimonials-masonry"
-            >
-              {activeTestimonials
-                .sort((a, b) => a.sort_index - b.sort_index)
-                .map((testimonial) => (
-                  <TestimonialCard 
-                    key={testimonial.id} 
-                    testimonial={testimonial} 
-                  />
-                ))}
-            </div>
-          </div>
-          
-          {/* Empty Space for sticky card */}
+          {content}
           <div className="hidden xl:block" />
         </div>
       </div>
