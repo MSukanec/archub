@@ -18,9 +18,14 @@ export function registerClientPortalRoutes(app: Express, deps: RouteDeps) {
       let isAdminPreview = false;
       let supabase = getAdminClient();
 
+      console.log('[ClientPortal] Auth header present:', !!req.headers.authorization);
+      console.log('[ClientPortal] Token extracted:', !!token);
+
       if (token) {
         const authenticatedClient = createAuthenticatedClient(token);
         const { data: { user }, error: authError } = await authenticatedClient.auth.getUser();
+        
+        console.log('[ClientPortal] Auth user:', user?.id, 'error:', authError?.message);
         
         if (!authError && user) {
           const { data: dbUser } = await authenticatedClient
@@ -29,12 +34,16 @@ export function registerClientPortalRoutes(app: Express, deps: RouteDeps) {
             .eq('auth_id', user.id)
             .single();
 
+          console.log('[ClientPortal] DB user found:', !!dbUser);
+
           if (dbUser) {
             const { data: project } = await supabase
               .from('projects')
               .select('organization_id')
               .eq('id', projectId)
               .single();
+
+            console.log('[ClientPortal] Project org:', project?.organization_id);
 
             if (project) {
               const { data: membership } = await supabase
@@ -44,6 +53,8 @@ export function registerClientPortalRoutes(app: Express, deps: RouteDeps) {
                 .eq('user_id', dbUser.id)
                 .eq('is_active', true)
                 .single();
+
+              console.log('[ClientPortal] Membership found:', !!membership);
 
               if (membership) {
                 isAdminPreview = true;
