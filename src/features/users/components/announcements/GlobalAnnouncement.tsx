@@ -32,7 +32,18 @@ export const useAnnouncementBanner = () => useContext(AnnouncementContext);
 // Provider component that manages ALL announcement logic
 export function AnnouncementProvider({ children }: { children: React.ReactNode }) {
   const { data: userData } = useCurrentUser();
-  const [dismissedIds, setDismissedIds] = useState<string[]>([]);
+  
+  // Initialize dismissedIds synchronously from localStorage to prevent layout jumps
+  const [dismissedIds, setDismissedIds] = useState<string[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      console.error('Error parsing dismissed announcements:', e);
+      return [];
+    }
+  });
 
   // Get current organization plan
   const organizationId = userData?.preferences?.last_organization_id;
@@ -40,18 +51,6 @@ export function AnnouncementProvider({ children }: { children: React.ReactNode }
     (org) => org.id === organizationId
   );
   const planCode = (currentOrganization?.plan?.name || 'free').toLowerCase();
-
-  // Load dismissed announcements from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setDismissedIds(JSON.parse(stored));
-      } catch (e) {
-        console.error('Error parsing dismissed announcements:', e);
-      }
-    }
-  }, []);
 
   // Fetch active announcements
   const { data: announcements } = useQuery({

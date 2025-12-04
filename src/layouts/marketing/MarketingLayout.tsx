@@ -168,17 +168,16 @@ function MarketingLayoutContent({
   }, [seo]);
 
   const HEADER_HEIGHT = 64; // h-16 = 64px
-  const totalOffset = hasActiveAnnouncement ? announcementHeight + HEADER_HEIGHT : HEADER_HEIGHT;
+  const bannerOffset = hasActiveAnnouncement ? announcementHeight : 0;
+  const totalOffset = bannerOffset + HEADER_HEIGHT;
 
   // Special layout with hero section (for course landing pages)
+  // Hero goes BEHIND the translucent header, no padding on wrapper
   if (heroSlot) {
     return (
       <>
         <GlobalAnnouncement />
-        <div 
-          className="min-h-screen overflow-x-hidden"
-          style={{ paddingTop: `${totalOffset}px` }}
-        >
+        <div className="min-h-screen overflow-x-hidden">
           <Header navigation={headerNavigation} hasAnnouncement={hasActiveAnnouncement} announcementHeight={announcementHeight} />
           
           {/* Floating Sticky Card - Desktop only, positioned absolutely */}
@@ -197,8 +196,12 @@ function MarketingLayoutContent({
             </div>
           )}
           
-          <main className="overflow-x-hidden">
+          {/* Hero section - uses negative margin to go behind the fixed header */}
+          <div style={{ marginTop: `-${HEADER_HEIGHT}px` }}>
             {heroSlot}
+          </div>
+          
+          <main className="overflow-x-hidden">
             {children}
           </main>
           
