@@ -196,8 +196,8 @@ function MarketingLayoutContent({
             </div>
           )}
           
-          {/* Hero section - uses negative margin to go behind the fixed header */}
-          <div style={{ marginTop: `-${HEADER_HEIGHT}px` }}>
+          {/* Hero section - uses negative margin to go behind the fixed header+announcement */}
+          <div style={{ marginTop: `-${totalOffset}px`, paddingTop: `${bannerOffset}px` }}>
             {heroSlot}
           </div>
           
