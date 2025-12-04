@@ -63,7 +63,7 @@ async function verifyProjectMembership(token: string, projectId: string) {
   }
   
   const roleName = (membership.role as any)?.name?.toLowerCase();
-  const isAdmin = roleName === 'owner' || roleName === 'admin';
+  const isAdmin = ['owner', 'admin', 'administrador', 'propietario'].includes(roleName);
   
   console.log('[ClientPortal Config] User role:', roleName, 'isAdmin:', isAdmin);
   
@@ -139,10 +139,10 @@ export function registerClientPortalRoutes(app: Express, deps: RouteDeps) {
         return res.status(401).json({ error: "Authentication required" });
       }
       
-      const { authorized, isAdmin, userId, organizationId } = await verifyProjectMembership(token, projectId);
+      const { authorized, userId, organizationId } = await verifyProjectMembership(token, projectId);
       
-      if (!authorized || !isAdmin) {
-        return res.status(403).json({ error: "Admin access required to update portal settings" });
+      if (!authorized) {
+        return res.status(403).json({ error: "Not authorized to update portal settings" });
       }
       
       const parseResult = portalSettingsSchema.safeParse(req.body);
