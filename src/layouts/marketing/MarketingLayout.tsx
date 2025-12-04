@@ -167,12 +167,18 @@ function MarketingLayoutContent({
     };
   }, [seo]);
 
+  const HEADER_HEIGHT = 64; // h-16 = 64px
+  const totalOffset = hasActiveAnnouncement ? announcementHeight + HEADER_HEIGHT : HEADER_HEIGHT;
+
   // Special layout with hero section (for course landing pages)
   if (heroSlot) {
     return (
       <>
         <GlobalAnnouncement />
-        <div className="min-h-screen overflow-x-hidden">
+        <div 
+          className="min-h-screen overflow-x-hidden"
+          style={{ paddingTop: `${totalOffset}px` }}
+        >
           <Header navigation={headerNavigation} hasAnnouncement={hasActiveAnnouncement} announcementHeight={announcementHeight} />
           
           {/* Floating Sticky Card - Desktop only, positioned absolutely */}
@@ -180,7 +186,7 @@ function MarketingLayoutContent({
             <div 
               className="hidden lg:block fixed z-40"
               style={{
-                top: '96px',
+                top: `${totalOffset + 32}px`,
                 width: '368px',
                 right: 'max(32px, calc((100vw - 1472px) / 2))',
               }}
@@ -206,7 +212,10 @@ function MarketingLayoutContent({
   return (
     <>
       <GlobalAnnouncement />
-      <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
+      <div 
+        className="min-h-screen bg-background flex flex-col overflow-x-hidden"
+        style={{ paddingTop: `${totalOffset}px` }}
+      >
         <Header navigation={headerNavigation} hasAnnouncement={hasActiveAnnouncement} announcementHeight={announcementHeight} />
         <div className="container mx-auto px-6 py-12 flex-1">
           {children}

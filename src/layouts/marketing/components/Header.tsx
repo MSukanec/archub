@@ -351,14 +351,17 @@ export function Header({ navigation, hasAnnouncement = false, announcementHeight
     );
   };
 
-  const headerClasses = "sticky top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/30 border-b border-white/10";
+  const headerClasses = "fixed left-0 right-0 z-50 backdrop-blur-md bg-black/30 border-b border-white/10";
   const headerHeight = "h-16";
   const logoTextClasses = "font-bold text-xl text-white";
   const navLinkClasses = "text-sm text-white/80 transition-colors hover:text-white font-medium";
 
   return (
     <>
-      <header className={headerClasses}>
+      <header 
+        className={headerClasses}
+        style={{ top: hasAnnouncement ? `${announcementHeight}px` : 0 }}
+      >
         <div className={`container mx-auto px-6 ${headerHeight} flex items-center justify-between`}>
           <div className="flex items-center space-x-8">
             <button 
