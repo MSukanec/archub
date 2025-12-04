@@ -427,7 +427,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
       </div>
 
       {/* FAQs */}
-      <div className="bg-card border rounded-lg p-6 space-y-4">
+      <div className="bg-card border rounded-lg p-6 space-y-4 overflow-hidden">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <HelpCircle className="w-5 h-5 text-accent flex-shrink-0" />
@@ -443,7 +443,7 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
           </Button>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 overflow-hidden">
           {faqs.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
               No hay FAQs creadas. Haz clic en "Agregar FAQ" para crear una.
@@ -453,10 +453,10 @@ export default function AdminCourseMarketingTab({ courseId }: AdminCourseMarketi
               {faqs.map((faq) => (
                 <div
                   key={faq.id}
-                  className="flex items-start justify-between gap-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex items-center justify-between gap-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors overflow-hidden"
                   data-testid={`faq-item-${faq.id}`}
                 >
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 overflow-hidden">
                     <p className="font-medium text-sm truncate">{faq.question}</p>
                     <p className="text-xs text-muted-foreground truncate mt-1">
                       {faq.answer}
