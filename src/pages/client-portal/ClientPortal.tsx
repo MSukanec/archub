@@ -3,6 +3,7 @@ import { useRoute } from 'wouter';
 import { ClientPortalLayout, useClientPortalData } from '@/features/client-portal';
 import type { ClientPortalTab, ClientPortalClient } from '@/features/client-portal';
 import { PortalDashboardTab } from './PortalDashboardTab';
+import { PortalInstallmentsTab } from './PortalInstallmentsTab';
 import { PortalPaymentsTab } from './PortalPaymentsTab';
 import { PortalLogsTab } from './PortalLogsTab';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
@@ -84,6 +85,8 @@ export default function ClientPortal() {
     switch (activeTab) {
       case 'dashboard':
         return <PortalDashboardTab data={data} />;
+      case 'installments':
+        return <PortalInstallmentsTab data={data} />;
       case 'payments':
         return <PortalPaymentsTab data={data} />;
       case 'logs':
