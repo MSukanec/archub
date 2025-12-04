@@ -534,21 +534,6 @@ export function LeftSidebar() {
                         ),
                       },
                       {
-                        id: 'client-portal' as const,
-                        icon: <Eye className="h-5 w-5" />,
-                        testId: 'button-sidebar-client-portal',
-                        onClick: () => {
-                          if (!isAdmin) return;
-                          if (selectedProjectId) {
-                            navigate(`/portal/${selectedProjectId}`);
-                          }
-                        },
-                        shouldRender: () => hasProjects && !!selectedProjectId,
-                        wrapper: (children: React.ReactNode) => (
-                          <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>{children}</RoleRestricted>
-                        ),
-                      },
-                      {
                         id: 'learning' as const,
                         icon: <GraduationCap className="h-5 w-5" />,
                         onClick: () => {
