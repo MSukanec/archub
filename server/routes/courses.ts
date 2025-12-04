@@ -2094,8 +2094,7 @@ export function registerCourseRoutes(app: Express, deps: RouteDeps): void {
       const { data: testimonial, error: deleteError } = await authenticatedSupabase
         .from('testimonials')
         .update({
-          is_deleted: true,
-          deleted_at: new Date().toISOString()
+          is_deleted: true
         })
         .eq('user_id', dbUser.id)
         .eq('course_id', courseId)
