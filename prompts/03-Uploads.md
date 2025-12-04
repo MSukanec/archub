@@ -431,9 +431,9 @@ All upload functions:
 ### Current Valid Categories (PostgreSQL)
 
 ```
-dni_front, dni_back, document, photo, other, general, technical,
-financial, legal, course_cover, instructor_photo, module_image,
-section_background, testimonial_logo, project_photo, og_image,
+document, photo, other, general, technical, financial, legal,
+course_cover, instructor_photo, module_image, section_background,
+testimonial_logo, testimonial_avatar, project_photo, og_image,
 client_gallery
 ```
 
@@ -448,8 +448,6 @@ ALTER TABLE public.media_links
 ADD CONSTRAINT media_links_category_check CHECK (
   (category IS NULL) OR (
     category = ANY (ARRAY[
-      'dni_front'::text,
-      'dni_back'::text,
       'document'::text,
       'photo'::text,
       'other'::text,
@@ -462,6 +460,7 @@ ADD CONSTRAINT media_links_category_check CHECK (
       'module_image'::text,
       'section_background'::text,
       'testimonial_logo'::text,
+      'testimonial_avatar'::text,
       'project_photo'::text,
       'og_image'::text,
       'client_gallery'::text,

@@ -90,8 +90,6 @@ create table public.media_links (
       or (
         category = any (
           array[
-            'dni_front'::text,
-            'dni_back'::text,
             'document'::text,
             'photo'::text,
             'other'::text,
@@ -104,6 +102,7 @@ create table public.media_links (
             'module_image'::text,
             'section_background'::text,
             'testimonial_logo'::text,
+            'testimonial_avatar'::text,
             'project_photo'::text,
             'og_image'::text,
             'client_gallery'::text
