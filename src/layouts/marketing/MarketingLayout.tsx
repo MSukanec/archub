@@ -172,24 +172,17 @@ function MarketingLayoutContent({
     return (
       <>
         <GlobalAnnouncement />
-        <div 
-          className="min-h-screen overflow-x-hidden"
-          style={{
-            paddingTop: hasActiveAnnouncement ? `${announcementHeight}px` : '0',
-            transition: 'padding-top 0.2s ease-out'
-          }}
-        >
-          <Header navigation={headerNavigation} />
+        <div className="min-h-screen overflow-x-hidden">
+          <Header navigation={headerNavigation} hasAnnouncement={hasActiveAnnouncement} announcementHeight={announcementHeight} />
           
           {/* Floating Sticky Card - Desktop only, positioned absolutely */}
           {stickyContent && (
             <div 
               className="hidden lg:block fixed z-40"
               style={{
-                top: hasActiveAnnouncement ? `calc(96px + ${announcementHeight}px)` : '96px',
+                top: '96px',
                 width: '368px',
                 right: 'max(32px, calc((100vw - 1472px) / 2))',
-                transition: 'top 0.2s ease-out'
               }}
             >
               <div className="sticky top-24">
@@ -213,14 +206,8 @@ function MarketingLayoutContent({
   return (
     <>
       <GlobalAnnouncement />
-      <div 
-        className="min-h-screen bg-background flex flex-col overflow-x-hidden"
-        style={{
-          paddingTop: hasActiveAnnouncement ? `${announcementHeight}px` : '0',
-          transition: 'padding-top 0.2s ease-out'
-        }}
-      >
-        <Header navigation={headerNavigation} />
+      <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
+        <Header navigation={headerNavigation} hasAnnouncement={hasActiveAnnouncement} announcementHeight={announcementHeight} />
         <div className="container mx-auto px-6 py-12 flex-1">
           {children}
         </div>

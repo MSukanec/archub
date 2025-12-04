@@ -17,6 +17,8 @@ import {
 
 interface HeaderProps {
   navigation?: Array<{ label: string; href: string }>;
+  hasAnnouncement?: boolean;
+  announcementHeight?: number;
 }
 
 // Navegación por defecto para páginas públicas (sin "Inicio" - el logo lleva a la landing)
@@ -61,7 +63,7 @@ function MarketingMobileMenuButton({
   return content;
 }
 
-export function Header({ navigation }: HeaderProps) {
+export function Header({ navigation, hasAnnouncement = false, announcementHeight = 0 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, loading, initialized, initialize, logout } = useAuthStore();
   const [location, setLocation] = useLocation();
@@ -349,7 +351,7 @@ export function Header({ navigation }: HeaderProps) {
     );
   };
 
-  const headerClasses = "fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/30 border-b border-white/10";
+  const headerClasses = "sticky top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/30 border-b border-white/10";
   const headerHeight = "h-16";
   const logoTextClasses = "font-bold text-xl text-white";
   const navLinkClasses = "text-sm text-white/80 transition-colors hover:text-white font-medium";
