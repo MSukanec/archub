@@ -59,14 +59,27 @@ export interface ClientPortalPayment {
   exchange_rate: number | null;
 }
 
+export interface ClientPortalSiteLogFile {
+  id: string;
+  file_url: string;
+  file_name: string | null;
+  file_type: string;
+}
+
+export interface ClientPortalSiteLogCreator {
+  full_name: string | null;
+  avatar_url: string | null;
+}
+
 export interface ClientPortalSiteLog {
   id: string;
   log_date: string;
+  created_at: string | null;
   comments: string | null;
   weather: string | null;
   type_name: string | null;
-  files_count: number;
-  creator_name: string | null;
+  files: ClientPortalSiteLogFile[];
+  creator: ClientPortalSiteLogCreator | null;
 }
 
 export interface ClientPortalStats {
