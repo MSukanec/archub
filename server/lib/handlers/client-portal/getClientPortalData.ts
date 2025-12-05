@@ -317,6 +317,7 @@ export async function getClientPortalData(
         reference,
         status,
         exchange_rate,
+        wallet_id,
         currency:currencies (
           code,
           symbol
@@ -325,9 +326,6 @@ export async function getClientPortalData(
           id,
           commitment_method,
           amount
-        ),
-        wallet:wallets (
-          name
         )
       `)
       .eq('project_id', projectId)
@@ -338,6 +336,23 @@ export async function getClientPortalData(
 
     if (paymentsError) {
       console.error('Error fetching payments:', paymentsError);
+    }
+
+    // Fetch wallet names separately
+    const walletIds = [...new Set((paymentsData || []).map((p: any) => p.wallet_id).filter(Boolean))];
+    let walletsMap: Record<string, string> = {};
+    
+    if (walletIds.length > 0) {
+      const { data: walletsData } = await supabase
+        .from('wallets')
+        .select('id, name')
+        .in('id', walletIds);
+      
+      if (walletsData) {
+        walletsData.forEach((w: any) => {
+          walletsMap[w.id] = w.name;
+        });
+      }
     }
 
     // Fetch receipt files for payments
@@ -398,7 +413,7 @@ export async function getClientPortalData(
       status: p.status,
       commitment_name: p.commitment?.commitment_method || null,
       commitment_amount: p.commitment?.amount ? parseFloat(p.commitment.amount) : null,
-      wallet_name: p.wallet?.name || null,
+      wallet_name: p.wallet_id ? walletsMap[p.wallet_id] || null : null,
       exchange_rate: p.exchange_rate ? parseFloat(p.exchange_rate) : null,
       receipt_url: receiptMap[p.id]?.url || null,
       receipt_name: receiptMap[p.id]?.name || null,
