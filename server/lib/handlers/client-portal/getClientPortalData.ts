@@ -173,6 +173,7 @@ export async function getClientPortalData(
       id,
       contact_id,
       is_primary,
+      unit,
       client_role:client_roles (
         name
       ),
@@ -205,7 +206,7 @@ export async function getClientPortalData(
     full_name: pc.contact?.full_name,
     email: pc.contact?.email,
     phone: pc.contact?.phone,
-    unit: null,
+    unit: pc.unit || null,
     is_primary: pc.is_primary,
     role_name: pc.client_role?.name || null,
   }));
@@ -339,7 +340,8 @@ export async function getClientPortalData(
     }
 
     // Fetch wallet names separately from organization_wallets
-    const walletIds = [...new Set((paymentsData || []).map((p: any) => p.wallet_id).filter(Boolean))];
+    const walletIdsSet = new Set((paymentsData || []).map((p: any) => p.wallet_id).filter(Boolean));
+    const walletIds = Array.from(walletIdsSet);
     let walletsMap: Record<string, string> = {};
     
     if (walletIds.length > 0) {
@@ -403,23 +405,62 @@ export async function getClientPortalData(
       }
     }
 
-    payments = (paymentsData || []).map((p: any) => ({
-      id: p.id,
-      amount: parseFloat(p.amount as string),
-      currency_code: p.currency?.code || stats.currency_code,
-      currency_symbol: p.currency?.symbol || stats.currency_symbol,
-      payment_date: p.payment_date,
-      reference: p.reference,
-      status: p.status,
-      commitment_name: p.commitment?.commitment_method || null,
-      commitment_amount: p.commitment?.amount ? parseFloat(p.commitment.amount) : null,
-      wallet_name: p.wallet_id ? walletsMap[p.wallet_id] || null : null,
-      exchange_rate: p.exchange_rate ? parseFloat(p.exchange_rate) : null,
-      receipt_url: receiptMap[p.id]?.url || null,
-      receipt_name: receiptMap[p.id]?.name || null,
-    }));
+    // Debug logging for wallet issues
+    console.log('[ClientPortal Payments] wallet_ids:', walletIds);
+    console.log('[ClientPortal Payments] walletsMap:', walletsMap);
+    
+    payments = (paymentsData || []).map((p: any) => {
+      const paymentAmount = parseFloat(p.amount as string);
+      const commitmentAmount = p.commitment?.amount ? parseFloat(p.commitment.amount) : null;
+      const paymentExchangeRate = p.exchange_rate ? parseFloat(p.exchange_rate) : null;
+      
+      // Calculate percentage correctly:
+      // If payment has an exchange_rate, the payment is in a different currency than commitment
+      // Convert payment to commitment currency for accurate percentage
+      let commitmentPercentage: number | null = null;
+      if (commitmentAmount && commitmentAmount > 0) {
+        if (paymentExchangeRate && paymentExchangeRate > 1) {
+          // Payment is in local currency (e.g., ARS), commitment is in foreign currency (e.g., USD)
+          // Convert payment to foreign currency: paymentAmount / exchangeRate
+          const paymentInCommitmentCurrency = paymentAmount / paymentExchangeRate;
+          commitmentPercentage = Math.round((paymentInCommitmentCurrency / commitmentAmount) * 100);
+        } else {
+          // Same currency or no exchange rate
+          commitmentPercentage = Math.round((paymentAmount / commitmentAmount) * 100);
+        }
+      }
+      
+      return {
+        id: p.id,
+        amount: paymentAmount,
+        currency_code: p.currency?.code || stats.currency_code,
+        currency_symbol: p.currency?.symbol || stats.currency_symbol,
+        payment_date: p.payment_date,
+        reference: p.reference,
+        status: p.status,
+        commitment_name: selectedClient?.unit || null,
+        commitment_amount: commitmentAmount,
+        commitment_currency_code: commitment?.currency_code || null,
+        commitment_currency_symbol: commitment?.currency_symbol || null,
+        commitment_percentage: commitmentPercentage,
+        wallet_name: p.wallet_id ? walletsMap[p.wallet_id] || null : null,
+        exchange_rate: paymentExchangeRate,
+        receipt_url: receiptMap[p.id]?.url || null,
+        receipt_name: receiptMap[p.id]?.name || null,
+      };
+    });
 
-    stats.total_paid = payments.reduce((sum, p) => sum + p.amount, 0);
+    // Calculate total_paid in commitment currency (normalized)
+    let totalPaidNormalized = 0;
+    for (const p of payments) {
+      if (p.exchange_rate && p.exchange_rate > 1) {
+        totalPaidNormalized += p.amount / p.exchange_rate;
+      } else {
+        totalPaidNormalized += p.amount;
+      }
+    }
+    
+    stats.total_paid = totalPaidNormalized;
     stats.total_pending = stats.total_commitment - stats.total_paid;
 
     if (stats.total_commitment > 0) {

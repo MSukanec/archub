@@ -34,11 +34,6 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
     }).format(amount)}`;
   };
 
-  const calculatePercentage = (amount: number, total: number | null) => {
-    if (!total || total === 0) return null;
-    return Math.round((amount / total) * 100);
-  };
-
   const handleDownloadReceipt = (url: string, fileName: string | null) => {
     const link = document.createElement('a');
     link.href = url;
@@ -98,7 +93,6 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
         <div className="space-y-3">
           {payments.map((payment) => {
             const config = statusConfig[payment.status as keyof typeof statusConfig] || statusConfig.pending;
-            const amountPercentage = calculatePercentage(payment.amount, payment.commitment_amount);
 
             return (
               <div
@@ -153,9 +147,9 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
                       <p className="font-medium text-sm">
                         {formatCurrency(payment.amount, payment.currency_symbol)}
                       </p>
-                      {amountPercentage !== null && (
+                      {payment.commitment_percentage !== null && (
                         <p className="text-xs text-muted-foreground">
-                          {amountPercentage}% del compromiso
+                          {payment.commitment_percentage}% del compromiso
                         </p>
                       )}
                     </div>
@@ -258,9 +252,9 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
                       <p className="font-medium text-sm">
                         {formatCurrency(payment.amount, payment.currency_symbol)}
                       </p>
-                      {amountPercentage !== null && (
+                      {payment.commitment_percentage !== null && (
                         <p className="text-xs text-muted-foreground">
-                          {amountPercentage}% del compromiso
+                          {payment.commitment_percentage}% del compromiso
                         </p>
                       )}
                     </div>
