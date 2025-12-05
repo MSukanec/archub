@@ -173,7 +173,6 @@ export async function getClientPortalData(
       id,
       contact_id,
       is_primary,
-      unit,
       client_role:client_roles (
         name
       ),
@@ -206,7 +205,7 @@ export async function getClientPortalData(
     full_name: pc.contact?.full_name,
     email: pc.contact?.email,
     phone: pc.contact?.phone,
-    unit: pc.unit || null,
+    unit: null,
     is_primary: pc.is_primary,
     role_name: pc.client_role?.name || null,
   }));
@@ -438,7 +437,7 @@ export async function getClientPortalData(
         payment_date: p.payment_date,
         reference: p.reference,
         status: p.status,
-        commitment_name: selectedClient?.unit || null,
+        commitment_name: selectedClient?.full_name || null,
         commitment_amount: commitmentAmount,
         commitment_currency_code: commitment?.currency_code || null,
         commitment_currency_symbol: commitment?.currency_symbol || null,
