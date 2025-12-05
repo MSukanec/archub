@@ -148,7 +148,7 @@ export function ClientPortalLayout({
             </div>
           </div>
 
-          {/* Desktop Tabs - Con underline animado */}
+          {/* Desktop Tabs - Idéntico al dashboard */}
           <div className="hidden sm:block">
             <div className="h-[45px] flex items-center relative overflow-hidden border-t border-border/30">
               <div ref={tabsContainerRef} className="flex items-center relative" style={{ gap: '24px' }}>
@@ -157,21 +157,25 @@ export function ClientPortalLayout({
                     key={tab.id}
                     data-tab-id={tab.id}
                     onClick={() => onTabChange(tab.id)}
-                    className={`relative text-sm flex items-center gap-2 px-1 h-[45px] flex-shrink-0 min-w-0 transition-colors ${
+                    className={`relative text-sm flex items-center gap-2 px-1 h-[45px] flex-shrink-0 min-w-0 ${
                       tab.id === activeTab
                         ? "text-foreground font-medium"
-                        : "text-muted-foreground hover:text-foreground"
+                        : "text-muted-foreground"
                     }`}
+                    style={{ 
+                      transition: 'none',
+                      transform: 'translateZ(0)',
+                      willChange: 'auto'
+                    }}
                     data-testid={`tab-${tab.id}`}
                   >
-                    <tab.icon className="h-4 w-4" />
                     {tab.label}
                   </button>
                 ))}
                 
-                {/* Subrayado animado */}
+                {/* Subrayado animado con --accent */}
                 <div
-                  className="absolute bottom-0 h-[2px] bg-primary transition-all duration-300 ease-out pointer-events-none"
+                  className="absolute bottom-0 h-[2px] bg-[var(--accent)] transition-all duration-300 ease-out pointer-events-none"
                   style={{
                     width: `${underlineStyle.width}px`,
                     transform: `translateX(${underlineStyle.left}px)`,
