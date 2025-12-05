@@ -57,6 +57,8 @@ export interface ClientPortalPayment {
   commitment_amount: number | null;
   wallet_name: string | null;
   exchange_rate: number | null;
+  receipt_url: string | null;
+  receipt_name: string | null;
 }
 
 export interface ClientPortalSiteLogFile {
@@ -338,6 +340,54 @@ export async function getClientPortalData(
       console.error('Error fetching payments:', paymentsError);
     }
 
+    // Fetch receipt files for payments
+    const paymentIds = (paymentsData || []).map((p: any) => p.id);
+    let receiptMap: Record<string, { url: string; name: string | null }> = {};
+    
+    if (paymentIds.length > 0) {
+      const { data: receiptLinks } = await supabase
+        .from('media_links')
+        .select(`
+          client_payment_id,
+          media_file:media_files (
+            id,
+            file_url,
+            file_name,
+            bucket,
+            file_path
+          )
+        `)
+        .in('client_payment_id', paymentIds);
+      
+      if (receiptLinks) {
+        for (const link of receiptLinks as any[]) {
+          const mediaFile = link.media_file;
+          if (link.client_payment_id && mediaFile) {
+            let fileUrl = mediaFile.file_url;
+            
+            // Generate signed URL for private/social buckets
+            const bucket = mediaFile.bucket;
+            const filePath = mediaFile.file_path;
+            
+            if (bucket && filePath && (bucket === 'private-assets' || bucket === 'social-assets')) {
+              const { data: signedUrlData } = await supabase.storage
+                .from(bucket)
+                .createSignedUrl(filePath, 3600);
+              
+              if (signedUrlData?.signedUrl) {
+                fileUrl = signedUrlData.signedUrl;
+              }
+            }
+            
+            receiptMap[link.client_payment_id] = {
+              url: fileUrl,
+              name: mediaFile.file_name,
+            };
+          }
+        }
+      }
+    }
+
     payments = (paymentsData || []).map((p: any) => ({
       id: p.id,
       amount: parseFloat(p.amount as string),
@@ -350,6 +400,8 @@ export async function getClientPortalData(
       commitment_amount: p.commitment?.amount ? parseFloat(p.commitment.amount) : null,
       wallet_name: p.wallet?.name || null,
       exchange_rate: p.exchange_rate ? parseFloat(p.exchange_rate) : null,
+      receipt_url: receiptMap[p.id]?.url || null,
+      receipt_name: receiptMap[p.id]?.name || null,
     }));
 
     stats.total_paid = payments.reduce((sum, p) => sum + p.amount, 0);

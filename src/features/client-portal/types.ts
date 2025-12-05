@@ -57,6 +57,8 @@ export interface ClientPortalPayment {
   commitment_amount: number | null;
   wallet_name: string | null;
   exchange_rate: number | null;
+  receipt_url: string | null;
+  receipt_name: string | null;
 }
 
 export interface ClientPortalSiteLogFile {

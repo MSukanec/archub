@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, AlertCircle, XCircle, Receipt, Calendar, Wallet, FileText, DollarSign } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CheckCircle, Clock, AlertCircle, XCircle, Receipt, Calendar, Wallet, FileText, DollarSign, ArrowDownToLine, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { ClientPortalPayment } from '../types';
@@ -31,6 +32,21 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount)}`;
+  };
+
+  const calculatePercentage = (amount: number, total: number | null) => {
+    if (!total || total === 0) return null;
+    return Math.round((amount / total) * 100);
+  };
+
+  const handleDownloadReceipt = (url: string, fileName: string | null) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName || 'comprobante';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (isLoading) {
@@ -82,6 +98,7 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
         <div className="space-y-3">
           {payments.map((payment) => {
             const config = statusConfig[payment.status as keyof typeof statusConfig] || statusConfig.pending;
+            const amountPercentage = calculatePercentage(payment.amount, payment.commitment_amount);
 
             return (
               <div
@@ -89,67 +106,204 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
                 className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                 data-testid={`payment-item-${payment.id}`}
               >
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                  {/* Fecha de pago */}
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
-                      <Calendar className="h-3.5 w-3.5" />
-                      <span className="text-xs">Fecha</span>
-                    </div>
-                    <p className="font-medium text-sm">
-                      {formatDate(payment.payment_date)}
-                    </p>
-                  </div>
-
-                  {/* Compromiso */}
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
-                      <FileText className="h-3.5 w-3.5" />
-                      <span className="text-xs">Compromiso</span>
-                    </div>
-                    <p className="font-medium text-sm">
-                      {payment.commitment_name || '-'}
-                    </p>
-                    {payment.commitment_amount && (
-                      <p className="text-xs text-muted-foreground">
-                        {formatCurrency(payment.commitment_amount, payment.currency_symbol)}
+                {/* Mobile Layout */}
+                <div className="block sm:hidden space-y-4">
+                  {/* Row 1: Fecha + Estado */}
+                  <div className="flex items-start justify-between">
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                        <Calendar className="h-3.5 w-3.5" />
+                        <span className="text-xs">Fecha</span>
+                      </div>
+                      <p className="font-medium text-sm">
+                        {formatDate(payment.payment_date)}
                       </p>
-                    )}
-                  </div>
-
-                  {/* Billetera */}
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
-                      <Wallet className="h-3.5 w-3.5" />
-                      <span className="text-xs">Billetera</span>
                     </div>
-                    <p className="font-medium text-sm">
-                      {payment.wallet_name || '-'}
-                    </p>
-                  </div>
-
-                  {/* Monto */}
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
-                      <DollarSign className="h-3.5 w-3.5" />
-                      <span className="text-xs">Monto</span>
-                    </div>
-                    <p className="font-medium text-sm">
-                      {formatCurrency(payment.amount, payment.currency_symbol)}
-                    </p>
-                    {payment.exchange_rate && payment.exchange_rate !== 1 && (
-                      <p className="text-xs text-muted-foreground">
-                        TC: {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Estado */}
-                  <div className="flex flex-col items-start sm:items-end">
-                    <span className="text-xs text-muted-foreground mb-1">Estado</span>
                     <Badge className={config.className}>
                       {config.label}
                     </Badge>
+                  </div>
+
+                  {/* Row 2: Compromiso + Monto */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                        <FileText className="h-3.5 w-3.5" />
+                        <span className="text-xs">Compromiso</span>
+                      </div>
+                      {payment.commitment_amount ? (
+                        <>
+                          <p className="font-medium text-sm">
+                            {formatCurrency(payment.commitment_amount, payment.currency_symbol)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {payment.commitment_name || 'Total'}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">-</p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                        <DollarSign className="h-3.5 w-3.5" />
+                        <span className="text-xs">Monto</span>
+                      </div>
+                      <p className="font-medium text-sm">
+                        {formatCurrency(payment.amount, payment.currency_symbol)}
+                      </p>
+                      {amountPercentage !== null && (
+                        <p className="text-xs text-muted-foreground">
+                          {amountPercentage}% del compromiso
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Row 3: Billetera + Cotización */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                        <Wallet className="h-3.5 w-3.5" />
+                        <span className="text-xs">Billetera</span>
+                      </div>
+                      <p className="font-medium text-sm">
+                        {payment.wallet_name || '-'}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                        <TrendingUp className="h-3.5 w-3.5" />
+                        <span className="text-xs">Cotización</span>
+                      </div>
+                      <p className="font-medium text-sm">
+                        {payment.exchange_rate && payment.exchange_rate !== 1
+                          ? payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                          : '-'
+                        }
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Row 4: Download Button */}
+                  {payment.receipt_url && (
+                    <div className="pt-2 border-t">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full gap-2"
+                        onClick={() => handleDownloadReceipt(payment.receipt_url!, payment.receipt_name)}
+                        data-testid={`button-download-receipt-${payment.id}`}
+                      >
+                        <ArrowDownToLine className="h-4 w-4" />
+                        Descargar Comprobante
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Desktop Layout */}
+                <div className="hidden sm:block">
+                  <div className="grid grid-cols-7 gap-4 items-start">
+                    {/* Fecha */}
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                        <Calendar className="h-3.5 w-3.5" />
+                        <span className="text-xs">Fecha</span>
+                      </div>
+                      <p className="font-medium text-sm">
+                        {formatDate(payment.payment_date)}
+                      </p>
+                    </div>
+
+                    {/* Compromiso */}
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                        <FileText className="h-3.5 w-3.5" />
+                        <span className="text-xs">Compromiso</span>
+                      </div>
+                      {payment.commitment_amount ? (
+                        <>
+                          <p className="font-medium text-sm">
+                            {formatCurrency(payment.commitment_amount, payment.currency_symbol)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {payment.commitment_name || 'Total'}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">-</p>
+                      )}
+                    </div>
+
+                    {/* Billetera */}
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                        <Wallet className="h-3.5 w-3.5" />
+                        <span className="text-xs">Billetera</span>
+                      </div>
+                      <p className="font-medium text-sm">
+                        {payment.wallet_name || '-'}
+                      </p>
+                    </div>
+
+                    {/* Monto */}
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                        <DollarSign className="h-3.5 w-3.5" />
+                        <span className="text-xs">Monto</span>
+                      </div>
+                      <p className="font-medium text-sm">
+                        {formatCurrency(payment.amount, payment.currency_symbol)}
+                      </p>
+                      {amountPercentage !== null && (
+                        <p className="text-xs text-muted-foreground">
+                          {amountPercentage}% del compromiso
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Cotización */}
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                        <TrendingUp className="h-3.5 w-3.5" />
+                        <span className="text-xs">Cotización</span>
+                      </div>
+                      <p className="font-medium text-sm">
+                        {payment.exchange_rate && payment.exchange_rate !== 1
+                          ? payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                          : '-'
+                        }
+                      </p>
+                    </div>
+
+                    {/* Estado */}
+                    <div className="flex flex-col">
+                      <span className="text-xs text-muted-foreground mb-1">Estado</span>
+                      <Badge className={config.className}>
+                        {config.label}
+                      </Badge>
+                    </div>
+
+                    {/* Comprobante */}
+                    <div className="flex flex-col items-end">
+                      {payment.receipt_url ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
+                          onClick={() => handleDownloadReceipt(payment.receipt_url!, payment.receipt_name)}
+                          data-testid={`button-download-receipt-${payment.id}`}
+                        >
+                          <ArrowDownToLine className="h-3.5 w-3.5" />
+                          <span className="hidden lg:inline">Descargar</span>
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">-</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
