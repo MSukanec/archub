@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 import { Resend } from 'resend';
 import { render } from '@react-email/render';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { getAdminClient } from '../../../routes/_base.js';
 import { extractToken, createAuthenticatedClient } from '../../auth/helpers.js';
 import PortalAccessEmail from '../../../../src/emails/PortalAccessEmail.js';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const BASE_URL = process.env.VITE_APP_URL || 'https://seencel.com';
+const PORTAL_TOKEN_SECRET = process.env.PORTAL_TOKEN_SECRET || process.env.SESSION_SECRET || 'default-dev-secret-change-in-production';
 
 interface PortalAccessToken {
   projectId: string;
@@ -15,22 +17,57 @@ interface PortalAccessToken {
   exp: number;
 }
 
+function signPayload(payload: string): string {
+  return createHmac('sha256', PORTAL_TOKEN_SECRET)
+    .update(payload)
+    .digest('base64url');
+}
+
 function generatePortalToken(data: Omit<PortalAccessToken, 'exp'>): string {
   const payload: PortalAccessToken = {
     ...data,
     exp: Date.now() + 24 * 60 * 60 * 1000,
   };
-  return Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const payloadBase64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const signature = signPayload(payloadBase64);
+  return `${payloadBase64}.${signature}`;
+}
+
+function safeCompare(a: string, b: string): boolean {
+  try {
+    const bufA = Buffer.from(a);
+    const bufB = Buffer.from(b);
+    if (bufA.length !== bufB.length) {
+      return false;
+    }
+    return timingSafeEqual(bufA, bufB);
+  } catch {
+    return false;
+  }
 }
 
 export function parsePortalToken(token: string): PortalAccessToken | null {
   try {
-    const payload = JSON.parse(Buffer.from(token, 'base64url').toString('utf-8'));
+    const [payloadBase64, signature] = token.split('.');
+    if (!payloadBase64 || !signature) {
+      console.error('[PortalToken] Invalid token format - missing parts');
+      return null;
+    }
+    
+    const expectedSignature = signPayload(payloadBase64);
+    if (!safeCompare(signature, expectedSignature)) {
+      console.error('[PortalToken] Invalid signature');
+      return null;
+    }
+    
+    const payload = JSON.parse(Buffer.from(payloadBase64, 'base64url').toString('utf-8'));
     if (payload.exp < Date.now()) {
+      console.error('[PortalToken] Token expired');
       return null;
     }
     return payload;
-  } catch {
+  } catch (error) {
+    console.error('[PortalToken] Parse error:', error);
     return null;
   }
 }
