@@ -2,6 +2,7 @@ import type { Express } from "express";
 import type { RouteDeps } from './_base';
 import { getAdminClient } from './_base';
 import { getClientPortalData } from '../lib/handlers/client-portal/getClientPortalData.js';
+import { handleSendPortalAccess, parsePortalToken } from '../lib/handlers/client-portal/sendPortalAccess.js';
 import { extractToken, createAuthenticatedClient } from '../lib/auth/helpers.js';
 import { z } from 'zod';
 
@@ -176,6 +177,58 @@ export function registerClientPortalRoutes(app: Express, deps: RouteDeps) {
     } catch (error: any) {
       console.error('Error in PUT portal config:', error);
       return res.status(500).json({ error: error.message || "Failed to save portal settings" });
+    }
+  });
+
+  // POST send portal access email to a client
+  app.post("/api/client-portal/send-access/:projectClientId", handleSendPortalAccess);
+  
+  // GET verify portal access token
+  app.get("/api/client-portal/verify-token", async (req, res) => {
+    try {
+      const { token } = req.query;
+      
+      if (!token || typeof token !== 'string') {
+        return res.status(400).json({ error: 'Token is required' });
+      }
+      
+      const parsed = parsePortalToken(token);
+      
+      if (!parsed) {
+        return res.status(401).json({ error: 'Invalid or expired token' });
+      }
+      
+      // Get project and client info for the portal
+      const supabase = getAdminClient();
+      
+      const { data: projectClient } = await supabase
+        .from('project_clients')
+        .select(`
+          id,
+          contact_id,
+          project:projects!left (
+            id,
+            name
+          )
+        `)
+        .eq('id', parsed.projectClientId)
+        .eq('is_deleted', false)
+        .single();
+        
+      if (!projectClient) {
+        return res.status(404).json({ error: 'Client not found' });
+      }
+      
+      return res.status(200).json({
+        valid: true,
+        projectId: parsed.projectId,
+        projectClientId: parsed.projectClientId,
+        contactId: parsed.contactId,
+        projectName: (projectClient.project as any)?.name,
+      });
+    } catch (error: any) {
+      console.error('Error verifying portal token:', error);
+      return res.status(500).json({ error: error.message || 'Failed to verify token' });
     }
   });
 
