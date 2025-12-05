@@ -107,13 +107,17 @@ export function ClientPortalLayout({
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <Link href={isAdminPreview ? "/home" : "/"}>
-                <Button variant="ghost" size="sm" className="gap-2" data-testid="button-back-home">
-                  <ArrowLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline">Volver</span>
-                </Button>
-              </Link>
-              <div className="h-6 w-px bg-border hidden sm:block" />
+              {isAdminPreview && (
+                <>
+                  <Link href="/home">
+                    <Button variant="ghost" size="sm" className="gap-2" data-testid="button-back-home">
+                      <ArrowLeft className="h-4 w-4" />
+                      <span className="hidden sm:inline">Volver</span>
+                    </Button>
+                  </Link>
+                  <div className="h-6 w-px bg-border hidden sm:block" />
+                </>
+              )}
               <div className="flex items-center gap-3">
                 {project.image_url && (
                   <img
