@@ -58,6 +58,7 @@ import { useActionBarMobile } from '@/layouts';
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectContext } from "@/stores/projectContext";
 import { MovementKPICardsWithWallets } from "@/features/finances/components/MovementKPICardsWithWallets";
+import { exportToExcel } from "@/lib/export-utils";
 
 interface Movement {
   id: string;
@@ -806,6 +807,75 @@ export default function MovementsList() {
     filterByWallet,
   ]);
 
+  const handleExportToExcel = useCallback(() => {
+    const exportColumns = [
+      { key: 'project', label: 'Proyecto', render: (item: Movement | ConversionGroup | TransferGroup) => {
+        if ('is_conversion_group' in item || 'is_transfer_group' in item) {
+          const projectId = (item as any).movements?.[0]?.project_id;
+          return projectsMap[projectId]?.name || '-';
+        }
+        return projectsMap[(item as Movement).project_id]?.name || '-';
+      }},
+      { key: 'movement_date', label: 'Fecha', render: (item: Movement | ConversionGroup | TransferGroup) => {
+        return item.movement_date ? formatDate(item.movement_date) : '-';
+      }},
+      { key: 'type', label: 'Tipo', render: (item: Movement | ConversionGroup | TransferGroup) => {
+        if ('is_conversion_group' in item) return 'Conversión';
+        if ('is_transfer_group' in item) return 'Transferencia';
+        return (item as Movement).movement_data?.type?.name || '-';
+      }},
+      { key: 'category', label: 'Categoría', render: (item: Movement | ConversionGroup | TransferGroup) => {
+        if ('is_conversion_group' in item) return `${item.from_currency} → ${item.to_currency}`;
+        if ('is_transfer_group' in item) return `${item.from_wallet} → ${item.to_wallet}`;
+        return (item as Movement).movement_data?.category?.name || '-';
+      }},
+      { key: 'subcategory', label: 'Subcategoría', render: (item: Movement | ConversionGroup | TransferGroup) => {
+        if ('is_conversion_group' in item || 'is_transfer_group' in item) return '-';
+        return (item as Movement).movement_data?.subcategory?.name || '-';
+      }},
+      { key: 'description', label: 'Descripción', render: (item: Movement | ConversionGroup | TransferGroup) => {
+        return item.description || '-';
+      }},
+      { key: 'currency', label: 'Moneda', render: (item: Movement | ConversionGroup | TransferGroup) => {
+        if ('is_conversion_group' in item) return `${item.from_currency}/${item.to_currency}`;
+        if ('is_transfer_group' in item) {
+          const firstMovement = item.movements[0];
+          return firstMovement?.movement_data?.currency?.code || 'USD';
+        }
+        return (item as Movement).movement_data?.currency?.code || 'USD';
+      }},
+      { key: 'wallet', label: 'Billetera', render: (item: Movement | ConversionGroup | TransferGroup) => {
+        if ('is_conversion_group' in item) {
+          const egresoMovement = item.movements.find(m => m.movement_data?.type?.name?.toLowerCase()?.includes('egreso'));
+          return egresoMovement?.movement_data?.wallet?.name || '-';
+        }
+        if ('is_transfer_group' in item) return `${item.from_wallet} → ${item.to_wallet}`;
+        return (item as Movement).movement_data?.wallet?.name || '-';
+      }},
+      { key: 'amount', label: 'Monto', render: (item: Movement | ConversionGroup | TransferGroup) => {
+        if ('is_conversion_group' in item) return `-${item.from_amount} / +${item.to_amount}`;
+        if ('is_transfer_group' in item) return item.amount;
+        return (item as Movement).amount;
+      }},
+      { key: 'exchange_rate', label: 'Cotización', render: (item: Movement | ConversionGroup | TransferGroup) => {
+        if ('is_conversion_group' in item || 'is_transfer_group' in item) return '-';
+        return (item as Movement).exchange_rate || '-';
+      }},
+    ];
+
+    const today = new Date().toISOString().split('T')[0];
+    exportToExcel({
+      filename: `movimientos_${today}.xlsx`,
+      sheetName: 'Movimientos',
+      columns: exportColumns,
+      data: processedMovements
+    });
+
+    toast({
+      title: "Exportación exitosa",
+      description: `Se exportaron ${processedMovements.length} movimientos a Excel.`,
+    });
+  }, [processedMovements, projectsMap, toast]);
 
   // Set sidebar context to project when component mounts
   const { setSidebarContext } = useNavigationStore();
@@ -1385,6 +1455,8 @@ export default function MovementsList() {
           },
           showImport: true,
           onImport: () => openModal('movement-import', { projectId: selectedProjectId }),
+          showExport: true,
+          onExport: handleExportToExcel,
           customActions: selectedMovements.length > 0 && (
             <Button
               variant="ghost"
