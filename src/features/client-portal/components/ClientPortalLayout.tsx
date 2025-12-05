@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ArrowLeft, Building2, CreditCard, Calendar, Receipt, BookOpen, Eye } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Link } from 'wouter';
+import { Building2, Calendar, Receipt, BookOpen, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { ClientPortalTab, ClientPortalProject, ClientPortalSettings } from '../types';
 
@@ -107,17 +105,6 @@ export function ClientPortalLayout({
         <div className="max-w-[1440px] mx-auto px-6 sm:px-20">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              {isAdminPreview && (
-                <>
-                  <Link href="/home">
-                    <Button variant="ghost" size="sm" className="gap-2" data-testid="button-back-home">
-                      <ArrowLeft className="h-4 w-4" />
-                      <span className="hidden sm:inline">Volver</span>
-                    </Button>
-                  </Link>
-                  <div className="h-6 w-px bg-border hidden sm:block" />
-                </>
-              )}
               <div className="flex items-center gap-3">
                 {project.image_url && (
                   <img
