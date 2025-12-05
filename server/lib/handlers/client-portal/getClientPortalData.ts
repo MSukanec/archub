@@ -429,21 +429,28 @@ export async function getClientPortalData(
       const paymentAmount = parseFloat(p.amount as string);
       const commitmentAmount = commitment?.amount || null;
       const paymentExchangeRate = p.exchange_rate ? parseFloat(p.exchange_rate) : null;
+      const paymentCurrencyCode = p.currency?.code || stats.currency_code;
+      const commitmentCurrencyCode = commitment?.currency_code || stats.currency_code;
+      
+      // Only convert when payment currency differs from commitment currency
+      const needsConversion = paymentCurrencyCode !== commitmentCurrencyCode && paymentExchangeRate && paymentExchangeRate > 0;
       
       // Calculate this payment's percentage of commitment
       let commitmentPercentage: number | null = null;
       if (commitmentAmount && commitmentAmount > 0) {
-        if (paymentExchangeRate && paymentExchangeRate > 1) {
-          const paymentInCommitmentCurrency = paymentAmount / paymentExchangeRate;
+        if (needsConversion) {
+          // Payment is in different currency, convert to commitment currency
+          const paymentInCommitmentCurrency = paymentAmount / paymentExchangeRate!;
           commitmentPercentage = Math.round((paymentInCommitmentCurrency / commitmentAmount) * 100);
         } else {
+          // Payment is in same currency as commitment, use directly
           commitmentPercentage = Math.round((paymentAmount / commitmentAmount) * 100);
         }
       }
       
-      // Calculate normalized amount for cumulative tracking
-      const normalizedAmount = paymentExchangeRate && paymentExchangeRate > 1
-        ? paymentAmount / paymentExchangeRate
+      // Calculate normalized amount for cumulative tracking (in commitment currency)
+      const normalizedAmount = needsConversion
+        ? paymentAmount / paymentExchangeRate!
         : paymentAmount;
       
       return {
@@ -485,6 +492,16 @@ export async function getClientPortalData(
     // We need to calculate cumulative from oldest to newest, then assign in reverse
     const commitmentAmount = commitment?.amount || 0;
     
+    console.log('[ClientPortal Cumulative] Commitment amount:', commitmentAmount);
+    console.log('[ClientPortal Cumulative] Payments count:', paymentsRaw.length);
+    console.log('[ClientPortal Cumulative] Payments raw data:', paymentsRaw.map(p => ({
+      id: p.id,
+      date: p.payment_date,
+      amount: p.amount,
+      normalizedAmount: p.normalizedAmount,
+      exchange_rate: p.exchange_rate,
+    })));
+    
     // Build cumulative map
     const cumulativeMap: Record<string, number> = {};
     
@@ -494,14 +511,24 @@ export async function getClientPortalData(
         new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()
       );
       
+      console.log('[ClientPortal Cumulative] Sorted by date ASC:', sortedByDateAsc.map(p => ({
+        id: p.id,
+        date: p.payment_date,
+        normalizedAmount: p.normalizedAmount,
+      })));
+      
       // Calculate cumulative percentages
       let runningTotal = 0;
       
       for (const p of sortedByDateAsc) {
         runningTotal += p.normalizedAmount;
-        cumulativeMap[p.id] = Math.round((runningTotal / commitmentAmount) * 100);
+        const cumulativePct = Math.round((runningTotal / commitmentAmount) * 100);
+        cumulativeMap[p.id] = cumulativePct;
+        console.log('[ClientPortal Cumulative] Payment', p.id.slice(0, 8), '- Added:', p.normalizedAmount, 'Running:', runningTotal, 'Cumulative %:', cumulativePct);
       }
     }
+    
+    console.log('[ClientPortal Cumulative] Final map:', cumulativeMap);
     
     // Map to final output format (excluding normalizedAmount)
     payments = paymentsRaw.map(p => ({
