@@ -51,9 +51,9 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
   const [customColorH, setCustomColorH] = useState<number | null>(null)
   const [customColorHex, setCustomColorHex] = useState<string | null>(null)
   
-  // Get project types and modalities
-  const { data: projectTypes = [] } = useProjectTypes()
-  const { data: projectModalities = [] } = useProjectModalities()
+  // Get project types and modalities (requires organizationId to be enabled)
+  const { data: projectTypes = [] } = useProjectTypes(organizationId)
+  const { data: projectModalities = [] } = useProjectModalities(organizationId)
 
   // Get project data for BasicData tab
   const { data: projectData, isSuccess: projectDataSuccess } = useQuery({
@@ -236,13 +236,11 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     mutationFn: async (dataToSave: any) => {
       if (!activeProjectId || !supabase) return;
 
-      // Update fields in projects table (name, code, status, project_type_id, project_modality_id)
+      // Update fields in projects table (name, code, status)
       const projectsUpdate: any = {};
       if (dataToSave.name !== undefined) projectsUpdate.name = dataToSave.name;
       if (dataToSave.code !== undefined) projectsUpdate.code = dataToSave.code;
       if (dataToSave.status !== undefined) projectsUpdate.status = dataToSave.status;
-      if (dataToSave.project_type_id !== undefined) projectsUpdate.project_type_id = dataToSave.project_type_id || null;
-      if (dataToSave.project_modality_id !== undefined) projectsUpdate.project_modality_id = dataToSave.project_modality_id || null;
       
       if (Object.keys(projectsUpdate).length > 0) {
         const { error: projectError } = await supabase
@@ -256,8 +254,9 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         }
       }
 
-      // Prepare project_data payload - explicitly exclude fields that belong to projects table
-      const { name, code, status, project_type_id, project_modality_id, ...projectDataPayload } = dataToSave;
+      // Prepare project_data payload - exclude fields that belong to projects table
+      // project_type_id and project_modality_id go to project_data table
+      const { name, code, status, ...projectDataPayload } = dataToSave;
 
       if (Object.keys(projectDataPayload).length === 0) return;
 
@@ -328,13 +327,13 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       setUseCustomColor(projectInfo.use_custom_color || false);
       setCustomColorH(projectInfo.custom_color_h);
       setCustomColorHex(projectInfo.custom_color_hex);
-      // project_type_id and project_modality_id are in projects table, not project_data
-      setProjectTypeId(projectInfo.project_type_id || '');
-      setProjectModalityId(projectInfo.project_modality_id || '');
     }
 
     // Load project data (from project_data table - may be null for new projects)
+    // project_type_id and project_modality_id ARE in project_data table
     if (projectData) {
+      setProjectTypeId(projectData.project_type_id || '');
+      setProjectModalityId(projectData.project_modality_id || '');
       setDescription(projectData.description || '');
       setInternalNotes(projectData.internal_notes || '');
     }
