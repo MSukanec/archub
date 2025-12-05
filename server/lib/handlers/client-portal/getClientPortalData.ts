@@ -345,22 +345,37 @@ export async function getClientPortalData(
       console.error('Error fetching payments:', paymentsError);
     }
 
-    // Fetch wallet names separately from organization_wallets
+    // Fetch wallet names separately from organization_wallets (junction table)
+    // organization_wallets.id is stored in client_payments.wallet_id
+    // organization_wallets links to wallets table which has the name
     const walletIdsSet = new Set((paymentsData || []).map((p: any) => p.wallet_id).filter(Boolean));
     const walletIds = Array.from(walletIdsSet);
     let walletsMap: Record<string, string> = {};
     
     if (walletIds.length > 0) {
-      const { data: walletsData } = await supabase
+      const { data: walletsData, error: walletsError } = await supabase
         .from('organization_wallets')
-        .select('id, name')
+        .select(`
+          id,
+          wallets (
+            name
+          )
+        `)
         .in('id', walletIds);
+      
+      if (walletsError) {
+        console.error('[ClientPortal] Error fetching wallets:', walletsError);
+      }
       
       if (walletsData) {
         walletsData.forEach((w: any) => {
-          walletsMap[w.id] = w.name;
+          if (w.wallets?.name) {
+            walletsMap[w.id] = w.wallets.name;
+          }
         });
       }
+      
+      console.log('[ClientPortal Payments] walletsData:', walletsData);
     }
 
     // Fetch receipt files for payments
