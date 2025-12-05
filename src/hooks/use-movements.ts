@@ -92,9 +92,11 @@ export function useMovements(organizationId?: string | undefined, projectId?: st
         throw new Error('Supabase client not initialized')
       }
 
-      // Get movements data from the view
+      // Query directly from movements table with JOINs
+      // NOTE: FK hints are only required when there are multiple FKs to the same table (e.g., movement_concepts)
+      // For tables with single FK relationships, Supabase can infer automatically
       let query = supabase
-        .from('movements_view')
+        .from('movements')
         .select(`
           id,
           description,
@@ -114,27 +116,19 @@ export function useMovements(organizationId?: string | undefined, projectId?: st
           is_favorite,
           conversion_group_id,
           transfer_group_id,
-          project_name,
-          project_color,
-          currency_name,
-          currency_symbol,
-          currency_code,
-          currency_country,
-          wallet_name,
-          type_name,
-          category_name,
-          subcategory_name,
           partner,
-          subcontract,
-          client,
-          member,
-          member_avatar,
-          movement_personnel_id,
-          personnel,
           indirect_id,
-          indirect,
-          general_cost_id,
-          general_cost
+          projects(name, color),
+          movement_types:movement_concepts!movements_type_id_fkey(id, name),
+          movement_categories:movement_concepts!movements_category_id_fkey(id, name),
+          movement_subcategories:movement_concepts!movements_subcategory_id_fkey(id, name),
+          currencies(id, name, code, symbol, country),
+          organization_wallets(
+            id,
+            wallets(id, name)
+          ),
+          profiles(full_name, avatar_url),
+          indirect_costs(id, name)
         `)
         
       query = query.eq('organization_id', effectiveOrgId)
@@ -150,6 +144,7 @@ export function useMovements(organizationId?: string | undefined, projectId?: st
       const { data, error } = await query;
 
       if (error) {
+        console.error('Error fetching movements:', error)
         return []
       }
 
@@ -157,48 +152,44 @@ export function useMovements(organizationId?: string | undefined, projectId?: st
         return []
       }
 
-      // All data now comes from the view, no need for additional queries
-
-      // Transform the data using view columns
-      const transformedData = data.map((movement) => {
+      // Transform the data from joined tables
+      const transformedData = data.map((movement: any) => {
         return {
           ...movement,
           exchange_rate: movement.exchange_rate,
           creator: {
-            full_name: movement.member,
-            avatar_url: movement.member_avatar
+            full_name: movement.profiles?.full_name,
+            avatar_url: movement.profiles?.avatar_url
           },
           movement_data: {
-            type: {
-              id: movement.type_id,
-              name: movement.type_name
-            },
-            category: {
-              id: movement.category_id,
-              name: movement.category_name
-            },
-            subcategory: movement.subcategory_id ? {
-              id: movement.subcategory_id,
-              name: movement.subcategory_name
+            type: movement.movement_types ? {
+              id: movement.movement_types.id,
+              name: movement.movement_types.name
             } : undefined,
-            currency: {
-              id: movement.currency_id,
-              name: movement.currency_name,
-              code: movement.currency_code,
-              symbol: movement.currency_symbol
-            },
-            wallet: {
-              id: movement.wallet_id,
-              name: movement.wallet_name
-            }
+            category: movement.movement_categories ? {
+              id: movement.movement_categories.id,
+              name: movement.movement_categories.name
+            } : undefined,
+            subcategory: movement.movement_subcategories ? {
+              id: movement.movement_subcategories.id,
+              name: movement.movement_subcategories.name
+            } : undefined,
+            currency: movement.currencies ? {
+              id: movement.currencies.id,
+              name: movement.currencies.name,
+              code: movement.currencies.code,
+              symbol: movement.currencies.symbol
+            } : undefined,
+            wallet: movement.organization_wallets?.wallets ? {
+              id: movement.organization_wallets.id,
+              name: movement.organization_wallets.wallets.name
+            } : undefined
           },
-          project_name: movement.project_name,
-          project_color: movement.project_color,
-          partner: movement.partner,
-          subcontract: movement.subcontract,
-          client: movement.client,
-          indirect_id: movement.indirect_id,
-          indirect: movement.indirect
+          project_name: movement.projects?.name,
+          project_color: movement.projects?.color,
+          member: movement.profiles?.full_name,
+          member_avatar: movement.profiles?.avatar_url,
+          indirect: movement.indirect_costs?.name
         }
       });
       

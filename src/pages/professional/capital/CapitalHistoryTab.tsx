@@ -100,7 +100,7 @@ export function CapitalHistoryTab({
       label: "Socio",
       width: "1fr",
       render: (item: CapitalMovement) => {
-        // Use partner column from movements_view first, then fallback to member
+        // Use partner field from movement data
         let displayName = item.partner
 
         if (!displayName) {

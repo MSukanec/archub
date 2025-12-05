@@ -658,15 +658,6 @@ export const movement_subcontracts = pgTable("movement_subcontracts", {
   created_at: timestamp("created_at").defaultNow(),
 });
 
-// Movement Clients Junction Table
-export const movement_clients = pgTable("movement_clients", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  movement_id: uuid("movement_id").notNull(),
-  project_client_id: uuid("project_client_id").notNull(),
-  created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow(),
-});
-
 // ============================================
 // CLIENT MANAGEMENT TABLES
 // ============================================
@@ -967,14 +958,6 @@ export type InsertBudget = z.infer<typeof insertBudgetSchema>;
 export type BudgetItem = typeof budget_items.$inferSelect;
 export type InsertBudgetItem = z.infer<typeof insertBudgetItemSchema>;
 
-// Movement General Costs Junction Table
-export const movement_general_costs = pgTable("movement_general_costs", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  movement_id: uuid("movement_id").notNull(),
-  general_cost_id: uuid("general_cost_id").notNull(),
-  created_at: timestamp("created_at").defaultNow(),
-});
-
 // Project Personnel Table
 export const project_personnel = pgTable("project_personnel", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -1062,16 +1045,6 @@ export const insertMovementSubcontractSchema = createInsertSchema(movement_subco
   created_at: true,
 });
 
-export const insertMovementClientSchema = createInsertSchema(movement_clients).omit({
-  id: true,
-  created_at: true,
-  updated_at: true,
-});
-
-export const insertMovementGeneralCostSchema = createInsertSchema(movement_general_costs).omit({
-  id: true,
-  created_at: true,
-});
 
 export const insertProjectPersonnelSchema = createInsertSchema(project_personnel).omit({
   id: true,
@@ -1128,15 +1101,10 @@ export type MovementTask = typeof movement_tasks.$inferSelect;
 export type InsertMovementTask = z.infer<typeof insertMovementTaskSchema>;
 export type MovementSubcontract = typeof movement_subcontracts.$inferSelect;
 export type InsertMovementSubcontract = z.infer<typeof insertMovementSubcontractSchema>;
-export type MovementClient = typeof movement_clients.$inferSelect;
-export type InsertMovementClient = z.infer<typeof insertMovementClientSchema>;
-
-export type MovementGeneralCost = typeof movement_general_costs.$inferSelect;
 export type ProjectPersonnel = typeof project_personnel.$inferSelect;
 export type InsertProjectPersonnel = z.infer<typeof insertProjectPersonnelSchema>;
 export type PersonnelRate = typeof personnel_rates.$inferSelect;
 export type InsertPersonnelRate = z.infer<typeof insertPersonnelRatesSchema>;
-export type InsertMovementGeneralCost = z.infer<typeof insertMovementGeneralCostSchema>;
 
 
 // Subcontracts tables

@@ -37,9 +37,6 @@ import { CommitmentItem } from './fields/ClientsFields'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/features/subcontracts'
-import { useMovementProjectClients, useCreateMovementProjectClients, useUpdateMovementProjectClients } from '@/hooks/use-movement-project-clients'
-import { useMovementPartners, useCreateMovementPartners, useUpdateMovementPartners } from '@/hooks/use-movement-partners'
-import { useMovementGeneralCosts, useCreateMovementGeneralCosts, useUpdateMovementGeneralCosts } from '@/hooks/use-movement-general-costs'
 import { useMovementPersonnel } from '@/hooks/use-movement-personnel'
 
 // Schema de movimiento básico - proyecto siempre requerido
@@ -178,32 +175,8 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const createMovementSubcontractsMutation = useCreateMovementSubcontracts()
   const updateMovementSubcontractsMutation = useUpdateMovementSubcontracts()
 
-  // Mutaciones para clientes de proyecto
-  const createMovementProjectClientsMutation = useCreateMovementProjectClients()
-  const updateMovementProjectClientsMutation = useUpdateMovementProjectClients()
-
-  // Mutaciones para partners unificadas
-  const createMovementPartnersMutation = useCreateMovementPartners()
-  const updateMovementPartnersMutation = useUpdateMovementPartners()
-
-  // Mutaciones para gastos generales
-  const createMovementGeneralCostsMutation = useCreateMovementGeneralCosts()
-  const updateMovementGeneralCostsMutation = useUpdateMovementGeneralCosts()
-
   // Lazy-loaded queries for associations - only enabled when needed
   const { data: existingSubcontracts, refetch: refetchSubcontracts } = useMovementSubcontracts(
-    isEditing && editingMovement?.id ? editingMovement.id : undefined
-  )
-
-  const { data: existingProjectClients, refetch: refetchProjectClients } = useMovementProjectClients(
-    isEditing && editingMovement?.id ? editingMovement.id : undefined
-  )
-
-  const { data: existingPartners, refetch: refetchPartners } = useMovementPartners(
-    isEditing && editingMovement?.id ? editingMovement.id : undefined
-  )
-
-  const { data: existingGeneralCosts, refetch: refetchGeneralCosts } = useMovementGeneralCosts(
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
@@ -255,36 +228,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   })
   const [selectedSubcategoryId, setSelectedSubcategoryId] = React.useState('') // Clear subcategory since they no longer exist
   
-  // Process association data when loaded
-  React.useEffect(() => {
-    if (isEditing && existingPartners && existingPartners.length > 0) {
-      const transformedPartners = existingPartners.map((partner: any) => {
-        let partnerName = 'Socio sin nombre'
-        if (partner.partners?.contacts) {
-          const { contacts } = partner.partners
-          if (contacts.company_name) {
-            partnerName = contacts.company_name
-          } else {
-            const fullName = `${contacts.first_name || ''} ${contacts.last_name || ''}`.trim()
-            if (fullName) {
-              partnerName = fullName
-            } else if (contacts.email) {
-              partnerName = contacts.email
-            }
-          }
-        }
-        return { partner_id: partner.partner_id, partner_name: partnerName }
-      })
-      
-      // Determine if contributions or withdrawals based on subcategory_id
-      if (editingMovement?.subcategory_id === 'a0429ca8-f4b9-4b91-84a2-b6603452f7fb') {
-        setSelectedPartnerContributions(transformedPartners)
-      } else if (editingMovement?.subcategory_id === 'c04a82f8-6fd8-439d-81f7-325c63905a1b') {
-        setSelectedPartnerWithdrawals(transformedPartners)
-      }
-    }
-  }, [existingPartners, editingMovement?.subcategory_id])
-
   // Process subcontracts when loaded
   React.useEffect(() => {
     if (existingSubcontracts && existingSubcontracts.length > 0) {
@@ -311,16 +254,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   }, [editingMovement?.indirect_id, editingMovement?.indirect])
 
-  // Process general costs when loaded
-  React.useEffect(() => {
-    if (existingGeneralCosts && existingGeneralCosts.length > 0) {
-      const transformedGeneralCosts = existingGeneralCosts.map((generalCost: any) => ({
-        general_cost_id: generalCost.general_cost_id
-      }))
-      setSelectedGeneralCosts(transformedGeneralCosts)
-    }
-  }, [existingGeneralCosts])
-
   // Process personnel when loaded
   React.useEffect(() => {
     if (existingPersonnel && existingPersonnel.length > 0) {
@@ -337,28 +270,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
       setSelectedPersonnel(transformedPersonnel)
     }
   }, [existingPersonnel])
-
-  // Process project clients when loaded
-  React.useEffect(() => {
-    if (existingProjectClients && existingProjectClients.length > 0) {
-      const transformedClients = existingProjectClients.map((client: any) => {
-        let clientName = 'Sin nombre'
-        if (client.project_clients?.contact) {
-          const contact = client.project_clients.contact
-          const fullName = contact.full_name || 
-            `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-          if (fullName) clientName = fullName
-        }
-
-        return {
-          project_client_id: client.project_client_id,
-          unit: client.project_clients?.unit || 'N/A',
-          client_name: clientName
-        }
-      })
-      setSelectedClients(transformedClients)
-    }
-  }, [existingProjectClients])
 
   // Extract default values with fallbacks to prevent blocking
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies[0]?.currency?.id || ''
@@ -926,49 +837,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   }, [])
 
-  // Función para cargar clientes del proyecto asignados al movimiento
-  const loadMovementProjectClients = React.useCallback(async (movementId: string) => {
-    try {
-      const { data: clientAssignments, error } = await supabase
-        .from('movement_clients')
-        .select(`
-          project_client_id,
-          project_clients:project_client_id (
-            id,
-            unit,
-            contact:client_id (
-              id,
-              first_name,
-              last_name,
-              full_name
-            )
-          )
-        `)
-        .eq('movement_id', movementId)
-
-      if (error) throw error
-
-      if (clientAssignments && clientAssignments.length > 0) {
-        const formattedClients = clientAssignments.map((assignment: any) => {
-          const projectClient = assignment.project_clients
-          const contact = projectClient?.contact
-          const clientName = contact?.full_name || 
-            `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre'
-
-          return {
-            project_client_id: assignment.project_client_id,
-            unit: projectClient?.unit || 'N/A',
-            client_name: clientName
-          }
-        })
-
-        setSelectedClients(formattedClients)
-      }
-    } catch (error) {
-      console.error('Error loading project client assignments:', error)
-    }
-  }, [])
-
   // Función para cargar costos indirectos asignados al movimiento
   const loadMovementIndirects = React.useCallback(async (movementId: string) => {
     try {
@@ -1061,14 +929,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
         if (deleteSubcontractsError) throw deleteSubcontractsError
 
-        // Actualizar clientes de proyecto asignados - eliminar existentes y crear nuevos
-        const { error: deleteProjectClientsError } = await supabase
-          .from('movement_clients')
-          .delete()
-          .eq('movement_id', editingMovement.id)
-
-        if (deleteProjectClientsError) throw deleteProjectClientsError
-
         // Actualizar costos indirectos asignados - eliminar existentes y crear nuevos
         const { error: deleteIndirectsError } = await supabase
           .from('movement_indirects')
@@ -1076,35 +936,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           .eq('movement_id', editingMovement.id)
 
         if (deleteIndirectsError) throw deleteIndirectsError
-
-        // Actualizar gastos generales asignados - eliminar existentes y crear nuevos
-        const { error: deleteGeneralCostsError } = await supabase
-          .from('movement_general_costs')
-          .delete()
-          .eq('movement_id', editingMovement.id)
-
-        if (deleteGeneralCostsError) throw deleteGeneralCostsError
-
-        // Actualizar partners (retiros y aportes) - usar hook unificado
-        const allPartners = [
-          ...(selectedPartnerWithdrawals || []),
-          ...(selectedPartnerContributions || [])
-        ]
-        
-        if (allPartners.length > 0) {
-          await updateMovementPartnersMutation.mutateAsync({
-            movementId: editingMovement.id,
-            partners: allPartners
-          })
-        } else {
-          // Si no hay partners, eliminar los existentes
-          const { error: deletePartnersError } = await supabase
-            .from('movement_partners')
-            .delete()
-            .eq('movement_id', editingMovement.id)
-
-          if (deletePartnersError) throw deletePartnersError
-        }
       } else {
         // Crear nuevo movimiento
         const { data: insertResult, error } = await supabase
@@ -1158,52 +989,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         }
       }
 
-      // Si hay partners seleccionados (retiros y aportes), usar hook unificado
-      const allPartners = [
-        ...(selectedPartnerWithdrawals || []),
-        ...(selectedPartnerContributions || [])
-      ]
-      
-      if (allPartners.length > 0) {
-        if (isEditing) {
-          // Modo edición: usar updateMovementPartnersMutation
-          await updateMovementPartnersMutation.mutateAsync({
-            movementId: result.id,
-            partners: allPartners
-          })
-        } else {
-          // Modo creación: usar createMovementPartnersMutation
-          await createMovementPartnersMutation.mutateAsync({
-            movementId: result.id,
-            partners: allPartners
-          })
-        }
-      }
-
-      // Si hay clientes de proyecto seleccionados, guardar las asignaciones en movement_clients
-      if (selectedClients && selectedClients.length > 0) {
-        // Primero eliminar registros existentes si es edición
-        if (editingMovement?.id) {
-          const { error: deleteError } = await supabase
-            .from('movement_clients')
-            .delete()
-            .eq('movement_id', editingMovement.id)
-
-          if (deleteError) throw deleteError
-        }
-        
-        const projectClientsData = selectedClients.map(client => ({
-          movement_id: result.id,
-          project_client_id: client.project_client_id
-        }))
-
-        const { error: projectClientsError } = await supabase
-          .from('movement_clients')
-          .insert(projectClientsData)
-
-        if (projectClientsError) throw projectClientsError
-      }
-
       // Si hay costos indirectos seleccionados, guardar las asignaciones en movement_indirects
       if (selectedIndirects && selectedIndirects.length > 0) {
         // Primero eliminar registros existentes si es edición
@@ -1226,30 +1011,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
           .insert(indirectsData)
 
         if (indirectsError) throw indirectsError
-      }
-
-      // Si hay gastos generales seleccionados, guardar las asignaciones en movement_general_costs
-      if (selectedGeneralCosts && selectedGeneralCosts.length > 0) {
-        // Primero eliminar registros existentes si es edición
-        if (editingMovement?.id) {
-          const { error: deleteError } = await supabase
-            .from('movement_general_costs')
-            .delete()
-            .eq('movement_id', editingMovement.id)
-
-          if (deleteError) throw deleteError
-        }
-        
-        const generalCostsData = selectedGeneralCosts.map(generalCost => ({
-          movement_id: result.id,
-          general_cost_id: generalCost.general_cost_id
-        }))
-
-        const { error: generalCostsError } = await supabase
-          .from('movement_general_costs')
-          .insert(generalCostsData)
-
-        if (generalCostsError) throw generalCostsError
       }
 
       return result

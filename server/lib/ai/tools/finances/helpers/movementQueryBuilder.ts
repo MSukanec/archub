@@ -16,10 +16,8 @@ export interface MovementRow {
   subcontract?: string;
   subcontract_contact?: string;
   personnel?: string;
-  client?: string;
   member?: string;
   indirect?: string;
-  general_cost?: string;
 }
 
 export interface MovementQueryOptions {
@@ -31,7 +29,6 @@ export interface MovementQueryOptions {
     partner?: boolean;
     subcontract?: boolean;
     personnel?: boolean;
-    client?: boolean;
     member?: boolean;
   };
   includeConcepts?: {
@@ -39,13 +36,10 @@ export interface MovementQueryOptions {
     category?: boolean;
   };
   includeIndirect?: boolean;
-  includeGeneralCost?: boolean;
 }
 
 /**
- * Construye una query optimizada de movimientos seleccionando SOLO los campos necesarios
- * de movements_view. PostgreSQL's query planner optimizará automáticamente los JOINs
- * no utilizados.
+ * Construye una query optimizada de movimientos desde la tabla movements con JOINs.
  * 
  * CRÍTICO: Para subcontracts, incluye tanto subcontract (título) como subcontract_contact (nombre del contacto)
  * 
@@ -57,11 +51,69 @@ export function buildMovementQuery(
   supabase: SupabaseClient,
   options: MovementQueryOptions = {}
 ): any {
-  const fields = getMovementSelectFields(options);
-  
+  // Build the select string with JOINs based on options
+  // NOTE: FK hints are only required when there are multiple FKs to the same table (e.g., movement_concepts)
+  // For tables with single FK relationships, Supabase can infer automatically
+  const selectParts: string[] = [
+    'amount',
+    'organization_id',
+    'movement_date'
+  ];
+
+  if (options.includeDescription) {
+    selectParts.push('description');
+  }
+
+  if (options.includeProject) {
+    selectParts.push('projects(name)');
+  }
+
+  if (options.includeCurrency) {
+    selectParts.push('currencies(code, symbol)');
+    selectParts.push('exchange_rate');
+  }
+
+  if (options.includeWallet) {
+    selectParts.push('organization_wallets(wallets(name))');
+  }
+
+  if (options.includeConcepts?.type) {
+    selectParts.push('movement_types:movement_concepts!movements_type_id_fkey(name)');
+  }
+
+  if (options.includeConcepts?.category) {
+    selectParts.push('movement_categories:movement_concepts!movements_category_id_fkey(name)');
+  }
+
+  // Role fields - partner is a direct column on movements table
+  if (options.includeRoles?.partner) {
+    selectParts.push('partner');
+  }
+
+  // Subcontracts - join through movement_subcontracts junction table
+  if (options.includeRoles?.subcontract) {
+    selectParts.push('movement_subcontracts(subcontracts(title, contacts(first_name, last_name)))');
+  }
+
+  // Personnel - join through movement_personnel junction table
+  if (options.includeRoles?.personnel) {
+    selectParts.push('movement_personnel(personnel(contacts(first_name, last_name)))');
+  }
+
+  // Member (creator) - profiles table
+  if (options.includeRoles?.member) {
+    selectParts.push('profiles(full_name)');
+  }
+
+  // Indirect costs
+  if (options.includeIndirect) {
+    selectParts.push('indirect_id');
+    selectParts.push('indirect_costs(name)');
+  }
+
   return supabase
-    .from('movements_view')
-    .select(fields) as any;
+    .from('movements')
+    .select(selectParts.join(', ')) as any;
 }
 
 /**
@@ -110,7 +162,7 @@ export function getMovementSelectFields(options: MovementQueryOptions = {}): str
     fields.push('category_name');
   }
 
-  // Roles - TODOS los roles deben estar soportados
+  // Roles - supported roles (client and general_cost no longer available as tables were deleted)
   if (options.includeRoles?.partner) {
     fields.push('partner');
   }
@@ -125,10 +177,6 @@ export function getMovementSelectFields(options: MovementQueryOptions = {}): str
     fields.push('personnel');
   }
 
-  if (options.includeRoles?.client) {
-    fields.push('client');
-  }
-
   if (options.includeRoles?.member) {
     fields.push('member');
   }
@@ -136,11 +184,6 @@ export function getMovementSelectFields(options: MovementQueryOptions = {}): str
   // Indirects
   if (options.includeIndirect) {
     fields.push('indirect');
-  }
-
-  // General Costs
-  if (options.includeGeneralCost) {
-    fields.push('general_cost');
   }
 
   return fields.join(', ');

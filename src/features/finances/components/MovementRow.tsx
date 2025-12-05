@@ -39,7 +39,7 @@ interface Movement {
     };
   };
   
-  // Datos específicos de la vista movements_view
+  // Role data from movement relations
   partner?: string;
   subcontract?: string;
   client?: string;

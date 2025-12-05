@@ -135,7 +135,7 @@ export default function FinancesCapitalMovements() {
     enabled: !!organizationId && !!supabase
   })
 
-  // Calculate member summary using partner column from movements_view
+  // Calculate member summary using partner field from movements data
   const { memberSummary, availableCurrencies } = useMemo(() => {
     const currenciesSet = new Set<string>()
     
@@ -154,7 +154,7 @@ export default function FinancesCapitalMovements() {
       let partnerName = null
       let partnerEmail = ''
 
-      // Use partner column from movements_view if available
+      // Use partner field from movement data if available
       if (movement.partner) {
         partnerName = movement.partner
         partnerId = `partner_${movement.id}` // Create a unique ID for grouping
