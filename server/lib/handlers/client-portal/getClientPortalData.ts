@@ -338,13 +338,13 @@ export async function getClientPortalData(
       console.error('Error fetching payments:', paymentsError);
     }
 
-    // Fetch wallet names separately
+    // Fetch wallet names separately from organization_wallets
     const walletIds = [...new Set((paymentsData || []).map((p: any) => p.wallet_id).filter(Boolean))];
     let walletsMap: Record<string, string> = {};
     
     if (walletIds.length > 0) {
       const { data: walletsData } = await supabase
-        .from('wallets')
+        .from('organization_wallets')
         .select('id, name')
         .in('id', walletIds);
       
