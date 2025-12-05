@@ -401,25 +401,45 @@ export async function getClientPortalData(
           id,
           file_url,
           file_name,
-          file_type
+          file_type,
+          bucket,
+          file_path
         )
       `)
       .in('site_log_id', siteLogIds);
 
     if (!mediaLinksError && mediaLinksData) {
-      mediaLinksData.forEach((link: any) => {
-        if (link.site_log_id && link.media_file) {
+      for (const link of mediaLinksData as any[]) {
+        const mediaFile = link.media_file;
+        if (link.site_log_id && mediaFile) {
           if (!filesMap[link.site_log_id]) {
             filesMap[link.site_log_id] = [];
           }
+          
+          let fileUrl = mediaFile.file_url;
+          
+          // For private/social buckets, generate signed URL
+          const bucket = mediaFile.bucket;
+          const filePath = mediaFile.file_path;
+          
+          if (bucket && filePath && (bucket === 'private-assets' || bucket === 'social-assets')) {
+            const { data: signedUrlData } = await supabase.storage
+              .from(bucket)
+              .createSignedUrl(filePath, 3600); // 1 hour expiry
+            
+            if (signedUrlData?.signedUrl) {
+              fileUrl = signedUrlData.signedUrl;
+            }
+          }
+          
           filesMap[link.site_log_id].push({
-            id: link.media_file.id,
-            file_url: link.media_file.file_url,
-            file_name: link.media_file.file_name,
-            file_type: link.media_file.file_type || 'image',
+            id: mediaFile.id,
+            file_url: fileUrl,
+            file_name: mediaFile.file_name,
+            file_type: mediaFile.file_type || 'image',
           });
         }
-      });
+      }
     }
   }
 
