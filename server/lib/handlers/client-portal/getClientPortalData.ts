@@ -378,9 +378,11 @@ export async function getClientPortalData(
         .in('client_payment_id', paymentIds);
       
       if (receiptLinks) {
-        for (const link of receiptLinks as any[]) {
-          const mediaFile = link.media_file;
-          if (link.client_payment_id && mediaFile) {
+        // Process all receipt files and generate signed URLs in parallel
+        const receiptPromises = (receiptLinks as any[])
+          .filter(link => link.client_payment_id && link.media_file)
+          .map(async (link) => {
+            const mediaFile = link.media_file;
             let fileUrl = mediaFile.file_url;
             
             // Generate signed URL for private/social buckets
@@ -397,11 +399,18 @@ export async function getClientPortalData(
               }
             }
             
-            receiptMap[link.client_payment_id] = {
+            return {
+              paymentId: link.client_payment_id,
               url: fileUrl,
               name: mediaFile.file_name,
             };
-          }
+          });
+        
+        // Execute all signed URL generations in parallel
+        const resolvedReceipts = await Promise.all(receiptPromises);
+        
+        for (const { paymentId, url, name } of resolvedReceipts) {
+          receiptMap[paymentId] = { url, name };
         }
       }
     }
@@ -518,13 +527,11 @@ export async function getClientPortalData(
       .in('site_log_id', siteLogIds);
 
     if (!mediaLinksError && mediaLinksData) {
-      for (const link of mediaLinksData as any[]) {
-        const mediaFile = link.media_file;
-        if (link.site_log_id && mediaFile) {
-          if (!filesMap[link.site_log_id]) {
-            filesMap[link.site_log_id] = [];
-          }
-          
+      // Process all files and generate signed URLs in parallel
+      const filePromises = (mediaLinksData as any[])
+        .filter(link => link.site_log_id && link.media_file)
+        .map(async (link) => {
+          const mediaFile = link.media_file;
           let fileUrl = mediaFile.file_url;
           
           // For private/social buckets, generate signed URL
@@ -541,13 +548,26 @@ export async function getClientPortalData(
             }
           }
           
-          filesMap[link.site_log_id].push({
-            id: mediaFile.id,
-            file_url: fileUrl,
-            file_name: mediaFile.file_name,
-            file_type: mediaFile.file_type || 'image',
-          });
+          return {
+            siteLogId: link.site_log_id,
+            file: {
+              id: mediaFile.id,
+              file_url: fileUrl,
+              file_name: mediaFile.file_name,
+              file_type: mediaFile.file_type || 'image',
+            }
+          };
+        });
+      
+      // Execute all signed URL generations in parallel
+      const resolvedFiles = await Promise.all(filePromises);
+      
+      // Build the filesMap from resolved results
+      for (const { siteLogId, file } of resolvedFiles) {
+        if (!filesMap[siteLogId]) {
+          filesMap[siteLogId] = [];
         }
+        filesMap[siteLogId].push(file);
       }
     }
   }
