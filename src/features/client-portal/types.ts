@@ -33,6 +33,7 @@ export interface ClientPortalCommitment {
   currency_code: string;
   currency_symbol: string;
   commitment_method: string;
+  unit_name: string | null;
 }
 
 export interface ClientPortalScheduleItem {

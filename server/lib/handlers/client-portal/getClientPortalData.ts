@@ -241,6 +241,7 @@ export async function getClientPortalData(
         id,
         amount,
         commitment_method,
+        unit_name,
         currency:currencies (
           code,
           symbol
@@ -264,6 +265,7 @@ export async function getClientPortalData(
         currency_code: currency?.code || 'ARS',
         currency_symbol: currency?.symbol || '$',
         commitment_method: commitmentData.commitment_method,
+        unit_name: (commitmentData as any).unit_name || null,
       };
 
       stats.total_commitment = commitment.amount;
@@ -437,7 +439,7 @@ export async function getClientPortalData(
         payment_date: p.payment_date,
         reference: p.reference,
         status: p.status,
-        commitment_name: selectedClient?.full_name || null,
+        commitment_name: commitment?.unit_name || null,
         commitment_amount: commitmentAmount,
         commitment_currency_code: commitment?.currency_code || null,
         commitment_currency_symbol: commitment?.currency_symbol || null,
