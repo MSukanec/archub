@@ -280,6 +280,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
       queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['projects-lite'] });
       toast({
         title: "Cambios guardados",
         description: "Los datos del proyecto se han guardado automáticamente"
@@ -579,7 +580,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
             <h2 className="text-lg font-semibold">Color del Proyecto</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Define el color que identificará este proyecto en toda la plataforma. Puedes elegir entre nuestra paleta predefinida o crear un color personalizado con el plan PRO.
+            Define el color que identificará este proyecto en toda la plataforma. Puedes elegir entre nuestra paleta predefinida o crear un color personalizado.
           </p>
         </div>
 

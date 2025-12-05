@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { hslToHex, hexToRgb, hexToHsl, formatHslForCss, calculateHoverColor, calculateForegroundColor } from "@/utils/colorUtils";
-import { isProOrTeams } from "@/utils/planHelpers";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { useCurrentUser } from "@/hooks/use-current-user";
 import { useThemeStore } from "@/stores/themeStore";
 
 type Props = {
@@ -18,19 +16,10 @@ export default function ProjectColorAdvanced({
   initialEnabled = false,
   onChange
 }: Props) {
-  const { data: userData } = useCurrentUser();
   const { isDark } = useThemeStore();
-  
-  // Get current organization plan
-  const organizationId = userData?.preferences?.last_organization_id;
-  const currentOrganization = userData?.organizations?.find(
-    (org) => org.id === organizationId
-  );
-  const planCode = currentOrganization?.plan?.name || 'free';
-  const isPro = isProOrTeams(planCode);
 
   // State
-  const [enabled, setEnabled] = useState(initialEnabled && isPro);
+  const [enabled, setEnabled] = useState(initialEnabled);
   const [hue, setHue] = useState<number>(initialHue ?? 180); // Default to cyan
   const [hasInteracted, setHasInteracted] = useState(false); // Track user interaction
 
@@ -39,7 +28,7 @@ export default function ProjectColorAdvanced({
 
   // Apply preview to CSS variables when enabled
   useEffect(() => {
-    if (!enabled || !isPro) {
+    if (!enabled) {
       // Clear preview variables
       const root = document.documentElement;
       root.style.removeProperty('--accent-preview');
@@ -76,31 +65,28 @@ export default function ProjectColorAdvanced({
       root.style.removeProperty('--accent-preview-hover');
       root.style.removeProperty('--accent-preview-foreground');
     };
-  }, [enabled, isPro, hex, isDark]);
+  }, [enabled, hex, isDark]);
 
   // Notify parent of changes (only after user interaction)
   useEffect(() => {
-    // Don't notify on mount to avoid overwriting existing values for non-PRO users
     if (!hasInteracted) return;
 
-    const shouldUseCustom = enabled && isPro;
     onChange({
-      useCustom: shouldUseCustom,
-      hue: shouldUseCustom ? hue : null,
-      hex: shouldUseCustom ? hex : null
+      useCustom: enabled,
+      hue: enabled ? hue : null,
+      hex: enabled ? hex : null
     });
-  }, [enabled, hue, isPro, hex, onChange, hasInteracted]);
+  }, [enabled, hue, hex, onChange, hasInteracted]);
 
   // Handle checkbox toggle
   const handleToggle = (checked: boolean) => {
-    if (!isPro) return; // Prevent toggle if not PRO
     setHasInteracted(true);
     setEnabled(checked);
   };
 
   // Handle slider change
   const handleHueChange = (value: number) => {
-    if (!isPro || !enabled) return;
+    if (!enabled) return;
     setHasInteracted(true);
     setHue(value);
   };
@@ -120,14 +106,13 @@ export default function ProjectColorAdvanced({
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
-              className="w-4 h-4 accent-accent cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-              checked={enabled && isPro}
+              className="w-4 h-4 accent-accent cursor-pointer"
+              checked={enabled}
               onChange={(e) => handleToggle(e.target.checked)}
-              disabled={!isPro}
               data-testid="custom-color-toggle"
             />
             <span className="text-xs text-muted-foreground">
-              {isPro ? "Activar" : "Requiere Pro"}
+              Activar
             </span>
           </label>
         </div>
@@ -143,7 +128,7 @@ export default function ProjectColorAdvanced({
               step={1}
               value={hue}
               onChange={(e) => handleHueChange(Number(e.target.value))}
-              disabled={!isPro || !enabled}
+              disabled={!enabled}
               className="flex-1 h-3 rounded-full appearance-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-50
                 [&::-webkit-slider-track]:h-3
                 [&::-webkit-slider-track]:rounded-full
@@ -196,7 +181,7 @@ export default function ProjectColorAdvanced({
           </div>
 
           {/* Preview badge */}
-          {enabled && isPro && (
+          {enabled && (
             <div className="flex items-center gap-2 pt-2 border-t border-border">
               <span className="text-xs text-muted-foreground">Vista previa:</span>
               <Badge
