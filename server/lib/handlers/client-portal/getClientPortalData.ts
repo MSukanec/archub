@@ -33,6 +33,7 @@ export interface ClientPortalCommitment {
   currency_code: string;
   currency_symbol: string;
   commitment_method: string;
+  unit_name: string | null;
 }
 
 export interface ClientPortalScheduleItem {
@@ -55,6 +56,10 @@ export interface ClientPortalPayment {
   status: string;
   commitment_name: string | null;
   commitment_amount: number | null;
+  commitment_currency_code: string | null;
+  commitment_currency_symbol: string | null;
+  commitment_percentage: number | null;
+  cumulative_percentage: number | null;
   wallet_name: string | null;
   exchange_rate: number | null;
   receipt_url: string | null;
@@ -419,30 +424,32 @@ export async function getClientPortalData(
     console.log('[ClientPortal Payments] wallet_ids:', walletIds);
     console.log('[ClientPortal Payments] walletsMap:', walletsMap);
     
-    payments = (paymentsData || []).map((p: any) => {
+    // First pass: map payments with basic info
+    const paymentsRaw = (paymentsData || []).map((p: any) => {
       const paymentAmount = parseFloat(p.amount as string);
-      const commitmentAmount = p.commitment?.amount ? parseFloat(p.commitment.amount) : null;
+      const commitmentAmount = commitment?.amount || null;
       const paymentExchangeRate = p.exchange_rate ? parseFloat(p.exchange_rate) : null;
       
-      // Calculate percentage correctly:
-      // If payment has an exchange_rate, the payment is in a different currency than commitment
-      // Convert payment to commitment currency for accurate percentage
+      // Calculate this payment's percentage of commitment
       let commitmentPercentage: number | null = null;
       if (commitmentAmount && commitmentAmount > 0) {
         if (paymentExchangeRate && paymentExchangeRate > 1) {
-          // Payment is in local currency (e.g., ARS), commitment is in foreign currency (e.g., USD)
-          // Convert payment to foreign currency: paymentAmount / exchangeRate
           const paymentInCommitmentCurrency = paymentAmount / paymentExchangeRate;
           commitmentPercentage = Math.round((paymentInCommitmentCurrency / commitmentAmount) * 100);
         } else {
-          // Same currency or no exchange rate
           commitmentPercentage = Math.round((paymentAmount / commitmentAmount) * 100);
         }
       }
       
+      // Calculate normalized amount for cumulative tracking
+      const normalizedAmount = paymentExchangeRate && paymentExchangeRate > 1
+        ? paymentAmount / paymentExchangeRate
+        : paymentAmount;
+      
       return {
         id: p.id,
         amount: paymentAmount,
+        normalizedAmount,
         currency_code: p.currency?.code || stats.currency_code,
         currency_symbol: p.currency?.symbol || stats.currency_symbol,
         payment_date: p.payment_date,
@@ -462,12 +469,8 @@ export async function getClientPortalData(
 
     // Calculate total_paid in commitment currency (normalized)
     let totalPaidNormalized = 0;
-    for (const p of payments) {
-      if (p.exchange_rate && p.exchange_rate > 1) {
-        totalPaidNormalized += p.amount / p.exchange_rate;
-      } else {
-        totalPaidNormalized += p.amount;
-      }
+    for (const p of paymentsRaw) {
+      totalPaidNormalized += p.normalizedAmount;
     }
     
     stats.total_paid = totalPaidNormalized;
@@ -476,6 +479,50 @@ export async function getClientPortalData(
     if (stats.total_commitment > 0) {
       stats.project_progress = Math.round((stats.total_paid / stats.total_commitment) * 100);
     }
+
+    // Calculate cumulative percentage for each payment
+    // Payments are ordered by date DESC (newest first)
+    // We need to calculate cumulative from oldest to newest, then assign in reverse
+    const commitmentAmount = commitment?.amount || 0;
+    
+    // Build cumulative map
+    const cumulativeMap: Record<string, number> = {};
+    
+    if (commitmentAmount > 0) {
+      // Sort by date ASC to calculate cumulative from oldest
+      const sortedByDateAsc = [...paymentsRaw].sort((a, b) => 
+        new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()
+      );
+      
+      // Calculate cumulative percentages
+      let runningTotal = 0;
+      
+      for (const p of sortedByDateAsc) {
+        runningTotal += p.normalizedAmount;
+        cumulativeMap[p.id] = Math.round((runningTotal / commitmentAmount) * 100);
+      }
+    }
+    
+    // Map to final output format (excluding normalizedAmount)
+    payments = paymentsRaw.map(p => ({
+      id: p.id,
+      amount: p.amount,
+      currency_code: p.currency_code,
+      currency_symbol: p.currency_symbol,
+      payment_date: p.payment_date,
+      reference: p.reference,
+      status: p.status,
+      commitment_name: p.commitment_name,
+      commitment_amount: p.commitment_amount,
+      commitment_currency_code: p.commitment_currency_code,
+      commitment_currency_symbol: p.commitment_currency_symbol,
+      commitment_percentage: p.commitment_percentage,
+      cumulative_percentage: cumulativeMap[p.id] ?? null,
+      wallet_name: p.wallet_name,
+      exchange_rate: p.exchange_rate,
+      receipt_url: p.receipt_url,
+      receipt_name: p.receipt_name,
+    }));
   }
 
   const { data: siteLogsData, error: siteLogsError } = await supabase

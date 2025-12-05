@@ -59,6 +59,7 @@ export interface ClientPortalPayment {
   commitment_currency_code: string | null;
   commitment_currency_symbol: string | null;
   commitment_percentage: number | null;
+  cumulative_percentage: number | null;
   wallet_name: string | null;
   exchange_rate: number | null;
   receipt_url: string | null;
