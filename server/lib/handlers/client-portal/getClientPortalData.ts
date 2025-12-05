@@ -59,14 +59,27 @@ export interface ClientPortalPayment {
   exchange_rate: number | null;
 }
 
+export interface ClientPortalSiteLogFile {
+  id: string;
+  file_url: string;
+  file_name: string | null;
+  file_type: string;
+}
+
+export interface ClientPortalSiteLogCreator {
+  full_name: string | null;
+  avatar_url: string | null;
+}
+
 export interface ClientPortalSiteLog {
   id: string;
   log_date: string;
+  created_at: string | null;
   comments: string | null;
   weather: string | null;
   type_name: string | null;
-  files_count: number;
-  creator_name: string | null;
+  files: ClientPortalSiteLogFile[];
+  creator: ClientPortalSiteLogCreator | null;
 }
 
 export interface ClientPortalStats {
@@ -352,6 +365,7 @@ export async function getClientPortalData(
     .select(`
       id,
       log_date,
+      created_at,
       comments,
       weather,
       site_log_type:site_log_types (
@@ -359,7 +373,8 @@ export async function getClientPortalData(
       ),
       creator:organization_members (
         user:users (
-          full_name
+          full_name,
+          avatar_url
         )
       )
     `)
@@ -367,24 +382,43 @@ export async function getClientPortalData(
     .eq('organization_id', organizationId)
     .eq('is_public', true)
     .order('log_date', { ascending: false })
-    .limit(20);
+    .limit(50);
 
   if (siteLogsError) {
     console.error('Error fetching site logs:', siteLogsError);
   }
 
   const siteLogIds = (siteLogsData || []).map((l: any) => l.id);
-  let filesCountMap: Record<string, number> = {};
+  let filesMap: Record<string, ClientPortalSiteLogFile[]> = {};
 
   if (siteLogIds.length > 0) {
-    const { data: filesData, error: filesError } = await supabase
+    const { data: mediaLinksData, error: mediaLinksError } = await supabase
       .from('media_links')
-      .select('site_log_id')
+      .select(`
+        id,
+        site_log_id,
+        media_file:media_files (
+          id,
+          file_url,
+          file_name,
+          file_type
+        )
+      `)
       .in('site_log_id', siteLogIds);
 
-    if (!filesError && filesData) {
-      filesData.forEach((f: any) => {
-        filesCountMap[f.site_log_id] = (filesCountMap[f.site_log_id] || 0) + 1;
+    if (!mediaLinksError && mediaLinksData) {
+      mediaLinksData.forEach((link: any) => {
+        if (link.site_log_id && link.media_file) {
+          if (!filesMap[link.site_log_id]) {
+            filesMap[link.site_log_id] = [];
+          }
+          filesMap[link.site_log_id].push({
+            id: link.media_file.id,
+            file_url: link.media_file.file_url,
+            file_name: link.media_file.file_name,
+            file_type: link.media_file.file_type || 'image',
+          });
+        }
       });
     }
   }
@@ -392,11 +426,15 @@ export async function getClientPortalData(
   const site_logs: ClientPortalSiteLog[] = (siteLogsData || []).map((log: any) => ({
     id: log.id,
     log_date: log.log_date,
+    created_at: log.created_at,
     comments: log.comments,
     weather: log.weather,
     type_name: log.site_log_type?.name || null,
-    files_count: filesCountMap[log.id] || 0,
-    creator_name: log.creator?.user?.full_name || null,
+    files: filesMap[log.id] || [],
+    creator: log.creator?.user ? {
+      full_name: log.creator.user.full_name,
+      avatar_url: log.creator.user.avatar_url,
+    } : null,
   }));
 
   const { data: portalSettings } = await supabase
