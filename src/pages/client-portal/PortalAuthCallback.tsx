@@ -43,12 +43,12 @@ export default function PortalAuthCallback() {
         setProjectData(data);
         setStatus('success');
 
-        // Store session in localStorage for portal access
+        // Store session in localStorage for portal access (30 days)
         const session = {
           projectId: data.projectId,
           projectClientId: data.projectClientId,
           contactId: data.contactId,
-          exp: Date.now() + 24 * 60 * 60 * 1000,
+          exp: Date.now() + 30 * 24 * 60 * 60 * 1000,
         };
         localStorage.setItem('portal_session', JSON.stringify(session));
 

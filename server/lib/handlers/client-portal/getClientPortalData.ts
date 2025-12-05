@@ -53,6 +53,10 @@ export interface ClientPortalPayment {
   payment_date: string;
   reference: string | null;
   status: string;
+  commitment_name: string | null;
+  commitment_amount: number | null;
+  wallet_name: string | null;
+  exchange_rate: number | null;
 }
 
 export interface ClientPortalSiteLog {
@@ -297,9 +301,18 @@ export async function getClientPortalData(
         payment_date,
         reference,
         status,
+        exchange_rate,
         currency:currencies (
           code,
           symbol
+        ),
+        commitment:client_commitments (
+          id,
+          commitment_method,
+          amount
+        ),
+        wallet:wallets (
+          name
         )
       `)
       .eq('project_id', projectId)
@@ -320,6 +333,10 @@ export async function getClientPortalData(
       payment_date: p.payment_date,
       reference: p.reference,
       status: p.status,
+      commitment_name: p.commitment?.commitment_method || null,
+      commitment_amount: p.commitment?.amount ? parseFloat(p.commitment.amount) : null,
+      wallet_name: p.wallet?.name || null,
+      exchange_rate: p.exchange_rate ? parseFloat(p.exchange_rate) : null,
     }));
 
     stats.total_paid = payments.reduce((sum, p) => sum + p.amount, 0);

@@ -53,6 +53,10 @@ export interface ClientPortalPayment {
   payment_date: string;
   reference: string | null;
   status: string;
+  commitment_name: string | null;
+  commitment_amount: number | null;
+  wallet_name: string | null;
+  exchange_rate: number | null;
 }
 
 export interface ClientPortalSiteLog {

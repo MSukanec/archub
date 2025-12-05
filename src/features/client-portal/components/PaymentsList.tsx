@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, AlertCircle, XCircle, Receipt } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, XCircle, Receipt, Calendar, Wallet, FileText, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { ClientPortalPayment } from '../types';
@@ -79,32 +79,79 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
         <CardTitle className="text-base font-medium">Historial de Pagos</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {payments.map((payment) => {
             const config = statusConfig[payment.status as keyof typeof statusConfig] || statusConfig.pending;
-            const StatusIcon = config.icon;
 
             return (
               <div
                 key={payment.id}
-                className="flex items-center gap-4 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                 data-testid={`payment-item-${payment.id}`}
               >
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <StatusIcon className="h-5 w-5 text-primary" />
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                  {/* Fecha de pago */}
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span className="text-xs">Fecha</span>
+                    </div>
+                    <p className="font-medium text-sm">
+                      {formatDate(payment.payment_date)}
+                    </p>
+                  </div>
+
+                  {/* Compromiso */}
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                      <FileText className="h-3.5 w-3.5" />
+                      <span className="text-xs">Compromiso</span>
+                    </div>
+                    <p className="font-medium text-sm">
+                      {payment.commitment_name || '-'}
+                    </p>
+                    {payment.commitment_amount && (
+                      <p className="text-xs text-muted-foreground">
+                        {formatCurrency(payment.commitment_amount, payment.currency_symbol)}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Billetera */}
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                      <Wallet className="h-3.5 w-3.5" />
+                      <span className="text-xs">Billetera</span>
+                    </div>
+                    <p className="font-medium text-sm">
+                      {payment.wallet_name || '-'}
+                    </p>
+                  </div>
+
+                  {/* Monto */}
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                      <DollarSign className="h-3.5 w-3.5" />
+                      <span className="text-xs">Monto</span>
+                    </div>
+                    <p className="font-medium text-sm">
+                      {formatCurrency(payment.amount, payment.currency_symbol)}
+                    </p>
+                    {payment.exchange_rate && payment.exchange_rate !== 1 && (
+                      <p className="text-xs text-muted-foreground">
+                        TC: {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Estado */}
+                  <div className="flex flex-col items-start sm:items-end">
+                    <span className="text-xs text-muted-foreground mb-1">Estado</span>
+                    <Badge className={config.className}>
+                      {config.label}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">
-                    {formatCurrency(payment.amount, payment.currency_symbol)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDate(payment.payment_date)}
-                    {payment.reference && ` • Ref: ${payment.reference}`}
-                  </p>
-                </div>
-                <Badge className={config.className}>
-                  {config.label}
-                </Badge>
               </div>
             );
           })}
