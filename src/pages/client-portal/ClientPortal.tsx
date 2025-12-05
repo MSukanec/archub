@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useRoute } from 'wouter';
+import { useState, useEffect, useMemo } from 'react';
+import { useRoute, useSearch } from 'wouter';
 import { ClientPortalLayout, useClientPortalData } from '@/features/client-portal';
 import type { ClientPortalTab, ClientPortalClient } from '@/features/client-portal';
 import { PortalDashboardTab } from './PortalDashboardTab';
@@ -17,16 +17,59 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface PortalSession {
+  projectId: string;
+  projectClientId: string;
+  contactId: string;
+  exp: number;
+}
+
+function getPortalSession(): PortalSession | null {
+  try {
+    const stored = localStorage.getItem('portal_session');
+    if (!stored) return null;
+    const session = JSON.parse(stored) as PortalSession;
+    if (session.exp < Date.now()) {
+      localStorage.removeItem('portal_session');
+      return null;
+    }
+    return session;
+  } catch {
+    return null;
+  }
+}
+
 export default function ClientPortal() {
   const [, params] = useRoute('/portal/:projectId');
   const projectId = params?.projectId;
+  const searchString = useSearch();
   
   const [activeTab, setActiveTab] = useState<ClientPortalTab>('dashboard');
   const [selectedClientId, setSelectedClientId] = useState<string | undefined>();
 
+  // Check for client ID from URL params or portal session
+  const clientIdFromSession = useMemo(() => {
+    const urlParams = new URLSearchParams(searchString);
+    const urlClientId = urlParams.get('clientId');
+    if (urlClientId) return urlClientId;
+    
+    const session = getPortalSession();
+    if (session && session.projectId === projectId) {
+      return session.contactId;
+    }
+    return undefined;
+  }, [searchString, projectId]);
+
+  // Set initial selected client from session/URL
+  useEffect(() => {
+    if (clientIdFromSession && !selectedClientId) {
+      setSelectedClientId(clientIdFromSession);
+    }
+  }, [clientIdFromSession]);
+
   const { data, isLoading, isFetching, error } = useClientPortalData({
     projectId: projectId || '',
-    clientId: selectedClientId,
+    clientId: selectedClientId || clientIdFromSession,
   });
 
   if (!projectId) {

@@ -1,6 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useToast } from '@/hooks/use-toast'
-import { Users, Plus, Edit, Trash2, User, Eye, UserCheck, FileText, Calendar } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, User, Eye, UserCheck, FileText, Calendar, Send, Loader2 } from 'lucide-react'
+import { useMutation } from '@tanstack/react-query'
+import { apiRequest } from '@/lib/queryClient'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -217,6 +219,48 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
     });
   };
 
+  // Send portal access mutation
+  const sendAccessMutation = useMutation({
+    mutationFn: async (projectClientId: string) => {
+      const response = await apiRequest('POST', `/api/client-portal/send-access/${projectClientId}`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: 'Acceso enviado',
+        description: `Se envió el enlace de acceso a ${data.sentTo}`,
+      });
+    },
+    onError: (error: any) => {
+      const errorData = error?.message ? JSON.parse(error.message) : {};
+      if (errorData.code === 'NO_EMAIL') {
+        toast({
+          title: 'Sin email',
+          description: 'Este cliente no tiene email registrado. Edita el contacto para agregar uno.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Error al enviar',
+          description: errorData.error || 'No se pudo enviar el acceso al portal',
+          variant: 'destructive',
+        });
+      }
+    },
+  });
+
+  const handleSendAccess = (client: ProjectClientSummary) => {
+    if (!client.contacts?.email) {
+      toast({
+        title: 'Sin email',
+        description: 'Este cliente no tiene email registrado. Edita el contacto para agregar uno.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    sendAccessMutation.mutate(client.id);
+  };
+
   // Show message only if there's no organization (shouldn't happen)
   if (!organizationId) {
     return (
@@ -419,6 +463,12 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             ),
           }}
           rowActions={(client: EnrichedClient) => [
+            {
+              label: 'Enviar Acceso al Portal',
+              icon: Send,
+              onClick: () => handleSendAccess(client),
+              disabled: !client.contacts?.email || sendAccessMutation.isPending,
+            },
             {
               label: 'Editar Cliente',
               icon: Edit,

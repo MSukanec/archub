@@ -97,6 +97,7 @@ import CommunityMap from "@/pages/community/CommunityMap";
 
 // Client Portal Pages (Lazy Loaded - para clientes externos)
 const ClientPortal = lazy(() => import("@/pages/client-portal/ClientPortal"));
+const PortalAuthCallback = lazy(() => import("@/pages/client-portal/PortalAuthCallback"));
 
 // Learning Pages (Lazy Loaded - incluye reproductor Vimeo pesado)
 const LearningDashboard = lazy(() => import("@/pages/learning/dashboard/LearningDashboard"));
@@ -146,7 +147,12 @@ function Router() {
   return (
     <AuthGuard>
       <Switch>
-        {/* Client Portal Route - Public via AuthGuard config */}
+        {/* Client Portal Routes - Public via AuthGuard config */}
+        <Route path="/portal/auth/callback">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <PortalAuthCallback />
+          </Suspense>
+        </Route>
         <Route path="/portal/:projectId">
           <Suspense fallback={<LazyLoadFallback />}>
             <ClientPortal />
