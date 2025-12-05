@@ -236,11 +236,13 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
     mutationFn: async (dataToSave: any) => {
       if (!activeProjectId || !supabase) return;
 
-      // Update project name, code, and status in projects table
+      // Update fields in projects table (name, code, status, project_type_id, project_modality_id)
       const projectsUpdate: any = {};
       if (dataToSave.name !== undefined) projectsUpdate.name = dataToSave.name;
       if (dataToSave.code !== undefined) projectsUpdate.code = dataToSave.code;
       if (dataToSave.status !== undefined) projectsUpdate.status = dataToSave.status;
+      if (dataToSave.project_type_id !== undefined) projectsUpdate.project_type_id = dataToSave.project_type_id || null;
+      if (dataToSave.project_modality_id !== undefined) projectsUpdate.project_modality_id = dataToSave.project_modality_id || null;
       
       if (Object.keys(projectsUpdate).length > 0) {
         const { error: projectError } = await supabase
@@ -255,7 +257,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       }
 
       // Prepare project_data payload - explicitly exclude fields that belong to projects table
-      const { name, code, status, ...projectDataPayload } = dataToSave;
+      const { name, code, status, project_type_id, project_modality_id, ...projectDataPayload } = dataToSave;
 
       if (Object.keys(projectDataPayload).length === 0) return;
 
@@ -317,7 +319,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       return;
     }
 
-    // Load project info data
+    // Load project info data (from projects table)
     if (projectInfo) {
       setProjectName(projectInfo.name || '');
       setProjectCode(projectInfo.code || '');
@@ -326,12 +328,13 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
       setUseCustomColor(projectInfo.use_custom_color || false);
       setCustomColorH(projectInfo.custom_color_h);
       setCustomColorHex(projectInfo.custom_color_hex);
+      // project_type_id and project_modality_id are in projects table, not project_data
+      setProjectTypeId(projectInfo.project_type_id || '');
+      setProjectModalityId(projectInfo.project_modality_id || '');
     }
 
-    // Load project data (may be null for new projects)
+    // Load project data (from project_data table - may be null for new projects)
     if (projectData) {
-      setProjectTypeId(projectData.project_type_id || '');
-      setProjectModalityId(projectData.project_modality_id || '');
       setDescription(projectData.description || '');
       setInternalNotes(projectData.internal_notes || '');
     }
