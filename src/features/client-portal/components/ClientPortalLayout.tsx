@@ -86,7 +86,7 @@ export function ClientPortalLayout({
     <div className="min-h-screen bg-background">
       {isAdminPreview && (
         <div className="bg-primary/10 border-b border-primary/20">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          <div className="max-w-[1440px] mx-auto px-6 sm:px-20 py-2">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4 text-primary" />
@@ -104,7 +104,7 @@ export function ClientPortalLayout({
       )}
 
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-20">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
               {isAdminPreview && (
@@ -186,7 +186,7 @@ export function ClientPortalLayout({
 
         {/* Mobile Tabs - Chips horizontales scrollables */}
         <div className="sm:hidden border-t border-border/30">
-          <div className="px-4 py-3">
+          <div className="px-6 py-3">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {visibleTabs.map((tab) => (
                 <button
@@ -211,7 +211,7 @@ export function ClientPortalLayout({
         </div>
       </header>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-[1440px] mx-auto px-6 sm:px-20 py-6">
         <main data-testid="client-portal-content">
           {children}
         </main>
