@@ -966,10 +966,18 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
       }
 
       queryClient.invalidateQueries({ queryKey: CONTACT_QUERY_KEYS.all });
+      // Invalidate client queries (API routes like /api/projects/.../clients)
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey;
           return Array.isArray(key) && typeof key[0] === 'string' && key[0].includes('/clients');
+        }
+      });
+      // Invalidate CLIENT_QUERY_KEYS (array-based keys like ['clients', 'dashboard', ...])
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey;
+          return Array.isArray(key) && key[0] === 'clients';
         }
       });
       // Also invalidate the contacts query used by ClientForm selector
