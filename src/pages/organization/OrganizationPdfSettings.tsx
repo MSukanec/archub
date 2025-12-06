@@ -6,28 +6,368 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { usePdfTemplate, useUpdatePdfTemplate, DEFAULT_PDF_TEMPLATE } from '@/features/pdf';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs } from '@/components/ui-custom/Tabs';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import type { PdfTemplate } from '@shared/schema';
+
+function ColorInput({ 
+  label, 
+  value, 
+  onChange, 
+  testId 
+}: { 
+  label: string; 
+  value: string; 
+  onChange: (value: string) => void; 
+  testId: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs">{label}</Label>
+      <div className="flex gap-2">
+        <Input
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-10 h-8 p-0.5 cursor-pointer"
+          data-testid={testId}
+        />
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="flex-1 h-8 text-xs"
+        />
+      </div>
+    </div>
+  );
+}
+
+function NumberInput({ 
+  label, 
+  value, 
+  onChange, 
+  min, 
+  max, 
+  testId,
+  suffix
+}: { 
+  label: string; 
+  value: number; 
+  onChange: (value: number) => void; 
+  min?: number; 
+  max?: number; 
+  testId: string;
+  suffix?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs">{label}</Label>
+      <div className="flex items-center gap-1">
+        <Input
+          type="number"
+          value={value}
+          onChange={(e) => onChange(parseInt(e.target.value) || 0)}
+          min={min}
+          max={max}
+          className="h-8 text-xs"
+          data-testid={testId}
+        />
+        {suffix && <span className="text-xs text-muted-foreground">{suffix}</span>}
+      </div>
+    </div>
+  );
+}
+
+function SwitchRow({ 
+  label, 
+  description, 
+  checked, 
+  onChange, 
+  testId 
+}: { 
+  label: string; 
+  description?: string; 
+  checked: boolean; 
+  onChange: (checked: boolean) => void; 
+  testId: string;
+}) {
+  return (
+    <div className="flex items-center justify-between py-2">
+      <div className="space-y-0.5">
+        <Label className="text-sm">{label}</Label>
+        {description && <p className="text-xs text-muted-foreground">{description}</p>}
+      </div>
+      <Switch
+        checked={checked}
+        onCheckedChange={onChange}
+        data-testid={testId}
+      />
+    </div>
+  );
+}
+
+function HeaderPreview({ formData }: { formData: Partial<PdfTemplate> }) {
+  return (
+    <div 
+      className="border rounded-lg p-4 bg-white"
+      style={{ 
+        fontFamily: formData.font_family || 'Arial',
+        backgroundColor: formData.background_color || '#ffffff',
+        color: formData.text_color || '#1f2937'
+      }}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div 
+            className="bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500"
+            style={{ 
+              width: formData.logo_width || 80, 
+              height: formData.logo_height || 60 
+            }}
+          >
+            LOGO
+          </div>
+          <div>
+            {formData.company_name_show !== false && (
+              <div 
+                className="font-bold"
+                style={{ 
+                  fontSize: formData.company_name_size || 24,
+                  color: formData.company_name_color || '#1f2937'
+                }}
+              >
+                Mi Empresa S.A.
+              </div>
+            )}
+            <div 
+              className="text-muted-foreground"
+              style={{ fontSize: formData.company_info_size || 10 }}
+            >
+              {formData.company_address || 'Av. Principal 123, Ciudad'}
+              <br />
+              {formData.company_email || 'contacto@empresa.com'} | {formData.company_phone || '+54 11 1234-5678'}
+            </div>
+          </div>
+        </div>
+        <div className="text-right">
+          <div 
+            className="font-bold"
+            style={{ 
+              fontSize: formData.title_size || 18,
+              color: formData.primary_color || '#4f9eff'
+            }}
+          >
+            RECIBO DE PAGO
+          </div>
+          <div style={{ fontSize: formData.body_size || 12 }}>
+            N° 0001-00000123
+          </div>
+          <div 
+            className="text-muted-foreground"
+            style={{ fontSize: formData.body_size || 12 }}
+          >
+            Fecha: 06/12/2025
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ClientSectionPreview({ formData }: { formData: Partial<PdfTemplate> }) {
+  if (formData.show_client_section === false) return null;
+  
+  return (
+    <div 
+      className="border rounded-lg p-4 bg-white"
+      style={{ 
+        fontFamily: formData.font_family || 'Arial',
+        backgroundColor: formData.background_color || '#ffffff',
+        color: formData.text_color || '#1f2937'
+      }}
+    >
+      <div 
+        className="font-semibold mb-2 pb-2 border-b"
+        style={{ 
+          fontSize: formData.subtitle_size || 14,
+          borderColor: formData.secondary_color || '#e5e7eb'
+        }}
+      >
+        DATOS DEL CLIENTE
+      </div>
+      <div className="grid grid-cols-2 gap-2" style={{ fontSize: formData.body_size || 12 }}>
+        <div><span className="text-muted-foreground">Cliente:</span> Juan Pérez</div>
+        <div><span className="text-muted-foreground">CUIT:</span> 20-12345678-9</div>
+        <div><span className="text-muted-foreground">Dirección:</span> Calle 123</div>
+        <div><span className="text-muted-foreground">Tel:</span> +54 11 5555-5555</div>
+      </div>
+    </div>
+  );
+}
+
+function ProjectSectionPreview({ formData }: { formData: Partial<PdfTemplate> }) {
+  if (formData.show_project_section === false) return null;
+  
+  return (
+    <div 
+      className="border rounded-lg p-4 bg-white"
+      style={{ 
+        fontFamily: formData.font_family || 'Arial',
+        backgroundColor: formData.background_color || '#ffffff',
+        color: formData.text_color || '#1f2937'
+      }}
+    >
+      <div 
+        className="font-semibold mb-2 pb-2 border-b"
+        style={{ 
+          fontSize: formData.subtitle_size || 14,
+          borderColor: formData.secondary_color || '#e5e7eb'
+        }}
+      >
+        DATOS DEL PROYECTO
+      </div>
+      <div className="grid grid-cols-2 gap-2" style={{ fontSize: formData.body_size || 12 }}>
+        <div><span className="text-muted-foreground">Proyecto:</span> Casa Familia García</div>
+        <div><span className="text-muted-foreground">Ubicación:</span> Barrio Norte</div>
+      </div>
+    </div>
+  );
+}
+
+function DetailsSectionPreview({ formData }: { formData: Partial<PdfTemplate> }) {
+  if (formData.show_details_section === false) return null;
+  
+  return (
+    <div 
+      className="border rounded-lg p-4 bg-white"
+      style={{ 
+        fontFamily: formData.font_family || 'Arial',
+        backgroundColor: formData.background_color || '#ffffff',
+        color: formData.text_color || '#1f2937'
+      }}
+    >
+      <div 
+        className="font-semibold mb-2 pb-2 border-b"
+        style={{ 
+          fontSize: formData.subtitle_size || 14,
+          borderColor: formData.secondary_color || '#e5e7eb'
+        }}
+      >
+        DETALLE
+      </div>
+      <table className="w-full" style={{ fontSize: formData.body_size || 12 }}>
+        <thead>
+          <tr 
+            className="text-left"
+            style={{ backgroundColor: formData.secondary_color || '#e5e7eb' }}
+          >
+            <th className="p-2">Concepto</th>
+            <th className="p-2 text-right">Monto</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-b">
+            <td className="p-2">Anticipo de obra</td>
+            <td className="p-2 text-right">$150.000,00</td>
+          </tr>
+          <tr>
+            <td className="p-2 font-bold">TOTAL</td>
+            <td 
+              className="p-2 text-right font-bold"
+              style={{ color: formData.primary_color || '#4f9eff' }}
+            >
+              $150.000,00
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function FooterPreview({ formData }: { formData: Partial<PdfTemplate> }) {
+  return (
+    <div 
+      className="border rounded-lg p-3 bg-white"
+      style={{ 
+        fontFamily: formData.font_family || 'Arial',
+        backgroundColor: formData.background_color || '#ffffff',
+        color: formData.text_color || '#1f2937',
+        fontSize: formData.body_size ? formData.body_size - 2 : 10
+      }}
+    >
+      <div className="flex justify-between items-center text-muted-foreground">
+        <div>
+          {formData.footer_text && <div>{formData.footer_text}</div>}
+          {formData.show_footer_info !== false && (
+            <div className="text-xs">
+              {formData.footer_info || 'Documento generado por Seencel. www.seencel.com'}
+            </div>
+          )}
+        </div>
+        <div className="text-right">
+          {formData.footer_show_date !== false && <span>06/12/2025</span>}
+          {formData.footer_show_page_numbers !== false && <span className="ml-4">Página 1 de 1</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SignaturePreview({ formData }: { formData: Partial<PdfTemplate> }) {
+  if (formData.show_signature_section === false || formData.show_signature_fields === false) return null;
+  
+  const isHorizontal = formData.signature_layout === 'horizontal';
+  
+  return (
+    <div 
+      className="border rounded-lg p-4 bg-white"
+      style={{ 
+        fontFamily: formData.font_family || 'Arial',
+        backgroundColor: formData.background_color || '#ffffff',
+        color: formData.text_color || '#1f2937',
+        fontSize: formData.body_size || 12
+      }}
+    >
+      <div className={isHorizontal ? 'flex gap-8 justify-around' : 'space-y-6'}>
+        {['Emisor', 'Receptor'].map((role) => (
+          <div key={role} className="text-center">
+            <div className="border-b border-gray-400 w-48 mx-auto mb-1" />
+            <div className="text-sm">{formData.signature_text || 'Firma'}</div>
+            {formData.show_clarification_field !== false && (
+              <>
+                <div className="border-b border-gray-400 w-32 mx-auto mt-3 mb-1" />
+                <div className="text-xs text-muted-foreground">Aclaración</div>
+              </>
+            )}
+            {formData.show_date_field !== false && (
+              <>
+                <div className="border-b border-gray-400 w-24 mx-auto mt-3 mb-1" />
+                <div className="text-xs text-muted-foreground">Fecha</div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function OrganizationPdfSettings() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('general');
   
   const organizationId = userData?.organization?.id;
   
   const { data: template, isLoading } = usePdfTemplate(organizationId);
   const updateTemplate = useUpdatePdfTemplate();
   
-  // Local state for form
   const [formData, setFormData] = useState<Partial<PdfTemplate>>({});
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -35,12 +375,10 @@ export default function OrganizationPdfSettings() {
     setSidebarLevel('organization');
   }, [setSidebarLevel]);
 
-  // Initialize form data when template loads
   useEffect(() => {
     if (template) {
       setFormData(template);
     } else if (!isLoading) {
-      // Use defaults if no template exists
       setFormData(DEFAULT_PDF_TEMPLATE as Partial<PdfTemplate>);
     }
   }, [template, isLoading]);
@@ -81,20 +419,10 @@ export default function OrganizationPdfSettings() {
     setHasChanges(false);
   };
 
-  const tabs = [
-    { value: 'general', label: 'General' },
-    { value: 'header', label: 'Encabezado' },
-    { value: 'typography', label: 'Tipografía' },
-    { value: 'layout', label: 'Página' },
-    { value: 'sections', label: 'Secciones' },
-    { value: 'footer', label: 'Pie de Página' },
-    { value: 'signature', label: 'Firmas' },
-  ];
-
   const headerProps = {
     icon: FileText,
     title: "Documentos PDF",
-    description: "Personaliza el diseño y contenido de los documentos PDF que genera tu organización.",
+    description: "Personaliza el diseño de los documentos PDF que genera tu organización.",
     organizationId: organizationId ?? undefined,
     showMembers: true,
     actions: hasChanges ? [
@@ -116,14 +444,14 @@ export default function OrganizationPdfSettings() {
         data-testid="button-save-pdf-settings"
       >
         <Save className="w-4 h-4 mr-1" />
-        {updateTemplate.isPending ? 'Guardando...' : 'Guardar Cambios'}
+        {updateTemplate.isPending ? 'Guardando...' : 'Guardar'}
       </Button>
     ] : undefined
   };
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps} wide={false}>
+      <Layout headerProps={headerProps} wide>
         <div className="flex items-center justify-center h-64">
           <LoadingSpinner size="lg" />
         </div>
@@ -132,650 +460,460 @@ export default function OrganizationPdfSettings() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide={false}>
-      <div className="space-y-6">
-        <Tabs 
-          tabs={tabs}
-          value={activeTab}
-          onValueChange={setActiveTab}
-        />
+    <Layout headerProps={headerProps} wide>
+      <div className="space-y-8">
         
-        {activeTab === 'general' && (
+        {/* GENERAL, TIPOGRAFÍA Y PÁGINA */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Configuración General</CardTitle>
-              <CardDescription>
-                Nombre de la plantilla y colores principales de tus documentos.
-              </CardDescription>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Configuración General</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Nombre de la Plantilla</Label>
+                <Label className="text-xs">Nombre de la Plantilla</Label>
                 <Input
-                  id="name"
                   value={formData.name || ''}
                   onChange={(e) => handleChange('name', e.target.value)}
                   placeholder="Plantilla por defecto"
+                  className="h-8 text-sm"
                   data-testid="input-template-name"
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="primary_color">Color Primario</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="primary_color"
-                      type="color"
-                      value={formData.primary_color || '#4f9eff'}
-                      onChange={(e) => handleChange('primary_color', e.target.value)}
-                      className="w-12 h-10 p-1 cursor-pointer"
-                      data-testid="input-primary-color"
-                    />
-                    <Input
-                      value={formData.primary_color || '#4f9eff'}
-                      onChange={(e) => handleChange('primary_color', e.target.value)}
-                      placeholder="#4f9eff"
-                      className="flex-1"
-                    />
+              <div className="grid grid-cols-2 gap-3">
+                <ColorInput
+                  label="Color Primario"
+                  value={formData.primary_color || '#4f9eff'}
+                  onChange={(v) => handleChange('primary_color', v)}
+                  testId="input-primary-color"
+                />
+                <ColorInput
+                  label="Color Secundario"
+                  value={formData.secondary_color || '#e5e7eb'}
+                  onChange={(v) => handleChange('secondary_color', v)}
+                  testId="input-secondary-color"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <ColorInput
+                  label="Color de Texto"
+                  value={formData.text_color || '#1f2937'}
+                  onChange={(v) => handleChange('text_color', v)}
+                  testId="input-text-color"
+                />
+                <ColorInput
+                  label="Color de Fondo"
+                  value={formData.background_color || '#ffffff'}
+                  onChange={(v) => handleChange('background_color', v)}
+                  testId="input-background-color"
+                />
+              </div>
+
+              <div className="pt-2 border-t">
+                <Label className="text-xs font-medium">Tipografía</Label>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Fuente</Label>
+                    <Select
+                      value={formData.font_family || 'Arial'}
+                      onValueChange={(v) => handleChange('font_family', v)}
+                    >
+                      <SelectTrigger className="h-8 text-xs" data-testid="select-font-family">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Arial">Arial</SelectItem>
+                        <SelectItem value="Helvetica">Helvetica</SelectItem>
+                        <SelectItem value="Times-Roman">Times New Roman</SelectItem>
+                        <SelectItem value="Courier">Courier</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
+                  <NumberInput
+                    label="Título"
+                    value={formData.title_size || 18}
+                    onChange={(v) => handleChange('title_size', v)}
+                    min={12}
+                    max={36}
+                    testId="input-title-size"
+                    suffix="pt"
+                  />
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="secondary_color">Color Secundario</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="secondary_color"
-                      type="color"
-                      value={formData.secondary_color || '#e5e7eb'}
-                      onChange={(e) => handleChange('secondary_color', e.target.value)}
-                      className="w-12 h-10 p-1 cursor-pointer"
-                      data-testid="input-secondary-color"
-                    />
-                    <Input
-                      value={formData.secondary_color || '#e5e7eb'}
-                      onChange={(e) => handleChange('secondary_color', e.target.value)}
-                      placeholder="#e5e7eb"
-                      className="flex-1"
-                    />
-                  </div>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <NumberInput
+                    label="Subtítulo"
+                    value={formData.subtitle_size || 14}
+                    onChange={(v) => handleChange('subtitle_size', v)}
+                    min={10}
+                    max={24}
+                    testId="input-subtitle-size"
+                    suffix="pt"
+                  />
+                  <NumberInput
+                    label="Cuerpo"
+                    value={formData.body_size || 12}
+                    onChange={(v) => handleChange('body_size', v)}
+                    min={8}
+                    max={18}
+                    testId="input-body-size"
+                    suffix="pt"
+                  />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="text_color">Color de Texto</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="text_color"
-                      type="color"
-                      value={formData.text_color || '#1f2937'}
-                      onChange={(e) => handleChange('text_color', e.target.value)}
-                      className="w-12 h-10 p-1 cursor-pointer"
-                      data-testid="input-text-color"
-                    />
-                    <Input
-                      value={formData.text_color || '#1f2937'}
-                      onChange={(e) => handleChange('text_color', e.target.value)}
-                      placeholder="#1f2937"
-                      className="flex-1"
-                    />
+              <div className="pt-2 border-t">
+                <Label className="text-xs font-medium">Página</Label>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Tamaño</Label>
+                    <Select
+                      value={formData.page_size || 'A4'}
+                      onValueChange={(v) => handleChange('page_size', v)}
+                    >
+                      <SelectTrigger className="h-8 text-xs" data-testid="select-page-size">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A4">A4</SelectItem>
+                        <SelectItem value="LETTER">Carta</SelectItem>
+                        <SelectItem value="LEGAL">Legal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Orientación</Label>
+                    <Select
+                      value={formData.page_orientation || 'portrait'}
+                      onValueChange={(v) => handleChange('page_orientation', v)}
+                    >
+                      <SelectTrigger className="h-8 text-xs" data-testid="select-orientation">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="portrait">Vertical</SelectItem>
+                        <SelectItem value="landscape">Horizontal</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="background_color">Color de Fondo</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="background_color"
-                      type="color"
-                      value={formData.background_color || '#ffffff'}
-                      onChange={(e) => handleChange('background_color', e.target.value)}
-                      className="w-12 h-10 p-1 cursor-pointer"
-                      data-testid="input-background-color"
-                    />
-                    <Input
-                      value={formData.background_color || '#ffffff'}
-                      onChange={(e) => handleChange('background_color', e.target.value)}
-                      placeholder="#ffffff"
-                      className="flex-1"
-                    />
-                  </div>
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  <NumberInput label="↑" value={formData.margin_top || 20} onChange={(v) => handleChange('margin_top', v)} min={5} max={50} testId="input-margin-top" suffix="mm" />
+                  <NumberInput label="↓" value={formData.margin_bottom || 20} onChange={(v) => handleChange('margin_bottom', v)} min={5} max={50} testId="input-margin-bottom" suffix="mm" />
+                  <NumberInput label="←" value={formData.margin_left || 20} onChange={(v) => handleChange('margin_left', v)} min={5} max={50} testId="input-margin-left" suffix="mm" />
+                  <NumberInput label="→" value={formData.margin_right || 20} onChange={(v) => handleChange('margin_right', v)} min={5} max={50} testId="input-margin-right" suffix="mm" />
                 </div>
               </div>
             </CardContent>
           </Card>
-        )}
 
-        {activeTab === 'header' && (
+          <div className="space-y-4">
+            <div className="text-sm font-medium text-muted-foreground">Vista previa general</div>
+            <div 
+              className="border rounded-lg p-6 min-h-[400px]"
+              style={{ 
+                backgroundColor: formData.background_color || '#ffffff',
+                fontFamily: formData.font_family || 'Arial'
+              }}
+            >
+              <div className="text-center text-muted-foreground text-xs mb-4">
+                {formData.page_size || 'A4'} - {formData.page_orientation === 'landscape' ? 'Horizontal' : 'Vertical'}
+              </div>
+              <div className="space-y-3 transform scale-90 origin-top">
+                <HeaderPreview formData={formData} />
+                <ClientSectionPreview formData={formData} />
+                <ProjectSectionPreview formData={formData} />
+                <DetailsSectionPreview formData={formData} />
+                <SignaturePreview formData={formData} />
+                <FooterPreview formData={formData} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ENCABEZADO */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Encabezado del Documento</CardTitle>
-              <CardDescription>
-                Configura el logo y la información de tu empresa que aparece en el encabezado.
-              </CardDescription>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Encabezado</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Mostrar Nombre de Empresa</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Muestra el nombre de tu organización en el encabezado
-                  </p>
-                </div>
-                <Switch
-                  checked={formData.company_name_show ?? true}
-                  onCheckedChange={(checked) => handleChange('company_name_show', checked)}
-                  data-testid="switch-company-name-show"
+            <CardContent className="space-y-4">
+              <SwitchRow
+                label="Mostrar nombre de empresa"
+                checked={formData.company_name_show ?? true}
+                onChange={(v) => handleChange('company_name_show', v)}
+                testId="switch-company-name-show"
+              />
+              
+              <div className="grid grid-cols-2 gap-3">
+                <NumberInput
+                  label="Tamaño nombre"
+                  value={formData.company_name_size || 24}
+                  onChange={(v) => handleChange('company_name_size', v)}
+                  min={12}
+                  max={48}
+                  testId="input-company-name-size"
+                  suffix="pt"
+                />
+                <ColorInput
+                  label="Color nombre"
+                  value={formData.company_name_color || '#1f2937'}
+                  onChange={(v) => handleChange('company_name_color', v)}
+                  testId="input-company-name-color"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="company_name_size">Tamaño del Nombre</Label>
-                  <Input
-                    id="company_name_size"
-                    type="number"
-                    value={formData.company_name_size || 24}
-                    onChange={(e) => handleChange('company_name_size', parseInt(e.target.value))}
-                    min={12}
-                    max={48}
-                    data-testid="input-company-name-size"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="company_name_color">Color del Nombre</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="company_name_color"
-                      type="color"
-                      value={formData.company_name_color || '#1f2937'}
-                      onChange={(e) => handleChange('company_name_color', e.target.value)}
-                      className="w-12 h-10 p-1 cursor-pointer"
-                    />
-                    <Input
-                      value={formData.company_name_color || '#1f2937'}
-                      onChange={(e) => handleChange('company_name_color', e.target.value)}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="logo_width">Ancho del Logo (px)</Label>
-                  <Input
-                    id="logo_width"
-                    type="number"
-                    value={formData.logo_width || 80}
-                    onChange={(e) => handleChange('logo_width', parseInt(e.target.value))}
-                    min={20}
-                    max={200}
-                    data-testid="input-logo-width"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="logo_height">Alto del Logo (px)</Label>
-                  <Input
-                    id="logo_height"
-                    type="number"
-                    value={formData.logo_height || 60}
-                    onChange={(e) => handleChange('logo_height', parseInt(e.target.value))}
-                    min={20}
-                    max={200}
-                    data-testid="input-logo-height"
-                  />
-                </div>
+              <div className="grid grid-cols-2 gap-3">
+                <NumberInput
+                  label="Ancho logo"
+                  value={formData.logo_width || 80}
+                  onChange={(v) => handleChange('logo_width', v)}
+                  min={20}
+                  max={200}
+                  testId="input-logo-width"
+                  suffix="px"
+                />
+                <NumberInput
+                  label="Alto logo"
+                  value={formData.logo_height || 60}
+                  onChange={(v) => handleChange('logo_height', v)}
+                  min={20}
+                  max={200}
+                  testId="input-logo-height"
+                  suffix="px"
+                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="company_address">Dirección</Label>
+                <Label className="text-xs">Dirección</Label>
                 <Input
-                  id="company_address"
                   value={formData.company_address || ''}
                   onChange={(e) => handleChange('company_address', e.target.value)}
                   placeholder="Av. Principal 123, Ciudad"
+                  className="h-8 text-sm"
                   data-testid="input-company-address"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="company_email">Email</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Email</Label>
                   <Input
-                    id="company_email"
                     type="email"
                     value={formData.company_email || ''}
                     onChange={(e) => handleChange('company_email', e.target.value)}
                     placeholder="contacto@empresa.com"
+                    className="h-8 text-sm"
                     data-testid="input-company-email"
                   />
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="company_phone">Teléfono</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Teléfono</Label>
                   <Input
-                    id="company_phone"
                     value={formData.company_phone || ''}
                     onChange={(e) => handleChange('company_phone', e.target.value)}
                     placeholder="+54 11 1234-5678"
+                    className="h-8 text-sm"
                     data-testid="input-company-phone"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="company_info_size">Tamaño de Info de Empresa</Label>
-                <Input
-                  id="company_info_size"
-                  type="number"
-                  value={formData.company_info_size || 10}
-                  onChange={(e) => handleChange('company_info_size', parseInt(e.target.value))}
-                  min={8}
-                  max={16}
-                  data-testid="input-company-info-size"
-                />
-              </div>
+              <NumberInput
+                label="Tamaño info empresa"
+                value={formData.company_info_size || 10}
+                onChange={(v) => handleChange('company_info_size', v)}
+                min={8}
+                max={16}
+                testId="input-company-info-size"
+                suffix="pt"
+              />
             </CardContent>
           </Card>
-        )}
 
-        {activeTab === 'typography' && (
+          <div className="space-y-4">
+            <div className="text-sm font-medium text-muted-foreground">Vista previa del encabezado</div>
+            <HeaderPreview formData={formData} />
+          </div>
+        </div>
+
+        {/* SECCIONES */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Tipografía</CardTitle>
-              <CardDescription>
-                Configura las fuentes y tamaños de texto de tus documentos.
-              </CardDescription>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Secciones del Documento</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="font_family">Familia de Fuente</Label>
-                <Select
-                  value={formData.font_family || 'Arial'}
-                  onValueChange={(value) => handleChange('font_family', value)}
-                >
-                  <SelectTrigger data-testid="select-font-family">
-                    <SelectValue placeholder="Seleccionar fuente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Arial">Arial</SelectItem>
-                    <SelectItem value="Helvetica">Helvetica</SelectItem>
-                    <SelectItem value="Times-Roman">Times New Roman</SelectItem>
-                    <SelectItem value="Courier">Courier</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title_size">Tamaño de Título</Label>
-                  <Input
-                    id="title_size"
-                    type="number"
-                    value={formData.title_size || 18}
-                    onChange={(e) => handleChange('title_size', parseInt(e.target.value))}
-                    min={12}
-                    max={36}
-                    data-testid="input-title-size"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="subtitle_size">Tamaño de Subtítulo</Label>
-                  <Input
-                    id="subtitle_size"
-                    type="number"
-                    value={formData.subtitle_size || 14}
-                    onChange={(e) => handleChange('subtitle_size', parseInt(e.target.value))}
-                    min={10}
-                    max={24}
-                    data-testid="input-subtitle-size"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="body_size">Tamaño de Cuerpo</Label>
-                  <Input
-                    id="body_size"
-                    type="number"
-                    value={formData.body_size || 12}
-                    onChange={(e) => handleChange('body_size', parseInt(e.target.value))}
-                    min={8}
-                    max={18}
-                    data-testid="input-body-size"
-                  />
-                </div>
-              </div>
+            <CardContent className="space-y-2">
+              <SwitchRow
+                label="Sección de Cliente"
+                description="Información del cliente"
+                checked={formData.show_client_section ?? true}
+                onChange={(v) => handleChange('show_client_section', v)}
+                testId="switch-show-client-section"
+              />
+              <SwitchRow
+                label="Sección de Proyecto"
+                description="Información del proyecto"
+                checked={formData.show_project_section ?? true}
+                onChange={(v) => handleChange('show_project_section', v)}
+                testId="switch-show-project-section"
+              />
+              <SwitchRow
+                label="Sección de Detalles"
+                description="Tabla de conceptos y montos"
+                checked={formData.show_details_section ?? true}
+                onChange={(v) => handleChange('show_details_section', v)}
+                testId="switch-show-details-section"
+              />
+              <SwitchRow
+                label="Sección de Firmas"
+                description="Espacio para firmas"
+                checked={formData.show_signature_section ?? true}
+                onChange={(v) => handleChange('show_signature_section', v)}
+                testId="switch-show-signature-section"
+              />
             </CardContent>
           </Card>
-        )}
 
-        {activeTab === 'layout' && (
+          <div className="space-y-4">
+            <div className="text-sm font-medium text-muted-foreground">Vista previa de secciones</div>
+            <div className="space-y-3">
+              <ClientSectionPreview formData={formData} />
+              <ProjectSectionPreview formData={formData} />
+              <DetailsSectionPreview formData={formData} />
+            </div>
+          </div>
+        </div>
+
+        {/* PIE DE PÁGINA */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Configuración de Página</CardTitle>
-              <CardDescription>
-                Tamaño de página, orientación y márgenes del documento.
-              </CardDescription>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Pie de Página</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="page_size">Tamaño de Página</Label>
-                  <Select
-                    value={formData.page_size || 'A4'}
-                    onValueChange={(value) => handleChange('page_size', value)}
-                  >
-                    <SelectTrigger data-testid="select-page-size">
-                      <SelectValue placeholder="Seleccionar tamaño" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="A4">A4</SelectItem>
-                      <SelectItem value="LETTER">Carta (Letter)</SelectItem>
-                      <SelectItem value="LEGAL">Legal</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="page_orientation">Orientación</Label>
-                  <Select
-                    value={formData.page_orientation || 'portrait'}
-                    onValueChange={(value) => handleChange('page_orientation', value)}
-                  >
-                    <SelectTrigger data-testid="select-page-orientation">
-                      <SelectValue placeholder="Seleccionar orientación" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="portrait">Vertical (Portrait)</SelectItem>
-                      <SelectItem value="landscape">Horizontal (Landscape)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
+            <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>Márgenes (mm)</Label>
-                <div className="grid grid-cols-4 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Superior</Label>
-                    <Input
-                      type="number"
-                      value={formData.margin_top || 20}
-                      onChange={(e) => handleChange('margin_top', parseInt(e.target.value))}
-                      min={5}
-                      max={50}
-                      data-testid="input-margin-top"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Inferior</Label>
-                    <Input
-                      type="number"
-                      value={formData.margin_bottom || 20}
-                      onChange={(e) => handleChange('margin_bottom', parseInt(e.target.value))}
-                      min={5}
-                      max={50}
-                      data-testid="input-margin-bottom"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Izquierdo</Label>
-                    <Input
-                      type="number"
-                      value={formData.margin_left || 20}
-                      onChange={(e) => handleChange('margin_left', parseInt(e.target.value))}
-                      min={5}
-                      max={50}
-                      data-testid="input-margin-left"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Derecho</Label>
-                    <Input
-                      type="number"
-                      value={formData.margin_right || 20}
-                      onChange={(e) => handleChange('margin_right', parseInt(e.target.value))}
-                      min={5}
-                      max={50}
-                      data-testid="input-margin-right"
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'sections' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Secciones del Documento</CardTitle>
-              <CardDescription>
-                Activa o desactiva las secciones que aparecen en tus documentos.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Sección de Cliente</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Muestra la información del cliente en el documento
-                  </p>
-                </div>
-                <Switch
-                  checked={formData.show_client_section ?? true}
-                  onCheckedChange={(checked) => handleChange('show_client_section', checked)}
-                  data-testid="switch-show-client-section"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Sección de Proyecto</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Muestra la información del proyecto
-                  </p>
-                </div>
-                <Switch
-                  checked={formData.show_project_section ?? true}
-                  onCheckedChange={(checked) => handleChange('show_project_section', checked)}
-                  data-testid="switch-show-project-section"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Sección de Detalles</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Muestra los detalles adicionales del documento
-                  </p>
-                </div>
-                <Switch
-                  checked={formData.show_details_section ?? true}
-                  onCheckedChange={(checked) => handleChange('show_details_section', checked)}
-                  data-testid="switch-show-details-section"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Sección de Firmas</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Incluye espacio para firmas al final del documento
-                  </p>
-                </div>
-                <Switch
-                  checked={formData.show_signature_section ?? true}
-                  onCheckedChange={(checked) => handleChange('show_signature_section', checked)}
-                  data-testid="switch-show-signature-section"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'footer' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Pie de Página</CardTitle>
-              <CardDescription>
-                Configura el contenido del pie de página de tus documentos.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="footer_text">Texto del Pie de Página</Label>
+                <Label className="text-xs">Texto personalizado</Label>
                 <Textarea
-                  id="footer_text"
                   value={formData.footer_text || ''}
                   onChange={(e) => handleChange('footer_text', e.target.value)}
-                  placeholder="Texto personalizado para el pie de página..."
-                  rows={3}
+                  placeholder="Texto para el pie de página..."
+                  rows={2}
+                  className="text-sm"
                   data-testid="textarea-footer-text"
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Mostrar Información Adicional</Label>
-                  <p className="text-sm text-muted-foreground">
-                    "{formData.footer_info || 'Documento generado por Seencel. www.seencel.com'}"
-                  </p>
-                </div>
-                <Switch
-                  checked={formData.show_footer_info ?? true}
-                  onCheckedChange={(checked) => handleChange('show_footer_info', checked)}
-                  data-testid="switch-show-footer-info"
-                />
-              </div>
+              <SwitchRow
+                label="Mostrar info adicional"
+                checked={formData.show_footer_info ?? true}
+                onChange={(v) => handleChange('show_footer_info', v)}
+                testId="switch-show-footer-info"
+              />
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Mostrar Número de Página</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Agrega numeración automática de páginas
-                  </p>
+              {formData.show_footer_info !== false && (
+                <div className="space-y-2">
+                  <Label className="text-xs">Info adicional</Label>
+                  <Input
+                    value={formData.footer_info || ''}
+                    onChange={(e) => handleChange('footer_info', e.target.value)}
+                    placeholder="Documento generado por Seencel. www.seencel.com"
+                    className="h-8 text-sm"
+                    data-testid="input-footer-info"
+                  />
                 </div>
-                <Switch
-                  checked={formData.footer_show_page_numbers ?? true}
-                  onCheckedChange={(checked) => handleChange('footer_show_page_numbers', checked)}
-                  data-testid="switch-footer-show-page-numbers"
-                />
-              </div>
+              )}
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Mostrar Fecha</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Incluye la fecha de generación del documento
-                  </p>
-                </div>
-                <Switch
+              <div className="flex gap-4">
+                <SwitchRow
+                  label="Mostrar fecha"
                   checked={formData.footer_show_date ?? true}
-                  onCheckedChange={(checked) => handleChange('footer_show_date', checked)}
-                  data-testid="switch-footer-show-date"
+                  onChange={(v) => handleChange('footer_show_date', v)}
+                  testId="switch-footer-show-date"
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="footer_info">Información Adicional Personalizada</Label>
-                <Input
-                  id="footer_info"
-                  value={formData.footer_info || ''}
-                  onChange={(e) => handleChange('footer_info', e.target.value)}
-                  placeholder="Documento generado por Seencel. www.seencel.com"
-                  data-testid="input-footer-info"
+                <SwitchRow
+                  label="Mostrar N° página"
+                  checked={formData.footer_show_page_numbers ?? true}
+                  onChange={(v) => handleChange('footer_show_page_numbers', v)}
+                  testId="switch-footer-show-page-numbers"
                 />
               </div>
             </CardContent>
           </Card>
-        )}
 
-        {activeTab === 'signature' && (
+          <div className="space-y-4">
+            <div className="text-sm font-medium text-muted-foreground">Vista previa del pie de página</div>
+            <FooterPreview formData={formData} />
+          </div>
+        </div>
+
+        {/* FIRMAS */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Configuración de Firmas</CardTitle>
-              <CardDescription>
-                Personaliza el área de firmas de tus documentos.
-              </CardDescription>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Configuración de Firmas</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Mostrar Campos de Firma</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Incluye líneas para firma en el documento
-                  </p>
-                </div>
-                <Switch
-                  checked={formData.show_signature_fields ?? true}
-                  onCheckedChange={(checked) => handleChange('show_signature_fields', checked)}
-                  data-testid="switch-show-signature-fields"
-                />
-              </div>
+            <CardContent className="space-y-4">
+              <SwitchRow
+                label="Mostrar campos de firma"
+                checked={formData.show_signature_fields ?? true}
+                onChange={(v) => handleChange('show_signature_fields', v)}
+                testId="switch-show-signature-fields"
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="signature_layout">Disposición de Firmas</Label>
-                <Select
-                  value={formData.signature_layout || 'vertical'}
-                  onValueChange={(value) => handleChange('signature_layout', value)}
-                >
-                  <SelectTrigger data-testid="select-signature-layout">
-                    <SelectValue placeholder="Seleccionar disposición" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="vertical">Vertical (una debajo de otra)</SelectItem>
-                    <SelectItem value="horizontal">Horizontal (lado a lado)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {formData.show_signature_fields !== false && (
+                <>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Disposición</Label>
+                    <Select
+                      value={formData.signature_layout || 'vertical'}
+                      onValueChange={(v) => handleChange('signature_layout', v)}
+                    >
+                      <SelectTrigger className="h-8 text-xs" data-testid="select-signature-layout">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="vertical">Vertical</SelectItem>
+                        <SelectItem value="horizontal">Horizontal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="signature_text">Texto de Firma</Label>
-                <Input
-                  id="signature_text"
-                  value={formData.signature_text || ''}
-                  onChange={(e) => handleChange('signature_text', e.target.value)}
-                  placeholder="Firma y aclaración"
-                  data-testid="input-signature-text"
-                />
-              </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs">Texto de firma</Label>
+                    <Input
+                      value={formData.signature_text || ''}
+                      onChange={(e) => handleChange('signature_text', e.target.value)}
+                      placeholder="Firma"
+                      className="h-8 text-sm"
+                      data-testid="input-signature-text"
+                    />
+                  </div>
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Campo de Aclaración</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Incluye línea para aclaración de firma
-                  </p>
-                </div>
-                <Switch
-                  checked={formData.show_clarification_field ?? true}
-                  onCheckedChange={(checked) => handleChange('show_clarification_field', checked)}
-                  data-testid="switch-show-clarification-field"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Campo de Fecha</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Incluye línea para fecha junto a la firma
-                  </p>
-                </div>
-                <Switch
-                  checked={formData.show_date_field ?? true}
-                  onCheckedChange={(checked) => handleChange('show_date_field', checked)}
-                  data-testid="switch-show-date-field"
-                />
-              </div>
+                  <SwitchRow
+                    label="Campo de aclaración"
+                    checked={formData.show_clarification_field ?? true}
+                    onChange={(v) => handleChange('show_clarification_field', v)}
+                    testId="switch-show-clarification-field"
+                  />
+                  <SwitchRow
+                    label="Campo de fecha"
+                    checked={formData.show_date_field ?? true}
+                    onChange={(v) => handleChange('show_date_field', v)}
+                    testId="switch-show-date-field"
+                  />
+                </>
+              )}
             </CardContent>
           </Card>
-        )}
+
+          <div className="space-y-4">
+            <div className="text-sm font-medium text-muted-foreground">Vista previa de firmas</div>
+            <SignaturePreview formData={formData} />
+          </div>
+        </div>
+
       </div>
     </Layout>
   );
