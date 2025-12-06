@@ -17,8 +17,10 @@ export default function ClientSettingsTab() {
   const { data: clientRoles = [], isLoading } = useClientRoles(organizationId);
   const deleteMutation = useDeleteClientRole();
 
-  const systemRoles = clientRoles.filter(role => role.is_default === true);
-  const customRoles = clientRoles.filter(role => role.is_default === false);
+  // Sort all roles alphabetically by name (case-insensitive)
+  const sortedRoles = [...clientRoles].sort((a, b) => 
+    a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+  );
 
   const handleAddRole = () => {
     openModal('clientRole', { isEditing: false });
@@ -100,55 +102,30 @@ export default function ClientSettingsTab() {
         {/* Right Column - Contenido */}
         <div className="space-y-3">
 
-          {/* Roles del Sistema */}
-          {systemRoles.length > 0 && (
-            <>
-              {systemRoles.map((role) => (
-                <div 
-                  key={role.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
-                  data-testid={`card-client-role-${role.id}`}
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{role.name}</p>
-                      {role.description && (
-                        <p className="text-xs text-muted-foreground truncate">
-                          {role.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                      Sistema
-                    </span>
-                  </div>
+          {/* All roles sorted alphabetically */}
+          {sortedRoles.map((role) => (
+            <div 
+              key={role.id}
+              className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
+              data-testid={`card-client-role-${role.id}`}
+            >
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{role.name}</p>
+                  {role.description && (
+                    <p className="text-xs text-muted-foreground truncate">
+                      {role.description}
+                    </p>
+                  )}
                 </div>
-              ))}
-            </>
-          )}
-
-          {/* Roles Personalizados */}
-          {customRoles.length > 0 && (
-            <>
-              {customRoles.map((role) => (
-                <div 
-                  key={role.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
-                  data-testid={`card-client-role-${role.id}`}
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{role.name}</p>
-                      {role.description && (
-                        <p className="text-xs text-muted-foreground truncate">
-                          {role.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 ml-4">
+              </div>
+              <div className="flex items-center gap-1 ml-4">
+                {role.is_default ? (
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                    Sistema
+                  </span>
+                ) : (
+                  <>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -167,14 +144,14 @@ export default function ClientSettingsTab() {
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
 
-          {/* Estado vacío para roles personalizados */}
-          {customRoles.length === 0 && systemRoles.length === 0 && (
+          {/* Estado vacío */}
+          {sortedRoles.length === 0 && (
             <div className="p-8 text-center rounded-lg border border-dashed border-border">
               <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground mb-4">
