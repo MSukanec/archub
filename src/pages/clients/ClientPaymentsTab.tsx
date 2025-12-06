@@ -33,6 +33,7 @@ import type { TargetField, ImportConfig, ProjectContext } from '@/features/impor
 import { formatContactName } from '@/utils/contacts'
 import { PaymentReceiptPDF, type PaymentReceiptData } from '@/features/pdf'
 import { pdf } from '@react-pdf/renderer'
+import { useIsAdmin } from '@/hooks/use-admin-permissions'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
@@ -58,6 +59,7 @@ interface PaymentMetrics {
 
 export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps) {
   const { data: userData } = useCurrentUser();
+  const isAdmin = useIsAdmin();
   const { selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
@@ -1311,11 +1313,11 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           } : null
         }
         rowActions={(payment: ClientPaymentWithRelations) => [
-          {
+          ...(isAdmin ? [{
             label: 'Descargar Recibo',
             icon: Download,
             onClick: () => handleDownloadReceipt(payment),
-          },
+          }] : []),
           {
             label: 'Editar Pago',
             icon: Edit,
