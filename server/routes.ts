@@ -26,6 +26,7 @@ import { registerMediaRoutes } from './routes/media';
 import { registerEmailRoutes } from './routes/email';
 import { registerLayoutRoutes } from './routes/layout';
 import { registerClientPortalRoutes } from './routes/client-portal';
+import { registerPdfRoutes } from './routes/pdf';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
@@ -99,6 +100,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register client portal routes (public project view for clients)
   registerClientPortalRoutes(app, deps);
+
+  // Register PDF routes (templates, customization)
+  registerPdfRoutes(app, deps);
 
   // Diagnostic endpoints for payments
   app.get("/api/diag/last-payment-events", async (req, res) => {

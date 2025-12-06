@@ -16,3 +16,12 @@ export { PDFExporterModal } from './modals/PDFExporterModal';
 
 // PDF Types
 export type { PdfBlockProps, PdfBlock } from './types/types';
+
+// PDF Hooks
+export { 
+  usePdfTemplate, 
+  useCreatePdfTemplate, 
+  useUpdatePdfTemplate,
+  DEFAULT_PDF_TEMPLATE,
+  PDF_TEMPLATE_QUERY_KEYS 
+} from './hooks/use-pdf-templates';

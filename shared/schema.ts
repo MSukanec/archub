@@ -1893,3 +1893,81 @@ export const insertPaypalSeatPreferenceSchema = createInsertSchema(paypal_seat_p
 
 export type PaypalSeatPreference = typeof paypal_seat_preferences.$inferSelect;
 export type InsertPaypalSeatPreference = z.infer<typeof insertPaypalSeatPreferenceSchema>;
+
+// PDF Templates Table - Organization-level PDF customization
+export const pdf_templates = pgTable("pdf_templates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organization_id: uuid("organization_id"),
+  name: text("name").notNull().default("Plantilla por defecto"),
+  
+  // Logo configuration
+  logo_width: integer("logo_width").default(80),
+  logo_height: integer("logo_height").default(60),
+  
+  // Company info display
+  company_name_show: boolean("company_name_show").default(true),
+  company_name_size: integer("company_name_size").default(24),
+  company_name_color: text("company_name_color").default("#1f2937"),
+  company_address: text("company_address"),
+  company_email: text("company_email"),
+  company_phone: text("company_phone"),
+  company_info_size: integer("company_info_size").default(10),
+  
+  // Color scheme
+  primary_color: text("primary_color").default("#4f9eff"),
+  secondary_color: text("secondary_color").default("#e5e7eb"),
+  text_color: text("text_color").default("#1f2937"),
+  background_color: text("background_color").default("#ffffff"),
+  
+  // Typography
+  font_family: text("font_family").default("Arial"),
+  title_size: integer("title_size").default(18),
+  subtitle_size: integer("subtitle_size").default(14),
+  body_size: integer("body_size").default(12),
+  
+  // Page layout
+  page_size: varchar("page_size", { length: 10 }).default("A4"),
+  page_orientation: varchar("page_orientation", { length: 10 }).default("portrait"),
+  custom_width: numeric("custom_width"),
+  custom_height: numeric("custom_height"),
+  margin_top: integer("margin_top").default(20),
+  margin_bottom: integer("margin_bottom").default(20),
+  margin_left: integer("margin_left").default(20),
+  margin_right: integer("margin_right").default(20),
+  
+  // Section toggles
+  show_client_section: boolean("show_client_section").default(true),
+  show_project_section: boolean("show_project_section").default(true),
+  show_details_section: boolean("show_details_section").default(true),
+  show_signature_section: boolean("show_signature_section").default(true),
+  
+  // Footer configuration
+  footer_text: text("footer_text"),
+  footer_info: text("footer_info").default("Documento generado por Seencel. www.seencel.com"),
+  show_footer_info: boolean("show_footer_info").default(true),
+  footer_show_page_numbers: boolean("footer_show_page_numbers").default(true),
+  footer_show_date: boolean("footer_show_date").default(true),
+  
+  // Signature configuration
+  signature_text: text("signature_text"),
+  show_signature_fields: boolean("show_signature_fields").default(true),
+  signature_layout: varchar("signature_layout", { length: 20 }).default("vertical"),
+  show_clarification_field: boolean("show_clarification_field").default(true),
+  show_date_field: boolean("show_date_field").default(true),
+  
+  // Document metadata
+  document_number: text("document_number"),
+  
+  // Timestamps
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPdfTemplateSchema = createInsertSchema(pdf_templates).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export type PdfTemplate = typeof pdf_templates.$inferSelect;
+export type InsertPdfTemplate = z.infer<typeof insertPdfTemplateSchema>;
