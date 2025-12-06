@@ -972,6 +972,13 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
           return Array.isArray(key) && typeof key[0] === 'string' && key[0].includes('/clients');
         }
       });
+      // Also invalidate the contacts query used by ClientForm selector
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey;
+          return Array.isArray(key) && typeof key[0] === 'string' && key[0].includes('/api/contacts');
+        }
+      });
       
       toast({
         title: mode === 'edit' ? "Contacto actualizado" : "Contacto creado",
