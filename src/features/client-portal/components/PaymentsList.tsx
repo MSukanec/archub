@@ -1,13 +1,22 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Clock, AlertCircle, XCircle, Receipt, Download } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, XCircle, Receipt, Download, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import type { ClientPortalPayment } from '../types';
+import { useState } from 'react';
+import { pdf } from '@react-pdf/renderer';
+import { PaymentReceiptPDF, type PaymentReceiptData } from '@/features/pdf';
+import { useToast } from '@/hooks/use-toast';
+import type { ClientPortalPayment, ClientPortalProject, ClientPortalClient, ClientPortalCommitment } from '../types';
 
 interface PaymentsListProps {
   payments: ClientPortalPayment[];
   isLoading?: boolean;
+  project?: ClientPortalProject;
+  client?: ClientPortalClient | null;
+  commitment?: ClientPortalCommitment | null;
+  organizationName?: string;
+  organizationLogo?: string | null;
 }
 
 const statusConfig = {
@@ -17,7 +26,18 @@ const statusConfig = {
   void: { label: 'Anulado', icon: AlertCircle, className: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
 };
 
-export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
+export function PaymentsList({ 
+  payments, 
+  isLoading, 
+  project, 
+  client, 
+  commitment, 
+  organizationName, 
+  organizationLogo 
+}: PaymentsListProps) {
+  const { toast } = useToast();
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
   const formatDate = (dateStr: string) => {
     try {
       return format(new Date(dateStr), "d 'de' MMMM, yyyy", { locale: es });
@@ -33,7 +53,7 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
     }).format(amount)}`;
   };
 
-  const handleDownloadReceipt = (payment: ClientPortalPayment) => {
+  const handleDownloadReceipt = async (payment: ClientPortalPayment) => {
     if (payment.receipt_url) {
       const link = document.createElement('a');
       link.href = payment.receipt_url;
@@ -42,8 +62,54 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } else {
-      console.log('Generate PDF receipt for payment:', payment.id);
+      return;
+    }
+
+    setDownloadingId(payment.id);
+    try {
+      const receiptData: PaymentReceiptData = {
+        id: payment.id,
+        payment_date: payment.payment_date,
+        amount: payment.amount,
+        currency_symbol: payment.currency_symbol,
+        currency_code: payment.currency_code,
+        exchange_rate: payment.exchange_rate,
+        status: payment.status as 'confirmed' | 'pending' | 'rejected' | 'void',
+        reference: payment.reference,
+        wallet_name: payment.wallet_name,
+        client_name: client?.contact_name,
+        client_email: client?.contact_email,
+        project_name: project?.name,
+        project_code: project?.code,
+        organization_name: organizationName,
+        organization_logo: organizationLogo,
+        commitment_total: commitment?.amount,
+        cumulative_percentage: payment.cumulative_percentage,
+      };
+
+      const blob = await pdf(<PaymentReceiptPDF data={receiptData} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `recibo-${payment.id.slice(0, 8)}-${payment.payment_date}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Recibo descargado",
+        description: "El recibo de pago se ha descargado correctamente.",
+      });
+    } catch (error) {
+      console.error('Error generating receipt:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo generar el recibo. Intenta de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -130,9 +196,14 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
                   size="sm"
                   className="gap-1.5 h-8"
                   onClick={() => handleDownloadReceipt(payment)}
+                  disabled={downloadingId === payment.id}
                   data-testid={`button-download-receipt-${payment.id}`}
                 >
-                  <Download className="h-4 w-4" />
+                  {downloadingId === payment.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
@@ -191,9 +262,14 @@ export function PaymentsList({ payments, isLoading }: PaymentsListProps) {
                   size="icon"
                   className="h-8 w-8"
                   onClick={() => handleDownloadReceipt(payment)}
+                  disabled={downloadingId === payment.id}
                   data-testid={`button-download-receipt-${payment.id}`}
                 >
-                  <Download className="h-4 w-4" />
+                  {downloadingId === payment.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
