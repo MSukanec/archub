@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, CheckCircle2, AlertCircle, Calendar, Upload } from 'lucide-react'
+import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, CheckCircle2, AlertCircle, Calendar, Upload, Download } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
@@ -31,6 +31,8 @@ import { useOrganizationWallets, useOrganizationMembers } from '@/features/organ
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import type { TargetField, ImportConfig, ProjectContext } from '@/features/imports/types'
 import { formatContactName } from '@/utils/contacts'
+import { PaymentReceiptPDF, type PaymentReceiptData } from '@/features/pdf'
+import { pdf } from '@react-pdf/renderer'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
@@ -324,6 +326,60 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       projectId: activeProjectId,
       organizationId: organizationId,
     });
+  };
+
+  const handleDownloadReceipt = async (payment: ClientPaymentWithRelations) => {
+    try {
+      const clientContact = payment.client?.contact;
+      const clientName = formatContactName(clientContact);
+      
+      const receiptData: PaymentReceiptData = {
+        id: payment.id,
+        payment_date: payment.payment_date,
+        amount: payment.amount,
+        currency_symbol: payment.currency?.symbol || '$',
+        currency_code: payment.currency?.code || 'ARS',
+        exchange_rate: payment.exchange_rate,
+        status: payment.status,
+        reference: payment.reference,
+        notes: payment.notes,
+        wallet_name: payment.wallet?.wallets?.name,
+        client_name: clientName,
+        client_email: clientContact?.email,
+        client_phone: clientContact?.phone,
+        client_address: clientContact?.location,
+        project_name: payment.project?.name || projectName,
+        project_code: payment.project?.code,
+        organization_name: organizationName,
+        organization_logo: userData?.organization?.logo_url,
+        organization_address: userData?.organization?.address,
+        organization_email: userData?.organization?.email,
+        organization_phone: userData?.organization?.phone,
+        commitment_total: payment.commitment?.amount,
+      };
+
+      const blob = await pdf(<PaymentReceiptPDF data={receiptData} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `recibo-${payment.id.slice(0, 8)}-${payment.payment_date}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Recibo descargado",
+        description: "El recibo de pago se ha descargado correctamente.",
+      });
+    } catch (error) {
+      console.error('Error generating receipt:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo generar el recibo. Intenta de nuevo.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Bulk delete handler
@@ -1255,6 +1311,11 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           } : null
         }
         rowActions={(payment: ClientPaymentWithRelations) => [
+          {
+            label: 'Descargar Recibo',
+            icon: Download,
+            onClick: () => handleDownloadReceipt(payment),
+          },
           {
             label: 'Editar Pago',
             icon: Edit,

@@ -2,6 +2,8 @@
 export { InvoicePDF } from './components/InvoicePDF';
 export { PdfDocument } from './components/PdfDocument';
 export { PdfViewer } from './components/PdfViewer';
+export { PaymentReceiptPDF } from './components/PaymentReceiptPDF';
+export type { PaymentReceiptData } from './components/PaymentReceiptPDF';
 
 // PDF Blocks
 export { PdfHeader } from './components/blocks/PdfHeader';
