@@ -176,6 +176,8 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
     }
 
     // Helper: Convert amount to commitment currency using exchange_rate
+    // exchange_rate represents: 1 unit of source currency = X units of commitment currency
+    // So to convert: amount * exchange_rate = amount in commitment currency
     const convertToCommitmentCurrency = (amount: number, currency: CurrencyFinancial['currency'], exchangeRate: number | null): number => {
       if (!currency) return 0;
       
@@ -189,8 +191,8 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
         return 0; // Skip
       }
       
-      // Convert using exchange_rate (divide by cotización)
-      return amount / exchangeRate;
+      // Convert using exchange_rate (multiply by cotización)
+      return amount * exchangeRate;
     };
 
     let totalCommitted = 0;
@@ -242,8 +244,9 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
         paidByCurrency.set(currencySymbol, (paidByCurrency.get(currencySymbol) || 0) + payment.amount);
       } else {
         // Convert using payment's exchange_rate (not commitment's!)
+        // exchange_rate represents: 1 unit of payment currency = X units of commitment currency
         if (payment.exchange_rate && payment.exchange_rate > 0) {
-          totalPaid += payment.amount / payment.exchange_rate;
+          totalPaid += payment.amount * payment.exchange_rate;
           paidByCurrency.set(currencySymbol, (paidByCurrency.get(currencySymbol) || 0) + payment.amount);
         }
       }

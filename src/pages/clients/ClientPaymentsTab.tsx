@@ -30,6 +30,7 @@ import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/stat
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization/hooks'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import type { TargetField, ImportConfig, ProjectContext } from '@/features/imports/types'
+import { formatContactName } from '@/utils/contacts'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
@@ -157,10 +158,12 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       const currencySymbol = payment.currency.symbol;
 
       // Convert amount to commitment currency using payment's exchange_rate
+      // exchange_rate represents: 1 unit of payment currency = X units of commitment currency
+      // So to convert: payment_amount * exchange_rate = amount in commitment currency
       let convertedAmount = payment.amount;
       if (commitmentCurrency && payment.currency.id !== commitmentCurrency.id) {
         if (payment.exchange_rate && payment.exchange_rate > 0) {
-          convertedAmount = payment.amount / payment.exchange_rate;
+          convertedAmount = payment.amount * payment.exchange_rate;
         } else {
           countSkipped += 1;
           convertedAmount = 0; // Skip if no exchange rate
@@ -234,10 +237,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       if (payment.wallet?.wallets?.name) wallets.add(payment.wallet.wallets.name);
       if (payment.currency?.code) currencies.add(payment.currency.code);
       if (payment.client?.contact) {
-        const clientName = payment.client.contact.company_name || 
-                          payment.client.contact.full_name || 
-                          `${payment.client.contact.first_name || ''} ${payment.client.contact.last_name || ''}`.trim();
-        if (clientName) clients.add(clientName);
+        const clientName = formatContactName(payment.client.contact);
+        if (clientName && clientName !== 'Cliente') clients.add(clientName);
       }
       if (payment.client?.unit) units.add(payment.client.unit);
     });
@@ -269,9 +270,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       
       // Filter by client
       if (filterClient !== 'all') {
-        const clientName = payment.client?.contact?.company_name || 
-                          payment.client?.contact?.full_name || 
-                          `${payment.client?.contact?.first_name || ''} ${payment.client?.contact?.last_name || ''}`.trim();
+        const clientName = formatContactName(payment.client?.contact);
         if (clientName !== filterClient) return false;
       }
       
@@ -300,9 +299,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const handleDeletePayment = (payment: ClientPaymentWithRelations) => {
     if (!organizationId || !activeProjectId) return;
 
-    const clientName = payment.client?.contact?.company_name || 
-                      payment.client?.contact?.full_name || 
-                      `${payment.client?.contact?.first_name || ''} ${payment.client?.contact?.last_name || ''}`.trim();
+    const clientName = formatContactName(payment.client?.contact);
     const symbol = payment.currency?.symbol || '$';
     const formattedAmount = `${symbol} ${payment.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const paymentLabel = `${clientName} - ${formattedAmount}`;
@@ -535,13 +532,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       ? { type: 'project', projectId: activeProjectId, projectName: projectName || undefined }
       : { type: 'organization', organizationId: organizationId!, organizationName: organizationName || undefined };
 
-    // Build available clients list for foreign-key resolution
-    const getClientDisplayName = (contact: { company_name?: string | null; full_name?: string | null; first_name?: string | null; last_name?: string | null } | null): string => {
-      if (!contact) return '';
-      return String(contact.company_name || 
-             contact.full_name || 
-             `${contact.first_name || ''} ${contact.last_name || ''}`.trim());
-    };
+    // Build available clients list for foreign-key resolution using formatContactName
 
     const availableClientsMap = new Map<string, { id: string; name: string }>();
     
@@ -549,8 +540,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     if (projectClientsData && projectClientsData.length > 0) {
       projectClientsData.forEach(client => {
         if (client.contact && client.id) {
-          const clientName = getClientDisplayName(client.contact);
-          if (clientName && !availableClientsMap.has(client.id)) {
+          const clientName = formatContactName(client.contact);
+          if (clientName !== 'Cliente' && !availableClientsMap.has(client.id)) {
             availableClientsMap.set(client.id, { id: client.id, name: clientName });
           }
         }
@@ -561,8 +552,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     if (commitmentsData && commitmentsData.length > 0) {
       commitmentsData.forEach(commitment => {
         if (commitment.project_client?.contact && commitment.client_id) {
-          const clientName = getClientDisplayName(commitment.project_client.contact);
-          if (clientName && !availableClientsMap.has(commitment.client_id)) {
+          const clientName = formatContactName(commitment.project_client.contact);
+          if (clientName !== 'Cliente' && !availableClientsMap.has(commitment.client_id)) {
             availableClientsMap.set(commitment.client_id, { id: commitment.client_id, name: clientName });
           }
         }
@@ -572,8 +563,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     // Add clients from existing payments
     allPayments.forEach(payment => {
       if (payment.client?.contact && payment.client_id) {
-        const clientName = getClientDisplayName(payment.client.contact);
-        if (clientName && !availableClientsMap.has(payment.client_id)) {
+        const clientName = formatContactName(payment.client.contact);
+        if (clientName !== 'Cliente' && !availableClientsMap.has(payment.client_id)) {
           availableClientsMap.set(payment.client_id, { id: payment.client_id, name: clientName });
         }
       }
@@ -606,18 +597,11 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         onImport: async (rows: any[]) => {
           const clientsData: Record<string, string> = {};
           
-          const getClientDisplayName = (contact: { company_name?: string | null; full_name?: string | null; first_name?: string | null; last_name?: string | null } | null): string => {
-            if (!contact) return '';
-            return String(contact.company_name || 
-                   contact.full_name || 
-                   `${contact.first_name || ''} ${contact.last_name || ''}`.trim());
-          };
-          
           if (projectClientsData && projectClientsData.length > 0) {
             projectClientsData.forEach(client => {
               if (client.contact && client.id) {
-                const clientName = getClientDisplayName(client.contact);
-                if (clientName) {
+                const clientName = formatContactName(client.contact);
+                if (clientName !== 'Cliente') {
                   clientsData[clientName.toLowerCase()] = client.id;
                 }
               }
@@ -627,8 +611,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           if (commitmentsData && commitmentsData.length > 0) {
             commitmentsData.forEach(commitment => {
               if (commitment.project_client?.contact && commitment.client_id) {
-                const clientName = getClientDisplayName(commitment.project_client.contact);
-                if (clientName) {
+                const clientName = formatContactName(commitment.project_client.contact);
+                if (clientName !== 'Cliente') {
                   clientsData[clientName.toLowerCase()] = commitment.client_id;
                 }
               }
@@ -637,8 +621,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           
           allPayments.forEach(payment => {
             if (payment.client?.contact && payment.client_id) {
-              const clientName = getClientDisplayName(payment.client.contact);
-              if (clientName) {
+              const clientName = formatContactName(payment.client.contact);
+              if (clientName !== 'Cliente') {
                 clientsData[clientName.toLowerCase()] = payment.client_id;
               }
             }
@@ -958,9 +942,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           ? `${payment.client.contact.first_name[0]}${payment.client.contact.last_name[0]}`
           : payment.client?.contact?.first_name?.[0] || '?';
         
-        const displayName = payment.client?.contact?.company_name || 
-                           payment.client?.contact?.full_name || 
-                           `${payment.client?.contact?.first_name || ''} ${payment.client?.contact?.last_name || ''}`.trim();
+        const displayName = formatContactName(payment.client?.contact);
         
         const unit = payment.client?.unit;
         
