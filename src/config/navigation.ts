@@ -151,7 +151,7 @@ export const PROJECT_NAVIGATION: NavigationEntry[] = [
   { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon', testId: 'nav-project-indirects' },
   { id: 'logs', label: 'Bitácora de Obra', icon: BookOpen, href: '/construction/logs', testId: 'nav-project-logs' },
   { type: 'section-header', id: 'section-comercializacion', label: 'Comercialización y Venta' },
-  { id: 'clients', label: 'Clientes', icon: Users, href: '/clients', testId: 'nav-project-clients' },
+  { id: 'clients', label: 'Clientes', icon: LuHandshake, href: '/clients', testId: 'nav-project-clients' },
 ];
 
 export const ADMIN_NAVIGATION: NavigationItem[] = [

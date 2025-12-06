@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast'
-import { Users, Plus, DollarSign, CheckCircle2, AlertCircle, ListChecks } from 'lucide-react'
+import { Plus, DollarSign, CheckCircle2, AlertCircle, ListChecks, FileText } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard'
+import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import CommitmentAccordion from '@/features/clients/components/CommitmentAccordion'
 import {
   useClientDashboard,
@@ -277,6 +278,30 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
     };
   }, [projectClients, dashboardData, commitmentCurrency, commitmentsData, paymentsData]);
 
+  const handleAddCommitment = () => {
+    openModal('client-commitment', { projectId: activeProjectId, organizationId });
+  };
+
+  // Show empty state if no commitments
+  if (!isLoading && (!commitmentsData || commitmentsData.length === 0)) {
+    return (
+      <EmptyState
+        icon={<FileText />}
+        title="No hay compromisos de pago"
+        description="Agrega compromisos de pago a tus clientes para gestionar sus obligaciones y ver métricas financieras aquí."
+        action={
+          <Button
+            onClick={handleAddCommitment}
+            data-testid="button-add-commitment-empty"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Compromiso
+          </Button>
+        }
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* KPIs Grid - 4 columnas, 2 por fila en mobile */}
@@ -340,9 +365,9 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
         <div className="flex items-center justify-center py-12">
           <div className="text-muted-foreground">Cargando compromisos...</div>
         </div>
-      ) : commitmentsData && commitmentsData.length > 0 ? (
+      ) : (
         <CommitmentAccordion
-          commitments={commitmentsData}
+          commitments={commitmentsData || []}
           payments={paymentsData || []}
           onEdit={handleEditCommitment}
           onDelete={(commitment) => {
@@ -353,24 +378,6 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
             handleDeleteCommitment(commitment.id, clientName);
           }}
         />
-      ) : (
-        <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
-          <Users className="h-12 w-12 text-muted-foreground" />
-          <div>
-            <h3 className="font-semibold text-lg">No hay compromisos de pago</h3>
-            <p className="text-muted-foreground text-sm mt-1">
-              Agrega compromisos de pago a tus clientes para ver la información aquí.
-            </p>
-          </div>
-          <Button
-            onClick={() => openModal('client-commitment', { projectId: activeProjectId, organizationId })}
-            size="sm"
-            data-testid="button-add-commitment-empty"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Agregar Compromiso
-          </Button>
-        </div>
       )}
     </div>
   )
