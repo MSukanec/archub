@@ -78,12 +78,13 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   }, [dashboardData]);
 
   // Enrich projectClients with computed clientName field for sorting
+  // Priority: full_name > first_name + last_name > company_name
   const enrichedClients = useMemo<EnrichedClient[]>(() => {
     return projectClients.map(client => ({
       ...client,
-      clientName: client.contacts?.company_name || 
-                  client.contacts?.full_name || 
-                  `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim() || '-'
+      clientName: client.contacts?.full_name || 
+                  `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim() || 
+                  client.contacts?.company_name || '-'
     }));
   }, [projectClients]);
 
@@ -307,9 +308,10 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
           ? `${client.contacts.first_name[0]}${client.contacts.last_name[0]}`
           : client.contacts?.first_name?.[0] || '?';
         
-        const displayName = client.contacts?.company_name || 
-                           client.contacts?.full_name || 
-                           `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim();
+        // Priority: full_name > first_name + last_name > company_name
+        const displayName = client.contacts?.full_name || 
+                           `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim() ||
+                           client.contacts?.company_name;
         
         return (
           <div className="flex items-center gap-3">
