@@ -1,21 +1,23 @@
 import { Users, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useClientRoles } from '@/features/clients/hooks/use-client-roles';
-import { useDeleteClientRole } from '@/features/clients/hooks/use-client-roles';
+import { useClientRoles, useDeleteClientRole } from '@/features/clients/hooks/use-client-roles';
+import { useReplaceClientRole } from '@/features/clients/hooks/use-replace-client-role';
 import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
+import { getClientRoleUsageCount } from '@/features/clients/services/clientRoles';
 import type { ClientRole } from '@/features/clients/types';
 
 export default function ClientSettingsTab() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  const organizationId = userData?.organization?.id;
+  const organizationId = userData?.organization?.id ?? null;
   const { openModal } = useGlobalModalStore();
   
-  const { data: clientRoles = [], isLoading } = useClientRoles(organizationId);
+  const { data: clientRoles = [], isLoading } = useClientRoles(organizationId ?? undefined);
   const deleteMutation = useDeleteClientRole();
+  const replaceMutation = useReplaceClientRole(organizationId);
 
   // Sort all roles alphabetically by name (case-insensitive)
   const sortedRoles = [...clientRoles].sort((a, b) => 
@@ -33,34 +35,76 @@ export default function ClientSettingsTab() {
     });
   };
 
-  const handleDeleteRole = (role: ClientRole) => {
-    openModal('delete-confirmation', {
-      mode: 'delete',
-      title: '¿Eliminar rol de cliente?',
-      description: `Esta acción eliminará permanentemente el rol "${role.name}". Los clientes existentes con este rol no se verán afectados.`,
-      itemName: role.name,
-      itemType: 'rol',
-      destructiveActionText: 'Eliminar Rol',
-      onDelete: async () => {
-        if (!organizationId) return;
+  const handleDeleteRole = async (role: ClientRole) => {
+    if (!organizationId) return;
 
-        try {
-          await deleteMutation.mutateAsync({ roleId: role.id, organizationId });
+    try {
+      const usageCount = await getClientRoleUsageCount(role.id);
+      
+      const otherRoles = clientRoles.filter(r => r.id !== role.id);
+      const canReplace = usageCount > 0 && otherRoles.length > 0;
 
-          toast({
-            title: 'Rol eliminado',
-            description: 'El rol de cliente se eliminó correctamente'
-          });
-        } catch (error) {
-          console.error('Error deleting client role:', error);
-          toast({
-            title: 'Error',
-            description: 'No se pudo eliminar el rol de cliente',
-            variant: 'destructive'
-          });
+      const consequences: string[] = [];
+      if (usageCount > 0) {
+        consequences.push(
+          `${usageCount} cliente${usageCount === 1 ? '' : 's'} tiene${usageCount === 1 ? '' : 'n'} este rol asignado`
+        );
+        if (canReplace) {
+          consequences.push('Podés reemplazarlos con otro rol o dejarlos sin rol asignado');
+        } else {
+          consequences.push('Los clientes quedarán sin rol asignado');
         }
       }
-    });
+
+      const replacementOptions = otherRoles
+        .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+        .map(r => ({
+          label: r.name + (r.is_default ? ' (Sistema)' : ''),
+          value: r.id
+        }));
+
+      openModal('delete-confirmation', {
+        mode: canReplace ? 'replace' : 'delete',
+        title: '¿Eliminar rol de cliente?',
+        description: `¿Estás seguro de que querés eliminar el rol "${role.name}"?`,
+        itemName: role.name,
+        itemType: 'rol',
+        consequences: consequences.length > 0 ? consequences : undefined,
+        replacementOptions: canReplace ? replacementOptions : undefined,
+        currentId: role.id,
+        destructiveActionText: 'Eliminar Rol',
+        onDelete: async () => {
+          try {
+            await deleteMutation.mutateAsync({ roleId: role.id, organizationId });
+            toast({
+              title: 'Rol eliminado',
+              description: 'El rol de cliente se eliminó correctamente'
+            });
+          } catch (error) {
+            console.error('Error deleting client role:', error);
+            toast({
+              title: 'Error',
+              description: 'No se pudo eliminar el rol de cliente',
+              variant: 'destructive'
+            });
+          }
+        },
+        onReplace: async (newRoleId: string) => {
+          try {
+            await replaceMutation.mutateAsync({ oldRoleId: role.id, newRoleId });
+          } catch (error) {
+            console.error('Error replacing client role:', error);
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error checking role usage:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo verificar el uso del rol',
+        variant: 'destructive'
+      });
+    }
   };
 
   if (isLoading) {
