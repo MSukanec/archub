@@ -451,11 +451,13 @@ export async function getClientPortalData(
       const needsConversion = paymentCurrencyCode !== commitmentCurrencyCode && paymentExchangeRate && paymentExchangeRate > 0;
       
       // Calculate this payment's percentage of commitment
+      // exchange_rate represents: 1 unit of payment currency = X units of commitment currency
+      // Example: 1 USD = 1420 ARS, so payment in USD * 1420 = amount in ARS
       let commitmentPercentage: number | null = null;
       if (commitmentAmount && commitmentAmount > 0) {
         if (needsConversion) {
-          // Payment is in different currency, convert to commitment currency
-          const paymentInCommitmentCurrency = paymentAmount / paymentExchangeRate!;
+          // Payment is in different currency, convert to commitment currency by MULTIPLYING
+          const paymentInCommitmentCurrency = paymentAmount * paymentExchangeRate!;
           commitmentPercentage = Math.round((paymentInCommitmentCurrency / commitmentAmount) * 100);
         } else {
           // Payment is in same currency as commitment, use directly
@@ -464,8 +466,9 @@ export async function getClientPortalData(
       }
       
       // Calculate normalized amount for cumulative tracking (in commitment currency)
+      // MULTIPLY by exchange_rate to convert to commitment currency
       const normalizedAmount = needsConversion
-        ? paymentAmount / paymentExchangeRate!
+        ? paymentAmount * paymentExchangeRate!
         : paymentAmount;
       
       return {

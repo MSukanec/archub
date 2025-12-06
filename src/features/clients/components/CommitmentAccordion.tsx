@@ -115,7 +115,9 @@ function CommitmentItem({
         if (p.currency.id === commitment.currency.id) {
           return sum + p.amount;
         } else if (p.exchange_rate && p.exchange_rate > 0) {
-          return sum + (p.amount / p.exchange_rate);
+          // exchange_rate represents: 1 unit of payment currency = X units of commitment currency
+          // Example: 1 USD = 1420 ARS, so payment in USD * 1420 = amount in ARS
+          return sum + (p.amount * p.exchange_rate);
         }
         return sum + p.amount;
       }, 0);
