@@ -190,7 +190,7 @@ export default function PersonnelListTab({
         {
           key: "displayName",
           label: "Nombre",
-          width: "30%",
+          width: "28%",
           sortable: true,
           sortType: "string",
           render: (record: any) => {
@@ -237,7 +237,7 @@ export default function PersonnelListTab({
         {
           key: "start_date",
           label: "Fecha de inicio",
-          width: "12%",
+          width: "28%",
           sortable: true,
           sortType: "date",
           render: (record: any) => {
@@ -254,7 +254,7 @@ export default function PersonnelListTab({
         {
           key: "insurance_status",
           label: "Estado Seguro",
-          width: "15%",
+          width: "28%",
           sortable: true,
           sortType: "string",
           render: (record: any) => {
