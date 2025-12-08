@@ -73,6 +73,7 @@ import {
   Eye
 } from "lucide-react";
 import { SiDiscord } from 'react-icons/si';
+import { LuContact } from 'react-icons/lu';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlanRestricted, RoleRestricted } from "@/features/users";
 import { ComingSoonRestricted } from "@/components/shared/restrictions/guards/ComingSoonRestricted";
@@ -229,7 +230,7 @@ export function LeftSidebar() {
         { id: 'dashboard', label: 'Visión General', icon: Home, href: '/organization/dashboard' },
         { id: 'basic-data', label: 'Datos Básicos', icon: Building, href: '/organization/basic-data' },
         { id: 'projects', label: 'Gestión de Proyectos', icon: Folder, href: '/organization/projects' },
-        { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
+        { id: 'contacts', label: 'Contactos', icon: LuContact, href: '/contacts' },
         { id: 'members', label: 'Miembros', icon: Users, href: '/organization/members' },
         { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing' },
         { id: 'pdf-settings', label: 'Documentos PDF', icon: FileText, href: '/organization/pdf-settings', restricted: 'coming_soon' },
