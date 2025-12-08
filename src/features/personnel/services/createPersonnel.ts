@@ -7,6 +7,7 @@ export interface CreatePersonnelData {
   notes?: string;
   start_date?: string | null;
   end_date?: string | null;
+  created_by?: string | null;
 }
 
 export async function createPersonnel(data: CreatePersonnelData): Promise<any> {
@@ -17,6 +18,7 @@ export async function createPersonnel(data: CreatePersonnelData): Promise<any> {
     notes: data.notes || '',
     start_date: data.start_date,
     end_date: data.end_date,
+    created_by: data.created_by || null,
   });
 
   if (response.ok) {

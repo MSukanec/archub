@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -19,6 +19,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useContacts } from '@/features/contacts';
 import { useToast } from '@/hooks/use-toast';
 import { getAttachmentPublicUrl } from '@/features/contacts/utils';
+import { useOrganizationMembers } from '@/features/organization/hooks';
 import { useProjectPersonnel, useCreatePersonnel, useContactAttachmentsForPersonnel } from '@/features/personnel/hooks';
 
 const personnelFormSchema = z.object({
@@ -39,10 +40,15 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
   const organizationId = currentUser?.organization?.id;
   const { data: contacts = [] } = useContacts(organizationId);
   const projectId = currentUser?.preferences?.last_project_id;
+  const { data: members = [] } = useOrganizationMembers(organizationId);
   
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const currentMember = useMemo(() => {
+    return members.find(m => m.user_id === currentUser?.user?.id) || null
+  }, [members, currentUser?.user?.id]);
 
   // Helper para obtener nombre display
   const getDisplayName = (contact: any): string => {
@@ -148,6 +154,7 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
           organization_id: organizationId,
           contact_id,
           notes: '',
+          created_by: currentMember?.id || null,
         });
       }
 
