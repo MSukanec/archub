@@ -31,8 +31,6 @@ interface AttendanceGradebookProps {
   onExportAttendance?: () => void
   triggerTodayCenter?: boolean
   onEditAttendance?: (workerId: string, date: Date, existingAttendance?: any) => void
-  filterStatus?: 'all' | 'active'
-  onFilterStatusChange?: (status: 'all' | 'active') => void
 }
 
 const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
@@ -40,9 +38,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
   attendance = [],
   onExportAttendance,
   triggerTodayCenter = false,
-  onEditAttendance,
-  filterStatus = 'active',
-  onFilterStatusChange
+  onEditAttendance
 }) => {
   // Calculate date range: show 1 year before today and 3 days after
   const { startDate, endDate } = React.useMemo(() => {
@@ -303,18 +299,6 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
               <span className="text-[var(--table-header-fg)] whitespace-nowrap">Enfermedad</span>
             </div>
           </div>
-
-          {/* Filter Tabs */}
-          {onFilterStatusChange && (
-            <Tabs
-              tabs={[
-                { value: 'active', label: 'Activo' },
-                { value: 'all', label: 'Todos' }
-              ]}
-              value={filterStatus}
-              onValueChange={(value) => onFilterStatusChange(value as 'all' | 'active')}
-            />
-          )}
 
           {/* Export Button */}
           {onExportAttendance && (

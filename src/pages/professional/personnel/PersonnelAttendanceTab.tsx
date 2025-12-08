@@ -91,7 +91,7 @@ function useAttendanceData(projectId: string | undefined, organizationId: string
   })
 }
 
-function transformPersonnelAndAttendance(personnelData: any[], attendanceData: any[], filterStatus: 'all' | 'active') {
+function transformPersonnelAndAttendance(personnelData: any[], attendanceData: any[]) {
   // Primero, crear la lista de workers desde TODO el personal del proyecto
   const getDisplayName = (contact: any) => {
     if (!contact) return 'Sin nombre'
@@ -101,15 +101,12 @@ function transformPersonnelAndAttendance(personnelData: any[], attendanceData: a
     return contact.full_name || 'Sin nombre'
   }
 
-  // Filtrar con LA MISMA lógica que PersonnelListTab
-  let filteredPersonnel = personnelData
-  if (filterStatus === 'active') {
-    filteredPersonnel = personnelData.filter(p => {
-      // Tratar NULL como 'active' por defecto (para registros antiguos)
-      const personStatus = p.status || 'active'
-      return personStatus === 'active'
-    })
-  }
+  // Filtrar solo personal activo (ya filtramos soft-deleted en la query)
+  const filteredPersonnel = personnelData.filter(p => {
+    // Tratar NULL como 'active' por defecto (para registros antiguos)
+    const personStatus = p.status || 'active'
+    return personStatus === 'active'
+  })
 
   const workers = filteredPersonnel.map(personnel => {
     const contact = personnel.contact
@@ -175,8 +172,6 @@ export default function PersonnelAttendanceTab({
   selectedProjectId,
   currentOrganizationId 
 }: PersonnelAttendanceTabProps) {
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active'>('active')
-
   const { data: personnelData = [], isLoading: isPersonnelLoading } = useProjectPersonnel(
     selectedProjectId || undefined
   )
@@ -187,8 +182,8 @@ export default function PersonnelAttendanceTab({
   )
 
   const { workers, attendance } = useMemo(() => {
-    return transformPersonnelAndAttendance(personnelData, attendanceData, filterStatus)
-  }, [personnelData, attendanceData, filterStatus])
+    return transformPersonnelAndAttendance(personnelData, attendanceData)
+  }, [personnelData, attendanceData])
 
   const handleEditAttendance = (workerId: string, date: Date, existingAttendance?: any) => {
     const worker = workers.find(w => w.id === workerId)
@@ -239,8 +234,6 @@ export default function PersonnelAttendanceTab({
         workers={workers}
         attendance={attendance}
         onEditAttendance={handleEditAttendance}
-        filterStatus={filterStatus}
-        onFilterStatusChange={setFilterStatus}
       />
     </div>
   )
