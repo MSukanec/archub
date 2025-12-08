@@ -334,20 +334,23 @@ export async function getPersonnelPaymentById(
       return { success: false, error: 'Forbidden: Project does not belong to organization' };
     }
 
+    // Query for non-deleted payments (is_deleted is null or false)
     const { data: payment, error } = await supabase
       .from('personnel_payments')
       .select(PERSONNEL_PAYMENTS_SELECT)
       .eq('id', params.paymentId)
+      .eq('project_id', params.projectId)
+      .eq('organization_id', params.organizationId)
       .or('is_deleted.is.null,is_deleted.eq.false')
-      .single();
+      .maybeSingle();
 
-    if (error || !payment) {
+    if (error) {
       console.error('Error fetching personnel payment:', error);
       return { success: false, error: 'Payment not found' };
     }
 
-    if (payment.project_id !== params.projectId || payment.organization_id !== params.organizationId) {
-      return { success: false, error: 'Forbidden' };
+    if (!payment) {
+      return { success: false, error: 'Payment not found' };
     }
 
     const { data: attachments, error: attachmentsError } = await supabase

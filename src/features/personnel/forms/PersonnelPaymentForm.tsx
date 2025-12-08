@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -11,14 +11,17 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Users, CalendarIcon } from 'lucide-react'
+import { Users, CalendarIcon, FileText } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
-import { useEffect } from 'react'
+import { uploadFile, deleteFile } from '@/lib/storage'
+import { FileUploader } from '@/components/shared/FileUploader'
+import { useQueryClient } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
 import { 
   usePersonnelPayment, 
   useCreatePersonnelPayment, 
@@ -26,6 +29,7 @@ import {
   useProjectPersonnel,
 } from '@/features/personnel'
 import { getPersonnelPaymentStatusBadgeConfig } from '../utils/statusBadge'
+import { PERSONNEL_PAYMENT_QUERY_KEYS } from '../constants'
 
 const personnelPaymentSchema = z.object({
   payment_date: z.date({
@@ -53,6 +57,10 @@ function FormPanel({
   personnel,
   personnelLoading,
   isLoading,
+  filesToUpload,
+  setFilesToUpload,
+  existingFiles,
+  onExistingFileDelete,
 }: {
   form: ReturnType<typeof useForm<PersonnelPaymentFormData>>;
   onSubmit: (data: PersonnelPaymentFormData) => void;
@@ -63,6 +71,10 @@ function FormPanel({
   personnel: any[];
   personnelLoading: boolean;
   isLoading: boolean;
+  filesToUpload: any[];
+  setFilesToUpload: (files: any[]) => void;
+  existingFiles: any[];
+  onExistingFileDelete?: (fileId: string) => Promise<void>;
 }) {
   if (isLoading) {
     return (
@@ -326,6 +338,29 @@ function FormPanel({
           )}
         />
 
+        <div>
+          <FileUploader
+            mode="multiple"
+            filesToUpload={filesToUpload}
+            existingFiles={existingFiles}
+            onFilesChange={setFilesToUpload}
+            maxSize={10 * 1024 * 1024}
+            accept={{
+              'image/*': ['.png', '.jpg', '.jpeg'],
+              'application/pdf': ['.pdf'],
+              'application/msword': ['.doc'],
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+              'application/vnd.ms-excel': ['.xls'],
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+            }}
+            compressionPreset="document"
+            onExistingFileDelete={onExistingFileDelete}
+            emptyStateTitle="Sin archivos adjuntos"
+            emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
+            newFileBadgeText="Nuevo"
+          />
+        </div>
+
       </form>
     </Form>
   )
@@ -333,8 +368,10 @@ function FormPanel({
 
 function ViewPanel({
   existingPayment,
+  attachments,
 }: {
   existingPayment: any;
+  attachments: any[];
 }) {
   return (
     <div className="space-y-6">
@@ -399,6 +436,30 @@ function ViewPanel({
         </div>
       )}
 
+      {attachments.length > 0 && (
+        <div>
+          <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Archivos Adjuntos</h4>
+          <div className="space-y-2">
+            {attachments.map((attachment: any) => (
+              <a
+                key={attachment.id}
+                href={attachment.media_file?.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                data-testid={`link-personnel-payment-attachment-${attachment.id}`}
+              >
+                <FileText className="h-4 w-4" />
+                {attachment.media_file?.file_name || 'Archivo adjunto'}
+                {attachment.description && (
+                  <span className="text-xs text-muted-foreground">({attachment.description})</span>
+                )}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="pt-4 border-t border-border">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-muted-foreground">
           <div data-testid="text-personnel-payment-created-at">
@@ -429,6 +490,9 @@ export function PersonnelPaymentForm({ modalData, onClose, mode = 'create' }: Pe
   const { projectId, organizationId, paymentId } = modalData || {}
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
+  const [filesToUpload, setFilesToUpload] = useState<any[]>([])
+  const [attachments, setAttachments] = useState<any[]>([])
+  const queryClient = useQueryClient()
 
   const { data: existingPayment, isLoading: loadingPayment } = usePersonnelPayment(
     projectId,
@@ -481,6 +545,57 @@ export function PersonnelPaymentForm({ modalData, onClose, mode = 'create' }: Pe
   }, [existingPayment, mode, form])
 
   useEffect(() => {
+    const fetchAttachments = async () => {
+      if (!paymentId || !organizationId || !projectId) return
+      
+      try {
+        const { data: sessionData } = await supabase.auth.getSession()
+        const token = sessionData?.session?.access_token
+        
+        if (!token) {
+          console.error('No auth token available for fetching attachments')
+          return
+        }
+        
+        const response = await fetch(
+          `/api/projects/${projectId}/personnel-payments/${paymentId}/attachments?organization_id=${organizationId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        )
+        
+        if (response.ok) {
+          const result = await response.json()
+          if (result.data) {
+            setAttachments(result.data)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching personnel payment attachments:', error)
+      }
+    }
+    
+    if (mode === 'edit' || mode === 'view') {
+      fetchAttachments()
+    }
+  }, [paymentId, organizationId, projectId, mode])
+
+  const existingFiles = useMemo(() => {
+    if (!attachments || attachments.length === 0) return []
+    
+    return attachments.map((attachment: any) => ({
+      id: attachment.id,
+      file_name: attachment.media_file?.file_name || 'Archivo adjunto',
+      file_type: attachment.media_file?.file_type || 'document',
+      file_size: attachment.media_file?.file_size || 0,
+      file_url: attachment.media_file?.file_url || '',
+      isExisting: true,
+    }))
+  }, [attachments])
+
+  useEffect(() => {
     if (mode === 'create' && !paymentId) {
       if (currencies && currencies.length > 0) {
         const defaultCurrency = currencies.find(c => c.is_default)
@@ -502,6 +617,24 @@ export function PersonnelPaymentForm({ modalData, onClose, mode = 'create' }: Pe
 
   const createPaymentMutation = useCreatePersonnelPayment()
   const updatePaymentMutation = useUpdatePersonnelPayment()
+
+  const handleExistingFileDelete = useCallback(async (fileId: string) => {
+    try {
+      await deleteFile(fileId, false)
+      setAttachments(prev => prev.filter(a => a.id !== fileId))
+      queryClient.invalidateQueries({ queryKey: ['personnel-payment-media', paymentId] })
+      toast({
+        title: 'Archivo eliminado',
+        description: 'El archivo ha sido eliminado correctamente',
+      })
+    } catch (error: any) {
+      toast({
+        title: 'Error al eliminar archivo',
+        description: error.message,
+        variant: 'destructive',
+      })
+    }
+  }, [queryClient, paymentId, toast])
 
   const onSubmit = async (data: PersonnelPaymentFormData) => {
     try {
@@ -542,6 +675,70 @@ export function PersonnelPaymentForm({ modalData, onClose, mode = 'create' }: Pe
         })
       }
 
+      const createdPaymentId = paymentResult?.id || paymentId
+      
+      if (filesToUpload.length > 0 && createdPaymentId) {
+        if (!organizationId) {
+          toast({
+            variant: 'destructive',
+            title: 'Error al subir archivos',
+            description: 'No se encontró el ID de la organización.',
+            duration: 8000,
+          })
+          return;
+        }
+
+        for (const fileInput of filesToUpload) {
+          try {
+            console.log('[PersonnelPaymentForm] Uploading file:', {
+              fileName: fileInput.file?.name,
+              fileSize: fileInput.file?.size,
+              organizationId,
+              projectId,
+              createdPaymentId,
+              createdByMemberId: currentMember?.id,
+            })
+            
+            if (!fileInput.file) {
+              console.error('[PersonnelPaymentForm] No file object in fileInput:', fileInput)
+              continue
+            }
+            
+            const uploadResult = await uploadFile(fileInput.file, {
+              entity: 'personnel_payment_attachment',
+              organization_id: organizationId,
+              project_id: projectId,
+              created_by_member_id: currentMember?.id,
+              link_to: {
+                personnel_payment_id: createdPaymentId,
+              },
+              category: 'document',
+              description: fileInput.description || fileInput.file.name,
+            })
+            
+            console.log('[PersonnelPaymentForm] Upload successful:', uploadResult)
+          } catch (uploadError: any) {
+            console.error('[PersonnelPaymentForm] Error uploading file:', {
+              error: uploadError,
+              message: uploadError?.message,
+              code: uploadError?.code,
+              details: uploadError?.details,
+              hint: uploadError?.hint,
+              stack: uploadError?.stack,
+            })
+            toast({
+              variant: 'destructive',
+              title: 'Error al subir archivo',
+              description: uploadError?.message || String(uploadError) || 'Error desconocido',
+              duration: 8000,
+            })
+          }
+        }
+        queryClient.invalidateQueries({ queryKey: ['personnel-payment-media', createdPaymentId] })
+        queryClient.invalidateQueries({ queryKey: PERSONNEL_PAYMENT_QUERY_KEYS.payments(projectId) })
+        setFilesToUpload([])
+      }
+
       toast({
         title: mode === 'edit' ? 'Pago actualizado' : 'Pago registrado',
         description: mode === 'edit'
@@ -560,6 +757,7 @@ export function PersonnelPaymentForm({ modalData, onClose, mode = 'create' }: Pe
 
   const handleClose = () => {
     form.reset()
+    setFilesToUpload([])
     onClose()
   }
 
@@ -599,6 +797,7 @@ export function PersonnelPaymentForm({ modalData, onClose, mode = 'create' }: Pe
           existingPayment && (
             <ViewPanel
               existingPayment={existingPayment}
+              attachments={attachments}
             />
           )
         ) : (
@@ -612,6 +811,10 @@ export function PersonnelPaymentForm({ modalData, onClose, mode = 'create' }: Pe
             personnel={personnel || []}
             personnelLoading={personnelLoading}
             isLoading={isLoading}
+            filesToUpload={filesToUpload}
+            setFilesToUpload={setFilesToUpload}
+            existingFiles={existingFiles}
+            onExistingFileDelete={handleExistingFileDelete}
           />
         )}
       </ModalBody>
