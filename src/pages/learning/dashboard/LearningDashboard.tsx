@@ -48,13 +48,13 @@ export default function LearningDashboard() {
           </div>
           
           <h1 
-            className="text-lg sm:text-2xl md:text-5xl font-bold mb-2 sm:mb-4 md:mb-6 tracking-tight text-foreground line-clamp-2" 
+            className="text-lg sm:text-2xl md:text-5xl font-bold mb-2 sm:mb-4 md:mb-6 tracking-tight !text-white line-clamp-2" 
             data-testid="text-hero-title"
           >
             Programa Fundadores
           </h1>
           
-          <p className="text-xs sm:text-sm md:text-base max-w-2xl mb-4 sm:mb-8 text-muted-foreground line-clamp-2 sm:line-clamp-3">
+          <p className="text-xs sm:text-sm md:text-base max-w-2xl mb-4 sm:mb-8 line-clamp-2 sm:line-clamp-3" style={{ color: 'rgb(200, 200, 200)' }}>
             Únete a los pioneros de Seencel y obtén acceso vitalicio al curso Master ArchiCAD Online, beneficios exclusivos y descuentos permanentes. Una oportunidad única que no volverá a repetirse.
           </p>
           
