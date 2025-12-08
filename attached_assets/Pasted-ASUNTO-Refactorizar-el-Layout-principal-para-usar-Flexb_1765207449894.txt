@@ -1,0 +1,44 @@
+ASUNTO: Refactorizar el Layout principal para usar Flexbox Vertical y corregir el cálculo de altura (Hero / Announcement Bar).
+
+CONTEXTO: Actualmente, la aplicación tiene problemas de visualización en el Layout principal.
+
+Cuando activo la barra de anuncios (AnnouncementBar) en la parte superior, el contenido principal (Hero) se empuja hacia abajo, generando un scroll vertical innecesario porque el Hero probablemente tiene una altura fija de 100vh.
+
+Incluso sin la barra de anuncios, el layout no se siente robusto en diferentes tamaños de pantalla.
+
+OBJETIVO TÉCNICO: Necesito cambiar la estrategia de layout de "alturas fijas" (h-screen) a un modelo de "Flexbox Vertical". El contenedor padre debe ocupar toda la pantalla, y el contenido principal debe expandirse para ocupar el espacio restante disponible, independientemente de si la barra de anuncios está visible o no.
+
+INSTRUCCIONES DE IMPLEMENTACIÓN:
+
+Modificar el Componente Layout (o App.tsx):
+
+El contenedor raíz (div) debe tener las clases: flex flex-col min-h-screen.
+
+Coloca el AnnouncementBar y el Navbar al principio.
+
+Envuelve el contenido principal (children o <Outlet />) en una etiqueta <main>.
+
+CRÍTICO: Aplica la clase flex-1 (o flex-grow) a este <main>. Esto forzará al contenido a ocupar todo el espacio sobrante automáticamente.
+
+TypeScript
+
+// Ejemplo de la estructura deseada:
+<div className="flex flex-col min-h-screen">
+  <AnnouncementBar />
+  <Navbar />
+  <main className="flex-1 flex flex-col">
+    {children}
+  </main>
+  <Footer />
+</div>
+Modificar el Componente Hero (y otras secciones "Full Screen"):
+
+Busca el componente Hero (el que se ve en la Landing Page).
+
+ELIMINA cualquier clase que fuerce la altura de pantalla completa, como h-screen, min-h-screen o h-[100vh].
+
+REEMPLÁZALA por h-full o simplemente deja que el contenedor padre (main) controle la altura.
+
+Si necesitas centrar el contenido, asegúrate de que el main del paso 1 también tenga flex flex-col para que el Hero pueda expandirse al 100% de ese flex-1.
+
+RESULTADO ESPERADO: El Hero debe ocupar exactamente el espacio visible restante debajo del Navbar/Anuncio sin generar scrollbars dobles ni cortes, adaptándose dinámicamente si cierro o abro el anuncio.

@@ -16,7 +16,7 @@ export function HeroSection({ mode }: FoundersSectionProps) {
 
   return (
     <section
-      className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 -mx-6 relative overflow-hidden"
+      className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden"
       style={{
         backgroundImage: 'url(/hero-founders-1080.webp)',
         backgroundSize: 'cover',
