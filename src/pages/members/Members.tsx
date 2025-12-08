@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { MembersListTab } from '@/pages/members/tabs/MembersListTab';
 import { Users, UserPlus, Search, Filter, Bell } from 'lucide-react';
 import { Button } from "@/components/ui/button";

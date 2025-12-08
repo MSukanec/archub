@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { DashboardLayout as Layout, HeroLayout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
+import { HeroLayout } from "@/layouts/dashboard/HeroLayout";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { PricingContent } from "@/features/shared-content/pricing";
 

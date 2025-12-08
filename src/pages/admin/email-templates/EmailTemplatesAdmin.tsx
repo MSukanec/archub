@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Mail, RefreshCw, Copy, Check } from 'lucide-react';
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

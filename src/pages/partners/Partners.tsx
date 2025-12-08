@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { PartnersListTab } from '@/pages/partners/tabs/PartnersListTab';
 import { HandHeart } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';

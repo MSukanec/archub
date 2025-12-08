@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { DashboardLayout as Layout } from "@/layouts";
-import { CoursesCatalogContent } from '@/features/shared-content/courses';
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
+import { CoursesCatalogContent } from '@/features/shared-content/courses/CoursesCatalogContent';
 import { BookOpen } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 

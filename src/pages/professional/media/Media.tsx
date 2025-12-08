@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { MediaDocumentation } from './MediaDocumentation';
 import { MediaGallery } from './MediaGallery';
 import { FileText, Images, Upload, Plus } from 'lucide-react';

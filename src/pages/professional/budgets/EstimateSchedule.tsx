@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { DashboardLayout as Layout } from "@/layouts"
+import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, Trash2, BarChart3, CheckSquare } from 'lucide-react'

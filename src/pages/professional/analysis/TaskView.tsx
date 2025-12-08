@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { CheckSquare, Plus } from 'lucide-react';
 
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { TaskCostsView } from './tabs/TaskCostsView';
 import { TaskBasicDataView } from './tabs/TaskBasicDataView';
 import { useGeneratedTask } from "@/hooks/use-generated-tasks";

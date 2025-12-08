@@ -6,7 +6,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useCourseOverview, useCourseEnrollment, useLastLessonInProgress, useCoursePlayerStore } from '@/features/learning';
 
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import CourseDashboardTab from './view/CourseDashboardTab';
 import CourseContentTab from './view/CourseContentTab';
 import CoursePlayerTab from './view/CoursePlayerTab';

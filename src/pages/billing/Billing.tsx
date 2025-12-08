@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { BillingListTab } from '@/pages/billing/tabs/BillingListTab';
 import { CreditCard, Sparkles } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';

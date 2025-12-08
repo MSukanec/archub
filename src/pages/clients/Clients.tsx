@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Home, Bell, Search, Filter, ExternalLink } from 'lucide-react'
 import { LuHandshake } from 'react-icons/lu'
-import { DashboardLayout as Layout } from "@/layouts"
+import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGlobalModalStore } from '@/components/modal'
 import ClientDashboardTab from './ClientDashboardTab'

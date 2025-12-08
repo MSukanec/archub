@@ -1,4 +1,4 @@
-import { DashboardLayout as Layout } from "@/layouts"
+import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { useEffect, useState } from 'react'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'

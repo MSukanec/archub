@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { User as UserIcon } from 'lucide-react';
 
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Activity, Building } from 'lucide-react';
 
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
 import ActivityLogs from '@/pages/activity/ActivityLogs';

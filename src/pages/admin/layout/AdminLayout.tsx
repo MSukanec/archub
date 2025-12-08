@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Layout as LayoutIcon, Plus } from 'lucide-react';
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
 import AdminLayoutTab from './AdminLayoutTab';

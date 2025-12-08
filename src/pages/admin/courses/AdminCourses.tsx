@@ -1,4 +1,4 @@
-import { DashboardLayout as Layout } from "@/layouts"
+import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
 import { BookOpen, Plus, Users, BarChart3 } from 'lucide-react'

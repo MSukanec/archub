@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { User } from 'lucide-react';
 import { useLocation } from 'wouter';
 
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { ProfileBasicData } from './ProfileBasicData';
 import { ProfilePreferences } from './ProfilePreferences';
 import { ProfileOrganizations } from './ProfileOrganizations';

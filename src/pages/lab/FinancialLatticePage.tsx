@@ -5,7 +5,7 @@ import { X, Phone, Mail, AlertTriangle, Clock, DollarSign, Users, Loader2, Netwo
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
-import { DashboardLayout } from '@/layouts';
+import { Layout as DashboardLayout } from '@/layouts/dashboard/DashboardLayout';
 import { LabPageLayout } from '@/layouts/lab/components/LabPageLayout';
 import { useLab } from '@/layouts/lab/context/LabContext';
 import { 

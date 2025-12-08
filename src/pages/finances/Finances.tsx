@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { DollarSign } from "lucide-react";
 import { MovementsTab } from "./MovementsTab";
 import { PartnerMovementsTab } from "./PartnerMovementsTab";

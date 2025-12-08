@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
-import { DashboardLayout as Layout } from "@/layouts"
+import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { useNavigationStore } from '@/stores/navigationStore'
 import { ArrowRight } from 'lucide-react'
-import { CoursesCatalogContent } from '@/features/shared-content/courses'
+import { CoursesCatalogContent } from '@/features/shared-content/courses/CoursesCatalogContent'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useLocation } from 'wouter'

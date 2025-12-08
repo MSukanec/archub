@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CreditCard, Plus, RotateCcw, Play, Bell } from 'lucide-react';
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from '@/components/modal';
 import { useMutation } from '@tanstack/react-query';

@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useParams, useLocation } from 'wouter';
-import { DashboardLayout as Layout, HeroLayout } from "@/layouts";
-import { CourseLandingShell } from '@/features/shared-content/courses';
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
+import { HeroLayout } from "@/layouts/dashboard/HeroLayout";
+import { CourseLandingShell } from '@/features/shared-content/courses/CourseLandingShell';
 import { useCourseLanding, useCourseEnrollment, useCourseProgress } from '@/features/learning';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';

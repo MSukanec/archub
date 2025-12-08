@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info, GraduationCap, FileText, Palette, Search, HelpCircle, Plus, Pencil, Trash2, Upload, Users, X, Loader2 } from 'lucide-react';
-import { CourseFaqFormModal } from '@/features/learning';
+import { CourseFaqFormModal } from '@/features/learning/modals/admin/CourseFaqFormModal';
 import { uploadFile } from '@/lib/storage';
 import type { LandingSections, LandingSection, CourseFaq } from '@shared/schema';
 

@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { ForceGraphMethods } from 'react-force-graph-2d';
-import { DashboardLayout } from '@/layouts';
+import { Layout as DashboardLayout } from '@/layouts/dashboard/DashboardLayout';
 import { LabPageLayout } from '@/layouts/lab/components/LabPageLayout';
 import { useLab } from '@/layouts/lab/context/LabContext';
 import { NeuralNetworkGraph, GraphData, SatelliteNode } from '@/components/lab/neural-network';

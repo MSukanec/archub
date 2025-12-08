@@ -1,4 +1,4 @@
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Search, Filter, UserPlus, Bell, Settings } from 'lucide-react';

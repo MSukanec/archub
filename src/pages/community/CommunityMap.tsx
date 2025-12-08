@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useNavigationStore } from '@/stores/navigationStore';
 import { MapPin } from 'lucide-react';
 import { InteractiveProjectsMap } from '@/components/community/InteractiveProjectsMap';

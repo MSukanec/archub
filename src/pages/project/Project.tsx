@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { 
   Building2,
   FileText,

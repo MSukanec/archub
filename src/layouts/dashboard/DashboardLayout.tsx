@@ -15,7 +15,8 @@ import {
   useSecondarySidebarStore,
 } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { ActionBarMobile, useActionBarMobile, HeaderMobile } from '@/layouts';
+import { ActionBarMobile, useActionBarMobile } from './components/MobileActionBar';
+import { HeaderMobile } from './components/MobileMenu';
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectAccentColor } from "@/features/projects";
 import { useContentBackground } from "@/hooks/use-content-background";

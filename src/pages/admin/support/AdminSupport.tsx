@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Headphones, Plus, RotateCcw } from 'lucide-react';
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useGlobalModalStore } from '@/components/modal';
 import AdminSupportAnnouncementsTab from './AdminSupportAnnouncementsTab';
 import AdminSupportNotificationsTab from './AdminSupportNotificationsTab';

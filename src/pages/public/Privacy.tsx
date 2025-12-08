@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MarketingLayout } from "@/layouts";
+import { MarketingLayout } from "@/layouts/marketing";
 
 export default function Privacy() {
   const [activeSection, setActiveSection] = useState("about");

@@ -1,4 +1,4 @@
-import { MarketingLayout } from "@/layouts";
+import { MarketingLayout } from "@/layouts/marketing";
 import { PricingContent } from "@/features/shared-content/pricing";
 
 export default function PricingPlanPublic() {

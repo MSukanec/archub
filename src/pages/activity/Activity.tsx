@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Activity as ActivityIcon, Building } from 'lucide-react';
 import { useLocation } from 'wouter';
 
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
 import ActivityLogs from './ActivityLogs';

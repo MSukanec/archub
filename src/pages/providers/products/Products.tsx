@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Package } from 'lucide-react';
-import { DashboardLayout as Layout } from "@/layouts";
+import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import ProductList from './ProductList';
 
 const Products = () => {
