@@ -8,6 +8,5 @@ export function useProjectPersonnel(projectId?: string, organizationId?: string)
     queryKey: PERSONNEL_QUERY_KEYS.byProject(projectId || ''),
     queryFn: () => getProjectPersonnel(projectId || '', organizationId || ''),
     enabled: !!projectId && !!organizationId,
-    staleTime: Infinity,
   });
 }

@@ -108,6 +108,47 @@ export function registerPersonnelRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // ========== DELETE PROJECT PERSONNEL (SOFT DELETE) ==========
+
+  /**
+   * DELETE /api/personnel/:personnelId
+   * Soft delete a personnel record
+   */
+  app.delete("/api/personnel/:personnelId", async (req, res) => {
+    try {
+      const { personnelId } = req.params;
+      const { organizationId } = req.query;
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Soft delete the personnel record
+      const { data: deletedPersonnel, error } = await authenticatedSupabase
+        .from('project_personnel')
+        .update({ 
+          is_deleted: true, 
+          deleted_at: new Date().toISOString() 
+        })
+        .eq('id', personnelId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error deleting personnel:", error);
+        return res.status(500).json({ error: "Failed to delete personnel" });
+      }
+
+      res.json({ success: true, personnel: deletedPersonnel });
+    } catch (error) {
+      console.error("Error deleting personnel:", error);
+      res.status(500).json({ error: "Failed to delete personnel" });
+    }
+  });
+
   // ========== PERSONNEL RATES ENDPOINTS ==========
 
   /**

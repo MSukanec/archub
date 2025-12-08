@@ -18,14 +18,23 @@ export async function getProjectPersonnel(
       notes,
       start_date,
       end_date,
+      status,
+      labor_type_id,
+      created_at,
       contact:contacts(
         id,
         first_name,
         last_name,
+        full_name,
         organization_id
+      ),
+      labor_type:labor_types(
+        id,
+        name
       )
     `)
     .eq('project_id', projectId)
+    .eq('is_deleted', false)
     .order('created_at', { ascending: true });
 
   if (error) {

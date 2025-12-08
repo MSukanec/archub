@@ -1,6 +1,4 @@
-import { useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { useState, useMemo } from 'react'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Users } from 'lucide-react'
 import { format } from 'date-fns'
@@ -10,6 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, ShieldCheck, ShieldAlert, ShieldX, Shield } from "lucide-react"
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
+import { useProjectPersonnel, useDeletePersonnel } from '@/features/personnel/hooks'
+import { useCurrentUser } from '@/hooks/use-current-user'
 
 interface InsuranceStatus {
   status: 'sin_seguro' | 'vigente' | 'por_vencer' | 'vencido'
@@ -90,75 +90,43 @@ function renderInsuranceStatusBadge(status: string, daysToExpiry: number | null)
 
 interface PersonnelListTabProps {
   openModal: any
-  handleDeletePersonnel: (personnelId: string) => Promise<void>
+  handleDeletePersonnel?: (personnelId: string) => Promise<void>
   insuranceData: any[]
   selectedProjectId: string | null
 }
 
 export default function PersonnelListTab({ 
   openModal, 
-  handleDeletePersonnel, 
   insuranceData,
   selectedProjectId 
 }: PersonnelListTabProps) {
   const [statusFilter, setStatusFilter] = useState<'active' | 'inactive' | 'all'>('active')
-  const [refreshKey, setRefreshKey] = useState(0)
+  const { data: currentUser } = useCurrentUser()
+  const organizationId = currentUser?.organization?.id
 
-  const { data: personnelData = [], isLoading: isPersonnelLoading } = useQuery({
-    queryKey: ['project-personnel', selectedProjectId, refreshKey],
-    queryFn: async () => {
-      if (!selectedProjectId) return []
-      
-      const { data, error } = await supabase
-        .from('project_personnel')
-        .select(`
-          id,
-          notes,
-          start_date,
-          end_date,
-          status,
-          created_at,
-          contact:contacts(
-            id,
-            first_name,
-            last_name,
-            full_name
-          ),
-          labor_type:labor_types(
-            id,
-            name
-          )
-        `)
-        .eq('project_id', selectedProjectId)
-        .eq('is_deleted', false)
+  const { data: personnelData = [], isLoading: isPersonnelLoading } = useProjectPersonnel(
+    selectedProjectId || undefined,
+    organizationId
+  )
 
-      console.log('🔍 RAW PERSONNEL DATA:', JSON.stringify(data, null, 2))
-      if (error) throw error
-      
-      // Helper para obtener nombre
-      const getDisplayName = (contact: any) => {
-        if (!contact) return 'Sin nombre'
-        if (contact.first_name || contact.last_name) {
-          return `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-        }
-        return contact.full_name || 'Sin nombre'
-      }
-      
-      // Agregar campo displayName y ordenar alfabéticamente
-      const withDisplayNames = (data || []).map((item: any) => ({
-        ...item,
-        displayName: getDisplayName(item.contact)
-      }))
-      
-      const sorted = withDisplayNames.sort((a: any, b: any) => {
-        return a.displayName.toLowerCase().localeCompare(b.displayName.toLowerCase())
-      })
-      
-      console.log('✅ PROCESSED PERSONNEL DATA (after sort):', JSON.stringify(sorted, null, 2))
-      return sorted
-    },
-    enabled: !!selectedProjectId
-  })
+  const deletePersonnelMutation = useDeletePersonnel()
+
+  const getDisplayName = (contact: any) => {
+    if (!contact) return 'Sin nombre'
+    if (contact.first_name || contact.last_name) {
+      return `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
+    }
+    return contact.full_name || 'Sin nombre'
+  }
+
+  const processedPersonnelData = useMemo(() => {
+    return personnelData.map((item: any) => ({
+      ...item,
+      displayName: getDisplayName(item.contact)
+    })).sort((a: any, b: any) => {
+      return a.displayName.toLowerCase().localeCompare(b.displayName.toLowerCase())
+    })
+  }, [personnelData])
 
   if (isPersonnelLoading) {
     return (
@@ -168,8 +136,7 @@ export default function PersonnelListTab({
     )
   }
 
-  // Mostrar EmptyState si no hay personal en el proyecto
-  if (personnelData.length === 0) {
+  if (processedPersonnelData.length === 0) {
     return (
       <EmptyState
         icon={<Users className="h-8 w-8" />}
@@ -184,16 +151,29 @@ export default function PersonnelListTab({
     )
   }
 
-  // Filtrar datos según el statusFilter
-  const filteredPersonnelData = personnelData.filter((person: any) => {
+  const filteredPersonnelData = processedPersonnelData.filter((person: any) => {
     if (statusFilter === 'all') return true
-    // Tratar NULL como 'active' por defecto (para registros antiguos)
     const personStatus = person.status || 'active'
     
     if (statusFilter === 'active') return personStatus === 'active'
     if (statusFilter === 'inactive') return personStatus === 'inactive' || personStatus === 'absent'
     return true
   })
+
+  const handleDelete = (record: any) => {
+    if (!organizationId) return
+    
+    openModal('delete-confirmation', {
+      title: 'Eliminar Personal',
+      message: `¿Estás seguro de que deseas eliminar a ${record.displayName} del proyecto?`,
+      onConfirm: () => {
+        deletePersonnelMutation.mutate({
+          personnelId: record.id,
+          organizationId
+        })
+      }
+    })
+  }
 
   return (
     <Table
@@ -226,12 +206,8 @@ export default function PersonnelListTab({
               return <span className="text-muted-foreground">Sin datos</span>
             }
             
-            // Lógica de nombre display consistente con PersonnelFormModal
-            const displayName = (contact.first_name || contact.last_name) 
-              ? `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-              : contact.full_name || 'Sin nombre'
+            const displayName = record.displayName
             
-            // Iniciales
             let initials = '?'
             if (contact.first_name || contact.last_name) {
               initials = `${contact.first_name?.charAt(0) || ''}${contact.last_name?.charAt(0) || ''}`.toUpperCase()
@@ -303,11 +279,7 @@ export default function PersonnelListTab({
         {
           label: 'Eliminar',
           icon: Trash2,
-          onClick: () => openModal('delete-confirmation', {
-            title: 'Eliminar Personal',
-            message: `¿Estás seguro de que deseas eliminar a ${record.contact?.first_name} ${record.contact?.last_name} del proyecto?`,
-            onConfirm: () => handleDeletePersonnel(record.id)
-          }),
+          onClick: () => handleDelete(record),
           variant: 'destructive' as const
         }
       ]}

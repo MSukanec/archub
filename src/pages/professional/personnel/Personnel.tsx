@@ -1,9 +1,6 @@
 import { DashboardLayout as Layout } from "@/layouts"
 import { useEffect, useState } from 'react'
-import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal'
 import { Users, Plus } from 'lucide-react'
@@ -15,60 +12,9 @@ import PersonnelPaymentsTab from './PersonnelPaymentsTab'
 
 export default function Personnel() {
   const { openModal } = useGlobalModalStore()
-  const { data: userData } = useCurrentUser()
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
-  const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
   const [activeTab, setActiveTab] = useState('active')
-
-  const handleDeletePersonnel = async (personnelId: string) => {
-    try {
-      const { error } = await supabase
-        .from('project_personnel')
-        .update({ 
-          is_deleted: true, 
-          deleted_at: new Date().toISOString() 
-        })
-        .eq('id', personnelId)
-
-      if (error) {
-        console.error('Error deleting personnel:', error)
-        return
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['project-personnel', selectedProjectId] })
-      queryClient.invalidateQueries({ queryKey: ['attendance-data'] })
-    } catch (error) {
-      console.error('Error deleting personnel:', error)
-    }
-  }
-
-  const { data: personnelData = [] } = useQuery({
-    queryKey: ['project-personnel', selectedProjectId],
-    queryFn: async () => {
-      if (!selectedProjectId) return []
-      
-      const { data, error } = await supabase
-        .from('project_personnel')
-        .select(`
-          id,
-          notes,
-          created_at,
-          contact:contacts(
-            id,
-            first_name,
-            last_name
-          )
-        `)
-        .eq('project_id', selectedProjectId)
-        .eq('is_deleted', false)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      return data
-    },
-    enabled: !!selectedProjectId
-  })
 
   const { data: insuranceData = [] } = useInsuranceList({
     project_id: selectedProjectId || undefined
@@ -133,7 +79,6 @@ export default function Personnel() {
         {activeTab === 'active' && (
           <PersonnelListTab
             openModal={openModal}
-            handleDeletePersonnel={handleDeletePersonnel}
             insuranceData={insuranceData}
             selectedProjectId={selectedProjectId}
           />
