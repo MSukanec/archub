@@ -6,7 +6,7 @@ import { UserCheck } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { format } from 'date-fns'
 import { parseLocalDate, formatDateForDB } from '@/lib/date-utils'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 // Hook para obtener todo el personal del proyecto (con status)
 function useProjectPersonnel(projectId: string | undefined) {

@@ -149,6 +149,58 @@ export function registerPersonnelRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // ========== UPDATE PROJECT PERSONNEL ==========
+
+  /**
+   * PATCH /api/personnel/:personnelId
+   * Update a personnel record (status, dates, labor_type, notes)
+   */
+  app.patch("/api/personnel/:personnelId", async (req, res) => {
+    try {
+      const { personnelId } = req.params;
+      const { organization_id, notes, start_date, end_date, status, labor_type_id } = req.body;
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Build update object with only provided fields
+      const updateData: Record<string, any> = {
+        updated_at: new Date().toISOString()
+      };
+      
+      if (notes !== undefined) updateData.notes = notes;
+      if (start_date !== undefined) updateData.start_date = start_date;
+      if (end_date !== undefined) updateData.end_date = end_date;
+      if (status !== undefined) updateData.status = status;
+      if (labor_type_id !== undefined) updateData.labor_type_id = labor_type_id;
+
+      const { data: updatedPersonnel, error } = await authenticatedSupabase
+        .from('project_personnel')
+        .update(updateData)
+        .eq('id', personnelId)
+        .select(`
+          *,
+          contact:contacts(id, first_name, last_name, full_name),
+          labor_type:labor_types(id, name)
+        `)
+        .single();
+
+      if (error) {
+        console.error("Error updating personnel:", error);
+        return res.status(500).json({ error: "Failed to update personnel" });
+      }
+
+      res.json(updatedPersonnel);
+    } catch (error) {
+      console.error("Error updating personnel:", error);
+      res.status(500).json({ error: "Failed to update personnel" });
+    }
+  });
+
   // ========== REPLACE PROJECT PERSONNEL ==========
 
   /**
