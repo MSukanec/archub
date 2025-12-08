@@ -146,6 +146,12 @@ export const ENTITY_CONFIG: Record<EntityType, EntityConfig> = {
     basePath: 'marketplace/testimonials',
     compressionPreset: 'avatar',
     visibility: 'public'
+  },
+  'hero_section_media': {
+    bucket: 'public-assets',
+    basePath: 'app-ui/hero-sections',
+    compressionPreset: 'course-cover',
+    visibility: 'public'
   }
 };
 

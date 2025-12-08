@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -13,6 +13,7 @@ import { useCreateHeroSection, useUpdateHeroSection } from '../hooks/use-hero-se
 import { useToast } from '@/hooks/use-toast'
 import { FileUploader } from '@/components/shared/FileUploader'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { uploadFile } from '@/lib/storage'
 
 const heroSectionSchema = z.object({
   title: z.string().min(1, 'El título es requerido'),
@@ -43,6 +44,8 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
   const createMutation = useCreateHeroSection()
   const updateMutation = useUpdateHeroSection()
   const { data: userData } = useCurrentUser()
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const mode = modalData?.mode || 'create'
   const section = modalData?.section
@@ -84,27 +87,45 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
 
   const onSubmit = async (values: HeroSectionFormValues) => {
     try {
+      setIsUploading(true)
+      let finalMediaUrl = values.media_url
+
+      if (pendingFile) {
+        const uploadResult = await uploadFile(pendingFile, {
+          entity: 'hero_section_media',
+        })
+        finalMediaUrl = uploadResult.file_url || ''
+      }
+
+      const dataToSave = {
+        ...values,
+        media_url: finalMediaUrl,
+      }
+
       if (mode === 'edit' && section?.id) {
-        await updateMutation.mutateAsync({ id: section.id, data: values })
+        await updateMutation.mutateAsync({ id: section.id, data: dataToSave })
         toast({ title: 'Sección actualizada', description: 'Los cambios se guardaron correctamente' })
       } else {
         await createMutation.mutateAsync({
-          ...values,
+          ...dataToSave,
           section_type: 'learning_dashboard',
         })
         toast({ title: 'Sección creada', description: 'La nueva sección del carrusel se creó correctamente' })
       }
       onClose()
     } catch (error: any) {
+      console.error('[HeroSectionForm] Error:', error)
       toast({
         title: 'Error',
         description: error.message || 'No se pudo guardar la sección',
         variant: 'destructive',
       })
+    } finally {
+      setIsUploading(false)
     }
   }
 
-  const isPending = createMutation.isPending || updateMutation.isPending
+  const isPending = createMutation.isPending || updateMutation.isPending || isUploading
 
   return (
     <ModalLayout onClose={onClose} size="lg">
@@ -199,15 +220,20 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
                         variant="hero"
                         accept={form.watch('media_type') === 'video' ? 'media' : 'images'}
                         heroImageUrl={field.value || null}
-                        onHeroImageChange={(url) => field.onChange(url || '')}
+                        onHeroImageChange={(url) => {
+                          field.onChange(url || '')
+                          if (!url) setPendingFile(null)
+                        }}
                         filesToUpload={[]}
                         onFilesChange={(files) => {
                           if (files[0]?.file) {
-                            const url = URL.createObjectURL(files[0].file);
-                            field.onChange(url);
+                            setPendingFile(files[0].file)
+                            const previewUrl = URL.createObjectURL(files[0].file)
+                            field.onChange(previewUrl)
                           }
                         }}
                         compressionPreset="course-cover"
+                        isUploading={isUploading}
                       />
                     </FormControl>
                     <FormMessage />

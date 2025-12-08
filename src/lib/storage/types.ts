@@ -21,7 +21,8 @@ export type EntityType =
   | 'sitelog_photo'
   | 'project_document'
   | 'course_purchase_receipt'
-  | 'testimonial_avatar';
+  | 'testimonial_avatar'
+  | 'hero_section_media';
 
 export type BucketName = 'public-assets' | 'private-assets' | 'social-assets';
 
