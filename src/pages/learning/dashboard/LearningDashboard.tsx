@@ -3,6 +3,7 @@ import { DashboardLayout as Layout } from "@/layouts"
 import { useNavigationStore } from '@/stores/navigationStore'
 import { GraduationCap, ArrowRight, BookOpen } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { CoursesCatalogContent } from '@/features/shared-content/courses'
 import { StatCard } from '@/components/ui-custom/KPICard'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
@@ -167,6 +168,8 @@ export default function LearningDashboard() {
 
   const mainContent = (
     <div className="space-y-6 px-4 sm:px-6 md:px-12 py-6 md:py-12">
+      <CoursesCatalogContent mode="dashboard" showTabs={true} />
+      
       <StatCard className="p-6">
         <div className="mb-4 flex items-center gap-2">
           <BookOpen className="h-5 w-5" />

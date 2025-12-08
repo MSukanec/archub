@@ -179,7 +179,6 @@ export const COMMUNITY_NAVIGATION: NavigationItem[] = [
 export const LEARNING_NAVIGATION: NavigationItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/learning/dashboard', testId: 'nav-learning-dashboard' },
   { id: 'courses', label: 'Cursos', icon: GraduationCap, href: '/learning/courses', testId: 'nav-learning-courses' },
-  { id: 'community', label: 'Comunidad Discord', icon: MessageCircle, href: 'https://discord.com/channels/868615664070443008', testId: 'nav-learning-discord' },
 ];
 
 
