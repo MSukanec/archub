@@ -20,7 +20,7 @@ interface Worker {
 interface AttendanceRecord {
   workerId: string
   day: string
-  status: 'full' | 'half'
+  status: 'full' | 'half' | 'absent' | 'sick'
 }
 
 interface AttendanceGradebookProps {
@@ -250,6 +250,10 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
         return "bg-[var(--accent)]"
       case "half":
         return "bg-yellow-500"
+      case "absent":
+        return "bg-red-500"
+      case "sick":
+        return "bg-violet-500"
       default:
         return "bg-gray-200"
     }
@@ -289,8 +293,12 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
               <span className="text-[var(--table-header-fg)] whitespace-nowrap">Media</span>
             </div>
             <div className="flex items-center gap-1 md:gap-2">
-              <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+              <div className="w-3 h-3 rounded-full bg-red-500"></div>
               <span className="text-[var(--table-header-fg)] whitespace-nowrap">Ausente</span>
+            </div>
+            <div className="flex items-center gap-1 md:gap-2">
+              <div className="w-3 h-3 rounded-full bg-violet-500"></div>
+              <span className="text-[var(--table-header-fg)] whitespace-nowrap">Enfermedad</span>
             </div>
           </div>
 

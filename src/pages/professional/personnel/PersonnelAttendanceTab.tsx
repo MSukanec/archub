@@ -127,12 +127,26 @@ function transformPersonnelAndAttendance(personnelData: any[], attendanceData: a
   attendanceData.forEach(attendanceRecord => {
     if (attendanceRecord.personnel?.contact) {
       const workerId = attendanceRecord.personnel.contact.id
-      const logDate = new Date(attendanceRecord.created_at)
+      // Use work_date if available, fallback to created_at
+      const dateField = attendanceRecord.work_date || attendanceRecord.created_at
+      const logDate = new Date(dateField)
       const day = format(logDate, 'yyyy-MM-dd')
       
-      let status: 'full' | 'half' = 'full'
-      if (attendanceRecord.attendance_type === 'half') {
+      // Map DB fields back to UI status
+      // DB stores: attendance_type ('full'/'half') + status ('present'/'absent'/'leave'/'holiday')
+      // UI expects: 'full', 'half', 'absent', 'sick'
+      let status: 'full' | 'half' | 'absent' | 'sick' = 'full'
+      const dbStatus = attendanceRecord.status
+      const dbAttendanceType = attendanceRecord.attendance_type
+      
+      if (dbStatus === 'absent') {
+        status = 'absent'
+      } else if (dbStatus === 'leave') {
+        status = 'sick'
+      } else if (dbAttendanceType === 'half') {
         status = 'half'
+      } else {
+        status = 'full'
       }
 
       attendance.push({

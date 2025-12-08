@@ -131,11 +131,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
   }
 
   const handleSubmit = async (data: AttendanceForm) => {
-    console.log('=== SUBMIT START ===')
-    console.log('Form data:', JSON.stringify(data, null, 2))
-    console.log('isEditing:', isEditing)
-    console.log('currentUser:', currentUser?.organization?.id, projectId)
-    
     if (!currentUser?.organization?.id || !projectId) {
       toast({
         title: 'Error',
@@ -146,7 +141,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
     }
 
     const hoursWorked = getHoursWorked(data.attendance_type)
-    console.log('hoursWorked:', hoursWorked)
 
     try {
       // Check if we're editing an existing record or creating a new one
