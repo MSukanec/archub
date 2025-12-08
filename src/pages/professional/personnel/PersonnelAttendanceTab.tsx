@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { UserCheck } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { format } from 'date-fns'
+import { parseLocalDate, formatDateForDB } from '@/lib/date-utils'
 import { useMemo, useState } from 'react'
 
 // Hook para obtener todo el personal del proyecto (con status)
@@ -128,9 +129,10 @@ function transformPersonnelAndAttendance(personnelData: any[], attendanceData: a
     if (attendanceRecord.personnel?.contact) {
       const workerId = attendanceRecord.personnel.contact.id
       // Use work_date if available, fallback to created_at
+      // Use parseLocalDate to avoid timezone issues when reading dates from DB
       const dateField = attendanceRecord.work_date || attendanceRecord.created_at
-      const logDate = new Date(dateField)
-      const day = format(logDate, 'yyyy-MM-dd')
+      const logDate = parseLocalDate(dateField)
+      const day = logDate ? formatDateForDB(logDate) : ''
       
       // Map DB fields back to UI status
       // DB stores: attendance_type ('full'/'half') + status ('present'/'absent'/'leave'/'holiday')

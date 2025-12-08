@@ -150,8 +150,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
     try {
       // Use formatDateForDB to avoid timezone issues
       const workDate = formatDateForDB(data.attendance_date)
-      console.log('DEBUG: attendance_date from form:', data.attendance_date)
-      console.log('DEBUG: workDate after formatDateForDB:', workDate)
       
       if (hasExistingRecord) {
         const workerContactId = modalData?.editingData?.personnelId || attendance?.workerId
