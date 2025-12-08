@@ -11,7 +11,7 @@ interface FoundersPromoSectionProps {
 
 export function FoundersPromoSection({ mode = 'public', coursePrice }: FoundersPromoSectionProps) {
   const [, navigate] = useLocation();
-  const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/fundadores';
+  const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/founders';
 
   return (
     <section className="py-16 sm:py-20" data-testid="section-founders-promo">

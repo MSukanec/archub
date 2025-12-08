@@ -4,13 +4,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookOpen, Clock, CheckCircle, MessageCircle, Shield, ChevronUp, Crown, ArrowRight, Sparkles } from 'lucide-react';
+import { Tabs } from '@/components/ui-custom/Tabs';
+import { BookOpen, Clock, CheckCircle, MessageCircle, Shield, ChevronUp, Crown, ArrowRight, Sparkles, Award } from 'lucide-react';
 import { BlockedRestricted, ComingSoonCard } from '@/components/shared/restrictions';
 import type { CoursesMode } from '../types';
 import type { ItemStatus } from '@shared/schema';
 
 type PricingTab = 'course' | 'founders';
+
+const pricingTabs = [
+  { value: 'course', label: 'Solo Curso' },
+  { value: 'founders', label: 'Fundadores', icon: <Crown className="w-3 h-3" /> },
+];
 
 interface CourseStickyCardWithModeProps {
   mode: CoursesMode;
@@ -37,7 +42,7 @@ export function CourseStickyCardWithMode({
   const [pricingTab, setPricingTab] = useState<PricingTab>('course');
   const status = (course.status || 'available') as ItemStatus;
   
-  const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/fundadores';
+  const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/founders';
   
   // When in-grid, the card is positioned by the parent grid, no fixed positioning needed
   if (variant === 'in-grid') {
@@ -54,13 +59,7 @@ export function CourseStickyCardWithMode({
             </div>
           )}
 
-          <CardContent className="p-6 space-y-6">
-            <div>
-              <h3 className="font-bold text-xl" data-testid="text-course-title">
-                {course.title}
-              </h3>
-            </div>
-
+          <CardContent className="p-5 space-y-4">
             {isEnrolled && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
@@ -73,17 +72,12 @@ export function CourseStickyCardWithMode({
 
             {!isEnrolled && (
               <div className="space-y-4">
-                <Tabs value={pricingTab} onValueChange={(v) => setPricingTab(v as PricingTab)} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 h-auto p-1">
-                    <TabsTrigger value="course" className="text-xs py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                      Solo Curso
-                    </TabsTrigger>
-                    <TabsTrigger value="founders" className="text-xs py-2 gap-1 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
-                      <Crown className="w-3 h-3" />
-                      Fundadores
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
+                <Tabs 
+                  tabs={pricingTabs}
+                  value={pricingTab} 
+                  onValueChange={(v) => setPricingTab(v as PricingTab)} 
+                  className="w-full"
+                />
                 
                 {pricingTab === 'course' && course.price && (
                   <div className="space-y-1">
@@ -114,24 +108,21 @@ export function CourseStickyCardWithMode({
               </div>
             )}
 
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-3">
-                <BookOpen className="w-5 h-5 text-primary flex-shrink-0" />
+            <div className="space-y-2 text-sm">
+              <div className="flex items-start gap-2">
+                <BookOpen className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
                 <span data-testid="text-modules">{stats.total_modules} Módulos</span>
               </div>
-              <div className="flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-                <span data-testid="text-lessons">{stats.total_lessons} Lecciones</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-primary flex-shrink-0" />
-                <span data-testid="text-duration">{stats.total_duration_formatted} de Contenido</span>
-              </div>
-            </div>
-
-            <div className="space-y-2 text-sm border-t pt-4">
               <div className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                <span data-testid="text-lessons">{stats.total_lessons} Lecciones</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <Clock className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                <span data-testid="text-duration">{stats.total_duration_formatted} de Contenido</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <Award className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
                 <span>Certificado de Curso</span>
               </div>
               <div className="flex items-start gap-2">
@@ -246,13 +237,7 @@ export function CourseStickyCardWithMode({
             </div>
           )}
 
-          <CardContent className="p-6 space-y-6">
-            <div>
-              <h3 className="font-bold text-xl" data-testid="text-course-title">
-                {course.title}
-              </h3>
-            </div>
-
+          <CardContent className="p-5 space-y-4">
             {isEnrolled && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
@@ -265,17 +250,12 @@ export function CourseStickyCardWithMode({
 
             {!isEnrolled && (
               <div className="space-y-4">
-                <Tabs value={pricingTab} onValueChange={(v) => setPricingTab(v as PricingTab)} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 h-auto p-1">
-                    <TabsTrigger value="course" className="text-xs py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                      Solo Curso
-                    </TabsTrigger>
-                    <TabsTrigger value="founders" className="text-xs py-2 gap-1 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
-                      <Crown className="w-3 h-3" />
-                      Fundadores
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
+                <Tabs 
+                  tabs={pricingTabs}
+                  value={pricingTab} 
+                  onValueChange={(v) => setPricingTab(v as PricingTab)} 
+                  className="w-full"
+                />
                 
                 {pricingTab === 'course' && course.price && (
                   <div className="space-y-1">
@@ -306,24 +286,21 @@ export function CourseStickyCardWithMode({
               </div>
             )}
 
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-3">
-                <BookOpen className="w-5 h-5 text-primary flex-shrink-0" />
+            <div className="space-y-2 text-sm">
+              <div className="flex items-start gap-2">
+                <BookOpen className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
                 <span data-testid="text-modules">{stats.total_modules} Módulos</span>
               </div>
-              <div className="flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-                <span data-testid="text-lessons">{stats.total_lessons} Lecciones</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-primary flex-shrink-0" />
-                <span data-testid="text-duration">{stats.total_duration_formatted} de Contenido</span>
-              </div>
-            </div>
-
-            <div className="space-y-2 text-sm border-t pt-4">
               <div className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                <span data-testid="text-lessons">{stats.total_lessons} Lecciones</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <Clock className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                <span data-testid="text-duration">{stats.total_duration_formatted} de Contenido</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <Award className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
                 <span>Certificado de Curso</span>
               </div>
               <div className="flex items-start gap-2">
@@ -416,7 +393,7 @@ function MobileBottomBar({
 }: MobileBottomBarProps) {
   const [, navigate] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/fundadores';
+  const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/founders';
   
   return (
     <div className="xl:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg">
