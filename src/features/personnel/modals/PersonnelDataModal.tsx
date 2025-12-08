@@ -245,7 +245,6 @@ export function PersonnelDataModal({ modalData, onClose }: PersonnelDataModalPro
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="active">Activo</SelectItem>
-                    <SelectItem value="absent">Ausente</SelectItem>
                     <SelectItem value="inactive">Inactivo</SelectItem>
                   </SelectContent>
                 </Select>

@@ -5,7 +5,7 @@ export interface UpdatePersonnelData {
   notes?: string;
   start_date?: string | null;
   end_date?: string | null;
-  status?: 'active' | 'absent' | 'inactive' | null;
+  status?: 'active' | 'inactive' | null;
   labor_type_id?: string | null;
 }
 
