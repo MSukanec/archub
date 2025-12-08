@@ -36,9 +36,8 @@ const attendanceSchema = z.object({
   attendance_date: z.date({
     required_error: 'La fecha es requerida'
   }),
-  personnel_id: z.string().uuid('Selecciona personal'),
-  attendance_type: z.string().min(1, 'Selecciona el tipo de horario'),
-  hours_worked: z.number().min(0.5, 'Las horas deben ser al menos 0.5').max(24, 'Las horas no pueden ser más de 24'),
+  personnel_id: z.string().uuid('Personal requerido'),
+  attendance_type: z.string().min(1, 'Selecciona el tipo de asistencia'),
   description: z.string().optional()
 })
 
@@ -87,40 +86,40 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
 
 
 
+  // Get the personnel_id from editingData (contact_id) and map to project_personnel.id
+  const getPersonnelIdFromContactId = (contactId: string | undefined) => {
+    if (!contactId) return ''
+    const matchingPersonnel = projectPersonnel.find((p: any) => p.contact?.id === contactId)
+    return matchingPersonnel?.id || ''
+  }
+
   const form = useForm<AttendanceForm>({
     resolver: zodResolver(attendanceSchema),
     defaultValues: {
       attendance_date: modalData?.editingData?.attendanceDate || (isEditing && attendance?.created_at ? new Date(attendance.created_at) : new Date()),
-      personnel_id: modalData?.editingData?.personnelId || attendance?.personnel_id || '',
-      attendance_type: attendance?.attendance_type || 'full', // Preseleccionar "Jornada Completa"
-      hours_worked: attendance?.hours_worked || 8,
+      personnel_id: getPersonnelIdFromContactId(modalData?.editingData?.personnelId) || attendance?.personnel_id || '',
+      attendance_type: attendance?.attendance_type || attendance?.status || 'full',
       description: attendance?.description || ''
     }
   })
 
-  // Reset form when attendance data changes (for editing)
+  // Reset form when attendance data changes (for editing) or when projectPersonnel loads
   React.useEffect(() => {
-    if (isEditing && attendance) {
-      // The workerId from the gradebook is actually a contact_id, we need to find the corresponding project_personnel id
-      const workerContactId = modalData?.editingData?.personnelId || attendance.workerId || attendance.personnel_id || ''
-      
-      // Find the project_personnel record that matches this contact_id
+    if (projectPersonnel.length > 0) {
+      const workerContactId = modalData?.editingData?.personnelId || attendance?.workerId || attendance?.personnel_id || ''
       const matchingPersonnel = projectPersonnel.find((p: any) => p.contact?.id === workerContactId)
       const actualPersonnelId = matchingPersonnel?.id || ''
       
-      // Fix date handling - ensure we use the correct date
-      const attendanceDate = attendance.day ? new Date(attendance.day + 'T00:00:00') : 
-                             (attendance.created_at ? new Date(attendance.created_at) : new Date())
+      const attendanceDate = attendance?.day ? new Date(attendance.day + 'T00:00:00') : 
+                             modalData?.editingData?.attendanceDate ||
+                             (attendance?.created_at ? new Date(attendance.created_at) : new Date())
       
       const mappedData = {
         attendance_date: attendanceDate,
-        personnel_id: actualPersonnelId, // Use the correct project_personnel ID
-        attendance_type: attendance.status || attendance.attendance_type || 'full',
-        hours_worked: attendance.hours_worked || (attendance.status === 'half' ? 4 : 8),
-        description: attendance.description || ''
+        personnel_id: actualPersonnelId,
+        attendance_type: attendance?.status || attendance?.attendance_type || 'full',
+        description: attendance?.description || ''
       }
-      
-
       
       form.reset(mappedData)
     }
@@ -158,7 +157,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
           data: {
             personnel_id: data.personnel_id,
             attendance_type: data.attendance_type,
-            hours_worked: data.hours_worked,
             description: data.description,
           },
         })
@@ -171,7 +169,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
         await createAttendance.mutateAsync({
           personnel_id: data.personnel_id,
           attendance_type: data.attendance_type,
-          hours_worked: data.hours_worked,
           description: data.description,
           created_by: currentMember.id,
           project_id: projectId,
@@ -189,7 +186,9 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
 
   const attendanceTypes = [
     { value: 'full', label: 'Jornada Completa' },
-    { value: 'half', label: 'Media Jornada' }
+    { value: 'half', label: 'Media Jornada' },
+    { value: 'absent', label: 'Ausente' },
+    { value: 'sick', label: 'Enfermedad/Accidente' }
   ]
 
   const viewPanel = (
@@ -200,10 +199,27 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
     </div>
   )
 
+  // Get the contact name for display
+  const getContactName = () => {
+    const personnelId = form.watch('personnel_id')
+    const personnel = projectPersonnel.find((p: any) => p.id === personnelId)
+    if (personnel?.contact) {
+      return `${personnel.contact.first_name || ''} ${personnel.contact.last_name || ''}`.trim() || 'Sin nombre'
+    }
+    return modalData?.editingData?.contactName || 'Personal'
+  }
+
   const editPanel = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        {/* Fecha y Personal - Inline */}
+        {/* Show contact name as info */}
+        {isEditing && (
+          <div className="text-sm text-muted-foreground mb-2">
+            Asistencia para: <span className="font-medium text-foreground">{getContactName()}</span>
+          </div>
+        )}
+
+        {/* Fecha y Asistencia - Inline */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -243,72 +259,14 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
 
           <FormField
             control={form.control}
-            name="personnel_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Personal</FormLabel>
-                {projectPersonnel.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center p-8 border border-dashed rounded-lg">
-                    <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No hay personal asignado</h3>
-                    <p className="text-sm text-muted-foreground text-center mb-4">
-                      Necesitas asignar personal al proyecto antes de registrar asistencia
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onClose();
-                        navigate('/construction/personnel');
-                      }}
-                      className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-                    >
-                      Gestionar Personal
-                    </button>
-                  </div>
-                ) : (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar personal..." />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {projectPersonnel
-                        .filter((personnel: any) => personnel.contact && !Array.isArray(personnel.contact))
-                        .map((personnel: any) => (
-                        <SelectItem key={personnel.id} value={personnel.id}>
-                          {personnel.contact.first_name || 'Sin nombre'} {personnel.contact.last_name || ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Solo mostrar el resto del formulario si hay personal disponible */}
-        {projectPersonnel.length > 0 && (
-          <>
-        {/* Horario */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
             name="attendance_type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Horario</FormLabel>
-                <Select onValueChange={(value) => {
-                  field.onChange(value)
-                  // Auto-set hours based on attendance type
-                  if (value === 'full') form.setValue('hours_worked', 8)
-                  else if (value === 'half') form.setValue('hours_worked', 4)
-                }} value={field.value}>
+                <FormLabel>Asistencia</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar horario" />
+                      <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -319,27 +277,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="hours_worked"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Horas trabajadas</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.5"
-                    min="0.5"
-                    max="24"
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                  />
-                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -364,10 +301,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
             </FormItem>
           )}
         />
-
-
-          </>
-        )}
       </form>
     </Form>
   )
@@ -383,10 +316,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      middleLabel={isEditing && attendance ? "Eliminar" : undefined}
-      onMiddleClick={isEditing && attendance ? handleDelete : undefined}
-      middleVariant="destructive"
-      middleDisabled={deleteAttendanceMutation.isPending}
       rightLabel={isEditing ? "Guardar Cambios" : "Registrar Asistencia"}
       onRightClick={form.handleSubmit(handleSubmit)}
       submitDisabled={isLoading}
