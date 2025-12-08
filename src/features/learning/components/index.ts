@@ -20,6 +20,7 @@ export { CourseCard } from './landing/CourseCard';
 export { CourseGrid } from './landing/CourseGrid';
 export { CourseStickyCard } from './landing/CourseStickyCard';
 export { SectionHeader } from './landing/SectionHeader';
+export { FoundersPromoSection } from './landing/FoundersPromoSection';
 
 // ========== UNIFIED COMPONENTS (PUBLIC + DASHBOARD) ==========
 export { UnifiedCourseCard } from './UnifiedCourseCard';

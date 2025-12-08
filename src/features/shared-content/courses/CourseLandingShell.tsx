@@ -8,6 +8,7 @@ import {
   FAQSection,
   TestimonialsSection,
   CTAFooter,
+  FoundersPromoSection,
 } from '@/features/learning';
 import { InfiniteCarousel } from '@/components/shared/InfiniteCarousel';
 import type { CoursesMode } from './types';
@@ -66,6 +67,13 @@ export function CourseLandingShell({
           isEnrolled={isEnrolled} 
           progressPercentage={progressPercentage} 
         />
+        
+        {!isEnrolled && (
+          <FoundersPromoSection 
+            mode={mode}
+            coursePrice={course.price}
+          />
+        )}
         
         <InstructorSection course={course} />
         <PlatformSection />

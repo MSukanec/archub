@@ -1,12 +1,16 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { BookOpen, Clock, CheckCircle, MessageCircle, Shield, ChevronUp } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BookOpen, Clock, CheckCircle, MessageCircle, Shield, ChevronUp, Crown, ArrowRight, Sparkles } from 'lucide-react';
 import { BlockedRestricted, ComingSoonCard } from '@/components/shared/restrictions';
 import type { CoursesMode } from '../types';
 import type { ItemStatus } from '@shared/schema';
+
+type PricingTab = 'course' | 'founders';
 
 interface CourseStickyCardWithModeProps {
   mode: CoursesMode;
@@ -29,7 +33,11 @@ export function CourseStickyCardWithMode({
   ctaButtonText,
   variant = 'fixed',
 }: CourseStickyCardWithModeProps) {
+  const [, navigate] = useLocation();
+  const [pricingTab, setPricingTab] = useState<PricingTab>('course');
   const status = (course.status || 'available') as ItemStatus;
+  
+  const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/fundadores';
   
   // When in-grid, the card is positioned by the parent grid, no fixed positioning needed
   if (variant === 'in-grid') {
@@ -63,14 +71,46 @@ export function CourseStickyCardWithMode({
               </div>
             )}
 
-            {course.price && !isEnrolled && (
-              <div className="space-y-1">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-primary" data-testid="text-course-price">
-                    ${course.price}
-                  </span>
-                  <span className="text-sm text-muted-foreground">/ año</span>
-                </div>
+            {!isEnrolled && (
+              <div className="space-y-4">
+                <Tabs value={pricingTab} onValueChange={(v) => setPricingTab(v as PricingTab)} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 h-auto p-1">
+                    <TabsTrigger value="course" className="text-xs py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      Solo Curso
+                    </TabsTrigger>
+                    <TabsTrigger value="founders" className="text-xs py-2 gap-1 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+                      <Crown className="w-3 h-3" />
+                      Fundadores
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                
+                {pricingTab === 'course' && course.price && (
+                  <div className="space-y-1">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-bold text-primary" data-testid="text-course-price">
+                        ${course.price}
+                      </span>
+                      <span className="text-sm text-muted-foreground">/ año</span>
+                    </div>
+                  </div>
+                )}
+                
+                {pricingTab === 'founders' && (
+                  <div className="space-y-3 p-3 rounded-lg bg-accent/10 border border-accent/20">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-accent" />
+                      <span className="text-sm font-medium">Curso incluido gratis</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Suscríbete al plan anual PRO o TEAMS y obtén este curso sin costo adicional, junto con 8 beneficios exclusivos de por vida.
+                    </p>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold text-accent">Desde $19</span>
+                      <span className="text-xs text-muted-foreground">/ mes</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -104,21 +144,44 @@ export function CourseStickyCardWithMode({
               </div>
             </div>
 
-            <div className="pt-2">
-              <BlockedRestricted 
-                isBlocked={!isEnrolled && course.is_active === false}
-                title="Curso no disponible"
-                message="Este curso no está disponible para inscripción en este momento."
-              >
+            <div className="pt-2 space-y-3">
+              {pricingTab === 'course' || isEnrolled ? (
+                <BlockedRestricted 
+                  isBlocked={!isEnrolled && course.is_active === false}
+                  title="Curso no disponible"
+                  message="Este curso no está disponible para inscripción en este momento."
+                >
+                  <Button 
+                    size="lg" 
+                    className="w-full text-base font-semibold"
+                    onClick={onCTAClick}
+                    data-testid={isEnrolled ? "button-continue" : "button-enroll"}
+                  >
+                    {ctaButtonText}
+                  </Button>
+                </BlockedRestricted>
+              ) : (
                 <Button 
                   size="lg" 
-                  className="w-full text-base font-semibold"
-                  onClick={onCTAClick}
-                  data-testid={isEnrolled ? "button-continue" : "button-enroll"}
+                  className="w-full text-base font-semibold bg-accent hover:bg-accent/90 text-accent-foreground gap-2"
+                  onClick={() => navigate(foundersUrl)}
+                  data-testid="button-founders"
                 >
-                  {ctaButtonText}
+                  <Crown className="w-4 h-4" />
+                  Ver Programa Fundadores
                 </Button>
-              </BlockedRestricted>
+              )}
+              
+              {pricingTab === 'course' && !isEnrolled && (
+                <button
+                  onClick={() => navigate(foundersUrl)}
+                  className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-colors group"
+                >
+                  <Crown className="w-4 h-4 text-accent" />
+                  <span className="text-xs font-medium text-accent">¿Prefieres acceso ilimitado?</span>
+                  <ArrowRight className="w-3 h-3 text-accent group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -200,14 +263,46 @@ export function CourseStickyCardWithMode({
               </div>
             )}
 
-            {course.price && !isEnrolled && (
-              <div className="space-y-1">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-primary" data-testid="text-course-price">
-                    ${course.price}
-                  </span>
-                  <span className="text-sm text-muted-foreground">/ año</span>
-                </div>
+            {!isEnrolled && (
+              <div className="space-y-4">
+                <Tabs value={pricingTab} onValueChange={(v) => setPricingTab(v as PricingTab)} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 h-auto p-1">
+                    <TabsTrigger value="course" className="text-xs py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      Solo Curso
+                    </TabsTrigger>
+                    <TabsTrigger value="founders" className="text-xs py-2 gap-1 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+                      <Crown className="w-3 h-3" />
+                      Fundadores
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                
+                {pricingTab === 'course' && course.price && (
+                  <div className="space-y-1">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-bold text-primary" data-testid="text-course-price">
+                        ${course.price}
+                      </span>
+                      <span className="text-sm text-muted-foreground">/ año</span>
+                    </div>
+                  </div>
+                )}
+                
+                {pricingTab === 'founders' && (
+                  <div className="space-y-3 p-3 rounded-lg bg-accent/10 border border-accent/20">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-accent" />
+                      <span className="text-sm font-medium">Curso incluido gratis</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Suscríbete al plan anual PRO o TEAMS y obtén este curso sin costo adicional, junto con 8 beneficios exclusivos de por vida.
+                    </p>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold text-accent">Desde $19</span>
+                      <span className="text-xs text-muted-foreground">/ mes</span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -241,21 +336,44 @@ export function CourseStickyCardWithMode({
               </div>
             </div>
 
-            <div className="pt-2">
-              <BlockedRestricted 
-                isBlocked={!isEnrolled && course.is_active === false}
-                title="Curso no disponible"
-                message="Este curso no está disponible para inscripción en este momento."
-              >
+            <div className="pt-2 space-y-3">
+              {pricingTab === 'course' || isEnrolled ? (
+                <BlockedRestricted 
+                  isBlocked={!isEnrolled && course.is_active === false}
+                  title="Curso no disponible"
+                  message="Este curso no está disponible para inscripción en este momento."
+                >
+                  <Button 
+                    size="lg" 
+                    className="w-full text-base font-semibold"
+                    onClick={onCTAClick}
+                    data-testid={isEnrolled ? "button-continue" : "button-enroll"}
+                  >
+                    {ctaButtonText}
+                  </Button>
+                </BlockedRestricted>
+              ) : (
                 <Button 
                   size="lg" 
-                  className="w-full text-base font-semibold"
-                  onClick={onCTAClick}
-                  data-testid={isEnrolled ? "button-continue" : "button-enroll"}
+                  className="w-full text-base font-semibold bg-accent hover:bg-accent/90 text-accent-foreground gap-2"
+                  onClick={() => navigate(foundersUrl)}
+                  data-testid="button-founders"
                 >
-                  {ctaButtonText}
+                  <Crown className="w-4 h-4" />
+                  Ver Programa Fundadores
                 </Button>
-              </BlockedRestricted>
+              )}
+              
+              {pricingTab === 'course' && !isEnrolled && (
+                <button
+                  onClick={() => navigate(foundersUrl)}
+                  className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-colors group"
+                >
+                  <Crown className="w-4 h-4 text-accent" />
+                  <span className="text-xs font-medium text-accent">¿Prefieres acceso ilimitado?</span>
+                  <ArrowRight className="w-3 h-3 text-accent group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -265,6 +383,7 @@ export function CourseStickyCardWithMode({
       
       {/* Mobile/Tablet Bottom Bar - Visible only below xl breakpoint */}
       <MobileBottomBar
+        mode={mode}
         course={course}
         stats={stats}
         isEnrolled={isEnrolled}
@@ -277,6 +396,7 @@ export function CourseStickyCardWithMode({
 }
 
 interface MobileBottomBarProps {
+  mode: CoursesMode;
   course: any;
   stats: any;
   isEnrolled: boolean;
@@ -286,6 +406,7 @@ interface MobileBottomBarProps {
 }
 
 function MobileBottomBar({
+  mode,
   course,
   stats,
   isEnrolled,
@@ -293,7 +414,9 @@ function MobileBottomBar({
   onCTAClick,
   ctaButtonText,
 }: MobileBottomBarProps) {
+  const [, navigate] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/fundadores';
   
   return (
     <div className="xl:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg">
@@ -311,13 +434,22 @@ function MobileBottomBar({
                 <Progress value={progressPercentage} className="h-1.5" />
               </div>
             ) : (
-              <div className="flex items-baseline gap-1">
-                {course.price && (
-                  <>
-                    <span className="text-2xl font-bold text-primary">${course.price}</span>
-                    <span className="text-xs text-muted-foreground">/ año</span>
-                  </>
-                )}
+              <div className="flex flex-col">
+                <div className="flex items-baseline gap-1">
+                  {course.price && (
+                    <>
+                      <span className="text-xl font-bold text-primary">${course.price}</span>
+                      <span className="text-xs text-muted-foreground">/ año</span>
+                    </>
+                  )}
+                </div>
+                <button 
+                  onClick={() => navigate(foundersUrl)}
+                  className="flex items-center gap-1 text-xs text-accent hover:underline"
+                >
+                  <Crown className="w-3 h-3" />
+                  <span>o gratis con Fundadores</span>
+                </button>
               </div>
             )}
           </div>
@@ -370,7 +502,7 @@ function MobileBottomBar({
                   )}
                   
                   {/* Stats */}
-                  <div className="flex justify-center gap-6 text-sm">
+                  <div className="flex flex-wrap justify-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <BookOpen className="w-5 h-5 text-primary" />
                       <span>{stats.total_modules} Módulos</span>
@@ -401,8 +533,32 @@ function MobileBottomBar({
                     </div>
                   </div>
                   
+                  {/* Founders Banner */}
+                  {!isEnrolled && (
+                    <div 
+                      onClick={() => {
+                        setIsOpen(false);
+                        navigate(foundersUrl);
+                      }}
+                      className="p-4 rounded-lg bg-accent/10 border border-accent/20 cursor-pointer hover:bg-accent/20 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-accent/20 rounded-lg">
+                          <Crown className="w-5 h-5 text-accent" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-sm">Programa Fundadores</p>
+                          <p className="text-xs text-muted-foreground">
+                            Este curso incluido gratis + 8 beneficios exclusivos
+                          </p>
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-accent" />
+                      </div>
+                    </div>
+                  )}
+                  
                   {/* CTA Button */}
-                  <div className="pt-4">
+                  <div className="pt-4 space-y-3">
                     <Button 
                       size="lg" 
                       className="w-full text-base font-semibold"
@@ -413,6 +569,21 @@ function MobileBottomBar({
                     >
                       {ctaButtonText}
                     </Button>
+                    
+                    {!isEnrolled && (
+                      <Button 
+                        size="lg"
+                        variant="outline"
+                        className="w-full text-base font-semibold border-accent text-accent hover:bg-accent/10 gap-2"
+                        onClick={() => {
+                          setIsOpen(false);
+                          navigate(foundersUrl);
+                        }}
+                      >
+                        <Crown className="w-4 h-4" />
+                        Ver Programa Fundadores
+                      </Button>
+                    )}
                   </div>
                 </div>
               </SheetContent>
