@@ -172,40 +172,45 @@ function MarketingLayoutContent({
   const totalOffset = bannerOffset + HEADER_HEIGHT;
 
   // Special layout with hero section (for course landing pages)
-  // Uses Flexbox model: hero fills remaining viewport after header/announcement
+  // Hero fills exactly the remaining viewport after header/announcement using calc()
   if (heroSlot) {
     return (
-      <div className="flex flex-col min-h-screen overflow-x-hidden">
+      <>
         <GlobalAnnouncement />
-        <Header navigation={headerNavigation} hasAnnouncement={hasActiveAnnouncement} announcementHeight={announcementHeight} />
-        
-        {/* Floating Sticky Card - Desktop only, positioned absolutely */}
-        {stickyContent && (
-          <div 
-            className="hidden lg:block fixed z-40"
-            style={{
-              top: `${totalOffset + 32}px`,
-              width: '368px',
-              right: 'max(32px, calc((100vw - 1472px) / 2))',
-            }}
-          >
-            <div className="sticky top-24">
-              {stickyContent}
+        <div className="min-h-screen overflow-x-hidden">
+          <Header navigation={headerNavigation} hasAnnouncement={hasActiveAnnouncement} announcementHeight={announcementHeight} />
+          
+          {/* Floating Sticky Card - Desktop only, positioned absolutely */}
+          {stickyContent && (
+            <div 
+              className="hidden lg:block fixed z-40"
+              style={{
+                top: `${totalOffset + 32}px`,
+                width: '368px',
+                right: 'max(32px, calc((100vw - 1472px) / 2))',
+              }}
+            >
+              <div className="sticky top-24">
+                {stickyContent}
+              </div>
             </div>
+          )}
+          
+          {/* Hero section - uses calc to fill exactly remaining viewport */}
+          <div 
+            className="flex flex-col"
+            style={{ minHeight: `calc(100vh - ${totalOffset}px)` }}
+          >
+            {heroSlot}
           </div>
-        )}
-        
-        {/* Hero section - flex-1 makes it fill remaining viewport space */}
-        <div className="flex-1 flex flex-col">
-          {heroSlot}
+          
+          <main className="overflow-x-hidden">
+            {children}
+          </main>
+          
+          <Footer />
         </div>
-        
-        <main className="overflow-x-hidden">
-          {children}
-        </main>
-        
-        <Footer />
-      </div>
+      </>
     );
   }
 
