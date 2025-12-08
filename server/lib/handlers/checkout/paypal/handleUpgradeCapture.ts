@@ -189,6 +189,18 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
   const prorationAmountNum = parseFloat(amount_usd) || 0;
   const { returnBase } = buildURLContext(req);
 
+  // Debug logging for revise condition
+  console.log('[PayPal upgrade-capture] Revise condition check:', {
+    previous_subscription_id,
+    oldSub: oldSub ? {
+      id: oldSub.id,
+      provider_subscription_id: oldSub.provider_subscription_id,
+      payment_provider: oldSub.payment_provider,
+    } : null,
+    paypalPlanId,
+    willAttemptRevise: !!(oldSub?.provider_subscription_id && oldSub.payment_provider === 'paypal' && paypalPlanId),
+  });
+
   // Try to REVISE the existing PayPal subscription instead of cancel+create
   // This is cleaner and may not require re-approval if user paid with card
   if (oldSub?.provider_subscription_id && oldSub.payment_provider === 'paypal' && paypalPlanId) {
