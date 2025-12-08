@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { CalendarIcon } from 'lucide-react'
+import { formatDateForDB, parseLocalDate } from '@/lib/date-utils'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 
@@ -72,8 +73,11 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
     membersRef.current = members
   }, [members])
 
-  const isEditing = modalData?.isEditing || (modalData?.mode === 'edit' && modalData?.attendance)
   const attendance = modalData?.attendance || modalData?.editingData?.existingRecord
+  // Check if there's actually an existing attendance record (not just editing mode)
+  const hasExistingRecord = attendance && (attendance.day || attendance.id || attendance.workerId)
+  const isCreatingNew = !hasExistingRecord
+  const isEditing = modalData?.isEditing || (modalData?.mode === 'edit' && hasExistingRecord)
 
 
 
@@ -101,12 +105,13 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       const matchingPersonnel = projectPersonnel.find((p: any) => p.contact?.id === workerContactId)
       const actualPersonnelId = matchingPersonnel?.id || ''
       
-      const attendanceDate = attendance?.day ? new Date(attendance.day + 'T00:00:00') : 
+      // Use parseLocalDate for proper timezone handling
+      const attendanceDate = attendance?.day ? parseLocalDate(attendance.day) : 
                              modalData?.editingData?.attendanceDate ||
-                             (attendance?.created_at ? new Date(attendance.created_at) : new Date())
+                             (attendance?.created_at ? parseLocalDate(attendance.created_at) : new Date())
       
       const mappedData = {
-        attendance_date: attendanceDate,
+        attendance_date: attendanceDate || new Date(),
         personnel_id: actualPersonnelId,
         attendance_type: attendance?.status || attendance?.attendance_type || 'full',
         description: attendance?.description || ''
@@ -143,12 +148,12 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
     const hoursWorked = getHoursWorked(data.attendance_type)
 
     try {
-      // Check if we're editing an existing record or creating a new one
-      const hasExistingRecord = attendance && (attendance.day || attendance.id)
+      // Use formatDateForDB to avoid timezone issues
+      const workDate = formatDateForDB(data.attendance_date)
       
-      if (isEditing && hasExistingRecord) {
+      if (hasExistingRecord) {
         const workerContactId = modalData?.editingData?.personnelId || attendance?.workerId
-        const attendanceDate = attendance?.day || format(data.attendance_date, 'yyyy-MM-dd')
+        const attendanceDate = attendance?.day || workDate
         
         if (!workerContactId || !attendanceDate) {
           throw new Error('No se puede identificar la asistencia a actualizar')
@@ -169,9 +174,6 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
         if (!currentMember) {
           throw new Error('No se encontró el miembro de la organización para el usuario actual')
         }
-
-        // Format date as YYYY-MM-DD for work_date field
-        const workDate = format(data.attendance_date, 'yyyy-MM-dd')
         
         await createAttendance.mutateAsync({
           personnel_id: data.personnel_id,
@@ -223,7 +225,7 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {/* Show contact name as info */}
-        {isEditing && (
+        {modalData?.editingData?.contactName && (
           <div className="text-sm text-muted-foreground mb-2">
             Asistencia para: <span className="font-medium text-foreground">{getContactName()}</span>
           </div>
@@ -317,7 +319,7 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
 
   const headerContent = (
     <FormModalHeader
-      title={isEditing ? "Editar Asistencia" : "Registrar Asistencia"}
+      title={isCreatingNew ? "Registrar Asistencia" : "Editar Asistencia"}
       description="Registra la asistencia del personal al proyecto para el seguimiento de jornadas laborales."
       icon={Users}
     />
@@ -327,7 +329,7 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
     <FormModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      rightLabel={isEditing ? "Guardar Cambios" : "Registrar Asistencia"}
+      rightLabel={isCreatingNew ? "Registrar Asistencia" : "Guardar Cambios"}
       onRightClick={form.handleSubmit(handleSubmit)}
       submitDisabled={isLoading}
       showLoadingSpinner={isLoading}
