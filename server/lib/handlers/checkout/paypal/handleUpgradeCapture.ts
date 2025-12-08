@@ -5,7 +5,7 @@ import { insertPayment } from "../shared/payments.js";
 import { upgradeOrganizationPlan } from "../shared/subscriptions.js";
 import { buildURLContext } from "../shared/urls.js";
 import { capturePayPalOrder, getPayPalOrder } from "./api.js";
-import { createPayPalSubscription, cancelPayPalSubscription } from "./subscriptions-api.js";
+import { createPayPalSubscription, cancelPayPalSubscription, revisePayPalSubscription } from "./subscriptions-api.js";
 import { logPayPalMode } from "./config.js";
 
 export type HandleUpgradeCaptureResult =
@@ -175,13 +175,92 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
     return { success: false, error: "No email found", redirectUrl: `${baseUrl}/organization/billing?payment=error&reason=no_email` };
   }
 
-  // Cancel the old PayPal subscription if exists
+  // Get the target PayPal plan ID for the new plan
+  const paypalPlanId = target_paypal_plan_id || 
+                       (billing_period === 'monthly' ? plan.paypal_plan_monthly_id : plan.paypal_plan_annual_id);
+
+  // Get the old subscription to try revising it
   const { data: oldSub } = await supabase
     .from("organization_subscriptions")
     .select("id, provider_subscription_id, payment_provider")
     .eq("id", previous_subscription_id)
     .maybeSingle();
 
+  const prorationAmountNum = parseFloat(amount_usd) || 0;
+  const { returnBase } = buildURLContext(req);
+
+  // Try to REVISE the existing PayPal subscription instead of cancel+create
+  // This is cleaner and may not require re-approval if user paid with card
+  if (oldSub?.provider_subscription_id && oldSub.payment_provider === 'paypal' && paypalPlanId) {
+    console.log('[PayPal upgrade-capture] Attempting to revise existing subscription:', {
+      oldSubscriptionId: oldSub.provider_subscription_id,
+      newPlanId: paypalPlanId,
+    });
+
+    const reviseResult = await revisePayPalSubscription({
+      subscriptionId: oldSub.provider_subscription_id,
+      newPlanId: paypalPlanId,
+      returnUrl: `${returnBase}/organization/billing?payment=success&upgraded=true`,
+      cancelUrl: `${returnBase}/organization/billing?payment=cancelled`,
+    });
+
+    if (reviseResult.success) {
+      if (!reviseResult.requiresApproval) {
+        // Card payment - revision applied automatically!
+        console.log('[PayPal upgrade-capture] Subscription revised automatically (card payment)');
+        
+        // Update the subscription in DB with new plan
+        await upgradeOrganizationPlan(supabase, {
+          organizationId: organization_id,
+          planId: resolvedPlanId,
+          billingPeriod: billing_period as 'monthly' | 'annual',
+          paymentId: paymentId || `upgrade_${preferenceId}`,
+          amount: prorationAmountNum,
+          currency: "USD",
+          userId: publicUserId,
+          payerEmail: userEmail,
+          providerSubscriptionId: oldSub.provider_subscription_id, // Keep the same subscription ID
+        });
+
+        return { 
+          success: true, 
+          activated: true, 
+          message: "Upgrade completado exitosamente",
+          redirectUrl: `${baseUrl}/organization/billing?payment=success`,
+        };
+      } else {
+        // PayPal account payment - requires approval, but just for the plan change, not a new subscription
+        console.log('[PayPal upgrade-capture] Subscription revision requires approval');
+        
+        // Update the plan in DB now (will be confirmed when user approves)
+        await upgradeOrganizationPlan(supabase, {
+          organizationId: organization_id,
+          planId: resolvedPlanId,
+          billingPeriod: billing_period as 'monthly' | 'annual',
+          paymentId: paymentId || `upgrade_${preferenceId}`,
+          amount: prorationAmountNum,
+          currency: "USD",
+          userId: publicUserId,
+          payerEmail: userEmail,
+          providerSubscriptionId: oldSub.provider_subscription_id,
+        });
+
+        return { 
+          success: true, 
+          activated: true, 
+          message: "Upgrade activado, confirma el cambio de plan en PayPal",
+          redirectUrl: reviseResult.approvalUrl,
+          approvalUrl: reviseResult.approvalUrl,
+        };
+      }
+    } else {
+      console.warn('[PayPal upgrade-capture] Revise failed, falling back to cancel+create:', reviseResult.error);
+      // Fall through to cancel+create flow below
+    }
+  }
+
+  // Fallback: Cancel old subscription and create new one
+  // This happens if revise failed or if there's no existing PayPal subscription
   if (oldSub?.provider_subscription_id && oldSub.payment_provider === 'paypal') {
     console.log('[PayPal upgrade-capture] Cancelling old PayPal subscription:', oldSub.provider_subscription_id);
     try {
@@ -215,15 +294,11 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
   }
 
   // Create new PayPal recurring subscription
-  const paypalPlanId = target_paypal_plan_id || 
-                       (billing_period === 'monthly' ? plan.paypal_plan_monthly_id : plan.paypal_plan_annual_id);
-
   let newSubscriptionId: string | null = null;
   
   if (paypalPlanId) {
     console.log('[PayPal upgrade-capture] Creating new recurring subscription with plan:', paypalPlanId);
     
-    const { returnBase } = buildURLContext(req);
     const custom_id = `${user_id}|${resolvedPlanId}|${organization_id}|${billing_period}`;
     const return_url = `${returnBase}/api/checkout/paypal/capture-subscription?type=recurring`;
     const cancel_url = `${returnBase}/organization/billing?payment=cancelled`;
@@ -243,8 +318,6 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
       newSubscriptionId = subscriptionResult.subscriptionId;
       console.log('[PayPal upgrade-capture] New subscription created:', newSubscriptionId);
       
-      // Activate the new plan immediately (subscription will be confirmed when user approves)
-      const prorationAmountNum = parseFloat(amount_usd) || 0;
       await upgradeOrganizationPlan(supabase, {
         organizationId: organization_id,
         planId: resolvedPlanId,
@@ -257,7 +330,6 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
         providerSubscriptionId: newSubscriptionId,
       });
 
-      // Redirect user to approve the new subscription
       console.log('[PayPal upgrade-capture] Redirecting to subscription approval:', subscriptionResult.approvalUrl);
       return { 
         success: true, 
@@ -269,8 +341,6 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
     } else {
       console.error('[PayPal upgrade-capture] Failed to create new subscription:', subscriptionResult.error);
       
-      // Still activate the plan, but without recurring subscription
-      const prorationAmountNum = parseFloat(amount_usd) || 0;
       await upgradeOrganizationPlan(supabase, {
         organizationId: organization_id,
         planId: resolvedPlanId,
@@ -293,7 +363,6 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
     // No PayPal plan ID available, just activate without recurring
     console.log('[PayPal upgrade-capture] No PayPal plan ID, activating without recurring');
     
-    const prorationAmountNum = parseFloat(amount_usd) || 0;
     await upgradeOrganizationPlan(supabase, {
       organizationId: organization_id,
       planId: resolvedPlanId,

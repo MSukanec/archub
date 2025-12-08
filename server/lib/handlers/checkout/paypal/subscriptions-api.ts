@@ -344,6 +344,89 @@ export async function cancelPayPalSubscription(
   }
 }
 
+export type ReviseSubscriptionResult =
+  | { success: true; requiresApproval: false; subscription: any }
+  | { success: true; requiresApproval: true; approvalUrl: string; subscription: any }
+  | { success: false; error: string; status?: number; details?: any };
+
+export async function revisePayPalSubscription(params: {
+  subscriptionId: string;
+  newPlanId: string;
+  returnUrl?: string;
+  cancelUrl?: string;
+}): Promise<ReviseSubscriptionResult> {
+  try {
+    const token = await getPayPalAccessToken();
+
+    const body: any = {
+      plan_id: params.newPlanId,
+    };
+
+    if (params.returnUrl && params.cancelUrl) {
+      body.application_context = {
+        brand_name: "Seencel",
+        locale: "es-ES",
+        return_url: params.returnUrl,
+        cancel_url: params.cancelUrl,
+      };
+    }
+
+    console.log("[PayPal Subscriptions API] Revising subscription:", {
+      subscriptionId: params.subscriptionId,
+      newPlanId: params.newPlanId,
+    });
+
+    const response = await fetch(
+      `${PAYPAL_BASE_URL}/v1/billing/subscriptions/${params.subscriptionId}/revise`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("[PayPal Subscriptions API] Error revising subscription:", data);
+      return {
+        success: false,
+        error: data.message || "Error revising PayPal subscription",
+        status: response.status,
+        details: data,
+      };
+    }
+
+    const approvalUrl = data.links?.find((l: any) => l.rel === "approve")?.href;
+
+    if (approvalUrl) {
+      console.log("[PayPal Subscriptions API] Revision requires user approval");
+      return {
+        success: true,
+        requiresApproval: true,
+        approvalUrl,
+        subscription: data,
+      };
+    }
+
+    console.log("[PayPal Subscriptions API] Revision applied automatically (card payment)");
+    return {
+      success: true,
+      requiresApproval: false,
+      subscription: data,
+    };
+  } catch (error: any) {
+    console.error("[PayPal Subscriptions API] Fatal error revising subscription:", error);
+    return {
+      success: false,
+      error: error.message || "Unknown error",
+    };
+  }
+}
+
 export async function getPayPalProduct(
   productId: string
 ): Promise<PayPalProductResult> {
