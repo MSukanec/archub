@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, ShieldCheck, ShieldAlert, ShieldX, Shield } from "lucide-react"
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
-import { useProjectPersonnel, useDeletePersonnel } from '@/features/personnel/hooks'
+import { useProjectPersonnel, useDeletePersonnel, useReplacePersonnel, usePersonnelPayments } from '@/features/personnel/hooks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 
 interface InsuranceStatus {
@@ -108,7 +108,9 @@ export default function PersonnelListTab({
     organizationId
   )
 
-  const deletePersonnelMutation = useDeletePersonnel()
+  const { data: paymentsData = [] } = usePersonnelPayments(selectedProjectId, organizationId)
+  const deletePersonnelMutation = useDeletePersonnel(organizationId)
+  const replacePersonnelMutation = useReplacePersonnel(organizationId)
 
   const getDisplayName = (contact: any) => {
     if (!contact) return 'Sin nombre'
@@ -162,13 +164,54 @@ export default function PersonnelListTab({
   const handleDelete = (record: any) => {
     if (!organizationId) return
     
+    // Pagos relacionados a este personal
+    const associatedPayments = paymentsData.filter((p: any) => p.personnel_id === record.id)
+    
+    // Otros personal disponibles para reemplazo (excluir el que se va a eliminar)
+    const otherPersonnel = personnelData.filter((p: any) => p.id !== record.id)
+    
+    // Determinar si es posible reemplazar
+    const canReplace = associatedPayments.length > 0 && otherPersonnel.length > 0
+    
+    // Consecuencias
+    const consequences = []
+    if (associatedPayments.length > 0) {
+      consequences.push(
+        `${associatedPayments.length} pago${associatedPayments.length === 1 ? '' : 's'} será${associatedPayments.length === 1 ? 'á' : 'n'} afectado${associatedPayments.length === 1 ? '' : 's'}`
+      )
+      if (canReplace) {
+        consequences.push('Puedes reemplazarlos con otro o dejarlos sin referencia')
+      } else {
+        consequences.push('Los pagos quedarán sin referencia')
+      }
+    }
+    
+    // Opciones de reemplazo
+    const replacementOptions = otherPersonnel
+      .sort((a: any, b: any) => a.displayName.localeCompare(b.displayName))
+      .map((p: any) => ({
+        label: p.displayName || 'Sin nombre',
+        value: p.id
+      }))
+    
     openModal('delete-confirmation', {
+      mode: canReplace ? 'replace' : 'delete',
       title: 'Eliminar Personal',
-      message: `¿Estás seguro de que deseas eliminar a ${record.displayName} del proyecto?`,
-      onConfirm: () => {
+      description: `¿Estás seguro de que deseas eliminar a ${record.displayName} del proyecto?`,
+      itemName: record.displayName,
+      consequences: consequences.length > 0 ? consequences : undefined,
+      replacementOptions: canReplace ? replacementOptions : undefined,
+      currentId: record.id,
+      onDelete: () => {
         deletePersonnelMutation.mutate({
           personnelId: record.id,
           organizationId
+        })
+      },
+      onReplace: (newId: string) => {
+        replacePersonnelMutation.mutate({
+          oldId: record.id,
+          newId
         })
       }
     })

@@ -149,6 +149,74 @@ export function registerPersonnelRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // ========== REPLACE PROJECT PERSONNEL ==========
+
+  /**
+   * PATCH /api/personnel/:personnelId/replace
+   * Replace personnel in related records (payments, attendance) and then soft delete
+   */
+  app.patch("/api/personnel/:personnelId/replace", async (req, res) => {
+    try {
+      const { personnelId } = req.params;
+      const { new_personnel_id } = req.body;
+      const { organizationId } = req.query;
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      if (!new_personnel_id) {
+        return res.status(400).json({ error: "new_personnel_id is required" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Step 1: Update all personnel payments from old to new personnel
+      const { error: paymentsError } = await authenticatedSupabase
+        .from('personnel_payments')
+        .update({ personnel_id: new_personnel_id })
+        .eq('personnel_id', personnelId);
+
+      if (paymentsError) {
+        console.error("Error updating personnel payments:", paymentsError);
+        return res.status(500).json({ error: "Failed to migrate personnel payments" });
+      }
+
+      // Step 2: Update all personnel attendance from old to new personnel
+      const { error: attendanceError } = await authenticatedSupabase
+        .from('personnel_attendance')
+        .update({ personnel_id: new_personnel_id })
+        .eq('personnel_id', personnelId);
+
+      if (attendanceError) {
+        console.error("Error updating personnel attendance:", attendanceError);
+        return res.status(500).json({ error: "Failed to migrate personnel attendance" });
+      }
+
+      // Step 3: Soft delete the old personnel record
+      const { data: replacedPersonnel, error: deleteError } = await authenticatedSupabase
+        .from('project_personnel')
+        .update({ 
+          is_deleted: true, 
+          deleted_at: new Date().toISOString() 
+        })
+        .eq('id', personnelId)
+        .select()
+        .single();
+
+      if (deleteError) {
+        console.error("Error deleting personnel:", deleteError);
+        return res.status(500).json({ error: "Failed to delete personnel" });
+      }
+
+      res.json({ success: true, personnel: replacedPersonnel });
+    } catch (error) {
+      console.error("Error replacing personnel:", error);
+      res.status(500).json({ error: "Failed to replace personnel" });
+    }
+  });
+
   // ========== PERSONNEL RATES ENDPOINTS ==========
 
   /**
