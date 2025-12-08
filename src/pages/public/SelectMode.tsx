@@ -7,13 +7,13 @@ import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Lock, GraduationCap, Briefcase, Package, HardHat, UserCircle2, ArrowRight } from "lucide-react";
+import { Loader2, Lock, GraduationCap, Briefcase, Package, HardHat, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 interface ModeOption {
-  type: 'professional' | 'learner' | 'provider' | 'worker' | 'visitor';
+  type: 'professional' | 'learner' | 'provider' | 'worker';
   title: string;
   description: string;
   icon: typeof Briefcase;
@@ -47,13 +47,6 @@ const modeOptions: ModeOption[] = [
     title: "Mano de Obra y Contratistas",
     description: "Registra avances, reporta incidencias y coordina tareas con el equipo del proyecto",
     icon: HardHat,
-    available: false,
-  },
-  {
-    type: "visitor",
-    title: "Visitantes y Clientes",
-    description: "Explora las funcionalidades de la plataforma sin comprometerte con datos reales",
-    icon: UserCircle2,
     available: false,
   }
 ];
