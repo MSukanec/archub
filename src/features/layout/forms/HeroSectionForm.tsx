@@ -136,10 +136,10 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
       }
       onClose()
     } catch (error: any) {
-      console.error('[HeroSectionForm] Error:', error)
+      console.error('[HeroSectionForm] Error:', error?.message, error?.stack, error)
       toast({
         title: 'Error',
-        description: error.message || 'No se pudo guardar la sección',
+        description: error?.message || 'No se pudo guardar la sección',
         variant: 'destructive',
       })
     } finally {
