@@ -88,6 +88,7 @@ export default function CourseInfo() {
           progressPercentage={progressPercentage}
           onCTAClick={handleCTAClick}
           ctaButtonText={ctaButtonText}
+          clientGallery={data.clientGallery}
         />
       </HeroLayout>
     </Layout>
