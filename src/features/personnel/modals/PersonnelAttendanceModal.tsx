@@ -1,19 +1,13 @@
-import React from 'react'
+import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useQueryClient } from '@tanstack/react-query'
-import { addDays } from 'date-fns'
-import { Calendar, Users, Trash2 } from 'lucide-react'
+import { Users } from 'lucide-react'
 
-import { FormModalLayout } from '@/components/modal'
-import { FormModalHeader } from '@/components/modal'
-import { FormModalFooter } from '@/components/modal'
+import { FormModalLayout, FormModalHeader, FormModalFooter } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { format } from 'date-fns'
@@ -25,7 +19,6 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationMembers } from '@/features/organization'
-import { useLocation } from 'wouter'
 import { 
   useProjectPersonnel, 
   useCreatePersonnelAttendance, 
@@ -63,11 +56,9 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
   const { data: currentUser } = useCurrentUser()
   const organizationId = currentUser?.organization?.id
   const projectId = currentUser?.preferences?.last_project_id
-  const queryClient = useQueryClient()
-  const [, navigate] = useLocation()
 
   // Use feature hook to get project personnel
-  const { data: projectPersonnel = [], isLoading: personnelLoading } = useProjectPersonnel(
+  const { data: projectPersonnel = [] } = useProjectPersonnel(
     projectId,
     organizationId
   )
@@ -76,8 +67,8 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
   const { data: members = [] } = useOrganizationMembers(organizationId)
   
   // Mantener referencia actualizada de members para evitar stale closures
-  const membersRef = React.useRef(members)
-  React.useEffect(() => {
+  const membersRef = useRef(members)
+  useEffect(() => {
     membersRef.current = members
   }, [members])
 
@@ -104,7 +95,7 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
   })
 
   // Reset form when attendance data changes (for editing) or when projectPersonnel loads
-  React.useEffect(() => {
+  useEffect(() => {
     if (projectPersonnel.length > 0) {
       const workerContactId = modalData?.editingData?.personnelId || attendance?.workerId || attendance?.personnel_id || ''
       const matchingPersonnel = projectPersonnel.find((p: any) => p.contact?.id === workerContactId)
@@ -127,10 +118,17 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
 
   const createAttendance = useCreatePersonnelAttendance()
   const updateAttendance = useUpdatePersonnelAttendance()
-  
-  // TODO: Create deletePersonnelAttendance service/hook when backend endpoint is available
-  // For now, keeping minimal delete placeholder since it's referenced in the footer
-  const deleteAttendanceMutation = { isPending: false }
+
+  // Calculate hours worked based on attendance type
+  const getHoursWorked = (type: string) => {
+    switch (type) {
+      case 'full': return 8
+      case 'half': return 4
+      case 'absent': return 0
+      case 'sick': return 0
+      default: return 8
+    }
+  }
 
   const handleSubmit = async (data: AttendanceForm) => {
     if (!currentUser?.organization?.id || !projectId) {
@@ -141,6 +139,8 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
       })
       return
     }
+
+    const hoursWorked = getHoursWorked(data.attendance_type)
 
     try {
       if (isEditing) {
@@ -157,6 +157,7 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
           data: {
             personnel_id: data.personnel_id,
             attendance_type: data.attendance_type,
+            hours_worked: hoursWorked,
             description: data.description,
           },
         })
@@ -169,6 +170,7 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
         await createAttendance.mutateAsync({
           personnel_id: data.personnel_id,
           attendance_type: data.attendance_type,
+          hours_worked: hoursWorked,
           description: data.description,
           created_by: currentMember.id,
           project_id: projectId,
