@@ -23,7 +23,13 @@ export default function LearningDashboard() {
       className="relative h-[200px] sm:h-[250px] md:h-96 overflow-hidden w-full"
       data-testid="hero-founders-program"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-accent/10 to-background dark:from-accent/30 dark:via-accent/15 dark:to-background" />
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: 'url(/hero-founders-1080.webp)'
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black/100 dark:from-black/30 dark:via-black/70 dark:to-black/100" />
 
       <div className="relative h-full flex flex-col justify-end px-4 sm:px-6 md:px-12 py-4 sm:py-6 md:py-12">
         <div className="max-w-3xl">
