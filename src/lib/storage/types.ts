@@ -46,6 +46,7 @@ export interface UploadContext {
     material_payment_id?: string;
     material_purchase_id?: string;
     testimonial_id?: string;
+    hero_section_id?: string;
   };
   category?: string;
   description?: string;

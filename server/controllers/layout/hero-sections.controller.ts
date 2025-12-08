@@ -7,15 +7,44 @@ export async function getHeroSections(req: Request, res: Response) {
     const sectionType = req.query.section_type as string || 'learning_dashboard';
     
     const result = await db.execute(sql`
-      SELECT * FROM hero_sections 
-      WHERE section_type = ${sectionType} 
-      AND is_active = true
-      ORDER BY order_index ASC
+      SELECT 
+        hs.*,
+        mf.file_url as media_url,
+        mf.file_type as media_type
+      FROM hero_sections hs
+      LEFT JOIN media_links ml ON ml.hero_section_id = hs.id
+      LEFT JOIN media_files mf ON mf.id = ml.media_file_id AND mf.is_deleted = false
+      WHERE hs.section_type = ${sectionType} 
+      AND hs.is_active = true
+      ORDER BY hs.order_index ASC
     `);
     
     res.json(result.rows);
   } catch (error: any) {
     console.error('[HeroSections] Error fetching hero sections:', error);
+    res.status(500).json({ error: 'Failed to fetch hero sections' });
+  }
+}
+
+export async function getAllHeroSections(req: Request, res: Response) {
+  try {
+    const sectionType = req.query.section_type as string || 'learning_dashboard';
+    
+    const result = await db.execute(sql`
+      SELECT 
+        hs.*,
+        mf.file_url as media_url,
+        mf.file_type as media_type
+      FROM hero_sections hs
+      LEFT JOIN media_links ml ON ml.hero_section_id = hs.id
+      LEFT JOIN media_files mf ON mf.id = ml.media_file_id AND mf.is_deleted = false
+      WHERE hs.section_type = ${sectionType}
+      ORDER BY hs.order_index ASC
+    `);
+    
+    res.json(result.rows);
+  } catch (error: any) {
+    console.error('[HeroSections] Error fetching all hero sections:', error);
     res.status(500).json({ error: 'Failed to fetch hero sections' });
   }
 }
@@ -26,8 +55,6 @@ export async function createHeroSection(req: Request, res: Response) {
       section_type = 'learning_dashboard',
       title, 
       description, 
-      media_url, 
-      media_type = 'image',
       primary_button_text,
       primary_button_action,
       primary_button_action_type = 'url',
@@ -47,12 +74,12 @@ export async function createHeroSection(req: Request, res: Response) {
     const result = await db.execute(sql`
       INSERT INTO hero_sections (
         section_type, order_index, title, description, 
-        media_url, media_type, primary_button_text, primary_button_action, 
+        primary_button_text, primary_button_action, 
         primary_button_action_type, secondary_button_text, secondary_button_action,
         secondary_button_action_type, is_active
       ) VALUES (
         ${section_type}, ${nextOrder}, ${title}, ${description},
-        ${media_url}, ${media_type}, ${primary_button_text}, ${primary_button_action},
+        ${primary_button_text}, ${primary_button_action},
         ${primary_button_action_type}, ${secondary_button_text}, ${secondary_button_action},
         ${secondary_button_action_type}, ${is_active}
       )
@@ -72,8 +99,6 @@ export async function updateHeroSection(req: Request, res: Response) {
     const { 
       title, 
       description, 
-      media_url, 
-      media_type,
       primary_button_text,
       primary_button_action,
       primary_button_action_type,
@@ -88,8 +113,6 @@ export async function updateHeroSection(req: Request, res: Response) {
       UPDATE hero_sections SET
         title = COALESCE(${title}, title),
         description = COALESCE(${description}, description),
-        media_url = COALESCE(${media_url}, media_url),
-        media_type = COALESCE(${media_type}, media_type),
         primary_button_text = ${primary_button_text},
         primary_button_action = ${primary_button_action},
         primary_button_action_type = COALESCE(${primary_button_action_type}, primary_button_action_type),
@@ -117,6 +140,14 @@ export async function updateHeroSection(req: Request, res: Response) {
 export async function deleteHeroSection(req: Request, res: Response) {
   try {
     const { id } = req.params;
+
+    // Soft delete associated media files
+    await db.execute(sql`
+      UPDATE media_files SET is_deleted = true, updated_at = now()
+      WHERE id IN (
+        SELECT media_file_id FROM media_links WHERE hero_section_id = ${id}
+      )
+    `);
 
     await db.execute(sql`DELETE FROM hero_sections WHERE id = ${id}`);
 
