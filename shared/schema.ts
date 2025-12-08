@@ -970,6 +970,8 @@ export const project_personnel = pgTable("project_personnel", {
   status: text("status"), // 'active' | 'absent' | 'inactive'
   created_by: uuid("created_by"), // FK to organization_members
   organization_id: uuid("organization_id"),
+  is_deleted: boolean("is_deleted").notNull().default(false),
+  deleted_at: timestamp("deleted_at", { withTimezone: true }),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 });
@@ -1050,6 +1052,8 @@ export const insertProjectPersonnelSchema = createInsertSchema(project_personnel
   id: true,
   created_at: true,
   updated_at: true,
+  is_deleted: true,
+  deleted_at: true,
 });
 
 export const insertPersonnelAttendeesSchema = createInsertSchema(personnel_attendees).omit({
