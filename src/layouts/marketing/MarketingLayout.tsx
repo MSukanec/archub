@@ -172,7 +172,7 @@ function MarketingLayoutContent({
   const totalOffset = bannerOffset + HEADER_HEIGHT;
 
   // Special layout with hero section (for course landing pages)
-  // Hero fills exactly the remaining viewport after header/announcement using calc()
+  // Hero goes BEHIND the translucent header, no padding on wrapper
   if (heroSlot) {
     return (
       <>
@@ -196,11 +196,8 @@ function MarketingLayoutContent({
             </div>
           )}
           
-          {/* Hero section - uses calc to fill exactly remaining viewport */}
-          <div 
-            className="flex flex-col"
-            style={{ minHeight: `calc(100vh - ${totalOffset}px)` }}
-          >
+          {/* Hero section - uses negative margin to go behind the fixed header+announcement */}
+          <div style={{ marginTop: `-${totalOffset}px`, paddingTop: `${bannerOffset}px` }}>
             {heroSlot}
           </div>
           

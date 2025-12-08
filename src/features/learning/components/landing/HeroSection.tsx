@@ -23,7 +23,7 @@ export function HeroSection({ course, stats, isEnrolled = false, progressPercent
     : 'text-muted-foreground';
 
   return (
-    <section className="relative flex-1 flex items-center overflow-hidden">
+    <section className="relative h-screen flex items-center overflow-hidden">
       {/* Background Image with Parallax (desktop only) */}
       {hasCover ? (
         <>

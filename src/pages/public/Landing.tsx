@@ -134,7 +134,7 @@ const capabilities = [
 function HeroSectionComponent() {
   return (
     <section 
-      className="flex-1 flex flex-col items-center justify-center px-6 sm:px-8 md:px-12 lg:px-20 relative"
+      className="min-h-screen flex flex-col items-center justify-center px-6 sm:px-8 md:px-12 lg:px-20 -mx-6 relative"
       style={{
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(/hero-landing-1080.jpg)`,
         backgroundSize: 'cover',
