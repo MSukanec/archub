@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
 import { Users } from 'lucide-react'
 import { format } from 'date-fns'
@@ -100,7 +100,6 @@ export default function PersonnelListTab({
   insuranceData,
   selectedProjectId 
 }: PersonnelListTabProps) {
-  const [statusFilter, setStatusFilter] = useState<'active' | 'inactive' | 'all'>('active')
   const { data: currentUser } = useCurrentUser()
   const organizationId = currentUser?.organization?.id
 
@@ -124,6 +123,15 @@ export default function PersonnelListTab({
       ...item,
       displayName: getDisplayName(item.contact)
     })).sort((a: any, b: any) => {
+      // Sort active first, then by name
+      const aStatus = a.status || 'active'
+      const bStatus = b.status || 'active'
+      const aIsInactive = aStatus === 'inactive' || aStatus === 'absent'
+      const bIsInactive = bStatus === 'inactive' || bStatus === 'absent'
+      
+      if (aIsInactive !== bIsInactive) {
+        return aIsInactive ? 1 : -1
+      }
       return a.displayName.toLowerCase().localeCompare(b.displayName.toLowerCase())
     })
   }, [personnelData])
@@ -151,15 +159,6 @@ export default function PersonnelListTab({
     )
   }
 
-  const filteredPersonnelData = processedPersonnelData.filter((person: any) => {
-    if (statusFilter === 'all') return true
-    const personStatus = person.status || 'active'
-    
-    if (statusFilter === 'active') return personStatus === 'active'
-    if (statusFilter === 'inactive') return personStatus === 'inactive' || personStatus === 'absent'
-    return true
-  })
-
   const handleDelete = (record: any) => {
     if (!organizationId) return
     
@@ -177,22 +176,16 @@ export default function PersonnelListTab({
 
   return (
     <Table
-      data={filteredPersonnelData}
+      data={processedPersonnelData}
       defaultSort={{
         key: "displayName",
         direction: "asc"
       }}
-      topBar={{
-        tabsConfig: {
-          tabs: [
-            { value: 'active', label: 'Activos' },
-            { value: 'inactive', label: 'Inactivos' },
-            { value: 'all', label: 'Todos' }
-          ],
-          value: statusFilter,
-          onValueChange: (value) => setStatusFilter(value as 'active' | 'inactive' | 'all')
-        }
+      getIsInactive={(record: any) => {
+        const status = record.status || 'active'
+        return status === 'inactive' || status === 'absent'
       }}
+      inactiveSeparatorLabel="Personal Inactivo"
       columns={[
         {
           key: "displayName",
