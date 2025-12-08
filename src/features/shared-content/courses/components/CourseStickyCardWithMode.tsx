@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Clock, CheckCircle, MessageCircle, Shield } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { BookOpen, Clock, CheckCircle, MessageCircle, Shield, ChevronUp } from 'lucide-react';
 import { BlockedRestricted, ComingSoonCard } from '@/components/shared/restrictions';
 import type { CoursesMode } from '../types';
 import type { ItemStatus } from '@shared/schema';
@@ -260,6 +262,179 @@ export function CourseStickyCardWithMode({
         </ComingSoonCard>
       </div>
       </div>
+      
+      {/* Mobile/Tablet Bottom Bar - Visible only below xl breakpoint */}
+      <MobileBottomBar
+        course={course}
+        stats={stats}
+        isEnrolled={isEnrolled}
+        progressPercentage={progressPercentage}
+        onCTAClick={onCTAClick}
+        ctaButtonText={ctaButtonText}
+      />
     </>
+  );
+}
+
+interface MobileBottomBarProps {
+  course: any;
+  stats: any;
+  isEnrolled: boolean;
+  progressPercentage: number;
+  onCTAClick: () => void;
+  ctaButtonText: string;
+}
+
+function MobileBottomBar({
+  course,
+  stats,
+  isEnrolled,
+  progressPercentage,
+  onCTAClick,
+  ctaButtonText,
+}: MobileBottomBarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="xl:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg">
+      {/* Main bar with price and CTA */}
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex items-center justify-between gap-4">
+          {/* Left: Price or Progress */}
+          <div className="flex-1 min-w-0">
+            {isEnrolled ? (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Tu progreso</span>
+                  <span className="font-semibold">{progressPercentage}%</span>
+                </div>
+                <Progress value={progressPercentage} className="h-1.5" />
+              </div>
+            ) : (
+              <div className="flex items-baseline gap-1">
+                {course.price && (
+                  <>
+                    <span className="text-2xl font-bold text-primary">${course.price}</span>
+                    <span className="text-xs text-muted-foreground">/ año</span>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {/* Right: Buttons */}
+          <div className="flex items-center gap-2">
+            {/* Details Sheet Trigger */}
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <ChevronUp className="w-4 h-4" />
+                  <span className="hidden sm:inline">Detalles</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-auto max-h-[80vh] overflow-y-auto">
+                <div className="space-y-6 py-4">
+                  {/* Course Image */}
+                  {course.cover_url && (
+                    <div className="aspect-video w-full max-w-md mx-auto overflow-hidden rounded-lg">
+                      <img
+                        src={course.cover_url}
+                        alt={course.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Title */}
+                  <div className="text-center">
+                    <h3 className="font-bold text-xl">{course.title}</h3>
+                  </div>
+                  
+                  {/* Price */}
+                  {course.price && !isEnrolled && (
+                    <div className="text-center">
+                      <span className="text-4xl font-bold text-primary">${course.price}</span>
+                      <span className="text-sm text-muted-foreground ml-2">/ año</span>
+                    </div>
+                  )}
+                  
+                  {/* Progress */}
+                  {isEnrolled && (
+                    <div className="space-y-2 max-w-xs mx-auto">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Progreso</span>
+                        <span className="font-semibold">{progressPercentage}%</span>
+                      </div>
+                      <Progress value={progressPercentage} className="h-2" />
+                    </div>
+                  )}
+                  
+                  {/* Stats */}
+                  <div className="flex justify-center gap-6 text-sm">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-primary" />
+                      <span>{stats.total_modules} Módulos</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary" />
+                      <span>{stats.total_lessons} Lecciones</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-primary" />
+                      <span>{stats.total_duration_formatted}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Features */}
+                  <div className="space-y-2 text-sm border-t pt-4 max-w-sm mx-auto">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                      <span>Certificado de Curso</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                      <span>Foro de Consultas Privado</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-green-600 flex-shrink-0" />
+                      <span>Avalado por Graphisoft Argentina</span>
+                    </div>
+                  </div>
+                  
+                  {/* CTA Button */}
+                  <div className="pt-4">
+                    <Button 
+                      size="lg" 
+                      className="w-full text-base font-semibold"
+                      onClick={() => {
+                        setIsOpen(false);
+                        onCTAClick();
+                      }}
+                    >
+                      {ctaButtonText}
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+            
+            {/* Main CTA */}
+            <BlockedRestricted 
+              isBlocked={!isEnrolled && course.is_active === false}
+              title="Curso no disponible"
+              message="Este curso no está disponible para inscripción en este momento."
+            >
+              <Button 
+                size="sm"
+                className="font-semibold whitespace-nowrap"
+                onClick={onCTAClick}
+              >
+                {ctaButtonText}
+              </Button>
+            </BlockedRestricted>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
