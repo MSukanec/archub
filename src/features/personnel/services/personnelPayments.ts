@@ -58,6 +58,7 @@ export interface CreatePersonnelPaymentData {
   reference?: string | null;
   status: 'confirmed' | 'pending' | 'rejected' | 'void';
   personnel_id?: string | null;
+  created_by?: string | null;
 }
 
 export async function createPersonnelPayment(

@@ -58,6 +58,7 @@ export interface CreateMaterialPaymentData {
   reference?: string | null;
   status: 'confirmed' | 'pending' | 'rejected' | 'void';
   purchase_id?: string | null;
+  created_by?: string | null;
 }
 
 export async function createMaterialPayment(

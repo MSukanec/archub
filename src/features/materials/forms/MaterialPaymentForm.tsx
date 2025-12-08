@@ -614,6 +614,7 @@ export function MaterialPaymentForm({ modalData, onClose, mode = 'create' }: Mat
             reference: data.reference || null,
             notes: data.notes || null,
             purchase_id: null,
+            created_by: currentMember?.id || null,
           },
           projectId: projectId || '',
           organizationId: organizationId || '',

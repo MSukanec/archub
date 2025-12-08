@@ -669,6 +669,7 @@ export function PersonnelPaymentForm({ modalData, onClose, mode = 'create' }: Pe
             personnel_id: data.personnel_id || null,
             reference: data.reference || null,
             notes: data.notes || null,
+            created_by: currentMember?.id || null,
           },
           projectId: projectId || '',
           organizationId: organizationId || '',
