@@ -21,6 +21,7 @@ function useProjectPersonnel(projectId: string | undefined) {
           id,
           notes,
           status,
+          is_deleted,
           contact:contacts(
             id,
             first_name,
@@ -39,6 +40,7 @@ function useProjectPersonnel(projectId: string | undefined) {
           )
         `)
         .eq('project_id', projectId)
+        .or('is_deleted.is.null,is_deleted.eq.false')
 
       console.log('🔍 ATTENDANCE TAB - RAW PERSONNEL FROM SUPABASE:', JSON.stringify(data, null, 2))
 
