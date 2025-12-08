@@ -37,7 +37,6 @@ import { CommitmentItem } from './fields/ClientsFields'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/features/subcontracts'
-import { useMovementPersonnel } from '@/hooks/use-movement-personnel'
 
 // Schema de movimiento básico - proyecto siempre requerido
 const basicMovementSchema = z.object({
@@ -180,10 +179,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     isEditing && editingMovement?.id ? editingMovement.id : undefined
   )
 
-  const { data: existingPersonnel, refetch: refetchPersonnel } = useMovementPersonnel(
-    isEditing && editingMovement?.id ? editingMovement.id : undefined
-  )
-
   // States for hierarchical selection are now defined above with synchronous initialization
   
   // Infer movementType synchronously from editing data or default to 'normal'
@@ -254,22 +249,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
     }
   }, [editingMovement?.indirect_id, editingMovement?.indirect])
 
-  // Process personnel when loaded
-  React.useEffect(() => {
-    if (existingPersonnel && existingPersonnel.length > 0) {
-      const transformedPersonnel = existingPersonnel.map((personnel: any) => {
-        let contactName = 'Sin nombre'
-        if (personnel.project_personnel?.contact) {
-          const contact = personnel.project_personnel.contact
-          const fullName = contact.full_name || 
-            `${contact.first_name || ''} ${contact.last_name || ''}`.trim()
-          if (fullName) contactName = fullName
-        }
-        return { personnel_id: personnel.personnel_id, contact_name: contactName }
-      })
-      setSelectedPersonnel(transformedPersonnel)
-    }
-  }, [existingPersonnel])
 
   // Extract default values with fallbacks to prevent blocking
   const defaultCurrency = userData?.organization?.preferences?.default_currency || currencies[0]?.currency?.id || ''
@@ -748,9 +727,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
     // Cargar asignaciones existentes
     if (editingMovement.id) {
-      loadMovementPersonnel(editingMovement.id)
       loadMovementSubcontracts(editingMovement.id)
-      loadMovementProjectClients(editingMovement.id)
       loadMovementIndirects(editingMovement.id)
     }
 
@@ -759,44 +736,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
   }, [isEditing, editingMovement, movementConcepts, handleTypeChange, form, loadConversionData, loadTransferData, hasLoadedInitialData])
 
-  // Función para cargar personal asignado del movimiento
-  const loadMovementPersonnel = React.useCallback(async (movementId: string) => {
-    try {
-      const { data: personnelAssignments, error } = await supabase
-        .from('movement_personnel')
-        .select(`
-          personnel_id,
-          personnel:personnel_id (
-            id,
-            contact:contact_id (
-              first_name,
-              last_name
-            )
-          )
-        `)
-        .eq('movement_id', movementId)
-
-      if (error) throw error
-
-      if (personnelAssignments && personnelAssignments.length > 0) {
-        const formattedPersonnel = personnelAssignments.map((assignment: any) => {
-          const contact = assignment.personnel?.contact
-          const contactName = contact 
-            ? `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 'Sin nombre'
-            : 'Sin nombre'
-
-          return {
-            personnel_id: assignment.personnel_id,
-            contact_name: contactName
-          }
-        })
-
-        setSelectedPersonnel(formattedPersonnel)
-      }
-    } catch (error) {
-      console.error('Error loading personnel assignments:', error)
-    }
-  }, [])
 
   // Función para cargar subcontratos asignados del movimiento
   const loadMovementSubcontracts = React.useCallback(async (movementId: string) => {
@@ -913,14 +852,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         if (error) throw error
         result = updateResult
 
-        // Actualizar personal asignado - eliminar existente y crear nuevo
-        const { error: deletePersonnelError } = await supabase
-          .from('movement_personnel')
-          .delete()
-          .eq('movement_id', editingMovement.id)
-
-        if (deletePersonnelError) throw deletePersonnelError
-
         // Actualizar subcontratos asignados - eliminar existentes y crear nuevos
         const { error: deleteSubcontractsError } = await supabase
           .from('movement_subcontracts')
@@ -946,30 +877,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
         if (error) throw error
         result = insertResult
-      }
-
-      // Si hay personal seleccionado, guardar las asignaciones en movement_personnel
-      if (selectedPersonnel && selectedPersonnel.length > 0) {
-        // Primero eliminar registros existentes si es edición
-        if (isEditing && editingMovement?.id) {
-          const { error: deleteError } = await supabase
-            .from('movement_personnel')
-            .delete()
-            .eq('movement_id', editingMovement.id)
-
-          if (deleteError) throw deleteError
-        }
-        
-        const personnelData = selectedPersonnel.map(person => ({
-          movement_id: result.id,
-          personnel_id: person.personnel_id
-        }))
-
-        const { error: personnelError } = await supabase
-          .from('movement_personnel')
-          .insert(personnelData)
-
-        if (personnelError) throw personnelError
       }
 
       // Si hay subcontratos seleccionados, usar hook unificado
@@ -1229,21 +1136,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
         if (error) throw error
 
-        // Si hay personal seleccionado, guardar las asignaciones en movement_personnel para el movimiento de egreso
-        if (selectedPersonnel && selectedPersonnel.length > 0 && results) {
-          const egressPersonnelData = selectedPersonnel.map(person => ({
-            movement_id: results[0].id, // Movimiento de egreso
-            personnel_id: person.personnel_id
-          }))
-
-          const { error: personnelError } = await supabase
-            .from('movement_personnel')
-            .insert(egressPersonnelData)
-
-          if (personnelError) throw personnelError
-        }
-
-
         return results
       }
     },
@@ -1330,20 +1222,6 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         .select()
 
       if (error) throw error
-
-      // Si hay personal seleccionado, guardar las asignaciones en movement_personnel para el movimiento de egreso
-      if (selectedPersonnel && selectedPersonnel.length > 0 && results) {
-        const egressPersonnelData = selectedPersonnel.map(person => ({
-          movement_id: results[0].id, // Movimiento de egreso
-          personnel_id: person.personnel_id
-        }))
-
-        const { error: personnelError } = await supabase
-          .from('movement_personnel')
-          .insert(egressPersonnelData)
-
-        if (personnelError) throw personnelError
-      }
 
       return results
     },

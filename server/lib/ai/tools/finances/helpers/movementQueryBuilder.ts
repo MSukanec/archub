@@ -95,10 +95,8 @@ export function buildMovementQuery(
     selectParts.push('movement_subcontracts(subcontracts(title, contacts(first_name, last_name)))');
   }
 
-  // Personnel - join through movement_personnel junction table
-  if (options.includeRoles?.personnel) {
-    selectParts.push('movement_personnel(personnel(contacts(first_name, last_name)))');
-  }
+  // Personnel - no longer supported (movement_personnel table deleted)
+  // Personnel payments are now handled via personnel_payments table
 
   // Member (creator) - profiles table
   if (options.includeRoles?.member) {
