@@ -195,7 +195,8 @@ export default function PersonnelListTab({
     const associatedPayments = paymentsData.filter((p: any) => p.personnel_id === record.id)
     
     // Otros personal disponibles para reemplazo (excluir el que se va a eliminar)
-    const otherPersonnel = personnelData.filter((p: any) => p.id !== record.id)
+    // Usar processedPersonnelData que tiene displayName ya calculado
+    const otherPersonnel = processedPersonnelData.filter((p: any) => p.id !== record.id)
     
     // Determinar si es posible reemplazar
     const canReplace = associatedPayments.length > 0 && otherPersonnel.length > 0
