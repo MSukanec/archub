@@ -167,6 +167,9 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
           throw new Error('No se encontró el miembro de la organización para el usuario actual')
         }
 
+        // Format date as YYYY-MM-DD for work_date field
+        const workDate = format(data.attendance_date, 'yyyy-MM-dd')
+        
         await createAttendance.mutateAsync({
           personnel_id: data.personnel_id,
           attendance_type: data.attendance_type,
@@ -175,7 +178,7 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
           created_by: currentMember.id,
           project_id: projectId,
           organization_id: currentUser.organization.id,
-          created_at: data.attendance_date.toISOString(),
+          work_date: workDate,
         })
       }
       onClose()
@@ -310,6 +313,7 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
   const headerContent = (
     <FormModalHeader
       title={isEditing ? "Editar Asistencia" : "Registrar Asistencia"}
+      description="Registra la asistencia del personal al proyecto para el seguimiento de jornadas laborales."
       icon={Users}
     />
   )

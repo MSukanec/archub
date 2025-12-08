@@ -58,6 +58,8 @@ create table public.project_personnel (
   start_date date null,
   end_date date null,
   status text not null,
+  is_deleted boolean not null default false,
+  deleted_at timestamp with time zone null,
   constraint project_personnel_pkey primary key (id),
   constraint project_personnel_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
   constraint project_personnel_labor_type_id_fkey foreign KEY (labor_type_id) references labor_types (id) on delete set null,
@@ -83,6 +85,10 @@ create index IF not exists idx_project_personnel_labor_type_id on public.project
 
 create index IF not exists idx_project_personnel_status on public.project_personnel using btree (status) TABLESPACE pg_default;
 
+create index IF not exists idx_project_personnel_is_deleted on public.project_personnel using btree (is_deleted) TABLESPACE pg_default
+where
+  (is_deleted = false);
+
 ---------- TABLA PERSONNEL_PAYMENTS:
 
 create table public.personnel_payments (
@@ -101,6 +107,8 @@ create table public.personnel_payments (
   wallet_id uuid null,
   status text not null default 'confirmed'::text,
   created_by uuid null,
+  is_deleted boolean null default false,
+  deleted_at timestamp with time zone null,
   constraint personnel_payments_pkey primary key (id),
   constraint fk_pp_currency foreign KEY (currency_id) references currencies (id) on delete RESTRICT,
   constraint fk_pp_org foreign KEY (organization_id) references organizations (id) on delete CASCADE,
@@ -130,6 +138,66 @@ create index IF not exists idx_personnel_payments_view_project on public.personn
 
 create index IF not exists idx_personnel_payments_view_org on public.personnel_payments using btree (organization_id, payment_date desc) TABLESPACE pg_default;
 
+create index IF not exists idx_personnel_payments_not_deleted on public.personnel_payments using btree (organization_id, project_id) TABLESPACE pg_default
+where
+  (
+    (is_deleted is null)
+    or (is_deleted = false)
+  );
+
 create index IF not exists idx_personnel_payments_org_project on public.personnel_payments using btree (organization_id, project_id) TABLESPACE pg_default;
 
 create index IF not exists idx_personnel_payments_personnel on public.personnel_payments using btree (personnel_id) TABLESPACE pg_default;
+
+---------- TABLA PERSONNEL_ATTENDEES:
+
+create table public.personnel_attendees (
+  id uuid not null default gen_random_uuid (),
+  site_log_id uuid null,
+  attendance_type text null default 'full'::text,
+  hours_worked numeric(5, 2) null,
+  description text null,
+  created_by uuid null,
+  created_at timestamp with time zone null default now(),
+  updated_at timestamp with time zone null default now(),
+  project_id uuid null,
+  personnel_id uuid null,
+  organization_id uuid null,
+  work_date date not null default CURRENT_DATE,
+  status text null,
+  constraint site_log_attendees_pkey primary key (id),
+  constraint attendees_personnel_id_fkey foreign KEY (personnel_id) references project_personnel (id) on delete set null,
+  constraint attendees_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
+  constraint attendees_site_log_id_fkey foreign KEY (site_log_id) references site_logs (id) on delete set null,
+  constraint personnel_attendees_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint attendees_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
+  constraint personnel_attendees_status_check check (
+    (
+      (status is null)
+      or (
+        status = any (
+          array[
+            'present'::text,
+            'absent'::text,
+            'leave'::text,
+            'holiday'::text
+          ]
+        )
+      )
+    )
+  ),
+  constraint site_log_attendees_attendance_type_check check (
+    (
+      attendance_type = any (array['full'::text, 'half'::text])
+    )
+  ),
+  constraint personnel_attendees_hours_check check (
+    (
+      (hours_worked is null)
+      or (
+        (hours_worked >= (0)::numeric)
+        and (hours_worked <= (24)::numeric)
+      )
+    )
+  )
+) TABLESPACE pg_default;
