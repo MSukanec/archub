@@ -1,7 +1,6 @@
 import type { Request } from "express";
 import { createServiceSupabaseClient } from "../shared/auth.js";
 import { getAdminClient } from "../../../../routes/_base.js";
-import { getUserData } from "../shared/user.js";
 import { insertPayment } from "../shared/payments.js";
 import { upgradeOrganizationPlan } from "../shared/subscriptions.js";
 import { buildURLContext } from "../shared/urls.js";
@@ -73,23 +72,10 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
     return { success: false, error: "Incomplete data", redirectUrl: `${baseUrl}/organization/billing?payment=error&reason=incomplete_data` };
   }
 
-  // Get public user ID from auth_id
-  let publicUserId: string | null = null;
-  if (user_id) {
-    console.log('[PayPal upgrade-capture] Converting auth_id to user_id:', { auth_id: user_id });
-    const { data: userProfile, error: profileError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("auth_id", user_id)
-      .maybeSingle();
-    
-    if (profileError || !userProfile) {
-      console.error('[PayPal upgrade-capture] Could not find user by auth_id:', profileError);
-    } else {
-      publicUserId = userProfile.id;
-      console.log('[PayPal upgrade-capture] Found user_id:', publicUserId);
-    }
-  }
+  // NOTE: user_id from preference is already the public user ID (from users table), not auth_id
+  // This is set in createUpgradeOrder.ts where we query users by auth_id and store the resulting id
+  const publicUserId = user_id;
+  console.log('[PayPal upgrade-capture] Using user_id from preference:', publicUserId);
 
   // Get plan data
   let resolvedPlanId = plan_id;
@@ -167,28 +153,25 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
       productId: resolvedPlanId,
     });
 
-    paymentId = paymentResult.paymentId;
+    paymentId = paymentResult.paymentId || null;
     console.log('[PayPal upgrade-capture] Payment recorded:', paymentId);
   }
 
   // Get user email for creating new subscription
+  // publicUserId is the internal users table ID, so we query directly by id
   let userEmail: string | null = null;
-  if (user_id) {
-    const userData = await getUserData(supabase, user_id);
-    userEmail = userData.email;
-  }
-
-  if (!userEmail && publicUserId) {
+  if (publicUserId) {
     const { data: userRow } = await adminClient
       .from("users")
       .select("email")
       .eq("id", publicUserId)
       .maybeSingle();
     userEmail = userRow?.email || null;
+    console.log('[PayPal upgrade-capture] Found email for user:', userEmail ? 'yes' : 'no');
   }
 
   if (!userEmail) {
-    console.error('[PayPal upgrade-capture] No email found for user');
+    console.error('[PayPal upgrade-capture] No email found for user:', publicUserId);
     return { success: false, error: "No email found", redirectUrl: `${baseUrl}/organization/billing?payment=error&reason=no_email` };
   }
 
