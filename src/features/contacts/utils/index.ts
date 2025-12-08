@@ -5,10 +5,10 @@ import { getPublicUrl } from '@/lib/supabase/storage';
  * Formatea el nombre de un contacto con lógica de fallback.
  * 
  * Prioridad:
- * 1. company_name
- * 2. display_name_override
+ * 1. display_name_override
+ * 2. first_name + last_name
  * 3. full_name
- * 4. first_name + last_name
+ * 4. company_name
  * 5. 'Cliente' (fallback)
  * 
  * @param contact - Objeto contacto con campos de nombre
@@ -23,16 +23,8 @@ export function formatContactName(contact: {
 } | null | undefined): string {
   if (!contact) return 'Cliente';
   
-  if (contact.company_name?.trim()) {
-    return contact.company_name.trim();
-  }
-  
   if (contact.display_name_override?.trim()) {
     return contact.display_name_override.trim();
-  }
-  
-  if (contact.full_name?.trim()) {
-    return contact.full_name.trim();
   }
   
   const firstName = contact.first_name?.trim() || '';
@@ -40,6 +32,14 @@ export function formatContactName(contact: {
   
   if (firstName || lastName) {
     return `${firstName} ${lastName}`.trim();
+  }
+  
+  if (contact.full_name?.trim()) {
+    return contact.full_name.trim();
+  }
+  
+  if (contact.company_name?.trim()) {
+    return contact.company_name.trim();
   }
   
   return 'Cliente';
