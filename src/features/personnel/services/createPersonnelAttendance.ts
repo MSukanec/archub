@@ -54,8 +54,17 @@ export async function createPersonnelAttendance(data: CreatePersonnelAttendanceD
     });
 
   if (error) {
-    console.error('Error creating personnel attendance:', error);
-    throw error;
+    console.error('Error creating personnel attendance:', JSON.stringify(error, null, 2));
+    console.error('Insert data was:', {
+      personnel_id: data.personnel_id,
+      attendance_type,
+      status,
+      hours_worked: data.hours_worked,
+      work_date: data.work_date,
+      project_id: data.project_id,
+      organization_id: data.organization_id
+    });
+    throw new Error(`Failed to create attendance: ${error.message || error.code || 'Unknown error'}`);
   }
 
   return { success: true };
