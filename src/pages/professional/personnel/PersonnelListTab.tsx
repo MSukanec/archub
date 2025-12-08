@@ -6,10 +6,12 @@ import { Table } from "@/components/ui-custom/tables-and-trees/Table"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Edit, Trash2, ShieldCheck, ShieldAlert, ShieldX, Shield } from "lucide-react"
+import { Edit, Trash2, ShieldCheck, ShieldAlert, ShieldX, Shield, User } from "lucide-react"
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
 import { useProjectPersonnel, useDeletePersonnel, useReplacePersonnel, usePersonnelPayments } from '@/features/personnel/hooks'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useToast } from '@/hooks/use-toast'
+import { queryClient } from '@/lib/queryClient'
 
 interface InsuranceStatus {
   status: 'sin_seguro' | 'vigente' | 'por_vencer' | 'vencido'
@@ -102,15 +104,40 @@ export default function PersonnelListTab({
 }: PersonnelListTabProps) {
   const { data: currentUser } = useCurrentUser()
   const organizationId = currentUser?.organization?.id
+  const { toast } = useToast()
 
   const { data: personnelData = [], isLoading: isPersonnelLoading } = useProjectPersonnel(
     selectedProjectId || undefined,
     organizationId
   )
 
-  const { data: paymentsData = [] } = usePersonnelPayments(selectedProjectId, organizationId)
-  const deletePersonnelMutation = useDeletePersonnel(organizationId)
-  const replacePersonnelMutation = useReplacePersonnel(organizationId)
+  const { data: paymentsData = [] } = usePersonnelPayments(selectedProjectId || undefined, organizationId)
+  const deletePersonnelMutation = useDeletePersonnel(organizationId || null)
+  const replacePersonnelMutation = useReplacePersonnel(organizationId || null)
+
+  const handleEditContact = (record: any) => {
+    if (!record.contact) {
+      toast({
+        title: 'Error',
+        description: 'Este personal no tiene un contacto asociado',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Prefetch contact data before opening modal
+    if (organizationId && record.contact.id) {
+      queryClient.prefetchQuery({
+        queryKey: [`/api/contacts/${record.contact.id}?organization_id=${organizationId}`],
+        staleTime: 2 * 60 * 1000,
+      });
+    }
+
+    openModal('contact', {
+      contactId: record.contact.id,
+      mode: 'edit',
+    });
+  }
 
   const getDisplayName = (contact: any) => {
     if (!contact) return 'Sin nombre'
@@ -308,9 +335,14 @@ export default function PersonnelListTab({
       ]}
       rowActions={(record: any) => [
         {
-          label: 'Editar',
+          label: 'Editar Personal',
           icon: Edit,
           onClick: () => openModal('personnel-data', { personnelRecord: record })
+        },
+        {
+          label: 'Editar Contacto',
+          icon: User,
+          onClick: () => handleEditContact(record)
         },
         {
           label: 'Eliminar',
