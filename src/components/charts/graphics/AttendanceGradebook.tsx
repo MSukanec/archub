@@ -16,6 +16,7 @@ interface Worker {
   avatar_url?: string
   contactType?: string
   contactTypeId?: string
+  status?: string // 'active' | 'inactive' | null
 }
 
 interface AttendanceRecord {
@@ -416,7 +417,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
                       const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
                       
                       return (
-                        <div key={worker.id} className={`h-12 px-2 md:px-4 bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors flex items-center ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''}`}>
+                        <div key={worker.id} className={`h-12 px-2 md:px-4 bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors flex items-center ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''} ${worker.status && worker.status !== 'active' ? 'opacity-50' : ''}`}>
                           <Avatar className="h-8 w-8 flex-shrink-0">
                             <AvatarImage src={worker.avatar_url} alt={worker.name} />
                             <AvatarFallback className="text-xs font-medium">
@@ -424,7 +425,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
                             </AvatarFallback>
                           </Avatar>
                           <div className="ml-2 md:ml-3 min-w-0 flex-1">
-                            <div className="text-xs md:text-sm font-medium text-[var(--table-row-fg)] truncate">{worker.name}</div>
+                            <div className={`text-xs md:text-sm font-medium text-[var(--table-row-fg)] truncate ${worker.status && worker.status !== 'active' ? 'line-through' : ''}`}>{worker.name}</div>
                           </div>
                         </div>
                       );
@@ -481,11 +482,12 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
                     const isLastWorkerInGroup = workerIndex === workersInGroup.length - 1
                     const isLastGroup = groupIndex === Object.keys(groupedWorkers).length - 1
                     const shouldShowBorder = !isLastWorkerInGroup || !isLastGroup
+                    const isInactive = worker.status && worker.status !== 'active'
                     
                     return (
                       <div 
                         key={worker.id} 
-                        className={`h-12 flex bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''}`}
+                        className={`h-12 flex bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover-bg)] transition-colors ${shouldShowBorder ? 'border-b border-[var(--table-row-border)]' : ''} ${isInactive ? 'opacity-50' : ''}`}
                       >
                         {dateRange.map((date) => {
                           const status = getAttendanceStatus(worker.id, date)
@@ -497,8 +499,8 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
                               className={`flex items-center justify-center border-r border-[var(--table-row-border)]/30 last:border-r-0 ${isTodayDate ? 'bg-[var(--accent)]/20 border-l-2 border-r-2 border-[var(--accent)]' : ''}`}
                               style={{ width: '65px', minWidth: '65px' }}
                             >
-                              {isWeekendDay ? (
-                                <div className={`w-6 h-6 rounded-full ${getAttendanceColor(status, isWeekendDay)} flex items-center justify-center`}>
+                              {isWeekendDay || isInactive ? (
+                                <div className={`w-6 h-6 rounded-full ${getAttendanceColor(status, isWeekendDay)} flex items-center justify-center ${isInactive ? 'cursor-not-allowed' : ''}`}>
                                   <span className="text-xs text-gray-400">×</span>
                                 </div>
                               ) : (
