@@ -115,17 +115,21 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
         
         toast({ title: 'Sección actualizada', description: 'Los cambios se guardaron correctamente' })
       } else {
+        console.log('[HeroSectionForm] Creating new section with values:', values)
         const newSection = await createMutation.mutateAsync({
           ...values,
           section_type: 'learning_dashboard',
         })
+        console.log('[HeroSectionForm] New section created:', newSection)
         
         if (pendingFile && newSection?.id) {
+          console.log('[HeroSectionForm] Uploading file for section:', newSection.id)
           await uploadFile(pendingFile, {
             entity: 'hero_section_media',
             link_to: { hero_section_id: newSection.id },
             is_cover: true,
           })
+          console.log('[HeroSectionForm] File uploaded successfully')
         }
         
         toast({ title: 'Sección creada', description: 'La nueva sección del carrusel se creó correctamente' })
