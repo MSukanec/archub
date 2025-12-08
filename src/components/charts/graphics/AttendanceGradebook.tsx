@@ -267,7 +267,7 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
 
 
   return (
-    <div className="relative border border-border rounded-lg overflow-hidden bg-card w-full max-w-full">
+    <div className="relative border border-border rounded-lg overflow-hidden bg-card w-full max-w-full min-w-0">
       {/* Header with title and export */}
       <div className="flex items-center justify-between p-4 border-b border-[var(--table-header-border)] bg-[var(--table-header-bg)] flex-wrap gap-2">
         <div className="min-w-0">

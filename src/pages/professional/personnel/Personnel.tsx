@@ -82,7 +82,7 @@ export default function Personnel() {
 
   return (
     <Layout headerProps={headerProps} wide>
-      <div className="space-y-6 max-w-full overflow-x-hidden">
+      <div className="space-y-6 max-w-full min-w-0 overflow-x-hidden">
         {activeTab === 'active' && (
           <PersonnelListTab
             openModal={openModal}

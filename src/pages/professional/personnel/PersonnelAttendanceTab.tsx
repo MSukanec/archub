@@ -216,7 +216,7 @@ export default function PersonnelAttendanceTab({
   // Siempre mostrar el componente si HAY personal en el proyecto
   // El empty state interno se muestra si workers.length === 0 (por el filtro)
   return (
-    <div className="w-full max-w-full overflow-hidden">
+    <div className="w-full min-w-0 overflow-x-auto">
       <AttendanceGradebook 
         workers={workers}
         attendance={attendance}
