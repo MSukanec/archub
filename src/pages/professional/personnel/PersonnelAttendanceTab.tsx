@@ -216,12 +216,14 @@ export default function PersonnelAttendanceTab({
   // Siempre mostrar el componente si HAY personal en el proyecto
   // El empty state interno se muestra si workers.length === 0 (por el filtro)
   return (
-    <AttendanceGradebook 
-      workers={workers}
-      attendance={attendance}
-      onEditAttendance={handleEditAttendance}
-      filterStatus={filterStatus}
-      onFilterStatusChange={setFilterStatus}
-    />
+    <div className="w-full max-w-full overflow-hidden">
+      <AttendanceGradebook 
+        workers={workers}
+        attendance={attendance}
+        onEditAttendance={handleEditAttendance}
+        filterStatus={filterStatus}
+        onFilterStatusChange={setFilterStatus}
+      />
+    </div>
   )
 }
