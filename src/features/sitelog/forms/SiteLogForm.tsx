@@ -244,16 +244,15 @@ function FormPanel({
               <FormItem>
                 <FormLabel>
                   Tipo de Bitácora *
-                  {!isPro && <Badge className="ml-2 text-[10px]">PRO</Badge>}
                 </FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
                   value={field.value || ""}
-                  disabled={typesLoading || !isPro}
+                  disabled={typesLoading}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder={!isPro ? "Requiere plan PRO" : typesLoading ? "Cargando..." : "Seleccionar tipo"} />
+                      <SelectValue placeholder={typesLoading ? "Cargando..." : "Seleccionar tipo"} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -328,16 +327,14 @@ function FormPanel({
               <FormItem>
                 <FormLabel>
                   Público
-                  {!isTeams && <Badge className="ml-2 text-[10px]">TEAMS</Badge>}
                 </FormLabel>
                 <Select 
                   onValueChange={(value) => field.onChange(value === "true")} 
                   value={field.value ? "true" : "false"}
-                  disabled={!isTeams}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder={!isTeams ? "Requiere plan TEAMS" : "Seleccionar visibilidad"} />
+                      <SelectValue placeholder="Seleccionar visibilidad" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

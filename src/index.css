@@ -83,11 +83,11 @@ html {
 
   /* Buttons - Secondary */
   --button-secondary-bg: transparent;
-  --button-secondary-text: hsl(76, 100%, 40%);
-  --button-secondary-border: hsl(76, 100%, 40%);
+  --button-secondary-text: var(--accent);
+  --button-secondary-border: var(--accent);
   --button-secondary-hover-bg: transparent;
-  --button-secondary-hover-text: hsl(76, 100%, 40%);
-  --button-secondary-hover-border: hsl(76, 100%, 40%);
+  --button-secondary-hover-text: var(--accent);
+  --button-secondary-hover-border: var(--accent);
 
   /* Buttons - Ghost */
   --button-ghost-bg: transparent;
@@ -268,11 +268,11 @@ html {
 
   /* Buttons - Secondary */
   --button-secondary-bg: hsl(250, 6%, 19%);
-  --button-secondary-text: hsl(76, 100%, 40%);
-  --button-secondary-border: hsl(76, 100%, 40%);
-  --button-secondary-hover-bg: hsl(76, 100%, 15%);
-  --button-secondary-hover-text: hsl(76, 100%, 40%);
-  --button-secondary-hover-border: hsl(76, 100%, 40%);
+  --button-secondary-text: var(--accent);
+  --button-secondary-border: var(--accent);
+  --button-secondary-hover-bg: color-mix(in srgb, var(--accent) 15%, transparent);
+  --button-secondary-hover-text: var(--accent);
+  --button-secondary-hover-border: var(--accent);
 
   /* Buttons - Ghost */
   --button-ghost-bg: transparent;
