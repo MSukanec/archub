@@ -13,6 +13,7 @@ import { useCreateHeroSection, useUpdateHeroSection } from '../hooks/use-hero-se
 import { useToast } from '@/hooks/use-toast'
 import { FileUploader } from '@/components/shared/FileUploader'
 import { uploadFile } from '@/lib/storage'
+import { supabase } from '@/lib/supabase'
 
 const heroSectionSchema = z.object({
   title: z.string().min(1, 'El título es requerido'),
@@ -43,6 +44,7 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [imageWasRemoved, setImageWasRemoved] = useState(false)
 
   const mode = modalData?.mode || 'create'
   const section = modalData?.section
@@ -88,6 +90,21 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
       if (mode === 'edit' && section?.id) {
         await updateMutation.mutateAsync({ id: section.id, data: values })
         
+        if (imageWasRemoved && !pendingFile) {
+          const { data: links } = await supabase
+            .from('media_links')
+            .select('media_file_id')
+            .eq('hero_section_id', section.id)
+          
+          if (links && links.length > 0) {
+            const fileIds = links.map(l => l.media_file_id)
+            await supabase
+              .from('media_files')
+              .update({ is_deleted: true, updated_at: new Date().toISOString() })
+              .in('id', fileIds)
+          }
+        }
+        
         if (pendingFile) {
           await uploadFile(pendingFile, {
             entity: 'hero_section_media',
@@ -131,12 +148,14 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
       setPendingFile(files[0].file)
       const objectUrl = URL.createObjectURL(files[0].file)
       setPreviewUrl(objectUrl)
+      setImageWasRemoved(false)
     }
   }
 
   const handleRemoveImage = () => {
     setPendingFile(null)
     setPreviewUrl(null)
+    setImageWasRemoved(true)
   }
 
   const isPending = createMutation.isPending || updateMutation.isPending || isUploading
