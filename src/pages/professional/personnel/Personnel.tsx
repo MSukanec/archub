@@ -63,6 +63,13 @@ export default function Personnel() {
       label: 'Agregar Personal',
       icon: Plus,
       onClick: () => openModal('personnel')
+    } : activeTab === 'payments' ? {
+      label: 'Agregar Pago',
+      icon: Plus,
+      onClick: () => openModal('personnel-payment', {
+        projectId: selectedProjectId,
+        organizationId: currentOrganizationId
+      })
     } : activeTab === 'insurance' ? {
       label: 'Nuevo Seguro',
       icon: Plus,
@@ -86,9 +93,7 @@ export default function Personnel() {
 
         {activeTab === 'payments' && (
           <PersonnelPaymentsTab
-            openModal={openModal}
-            selectedProjectId={selectedProjectId}
-            currentOrganizationId={currentOrganizationId}
+            projectId={selectedProjectId || undefined}
           />
         )}
 
