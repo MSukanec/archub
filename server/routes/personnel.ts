@@ -1,12 +1,112 @@
 import type { Express } from "express";
 import type { RouteDeps } from "./_base";
-import { insertPersonnelRatesSchema } from "../../shared/schema";
+import { insertPersonnelRatesSchema, insertProjectPersonnelSchema } from "../../shared/schema";
 
 /**
  * Register personnel-related endpoints (rates, payments, attendance)
  */
 export function registerPersonnelRoutes(app: Express, deps: RouteDeps): void {
   const { createAuthenticatedClient, extractToken } = deps;
+
+  // ========== CREATE PROJECT PERSONNEL ==========
+
+  /**
+   * POST /api/personnel
+   * Add a contact as personnel to a project
+   */
+  app.post("/api/personnel", async (req, res) => {
+    try {
+      const personnelData = req.body;
+
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+
+      const authenticatedSupabase = createAuthenticatedClient(token);
+
+      // Validate request body
+      const validation = insertProjectPersonnelSchema.safeParse({
+        ...personnelData,
+        status: personnelData.status || 'active',
+      });
+
+      if (!validation.success) {
+        console.error("Validation errors:", validation.error.errors);
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: validation.error.errors 
+        });
+      }
+
+      const validatedData = validation.data;
+
+      // Check if this contact is already assigned to this project
+      const { data: existingPersonnel } = await authenticatedSupabase
+        .from('project_personnel')
+        .select('id, is_deleted')
+        .eq('project_id', validatedData.project_id)
+        .eq('contact_id', validatedData.contact_id)
+        .maybeSingle();
+
+      if (existingPersonnel) {
+        // If soft-deleted, reactivate instead of creating new
+        if (existingPersonnel.is_deleted) {
+          const { data: reactivated, error: reactivateError } = await authenticatedSupabase
+            .from('project_personnel')
+            .update({ 
+              is_deleted: false, 
+              deleted_at: null,
+              status: 'active',
+              notes: validatedData.notes,
+              start_date: validatedData.start_date,
+              end_date: validatedData.end_date,
+              labor_type_id: validatedData.labor_type_id,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existingPersonnel.id)
+            .select(`
+              *,
+              contact:contacts(id, first_name, last_name, full_name),
+              labor_type:labor_types(id, name)
+            `)
+            .single();
+
+          if (reactivateError) {
+            console.error("Error reactivating personnel:", reactivateError);
+            return res.status(500).json({ error: "Failed to reactivate personnel" });
+          }
+
+          return res.json(reactivated);
+        }
+
+        return res.status(400).json({ 
+          error: "Este contacto ya está asignado a este proyecto" 
+        });
+      }
+
+      // Create new personnel record
+      const { data: newPersonnel, error } = await authenticatedSupabase
+        .from('project_personnel')
+        .insert(validatedData)
+        .select(`
+          *,
+          contact:contacts(id, first_name, last_name, full_name),
+          labor_type:labor_types(id, name)
+        `)
+        .single();
+
+      if (error) {
+        console.error("Error creating personnel:", error);
+        return res.status(500).json({ error: "Failed to create personnel" });
+      }
+
+      res.json(newPersonnel);
+    } catch (error) {
+      console.error("Error creating personnel:", error);
+      res.status(500).json({ error: "Failed to create personnel" });
+    }
+  });
 
   // ========== PERSONNEL RATES ENDPOINTS ==========
 
