@@ -9,6 +9,7 @@ import { useInsuranceList } from '@/features/personnel'
 import PersonnelListTab from './PersonnelListTab'
 import PersonnelAttendanceTab from './PersonnelAttendanceTab'
 import PersonnelPaymentsTab from './PersonnelPaymentsTab'
+import { ComingSoonRestricted } from '@/components/shared/restrictions/guards/ComingSoonRestricted'
 
 export default function Personnel() {
   const { openModal } = useGlobalModalStore()
@@ -105,7 +106,11 @@ export default function Personnel() {
           />
         )}
 
-        {activeTab === 'insurance' && <InsuranceTab />}
+        {activeTab === 'insurance' && (
+          <ComingSoonRestricted>
+            <InsuranceTab />
+          </ComingSoonRestricted>
+        )}
       </div>
     </Layout>
   )
