@@ -72,7 +72,6 @@ import {
   Award,
   Eye
 } from "lucide-react";
-import { SiDiscord } from 'react-icons/si';
 import { LuContact } from 'react-icons/lu';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlanRestricted, RoleRestricted } from "@/features/users";
@@ -561,13 +560,6 @@ export function LeftSidebar() {
                         testId: 'button-sidebar-learning-courses',
                         onClick: () => navigate('/learning/courses'),
                         isActive: location === '/learning/courses',
-                      },
-                      {
-                        id: 'learner-discord' as const,
-                        icon: <SiDiscord className="h-5 w-5" />, // Icono de Discord
-                        testId: 'button-sidebar-learning-discord',
-                        onClick: () => window.open('https://discord.gg/aHxTsPZ4', '_blank'),
-                        isActive: false,
                       },
                     ];
 
