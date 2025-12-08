@@ -232,7 +232,7 @@ export function LeftSidebar() {
         { id: 'contacts', label: 'Contactos', icon: Users, href: '/contacts' },
         { id: 'members', label: 'Miembros', icon: Users, href: '/organization/members' },
         { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing' },
-        { id: 'pdf-settings', label: 'Documentos PDF', icon: FileText, href: '/organization/pdf-settings', restricted: 'admin' },
+        { id: 'pdf-settings', label: 'Documentos PDF', icon: FileText, href: '/organization/pdf-settings', restricted: 'coming_soon' },
         { type: 'section-header', id: 'section-finanzas', label: 'Finanzas' },
         { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
         { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', restricted: 'lab_user' },
