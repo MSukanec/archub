@@ -161,7 +161,7 @@ export default function PersonnelListTab({
       if (aIsInactive !== bIsInactive) {
         return aIsInactive ? 1 : -1
       }
-      return a.displayName.toLowerCase().localeCompare(b.displayName.toLowerCase())
+      return (a.displayName || '').toLowerCase().localeCompare((b.displayName || '').toLowerCase())
     })
   }, [personnelData])
 
@@ -215,7 +215,7 @@ export default function PersonnelListTab({
     
     // Opciones de reemplazo
     const replacementOptions = otherPersonnel
-      .sort((a: any, b: any) => a.displayName.localeCompare(b.displayName))
+      .sort((a: any, b: any) => (a.displayName || '').localeCompare(b.displayName || ''))
       .map((p: any) => ({
         label: p.displayName || 'Sin nombre',
         value: p.id
