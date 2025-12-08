@@ -21,7 +21,7 @@ import SiteLogForm from '@/features/sitelog/forms/SiteLogForm';
 import { SiteLogTypeForm } from '@/features/sitelog/forms/SiteLogTypeForm';
 import { ProjectTypeForm } from '@/features/projects/forms/ProjectTypeForm';
 import { ProjectModalityForm } from '@/features/projects/forms/ProjectModalityForm';
-import { PersonnelAttendanceModal, PersonnelAddModal, PersonnelDataModal, PersonnelRatesModal, AdminLaborModal } from '@/features/personnel';
+import { PersonnelAttendanceModal, PersonnelAddModal, PersonnelDataModal, PersonnelRatesModal, AdminLaborModal, PersonnelPaymentForm } from '@/features/personnel';
 import { SubcontractFormModal, SubcontractBidFormModal, SubcontractAwardModal, SubcontractTaskFormModal } from '@/features/subcontracts';
 import { PDFExporterModal } from '@/features/pdf';
 import GeneralCostForm from '@/features/general-costs/forms/GeneralCostForm';
@@ -296,6 +296,15 @@ export function initializeModalRegistry(): void {
   registerModal('personnel', PersonnelAddModal as any, projectConfig);
   registerModal('personnel-data', PersonnelDataModal as any, projectConfig);
   registerModal('personnelRates', PersonnelRatesModal as any, projectConfig);
+  registerModal('personnel-payment', PersonnelPaymentForm as any, {
+    ...financeConfig,
+    mapDataToProps: (data) => ({
+      projectId: data?.projectId,
+      organizationId: data?.organizationId,
+      paymentId: data?.paymentId,
+      mode: data?.paymentId ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
   registerModal('labor-type-form', AdminLaborModal as any, adminConfig);
   
   registerModal('subcontract', SubcontractFormModal as any, { ...projectConfig, size: 'xl' });

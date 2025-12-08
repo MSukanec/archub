@@ -64,6 +64,14 @@ import {
   handleDeleteMaterialPurchase,
   handleGetMaterialPurchaseAttachments
 } from '../controllers/projects/materialPurchases.controller.js';
+import {
+  handleListPersonnelPayments,
+  handleGetPersonnelPayment,
+  handleCreatePersonnelPayment,
+  handleUpdatePersonnelPayment,
+  handleDeletePersonnelPayment,
+  handleGetPersonnelPaymentAttachments
+} from '../controllers/projects/personnelPayments.controller.js';
 
 /**
  * Register project-related endpoints (projects, budgets, budget items, project clients)
@@ -142,6 +150,26 @@ export function registerProjectRoutes(app: Express, deps: RouteDeps): void {
 
   // GET /api/projects/:projectId/material-payments/:paymentId/attachments - Get payment attachments
   app.get("/api/projects/:projectId/material-payments/:paymentId/attachments", handleGetMaterialPaymentAttachments);
+
+  // ========== PERSONNEL PAYMENTS ENDPOINTS ==========
+
+  // GET /api/projects/:projectId/personnel-payments - Get all personnel payments for a project
+  app.get("/api/projects/:projectId/personnel-payments", handleListPersonnelPayments);
+
+  // GET /api/projects/:projectId/personnel-payments/:paymentId - Get a single personnel payment
+  app.get("/api/projects/:projectId/personnel-payments/:paymentId", handleGetPersonnelPayment);
+
+  // POST /api/projects/:projectId/personnel-payments - Create a new personnel payment
+  app.post("/api/projects/:projectId/personnel-payments", handleCreatePersonnelPayment);
+
+  // PATCH /api/projects/:projectId/personnel-payments/:paymentId - Update a personnel payment
+  app.patch("/api/projects/:projectId/personnel-payments/:paymentId", handleUpdatePersonnelPayment);
+
+  // DELETE /api/projects/:projectId/personnel-payments/:paymentId - Delete a personnel payment
+  app.delete("/api/projects/:projectId/personnel-payments/:paymentId", handleDeletePersonnelPayment);
+
+  // GET /api/projects/:projectId/personnel-payments/:paymentId/attachments - Get payment attachments
+  app.get("/api/projects/:projectId/personnel-payments/:paymentId/attachments", handleGetPersonnelPaymentAttachments);
 
   // ========== PURCHASE ORDERS ENDPOINTS ==========
 
