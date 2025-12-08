@@ -131,6 +131,11 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
   }
 
   const handleSubmit = async (data: AttendanceForm) => {
+    console.log('=== SUBMIT START ===')
+    console.log('Form data:', JSON.stringify(data, null, 2))
+    console.log('isEditing:', isEditing)
+    console.log('currentUser:', currentUser?.organization?.id, projectId)
+    
     if (!currentUser?.organization?.id || !projectId) {
       toast({
         title: 'Error',
@@ -141,11 +146,15 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
     }
 
     const hoursWorked = getHoursWorked(data.attendance_type)
+    console.log('hoursWorked:', hoursWorked)
 
     try {
-      if (isEditing) {
-        const workerContactId = modalData?.editingData?.personnelId || attendance.workerId
-        const attendanceDate = attendance.day || attendance.created_at?.split('T')[0]
+      // Check if we're editing an existing record or creating a new one
+      const hasExistingRecord = attendance && (attendance.day || attendance.id)
+      
+      if (isEditing && hasExistingRecord) {
+        const workerContactId = modalData?.editingData?.personnelId || attendance?.workerId
+        const attendanceDate = attendance?.day || format(data.attendance_date, 'yyyy-MM-dd')
         
         if (!workerContactId || !attendanceDate) {
           throw new Error('No se puede identificar la asistencia a actualizar')
@@ -182,8 +191,10 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
         })
       }
       onClose()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error handling attendance:', error)
+      console.error('Error message:', error?.message)
+      console.error('Error stack:', error?.stack)
     }
   }
 
