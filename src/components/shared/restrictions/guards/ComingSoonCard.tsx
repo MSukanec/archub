@@ -1,4 +1,4 @@
-import { Clock, Wrench, CheckCircle } from "lucide-react";
+import { Clock, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
@@ -25,9 +25,9 @@ const statusConfig = {
     isBlocking: true,
   },
   maintenance: {
-    icon: Wrench,
-    label: "En mantenimiento",
-    badgeClass: "bg-amber-500 text-white border-0",
+    icon: Clock,
+    label: "Próximamente",
+    badgeClass: "bg-violet-500 text-white border-0",
     isBlocking: true,
   },
 } as const;

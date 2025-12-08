@@ -44,8 +44,8 @@ export function CourseStickyCardWithMode({
   const isAdmin = useIsAdmin();
   const status = (course.status || 'available') as ItemStatus;
   
-  // Block checkout for non-admin users (testing mode)
-  const isCheckoutBlocked = !isAdmin && !isEnrolled;
+  // Checkout is now open to all users
+  const isCheckoutBlocked = false;
   
   const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/founders';
   
