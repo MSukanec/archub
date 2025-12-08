@@ -247,6 +247,7 @@ export async function listPersonnelPayments(
       .select(PERSONNEL_PAYMENTS_SELECT)
       .eq('project_id', params.projectId)
       .eq('organization_id', params.organizationId)
+      .or('is_deleted.is.null,is_deleted.eq.false')
       .order('payment_date', { ascending: false });
 
     if (error) {
@@ -337,6 +338,7 @@ export async function getPersonnelPaymentById(
       .from('personnel_payments')
       .select(PERSONNEL_PAYMENTS_SELECT)
       .eq('id', params.paymentId)
+      .or('is_deleted.is.null,is_deleted.eq.false')
       .single();
 
     if (error || !payment) {
@@ -592,11 +594,14 @@ export async function deletePersonnelPayment(
 
     const { error: deleteError } = await supabase
       .from('personnel_payments')
-      .delete()
+      .update({
+        is_deleted: true,
+        deleted_at: new Date().toISOString()
+      })
       .eq('id', params.paymentId);
 
     if (deleteError) {
-      console.error('Error deleting personnel payment:', deleteError);
+      console.error('Error soft-deleting personnel payment:', deleteError);
       return { success: false, error: 'Failed to delete personnel payment' };
     }
 
