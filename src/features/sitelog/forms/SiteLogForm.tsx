@@ -354,16 +354,14 @@ function FormPanel({
               <FormItem>
                 <FormLabel>
                   Estado
-                  {!isTeams && <Badge className="ml-2 text-[10px]">TEAMS</Badge>}
                 </FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
                   value={field.value || "approved"}
-                  disabled={!isTeams}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder={!isTeams ? "Requiere plan TEAMS" : "Seleccionar estado"} />
+                      <SelectValue placeholder="Seleccionar estado" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
