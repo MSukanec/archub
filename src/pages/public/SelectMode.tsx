@@ -238,8 +238,8 @@ export default function SelectMode() {
           })}
         </div>
 
-        {/* Upcoming Modes Grid - 3 columns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Upcoming Modes Grid - 2 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {upcomingModes.map((mode) => {
             const Icon = mode.icon;
             
