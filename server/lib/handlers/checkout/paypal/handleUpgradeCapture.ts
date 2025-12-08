@@ -180,11 +180,16 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
                        (billing_period === 'monthly' ? plan.paypal_plan_monthly_id : plan.paypal_plan_annual_id);
 
   // Get the old subscription to try revising it
-  const { data: oldSub } = await supabase
+  // Use adminClient to bypass RLS and ensure we can read the subscription
+  const { data: oldSub, error: oldSubError } = await adminClient
     .from("organization_subscriptions")
-    .select("id, provider_subscription_id, payment_provider")
+    .select("id, provider_subscription_id, payment_provider, status")
     .eq("id", previous_subscription_id)
     .maybeSingle();
+  
+  if (oldSubError) {
+    console.error('[PayPal upgrade-capture] Error fetching old subscription:', oldSubError);
+  }
 
   const prorationAmountNum = parseFloat(amount_usd) || 0;
   const { returnBase } = buildURLContext(req);
@@ -192,10 +197,12 @@ export async function handleUpgradeCapture(req: Request): Promise<HandleUpgradeC
   // Debug logging for revise condition
   console.log('[PayPal upgrade-capture] Revise condition check:', {
     previous_subscription_id,
+    oldSubError: oldSubError?.message || null,
     oldSub: oldSub ? {
       id: oldSub.id,
       provider_subscription_id: oldSub.provider_subscription_id,
       payment_provider: oldSub.payment_provider,
+      status: oldSub.status,
     } : null,
     paypalPlanId,
     willAttemptRevise: !!(oldSub?.provider_subscription_id && oldSub.payment_provider === 'paypal' && paypalPlanId),
