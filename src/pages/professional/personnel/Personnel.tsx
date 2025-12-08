@@ -11,7 +11,6 @@ import { InsuranceTab } from '@/features/personnel'
 import { useInsuranceList } from '@/features/personnel'
 import PersonnelListTab from './PersonnelListTab'
 import PersonnelAttendanceTab from './PersonnelAttendanceTab'
-import PersonnelDashboard from './PersonnelDashboard'
 import PersonnelPaymentsTab from './PersonnelPaymentsTab'
 
 export default function Personnel() {
@@ -20,7 +19,7 @@ export default function Personnel() {
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const queryClient = useQueryClient()
   const { setSidebarContext } = useNavigationStore()
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const [activeTab, setActiveTab] = useState('active')
 
   const handleDeletePersonnel = async (personnelId: string) => {
     try {
@@ -71,30 +70,17 @@ export default function Personnel() {
     project_id: selectedProjectId || undefined
   })
 
-  const hasPersonnel = personnelData.length > 0
-
   useEffect(() => {
     setSidebarContext('construction')
   }, [])
-
-  useEffect(() => {
-    if (!hasPersonnel && (activeTab === 'attendance' || activeTab === 'insurance' || activeTab === 'payments')) {
-      setActiveTab('dashboard')
-    }
-  }, [hasPersonnel, activeTab])
 
   const headerProps = {
     icon: Users,
     title: "Mano de Obra",
     description: "Gestiona el personal asignado a tus proyectos, registra asistencias y administra seguros de trabajo.",
-    organizationId: currentOrganizationId,
+    organizationId: currentOrganizationId || undefined,
     showMembers: true,
     tabs: [
-      {
-        id: 'dashboard',
-        label: 'Visión General',
-        isActive: activeTab === 'dashboard'
-      },
       {
         id: 'active',
         label: 'Listado de Personal',
@@ -103,28 +89,20 @@ export default function Personnel() {
       {
         id: 'payments',
         label: 'Pagos',
-        isActive: activeTab === 'payments',
-        disabled: !hasPersonnel
+        isActive: activeTab === 'payments'
       },
       {
         id: 'attendance',
         label: 'Asistencia',
-        isActive: activeTab === 'attendance',
-        disabled: !hasPersonnel
+        isActive: activeTab === 'attendance'
       },
       {
         id: 'insurance',
         label: 'Seguros',
-        isActive: activeTab === 'insurance',
-        disabled: !hasPersonnel
+        isActive: activeTab === 'insurance'
       }
     ],
     onTabChange: (tabId: string) => {
-      if (tabId === 'attendance' || tabId === 'insurance' || tabId === 'payments') {
-        if (!hasPersonnel) {
-          return
-        }
-      }
       setActiveTab(tabId)
     },
     actionButton: activeTab === 'attendance' ? {
@@ -148,16 +126,6 @@ export default function Personnel() {
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6 max-w-full overflow-x-hidden">
-        {activeTab === 'dashboard' && (
-          <PersonnelDashboard
-            selectedProjectId={selectedProjectId}
-            currentOrganizationId={currentOrganizationId}
-            personnelData={personnelData}
-            insuranceData={insuranceData}
-            onTabChange={setActiveTab}
-          />
-        )}
-
         {activeTab === 'active' && (
           <PersonnelListTab
             openModal={openModal}
