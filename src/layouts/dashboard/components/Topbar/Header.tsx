@@ -10,7 +10,9 @@ interface Tab {
   isActive?: boolean;
   onClick?: () => void;
   href?: string;
-  badgeCount?: number; // Opcional: contador para mostrar en la tab
+  badgeCount?: number;
+  disabled?: boolean;
+  comingSoon?: boolean;
 }
 
 interface ActionButton {
@@ -95,30 +97,41 @@ export function Header({
           <div className="flex items-center justify-between border-t" style={{ borderColor: 'hsl(210, 40%, 93%)' }}>
           {/* Left: Tabs */}
           <div className="flex items-center gap-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={tab.onClick}
-                className={cn(
-                  "relative py-5 px-3 text-sm font-medium transition-all duration-200 border-b-2",
-                  tab.isActive
-                    ? "text-[var(--accent)] border-[var(--accent)]"
-                    : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] border-transparent"
-                )}
-              >
-                <span className="flex items-center gap-2">
-                  {tab.label}
-                  {tab.badgeCount !== undefined && tab.badgeCount > 0 && (
-                    <span 
-                      className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full text-[10px] font-bold text-white"
-                      style={{ backgroundColor: 'var(--accent)' }}
-                    >
-                      {tab.badgeCount > 99 ? '99+' : tab.badgeCount}
-                    </span>
+            {tabs.map((tab) => {
+              const isDisabled = tab.disabled || tab.comingSoon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={isDisabled ? undefined : tab.onClick}
+                  disabled={isDisabled}
+                  className={cn(
+                    "relative py-5 px-3 text-sm font-medium transition-all duration-200 border-b-2",
+                    isDisabled
+                      ? "text-[var(--muted-foreground)] opacity-50 cursor-not-allowed border-transparent"
+                      : tab.isActive
+                        ? "text-[var(--accent)] border-[var(--accent)]"
+                        : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] border-transparent"
                   )}
-                </span>
-              </button>
-            ))}
+                >
+                  <span className="flex items-center gap-2">
+                    {tab.label}
+                    {tab.comingSoon && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                        Pronto
+                      </span>
+                    )}
+                    {tab.badgeCount !== undefined && tab.badgeCount > 0 && !isDisabled && (
+                      <span 
+                        className="inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full text-[10px] font-bold text-white"
+                        style={{ backgroundColor: 'var(--accent)' }}
+                      >
+                        {tab.badgeCount > 99 ? '99+' : tab.badgeCount}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Right: Action Buttons */}
