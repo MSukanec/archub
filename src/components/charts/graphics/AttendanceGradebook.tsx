@@ -8,6 +8,7 @@ import { Calendar, ChevronLeft, ChevronRight, Download, CalendarDays, UserX } fr
 import { format, addDays, eachDayOfInterval, isWeekend, isToday, startOfDay, subDays } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Tabs } from '@/components/ui-custom/Tabs'
+import { parseLocalDate } from '@/lib/date-utils'
 
 interface Worker {
   id: string
@@ -54,8 +55,8 @@ const AttendanceGradebook: React.FC<AttendanceGradebookProps> = ({
       }
     }
 
-    // Find the earliest attendance date
-    const attendanceDates = attendance.map(record => new Date(record.day)).sort((a, b) => a.getTime() - b.getTime())
+    // Find the earliest attendance date - use parseLocalDate to avoid timezone issues
+    const attendanceDates = attendance.map(record => parseLocalDate(record.day)).filter(d => d !== null).sort((a, b) => a!.getTime() - b!.getTime()) as Date[]
     const firstAttendanceDate = attendanceDates[0]
     
     // Start from the earliest attendance date or 1 year before today (whichever is earlier)
