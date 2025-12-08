@@ -12,14 +12,11 @@ import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/m
 import { useCreateHeroSection, useUpdateHeroSection } from '../hooks/use-hero-sections'
 import { useToast } from '@/hooks/use-toast'
 import { FileUploader } from '@/components/shared/FileUploader'
-import { useCurrentUser } from '@/hooks/use-current-user'
 import { uploadFile } from '@/lib/storage'
 
 const heroSectionSchema = z.object({
   title: z.string().min(1, 'El título es requerido'),
   description: z.string().optional(),
-  media_url: z.string().optional(),
-  media_type: z.enum(['image', 'video']).default('image'),
   primary_button_text: z.string().optional(),
   primary_button_action: z.string().optional(),
   primary_button_action_type: z.enum(['url', 'internal_route', 'external']).default('internal_route'),
@@ -43,8 +40,8 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
   const { toast } = useToast()
   const createMutation = useCreateHeroSection()
   const updateMutation = useUpdateHeroSection()
-  const { data: userData } = useCurrentUser()
   const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
 
   const mode = modalData?.mode || 'create'
@@ -55,8 +52,6 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
     defaultValues: {
       title: '',
       description: '',
-      media_url: '',
-      media_type: 'image',
       primary_button_text: '',
       primary_button_action: '',
       primary_button_action_type: 'internal_route',
@@ -72,8 +67,6 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
       form.reset({
         title: section.title || '',
         description: section.description || '',
-        media_url: section.media_url || '',
-        media_type: section.media_type || 'image',
         primary_button_text: section.primary_button_text || '',
         primary_button_action: section.primary_button_action || '',
         primary_button_action_type: section.primary_button_action_type || 'internal_route',
@@ -82,34 +75,42 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
         secondary_button_action_type: section.secondary_button_action_type || 'url',
         is_active: section.is_active ?? true,
       })
+      if (section.media_url) {
+        setPreviewUrl(section.media_url)
+      }
     }
   }, [section, form])
 
   const onSubmit = async (values: HeroSectionFormValues) => {
     try {
       setIsUploading(true)
-      let finalMediaUrl = values.media_url
-
-      if (pendingFile) {
-        const uploadResult = await uploadFile(pendingFile, {
-          entity: 'hero_section_media',
-        })
-        finalMediaUrl = uploadResult.file_url || ''
-      }
-
-      const dataToSave = {
-        ...values,
-        media_url: finalMediaUrl,
-      }
 
       if (mode === 'edit' && section?.id) {
-        await updateMutation.mutateAsync({ id: section.id, data: dataToSave })
+        await updateMutation.mutateAsync({ id: section.id, data: values })
+        
+        if (pendingFile) {
+          await uploadFile(pendingFile, {
+            entity: 'hero_section_media',
+            link_to: { hero_section_id: section.id },
+            is_cover: true,
+          })
+        }
+        
         toast({ title: 'Sección actualizada', description: 'Los cambios se guardaron correctamente' })
       } else {
-        await createMutation.mutateAsync({
-          ...dataToSave,
+        const newSection = await createMutation.mutateAsync({
+          ...values,
           section_type: 'learning_dashboard',
         })
+        
+        if (pendingFile && newSection?.id) {
+          await uploadFile(pendingFile, {
+            entity: 'hero_section_media',
+            link_to: { hero_section_id: newSection.id },
+            is_cover: true,
+          })
+        }
+        
         toast({ title: 'Sección creada', description: 'La nueva sección del carrusel se creó correctamente' })
       }
       onClose()
@@ -123,6 +124,19 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
     } finally {
       setIsUploading(false)
     }
+  }
+
+  const handleFileChange = (files: Array<{ file: File; preview?: string }>) => {
+    if (files[0]?.file) {
+      setPendingFile(files[0].file)
+      const objectUrl = URL.createObjectURL(files[0].file)
+      setPreviewUrl(objectUrl)
+    }
+  }
+
+  const handleRemoveImage = () => {
+    setPendingFile(null)
+    setPreviewUrl(null)
   }
 
   const isPending = createMutation.isPending || updateMutation.isPending || isUploading
@@ -173,28 +187,6 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
 
               <FormField
                 control={form.control}
-                name="media_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de Media</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger data-testid="select-media-type">
-                          <SelectValue placeholder="Seleccionar tipo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="image">Imagen</SelectItem>
-                        <SelectItem value="video">Video</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="is_active"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
@@ -208,38 +200,24 @@ export default function HeroSectionForm({ modalData, onClose }: HeroSectionFormP
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="media_url"
-                render={({ field }) => (
-                  <FormItem className="col-span-full">
-                    <FormLabel>Imagen/Video de Fondo</FormLabel>
-                    <FormControl>
-                      <FileUploader
-                        mode="single"
-                        variant="hero"
-                        accept={form.watch('media_type') === 'video' ? 'media' : 'images'}
-                        heroImageUrl={field.value || null}
-                        onHeroImageChange={(url) => {
-                          field.onChange(url || '')
-                          if (!url) setPendingFile(null)
-                        }}
-                        filesToUpload={[]}
-                        onFilesChange={(files) => {
-                          if (files[0]?.file) {
-                            setPendingFile(files[0].file)
-                            const previewUrl = URL.createObjectURL(files[0].file)
-                            field.onChange(previewUrl)
-                          }
-                        }}
-                        compressionPreset="course-cover"
-                        isUploading={isUploading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="col-span-full">
+                <FormLabel>Imagen de Fondo</FormLabel>
+                <div className="mt-2">
+                  <FileUploader
+                    mode="single"
+                    variant="hero"
+                    accept="images"
+                    heroImageUrl={previewUrl}
+                    onHeroImageChange={(url) => {
+                      if (!url) handleRemoveImage()
+                    }}
+                    filesToUpload={[]}
+                    onFilesChange={handleFileChange}
+                    compressionPreset="course-cover"
+                    isUploading={isUploading}
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="border-t pt-4">

@@ -36,8 +36,9 @@ export function useHeroSections(sectionType: string = 'learning_dashboard') {
 
 export function useCreateHeroSection() {
   return useMutation({
-    mutationFn: async (data: Partial<HeroSection>) => {
-      return apiRequest('POST', '/api/layout/hero-sections', data)
+    mutationFn: async (data: Partial<HeroSection>): Promise<HeroSection> => {
+      const res = await apiRequest('POST', '/api/layout/hero-sections', data)
+      return res.json()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/layout/hero-sections'] })
