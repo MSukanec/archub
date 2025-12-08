@@ -16,6 +16,7 @@ export type EntityType =
   | 'client_payment_attachment'
   | 'material_payment_attachment'
   | 'material_purchase_attachment'
+  | 'personnel_payment_attachment'
   | 'sitelog_attachment'
   | 'project_photo'
   | 'sitelog_photo'
@@ -45,6 +46,7 @@ export interface UploadContext {
     client_payment_id?: string;
     material_payment_id?: string;
     material_purchase_id?: string;
+    personnel_payment_id?: string;
     testimonial_id?: string;
     hero_section_id?: string;
   };
