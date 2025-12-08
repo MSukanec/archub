@@ -29,23 +29,25 @@ export function getContainerClasses(mode: WidthMode): string {
 /**
  * Gets padding classes for header based on width mode
  * In full mode, header maintains wide padding (px-24)
+ * Responsive: smaller padding on mobile
  * @param mode - Width mode
  * @returns Padding class string
  */
 export function getHeaderPaddingClasses(mode: WidthMode): string {
-  if (mode === "full") return "px-24"; // Header keeps padding in full mode
-  if (mode === "wide") return "px-24";
-  return "px-20";
+  if (mode === "full") return "px-4 sm:px-6 lg:px-24"; // Header keeps padding in full mode
+  if (mode === "wide") return "px-4 sm:px-6 lg:px-24";
+  return "px-4 sm:px-6 lg:px-20";
 }
 
 /**
  * Gets padding classes for content based on width mode
  * In full mode, content has zero padding (px-0)
+ * Responsive: smaller padding on mobile
  * @param mode - Width mode
  * @returns Padding class string
  */
 export function getContentPaddingClasses(mode: WidthMode): string {
   if (mode === "full") return "px-0"; // Content has no padding in full mode
-  if (mode === "wide") return "px-24";
-  return "px-20";
+  if (mode === "wide") return "px-4 sm:px-6 lg:px-24";
+  return "px-4 sm:px-6 lg:px-20";
 }
