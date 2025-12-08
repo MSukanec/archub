@@ -5,8 +5,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs } from '@/components/ui-custom/Tabs';
-import { BookOpen, Clock, CheckCircle, MessageCircle, Shield, ChevronUp, Crown, ArrowRight, Sparkles, Award } from 'lucide-react';
+import { BookOpen, Clock, CheckCircle, MessageCircle, Shield, ChevronUp, Crown, ArrowRight, Sparkles, Award, Lock } from 'lucide-react';
 import { BlockedRestricted, ComingSoonCard } from '@/components/shared/restrictions';
+import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import type { CoursesMode } from '../types';
 import type { ItemStatus } from '@shared/schema';
 
@@ -40,7 +41,11 @@ export function CourseStickyCardWithMode({
 }: CourseStickyCardWithModeProps) {
   const [, navigate] = useLocation();
   const [pricingTab, setPricingTab] = useState<PricingTab>('course');
+  const isAdmin = useIsAdmin();
   const status = (course.status || 'available') as ItemStatus;
+  
+  // Block checkout for non-admin users (testing mode)
+  const isCheckoutBlocked = !isAdmin && !isEnrolled;
   
   const foundersUrl = mode === 'dashboard' ? '/settings/founders' : '/founders';
   
@@ -146,8 +151,10 @@ export function CourseStickyCardWithMode({
                     size="lg" 
                     className="w-full text-base font-semibold"
                     onClick={onCTAClick}
+                    disabled={isCheckoutBlocked}
                     data-testid={isEnrolled ? "button-continue" : "button-enroll"}
                   >
+                    {isCheckoutBlocked && <Lock className="w-4 h-4 mr-2" />}
                     {ctaButtonText}
                   </Button>
                 </BlockedRestricted>
@@ -324,8 +331,10 @@ export function CourseStickyCardWithMode({
                     size="lg" 
                     className="w-full text-base font-semibold"
                     onClick={onCTAClick}
+                    disabled={isCheckoutBlocked}
                     data-testid={isEnrolled ? "button-continue" : "button-enroll"}
                   >
+                    {isCheckoutBlocked && <Lock className="w-4 h-4 mr-2" />}
                     {ctaButtonText}
                   </Button>
                 </BlockedRestricted>
@@ -367,6 +376,7 @@ export function CourseStickyCardWithMode({
         progressPercentage={progressPercentage}
         onCTAClick={onCTAClick}
         ctaButtonText={ctaButtonText}
+        isCheckoutBlocked={isCheckoutBlocked}
       />
     </>
   );
@@ -380,6 +390,7 @@ interface MobileBottomBarProps {
   progressPercentage: number;
   onCTAClick: () => void;
   ctaButtonText: string;
+  isCheckoutBlocked: boolean;
 }
 
 function MobileBottomBar({
@@ -390,6 +401,7 @@ function MobileBottomBar({
   progressPercentage,
   onCTAClick,
   ctaButtonText,
+  isCheckoutBlocked,
 }: MobileBottomBarProps) {
   const [, navigate] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
@@ -543,7 +555,9 @@ function MobileBottomBar({
                         setIsOpen(false);
                         onCTAClick();
                       }}
+                      disabled={isCheckoutBlocked}
                     >
+                      {isCheckoutBlocked && <Lock className="w-4 h-4 mr-2" />}
                       {ctaButtonText}
                     </Button>
                     
@@ -576,7 +590,9 @@ function MobileBottomBar({
                 size="sm"
                 className="font-semibold whitespace-nowrap"
                 onClick={onCTAClick}
+                disabled={isCheckoutBlocked}
               >
+                {isCheckoutBlocked && <Lock className="w-3 h-3 mr-1" />}
                 {ctaButtonText}
               </Button>
             </BlockedRestricted>
