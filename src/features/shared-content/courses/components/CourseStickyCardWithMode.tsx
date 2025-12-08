@@ -76,7 +76,7 @@ export function CourseStickyCardWithMode({
                   tabs={pricingTabs}
                   value={pricingTab} 
                   onValueChange={(v) => setPricingTab(v as PricingTab)} 
-                  className="w-full"
+                  fullWidth
                 />
                 
                 {pricingTab === 'course' && course.price && (
@@ -100,7 +100,7 @@ export function CourseStickyCardWithMode({
                       Suscríbete al plan anual PRO o TEAMS y obtén este curso sin costo adicional, junto con 8 beneficios exclusivos de por vida.
                     </p>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold text-accent">Desde $19</span>
+                      <span className="text-2xl font-bold text-accent">Desde $20</span>
                       <span className="text-xs text-muted-foreground">/ mes</span>
                     </div>
                   </div>
@@ -254,7 +254,7 @@ export function CourseStickyCardWithMode({
                   tabs={pricingTabs}
                   value={pricingTab} 
                   onValueChange={(v) => setPricingTab(v as PricingTab)} 
-                  className="w-full"
+                  fullWidth
                 />
                 
                 {pricingTab === 'course' && course.price && (
@@ -278,7 +278,7 @@ export function CourseStickyCardWithMode({
                       Suscríbete al plan anual PRO o TEAMS y obtén este curso sin costo adicional, junto con 8 beneficios exclusivos de por vida.
                     </p>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold text-accent">Desde $19</span>
+                      <span className="text-2xl font-bold text-accent">Desde $20</span>
                       <span className="text-xs text-muted-foreground">/ mes</span>
                     </div>
                   </div>
