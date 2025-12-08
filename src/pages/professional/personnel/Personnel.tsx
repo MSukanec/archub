@@ -25,7 +25,10 @@ export default function Personnel() {
     try {
       const { error } = await supabase
         .from('project_personnel')
-        .delete()
+        .update({ 
+          is_deleted: true, 
+          deleted_at: new Date().toISOString() 
+        })
         .eq('id', personnelId)
 
       if (error) {
@@ -58,6 +61,7 @@ export default function Personnel() {
           )
         `)
         .eq('project_id', selectedProjectId)
+        .eq('is_deleted', false)
         .order('created_at', { ascending: false })
 
       if (error) throw error

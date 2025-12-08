@@ -130,6 +130,7 @@ export default function PersonnelListTab({
           )
         `)
         .eq('project_id', selectedProjectId)
+        .eq('is_deleted', false)
 
       console.log('🔍 RAW PERSONNEL DATA:', JSON.stringify(data, null, 2))
       if (error) throw error
