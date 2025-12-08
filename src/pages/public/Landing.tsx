@@ -20,7 +20,8 @@ import {
   Zap,
   Package
 } from "lucide-react";
-import { MarketingLayout } from "@/layouts";
+import { Header } from "@/layouts/marketing/components/Header";
+import { Footer } from "@/layouts/marketing/components/Footer";
 
 const coreFeatures = [
   {
@@ -174,21 +175,25 @@ function HeroSectionComponent() {
   );
 }
 
+const headerNavigation = [
+  { label: "Características", href: "#features" },
+  { label: "Capacidades", href: "#capabilities" },
+  { label: "Cursos", href: "/cursos" },
+  { label: "Fundadores", href: "/founders" },
+  { label: "Precios", href: "/precios" },
+  { label: "Contacto", href: "/contact" }
+];
+
 export default function Landing() {
   return (
-    <MarketingLayout
-      headerNavigation={[
-        { label: "Características", href: "#features" },
-        { label: "Capacidades", href: "#capabilities" },
-        { label: "Cursos", href: "/cursos" },
-        { label: "Fundadores", href: "/founders" },
-        { label: "Precios", href: "/precios" },
-        { label: "Contacto", href: "/contact" }
-      ]}
-      heroSlot={<HeroSectionComponent />}
-    >
-      {/* Real Benefits Section - Now after hero */}
-      <section className="py-20 -mx-6 border-t">
+    <div className="min-h-screen overflow-x-hidden">
+      <Header navigation={headerNavigation} />
+      
+      <HeroSectionComponent />
+      
+      <main className="container mx-auto px-6 overflow-x-hidden">
+        {/* Real Benefits Section - Now after hero */}
+        <section className="py-20 -mx-6 border-t">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
@@ -358,6 +363,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
-    </MarketingLayout>
+      </main>
+      
+      <Footer />
+    </div>
   );
 }
