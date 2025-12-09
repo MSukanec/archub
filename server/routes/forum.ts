@@ -16,27 +16,29 @@ function slugify(text: string): string {
 async function getUserRoles(userId: string): Promise<string[]> {
   const roles: string[] = ['public'];
 
-  const { data: adminCheck } = await supabaseAdmin
-    .from('admin_users')
-    .select('auth_id')
-    .eq('auth_id', userId)
-    .maybeSingle();
+  // Run admin check and prefs query in parallel
+  const [adminResult, prefsResult] = await Promise.all([
+    supabaseAdmin
+      .from('admin_users')
+      .select('auth_id')
+      .eq('auth_id', userId)
+      .maybeSingle(),
+    supabaseAdmin
+      .from('user_preferences')
+      .select('last_organization_id')
+      .eq('user_id', userId)
+      .maybeSingle()
+  ]);
 
-  if (adminCheck) {
+  if (adminResult.data) {
     roles.push('admin');
   }
 
-  const { data: prefs } = await supabaseAdmin
-    .from('user_preferences')
-    .select('last_organization_id')
-    .eq('user_id', userId)
-    .single();
-
-  if (prefs?.last_organization_id) {
+  if (prefsResult.data?.last_organization_id) {
     const { data: org } = await supabaseAdmin
       .from('organizations')
       .select('id, settings')
-      .eq('id', prefs.last_organization_id)
+      .eq('id', prefsResult.data.last_organization_id)
       .single();
 
     if (org?.settings?.is_founder) {
@@ -120,22 +122,25 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
       const offset = (page - 1) * limit;
       const categorySlug = req.query.category as string | undefined;
 
-      const userRoles = await getUserRoles(user.userId);
+      // Fetch user roles and categories in parallel
+      const [userRoles, categoriesResult] = await Promise.all([
+        getUserRoles(user.userId),
+        supabaseAdmin
+          .from('forum_categories')
+          .select('id, slug, allowed_roles, is_active')
+          .eq('is_active', true)
+      ]);
+      
       const isAdmin = userRoles.includes('admin');
+      const allCategories = categoriesResult.data || [];
 
       let categoryId: string | null = null;
       if (categorySlug && categorySlug !== 'all') {
-        const { data: category, error: catError } = await supabaseAdmin
-          .from('forum_categories')
-          .select('id, allowed_roles, is_active')
-          .eq('slug', categorySlug)
-          .single();
-
-        if (catError || !category) {
+        const category = allCategories.find(c => c.slug === categorySlug);
+        if (!category) {
           throw new HttpError(404, "Category not found");
         }
 
-        // Admins can access all categories
         if (!isAdmin) {
           const allowedRoles = category.allowed_roles || ['public'];
           if (!allowedRoles.some((role: string) => userRoles.includes(role))) {
@@ -145,15 +150,9 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
         categoryId = category.id;
       }
 
-      const { data: allCategories } = await supabaseAdmin
-        .from('forum_categories')
-        .select('id, allowed_roles')
-        .eq('is_active', true);
-
-      // Admins see all categories, others are filtered by role
       const accessibleCategoryIds = isAdmin
-        ? (allCategories || []).map(cat => cat.id)
-        : (allCategories || [])
+        ? allCategories.map(cat => cat.id)
+        : allCategories
             .filter(cat => {
               const allowedRoles = cat.allowed_roles || ['public'];
               return allowedRoles.some((role: string) => userRoles.includes(role));
@@ -268,22 +267,26 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
       const user = await requireUser(token);
       const { slug } = req.params;
 
-      const { data: thread, error: threadError } = await supabaseAdmin
-        .from('forum_threads')
-        .select(`
-          *,
-          author:users!forum_threads_author_id_fkey(id, full_name, avatar_url),
-          category:forum_categories!forum_threads_category_id_fkey(id, name, slug, allowed_roles, is_read_only)
-        `)
-        .eq('slug', slug)
-        .eq('is_deleted', false)
-        .single();
+      // Fetch thread and user roles in parallel
+      const [threadResult, userRoles] = await Promise.all([
+        supabaseAdmin
+          .from('forum_threads')
+          .select(`
+            *,
+            author:users!forum_threads_author_id_fkey(id, full_name, avatar_url),
+            category:forum_categories!forum_threads_category_id_fkey(id, name, slug, allowed_roles, is_read_only)
+          `)
+          .eq('slug', slug)
+          .eq('is_deleted', false)
+          .single(),
+        getUserRoles(user.userId)
+      ]);
 
-      if (threadError || !thread) {
+      if (threadResult.error || !threadResult.data) {
         throw new HttpError(404, "Thread not found");
       }
-
-      const userRoles = await getUserRoles(user.userId);
+      
+      const thread = threadResult.data;
       const isAdmin = userRoles.includes('admin');
       
       // Admins can access all threads, others need role match
@@ -294,6 +297,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
         }
       }
 
+      // Fetch posts
       const { data: posts, error: postsError } = await supabaseAdmin
         .from('forum_posts')
         .select(`
@@ -306,8 +310,9 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
 
       if (postsError) throw new HttpError(500, postsError.message);
 
-      // Get attachments for the thread
-      const { data: attachments } = await supabaseAdmin
+      // Fetch attachments (gracefully handle if column doesn't exist yet)
+      let attachments: any[] = [];
+      const { data: attachmentData, error: attachmentError } = await supabaseAdmin
         .from('media_links')
         .select(`
           id,
@@ -327,11 +332,15 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
         `)
         .eq('forum_thread_id', thread.id)
         .order('position', { ascending: true });
+      
+      if (!attachmentError && attachmentData) {
+        attachments = attachmentData;
+      }
 
       return res.json({
         ...thread,
         posts: posts || [],
-        attachments: attachments || []
+        attachments
       });
     } catch (error: any) {
       if (error instanceof HttpError) {
