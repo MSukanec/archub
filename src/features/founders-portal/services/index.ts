@@ -8,10 +8,6 @@ export const FOUNDERS_QUERY_KEYS = {
   votes: ['/api/founders/votes'] as const,
   vote: (id: string) => [`/api/founders/votes/${id}`] as const,
   voteResults: (id: string) => [`/api/founders/votes/${id}/results`] as const,
-  threads: (category?: string) => category 
-    ? [`/api/founders/forum/threads?category=${category}`] as const 
-    : ['/api/founders/forum/threads'] as const,
-  thread: (id: string) => [`/api/founders/forum/threads/${id}`] as const,
 };
 
 export interface FounderOrganization {
@@ -63,50 +59,6 @@ export interface VoteTopic {
   user_voted_option_id?: string | null;
 }
 
-export interface ForumThread {
-  id: string;
-  title: string;
-  content: string | null;
-  category: string;
-  is_pinned: boolean;
-  is_locked: boolean;
-  is_deleted: boolean;
-  created_at: string;
-  updated_at: string;
-  author: {
-    id: string;
-    full_name: string;
-    avatar_url: string | null;
-  } | null;
-  organization: {
-    id: string;
-    name: string;
-    logo_url: string | null;
-  } | null;
-  posts_count?: number;
-}
-
-export interface ForumPost {
-  id: string;
-  thread_id: string;
-  content: string;
-  created_at: string;
-  author: {
-    id: string;
-    full_name: string;
-    avatar_url: string | null;
-  } | null;
-  organization: {
-    id: string;
-    name: string;
-    logo_url: string | null;
-  } | null;
-}
-
-export interface ThreadWithPosts extends Omit<ForumThread, 'posts_count'> {
-  posts: ForumPost[];
-}
-
 export function useFounderDirectory() {
   return useQuery<FounderOrganization[]>({
     queryKey: FOUNDERS_QUERY_KEYS.directory,
@@ -128,19 +80,6 @@ export function useFounderVotes() {
 export function useFounderVote(id: string) {
   return useQuery<VoteTopic>({
     queryKey: FOUNDERS_QUERY_KEYS.vote(id),
-    enabled: !!id,
-  });
-}
-
-export function useForumThreads(category?: string) {
-  return useQuery<{ threads: ForumThread[]; pagination: any }>({
-    queryKey: FOUNDERS_QUERY_KEYS.threads(category),
-  });
-}
-
-export function useForumThread(id: string) {
-  return useQuery<ThreadWithPosts>({
-    queryKey: FOUNDERS_QUERY_KEYS.thread(id),
     enabled: !!id,
   });
 }
@@ -184,35 +123,6 @@ export function useCastVote() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: FOUNDERS_QUERY_KEYS.votes });
       queryClient.invalidateQueries({ queryKey: FOUNDERS_QUERY_KEYS.vote(variables.topicId) });
-    },
-  });
-}
-
-export function useCreateThread() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (data: { title: string; content: string; category: string }) => {
-      const res = await apiRequest('POST', '/api/founders/forum/threads', data);
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/founders/forum/threads'] });
-    },
-  });
-}
-
-export function useCreatePost() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async ({ threadId, content }: { threadId: string; content: string }) => {
-      const res = await apiRequest('POST', `/api/founders/forum/threads/${threadId}/posts`, { content });
-      return res.json();
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: FOUNDERS_QUERY_KEYS.thread(variables.threadId) });
-      queryClient.invalidateQueries({ queryKey: ['/api/founders/forum/threads'] });
     },
   });
 }
