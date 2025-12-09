@@ -24,9 +24,9 @@ interface ForumThreadFormProps {
     categoryId?: string;
     categorySlug?: string;
     thread?: ForumThreadWithAuthor;
+    mode?: 'create' | 'edit';
   };
   onClose: () => void;
-  mode?: 'create' | 'edit';
 }
 
 function parseContentText(content: { text?: string } | null | undefined): string {
@@ -48,13 +48,14 @@ function formatContentToJson(text: string): { type: string; content: { type: str
   };
 }
 
-export default function ForumThreadForm({ modalData, onClose, mode = 'create' }: ForumThreadFormProps) {
+export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormProps) {
   const { toast } = useToast();
   const { data: categories, isLoading: categoriesLoading } = useForumCategories();
   const createMutation = useCreateThread();
   const updateMutation = useUpdateThread();
 
   const thread = modalData?.thread;
+  const mode = modalData?.mode || (thread ? 'edit' : 'create');
   const preselectedCategoryId = modalData?.categoryId || thread?.category_id;
 
   const form = useForm<ThreadFormData>({

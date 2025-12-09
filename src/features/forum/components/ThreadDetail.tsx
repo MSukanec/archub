@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { parseLocalDate } from '@/lib/date-utils';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -187,9 +188,12 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
                 {organizationName && <span>({authorName})</span>}
                 <span>·</span>
                 <span>
-                  {format(new Date(thread.created_at), "d 'de' MMMM, yyyy 'a las' HH:mm", {
-                    locale: es,
-                  })}
+                  {(() => {
+                    const date = parseLocalDate(thread.created_at);
+                    return date && isValid(date) 
+                      ? format(date, "d 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })
+                      : 'Fecha no disponible';
+                  })()}
                 </span>
                 <span>·</span>
                 <span className="flex items-center gap-1">

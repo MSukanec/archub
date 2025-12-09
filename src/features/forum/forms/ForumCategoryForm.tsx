@@ -1,14 +1,15 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FolderPlus } from 'lucide-react';
+import { FolderPlus, Pencil } from 'lucide-react';
 
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useCreateCategory } from '../services';
+import { useCreateCategory, useUpdateCategory, type ForumCategory } from '../services';
 import { useToast } from '@/hooks/use-toast';
 
 const categorySchema = z.object({
@@ -22,7 +23,10 @@ const categorySchema = z.object({
 type CategoryFormData = z.infer<typeof categorySchema>;
 
 interface ForumCategoryFormProps {
-  modalData?: Record<string, unknown>;
+  modalData?: {
+    category?: ForumCategory;
+    mode?: 'create' | 'edit';
+  };
   onClose: () => void;
 }
 
@@ -32,9 +36,14 @@ const ROLE_OPTIONS = [
   { value: 'admin', label: 'Administradores' },
 ];
 
-export default function ForumCategoryForm({ onClose }: ForumCategoryFormProps) {
+export default function ForumCategoryForm({ modalData, onClose }: ForumCategoryFormProps) {
   const { toast } = useToast();
   const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+
+  const category = modalData?.category;
+  const mode = modalData?.mode || (category ? 'edit' : 'create');
+  const isEditing = mode === 'edit' && !!category;
 
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
@@ -47,35 +56,66 @@ export default function ForumCategoryForm({ onClose }: ForumCategoryFormProps) {
     },
   });
 
+  useEffect(() => {
+    if (isEditing && category) {
+      form.reset({
+        name: category.name || '',
+        description: category.description || '',
+        icon: category.icon || '',
+        color: category.color || '#3b82f6',
+        allowed_roles: category.allowed_roles?.length > 0 ? category.allowed_roles : ['public'],
+      });
+    }
+  }, [category, isEditing, form]);
+
   const onSubmit = async (data: CategoryFormData) => {
     try {
-      await createMutation.mutateAsync({
-        name: data.name,
-        description: data.description || undefined,
-        icon: data.icon || undefined,
-        color: data.color || undefined,
-        allowed_roles: data.allowed_roles.length > 0 ? data.allowed_roles : ['public'],
-      });
-      toast({
-        title: 'Categoría creada',
-        description: 'La categoría ha sido creada exitosamente',
-      });
+      if (isEditing && category) {
+        await updateMutation.mutateAsync({
+          categoryId: category.id,
+          data: {
+            name: data.name,
+            description: data.description || undefined,
+            icon: data.icon || undefined,
+            color: data.color || undefined,
+            allowed_roles: data.allowed_roles.length > 0 ? data.allowed_roles : ['public'],
+          },
+        });
+        toast({
+          title: 'Categoría actualizada',
+          description: 'La categoría ha sido actualizada exitosamente',
+        });
+      } else {
+        await createMutation.mutateAsync({
+          name: data.name,
+          description: data.description || undefined,
+          icon: data.icon || undefined,
+          color: data.color || undefined,
+          allowed_roles: data.allowed_roles.length > 0 ? data.allowed_roles : ['public'],
+        });
+        toast({
+          title: 'Categoría creada',
+          description: 'La categoría ha sido creada exitosamente',
+        });
+      }
       onClose();
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'No se pudo crear la categoría',
+        description: error.message || `No se pudo ${isEditing ? 'actualizar' : 'crear'} la categoría`,
         variant: 'destructive',
       });
     }
   };
 
+  const isPending = createMutation.isPending || updateMutation.isPending;
+
   return (
     <ModalLayout onClose={onClose} size="md">
       <ModalHeader
-        title="Nueva Categoría"
-        description="Crea una nueva categoría para el foro"
-        icon={FolderPlus}
+        title={isEditing ? 'Editar Categoría' : 'Nueva Categoría'}
+        description={isEditing ? 'Modifica los datos de la categoría' : 'Crea una nueva categoría para el foro'}
+        icon={isEditing ? Pencil : FolderPlus}
       />
 
       <ModalBody>
@@ -201,9 +241,9 @@ export default function ForumCategoryForm({ onClose }: ForumCategoryFormProps) {
       <ModalFooter
         leftLabel="Cancelar"
         onLeftClick={onClose}
-        submitText="Crear Categoría"
+        submitText={isEditing ? 'Guardar Cambios' : 'Crear Categoría'}
         onSubmit={form.handleSubmit(onSubmit)}
-        isSubmitting={createMutation.isPending}
+        isSubmitting={isPending}
       />
     </ModalLayout>
   );

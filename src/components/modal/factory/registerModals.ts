@@ -430,7 +430,10 @@ export function initializeModalRegistry(): void {
   registerModal('forum-category', ForumCategoryForm as any, {
     ...forumConfig,
     mapDataToProps: (data) => ({
-      modalData: data || {},
+      modalData: {
+        category: data?.category,
+        mode: data?.category ? (data?.mode || 'edit') : (data?.mode || 'create'),
+      },
     }),
   });
 }

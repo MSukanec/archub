@@ -161,7 +161,11 @@ export function useUpdateThread() {
   return useMutation({
     mutationFn: async ({ threadId, data }: { threadId: string; data: { title?: string; content?: string } }) => {
       const res = await apiRequest('PATCH', `/api/forum/threads/${threadId}`, data);
-      return res.json();
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || 'Error al actualizar tema');
+      }
+      return json;
     },
     onSuccess: (updatedThread) => {
       if (updatedThread?.slug) {
@@ -169,7 +173,31 @@ export function useUpdateThread() {
           queryKey: FORUM_QUERY_KEYS.thread(updatedThread.slug),
         });
       }
-      queryClient.invalidateQueries({ queryKey: ['/api/forum/categories'] });
+      queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
+      queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active' });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active' });
+    },
+  });
+}
+
+export function useDeleteThread() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (threadId: string) => {
+      const res = await apiRequest('DELETE', `/api/forum/threads/${threadId}`);
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || 'Error al eliminar tema');
+      }
+      return json;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
+      queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active' });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active' });
     },
   });
 }
@@ -318,6 +346,58 @@ export function useCreateCategory() {
       const json = await res.json();
       if (!res.ok) {
         throw new Error(json.error || 'Error al crear categoría');
+      }
+      return json;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
+      queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active' });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active' });
+    },
+  });
+}
+
+export interface UpdateCategoryData {
+  name?: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  allowed_roles?: string[];
+  sort_order?: number;
+  is_active?: boolean;
+}
+
+export function useUpdateCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ categoryId, data }: { categoryId: string; data: UpdateCategoryData }) => {
+      const res = await apiRequest('PATCH', `/api/forum/categories/${categoryId}`, data);
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || 'Error al actualizar categoría');
+      }
+      return json;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
+      queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active' });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active' });
+    },
+  });
+}
+
+export function useDeleteCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (categoryId: string) => {
+      const res = await apiRequest('DELETE', `/api/forum/categories/${categoryId}`);
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || 'Error al eliminar categoría');
       }
       return json;
     },
