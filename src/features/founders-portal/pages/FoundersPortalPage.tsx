@@ -27,29 +27,38 @@ export function FoundersPortalPage() {
     { id: 'foro', label: 'Foro', isActive: activeTab === 'foro' },
   ];
 
-  const headerProps = {
-    icon: Award,
-    title: 'Portal Fundadores',
-    description: 'Conecta con otras organizaciones fundadoras, participa en eventos y votaciones',
-    showSearch: false,
-    showFilters: false,
-    tabs,
-    onTabChange: setActiveTab,
-    ...(activeTab === 'foro' && {
-      actionButton: {
+  const getHeaderProps = () => {
+    const base = {
+      icon: Award,
+      title: 'Portal Fundadores',
+      description: 'Conecta con otras organizaciones fundadoras, participa en eventos y votaciones',
+      showSearch: false,
+      showFilters: false,
+      tabs,
+      onTabChange: setActiveTab,
+    };
+
+    if (activeTab === 'foro') {
+      const actions: any[] = [];
+      if (isAdmin) {
+        actions.push({
+          id: 'new-category',
+          label: 'Nueva Categoría',
+          icon: FolderPlus,
+          onClick: () => openModal('forum-category'),
+          variant: 'outline' as const,
+        });
+      }
+      actions.push({
+        id: 'new-thread',
         label: 'Nuevo Tema',
         icon: Plus,
         onClick: () => openModal('forum-thread'),
-        ...(isAdmin && {
-          additionalButton: {
-            label: 'Nueva Categoría',
-            icon: FolderPlus,
-            onClick: () => openModal('forum-category'),
-            variant: 'secondary' as const,
-          },
-        }),
-      },
-    }),
+      });
+      return { ...base, actions };
+    }
+
+    return base;
   };
 
   useEffect(() => {
@@ -60,7 +69,7 @@ export function FoundersPortalPage() {
 
   if (isLoading) {
     return (
-      <Layout wide headerProps={headerProps}>
+      <Layout wide headerProps={getHeaderProps()}>
         <div className="flex items-center justify-center h-64">
           <LoadingSpinner size="lg" />
         </div>
@@ -88,7 +97,7 @@ export function FoundersPortalPage() {
   };
 
   return (
-    <Layout wide headerProps={headerProps}>
+    <Layout wide headerProps={getHeaderProps()}>
       {renderTabContent()}
     </Layout>
   );

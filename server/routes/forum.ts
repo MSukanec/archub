@@ -710,7 +710,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
   app.post("/api/forum/categories", async (req: Request, res: Response) => {
     try {
       const token = extractToken(req.headers.authorization);
-      await verifyAdminUser(token);
+      const user = await verifyAdminUser(token);
 
       const { 
         name, 
@@ -740,7 +740,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
 
       const { data: category, error } = await supabaseAdmin
         .from('forum_categories')
-        .insert({
+        .insert([{
           name,
           slug,
           description: description || null,
@@ -750,7 +750,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
           sort_order: finalSortOrder,
           is_active: true,
           is_read_only: false,
-        })
+        }])
         .select()
         .single();
 
@@ -761,7 +761,8 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
       if (error instanceof HttpError) {
         return res.status(error.statusCode).json({ error: error.message });
       }
-      return res.status(500).json({ error: "Internal error" });
+      console.error('Forum category error:', error);
+      return res.status(500).json({ error: error.message || "Internal error" });
     }
   });
 }
