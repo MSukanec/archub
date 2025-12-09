@@ -1974,3 +1974,153 @@ export const insertPdfTemplateSchema = createInsertSchema(pdf_templates).omit({
 
 export type PdfTemplate = typeof pdf_templates.$inferSelect;
 export type InsertPdfTemplate = z.infer<typeof insertPdfTemplateSchema>;
+
+// ======================= FOUNDERS PORTAL =======================
+
+// Founder Portal Events Table
+export const founder_portal_events = pgTable("founder_portal_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  description: text("description"),
+  event_type: text("event_type", { enum: ["webinar", "meeting", "workshop", "announcement"] }).default("webinar"),
+  event_date: timestamp("event_date", { withTimezone: true }).notNull(),
+  event_end_date: timestamp("event_end_date", { withTimezone: true }),
+  location: text("location"),
+  is_virtual: boolean("is_virtual").default(true),
+  max_attendees: integer("max_attendees"),
+  created_by: uuid("created_by").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+  is_deleted: boolean("is_deleted").default(false),
+});
+
+export const insertFounderPortalEventSchema = createInsertSchema(founder_portal_events).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  is_deleted: true,
+});
+
+export type FounderPortalEvent = typeof founder_portal_events.$inferSelect;
+export type InsertFounderPortalEvent = z.infer<typeof insertFounderPortalEventSchema>;
+
+// Founder Event Registrations Table
+export const founder_event_registrations = pgTable("founder_event_registrations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  event_id: uuid("event_id").notNull(),
+  organization_id: uuid("organization_id").notNull(),
+  user_id: uuid("user_id").notNull(),
+  registered_at: timestamp("registered_at").defaultNow(),
+  attended: boolean("attended").default(false),
+});
+
+export const insertFounderEventRegistrationSchema = createInsertSchema(founder_event_registrations).omit({
+  id: true,
+  registered_at: true,
+});
+
+export type FounderEventRegistration = typeof founder_event_registrations.$inferSelect;
+export type InsertFounderEventRegistration = z.infer<typeof insertFounderEventRegistrationSchema>;
+
+// Founder Vote Topics Table
+export const founder_vote_topics = pgTable("founder_vote_topics", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status", { enum: ["draft", "active", "closed"] }).default("active"),
+  voting_deadline: timestamp("voting_deadline", { withTimezone: true }),
+  allow_multiple_votes: boolean("allow_multiple_votes").default(false),
+  created_by: uuid("created_by").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  closed_at: timestamp("closed_at", { withTimezone: true }),
+  is_deleted: boolean("is_deleted").default(false),
+});
+
+export const insertFounderVoteTopicSchema = createInsertSchema(founder_vote_topics).omit({
+  id: true,
+  created_at: true,
+  is_deleted: true,
+});
+
+export type FounderVoteTopic = typeof founder_vote_topics.$inferSelect;
+export type InsertFounderVoteTopic = z.infer<typeof insertFounderVoteTopicSchema>;
+
+// Founder Vote Options Table
+export const founder_vote_options = pgTable("founder_vote_options", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  topic_id: uuid("topic_id").notNull(),
+  option_text: text("option_text").notNull(),
+  option_order: integer("option_order").default(0),
+});
+
+export const insertFounderVoteOptionSchema = createInsertSchema(founder_vote_options).omit({
+  id: true,
+});
+
+export type FounderVoteOption = typeof founder_vote_options.$inferSelect;
+export type InsertFounderVoteOption = z.infer<typeof insertFounderVoteOptionSchema>;
+
+// Founder Vote Ballots Table
+export const founder_vote_ballots = pgTable("founder_vote_ballots", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  topic_id: uuid("topic_id").notNull(),
+  option_id: uuid("option_id").notNull(),
+  organization_id: uuid("organization_id").notNull(),
+  user_id: uuid("user_id").notNull(),
+  voted_at: timestamp("voted_at").defaultNow(),
+});
+
+export const insertFounderVoteBallotSchema = createInsertSchema(founder_vote_ballots).omit({
+  id: true,
+  voted_at: true,
+});
+
+export type FounderVoteBallot = typeof founder_vote_ballots.$inferSelect;
+export type InsertFounderVoteBallot = z.infer<typeof insertFounderVoteBallotSchema>;
+
+// Founder Forum Threads Table
+export const founder_forum_threads = pgTable("founder_forum_threads", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  category: text("category", { enum: ["general", "ideas", "feedback", "announcements"] }).default("general"),
+  organization_id: uuid("organization_id").notNull(),
+  user_id: uuid("user_id").notNull(),
+  is_pinned: boolean("is_pinned").default(false),
+  is_locked: boolean("is_locked").default(false),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+  is_deleted: boolean("is_deleted").default(false),
+});
+
+export const insertFounderForumThreadSchema = createInsertSchema(founder_forum_threads).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  is_deleted: true,
+});
+
+export type FounderForumThread = typeof founder_forum_threads.$inferSelect;
+export type InsertFounderForumThread = z.infer<typeof insertFounderForumThreadSchema>;
+
+// Founder Forum Posts Table
+export const founder_forum_posts = pgTable("founder_forum_posts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  thread_id: uuid("thread_id").notNull(),
+  content: text("content").notNull(),
+  organization_id: uuid("organization_id").notNull(),
+  user_id: uuid("user_id").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+  is_deleted: boolean("is_deleted").default(false),
+});
+
+export const insertFounderForumPostSchema = createInsertSchema(founder_forum_posts).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+  is_deleted: true,
+});
+
+export type FounderForumPost = typeof founder_forum_posts.$inferSelect;
+export type InsertFounderForumPost = z.infer<typeof insertFounderForumPostSchema>;
