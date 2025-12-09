@@ -901,15 +901,16 @@ export function registerFounderRoutes(app: Express, deps: RouteDeps): void {
         .select(`
           id,
           name,
-          logo_url,
           created_at,
           settings
         `)
         .eq('is_deleted', false)
-        .eq('is_active', true)
-        .not('settings', 'is', null);
+        .eq('is_active', true);
 
-      if (error) throw new HttpError(500, error.message);
+      if (error) {
+        console.error('Directory query error:', error);
+        throw new HttpError(500, error.message);
+      }
 
       // Filter only founder organizations
       const founderOrgs = organizations?.filter((org: any) => 
@@ -918,6 +919,7 @@ export function registerFounderRoutes(app: Express, deps: RouteDeps): void {
 
       return res.json(founderOrgs);
     } catch (error: any) {
+      console.error('Directory endpoint error:', error);
       if (error instanceof HttpError) {
         return res.status(error.statusCode).json({ error: error.message });
       }
