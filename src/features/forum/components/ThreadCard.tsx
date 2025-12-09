@@ -101,40 +101,15 @@ export function ThreadCard({ thread, onClick }: ThreadCardProps) {
           </Avatar>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
+            {/* Row 1: Author info + time */}
+            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1">
               {thread.is_pinned && (
                 <Pin className="h-3.5 w-3.5 text-accent" data-testid={`pin-icon-${thread.id}`} />
               )}
               {thread.is_locked && (
                 <Lock className="h-3.5 w-3.5 text-[var(--text-muted)]" data-testid={`lock-icon-${thread.id}`} />
               )}
-              {thread.category && (
-                <Badge variant="outline" className="text-xs">
-                  {thread.category.name}
-                </Badge>
-              )}
-            </div>
-
-            <h3 className="font-semibold text-[var(--text-default)] line-clamp-1 mb-1">
-              {thread.title}
-            </h3>
-
-            {contentPreview && (
-              <p className="text-sm text-[var(--text-muted)] line-clamp-2 mb-2">
-                {contentPreview}
-              </p>
-            )}
-
-            <div className="flex items-center gap-4 text-xs text-[var(--text-muted)]">
-              <div className="flex items-center gap-1">
-                <Avatar className="h-4 w-4">
-                  <AvatarImage src={thread.author?.avatar_url || undefined} />
-                  <AvatarFallback className="text-[8px]">
-                    {getInitials(authorName)}
-                  </AvatarFallback>
-                </Avatar>
-                <span>{organizationName || authorName}</span>
-              </div>
+              <span className="font-medium text-[var(--text-default)]">{authorName}</span>
               <span>·</span>
               <span>
                 {formatDistanceToNow(new Date(thread.last_activity_at || thread.created_at), {
@@ -143,6 +118,25 @@ export function ThreadCard({ thread, onClick }: ThreadCardProps) {
                 })}
               </span>
             </div>
+
+            {/* Row 2: Title */}
+            <h3 className="font-semibold text-[var(--text-default)] line-clamp-1 mb-1">
+              {thread.title}
+            </h3>
+
+            {/* Row 3: Content preview */}
+            {contentPreview && (
+              <p className="text-sm text-[var(--text-muted)] line-clamp-2 mb-2">
+                {contentPreview}
+              </p>
+            )}
+
+            {/* Row 4: Badge */}
+            {thread.category && (
+              <Badge className="text-xs bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90">
+                {thread.category.name}
+              </Badge>
+            )}
           </div>
 
           <div className="flex flex-col items-end gap-2 text-xs text-[var(--text-muted)]">

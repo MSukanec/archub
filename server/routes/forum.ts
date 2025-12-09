@@ -422,6 +422,46 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // DELETE /api/forum/threads/:id - Soft delete thread (author or admin only)
+  app.delete("/api/forum/threads/:id", async (req: Request, res: Response) => {
+    try {
+      const token = extractToken(req.headers.authorization);
+      const user = await requireUser(token);
+      const { id } = req.params;
+      const userRoles = await getUserRoles(user.userId);
+      const isAdmin = userRoles.includes('admin');
+
+      const { data: existing, error: fetchError } = await supabaseAdmin
+        .from('forum_threads')
+        .select('author_id')
+        .eq('id', id)
+        .single();
+
+      if (fetchError || !existing) {
+        throw new HttpError(404, "Thread not found");
+      }
+
+      // Only author or admin can delete
+      if (existing.author_id !== user.userId && !isAdmin) {
+        throw new HttpError(403, "Only the author or admin can delete this thread");
+      }
+
+      const { error } = await supabaseAdmin
+        .from('forum_threads')
+        .update({ is_deleted: true })
+        .eq('id', id);
+
+      if (error) throw new HttpError(400, error.message);
+
+      return res.json({ success: true });
+    } catch (error: any) {
+      if (error instanceof HttpError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
   // POST /api/forum/threads/:id/view - Increment view count
   app.post("/api/forum/threads/:id/view", async (req: Request, res: Response) => {
     try {
