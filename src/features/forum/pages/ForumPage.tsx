@@ -11,6 +11,7 @@ import {
 } from '../services';
 import { useGlobalModalStore } from '@/components/modal';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useIsAdmin } from '@/hooks/use-admin-permissions';
 
 interface ForumPageProps {
   allowedRoles?: string[];
@@ -22,6 +23,7 @@ export function ForumPage({ allowedRoles }: ForumPageProps) {
 
   const { openModal } = useGlobalModalStore();
   const { data: allCategories, isLoading: categoriesLoading } = useForumCategories();
+  const isAdmin = useIsAdmin();
 
   const categories = useMemo(() => {
     if (!allCategories) return [];
@@ -74,6 +76,10 @@ export function ForumPage({ allowedRoles }: ForumPageProps) {
     });
   };
 
+  const handleNewCategory = () => {
+    openModal('forum-category', {});
+  };
+
   const renderSidebar = () => {
     if (categoriesLoading) {
       return (
@@ -110,6 +116,8 @@ export function ForumPage({ allowedRoles }: ForumPageProps) {
         isLoading={threadsLoading}
         onThreadClick={handleThreadClick}
         onNewThread={handleNewThread}
+        onNewCategory={handleNewCategory}
+        isAdmin={isAdmin}
         showNewThreadButton={true}
       />
     );

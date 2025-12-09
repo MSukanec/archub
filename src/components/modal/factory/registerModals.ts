@@ -32,6 +32,7 @@ import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentMo
 import { HeroSectionForm } from '@/features/layout';
 import ForumThreadForm from '@/features/forum/forms/ForumThreadForm';
 import ForumPostForm from '@/features/forum/forms/ForumPostForm';
+import ForumCategoryForm from '@/features/forum/forms/ForumCategoryForm';
 
 const organizationConfig: ModalConfig = { category: 'organization', size: 'md' };
 const foundersConfig: ModalConfig = { category: 'founders', size: 'md' };
@@ -423,6 +424,13 @@ export function initializeModalRegistry(): void {
         post: data?.post,
       },
       mode: data?.post ? (data?.mode || 'edit') : (data?.mode || 'create'),
+    }),
+  });
+
+  registerModal('forum-category', ForumCategoryForm as any, {
+    ...forumConfig,
+    mapDataToProps: (data) => ({
+      modalData: data || {},
     }),
   });
 }

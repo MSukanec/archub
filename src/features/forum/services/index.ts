@@ -295,3 +295,26 @@ export function useIncrementViewCount() {
     },
   });
 }
+
+export interface CreateCategoryData {
+  name: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  allowed_roles?: string[];
+  sort_order?: number;
+}
+
+export function useCreateCategory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateCategoryData) => {
+      const res = await apiRequest('POST', '/api/forum/categories', data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
+    },
+  });
+}

@@ -705,6 +705,67 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
       return res.status(500).json({ error: "Internal error" });
     }
   });
+
+  // POST /api/forum/categories - Create new category (admin only)
+  app.post("/api/forum/categories", async (req: Request, res: Response) => {
+    try {
+      const token = extractToken(req.headers.authorization);
+      await verifyAdminUser(token);
+
+      const { 
+        name, 
+        description, 
+        icon = 'MessageSquare', 
+        color = '#3b82f6', 
+        allowed_roles = ['public'], 
+        sort_order 
+      } = req.body;
+
+      if (!name) {
+        throw new HttpError(400, "Name is required");
+      }
+
+      const id = nanoid();
+      const slug = slugify(name);
+
+      let finalSortOrder = sort_order;
+      if (finalSortOrder === undefined) {
+        const { data: lastCategory } = await supabaseAdmin
+          .from('forum_categories')
+          .select('sort_order')
+          .order('sort_order', { ascending: false })
+          .limit(1)
+          .single();
+        finalSortOrder = (lastCategory?.sort_order || 0) + 1;
+      }
+
+      const { data: category, error } = await supabaseAdmin
+        .from('forum_categories')
+        .insert({
+          id,
+          name,
+          slug,
+          description: description || null,
+          icon,
+          color,
+          allowed_roles,
+          sort_order: finalSortOrder,
+          is_active: true,
+          is_read_only: false,
+        })
+        .select()
+        .single();
+
+      if (error) throw new HttpError(400, error.message);
+
+      return res.status(201).json(category);
+    } catch (error: any) {
+      if (error instanceof HttpError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
 }
 
 export default registerForumRoutes;

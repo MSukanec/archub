@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, MessageSquare } from 'lucide-react';
+import { Plus, MessageSquare, FolderPlus } from 'lucide-react';
 import { ThreadCard } from './ThreadCard';
 import type { ForumThreadWithAuthor } from '../services';
 
@@ -14,6 +14,8 @@ interface ThreadListProps {
   isLoading?: boolean;
   onThreadClick?: (thread: ForumThreadWithAuthor) => void;
   onNewThread?: () => void;
+  onNewCategory?: () => void;
+  isAdmin?: boolean;
   showNewThreadButton?: boolean;
 }
 
@@ -68,6 +70,8 @@ export function ThreadList({
   isLoading,
   onThreadClick,
   onNewThread,
+  onNewCategory,
+  isAdmin,
   showNewThreadButton = true,
 }: ThreadListProps) {
   const [sortBy, setSortBy] = useState<SortOption>('recientes');
@@ -110,12 +114,20 @@ export function ThreadList({
           </span>
         </div>
 
-        {showNewThreadButton && onNewThread && (
-          <Button onClick={onNewThread} data-testid="button-new-thread">
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo tema
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {isAdmin && onNewCategory && (
+            <Button onClick={onNewCategory} variant="outline" data-testid="button-new-category">
+              <FolderPlus className="h-4 w-4 mr-2" />
+              Nueva Categoría
+            </Button>
+          )}
+          {showNewThreadButton && onNewThread && (
+            <Button onClick={onNewThread} data-testid="button-new-thread">
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo tema
+            </Button>
+          )}
+        </div>
       </div>
 
       {pinnedThreads.length > 0 && (
