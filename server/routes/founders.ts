@@ -822,6 +822,55 @@ export function registerFounderRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // ==================== ADMIN ====================
+
+  // POST /api/founders/admin/toggle-founder/:orgId - Toggle founder status (admin only)
+  app.post("/api/founders/admin/toggle-founder/:orgId", async (req: Request, res: Response) => {
+    try {
+      const token = extractToken(req.headers.authorization);
+      await verifyAdminUser(token!);
+      const { orgId } = req.params;
+
+      // Get current organization settings
+      const { data: org, error: fetchError } = await supabaseAdmin
+        .from('organizations')
+        .select('id, name, settings')
+        .eq('id', orgId)
+        .single();
+
+      if (fetchError || !org) {
+        throw new HttpError(404, "Organization not found");
+      }
+
+      const currentSettings = org.settings || {};
+      const newIsFounder = !currentSettings.is_founder;
+
+      // Update settings
+      const { error: updateError } = await supabaseAdmin
+        .from('organizations')
+        .update({ 
+          settings: { 
+            ...currentSettings, 
+            is_founder: newIsFounder 
+          } 
+        })
+        .eq('id', orgId);
+
+      if (updateError) throw new HttpError(500, updateError.message);
+
+      return res.json({ 
+        success: true, 
+        is_founder: newIsFounder,
+        message: newIsFounder ? 'Organización marcada como fundadora' : 'Organización removida de fundadores'
+      });
+    } catch (error: any) {
+      if (error instanceof HttpError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
   // ==================== DIRECTORY ====================
 
   // GET /api/founders/directory - List all founder organizations

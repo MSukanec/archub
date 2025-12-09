@@ -8,7 +8,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Edit, Trash2, Building, Crown } from 'lucide-react';
+import { Edit, Trash2, Building, Crown, Star } from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
 import { useGlobalModalStore } from '@/components/modal';
 
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +23,10 @@ interface Organization {
   is_system: boolean;
   plan_id: string;
   created_by: string;
+  settings: {
+    is_founder?: boolean;
+    [key: string]: any;
+  } | null;
   plan: {
     id: string;
     name: string;
@@ -117,7 +122,8 @@ function useAllOrganizations() {
           is_active,
           is_system,
           plan_id,
-          created_by
+          created_by,
+          settings
         `)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false });
@@ -254,6 +260,31 @@ const AdminAdminOrganizations = () => {
       });
     }
   });
+
+  const toggleFounderMutation = useMutation({
+    mutationFn: async (organizationId: string) => {
+      const res = await apiRequest('POST', `/api/founders/admin/toggle-founder/${organizationId}`);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
+      toast({
+        title: data.is_founder ? 'Fundador activado' : 'Fundador desactivado',
+        description: data.message
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo cambiar el estado de fundador.',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  const handleToggleFounder = (organization: Organization) => {
+    toggleFounderMutation.mutate(organization.id);
+  };
 
   // Filtrar organizaciones
   const filteredOrganizations = organizations?.filter(org => {
@@ -424,6 +455,11 @@ const AdminAdminOrganizations = () => {
         data={filteredOrganizations}
         isLoading={isLoading}
         rowActions={(organization) => [
+          {
+            icon: Star,
+            label: organization.settings?.is_founder ? 'Quitar Fundador' : 'Hacer Fundador',
+            onClick: () => handleToggleFounder(organization)
+          },
           {
             icon: Edit,
             label: 'Editar',
