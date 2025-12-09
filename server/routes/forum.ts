@@ -121,6 +121,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
       const categorySlug = req.query.category as string | undefined;
 
       const userRoles = await getUserRoles(user.userId);
+      const isAdmin = userRoles.includes('admin');
 
       let categoryId: string | null = null;
       if (categorySlug && categorySlug !== 'all') {
@@ -134,9 +135,12 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
           throw new HttpError(404, "Category not found");
         }
 
-        const allowedRoles = category.allowed_roles || ['public'];
-        if (!allowedRoles.some((role: string) => userRoles.includes(role))) {
-          throw new HttpError(403, "Access denied to this category");
+        // Admins can access all categories
+        if (!isAdmin) {
+          const allowedRoles = category.allowed_roles || ['public'];
+          if (!allowedRoles.some((role: string) => userRoles.includes(role))) {
+            throw new HttpError(403, "Access denied to this category");
+          }
         }
         categoryId = category.id;
       }
@@ -146,12 +150,15 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
         .select('id, allowed_roles')
         .eq('is_active', true);
 
-      const accessibleCategoryIds = (allCategories || [])
-        .filter(cat => {
-          const allowedRoles = cat.allowed_roles || ['public'];
-          return allowedRoles.some((role: string) => userRoles.includes(role));
-        })
-        .map(cat => cat.id);
+      // Admins see all categories, others are filtered by role
+      const accessibleCategoryIds = isAdmin
+        ? (allCategories || []).map(cat => cat.id)
+        : (allCategories || [])
+            .filter(cat => {
+              const allowedRoles = cat.allowed_roles || ['public'];
+              return allowedRoles.some((role: string) => userRoles.includes(role));
+            })
+            .map(cat => cat.id);
 
       let query = supabaseAdmin
         .from('forum_threads')
@@ -212,9 +219,14 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
       }
 
       const userRoles = await getUserRoles(user.userId);
-      const allowedRoles = category.allowed_roles || ['public'];
-      if (!allowedRoles.some((role: string) => userRoles.includes(role))) {
-        throw new HttpError(403, "Access denied to this category");
+      const isAdmin = userRoles.includes('admin');
+      
+      // Admins can access all categories
+      if (!isAdmin) {
+        const allowedRoles = category.allowed_roles || ['public'];
+        if (!allowedRoles.some((role: string) => userRoles.includes(role))) {
+          throw new HttpError(403, "Access denied to this category");
+        }
       }
 
       const { data: threads, error, count } = await supabaseAdmin
@@ -272,9 +284,14 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
       }
 
       const userRoles = await getUserRoles(user.userId);
-      const allowedRoles = thread.category?.allowed_roles || ['public'];
-      if (!allowedRoles.some((role: string) => userRoles.includes(role))) {
-        throw new HttpError(403, "Access denied to this thread");
+      const isAdmin = userRoles.includes('admin');
+      
+      // Admins can access all threads, others need role match
+      if (!isAdmin) {
+        const allowedRoles = thread.category?.allowed_roles || ['public'];
+        if (!allowedRoles.some((role: string) => userRoles.includes(role))) {
+          throw new HttpError(403, "Access denied to this thread");
+        }
       }
 
       const { data: posts, error: postsError } = await supabaseAdmin
