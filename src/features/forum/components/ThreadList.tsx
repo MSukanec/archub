@@ -80,9 +80,7 @@ export function ThreadList({
     return <ThreadListSkeleton />;
   }
 
-  if (threads.length === 0) {
-    return <EmptyState onNewThread={onNewThread} />;
-  }
+  const hasThreads = threads.length > 0;
 
   const pinnedThreads = threads.filter((t) => t.is_pinned);
   const regularThreads = threads.filter((t) => !t.is_pinned);
@@ -100,18 +98,22 @@ export function ThreadList({
     <div className="space-y-4" data-testid="thread-list">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-            <SelectTrigger className="w-36" data-testid="sort-select">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recientes">Recientes</SelectItem>
-              <SelectItem value="populares">Populares</SelectItem>
-            </SelectContent>
-          </Select>
-          <span className="text-sm text-[var(--text-muted)]">
-            {threads.length} {threads.length === 1 ? 'tema' : 'temas'}
-          </span>
+          {hasThreads && (
+            <>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                <SelectTrigger className="w-36" data-testid="sort-select">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recientes">Recientes</SelectItem>
+                  <SelectItem value="populares">Populares</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-[var(--text-muted)]">
+                {threads.length} {threads.length === 1 ? 'tema' : 'temas'}
+              </span>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -129,6 +131,18 @@ export function ThreadList({
           )}
         </div>
       </div>
+
+      {!hasThreads && (
+        <div className="text-center py-16" data-testid="thread-list-empty">
+          <MessageSquare className="h-12 w-12 mx-auto text-[var(--text-muted)] mb-4" />
+          <h3 className="text-lg font-medium text-[var(--text-default)] mb-2">
+            No hay temas en esta categoría
+          </h3>
+          <p className="text-[var(--text-muted)]">
+            Sé el primero en iniciar una conversación
+          </p>
+        </div>
+      )}
 
       {pinnedThreads.length > 0 && (
         <div className="space-y-2">
