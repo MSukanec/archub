@@ -8,7 +8,7 @@ import { FounderDirectory } from '../components/FounderDirectory';
 import { FounderEvents } from '../components/FounderEvents';
 import { FounderVoting } from '../components/FounderVoting';
 import { FounderForum } from '../components/FounderForum';
-import { Award, Plus } from 'lucide-react';
+import { Award, Plus, FolderPlus } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';
 
 export function FoundersPortalPage() {
@@ -40,6 +40,14 @@ export function FoundersPortalPage() {
         label: 'Nuevo Tema',
         icon: Plus,
         onClick: () => openModal('forum-thread'),
+        ...(isAdmin && {
+          additionalButton: {
+            label: 'Nueva Categoría',
+            icon: FolderPlus,
+            onClick: () => openModal('forum-category'),
+            variant: 'secondary' as const,
+          },
+        }),
       },
     }),
   };

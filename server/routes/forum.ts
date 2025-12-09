@@ -725,7 +725,6 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
         throw new HttpError(400, "Name is required");
       }
 
-      const id = nanoid();
       const slug = slugify(name);
 
       let finalSortOrder = sort_order;
@@ -735,14 +734,13 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
           .select('sort_order')
           .order('sort_order', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
         finalSortOrder = (lastCategory?.sort_order || 0) + 1;
       }
 
       const { data: category, error } = await supabaseAdmin
         .from('forum_categories')
         .insert({
-          id,
           name,
           slug,
           description: description || null,

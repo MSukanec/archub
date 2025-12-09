@@ -9,9 +9,7 @@ import {
   type ForumCategoryWithCounts,
   type ForumThreadWithAuthor,
 } from '../services';
-import { useGlobalModalStore } from '@/components/modal';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useIsAdmin } from '@/hooks/use-admin-permissions';
 
 interface ForumPageProps {
   allowedRoles?: string[];
@@ -21,9 +19,7 @@ export function ForumPage({ allowedRoles }: ForumPageProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedThread, setSelectedThread] = useState<ForumThreadWithAuthor | null>(null);
 
-  const { openModal } = useGlobalModalStore();
   const { data: allCategories, isLoading: categoriesLoading } = useForumCategories();
-  const isAdmin = useIsAdmin();
 
   const categories = useMemo(() => {
     if (!allCategories) return [];
@@ -68,18 +64,6 @@ export function ForumPage({ allowedRoles }: ForumPageProps) {
     setSelectedThread(null);
   };
 
-  const handleNewThread = () => {
-    const category = categories.find((c) => c.slug === selectedCategory);
-    openModal('forum-thread', {
-      categoryId: category?.id,
-      categorySlug: selectedCategory,
-    });
-  };
-
-  const handleNewCategory = () => {
-    openModal('forum-category', {});
-  };
-
   const renderSidebar = () => {
     if (categoriesLoading) {
       return (
@@ -115,10 +99,6 @@ export function ForumPage({ allowedRoles }: ForumPageProps) {
         threads={threads}
         isLoading={threadsLoading}
         onThreadClick={handleThreadClick}
-        onNewThread={handleNewThread}
-        onNewCategory={handleNewCategory}
-        isAdmin={isAdmin}
-        showNewThreadButton={true}
       />
     );
   };

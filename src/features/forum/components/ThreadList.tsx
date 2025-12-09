@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, MessageSquare, FolderPlus } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { ThreadCard } from './ThreadCard';
 import type { ForumThreadWithAuthor } from '../services';
 
@@ -13,10 +12,6 @@ interface ThreadListProps {
   threads: ForumThreadWithAuthor[];
   isLoading?: boolean;
   onThreadClick?: (thread: ForumThreadWithAuthor) => void;
-  onNewThread?: () => void;
-  onNewCategory?: () => void;
-  isAdmin?: boolean;
-  showNewThreadButton?: boolean;
 }
 
 function ThreadListSkeleton() {
@@ -45,34 +40,10 @@ function ThreadListSkeleton() {
   );
 }
 
-function EmptyState({ onNewThread }: { onNewThread?: () => void }) {
-  return (
-    <div className="text-center py-16" data-testid="thread-list-empty">
-      <MessageSquare className="h-12 w-12 mx-auto text-[var(--text-muted)] mb-4" />
-      <h3 className="text-lg font-medium text-[var(--text-default)] mb-2">
-        No hay temas en esta categoría
-      </h3>
-      <p className="text-[var(--text-muted)] mb-6">
-        Sé el primero en iniciar una conversación
-      </p>
-      {onNewThread && (
-        <Button onClick={onNewThread} data-testid="button-create-first-thread">
-          <Plus className="h-4 w-4 mr-2" />
-          Crear tema
-        </Button>
-      )}
-    </div>
-  );
-}
-
 export function ThreadList({
   threads,
   isLoading,
   onThreadClick,
-  onNewThread,
-  onNewCategory,
-  isAdmin,
-  showNewThreadButton = true,
 }: ThreadListProps) {
   const [sortBy, setSortBy] = useState<SortOption>('recientes');
 
@@ -81,7 +52,6 @@ export function ThreadList({
   }
 
   const hasThreads = threads.length > 0;
-
   const pinnedThreads = threads.filter((t) => t.is_pinned);
   const regularThreads = threads.filter((t) => !t.is_pinned);
 
@@ -96,41 +66,22 @@ export function ThreadList({
 
   return (
     <div className="space-y-4" data-testid="thread-list">
-      <div className="flex items-center justify-between">
+      {hasThreads && (
         <div className="flex items-center gap-3">
-          {hasThreads && (
-            <>
-              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                <SelectTrigger className="w-36" data-testid="sort-select">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recientes">Recientes</SelectItem>
-                  <SelectItem value="populares">Populares</SelectItem>
-                </SelectContent>
-              </Select>
-              <span className="text-sm text-[var(--text-muted)]">
-                {threads.length} {threads.length === 1 ? 'tema' : 'temas'}
-              </span>
-            </>
-          )}
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+            <SelectTrigger className="w-36" data-testid="sort-select">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recientes">Recientes</SelectItem>
+              <SelectItem value="populares">Populares</SelectItem>
+            </SelectContent>
+          </Select>
+          <span className="text-sm text-[var(--text-muted)]">
+            {threads.length} {threads.length === 1 ? 'tema' : 'temas'}
+          </span>
         </div>
-
-        <div className="flex items-center gap-2">
-          {isAdmin && onNewCategory && (
-            <Button onClick={onNewCategory} variant="outline" data-testid="button-new-category">
-              <FolderPlus className="h-4 w-4 mr-2" />
-              Nueva Categoría
-            </Button>
-          )}
-          {showNewThreadButton && onNewThread && (
-            <Button onClick={onNewThread} data-testid="button-new-thread">
-              <Plus className="h-4 w-4 mr-2" />
-              Nuevo tema
-            </Button>
-          )}
-        </div>
-      </div>
+      )}
 
       {!hasThreads && (
         <div className="text-center py-16" data-testid="thread-list-empty">
