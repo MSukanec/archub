@@ -1,0 +1,144 @@
+¡Exacto, Mati! Tu intuición te está diciendo la verdad: Tus tablas actuales están mezclando "peras con manzanas".
+
+En tu tabla actual pdf_templates estás mezclando:
+
+Branding: (primary_color, logo_width). Esto no debería ser parte de una "plantilla", porque si la empresa cambia su logo, ¡tiene que editar todas las plantillas!
+
+Configuración: (show_footer, margin_top).
+
+Estructura: (name).
+
+Veredicto: Sí, tíralas (o renómbralas a _old) y hazlas de nuevo. Si construyes sobre esto, vas a tener deuda técnica para siempre.
+
+Para ser Nivel Dios, necesitamos separar las preocupaciones. Aquí tienes el SQL limpio y definitivo para la arquitectura profesional de "Configuración en Cascada".
+
+1. Tabla: organization_brand_kits (La Identidad)
+Esta tabla guarda QUIÉN es la empresa. Se configura una vez y aplica a todos los PDFs (presupuestos, pagos, bitácora).
+
+SQL
+
+create table public.organization_brand_kits (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid not null references public.organizations(id) on delete cascade,
+  
+  -- Identidad Visual
+  logo_url text,
+  logo_width integer default 120, -- Ancho base preferido
+  
+  -- Paleta de Colores (La marca)
+  primary_color text default '#000000',
+  secondary_color text default '#808080',
+  accent_color text default '#0000FF',
+  
+  -- Tipografía Global
+  font_family text default 'Inter',
+  
+  -- Datos de Contacto (Para headers/footers automáticos)
+  company_name_override text, -- Por si quieren usar un nombre comercial distinto al fiscal
+  website text,
+  contact_email text,
+  contact_phone text,
+  address text,
+  tax_id text,
+  
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+  
+  -- Regla de oro: Una marca por organización
+  constraint organization_brand_kits_org_key unique (organization_id)
+);
+2. Tabla: pdf_templates (Los Diseños del Sistema)
+Esta tabla es TUYA (del sistema). Aquí defines los layouts disponibles. El usuario solo "elige" uno de estos, no los crea desde cero (al principio).
+
+SQL
+
+create table public.pdf_templates (
+  id uuid primary key default gen_random_uuid(),
+  
+  -- Identificadores
+  key text unique not null, -- ej: 'minimal-v1', 'classic-sidebar', 'modern-grid'
+  name text not null, -- ej: 'Minimalista Ejecutivo'
+  description text,
+  preview_image_url text, -- Para mostrar en el selector del Front
+  
+  -- Configuración Base (Schema)
+  -- Esto le dice al Front qué opciones mostrar para este diseño específico
+  -- Ej: { "supports_sidebar": true, "supports_cover_image": false }
+  capabilities jsonb default '{}'::jsonb,
+  
+  is_active boolean default true,
+  is_pro_only boolean default false, -- Para monetizar diseños premium
+  
+  created_at timestamp with time zone default now()
+);
+
+-- Insertar un par de ejemplos base para que no esté vacía
+INSERT INTO public.pdf_templates (key, name, description) VALUES 
+('minimal', 'Minimalista', 'Diseño limpio, fondo blanco, ideal para presupuestos formales.'),
+('modern', 'Moderno', 'Encabezados con color de acento y tipografía grande.');
+3. Tabla: pdf_configurations (La Configuración Específica)
+Aquí es donde se une todo. "La Organización X quiere usar la Plantilla 'Minimalista' para sus 'Presupuestos' con estas opciones extra".
+
+SQL
+
+create table public.pdf_configurations (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid not null references public.organizations(id) on delete cascade,
+  
+  -- ¿Qué estamos configurando?
+  document_type text not null, -- 'budget', 'payment', 'sitelog', 'purchase_order'
+  
+  -- ¿Qué diseño base eligieron?
+  template_id uuid references public.pdf_templates(id),
+  
+  -- Ajustes Específicos (JSONB es la clave del éxito aquí)
+  -- Aquí guardas los toggles: { "show_footer": true, "show_page_numbers": false, "margin_scale": 1.2 }
+  -- Si mañana inventas una opción nueva, NO tienes que alterar la tabla, solo guardas el JSON.
+  settings jsonb default '{}'::jsonb,
+  
+  -- Textos libres específicos para este tipo de doc
+  custom_header_text text,
+  custom_footer_text text, -- Ej: "Presupuesto válido por 15 días"
+  disclaimer_text text,
+  
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now(),
+  
+  -- Regla: Una configuración por tipo de documento por organización
+  constraint pdf_configurations_org_doc_key unique (organization_id, document_type)
+);
+¿Y qué pasa con la tabla public.pdf que tenías?
+Esa tabla servía para guardar el historial de PDFs generados. Puedes mantenerla, pero renombrémosla para que sea claro que es un Historial, no una configuración.
+
+SQL
+
+create table public.generated_pdfs_history (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid not null references public.organizations(id) on delete cascade,
+  
+  created_by uuid references public.organization_members(id),
+  created_at timestamp with time zone default now(),
+  
+  -- Metadatos
+  name text not null, -- "Presupuesto Casa Lote 4.pdf"
+  document_type text, -- 'budget'
+  entity_id uuid, -- ID del presupuesto o pago original (opcional)
+  
+  -- El archivo real
+  storage_path text, -- Ruta en Supabase Storage
+  file_size_bytes bigint,
+  
+  -- Snapshot (Opcional pero recomendado nivel Dios)
+  -- Guardar qué configuración se usó en ese momento exacto, por si la cambian después.
+  configuration_snapshot jsonb 
+);
+Resumen del cambio
+Antes: Tenías una tabla gigante (pdf_templates) donde si cambiaban el color primario, tenías que actualizar todos los templates manualmente.
+
+Ahora:
+
+Cambian el color en organization_brand_kits -> Se actualizan todos los PDFs automáticamente.
+
+Quieren cambiar el diseño de los Presupuestos -> Tocan pdf_configurations para ese document_type.
+
+Tu sistema es escalable y ordenado.
