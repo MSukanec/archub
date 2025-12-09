@@ -43,13 +43,23 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-function CreateThreadDialog() {
+export function CreateThreadDialog({ 
+  open, 
+  onOpenChange 
+}: { 
+  open?: boolean; 
+  onOpenChange?: (open: boolean) => void;
+}) {
   const { toast } = useToast();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('general');
   const createMutation = useCreateThread();
+
+  const isControlled = open !== undefined;
+  const isOpen = isControlled ? open : internalOpen;
+  const setIsOpen = isControlled ? (onOpenChange || (() => {})) : setInternalOpen;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +71,7 @@ function CreateThreadDialog() {
         title: 'Tema creado',
         description: 'Tu tema ha sido publicado exitosamente',
       });
-      setOpen(false);
+      setIsOpen(false);
       setTitle('');
       setContent('');
       setCategory('general');
@@ -75,13 +85,15 @@ function CreateThreadDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button data-testid="button-new-thread">
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo Tema
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button data-testid="button-new-thread">
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Tema
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Crear nuevo tema</DialogTitle>
@@ -120,7 +132,7 @@ function CreateThreadDialog() {
             />
           </div>
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
               Cancelar
             </Button>
             <Button 
@@ -319,14 +331,7 @@ export function FounderForum() {
   const threads = data?.threads || [];
 
   if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <div className="flex justify-end">
-          <Skeleton className="h-9 w-32" />
-        </div>
-        <ForumSkeleton />
-      </div>
-    );
+    return <ForumSkeleton />;
   }
 
   if (error) {
@@ -342,10 +347,6 @@ export function FounderForum() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <CreateThreadDialog />
-      </div>
-
       {threads.length === 0 ? (
         <div className="text-center py-12">
           <MessagesSquare className="h-12 w-12 mx-auto text-[var(--text-muted)] mb-3" />
