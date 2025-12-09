@@ -9,13 +9,14 @@ import { FounderEvents } from '../components/FounderEvents';
 import { FounderVoting } from '../components/FounderVoting';
 import { FounderForum } from '../components/FounderForum';
 import { Award, Plus } from 'lucide-react';
-import { openModal } from '@/components/modal';
+import { useGlobalModalStore } from '@/components/modal';
 
 export function FoundersPortalPage() {
   const [activeTab, setActiveTab] = useState('directorio');
   const { data: userData, isLoading } = useCurrentUser();
   const isAdmin = useIsAdmin();
   const [location, navigate] = useLocation();
+  const { openModal } = useGlobalModalStore();
   
   const isFounder = userData?.organization?.settings?.is_founder === true;
 
