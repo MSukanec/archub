@@ -14,27 +14,44 @@ async function requireFounderAccess(token: string): Promise<{
 }> {
   const user = await requireUser(token);
   
-  // Get user's active organization membership
+  // Get user's current organization from preferences
+  const { data: prefs, error: prefsError } = await user.supabase
+    .from('user_preferences')
+    .select('last_organization_id')
+    .eq('user_id', user.userId)
+    .single();
+
+  if (prefsError || !prefs?.last_organization_id) {
+    throw new HttpError(403, "User has no active organization selected");
+  }
+
+  const organizationId = prefs.last_organization_id;
+
+  // Check membership in that organization
   const { data: membership, error: memberError } = await user.supabase
     .from('organization_members')
-    .select(`
-      organization_id,
-      organizations!inner (
-        id,
-        settings
-      )
-    `)
+    .select('id, is_active')
     .eq('user_id', user.userId)
+    .eq('organization_id', organizationId)
     .eq('is_active', true)
     .single();
 
   if (memberError || !membership) {
-    throw new HttpError(403, "User is not a member of any organization");
+    throw new HttpError(403, "User is not an active member of the current organization");
   }
 
-  // Check if organization is a founder org
-  const org = (membership as any).organizations;
-  const settings = org?.settings || {};
+  // Get organization settings to check founder status
+  const { data: org, error: orgError } = await supabaseAdmin
+    .from('organizations')
+    .select('id, settings')
+    .eq('id', organizationId)
+    .single();
+
+  if (orgError || !org) {
+    throw new HttpError(403, "Organization not found");
+  }
+
+  const settings = org.settings || {};
   
   if (!settings.is_founder) {
     throw new HttpError(403, "Access restricted to founder organizations");
@@ -42,7 +59,7 @@ async function requireFounderAccess(token: string): Promise<{
 
   return {
     userId: user.userId,
-    organizationId: membership.organization_id,
+    organizationId: organizationId,
     supabase: user.supabase
   };
 }
