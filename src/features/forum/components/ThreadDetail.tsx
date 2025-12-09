@@ -79,6 +79,21 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
 
   const [replyContent, setReplyContent] = useState('');
 
+  // Calculate image attachments for lightbox - must be before any conditional returns
+  const imageAttachments = useMemo(() => {
+    if (!thread?.attachments) return [];
+    return thread.attachments
+      .filter(att => att.media_file?.file_type === 'image' && att.media_file?.file_url)
+      .map(att => ({
+        id: att.id,
+        url: att.media_file!.file_url!,
+        name: att.media_file!.file_name,
+      }));
+  }, [thread?.attachments]);
+  
+  const imageUrls = useMemo(() => imageAttachments.map(img => img.url), [imageAttachments]);
+  const { isOpen: isLightboxOpen, currentIndex, openLightbox, closeLightbox } = useImageLightbox(imageUrls);
+
   useEffect(() => {
     if (thread?.id) {
       incrementViewMutation.mutate(thread.id);
@@ -149,20 +164,6 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
     : thread.content?.text || '';
   const likeCount = reactions?.thread?.likes ?? 0;
   const isLiked = reactions?.thread?.userReaction === 'like';
-  
-  // Get image URLs from attachments for lightbox
-  const imageAttachments = useMemo(() => {
-    return (thread.attachments || [])
-      .filter(att => att.media_file?.file_type === 'image' && att.media_file?.file_url)
-      .map(att => ({
-        id: att.id,
-        url: att.media_file!.file_url!,
-        name: att.media_file!.file_name,
-      }));
-  }, [thread.attachments]);
-  
-  const imageUrls = imageAttachments.map(img => img.url);
-  const { isOpen: isLightboxOpen, currentIndex, openLightbox, closeLightbox } = useImageLightbox(imageUrls);
 
   return (
     <div className="space-y-4" data-testid="thread-detail">
