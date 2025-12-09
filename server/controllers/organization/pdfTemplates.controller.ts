@@ -3,25 +3,15 @@ import { getAdminClient, extractToken } from "../../routes/_base.js";
 import { requireUser, HttpError } from "../../lib/auth/helpers.js";
 import { insertPdfTemplateSchema } from "@shared/schema";
 
-interface MemberWithRole {
-  id: string;
-  role_id: string | null;
-  role: { name: string } | null;
-}
-
 /**
- * Verify that a user belongs to an organization with at least member role
- * Returns the member record if valid, null otherwise
+ * Verify that a user belongs to an organization
+ * Returns true if valid, false otherwise
  * Uses the internal user_id (not auth_id)
  */
-async function verifyOrganizationMembership(userId: string, organizationId: string): Promise<MemberWithRole | null> {
+async function verifyOrganizationMembership(userId: string, organizationId: string): Promise<boolean> {
   const { data: member, error } = await getAdminClient()
     .from('organization_members')
-    .select(`
-      id,
-      role_id,
-      role:roles(name)
-    `)
+    .select('id')
     .eq('organization_id', organizationId)
     .eq('user_id', userId)
     .eq('is_active', true)
@@ -29,19 +19,10 @@ async function verifyOrganizationMembership(userId: string, organizationId: stri
   
   if (error) {
     console.error('Error verifying organization membership:', error);
-    return null;
+    return false;
   }
   
-  return member as MemberWithRole | null;
-}
-
-/**
- * Check if a member has admin or owner role
- */
-function isAdminOrOwner(member: MemberWithRole | null): boolean {
-  if (!member?.role) return false;
-  const roleName = member.role.name?.toLowerCase();
-  return roleName === 'admin' || roleName === 'owner';
+  return !!member;
 }
 
 /**
@@ -61,8 +42,8 @@ export async function handleGetPdfTemplate(req: Request, res: Response) {
     const { userId } = await requireUser(token);
     
     // Verify user belongs to organization
-    const member = await verifyOrganizationMembership(userId, organizationId);
-    if (!member) {
+    const isMember = await verifyOrganizationMembership(userId, organizationId);
+    if (!isMember) {
       return res.status(403).json({ error: "No tienes acceso a esta organización" });
     }
     
@@ -107,14 +88,10 @@ export async function handleCreatePdfTemplate(req: Request, res: Response) {
     // Get authenticated user with internal userId (mapped from auth_id)
     const { userId } = await requireUser(token);
     
-    // Verify user belongs to organization with admin role
-    const member = await verifyOrganizationMembership(userId, organizationId);
-    if (!member) {
+    // Verify user belongs to organization (RLS handles permission checks)
+    const isMember = await verifyOrganizationMembership(userId, organizationId);
+    if (!isMember) {
       return res.status(403).json({ error: "No tienes acceso a esta organización" });
-    }
-    
-    if (!isAdminOrOwner(member)) {
-      return res.status(403).json({ error: "Solo administradores pueden modificar la configuración de PDFs" });
     }
     
     // Check if template already exists
@@ -181,14 +158,10 @@ export async function handleUpdatePdfTemplate(req: Request, res: Response) {
     // Get authenticated user with internal userId (mapped from auth_id)
     const { userId } = await requireUser(token);
     
-    // Verify user belongs to organization with admin role
-    const member = await verifyOrganizationMembership(userId, organizationId);
-    if (!member) {
+    // Verify user belongs to organization (RLS handles permission checks)
+    const isMember = await verifyOrganizationMembership(userId, organizationId);
+    if (!isMember) {
       return res.status(403).json({ error: "No tienes acceso a esta organización" });
-    }
-    
-    if (!isAdminOrOwner(member)) {
-      return res.status(403).json({ error: "Solo administradores pueden modificar la configuración de PDFs" });
     }
     
     // Reject empty payloads
