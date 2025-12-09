@@ -513,7 +513,6 @@ export function LeftSidebar() {
                         icon: <Award className="h-5 w-5" />,
                         testId: 'button-sidebar-founders',
                         onClick: () => {
-                          setSidebarLevel('founders');
                           navigate('/organization/founders-portal');
                         },
                         shouldRender: () => isFounder || isAdmin,
