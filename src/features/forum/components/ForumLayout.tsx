@@ -16,7 +16,7 @@ export function ForumLayout({
   return (
     <div className="flex h-full min-h-0" data-testid="forum-layout">
       {sidebar && (
-        <aside className="hidden md:flex w-1/4 min-w-[200px] max-w-[320px] flex-shrink-0 border-r border-[var(--card-border)] bg-[var(--sidebar-bg)]">
+        <aside className="hidden md:flex w-1/3 min-w-[240px] max-w-[400px] flex-shrink-0 border-r border-[var(--card-border)] bg-[var(--sidebar-bg)]">
           <ScrollArea className="w-full">
             <div className="p-4">
               {sidebar}
