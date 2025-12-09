@@ -235,7 +235,6 @@ export function LeftSidebar() {
         { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing' },
         { id: 'settings', label: 'Ajustes', icon: Settings, href: '/organization/settings' },
         { id: 'activity', label: 'Actividad', icon: Activity, href: '/organization/activity', restricted: 'coming_soon' },
-        { id: 'pdf-settings', label: 'Documentos PDF', icon: FileText, href: '/organization/pdf-settings', restricted: 'coming_soon' },
         { type: 'section-header', id: 'section-finanzas', label: 'Finanzas' },
         { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
         { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', restricted: 'lab_user' },
