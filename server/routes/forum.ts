@@ -788,6 +788,65 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
       return res.status(500).json({ error: error.message || "Internal error" });
     }
   });
+
+  // PATCH /api/forum/categories/:id - Update category (admin only)
+  app.patch("/api/forum/categories/:id", async (req: Request, res: Response) => {
+    try {
+      await verifyAdminUser(req.headers.authorization);
+      const { id } = req.params;
+      const { name, description, icon, color, allowed_roles, sort_order } = req.body;
+
+      const updateData: Record<string, any> = {};
+      if (name !== undefined) {
+        updateData.name = name;
+        updateData.slug = slugify(name);
+      }
+      if (description !== undefined) updateData.description = description;
+      if (icon !== undefined) updateData.icon = icon;
+      if (color !== undefined) updateData.color = color;
+      if (allowed_roles !== undefined) updateData.allowed_roles = allowed_roles;
+      if (sort_order !== undefined) updateData.sort_order = sort_order;
+
+      const { data: category, error } = await supabaseAdmin
+        .from('forum_categories')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw new HttpError(400, error.message);
+
+      return res.json(category);
+    } catch (error: any) {
+      if (error instanceof HttpError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
+  // DELETE /api/forum/categories/:id - Delete category (admin only)
+  app.delete("/api/forum/categories/:id", async (req: Request, res: Response) => {
+    try {
+      await verifyAdminUser(req.headers.authorization);
+      const { id } = req.params;
+
+      // Soft delete - set is_active to false
+      const { error } = await supabaseAdmin
+        .from('forum_categories')
+        .update({ is_active: false })
+        .eq('id', id);
+
+      if (error) throw new HttpError(400, error.message);
+
+      return res.json({ success: true });
+    } catch (error: any) {
+      if (error instanceof HttpError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
 }
 
 export default registerForumRoutes;
