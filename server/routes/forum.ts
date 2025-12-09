@@ -19,7 +19,7 @@ async function getUserRoles(userId: string): Promise<string[]> {
   const { data: adminCheck } = await supabaseAdmin
     .from('admin_users')
     .select('auth_id')
-    .eq('user_id', userId)
+    .eq('auth_id', userId)
     .maybeSingle();
 
   if (adminCheck) {
