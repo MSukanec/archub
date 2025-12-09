@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getAttachmentPublicUrl } from '@/features/contacts/utils';
 import { useOrganizationMembers } from '@/features/organization/hooks';
 import { useProjectPersonnel, useCreatePersonnel, useContactAttachmentsForPersonnel } from '@/features/personnel/hooks';
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 
 const personnelFormSchema = z.object({
   contact_ids: z.array(z.string()).min(1, "Selecciona al menos un contacto")
@@ -149,12 +150,24 @@ export function PersonnelAddModal({ data }: PersonnelAddModalProps) {
 
       // Create personnel records sequentially using the feature hook
       for (const contact_id of data.contact_ids) {
-        await createPersonnel.mutateAsync({
+        const result = await createPersonnel.mutateAsync({
           project_id: projectId,
           organization_id: organizationId,
           contact_id,
           notes: '',
           created_by: currentMember?.id || null,
+        });
+
+        const contact = (contacts as any[]).find((c: any) => c.id === contact_id);
+        const displayName = contact ? getDisplayName(contact) : 'Personal';
+        
+        await logActivity({
+          organization_id: organizationId,
+          user_id: currentUser?.user?.id || '',
+          action: ACTIVITY_ACTIONS.ADD_PERSONNEL,
+          target_table: TARGET_TABLES.PERSONNEL,
+          target_id: result?.id || contact_id,
+          metadata: { full_name: displayName, role: null }
         });
       }
 

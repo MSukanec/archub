@@ -44,7 +44,25 @@ export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
     
     [ACTIVITY_ACTIONS.ADD_CLIENT]: { icon: '🤝', label: 'Cliente Agregado', color: 'green' },
     [ACTIVITY_ACTIONS.UPDATE_CLIENT]: { icon: '✏️', label: 'Cliente Editado', color: 'yellow' },
-    [ACTIVITY_ACTIONS.REMOVE_CLIENT]: { icon: '🚪', label: 'Cliente Removido', color: 'red' }
+    [ACTIVITY_ACTIONS.REMOVE_CLIENT]: { icon: '🚪', label: 'Cliente Removido', color: 'red' },
+    
+    [ACTIVITY_ACTIONS.CREATE_PROJECT]: { icon: '🏗️', label: 'Proyecto Creado', color: 'blue' },
+    [ACTIVITY_ACTIONS.UPDATE_PROJECT]: { icon: '✏️', label: 'Proyecto Editado', color: 'yellow' },
+    [ACTIVITY_ACTIONS.DELETE_PROJECT]: { icon: '🗑️', label: 'Proyecto Eliminado', color: 'red' },
+    
+    [ACTIVITY_ACTIONS.ADD_PERSONNEL]: { icon: '👷', label: 'Personal Agregado', color: 'green' },
+    [ACTIVITY_ACTIONS.UPDATE_PERSONNEL]: { icon: '✏️', label: 'Personal Editado', color: 'yellow' },
+    [ACTIVITY_ACTIONS.DELETE_PERSONNEL]: { icon: '🗑️', label: 'Personal Eliminado', color: 'red' },
+    [ACTIVITY_ACTIONS.REGISTER_ATTENDANCE]: { icon: '📋', label: 'Asistencia Registrada', color: 'blue' },
+    
+    [ACTIVITY_ACTIONS.CREATE_SUBCONTRACT]: { icon: '📑', label: 'Subcontrato Creado', color: 'blue' },
+    [ACTIVITY_ACTIONS.UPDATE_SUBCONTRACT]: { icon: '✏️', label: 'Subcontrato Editado', color: 'yellow' },
+    [ACTIVITY_ACTIONS.DELETE_SUBCONTRACT]: { icon: '🗑️', label: 'Subcontrato Eliminado', color: 'red' },
+    
+    [ACTIVITY_ACTIONS.ADD_MATERIAL]: { icon: '🧱', label: 'Material Agregado', color: 'green' },
+    [ACTIVITY_ACTIONS.UPDATE_MATERIAL]: { icon: '✏️', label: 'Material Editado', color: 'yellow' },
+    [ACTIVITY_ACTIONS.DELETE_MATERIAL]: { icon: '🗑️', label: 'Material Eliminado', color: 'red' },
+    [ACTIVITY_ACTIONS.CREATE_PURCHASE]: { icon: '🛒', label: 'Compra Creada', color: 'blue' }
   };
 
   const info = actionInfo[action] || { icon: '📊', label: 'Actividad', color: 'gray' };
@@ -76,6 +94,34 @@ export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
     case ACTIVITY_ACTIONS.ADD_CONTACT:
     case ACTIVITY_ACTIONS.UPDATE_CONTACT:
       description = `${metadata?.first_name || ''} ${metadata?.last_name || ''}${metadata?.company_name ? ` de ${metadata.company_name}` : ''}`.trim();
+      break;
+      
+    case ACTIVITY_ACTIONS.CREATE_PROJECT:
+    case ACTIVITY_ACTIONS.UPDATE_PROJECT:
+      description = `${metadata?.name || 'Proyecto'}${metadata?.project_type ? ` - ${metadata.project_type}` : ''}`;
+      break;
+      
+    case ACTIVITY_ACTIONS.ADD_PERSONNEL:
+    case ACTIVITY_ACTIONS.UPDATE_PERSONNEL:
+      description = `${metadata?.full_name || metadata?.name || 'Personal'}${metadata?.role ? ` - ${metadata.role}` : ''}`;
+      break;
+      
+    case ACTIVITY_ACTIONS.REGISTER_ATTENDANCE:
+      description = `${metadata?.personnel_name || 'Personal'}${metadata?.attendance_type ? ` - ${metadata.attendance_type}` : ''}`;
+      break;
+      
+    case ACTIVITY_ACTIONS.CREATE_SUBCONTRACT:
+    case ACTIVITY_ACTIONS.UPDATE_SUBCONTRACT:
+      description = `${metadata?.name || 'Subcontrato'}${metadata?.contractor ? ` con ${metadata.contractor}` : ''}`;
+      break;
+      
+    case ACTIVITY_ACTIONS.ADD_MATERIAL:
+    case ACTIVITY_ACTIONS.UPDATE_MATERIAL:
+      description = `${metadata?.name || 'Material'}${metadata?.quantity ? ` x${metadata.quantity}` : ''}`;
+      break;
+      
+    case ACTIVITY_ACTIONS.CREATE_PURCHASE:
+      description = `Compra de ${metadata?.material_name || 'material'}${metadata?.amount ? ` - $${metadata.amount}` : ''}`;
       break;
       
     default:

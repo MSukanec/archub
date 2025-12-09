@@ -25,6 +25,7 @@ import {
   useCreatePersonnelAttendance, 
   useUpdatePersonnelAttendance 
 } from '@/features/personnel/hooks'
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity'
 
 const attendanceSchema = z.object({
   attendance_date: z.date({
@@ -175,7 +176,7 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
           throw new Error('No se encontró el miembro de la organización para el usuario actual')
         }
         
-        await createAttendance.mutateAsync({
+        const result = await createAttendance.mutateAsync({
           personnel_id: data.personnel_id,
           attendance_type: data.attendance_type,
           hours_worked: hoursWorked,
@@ -184,6 +185,20 @@ export function PersonnelAttendanceModal({ modalData, onClose }: PersonnelAttend
           project_id: projectId,
           organization_id: currentUser.organization.id,
           work_date: workDate,
+        })
+
+        const personnelName = getContactName()
+        await logActivity({
+          organization_id: currentUser.organization.id,
+          user_id: currentUser.user.id,
+          action: ACTIVITY_ACTIONS.REGISTER_ATTENDANCE,
+          target_table: TARGET_TABLES.PERSONNEL_ATTENDANCE,
+          target_id: result?.id || data.personnel_id,
+          metadata: { 
+            personnel_name: personnelName, 
+            attendance_type: data.attendance_type,
+            date: workDate
+          }
         })
       }
       onClose()

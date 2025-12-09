@@ -99,7 +99,29 @@ export const ACTIVITY_ACTIONS = {
   // Clientes
   ADD_CLIENT: 'add_client',
   UPDATE_CLIENT: 'update_client',
-  REMOVE_CLIENT: 'remove_client'
+  REMOVE_CLIENT: 'remove_client',
+  
+  // Proyectos
+  CREATE_PROJECT: 'create_project',
+  UPDATE_PROJECT: 'update_project',
+  DELETE_PROJECT: 'delete_project',
+  
+  // Personal
+  ADD_PERSONNEL: 'add_personnel',
+  UPDATE_PERSONNEL: 'update_personnel',
+  DELETE_PERSONNEL: 'delete_personnel',
+  REGISTER_ATTENDANCE: 'register_attendance',
+  
+  // Subcontratos
+  CREATE_SUBCONTRACT: 'create_subcontract',
+  UPDATE_SUBCONTRACT: 'update_subcontract',
+  DELETE_SUBCONTRACT: 'delete_subcontract',
+  
+  // Materiales
+  ADD_MATERIAL: 'add_material',
+  UPDATE_MATERIAL: 'update_material',
+  DELETE_MATERIAL: 'delete_material',
+  CREATE_PURCHASE: 'create_purchase'
 } as const;
 
 // Tabla de mapeo para target_table
@@ -111,5 +133,11 @@ export const TARGET_TABLES = {
   KANBAN_CARDS: 'kanban_cards',
   CONTACTS: 'contacts',
   ORGANIZATION_MEMBERS: 'organization_members',
-  PROJECT_CLIENTS: 'project_clients'
+  PROJECT_CLIENTS: 'project_clients',
+  PROJECTS: 'projects',
+  PERSONNEL: 'personnel',
+  PERSONNEL_ATTENDANCE: 'personnel_attendance',
+  SUBCONTRACTS: 'subcontracts',
+  MATERIALS: 'materials',
+  MATERIAL_PURCHASES: 'material_purchases'
 } as const;

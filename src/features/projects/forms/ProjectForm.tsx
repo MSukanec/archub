@@ -27,6 +27,7 @@ import { uploadProjectImage, updateProjectLastActive } from '@/features/projects
 import { QUERY_KEYS } from '../constants';
 import { USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization';
 import ProjectColorAdvanced from '../components/ProjectColorAdvanced';
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 
 const PRESET_COLORS = [
   { hex: '#007aff', name: 'Ocean' },
@@ -546,6 +547,16 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
           }
         });
 
+        const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
+        await logActivity({
+          organization_id: organizationId,
+          user_id: userData?.user?.id || '',
+          action: ACTIVITY_ACTIONS.UPDATE_PROJECT,
+          target_table: TARGET_TABLES.PROJECTS,
+          target_id: project.id,
+          metadata: { name: cleanedData.name, project_type: projectTypeName }
+        });
+
         if (selectedImageFile) {
           await handleImageUpload(project.id);
         }
@@ -601,6 +612,16 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
         if (selectedImageFile && newProject.id) {
           await handleImageUpload(newProject.id);
         }
+
+        const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
+        await logActivity({
+          organization_id: organizationId,
+          user_id: userData?.user?.id || '',
+          action: ACTIVITY_ACTIONS.CREATE_PROJECT,
+          target_table: TARGET_TABLES.PROJECTS,
+          target_id: newProject.id,
+          metadata: { name: cleanedData.name, project_type: projectTypeName }
+        });
 
         toast({
           title: "Proyecto creado",

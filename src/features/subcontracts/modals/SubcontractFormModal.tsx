@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useGlobalModalStore } from '@/components/modal';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
@@ -41,6 +43,7 @@ interface SubcontractFormModalProps {
 export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { closeModal } = useGlobalModalStore();
+  const { data: currentUser } = useCurrentUser();
 
   const createSubcontract = useCreateSubcontract();
   const updateSubcontract = useUpdateSubcontract();
@@ -87,8 +90,17 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
             exchange_rate: existingSubcontract?.exchange_rate || null,
           }
         });
+
+        await logActivity({
+          organization_id: modalData.organizationId,
+          user_id: currentUser?.user?.id || '',
+          action: ACTIVITY_ACTIONS.UPDATE_SUBCONTRACT,
+          target_table: TARGET_TABLES.SUBCONTRACTS,
+          target_id: modalData.subcontractId,
+          metadata: { name: data.title, contractor: null }
+        });
       } else {
-        await createSubcontract.mutateAsync({
+        const result = await createSubcontract.mutateAsync({
           project_id: modalData.projectId,
           organization_id: modalData.organizationId,
           date: data.date,
@@ -99,6 +111,15 @@ export function SubcontractFormModal({ modalData }: SubcontractFormModalProps) {
           currency_id: null,
           amount_total: null,
           exchange_rate: null,
+        });
+
+        await logActivity({
+          organization_id: modalData.organizationId,
+          user_id: currentUser?.user?.id || '',
+          action: ACTIVITY_ACTIONS.CREATE_SUBCONTRACT,
+          target_table: TARGET_TABLES.SUBCONTRACTS,
+          target_id: result?.id || '',
+          metadata: { name: data.title, contractor: null }
         });
       }
       
