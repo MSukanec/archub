@@ -709,8 +709,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
   // POST /api/forum/categories - Create new category (admin only)
   app.post("/api/forum/categories", async (req: Request, res: Response) => {
     try {
-      const token = extractToken(req.headers.authorization);
-      const user = await verifyAdminUser(token);
+      const user = await verifyAdminUser(req.headers.authorization);
 
       const { 
         name, 

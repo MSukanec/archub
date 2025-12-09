@@ -311,7 +311,11 @@ export function useCreateCategory() {
   return useMutation({
     mutationFn: async (data: CreateCategoryData) => {
       const res = await apiRequest('POST', '/api/forum/categories', data);
-      return res.json();
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || 'Error al crear categoría');
+      }
+      return json;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
