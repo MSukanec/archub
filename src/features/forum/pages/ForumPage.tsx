@@ -84,6 +84,11 @@ export function ForumPage({ allowedRoles }: ForumPageProps) {
     );
   };
 
+  const currentCategory = useMemo(() => {
+    if (!selectedCategory) return null;
+    return categories.find(c => c.slug === selectedCategory) || null;
+  }, [selectedCategory, categories]);
+
   const renderContent = () => {
     if (selectedThread) {
       return (
@@ -99,6 +104,7 @@ export function ForumPage({ allowedRoles }: ForumPageProps) {
         threads={threads}
         isLoading={threadsLoading}
         onThreadClick={handleThreadClick}
+        selectedCategory={currentCategory}
       />
     );
   };

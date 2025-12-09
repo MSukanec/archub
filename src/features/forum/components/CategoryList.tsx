@@ -28,7 +28,7 @@ import { useDeleteCategory, type ForumCategoryWithCounts } from '../services';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { useToast } from '@/hooks/use-toast';
 
-const ICON_MAP: Record<string, LucideIcon> = {
+export const ICON_MAP: Record<string, LucideIcon> = {
   'message-square': MessageSquare,
   'briefcase': Briefcase,
   'help-circle': HelpCircle,
@@ -41,7 +41,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   'folder': Folder,
 };
 
-function getIconComponent(iconName: string | null): LucideIcon {
+export function getIconComponent(iconName: string | null): LucideIcon {
   if (!iconName) return MessageSquare;
   return ICON_MAP[iconName] || MessageSquare;
 }

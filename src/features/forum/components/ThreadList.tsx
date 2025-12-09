@@ -1,13 +1,15 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, Users } from 'lucide-react';
 import { ThreadCard } from './ThreadCard';
-import type { ForumThreadWithAuthor } from '../services';
+import { getIconComponent } from './CategoryList';
+import type { ForumThreadWithAuthor, ForumCategoryWithCounts } from '../services';
 
 interface ThreadListProps {
   threads: ForumThreadWithAuthor[];
   isLoading?: boolean;
   onThreadClick?: (thread: ForumThreadWithAuthor) => void;
+  selectedCategory?: ForumCategoryWithCounts | null;
 }
 
 function ThreadListSkeleton() {
@@ -40,6 +42,7 @@ export function ThreadList({
   threads,
   isLoading,
   onThreadClick,
+  selectedCategory,
 }: ThreadListProps) {
   if (isLoading) {
     return <ThreadListSkeleton />;
@@ -54,9 +57,55 @@ export function ThreadList({
            new Date(a.last_activity_at || a.created_at).getTime();
   });
 
+  const CategoryIcon = selectedCategory ? getIconComponent(selectedCategory.icon) : MessageSquare;
+
   return (
     <div className="space-y-4" data-testid="thread-list">
-      {hasThreads && (
+      {selectedCategory && (
+        <div 
+          className="rounded-xl border border-[var(--card-border)] bg-gradient-to-r from-[var(--card-bg)] to-transparent overflow-hidden"
+          data-testid="category-header"
+        >
+          <div 
+            className="h-16 w-full"
+            style={{ 
+              background: selectedCategory.color 
+                ? `linear-gradient(135deg, ${selectedCategory.color}20 0%, ${selectedCategory.color}40 100%)`
+                : 'linear-gradient(135deg, var(--accent)20 0%, var(--accent)40 100%)'
+            }}
+          />
+          <div className="p-5 -mt-8">
+            <div className="flex items-start gap-4">
+              <div 
+                className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg border-4 border-[var(--card-bg)]"
+                style={{ 
+                  backgroundColor: selectedCategory.color || 'var(--accent)',
+                }}
+              >
+                <CategoryIcon className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1 pt-2">
+                <h2 className="text-xl font-bold text-[var(--text-default)]">
+                  {selectedCategory.name}
+                </h2>
+                {selectedCategory.description && (
+                  <p className="text-sm text-[var(--text-muted)] mt-1 leading-relaxed">
+                    {selectedCategory.description}
+                  </p>
+                )}
+                <div className="flex items-center gap-4 mt-3 text-xs text-[var(--text-muted)]">
+                  <span className="flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    {selectedCategory.thread_count ?? 0} {(selectedCategory.thread_count ?? 0) === 1 ? 'tema' : 'temas'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!selectedCategory && hasThreads && (
         <div className="flex items-center gap-3">
           <span className="text-sm text-[var(--text-muted)]">
             {threads.length} {threads.length === 1 ? 'tema' : 'temas'}
