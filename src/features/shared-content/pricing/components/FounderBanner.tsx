@@ -90,10 +90,7 @@ export function FounderBanner({ mode = 'public' }: FounderBannerProps) {
               ¿Preguntas? <Link href="/contact" className="text-accent hover:underline">Contacta con nuestro equipo</Link>
             </p>
             <Button 
-              onClick={() => {
-                const url = mode === 'dashboard' ? '/settings/founders' : '/fundadores';
-                window.open(url, '_blank');
-              }}
+              onClick={() => navigate('/founders')}
               className="text-xs bg-accent text-accent-foreground hover:bg-accent/90 gap-1.5 h-8 px-3"
             >
               Ver Detalles
