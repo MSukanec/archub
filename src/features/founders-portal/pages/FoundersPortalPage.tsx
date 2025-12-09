@@ -8,12 +8,13 @@ import { FounderDirectory } from '../components/FounderDirectory';
 import { FounderEvents } from '../components/FounderEvents';
 import { FounderVoting } from '../components/FounderVoting';
 import { FounderForum } from '../components/FounderForum';
+import { FoundersDashboardTab } from '@/pages/founders-portal/tabs/FoundersDashboardTab';
 import { Award, FolderPlus } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 
 export function FoundersPortalPage() {
-  const [activeTab, setActiveTab] = useState('directorio');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const { data: userData, isLoading } = useCurrentUser();
   const isAdmin = useIsAdmin();
   const [location, navigate] = useLocation();
@@ -22,6 +23,7 @@ export function FoundersPortalPage() {
   const isFounder = userData?.organization?.settings?.is_founder === true;
 
   const tabs = [
+    { id: 'dashboard', label: 'Visión General', isActive: activeTab === 'dashboard' },
     { id: 'directorio', label: 'Directorio', isActive: activeTab === 'directorio' },
     { id: 'eventos', label: 'Eventos', isActive: activeTab === 'eventos' },
     { id: 'votaciones', label: 'Votaciones', isActive: activeTab === 'votaciones' },
@@ -81,6 +83,8 @@ export function FoundersPortalPage() {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'dashboard':
+        return <FoundersDashboardTab onTabChange={setActiveTab} />;
       case 'directorio':
         return <FounderDirectory />;
       case 'eventos':
@@ -90,7 +94,7 @@ export function FoundersPortalPage() {
       case 'foro':
         return <FounderForum />;
       default:
-        return <FounderDirectory />;
+        return <FoundersDashboardTab onTabChange={setActiveTab} />;
     }
   };
 
