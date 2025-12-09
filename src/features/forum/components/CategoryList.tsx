@@ -105,14 +105,14 @@ export function CategoryList({
       <button
         onClick={() => onCategorySelect(null)}
         className={cn(
-          'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+          'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors',
           selectedCategory === null
-            ? 'bg-accent text-white'
+            ? 'bg-accent text-white font-medium'
             : 'text-[var(--text-default)] hover:bg-[var(--hover-bg)]'
         )}
         data-testid="category-all"
       >
-        <MessageSquare className="h-4 w-4 flex-shrink-0" />
+        <MessageSquare className="h-3.5 w-3.5 flex-shrink-0" />
         <span className="flex-1 text-left">Todos</span>
       </button>
 
@@ -129,15 +129,15 @@ export function CategoryList({
             <button
               onClick={() => onCategorySelect(category.slug)}
               className={cn(
-                'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors',
                 isSelected
-                  ? 'bg-accent text-white'
+                  ? 'bg-accent text-white font-medium'
                   : 'text-[var(--text-default)] hover:bg-[var(--hover-bg)]'
               )}
               data-testid={`category-${category.slug}`}
             >
               <Icon
-                className="h-4 w-4 flex-shrink-0"
+                className="h-3.5 w-3.5 flex-shrink-0"
                 style={{ color: isSelected ? undefined : category.color || undefined }}
               />
               <span className="flex-1 text-left truncate">{category.name}</span>

@@ -107,7 +107,7 @@ export function ForumPage({ allowedRoles }: ForumPageProps) {
         isLoading={threadsLoading}
         onThreadClick={handleThreadClick}
         selectedCategory={currentCategory}
-        onNewThread={() => openModal('forum-thread')}
+        onNewThread={() => openModal('forum-thread', { categoryId: currentCategory?.id })}
       />
     );
   };
