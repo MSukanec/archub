@@ -36,7 +36,7 @@ export function ForumPage({ allowedRoles }: ForumPageProps) {
   }, [allCategories, allowedRoles]);
 
   const { data: threadsData, isLoading: threadsLoading } = useForumThreads(
-    selectedCategory || 'all',
+    selectedCategory,
     1,
     50
   );

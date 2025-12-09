@@ -90,6 +90,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
     try {
       await createPostMutation.mutateAsync({
         thread_id: thread.id,
+        thread_slug: threadSlug,
         content: replyContent,
       });
       setReplyContent('');

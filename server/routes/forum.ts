@@ -103,6 +103,87 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // GET /api/forum/threads - List all threads (with optional category filter)
+  app.get("/api/forum/threads", async (req: Request, res: Response) => {
+    try {
+      const token = extractToken(req.headers.authorization);
+      const user = await requireUser(token);
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+      const offset = (page - 1) * limit;
+      const categorySlug = req.query.category as string | undefined;
+
+      const userRoles = await getUserRoles(user.userId);
+
+      let categoryId: string | null = null;
+      if (categorySlug && categorySlug !== 'all') {
+        const { data: category, error: catError } = await supabaseAdmin
+          .from('forum_categories')
+          .select('id, allowed_roles, is_active')
+          .eq('slug', categorySlug)
+          .single();
+
+        if (catError || !category) {
+          throw new HttpError(404, "Category not found");
+        }
+
+        const allowedRoles = category.allowed_roles || ['public'];
+        if (!allowedRoles.some((role: string) => userRoles.includes(role))) {
+          throw new HttpError(403, "Access denied to this category");
+        }
+        categoryId = category.id;
+      }
+
+      const { data: allCategories } = await supabaseAdmin
+        .from('forum_categories')
+        .select('id, allowed_roles')
+        .eq('is_active', true);
+
+      const accessibleCategoryIds = (allCategories || [])
+        .filter(cat => {
+          const allowedRoles = cat.allowed_roles || ['public'];
+          return allowedRoles.some((role: string) => userRoles.includes(role));
+        })
+        .map(cat => cat.id);
+
+      let query = supabaseAdmin
+        .from('forum_threads')
+        .select(`
+          *,
+          author:users!forum_threads_author_id_fkey(id, full_name, avatar_url),
+          category:forum_categories!forum_threads_category_id_fkey(id, name, slug, allowed_roles)
+        `, { count: 'exact' })
+        .eq('is_deleted', false)
+        .in('category_id', accessibleCategoryIds);
+
+      if (categoryId) {
+        query = query.eq('category_id', categoryId);
+      }
+
+      const { data: threads, error, count } = await query
+        .order('is_pinned', { ascending: false })
+        .order('last_activity_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (error) throw new HttpError(500, error.message);
+
+      return res.json({
+        threads: threads || [],
+        pagination: {
+          page,
+          limit,
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limit)
+        }
+      });
+    } catch (error: any) {
+      if (error instanceof HttpError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
   // GET /api/forum/categories/:slug/threads - List threads in a category
   app.get("/api/forum/categories/:slug/threads", async (req: Request, res: Response) => {
     try {

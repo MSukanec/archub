@@ -3,7 +3,7 @@ import { apiRequest } from '@/lib/queryClient';
 
 export const FORUM_QUERY_KEYS = {
   categories: ['/api/forum/categories'] as const,
-  categoryThreads: (categorySlug: string) => ['/api/forum/categories', categorySlug, 'threads'] as const,
+  threads: ['/api/forum/threads'] as const,
   thread: (threadSlug: string) => ['/api/forum/threads', threadSlug] as const,
   threadReactions: (threadId: string) => ['/api/forum/threads', threadId, 'reactions'] as const,
 };
@@ -108,17 +108,17 @@ export function useForumCategories() {
   });
 }
 
-export function useForumThreads(categorySlug: string, page: number = 1, limit: number = 20) {
+export function useForumThreads(categorySlug: string | null, page: number = 1, limit: number = 20) {
   return useQuery<ThreadsResponse>({
-    queryKey: [...FORUM_QUERY_KEYS.categoryThreads(categorySlug), { page, limit }],
+    queryKey: [...FORUM_QUERY_KEYS.threads, { category: categorySlug || 'all', page, limit }],
     queryFn: async () => {
-      const res = await fetch(`/api/forum/categories/${categorySlug}/threads?page=${page}&limit=${limit}`, {
+      const categoryParam = categorySlug && categorySlug !== 'all' ? `&category=${categorySlug}` : '';
+      const res = await fetch(`/api/forum/threads?page=${page}&limit=${limit}${categoryParam}`, {
         credentials: 'include',
       });
       if (!res.ok) throw new Error('Failed to fetch threads');
       return res.json();
     },
-    enabled: !!categorySlug,
   });
 }
 
@@ -144,13 +144,9 @@ export function useCreateThread() {
       const res = await apiRequest('POST', '/api/forum/threads', data);
       return res.json();
     },
-    onSuccess: (newThread) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
-      if (newThread?.category?.slug) {
-        queryClient.invalidateQueries({
-          queryKey: FORUM_QUERY_KEYS.categoryThreads(newThread.category.slug),
-        });
-      }
+      queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
     },
   });
 }
@@ -178,15 +174,21 @@ export function useCreatePost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: { thread_id: string; content: string; parent_id?: string }) => {
-      const res = await apiRequest('POST', '/api/forum/posts', data);
-      return res.json();
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey[0] === '/api/forum/threads' && query.queryKey.length >= 2,
+    mutationFn: async (data: { thread_id: string; thread_slug?: string; content: string; parent_id?: string }) => {
+      const res = await apiRequest('POST', '/api/forum/posts', {
+        thread_id: data.thread_id,
+        content: data.content,
+        parent_id: data.parent_id,
       });
+      return { ...await res.json(), thread_slug: data.thread_slug };
+    },
+    onSuccess: (result) => {
+      if (result.thread_slug) {
+        queryClient.invalidateQueries({
+          queryKey: FORUM_QUERY_KEYS.thread(result.thread_slug),
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
     },
   });
 }
