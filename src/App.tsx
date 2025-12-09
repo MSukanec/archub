@@ -102,6 +102,9 @@ const PortalAuthCallback = lazy(() => import("@/pages/client-portal/PortalAuthCa
 
 // Learning Pages (Lazy Loaded - incluye reproductor Vimeo pesado)
 const LearningDashboard = lazy(() => import("@/pages/learning/dashboard/LearningDashboard"));
+
+// Founders Portal (Lazy Loaded - solo fundadores)
+const FoundersPortalPage = lazy(() => import("@/features/founders-portal").then(m => ({ default: m.FoundersPortalPage })));
 const CourseList = lazy(() => import("@/pages/learning/courses/CourseList"));
 const CourseInfo = lazy(() => import("@/pages/learning/courses/CourseInfo"));
 const CourseView = lazy(() => import("@/pages/learning/courses/CourseView"));
@@ -186,6 +189,11 @@ function Router() {
         <Route path="/organization/dashboard" component={OrganizationDashboard} />
         <Route path="/organization/basic-data" component={OrganizationData} />
         <Route path="/organization/activity" component={Activity} />
+        <Route path="/organization/founders-portal">
+          <Suspense fallback={<LazyLoadFallback />}>
+            <FoundersPortalPage />
+          </Suspense>
+        </Route>
         <Route path="/contacts" component={Contacts} />
         <Route path="/organization/projects" component={Projects} />
         

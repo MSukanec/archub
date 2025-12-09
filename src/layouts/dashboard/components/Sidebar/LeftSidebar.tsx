@@ -220,6 +220,7 @@ export function LeftSidebar() {
 
   // Organización y usuario para settings sections
   const organizationName = userData?.organization?.name || 'Organización';
+  const isFounder = userData?.organization?.settings?.is_founder === true;
 
   // Navegación según el nivel del sidebar
   const getNavigationItems = (): NavigationItem[] => {
@@ -512,14 +513,10 @@ export function LeftSidebar() {
                         icon: <Award className="h-5 w-5" />,
                         testId: 'button-sidebar-founders',
                         onClick: () => {
-                          if (!isAdmin) return;
                           setSidebarLevel('founders');
-                          navigate('/founders');
+                          navigate('/organization/founders-portal');
                         },
-                        shouldRender: () => true,
-                        wrapper: (children: React.ReactNode) => (
-                          <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>{children}</RoleRestricted>
-                        ),
+                        shouldRender: () => isFounder || isAdmin,
                       },
                       {
                         id: 'community' as const,

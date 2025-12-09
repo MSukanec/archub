@@ -1,15 +1,42 @@
 import { Layout } from '@/layouts/dashboard/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useIsAdmin } from '@/hooks/use-admin-permissions';
+import { useLocation } from 'wouter';
+import { useEffect } from 'react';
 import { FounderDirectory } from '../components/FounderDirectory';
 import { FounderEvents } from '../components/FounderEvents';
 import { FounderVoting } from '../components/FounderVoting';
 import { FounderForum } from '../components/FounderForum';
-import { Building2, Calendar, Vote, MessagesSquare } from 'lucide-react';
+import { Building2, Calendar, Vote, MessagesSquare, Loader2 } from 'lucide-react';
 
 export function FoundersPortalPage() {
-  const { data: userData } = useCurrentUser();
+  const { data: userData, isLoading } = useCurrentUser();
+  const isAdmin = useIsAdmin();
+  const [, navigate] = useLocation();
+  
+  const isFounder = userData?.organization?.settings?.is_founder === true;
   const organizationName = userData?.organization?.name || 'tu organización';
+
+  useEffect(() => {
+    if (!isLoading && !isFounder && !isAdmin) {
+      navigate('/organization/dashboard');
+    }
+  }, [isLoading, isFounder, isAdmin, navigate]);
+
+  if (isLoading) {
+    return (
+      <Layout headerProps={{ icon: Building2, title: 'Portal Fundadores' }}>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!isFounder && !isAdmin) {
+    return null;
+  }
 
   return (
     <Layout
