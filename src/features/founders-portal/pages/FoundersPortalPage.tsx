@@ -10,6 +10,7 @@ import { FounderVoting } from '../components/FounderVoting';
 import { FounderForum } from '../components/FounderForum';
 import { Award, Plus, FolderPlus } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';
+import { Button } from '@/components/ui/button';
 
 export function FoundersPortalPage() {
   const [activeTab, setActiveTab] = useState('directorio');
@@ -39,22 +40,33 @@ export function FoundersPortalPage() {
     };
 
     if (activeTab === 'foro') {
-      const actions: any[] = [];
+      const actions: React.ReactNode[] = [];
       if (isAdmin) {
-        actions.push({
-          id: 'new-category',
-          label: 'Nueva Categoría',
-          icon: FolderPlus,
-          onClick: () => openModal('forum-category'),
-          variant: 'outline' as const,
-        });
+        actions.push(
+          <Button
+            key="new-category"
+            variant="outline"
+            size="sm"
+            onClick={() => openModal('forum-category')}
+            className="h-8 px-3 text-xs font-medium"
+          >
+            <FolderPlus className="w-4 h-4 mr-1.5" />
+            Nueva Categoría
+          </Button>
+        );
       }
-      actions.push({
-        id: 'new-thread',
-        label: 'Nuevo Tema',
-        icon: Plus,
-        onClick: () => openModal('forum-thread'),
-      });
+      actions.push(
+        <Button
+          key="new-thread"
+          variant="default"
+          size="sm"
+          onClick={() => openModal('forum-thread')}
+          className="h-8 px-3 text-xs font-medium"
+        >
+          <Plus className="w-4 h-4 mr-1.5" />
+          Nuevo Tema
+        </Button>
+      );
       return { ...base, actions };
     }
 
