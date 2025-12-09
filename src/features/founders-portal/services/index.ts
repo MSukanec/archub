@@ -2,14 +2,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 
 export const FOUNDERS_QUERY_KEYS = {
-  directory: ['founders', 'directory'] as const,
-  events: ['founders', 'events'] as const,
-  event: (id: string) => ['founders', 'events', id] as const,
-  votes: ['founders', 'votes'] as const,
-  vote: (id: string) => ['founders', 'votes', id] as const,
-  voteResults: (id: string) => ['founders', 'votes', id, 'results'] as const,
-  threads: (category?: string) => ['founders', 'forum', 'threads', category] as const,
-  thread: (id: string) => ['founders', 'forum', 'threads', id] as const,
+  directory: ['/api/founders/directory'] as const,
+  events: ['/api/founders/events'] as const,
+  event: (id: string) => ['/api/founders/events', id] as const,
+  votes: ['/api/founders/votes'] as const,
+  vote: (id: string) => [`/api/founders/votes/${id}`] as const,
+  voteResults: (id: string) => [`/api/founders/votes/${id}/results`] as const,
+  threads: (category?: string) => category 
+    ? [`/api/founders/forum/threads?category=${category}`] as const 
+    : ['/api/founders/forum/threads'] as const,
+  thread: (id: string) => [`/api/founders/forum/threads/${id}`] as const,
 };
 
 export interface FounderOrganization {
@@ -31,13 +33,13 @@ export interface FounderEvent {
   description: string | null;
   event_type: string;
   event_date: string;
-  event_time: string | null;
+  event_end_date: string | null;
   location: string | null;
-  meeting_url: string | null;
+  is_virtual: boolean;
   max_attendees: number | null;
   is_deleted: boolean;
   created_at: string;
-  registrations: { count: number }[];
+  registrations_count?: number;
   is_registered?: boolean;
 }
 
@@ -56,7 +58,6 @@ export interface VoteTopic {
   voting_deadline: string | null;
   created_at: string;
   options: VoteOption[];
-  ballots?: { count: number }[];
   vote_counts?: Record<string, number>;
   total_votes?: number;
   user_voted_option_id?: string | null;
@@ -82,7 +83,7 @@ export interface ForumThread {
     name: string;
     logo_url: string | null;
   } | null;
-  posts: { count: number }[];
+  posts_count?: number;
 }
 
 export interface ForumPost {
@@ -102,7 +103,7 @@ export interface ForumPost {
   } | null;
 }
 
-export interface ThreadWithPosts extends Omit<ForumThread, 'posts'> {
+export interface ThreadWithPosts extends Omit<ForumThread, 'posts_count'> {
   posts: ForumPost[];
 }
 
@@ -196,7 +197,7 @@ export function useCreateThread() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['founders', 'forum', 'threads'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/founders/forum/threads'] });
     },
   });
 }
@@ -211,7 +212,7 @@ export function useCreatePost() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: FOUNDERS_QUERY_KEYS.thread(variables.threadId) });
-      queryClient.invalidateQueries({ queryKey: ['founders', 'forum', 'threads'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/founders/forum/threads'] });
     },
   });
 }

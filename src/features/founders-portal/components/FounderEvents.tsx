@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Clock, MapPin, Video, Users, CalendarX } from 'lucide-react';
+import { Calendar, MapPin, Video, Users, CalendarX } from 'lucide-react';
 import { useFounderEvents, useRegisterEvent, useUnregisterEvent, type FounderEvent } from '../services';
 import { useToast } from '@/hooks/use-toast';
 
@@ -27,7 +27,7 @@ function EventCard({ event }: { event: FounderEvent }) {
   
   const eventDate = new Date(event.event_date);
   const isPast = eventDate < new Date();
-  const registrationCount = event.registrations?.[0]?.count || 0;
+  const registrationCount = event.registrations_count || 0;
   const typeBadge = getEventTypeBadge(event.event_type);
 
   const handleRegister = async () => {
@@ -87,13 +87,6 @@ function EventCard({ event }: { event: FounderEvent }) {
               <span>{format(eventDate, "d 'de' MMMM, yyyy", { locale: es })}</span>
             </div>
             
-            {event.event_time && (
-              <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                <span>{event.event_time}</span>
-              </div>
-            )}
-            
             {event.location && (
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
@@ -101,7 +94,7 @@ function EventCard({ event }: { event: FounderEvent }) {
               </div>
             )}
             
-            {event.meeting_url && (
+            {event.is_virtual && (
               <div className="flex items-center gap-1">
                 <Video className="h-4 w-4" />
                 <span>Online</span>

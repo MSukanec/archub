@@ -230,7 +230,7 @@ function ThreadPosts({ threadId }: { threadId: string }) {
 
 function ThreadCard({ thread }: { thread: ForumThread }) {
   const [isOpen, setIsOpen] = useState(false);
-  const replyCount = thread.posts?.[0]?.count || 0;
+  const replyCount = thread.posts_count || 0;
 
   return (
     <Card data-testid={`card-thread-${thread.id}`}>
