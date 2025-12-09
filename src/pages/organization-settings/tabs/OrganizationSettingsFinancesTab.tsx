@@ -424,9 +424,6 @@ export function OrganizationSettingsFinancesTab() {
           <div className="flex items-center gap-2 mb-6">
             <Coins className="h-5 w-5 text-[var(--accent)]" />
             <h2 className="text-lg font-semibold">Monedas Secundarias y Cotización</h2>
-            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: "hsl(213, 100%, 30%)" }}>
-              PRO
-            </div>
           </div>
           <p className="text-sm text-muted-foreground">
             Configura monedas adicionales y habilita la funcionalidad de cotización para gestionar tasas de cambio personalizadas.
