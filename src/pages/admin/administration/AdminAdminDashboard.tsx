@@ -203,25 +203,45 @@ export default function AdminAdminDashboard() {
     refetchInterval: 30000 // Auto-refresh cada 30 segundos
   })
 
-  // Últimas organizaciones registradas - OPTIMIZADO
-  const { data: recentOrganizations, isLoading: loadingOrgs } = useQuery({
-    queryKey: ['recently-registered-organizations'],
+  // Últimos usuarios registrados con su organización
+  const { data: recentUsers, isLoading: loadingUsers } = useQuery({
+    queryKey: ['recently-registered-users'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
 
-      // Obtener las últimas organizaciones registradas ordenadas por created_at
-      const { data } = await supabase
-        .from('organizations')
-        .select('id, name, created_at')
-        .eq('is_deleted', false)
+      // Obtener los últimos usuarios registrados con su organización principal
+      const { data: users } = await supabase
+        .from('users')
+        .select('id, full_name, email, created_at')
         .order('created_at', { ascending: false })
         .limit(10)
 
-      return data || []
+      if (!users || users.length === 0) return []
+
+      // Obtener las organizaciones de cada usuario via organization_members
+      const userIds = users.map(u => u.id)
+      const { data: memberships } = await supabase
+        .from('organization_members')
+        .select('user_id, organization:organizations(name)')
+        .in('user_id', userIds)
+        .is('is_deleted', false)
+
+      // Crear mapa de usuario -> organización
+      const userOrgMap = new Map<string, string>()
+      memberships?.forEach((m: any) => {
+        if (!userOrgMap.has(m.user_id) && m.organization?.name) {
+          userOrgMap.set(m.user_id, m.organization.name)
+        }
+      })
+
+      return users.map(user => ({
+        ...user,
+        organization_name: userOrgMap.get(user.id) || null
+      }))
     },
     enabled: !!supabase,
-    staleTime: 30000, // Cache 30 segundos
-    refetchInterval: 60000 // Auto-refresh cada minuto
+    staleTime: 30000,
+    refetchInterval: 60000
   })
 
   const userGrowth = stats?.newUsersLastMonth 
@@ -384,33 +404,33 @@ export default function AdminAdminDashboard() {
         </Card>
 
         {/* Últimos Registrados */}
-        <Card className="p-4" data-testid="card-organizaciones-recientes">
+        <Card className="p-4" data-testid="card-usuarios-recientes">
           <div className="flex items-center gap-2 mb-4">
             <UserPlus className="h-4 w-4" />
             <p className="text-xs font-normal text-muted-foreground uppercase tracking-wide">
               Últimos Registrados
             </p>
           </div>
-          {loadingOrgs ? (
+          {loadingUsers ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <Skeleton key={i} className="h-16" />
               ))}
             </div>
-          ) : recentOrganizations && recentOrganizations.length > 0 ? (
+          ) : recentUsers && recentUsers.length > 0 ? (
             <>
               <div className="space-y-2">
-                {recentOrganizations.map((org: any) => (
-                  <div key={org.id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
+                {recentUsers.map((user: any) => (
+                  <div key={user.id} className="flex items-start justify-between gap-3 p-2 rounded-lg border hover:bg-muted/30 transition-colors">
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold truncate text-sm">{org.name}</p>
+                      <p className="font-semibold truncate text-sm">{user.full_name || user.email}</p>
                       <p className="text-xs text-muted-foreground truncate mt-0.5">
-                        Organización
+                        {user.organization_name || 'Sin organización'}
                       </p>
                     </div>
                     <div className="flex-shrink-0">
                       <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {format(new Date(org.created_at), "d 'de' MMM, HH:mm", { locale: es })}
+                        {format(new Date(user.created_at), "d 'de' MMM, HH:mm", { locale: es })}
                       </span>
                     </div>
                   </div>
@@ -425,12 +445,12 @@ export default function AdminAdminDashboard() {
                 className="block mt-4 pt-3 border-t text-center text-sm hover:underline transition-all"
                 style={{ color: 'hsl(var(--accent))' }}
               >
-                Ver más organizaciones
+                Ver más usuarios
               </a>
             </>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">
-              No hay organizaciones registradas
+              No hay usuarios registrados
             </p>
           )}
         </Card>
