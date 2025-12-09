@@ -1,104 +1,26 @@
 import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useProjectContext } from '@/stores/projectContext';
-import { useNavigationStore } from '@/stores/navigationStore';
 import { useThemeStore } from '@/stores/themeStore';
-import { supabase } from '@/lib/supabase';
 import { 
-  hexToRgb, 
-  hexToHsl, 
   calculateHoverColor, 
   calculateForegroundColor,
-  hslToHex 
 } from '../utils/colorUtils';
-import { DEFAULT_ACCENT, QUERY_KEYS } from '../constants';
+import { DEFAULT_ACCENT } from '../constants';
 
 /**
- * Hook que actualiza dinámicamente el color de acento (--accent) 
- * basado en el color del proyecto activo.
+ * Hook que actualiza dinámicamente el color de acento (--accent).
  * 
- * Comportamiento:
- * - Cuando hay un proyecto seleccionado en nivel 'project': usa el color del proyecto
- * - Cuando está en nivel 'organization' o 'general': usa el color por defecto (verde lima)
- * - Actualiza automáticamente cuando cambia el proyecto
+ * NOTA: La funcionalidad de aplicar el color del proyecto a la UI está 
+ * temporalmente desactivada. Siempre usa el color por defecto (verde lima).
+ * 
+ * TODO: Reactivar cuando se defina mejor el sistema de colores por proyecto.
  */
 export function useProjectAccentColor() {
-  const { selectedProjectId } = useProjectContext();
-  const { sidebarLevel } = useNavigationStore();
   const { isDark } = useThemeStore();
 
-  // Use React Query to fetch project color data (will auto-update when invalidated)
-  const { data: projectColor } = useQuery({
-    queryKey: [QUERY_KEYS.PROJECT_COLOR, selectedProjectId],
-    queryFn: async () => {
-      if (!selectedProjectId || !supabase) return null;
-
-      const { data, error } = await supabase
-        .from('projects')
-        .select('color, use_custom_color, custom_color_h, custom_color_hex')
-        .eq('id', selectedProjectId)
-        .eq('is_deleted', false)
-        .single();
-
-      if (error) return null;
-      return data;
-    },
-    enabled: sidebarLevel === 'project' && !!selectedProjectId,
-    staleTime: 30000, // Consider data fresh for 30 seconds
-  });
-
   useEffect(() => {
-    const updateAccentColor = () => {
-      // Si no estamos en nivel de proyecto o no hay proyecto seleccionado, usar color por defecto
-      if (sidebarLevel !== 'project' || !selectedProjectId) {
-        applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
-        return;
-      }
-
-      if (!projectColor) {
-        // Si no hay datos del proyecto, usar el por defecto
-        applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
-        return;
-      }
-
-      try {
-        // Determinar qué color usar basado en use_custom_color
-        let projectColorHex: string | null = null;
-
-        if (projectColor.use_custom_color) {
-          // Usar color personalizado
-          if (projectColor.custom_color_hex) {
-            // Si hay hex guardado, usarlo
-            projectColorHex = projectColor.custom_color_hex;
-          } else if (projectColor.custom_color_h !== null && projectColor.custom_color_h !== undefined) {
-            // Si solo hay hue, convertirlo a hex
-            projectColorHex = hslToHex(projectColor.custom_color_h);
-          }
-        } else {
-          // Usar color de la paleta predefinida
-          projectColorHex = projectColor.color;
-        }
-
-        if (!projectColorHex) {
-          // Si no hay color definido, usar el por defecto
-          applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
-          return;
-        }
-
-        // Convertir el color hex del proyecto a HSL y RGB
-        const rgb = hexToRgb(projectColorHex);
-        const hsl = hexToHsl(projectColorHex);
-
-        // Aplicar el color del proyecto
-        applyAccentColor(projectColorHex, hsl, rgb, isDark);
-
-      } catch (err) {
-        applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
-      }
-    };
-
-    updateAccentColor();
-  }, [selectedProjectId, sidebarLevel, isDark, projectColor]);
+    // Siempre usar color por defecto - funcionalidad de color por proyecto desactivada
+    applyAccentColor(DEFAULT_ACCENT.hex, DEFAULT_ACCENT.hsl, DEFAULT_ACCENT.rgb, isDark);
+  }, [isDark]);
 }
 
 /**
