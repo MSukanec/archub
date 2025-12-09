@@ -1,15 +1,20 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { MessagesSquare } from 'lucide-react';
+import { MessagesSquare, Loader2 } from 'lucide-react';
 
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FileUploader } from '@/components/shared/FileUploader';
 import { useForumCategories, useCreateThread, useUpdateThread, ForumThreadWithAuthor } from '../services';
 import { useToast } from '@/hooks/use-toast';
+import { uploadFile } from '@/lib/storage';
+import { useAuthStore } from '@/stores/authStore';
+import { useProjectContext } from '@/stores/projectContext';
 
 const threadSchema = z.object({
   title: z.string().min(1, 'El título es requerido').max(200, 'Máximo 200 caracteres'),
@@ -18,6 +23,14 @@ const threadSchema = z.object({
 });
 
 type ThreadFormData = z.infer<typeof threadSchema>;
+
+interface FileToUpload {
+  file: File;
+  title: string;
+  description: string;
+  category: string;
+  uploadProgress: number;
+}
 
 interface ForumThreadFormProps {
   modalData?: {
@@ -35,24 +48,16 @@ function parseContentText(content: { text?: string } | null | undefined): string
   return content.text || '';
 }
 
-function formatContentToJson(text: string): { type: string; content: { type: string; content: { type: string; text: string }[] }[] } {
-  return {
-    type: 'doc',
-    content: [{
-      type: 'paragraph',
-      content: [{
-        type: 'text',
-        text: text,
-      }],
-    }],
-  };
-}
-
 export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormProps) {
   const { toast } = useToast();
+  const { user } = useAuthStore();
+  const { currentOrganizationId } = useProjectContext();
   const { data: categories, isLoading: categoriesLoading } = useForumCategories();
   const createMutation = useCreateThread();
   const updateMutation = useUpdateThread();
+
+  const [filesToUpload, setFilesToUpload] = useState<FileToUpload[]>([]);
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
 
   const thread = modalData?.thread;
   const mode = modalData?.mode || (thread ? 'edit' : 'create');
@@ -67,6 +72,46 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
     },
   });
 
+  const uploadAttachments = async (threadId: string) => {
+    if (filesToUpload.length === 0) return;
+    
+    setIsUploadingFiles(true);
+    
+    try {
+      for (let i = 0; i < filesToUpload.length; i++) {
+        const fileItem = filesToUpload[i];
+        
+        setFilesToUpload(prev => 
+          prev.map((f, idx) => idx === i ? { ...f, uploadProgress: 10 } : f)
+        );
+        
+        await uploadFile(fileItem.file, {
+          entity: 'forum_thread_attachment',
+          organization_id: currentOrganizationId || undefined,
+          user_id: user?.id,
+          link_to: {
+            forum_thread_id: threadId,
+          },
+          category: 'forum_attachment',
+          description: fileItem.title || fileItem.file.name,
+        });
+        
+        setFilesToUpload(prev => 
+          prev.map((f, idx) => idx === i ? { ...f, uploadProgress: 100 } : f)
+        );
+      }
+    } catch (error: any) {
+      console.error('Error uploading attachments:', error);
+      toast({
+        title: 'Error al subir imágenes',
+        description: error.message || 'Algunas imágenes no pudieron ser subidas',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploadingFiles(false);
+    }
+  };
+
   const onSubmit = async (data: ThreadFormData) => {
     try {
       if (mode === 'edit' && thread) {
@@ -77,16 +122,26 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
             content: data.content || '',
           },
         });
+        
+        if (filesToUpload.length > 0) {
+          await uploadAttachments(thread.id);
+        }
+        
         toast({
           title: 'Tema actualizado',
           description: 'Los cambios han sido guardados exitosamente',
         });
       } else {
-        await createMutation.mutateAsync({
+        const result = await createMutation.mutateAsync({
           category_id: data.category_id,
           title: data.title,
           content: data.content || '',
         });
+        
+        if (filesToUpload.length > 0 && result?.id) {
+          await uploadAttachments(result.id);
+        }
+        
         toast({
           title: 'Tema creado',
           description: 'Tu tema ha sido publicado exitosamente',
@@ -102,7 +157,7 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
     }
   };
 
-  const isPending = createMutation.isPending || updateMutation.isPending;
+  const isPending = createMutation.isPending || updateMutation.isPending || isUploadingFiles;
   const showCategorySelect = !preselectedCategoryId && mode === 'create';
 
   return (
@@ -170,7 +225,7 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
                   <FormControl>
                     <Textarea
                       placeholder="Describe tu tema o pregunta..."
-                      rows={6}
+                      rows={5}
                       {...field}
                       data-testid="input-thread-content"
                     />
@@ -179,6 +234,22 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
                 </FormItem>
               )}
             />
+
+            <div className="space-y-2">
+              <FormLabel>Imágenes (opcional)</FormLabel>
+              <FileUploader
+                mode="multiple"
+                accept="images"
+                filesToUpload={filesToUpload}
+                onFilesChange={setFilesToUpload}
+                compressOnDrop={true}
+                compressionPreset="sitelog-photo"
+                maxSize={5 * 1024 * 1024}
+                emptyStateDescription="Arrastra imágenes o haz clic para seleccionar"
+                maxSizeLabel="Máximo 5 MB por imagen • Solo imágenes"
+                disabled={isPending}
+              />
+            </div>
           </form>
         </Form>
       </ModalBody>
@@ -186,7 +257,13 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
       <ModalFooter
         leftLabel="Cancelar"
         onLeftClick={onClose}
-        submitText={mode === 'edit' ? 'Guardar Cambios' : 'Crear Tema'}
+        submitText={
+          isUploadingFiles 
+            ? 'Subiendo imágenes...' 
+            : mode === 'edit' 
+              ? 'Guardar Cambios' 
+              : 'Crear Tema'
+        }
         onSubmit={form.handleSubmit(onSubmit)}
         isSubmitting={isPending}
       />

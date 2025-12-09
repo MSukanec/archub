@@ -144,6 +144,7 @@ export async function uploadFile(
       if (context.link_to.material_payment_id) mediaLinkData.material_payment_id = context.link_to.material_payment_id;
       if (context.link_to.material_purchase_id) mediaLinkData.material_purchase_id = context.link_to.material_purchase_id;
       if (context.link_to.hero_section_id) mediaLinkData.hero_section_id = context.link_to.hero_section_id;
+      if (context.link_to.forum_thread_id) mediaLinkData.forum_thread_id = context.link_to.forum_thread_id;
       if (context.category) mediaLinkData.category = context.category;
       if (context.description) mediaLinkData.description = context.description;
       if (context.position !== undefined) mediaLinkData.position = context.position;
