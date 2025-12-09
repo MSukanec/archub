@@ -1,0 +1,1 @@
+export { FoundersPortalPage } from './FoundersPortalPage';
