@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Layout } from '@/layouts/dashboard/DashboardLayout';
-import { Tabs } from '@/components/ui-custom/Tabs';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { useLocation } from 'wouter';
@@ -15,29 +14,32 @@ export function FoundersPortalPage() {
   const [activeTab, setActiveTab] = useState('directorio');
   const { data: userData, isLoading } = useCurrentUser();
   const isAdmin = useIsAdmin();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   
   const isFounder = userData?.organization?.settings?.is_founder === true;
-  const organizationName = userData?.organization?.name || 'tu organización';
 
   const tabs = [
-    { value: 'directorio', label: 'Directorio' },
-    { value: 'eventos', label: 'Eventos' },
-    { value: 'votaciones', label: 'Votaciones' },
-    { value: 'foro', label: 'Foro' },
+    { id: 'directorio', label: 'Directorio', isActive: activeTab === 'directorio' },
+    { id: 'eventos', label: 'Eventos', isActive: activeTab === 'eventos' },
+    { id: 'votaciones', label: 'Votaciones', isActive: activeTab === 'votaciones' },
+    { id: 'foro', label: 'Foro', isActive: activeTab === 'foro' },
   ];
 
   const headerProps = {
     icon: Award,
     title: 'Portal Fundadores',
-    description: `Conecta con otras organizaciones fundadoras, participa en eventos y votaciones`,
+    description: 'Conecta con otras organizaciones fundadoras, participa en eventos y votaciones',
+    showSearch: false,
+    showFilters: false,
+    tabs,
+    onTabChange: setActiveTab,
   };
 
   useEffect(() => {
-    if (!isLoading && !isFounder && !isAdmin) {
+    if (!isLoading && !isFounder && !isAdmin && location === '/organization/founders-portal') {
       navigate('/organization/dashboard');
     }
-  }, [isLoading, isFounder, isAdmin, navigate]);
+  }, [isLoading, isFounder, isAdmin, location, navigate]);
 
   if (isLoading) {
     return (
@@ -70,14 +72,7 @@ export function FoundersPortalPage() {
 
   return (
     <Layout wide headerProps={headerProps}>
-      <div className="space-y-6">
-        <Tabs 
-          tabs={tabs}
-          value={activeTab}
-          onValueChange={setActiveTab}
-        />
-        {renderTabContent()}
-      </div>
+      {renderTabContent()}
     </Layout>
   );
 }
