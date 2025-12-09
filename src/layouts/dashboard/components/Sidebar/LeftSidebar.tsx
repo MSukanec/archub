@@ -513,9 +513,13 @@ export function LeftSidebar() {
                         icon: <Award className="h-5 w-5" />,
                         testId: 'button-sidebar-founders',
                         onClick: () => {
+                          if (!isAdmin) return;
                           navigate('/organization/founders-portal');
                         },
-                        shouldRender: () => isFounder || isAdmin,
+                        shouldRender: () => true,
+                        wrapper: (children: React.ReactNode) => (
+                          <RoleRestricted requiredRole="admin" hideCompletely showAsPreview>{children}</RoleRestricted>
+                        ),
                       },
                       {
                         id: 'community' as const,
