@@ -113,9 +113,7 @@ export function useForumThreads(categorySlug: string | null, page: number = 1, l
     queryKey: [...FORUM_QUERY_KEYS.threads, { category: categorySlug || 'all', page, limit }],
     queryFn: async () => {
       const categoryParam = categorySlug && categorySlug !== 'all' ? `&category=${categorySlug}` : '';
-      const res = await fetch(`/api/forum/threads?page=${page}&limit=${limit}${categoryParam}`, {
-        credentials: 'include',
-      });
+      const res = await apiRequest('GET', `/api/forum/threads?page=${page}&limit=${limit}${categoryParam}`);
       if (!res.ok) throw new Error('Failed to fetch threads');
       return res.json();
     },
