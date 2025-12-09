@@ -529,7 +529,7 @@ export function registerFounderRoutes(app: Express, deps: RouteDeps): void {
         .select(`
           *,
           author:users!founder_forum_threads_user_id_fkey(id, full_name, avatar_url),
-          organization:organizations!founder_forum_threads_organization_id_fkey(id, name, logo_url),
+          organization:organizations!founder_forum_threads_organization_id_fkey(id, name),
           posts:founder_forum_posts(count)
         `, { count: 'exact' })
         .eq('is_deleted', false)
@@ -574,11 +574,11 @@ export function registerFounderRoutes(app: Express, deps: RouteDeps): void {
         .select(`
           *,
           author:users!founder_forum_threads_user_id_fkey(id, full_name, avatar_url),
-          organization:organizations!founder_forum_threads_organization_id_fkey(id, name, logo_url),
+          organization:organizations!founder_forum_threads_organization_id_fkey(id, name),
           posts:founder_forum_posts(
             *,
             author:users!founder_forum_posts_user_id_fkey(id, full_name, avatar_url),
-            organization:organizations!founder_forum_posts_organization_id_fkey(id, name, logo_url)
+            organization:organizations!founder_forum_posts_organization_id_fkey(id, name)
           )
         `)
         .eq('id', id)
