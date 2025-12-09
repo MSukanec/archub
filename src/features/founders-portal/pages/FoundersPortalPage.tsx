@@ -8,7 +8,7 @@ import { FounderDirectory } from '../components/FounderDirectory';
 import { FounderEvents } from '../components/FounderEvents';
 import { FounderVoting } from '../components/FounderVoting';
 import { FounderForum } from '../components/FounderForum';
-import { Award, Plus, FolderPlus } from 'lucide-react';
+import { Award, FolderPlus } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 
@@ -39,32 +39,18 @@ export function FoundersPortalPage() {
       onTabChange: setActiveTab,
     };
 
-    if (activeTab === 'foro') {
+    if (activeTab === 'foro' && isAdmin) {
       const actions: React.ReactNode[] = [];
-      if (isAdmin) {
-        actions.push(
-          <Button
-            key="new-category"
-            variant="secondary"
-            size="sm"
-            onClick={() => openModal('forum-category')}
-            className="h-8 px-3 text-xs font-medium"
-          >
-            <FolderPlus className="w-4 h-4 mr-1.5" />
-            Nueva Categoría
-          </Button>
-        );
-      }
       actions.push(
         <Button
-          key="new-thread"
-          variant="default"
+          key="new-category"
+          variant="secondary"
           size="sm"
-          onClick={() => openModal('forum-thread')}
+          onClick={() => openModal('forum-category')}
           className="h-8 px-3 text-xs font-medium"
         >
-          <Plus className="w-4 h-4 mr-1.5" />
-          Nuevo Tema
+          <FolderPlus className="w-4 h-4 mr-1.5" />
+          Nueva Categoría
         </Button>
       );
       return { ...base, actions };

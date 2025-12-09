@@ -10,6 +10,7 @@ import {
   type ForumThreadWithAuthor,
 } from '../services';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useGlobalModalStore } from '@/components/modal';
 
 interface ForumPageProps {
   allowedRoles?: string[];
@@ -18,6 +19,7 @@ interface ForumPageProps {
 export function ForumPage({ allowedRoles }: ForumPageProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedThread, setSelectedThread] = useState<ForumThreadWithAuthor | null>(null);
+  const { openModal } = useGlobalModalStore();
 
   const { data: allCategories, isLoading: categoriesLoading } = useForumCategories();
 
@@ -105,6 +107,7 @@ export function ForumPage({ allowedRoles }: ForumPageProps) {
         isLoading={threadsLoading}
         onThreadClick={handleThreadClick}
         selectedCategory={currentCategory}
+        onNewThread={() => openModal('forum-thread')}
       />
     );
   };

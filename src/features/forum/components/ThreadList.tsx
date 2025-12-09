@@ -1,8 +1,10 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
-import { MessageSquare, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { MessageSquare, Plus } from 'lucide-react';
 import { ThreadCard } from './ThreadCard';
 import { getIconComponent } from './CategoryList';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import type { ForumThreadWithAuthor, ForumCategoryWithCounts } from '../services';
 
 interface ThreadListProps {
@@ -10,6 +12,7 @@ interface ThreadListProps {
   isLoading?: boolean;
   onThreadClick?: (thread: ForumThreadWithAuthor) => void;
   selectedCategory?: ForumCategoryWithCounts | null;
+  onNewThread?: () => void;
 }
 
 function ThreadListSkeleton() {
@@ -43,6 +46,7 @@ export function ThreadList({
   isLoading,
   onThreadClick,
   selectedCategory,
+  onNewThread,
 }: ThreadListProps) {
   if (isLoading) {
     return <ThreadListSkeleton />;
@@ -85,9 +89,23 @@ export function ThreadList({
                 <CategoryIcon className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1 pt-2">
-                <h2 className="text-xl font-bold text-[var(--text-default)]">
-                  {selectedCategory.name}
-                </h2>
+                <div className="flex items-center justify-between gap-4">
+                  <h2 className="text-xl font-bold text-[var(--text-default)]">
+                    {selectedCategory.name}
+                  </h2>
+                  {onNewThread && !selectedCategory.is_read_only && (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={onNewThread}
+                      className="h-8 px-3 text-xs font-medium"
+                      data-testid="button-new-thread"
+                    >
+                      <Plus className="w-4 h-4 mr-1.5" />
+                      Nuevo Tema
+                    </Button>
+                  )}
+                </div>
                 {selectedCategory.description && (
                   <p className="text-sm text-[var(--text-muted)] mt-1 leading-relaxed">
                     {selectedCategory.description}
@@ -114,15 +132,23 @@ export function ThreadList({
       )}
 
       {!hasThreads && (
-        <div className="text-center py-16" data-testid="thread-list-empty">
-          <MessageSquare className="h-12 w-12 mx-auto text-[var(--text-muted)] mb-4" />
-          <h3 className="text-lg font-medium text-[var(--text-default)] mb-2">
-            No hay temas en esta categoría
-          </h3>
-          <p className="text-[var(--text-muted)]">
-            Sé el primero en iniciar una conversación
-          </p>
-        </div>
+        <EmptyState
+          icon={<MessageSquare />}
+          title="No hay temas en esta categoría"
+          description="Sé el primero en iniciar una conversación"
+          action={
+            onNewThread && (!selectedCategory || !selectedCategory.is_read_only) ? (
+              <Button
+                variant="default"
+                onClick={onNewThread}
+                data-testid="button-new-thread-empty"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nuevo Tema
+              </Button>
+            ) : undefined
+          }
+        />
       )}
 
       {pinnedThreads.length > 0 && (
