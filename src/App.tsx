@@ -57,6 +57,7 @@ const Media = lazy(() => import("@/pages/media/Media"));
 import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
 import OrganizationPdfSettings from "@/pages/organization/OrganizationPdfSettings";
 import OrganizationData from "@/pages/organization-data/OrganizationData";
+import OrganizationSettings from "@/pages/organization-settings/OrganizationSettings";
 
 import Profile from "@/pages/profile/Profile";
 
@@ -252,6 +253,7 @@ function Router() {
 
         {/* Organization Settings Routes */}
         <Route path="/organization/billing" component={Billing} />
+        <Route path="/organization/settings" component={OrganizationSettings} />
         <Route path="/organization/pdf-settings" component={OrganizationPdfSettings} />
         <Route path="/organization/members" component={Members} />
         <Route path="/organization/partners" component={Partners} />

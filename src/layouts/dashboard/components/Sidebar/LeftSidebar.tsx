@@ -233,6 +233,7 @@ export function LeftSidebar() {
         { id: 'contacts', label: 'Contactos', icon: LuContact, href: '/contacts' },
         { id: 'members', label: 'Miembros', icon: Users, href: '/organization/members' },
         { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing' },
+        { id: 'settings', label: 'Ajustes', icon: Settings, href: '/organization/settings' },
         { id: 'activity', label: 'Actividad', icon: Activity, href: '/organization/activity', restricted: 'coming_soon' },
         { id: 'pdf-settings', label: 'Documentos PDF', icon: FileText, href: '/organization/pdf-settings', restricted: 'coming_soon' },
         { type: 'section-header', id: 'section-finanzas', label: 'Finanzas' },

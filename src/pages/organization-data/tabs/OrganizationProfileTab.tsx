@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, FileText, Users, MapPin, Globe } from 'lucide-react';
+import { Building2, FileText, Users, Globe } from 'lucide-react';
 
 import { AvatarUploader } from '@/components/shared/AvatarUploader';
 import { FounderBadge } from '@/components/shared/FounderBadge';
@@ -70,11 +70,6 @@ export function OrganizationProfileTab() {
   const [organizationName, setOrganizationName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   const [description, setDescription] = useState('');
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [country, setCountry] = useState('');
-  const [postalCode, setPostalCode] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [website, setWebsite] = useState('');
@@ -107,11 +102,6 @@ export function OrganizationProfileTab() {
 
       const organizationDataFields = {
         description: dataToSave.description,
-        address: dataToSave.address,
-        city: dataToSave.city,
-        state: dataToSave.state,
-        country: dataToSave.country,
-        postal_code: dataToSave.postal_code,
         phone: dataToSave.phone,
         email: dataToSave.email,
         website: dataToSave.website,
@@ -154,11 +144,6 @@ export function OrganizationProfileTab() {
     data: {
       name: organizationName,
       description,
-      address,
-      city,
-      state,
-      country,
-      postal_code: postalCode,
       phone,
       email,
       website,
@@ -197,11 +182,6 @@ export function OrganizationProfileTab() {
   useEffect(() => {
     if (organizationData) {
       setDescription(organizationData.description || '');
-      setAddress(organizationData.address || '');
-      setCity(organizationData.city || '');
-      setState(organizationData.state || '');
-      setCountry(organizationData.country || '');
-      setPostalCode(organizationData.postal_code || '');
       setPhone(organizationData.phone || '');
       setEmail(organizationData.email || '');
       setWebsite(organizationData.website || '');
@@ -364,74 +344,6 @@ export function OrganizationProfileTab() {
                 placeholder="Ej: https://www.constructora.com"
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <hr className="border-t border-[var(--section-divider)] my-8" />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <MapPin className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Ubicación de la Organización</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Dirección completa de la sede principal. Esta información se usa para documentación oficial, entregas y comunicaciones.
-          </p>
-        </div>
-
-        <div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="address">Dirección</Label>
-              <Input 
-                id="address"
-                placeholder="Ej: Av. Corrientes 1234"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city">Ciudad</Label>
-              <Input 
-                id="city"
-                placeholder="Ej: Buenos Aires"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="state">Provincia/Estado</Label>
-              <Input 
-                id="state"
-                placeholder="Ej: Buenos Aires"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="country">País</Label>
-              <Input 
-                id="country"
-                placeholder="Ej: Argentina"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="postal-code">Código Postal</Label>
-              <Input 
-                id="postal-code"
-                placeholder="Ej: C1043AAX"
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
               />
             </div>
           </div>
