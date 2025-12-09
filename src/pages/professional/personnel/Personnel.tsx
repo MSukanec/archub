@@ -30,6 +30,7 @@ export default function Personnel() {
     description: "Gestiona el personal asignado a tus proyectos, registra asistencias y administra seguros de trabajo.",
     organizationId: currentOrganizationId || undefined,
     showMembers: true,
+    showProjectSelector: true,
     tabs: [
       {
         id: 'active',
