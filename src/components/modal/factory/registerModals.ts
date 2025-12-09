@@ -30,10 +30,12 @@ import GeneralCostPaymentForm from '@/features/general-costs/forms/GeneralCostPa
 import GeneralCostPaymentView from '@/features/general-costs/forms/GeneralCostPaymentView';
 import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal, TestimonialForm } from '@/features/learning';
 import { HeroSectionForm } from '@/features/layout';
-import ForumThreadForm from '@/features/founders-portal/forms/ForumThreadForm';
+import ForumThreadForm from '@/features/forum/forms/ForumThreadForm';
+import ForumPostForm from '@/features/forum/forms/ForumPostForm';
 
 const organizationConfig: ModalConfig = { category: 'organization', size: 'md' };
 const foundersConfig: ModalConfig = { category: 'founders', size: 'md' };
+const forumConfig: ModalConfig = { category: 'forum', size: 'md' };
 const projectConfig: ModalConfig = { category: 'project', size: 'lg' };
 const financeConfig: ModalConfig = { category: 'finance', size: 'lg' };
 const learningConfig: ModalConfig = { category: 'learning', size: 'lg' };
@@ -401,9 +403,26 @@ export function initializeModalRegistry(): void {
   });
 
   registerModal('forum-thread', ForumThreadForm as any, {
-    ...foundersConfig,
+    ...forumConfig,
     mapDataToProps: (data) => ({
-      mode: data?.mode || 'create',
+      modalData: {
+        categoryId: data?.categoryId,
+        categorySlug: data?.categorySlug,
+        thread: data?.thread,
+      },
+      mode: data?.thread ? (data?.mode || 'edit') : (data?.mode || 'create'),
+    }),
+  });
+
+  registerModal('forum-post', ForumPostForm as any, {
+    ...forumConfig,
+    mapDataToProps: (data) => ({
+      modalData: {
+        threadId: data?.threadId,
+        parentId: data?.parentId,
+        post: data?.post,
+      },
+      mode: data?.post ? (data?.mode || 'edit') : (data?.mode || 'create'),
     }),
   });
 }

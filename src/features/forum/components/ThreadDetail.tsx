@@ -1,0 +1,282 @@
+import { useState } from 'react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Heart, Lock, Pin, Send, ArrowLeft, Eye } from 'lucide-react';
+import { PostCard } from './PostCard';
+import { cn } from '@/lib/utils';
+import {
+  useForumThread,
+  useThreadReactions,
+  useCreatePost,
+  useToggleReaction,
+  useIncrementViewCount,
+  type ForumThreadWithPosts,
+} from '../services';
+import { useToast } from '@/hooks/use-toast';
+import { useEffect } from 'react';
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join('')
+    .toUpperCase();
+}
+
+function ThreadDetailSkeleton() {
+  return (
+    <div className="space-y-4" data-testid="thread-detail-skeleton">
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="flex-1 space-y-3">
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="p-6 space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex gap-3">
+              <Skeleton className="h-8 w-8 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-16 w-full" />
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+interface ThreadDetailProps {
+  threadSlug: string;
+  onBack?: () => void;
+}
+
+export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
+  const { toast } = useToast();
+  const { data: thread, isLoading } = useForumThread(threadSlug);
+  const { data: reactions } = useThreadReactions(thread?.id || '');
+  const createPostMutation = useCreatePost();
+  const toggleReactionMutation = useToggleReaction();
+  const incrementViewMutation = useIncrementViewCount();
+
+  const [replyContent, setReplyContent] = useState('');
+
+  useEffect(() => {
+    if (thread?.id) {
+      incrementViewMutation.mutate(thread.id);
+    }
+  }, [thread?.id]);
+
+  const handleSubmitReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replyContent.trim() || !thread) return;
+
+    try {
+      await createPostMutation.mutateAsync({
+        thread_id: thread.id,
+        content: replyContent,
+      });
+      setReplyContent('');
+      toast({
+        title: 'Respuesta publicada',
+        description: 'Tu respuesta ha sido publicada correctamente',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo publicar la respuesta',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleLikeThread = () => {
+    if (!thread) return;
+    toggleReactionMutation.mutate({
+      item_type: 'thread',
+      item_id: thread.id,
+    });
+  };
+
+  const handleLikePost = (postId: string) => {
+    toggleReactionMutation.mutate({
+      item_type: 'post',
+      item_id: postId,
+    });
+  };
+
+  if (isLoading) {
+    return <ThreadDetailSkeleton />;
+  }
+
+  if (!thread) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-[var(--text-muted)]">Tema no encontrado</p>
+        {onBack && (
+          <Button variant="ghost" onClick={onBack} className="mt-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  const authorName = thread.author?.full_name || 'Anónimo';
+  const organizationName = thread.organization?.name;
+  const contentText = typeof thread.content === 'string'
+    ? thread.content
+    : thread.content?.text || '';
+  const likeCount = reactions?.thread?.likes ?? 0;
+  const isLiked = reactions?.thread?.userReaction === 'like';
+
+  return (
+    <div className="space-y-4" data-testid="thread-detail">
+      {onBack && (
+        <Button variant="ghost" onClick={onBack} className="mb-2" data-testid="button-back">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Volver
+        </Button>
+      )}
+
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <Avatar className="h-12 w-12 flex-shrink-0">
+              <AvatarImage src={thread.author?.avatar_url || undefined} />
+              <AvatarFallback>{getInitials(authorName)}</AvatarFallback>
+            </Avatar>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap mb-2">
+                {thread.is_pinned && (
+                  <Pin className="h-4 w-4 text-accent" />
+                )}
+                {thread.is_locked && (
+                  <Lock className="h-4 w-4 text-[var(--text-muted)]" />
+                )}
+                {thread.category && (
+                  <Badge variant="outline">{thread.category.name}</Badge>
+                )}
+              </div>
+
+              <h1 className="text-xl font-semibold text-[var(--text-default)] mb-2">
+                {thread.title}
+              </h1>
+
+              <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] mb-4">
+                <span className="font-medium">{organizationName || authorName}</span>
+                {organizationName && <span>({authorName})</span>}
+                <span>·</span>
+                <span>
+                  {format(new Date(thread.created_at), "d 'de' MMMM, yyyy 'a las' HH:mm", {
+                    locale: es,
+                  })}
+                </span>
+                <span>·</span>
+                <span className="flex items-center gap-1">
+                  <Eye className="h-3.5 w-3.5" />
+                  {thread.view_count || 0} vistas
+                </span>
+              </div>
+
+              {contentText && (
+                <div className="prose prose-sm max-w-none text-[var(--text-default)] whitespace-pre-wrap">
+                  {contentText}
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[var(--card-border)]">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn('h-8 px-3 gap-1.5', isLiked && 'text-red-500')}
+                  onClick={handleLikeThread}
+                  data-testid="like-thread-button"
+                >
+                  <Heart className={cn('h-4 w-4', isLiked && 'fill-current')} />
+                  <span>{likeCount}</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {thread.posts && thread.posts.length > 0 && (
+        <Card>
+          <CardHeader className="pb-0">
+            <h2 className="text-sm font-medium text-[var(--text-default)]">
+              {thread.posts.length} {thread.posts.length === 1 ? 'respuesta' : 'respuestas'}
+            </h2>
+          </CardHeader>
+          <CardContent className="divide-y divide-[var(--card-border)]">
+            {thread.posts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                likeCount={reactions?.posts?.[post.id] ?? 0}
+                onLike={handleLikePost}
+              />
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {!thread.is_locked && (
+        <Card>
+          <CardContent className="p-4">
+            <form onSubmit={handleSubmitReply} className="space-y-3">
+              <Textarea
+                placeholder="Escribe tu respuesta..."
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                rows={3}
+                className="resize-none"
+                data-testid="reply-textarea"
+              />
+              <div className="flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={createPostMutation.isPending || !replyContent.trim()}
+                  data-testid="submit-reply-button"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  {createPostMutation.isPending ? 'Enviando...' : 'Responder'}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {thread.is_locked && (
+        <Card className="bg-[var(--muted-bg)]">
+          <CardContent className="p-4 text-center">
+            <Lock className="h-5 w-5 mx-auto text-[var(--text-muted)] mb-2" />
+            <p className="text-sm text-[var(--text-muted)]">
+              Este tema está cerrado y no admite nuevas respuestas
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

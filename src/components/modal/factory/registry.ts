@@ -1,7 +1,7 @@
 import { ComponentType } from 'react';
 
 export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
-export type ModalCategory = 'admin' | 'project' | 'finance' | 'organization' | 'learning' | 'general';
+export type ModalCategory = 'admin' | 'project' | 'finance' | 'organization' | 'learning' | 'general' | 'founders' | 'forum';
 
 export interface ModalConfig {
   size?: ModalSize;

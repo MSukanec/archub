@@ -2078,49 +2078,104 @@ export const insertFounderVoteBallotSchema = createInsertSchema(founder_vote_bal
 export type FounderVoteBallot = typeof founder_vote_ballots.$inferSelect;
 export type InsertFounderVoteBallot = z.infer<typeof insertFounderVoteBallotSchema>;
 
-// Founder Forum Threads Table
-export const founder_forum_threads = pgTable("founder_forum_threads", {
+// ============================================================
+// FORUM SYSTEM TABLES (Global Reusable Forum Module)
+// ============================================================
+
+// Forum Categories Table
+export const forum_categories = pgTable("forum_categories", {
   id: uuid("id").primaryKey().defaultRandom(),
-  title: text("title").notNull(),
-  content: text("content").notNull(),
-  category: text("category", { enum: ["general", "ideas", "feedback", "announcements"] }).default("general"),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description"),
+  icon: text("icon"),
+  color: text("color").default("#000000"),
+  sort_order: integer("sort_order").default(0),
+  allowed_roles: text("allowed_roles").array().default(["public"]),
+  is_read_only: boolean("is_read_only").default(false),
+  is_active: boolean("is_active").default(true),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+export const insertForumCategorySchema = createInsertSchema(forum_categories).omit({
+  id: true,
+  created_at: true,
+});
+
+export type ForumCategory = typeof forum_categories.$inferSelect;
+export type InsertForumCategory = z.infer<typeof insertForumCategorySchema>;
+
+// Forum Threads Table
+export const forum_threads = pgTable("forum_threads", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  category_id: uuid("category_id").notNull(),
   organization_id: uuid("organization_id").notNull(),
-  user_id: uuid("user_id").notNull(),
+  author_id: uuid("author_id").notNull(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  content: jsonb("content").notNull(),
+  view_count: integer("view_count").default(0),
+  reply_count: integer("reply_count").default(0),
+  last_activity_at: timestamp("last_activity_at").defaultNow(),
   is_pinned: boolean("is_pinned").default(false),
   is_locked: boolean("is_locked").default(false),
+  is_deleted: boolean("is_deleted").default(false),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
-  is_deleted: boolean("is_deleted").default(false),
 });
 
-export const insertFounderForumThreadSchema = createInsertSchema(founder_forum_threads).omit({
+export const insertForumThreadSchema = createInsertSchema(forum_threads).omit({
   id: true,
+  view_count: true,
+  reply_count: true,
+  last_activity_at: true,
+  is_deleted: true,
   created_at: true,
   updated_at: true,
-  is_deleted: true,
 });
 
-export type FounderForumThread = typeof founder_forum_threads.$inferSelect;
-export type InsertFounderForumThread = z.infer<typeof insertFounderForumThreadSchema>;
+export type ForumThread = typeof forum_threads.$inferSelect;
+export type InsertForumThread = z.infer<typeof insertForumThreadSchema>;
 
-// Founder Forum Posts Table
-export const founder_forum_posts = pgTable("founder_forum_posts", {
+// Forum Posts Table (Replies with nested support)
+export const forum_posts = pgTable("forum_posts", {
   id: uuid("id").primaryKey().defaultRandom(),
   thread_id: uuid("thread_id").notNull(),
-  content: text("content").notNull(),
   organization_id: uuid("organization_id").notNull(),
-  user_id: uuid("user_id").notNull(),
+  author_id: uuid("author_id").notNull(),
+  parent_id: uuid("parent_id"),
+  content: jsonb("content").notNull(),
+  is_accepted_answer: boolean("is_accepted_answer").default(false),
+  is_deleted: boolean("is_deleted").default(false),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
-  is_deleted: boolean("is_deleted").default(false),
 });
 
-export const insertFounderForumPostSchema = createInsertSchema(founder_forum_posts).omit({
+export const insertForumPostSchema = createInsertSchema(forum_posts).omit({
   id: true,
+  is_accepted_answer: true,
+  is_deleted: true,
   created_at: true,
   updated_at: true,
-  is_deleted: true,
 });
 
-export type FounderForumPost = typeof founder_forum_posts.$inferSelect;
-export type InsertFounderForumPost = z.infer<typeof insertFounderForumPostSchema>;
+export type ForumPost = typeof forum_posts.$inferSelect;
+export type InsertForumPost = z.infer<typeof insertForumPostSchema>;
+
+// Forum Reactions Table (Like/Upvote system)
+export const forum_reactions = pgTable("forum_reactions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  user_id: uuid("user_id").notNull(),
+  item_type: text("item_type", { enum: ["thread", "post"] }).notNull(),
+  item_id: uuid("item_id").notNull(),
+  reaction_type: text("reaction_type").default("like"),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+export const insertForumReactionSchema = createInsertSchema(forum_reactions).omit({
+  id: true,
+  created_at: true,
+});
+
+export type ForumReaction = typeof forum_reactions.$inferSelect;
+export type InsertForumReaction = z.infer<typeof insertForumReactionSchema>;
