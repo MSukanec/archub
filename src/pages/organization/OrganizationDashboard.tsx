@@ -319,7 +319,7 @@ export default function OrganizationDashboard() {
         {/* KPIs Section - 4 Cards */}
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 1. Proyectos Activos */}
-          <StatCard href="/projects" data-testid="stat-card-proyectos-activos">
+          <StatCard href="/organization/projects" data-testid="stat-card-proyectos-activos">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <StatCardTitle>Proyectos Activos</StatCardTitle>
@@ -384,7 +384,7 @@ export default function OrganizationDashboard() {
         </div>
 
         {/* Projects Section - Estilo minimalista */}
-        <StatCard href="/projects">
+        <StatCard href="/organization/projects">
           <StatCardTitle>Proyectos Activos</StatCardTitle>
           <StatCardContent>
             {isLoading || projectsLoading ? (
