@@ -59,6 +59,9 @@ async function getUserOrgId(userId: string): Promise<string | null> {
 
 async function canAccessCategory(userId: string, categoryId: string): Promise<boolean> {
   const userRoles = await getUserRoles(userId);
+  
+  // Admins can access everything
+  if (userRoles.includes('admin')) return true;
 
   const { data: category } = await supabaseAdmin
     .from('forum_categories')
@@ -89,10 +92,14 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
 
       if (error) throw new HttpError(500, error.message);
 
-      const filteredCategories = (categories || []).filter(cat => {
-        const allowedRoles = cat.allowed_roles || ['public'];
-        return allowedRoles.some((role: string) => userRoles.includes(role));
-      });
+      // Admins see everything, others are filtered by role
+      const isAdmin = userRoles.includes('admin');
+      const filteredCategories = isAdmin 
+        ? (categories || [])
+        : (categories || []).filter(cat => {
+            const allowedRoles = cat.allowed_roles || ['public'];
+            return allowedRoles.some((role: string) => userRoles.includes(role));
+          });
 
       return res.json(filteredCategories);
     } catch (error: any) {

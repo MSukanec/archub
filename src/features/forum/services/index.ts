@@ -140,11 +140,17 @@ export function useCreateThread() {
   return useMutation({
     mutationFn: async (data: { category_id: string; title: string; content: string }) => {
       const res = await apiRequest('POST', '/api/forum/threads', data);
-      return res.json();
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || 'Error al crear tema');
+      }
+      return json;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active' });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active' });
     },
   });
 }
@@ -317,6 +323,9 @@ export function useCreateCategory() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.categories });
+      queryClient.invalidateQueries({ queryKey: FORUM_QUERY_KEYS.threads });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.categories, type: 'active' });
+      queryClient.refetchQueries({ queryKey: FORUM_QUERY_KEYS.threads, type: 'active' });
     },
   });
 }
