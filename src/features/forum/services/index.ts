@@ -80,8 +80,26 @@ export interface ForumPostWithAuthor {
   replies?: ForumPostWithAuthor[];
 }
 
+export interface ForumAttachment {
+  id: string;
+  category: string | null;
+  description: string | null;
+  position: number | null;
+  is_cover: boolean;
+  media_file: {
+    id: string;
+    file_name: string;
+    file_url: string | null;
+    file_type: string;
+    file_size: number;
+    bucket: string;
+    file_path: string;
+  } | null;
+}
+
 export interface ForumThreadWithPosts extends ForumThreadWithAuthor {
   posts: ForumPostWithAuthor[];
+  attachments?: ForumAttachment[];
 }
 
 export interface ThreadsResponse {

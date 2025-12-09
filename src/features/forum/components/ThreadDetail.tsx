@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { format, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { parseLocalDate } from '@/lib/date-utils';
@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Heart, Lock, Pin, Send, ArrowLeft, Eye } from 'lucide-react';
+import { Heart, Lock, Pin, Send, ArrowLeft, Eye, Image as ImageIcon } from 'lucide-react';
 import { PostCard } from './PostCard';
 import { cn } from '@/lib/utils';
 import {
@@ -18,9 +18,10 @@ import {
   useToggleReaction,
   useIncrementViewCount,
   type ForumThreadWithPosts,
+  type ForumAttachment,
 } from '../services';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect } from 'react';
+import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox';
 
 function getInitials(name: string): string {
   return name
@@ -148,6 +149,20 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
     : thread.content?.text || '';
   const likeCount = reactions?.thread?.likes ?? 0;
   const isLiked = reactions?.thread?.userReaction === 'like';
+  
+  // Get image URLs from attachments for lightbox
+  const imageAttachments = useMemo(() => {
+    return (thread.attachments || [])
+      .filter(att => att.media_file?.file_type === 'image' && att.media_file?.file_url)
+      .map(att => ({
+        id: att.id,
+        url: att.media_file!.file_url!,
+        name: att.media_file!.file_name,
+      }));
+  }, [thread.attachments]);
+  
+  const imageUrls = imageAttachments.map(img => img.url);
+  const { isOpen: isLightboxOpen, currentIndex, openLightbox, closeLightbox } = useImageLightbox(imageUrls);
 
   return (
     <div className="space-y-4" data-testid="thread-detail">
@@ -205,6 +220,33 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
               {contentText && (
                 <div className="prose prose-sm max-w-none text-[var(--text-default)] whitespace-pre-wrap">
                   {contentText}
+                </div>
+              )}
+
+              {imageAttachments.length > 0 && (
+                <div className="mt-4">
+                  <div className={cn(
+                    "grid gap-2",
+                    imageAttachments.length === 1 && "grid-cols-1",
+                    imageAttachments.length === 2 && "grid-cols-2",
+                    imageAttachments.length >= 3 && "grid-cols-2 md:grid-cols-3"
+                  )}>
+                    {imageAttachments.map((img, index) => (
+                      <div
+                        key={img.id}
+                        className="relative aspect-video rounded-lg overflow-hidden bg-muted cursor-pointer group"
+                        onClick={() => openLightbox(index)}
+                        data-testid={`thread-image-${img.id}`}
+                      >
+                        <img
+                          src={img.url}
+                          alt={img.name}
+                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -281,6 +323,15 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
             </p>
           </CardContent>
         </Card>
+      )}
+
+      {imageUrls.length > 0 && (
+        <ImageLightbox
+          images={imageUrls}
+          isOpen={isLightboxOpen}
+          currentIndex={currentIndex}
+          onClose={closeLightbox}
+        />
       )}
     </div>
   );

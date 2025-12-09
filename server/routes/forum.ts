@@ -306,9 +306,32 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
 
       if (postsError) throw new HttpError(500, postsError.message);
 
+      // Get attachments for the thread
+      const { data: attachments } = await supabaseAdmin
+        .from('media_links')
+        .select(`
+          id,
+          category,
+          description,
+          position,
+          is_cover,
+          media_file:media_files!media_links_media_file_id_fkey(
+            id,
+            file_name,
+            file_url,
+            file_type,
+            file_size,
+            bucket,
+            file_path
+          )
+        `)
+        .eq('forum_thread_id', thread.id)
+        .order('position', { ascending: true });
+
       return res.json({
         ...thread,
-        posts: posts || []
+        posts: posts || [],
+        attachments: attachments || []
       });
     } catch (error: any) {
       if (error instanceof HttpError) {
