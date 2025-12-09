@@ -45,7 +45,7 @@ export function FoundersPortalPage() {
         actions.push(
           <Button
             key="new-category"
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => openModal('forum-category')}
             className="h-8 px-3 text-xs font-medium"

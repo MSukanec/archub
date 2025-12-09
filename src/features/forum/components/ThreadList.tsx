@@ -1,12 +1,8 @@
-import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MessageSquare } from 'lucide-react';
 import { ThreadCard } from './ThreadCard';
 import type { ForumThreadWithAuthor } from '../services';
-
-type SortOption = 'recientes' | 'populares';
 
 interface ThreadListProps {
   threads: ForumThreadWithAuthor[];
@@ -45,8 +41,6 @@ export function ThreadList({
   isLoading,
   onThreadClick,
 }: ThreadListProps) {
-  const [sortBy, setSortBy] = useState<SortOption>('recientes');
-
   if (isLoading) {
     return <ThreadListSkeleton />;
   }
@@ -56,27 +50,14 @@ export function ThreadList({
   const regularThreads = threads.filter((t) => !t.is_pinned);
 
   const sortedRegularThreads = [...regularThreads].sort((a, b) => {
-    if (sortBy === 'recientes') {
-      return new Date(b.last_activity_at || b.created_at).getTime() -
-             new Date(a.last_activity_at || a.created_at).getTime();
-    } else {
-      return (b.view_count || 0) - (a.view_count || 0);
-    }
+    return new Date(b.last_activity_at || b.created_at).getTime() -
+           new Date(a.last_activity_at || a.created_at).getTime();
   });
 
   return (
     <div className="space-y-4" data-testid="thread-list">
       {hasThreads && (
         <div className="flex items-center gap-3">
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-            <SelectTrigger className="w-36" data-testid="sort-select">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recientes">Recientes</SelectItem>
-              <SelectItem value="populares">Populares</SelectItem>
-            </SelectContent>
-          </Select>
           <span className="text-sm text-[var(--text-muted)]">
             {threads.length} {threads.length === 1 ? 'tema' : 'temas'}
           </span>
