@@ -224,7 +224,6 @@ export default function AdminAdminDashboard() {
         .from('organization_members')
         .select('user_id, organization:organizations(name)')
         .in('user_id', userIds)
-        .is('is_deleted', false)
 
       // Crear mapa de usuario -> organización
       const userOrgMap = new Map<string, string>()
