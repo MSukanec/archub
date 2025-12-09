@@ -93,7 +93,7 @@ export function FounderBanner({ mode = 'public' }: FounderBannerProps) {
               onClick={() => navigate('/founders')}
               className="text-xs bg-accent text-accent-foreground hover:bg-accent/90 gap-1.5 h-8 px-3"
             >
-              Ver Detalles
+              Desde $16/mes
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </div>
