@@ -108,7 +108,6 @@ export function ForumPage({ allowedRoles }: ForumPageProps) {
       categories={categories}
       selectedCategory={selectedCategory}
       onCategorySelect={handleCategorySelect}
-      sidebar={renderSidebar()}
     >
       {renderContent()}
     </ForumLayout>
