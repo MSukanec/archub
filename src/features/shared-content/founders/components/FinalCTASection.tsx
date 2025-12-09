@@ -9,10 +9,10 @@ export function FinalCTASection({ mode }: FoundersSectionProps) {
   const isAuthenticated = !!user;
 
   const ctaHref = mode === 'dashboard' 
-    ? '/settings/plan?billing=annual'
+    ? '/settings/pricing-plan?billing=annual'
     : isAuthenticated 
-      ? '/settings/plan?billing=annual' 
-      : '/register?plan=annual';
+      ? '/settings/pricing-plan?billing=annual' 
+      : '/precios';
 
   const ctaText = mode === 'dashboard' 
     ? 'Actualizar a Plan Anual' 
