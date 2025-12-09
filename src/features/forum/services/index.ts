@@ -141,6 +141,11 @@ export function useForumThreads(categorySlug: string | null, page: number = 1, l
 export function useForumThread(threadSlug: string) {
   return useQuery<ForumThreadWithPosts>({
     queryKey: FORUM_QUERY_KEYS.thread(threadSlug),
+    queryFn: async () => {
+      const res = await apiRequest('GET', `/api/forum/threads/${threadSlug}`);
+      if (!res.ok) throw new Error('Failed to fetch thread');
+      return res.json();
+    },
     enabled: !!threadSlug,
   });
 }
@@ -148,6 +153,11 @@ export function useForumThread(threadSlug: string) {
 export function useThreadReactions(threadId: string) {
   return useQuery<ReactionsResponse>({
     queryKey: FORUM_QUERY_KEYS.threadReactions(threadId),
+    queryFn: async () => {
+      const res = await apiRequest('GET', `/api/forum/threads/${threadId}/reactions`);
+      if (!res.ok) throw new Error('Failed to fetch reactions');
+      return res.json();
+    },
     enabled: !!threadId,
   });
 }
