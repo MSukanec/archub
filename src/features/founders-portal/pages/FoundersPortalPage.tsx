@@ -7,12 +7,12 @@ import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { FounderDirectory } from '../components/FounderDirectory';
 import { FounderEvents } from '../components/FounderEvents';
 import { FounderVoting } from '../components/FounderVoting';
-import { FounderForum, CreateThreadDialog } from '../components/FounderForum';
+import { FounderForum } from '../components/FounderForum';
 import { Award, Plus } from 'lucide-react';
+import { openModal } from '@/components/modal';
 
 export function FoundersPortalPage() {
   const [activeTab, setActiveTab] = useState('directorio');
-  const [isNewThreadDialogOpen, setIsNewThreadDialogOpen] = useState(false);
   const { data: userData, isLoading } = useCurrentUser();
   const isAdmin = useIsAdmin();
   const [location, navigate] = useLocation();
@@ -38,7 +38,7 @@ export function FoundersPortalPage() {
       actionButton: {
         label: 'Nuevo Tema',
         icon: Plus,
-        onClick: () => setIsNewThreadDialogOpen(true),
+        onClick: () => openModal('forum-thread'),
       },
     }),
   };
@@ -81,10 +81,6 @@ export function FoundersPortalPage() {
   return (
     <Layout wide headerProps={headerProps}>
       {renderTabContent()}
-      <CreateThreadDialog 
-        open={isNewThreadDialogOpen} 
-        onOpenChange={setIsNewThreadDialogOpen} 
-      />
     </Layout>
   );
 }

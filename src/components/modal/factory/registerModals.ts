@@ -30,8 +30,10 @@ import GeneralCostPaymentForm from '@/features/general-costs/forms/GeneralCostPa
 import GeneralCostPaymentView from '@/features/general-costs/forms/GeneralCostPaymentView';
 import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal, TestimonialForm } from '@/features/learning';
 import { HeroSectionForm } from '@/features/layout';
+import ForumThreadForm from '@/features/founders-portal/forms/ForumThreadForm';
 
 const organizationConfig: ModalConfig = { category: 'organization', size: 'md' };
+const foundersConfig: ModalConfig = { category: 'founders', size: 'md' };
 const projectConfig: ModalConfig = { category: 'project', size: 'lg' };
 const financeConfig: ModalConfig = { category: 'finance', size: 'lg' };
 const learningConfig: ModalConfig = { category: 'learning', size: 'lg' };
@@ -395,6 +397,13 @@ export function initializeModalRegistry(): void {
         mode: data?.mode || 'create',
         section: data?.section,
       }
+    }),
+  });
+
+  registerModal('forum-thread', ForumThreadForm as any, {
+    ...foundersConfig,
+    mapDataToProps: (data) => ({
+      mode: data?.mode || 'create',
     }),
   });
 }
