@@ -1,31 +1,47 @@
 import type { Request, Response } from "express";
 import { getAdminClient, extractToken } from "../../routes/_base.js";
 import { requireUser, HttpError } from "../../lib/auth/helpers.js";
-import { db } from "../../db.js";
-import { organization_members, insertPdfTemplateSchema } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { insertPdfTemplateSchema } from "@shared/schema";
+
+interface MemberWithRole {
+  id: string;
+  role_id: string | null;
+  role: { name: string } | null;
+}
 
 /**
  * Verify that a user belongs to an organization with at least member role
  * Returns the member record if valid, null otherwise
  * Uses the internal user_id (not auth_id)
  */
-async function verifyOrganizationMembership(userId: string, organizationId: string) {
-  const member = await db.query.organization_members.findFirst({
-    where: and(
-      eq(organization_members.organization_id, organizationId),
-      eq(organization_members.user_id, userId),
-      eq(organization_members.is_active, true)
-    )
-  });
-  return member;
+async function verifyOrganizationMembership(userId: string, organizationId: string): Promise<MemberWithRole | null> {
+  const { data: member, error } = await getAdminClient()
+    .from('organization_members')
+    .select(`
+      id,
+      role_id,
+      role:roles(name)
+    `)
+    .eq('organization_id', organizationId)
+    .eq('user_id', userId)
+    .eq('is_active', true)
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Error verifying organization membership:', error);
+    return null;
+  }
+  
+  return member as MemberWithRole | null;
 }
 
 /**
  * Check if a member has admin or owner role
  */
-function isAdminOrOwner(role: string | null | undefined): boolean {
-  return role === 'admin' || role === 'owner';
+function isAdminOrOwner(member: MemberWithRole | null): boolean {
+  if (!member?.role) return false;
+  const roleName = member.role.name?.toLowerCase();
+  return roleName === 'admin' || roleName === 'owner';
 }
 
 /**
@@ -97,7 +113,7 @@ export async function handleCreatePdfTemplate(req: Request, res: Response) {
       return res.status(403).json({ error: "No tienes acceso a esta organización" });
     }
     
-    if (!isAdminOrOwner(member.role)) {
+    if (!isAdminOrOwner(member)) {
       return res.status(403).json({ error: "Solo administradores pueden modificar la configuración de PDFs" });
     }
     
@@ -171,7 +187,7 @@ export async function handleUpdatePdfTemplate(req: Request, res: Response) {
       return res.status(403).json({ error: "No tienes acceso a esta organización" });
     }
     
-    if (!isAdminOrOwner(member.role)) {
+    if (!isAdminOrOwner(member)) {
       return res.status(403).json({ error: "Solo administradores pueden modificar la configuración de PDFs" });
     }
     
