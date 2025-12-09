@@ -73,6 +73,16 @@ Preferred communication style: Simple, everyday language.
 - **Automated Downgrade Execution**: Hourly cron job (`execute-scheduled-downgrades.ts`) processes two types of expired subscriptions: (1) active subscriptions with `scheduled_downgrade_plan_id` - executes the planned downgrade, (2) cancelled subscriptions without scheduled downgrade - moves to FREE plan. Both paths apply soft-lock limits and suspend bonus course enrollments when transitioning to FREE.
 - **Downgrade Impact Calculation**: `DowngradeModal` fetches usage stats and calculates resources to be locked before user confirms downgrade.
 - **Lab Neural Network Renderer System**: Extensible node rendering architecture for neural network graphs.
+- **Organization Activity Tracking System**: Comprehensive audit logging for organization actions. Key files:
+  - `src/utils/logActivity.ts`: Main utility with `logActivity()` function and predefined `ACTIVITY_ACTIONS` and `TARGET_TABLES` constants
+  - `src/features/organization/services/getOrganizationActivityLogs.ts`: Fetches activity logs for a single organization
+  - `src/features/organization/services/getAllActivityLogs.ts`: Fetches all activity logs for admin view
+  - `src/features/organization/utils/index.ts`: `getActivityDisplayInfo()` for rendering activity with icons/labels
+  - `src/pages/settings/OrganizationActivity.tsx`: Organization members can view their org's activity
+  - `src/pages/admin/administration/AdminActivityLogs.tsx`: Admin can view ALL users' activity across ALL orgs
+  - **Logged operations**: Movements (financial), Site logs, Contacts, Projects, Personnel, Attendance, Subcontracts
+  - **Usage pattern**: Call `logActivity()` after successful mutation in `onSuccess` callback with organization_id, user_id, action, target_table, target_id, and metadata
+  - **RLS**: Table `organization_activity_logs` has policies for org members (INSERT/SELECT/UPDATE) and admins (SELECT all)
 
 ## External Dependencies
 - **Supabase**: Authentication.
