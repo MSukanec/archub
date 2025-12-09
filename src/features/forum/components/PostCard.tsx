@@ -3,8 +3,14 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Heart } from 'lucide-react';
+import { Heart, Pencil, Trash2, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { ForumPostWithAuthor } from '../services';
 
 function getInitials(name: string): string {
@@ -22,6 +28,9 @@ interface PostCardProps {
   likeCount?: number;
   isLiked?: boolean;
   onLike?: (postId: string) => void;
+  currentUserId?: string;
+  onEdit?: (post: ForumPostWithAuthor) => void;
+  onDelete?: (postId: string) => void;
 }
 
 export function PostCard({
@@ -30,6 +39,9 @@ export function PostCard({
   likeCount = 0,
   isLiked = false,
   onLike,
+  currentUserId,
+  onEdit,
+  onDelete,
 }: PostCardProps) {
   const authorName = post.author?.full_name || 'Anónimo';
   const organizationName = post.organization?.name;
@@ -39,6 +51,8 @@ export function PostCard({
   const contentText = typeof post.content === 'string'
     ? post.content
     : post.content?.text || '';
+
+  const isAuthor = currentUserId && post.author_id === currentUserId;
 
   return (
     <div
@@ -89,6 +103,39 @@ export function PostCard({
               <Heart className={cn('h-3.5 w-3.5', isLiked && 'fill-current')} />
               {likeCount > 0 && <span>{likeCount}</span>}
             </Button>
+
+            {isAuthor && (onEdit || onDelete) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-0"
+                    data-testid={`post-actions-${post.id}`}
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onEdit && (
+                    <DropdownMenuItem onClick={() => onEdit(post)} data-testid={`edit-post-${post.id}`}>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Editar
+                    </DropdownMenuItem>
+                  )}
+                  {onDelete && (
+                    <DropdownMenuItem 
+                      onClick={() => onDelete(post.id)} 
+                      className="text-destructive"
+                      data-testid={`delete-post-${post.id}`}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Eliminar
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </div>
@@ -101,6 +148,9 @@ export function PostCard({
               post={reply}
               depth={depth + 1}
               onLike={onLike}
+              currentUserId={currentUserId}
+              onEdit={onEdit}
+              onDelete={onDelete}
             />
           ))}
         </div>

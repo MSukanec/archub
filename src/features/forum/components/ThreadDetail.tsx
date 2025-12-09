@@ -15,12 +15,27 @@ import {
   useForumThread,
   useThreadReactions,
   useCreatePost,
+  useUpdatePost,
+  useDeletePost,
   useToggleReaction,
   useIncrementViewCount,
   type ForumThreadWithPosts,
   type ForumAttachment,
+  type ForumPostWithAuthor,
 } from '../services';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useGlobalModalStore } from '@/components/modal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox';
 
 function getInitials(name: string): string {
@@ -71,13 +86,18 @@ interface ThreadDetailProps {
 
 export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
   const { toast } = useToast();
+  const { data: userData } = useCurrentUser();
+  const { openModal } = useGlobalModalStore();
   const { data: thread, isLoading } = useForumThread(threadSlug);
   const { data: reactions } = useThreadReactions(thread?.id || '');
   const createPostMutation = useCreatePost();
+  const updatePostMutation = useUpdatePost();
+  const deletePostMutation = useDeletePost();
   const toggleReactionMutation = useToggleReaction();
   const incrementViewMutation = useIncrementViewCount();
 
   const [replyContent, setReplyContent] = useState('');
+  const [postToDelete, setPostToDelete] = useState<string | null>(null);
 
   // Calculate image attachments for lightbox - must be before any conditional returns
   const imageAttachments = useMemo(() => {
@@ -139,6 +159,37 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
     });
   };
 
+  const handleEditPost = (post: ForumPostWithAuthor) => {
+    openModal('forum-post', { 
+      threadId: thread?.id, 
+      threadSlug,
+      post 
+    });
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    setPostToDelete(postId);
+  };
+
+  const confirmDeletePost = async () => {
+    if (!postToDelete) return;
+    try {
+      await deletePostMutation.mutateAsync(postToDelete);
+      toast({
+        title: 'Respuesta eliminada',
+        description: 'La respuesta ha sido eliminada correctamente',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo eliminar la respuesta',
+        variant: 'destructive',
+      });
+    } finally {
+      setPostToDelete(null);
+    }
+  };
+
   if (isLoading) {
     return <ThreadDetailSkeleton />;
   }
@@ -191,7 +242,11 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
                   <Lock className="h-4 w-4 text-[var(--text-muted)]" />
                 )}
                 {thread.category && (
-                  <Badge variant="outline">{thread.category.name}</Badge>
+                  <Badge 
+                    className="bg-[var(--accent)] text-white border-transparent hover:bg-[var(--accent)]"
+                  >
+                    {thread.category.name}
+                  </Badge>
                 )}
               </div>
 
@@ -282,6 +337,9 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
                 post={post}
                 likeCount={reactions?.posts?.[post.id] ?? 0}
                 onLike={handleLikePost}
+                currentUserId={userData?.user?.id}
+                onEdit={handleEditPost}
+                onDelete={handleDeletePost}
               />
             ))}
           </CardContent>
@@ -334,6 +392,26 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
           onClose={closeLightbox}
         />
       )}
+
+      <AlertDialog open={!!postToDelete} onOpenChange={() => setPostToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar respuesta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. La respuesta será eliminada permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeletePost}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
