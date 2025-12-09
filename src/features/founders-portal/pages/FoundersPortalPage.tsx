@@ -35,11 +35,10 @@ export function FoundersPortalPage() {
     tabs,
     onTabChange: setActiveTab,
     ...(activeTab === 'foro' && {
-      primaryAction: {
+      actionButton: {
         label: 'Nuevo Tema',
         icon: Plus,
         onClick: () => setIsNewThreadDialogOpen(true),
-        'data-testid': 'button-new-thread',
       },
     }),
   };
