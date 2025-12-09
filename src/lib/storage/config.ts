@@ -158,6 +158,12 @@ export const ENTITY_CONFIG: Record<EntityType, EntityConfig> = {
     basePath: 'app-ui/hero-sections',
     compressionPreset: 'course-cover',
     visibility: 'public'
+  },
+  'forum_thread_attachment': {
+    bucket: 'social-assets',
+    basePath: 'forum/{org_id}/threads',
+    compressionPreset: 'sitelog-photo',
+    visibility: 'organization'
   }
 };
 
