@@ -27,6 +27,7 @@ import { CONTACT_QUERY_KEYS } from "@/features/contacts/constants";
 import { uploadContactAvatar, getContactAvatarUrl } from "@/lib/storage/uploadHelpers";
 import { compressImage } from "@/lib/imageCompression";
 import { supabase } from "@/lib/supabase";
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 
 const createContactSchema = z.object({
   first_name: z.string().min(1, "El nombre es requerido"),
@@ -951,7 +952,21 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
         return newContact;
       }
     },
-    onSuccess: async () => {
+    onSuccess: async (result, variables) => {
+      // Registrar actividad
+      await logActivity({
+        organization_id: organizationId || '',
+        user_id: userData?.user?.id || '',
+        action: mode === 'edit' ? ACTIVITY_ACTIONS.UPDATE_CONTACT : ACTIVITY_ACTIONS.ADD_CONTACT,
+        target_table: TARGET_TABLES.CONTACTS,
+        target_id: result?.id || editingContact?.id || '',
+        metadata: { 
+          first_name: variables.first_name || '',
+          last_name: variables.last_name || '',
+          company_name: variables.company_name || ''
+        }
+      })
+
       if (mode === 'create') {
         try {
           const { error: checklistError } = await supabase.rpc('tick_home_checklist', {

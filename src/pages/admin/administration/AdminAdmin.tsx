@@ -5,6 +5,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import AdminAdminDashboard from './AdminAdminDashboard';
 import AdminAdminOrganizations from './AdminAdminOrganizations';
 import AdminAdminUsers from './AdminAdminUsers';
+import AdminActivityLogs from './AdminActivityLogs';
 
 const AdminAdmin = () => {
   const [activeTab, setActiveTab] = useState('resumen');
@@ -13,7 +14,8 @@ const AdminAdmin = () => {
   const tabs = [
     { id: 'resumen', label: 'Resumen', isActive: activeTab === 'resumen' },
     { id: 'organizaciones', label: 'Organizaciones', isActive: activeTab === 'organizaciones' },
-    { id: 'usuarios', label: 'Usuarios', isActive: activeTab === 'usuarios' }
+    { id: 'usuarios', label: 'Usuarios', isActive: activeTab === 'usuarios' },
+    { id: 'actividad', label: 'Actividad', isActive: activeTab === 'actividad' }
   ];
 
   const getActionButton = () => {
@@ -53,6 +55,8 @@ const AdminAdmin = () => {
         return <AdminAdminOrganizations />;
       case 'usuarios':
         return <AdminAdminUsers />;
+      case 'actividad':
+        return <AdminActivityLogs />;
       default:
         return <AdminAdminDashboard />;
     }

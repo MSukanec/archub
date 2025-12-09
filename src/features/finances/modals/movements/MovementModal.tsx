@@ -37,6 +37,7 @@ import { CommitmentItem } from './fields/ClientsFields'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useMovementSubcontracts, useCreateMovementSubcontracts, useUpdateMovementSubcontracts } from '@/features/subcontracts'
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity'
 
 // Schema de movimiento básico - proyecto siempre requerido
 const basicMovementSchema = z.object({
@@ -922,7 +923,22 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       return result
     },
-    onSuccess: async (result) => {
+    onSuccess: async (result, variables) => {
+      // Registrar actividad
+      const conceptName = movementConcepts?.find((c: any) => c.id === variables.type_id)?.name || 'Movimiento'
+      await logActivity({
+        organization_id: userData?.organization?.id || '',
+        user_id: userData?.user?.id || '',
+        action: isEditing ? ACTIVITY_ACTIONS.UPDATE_MOVEMENT : ACTIVITY_ACTIONS.CREATE_MOVEMENT,
+        target_table: TARGET_TABLES.MOVEMENTS,
+        target_id: result.id,
+        metadata: { 
+          amount: variables.amount, 
+          description: variables.description || '',
+          concept_name: conceptName
+        }
+      })
+
       // Si estamos creando un nuevo movimiento (no editando), marcar checklist
       if (!isEditing) {
         try {
@@ -1085,7 +1101,7 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
         if (updateDestError) throw updateDestError
 
 
-        return { id: editingMovement.id, updated: true }
+        return { id: editingMovement.id, updated: true, isUpdate: true, amount_from: data.amount_from, amount_to: data.amount_to, description: data.description }
 
       } else {
 
@@ -1136,10 +1152,25 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
         if (error) throw error
 
-        return results
+        return { ...results[0], amount_from: data.amount_from, amount_to: data.amount_to, description: data.description }
       }
     },
-    onSuccess: () => {
+    onSuccess: async (result, variables) => {
+      // Registrar actividad
+      const conceptName = movementConcepts?.find((c: any) => c.id === variables.type_id)?.name || 'Conversión'
+      await logActivity({
+        organization_id: userData?.organization?.id || '',
+        user_id: userData?.user?.id || '',
+        action: isEditing ? ACTIVITY_ACTIONS.UPDATE_MOVEMENT : ACTIVITY_ACTIONS.CREATE_MOVEMENT,
+        target_table: TARGET_TABLES.MOVEMENTS,
+        target_id: result?.id || '',
+        metadata: { 
+          amount: variables.amount_from, 
+          description: variables.description || 'Conversión de moneda',
+          concept_name: conceptName
+        }
+      })
+
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })
@@ -1223,9 +1254,24 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
 
       if (error) throw error
 
-      return results
+      return { ...results[0], amount: data.amount, description: data.description }
     },
-    onSuccess: () => {
+    onSuccess: async (result, variables) => {
+      // Registrar actividad
+      const conceptName = movementConcepts?.find((c: any) => c.id === variables.type_id)?.name || 'Transferencia'
+      await logActivity({
+        organization_id: userData?.organization?.id || '',
+        user_id: userData?.user?.id || '',
+        action: ACTIVITY_ACTIONS.CREATE_MOVEMENT,
+        target_table: TARGET_TABLES.MOVEMENTS,
+        target_id: result?.id || '',
+        metadata: { 
+          amount: variables.amount, 
+          description: variables.description || 'Transferencia interna',
+          concept_name: conceptName
+        }
+      })
+
       queryClient.invalidateQueries({ queryKey: ['movements'] })
       queryClient.invalidateQueries({ queryKey: ['movements-view'] })
       queryClient.invalidateQueries({ queryKey: ['wallet-currency-balances'] })

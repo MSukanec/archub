@@ -29,6 +29,7 @@ import { useSiteLogTypes } from "../hooks/use-sitelog-types";
 import { useSiteLogFiles } from "../hooks/use-sitelog-files";
 import { FileUploader } from "@/components/shared/FileUploader";
 import { deleteMediaFileV2 } from "@/features/media/services/deleteMediaFileV2";
+import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 
 interface SiteLogFormProps {
   modalData?: any;
@@ -522,7 +523,22 @@ export default function SiteLogForm({ modalData, onClose, mode = "create" }: Sit
 
       return savedSiteLog;
     },
-    onSuccess: async (savedSiteLog) => {
+    onSuccess: async (savedSiteLog, variables) => {
+      // Registrar actividad
+      const entryTypeName = siteLogTypes.find((t: any) => t.id === variables.entry_type_id)?.name || 'Bitácora'
+      await logActivity({
+        organization_id: currentOrganizationId || '',
+        user_id: currentUser?.user?.id || '',
+        action: siteLogId ? ACTIVITY_ACTIONS.UPDATE_SITE_LOG : ACTIVITY_ACTIONS.CREATE_SITE_LOG,
+        target_table: TARGET_TABLES.SITE_LOGS,
+        target_id: savedSiteLog.id,
+        metadata: { 
+          entry_type: entryTypeName,
+          comments: variables.comments || '',
+          project_id: selectedProjectId || ''
+        }
+      })
+
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
       if (filesToUpload.length > 0) {
         try {
