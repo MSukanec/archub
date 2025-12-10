@@ -1,11 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';
-import { DollarSign, TrendingUp, CreditCard, Inbox, Search, Filter, Bell, Plus } from 'lucide-react';
+import { DollarSign, TrendingUp, CreditCard, Inbox, Search, Bell, Banknote } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { supabase } from '@/lib/supabase';
 import { es } from 'date-fns/locale';
 import { useGlobalModalStore } from '@/components/modal';
 import { useActionBarMobile } from '@/layouts';
@@ -68,6 +68,27 @@ const AdminPaymentsTab = () => {
     queryKey: ['/api/admin/payments/all'],
   });
 
+  const { data: exchangeRateData } = useQuery({
+    queryKey: ['exchange-rate-usd-ars'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('exchange_rates')
+        .select('rate')
+        .eq('from_currency', 'USD')
+        .eq('to_currency', 'ARS')
+        .eq('is_active', true)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching exchange rate:', error);
+        return 1200;
+      }
+      return Number(data?.rate) || 1200;
+    },
+  });
+
+  const exchangeRate = exchangeRateData || 1200;
+
   const stats = useMemo(() => {
     const now = new Date();
     const currentMonthStart = startOfMonth(now);
@@ -77,21 +98,36 @@ const AdminPaymentsTab = () => {
       isWithinInterval(new Date(p.created_at), { start: currentMonthStart, end: currentMonthEnd })
     );
 
-    const totalAmountARS = paymentsThisMonth
+    const historicalARS = payments
       .filter(p => p.currency === 'ARS')
       .reduce((sum, p) => sum + p.amount, 0);
 
-    const totalAmountUSD = paymentsThisMonth
+    const historicalUSD = payments
       .filter(p => p.currency === 'USD')
       .reduce((sum, p) => sum + p.amount, 0);
+
+    const monthlyARS = paymentsThisMonth
+      .filter(p => p.currency === 'ARS')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const monthlyUSD = paymentsThisMonth
+      .filter(p => p.currency === 'USD')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const historicalDollarized = historicalUSD + (historicalARS / exchangeRate);
+    const monthlyDollarized = monthlyUSD + (monthlyARS / exchangeRate);
 
     return {
       totalPayments: payments.length,
       paymentsThisMonth: paymentsThisMonth.length,
-      totalAmountARS,
-      totalAmountUSD,
+      historicalARS,
+      historicalUSD,
+      monthlyARS,
+      monthlyUSD,
+      historicalDollarized,
+      monthlyDollarized,
     };
-  }, [payments]);
+  }, [payments, exchangeRate]);
 
   // Filter payments by search
   const filteredPayments = useMemo(() => {
@@ -149,7 +185,7 @@ const AdminPaymentsTab = () => {
         }
       });
     }
-  }, [isMobile]);
+  }, [isMobile, setFilterConfig, setMobileSearchValue]);
 
   const columns = [
     {
@@ -277,49 +313,64 @@ const AdminPaymentsTab = () => {
     },
   ];
 
+  const formatARS = (value: number) => new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+
+  const formatUSD = (value: number) => new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+
   return (
     <div className="space-y-6">
-      {/* KPIs - 3 columns in one row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* KPIs - 2 columns on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <StatCard>
           <div className="flex items-center justify-between">
             <StatCardTitle showArrow={false}>Total Pagos</StatCardTitle>
             <DollarSign className="h-5 w-5 text-accent" />
           </div>
           <StatCardValue>{stats.totalPayments}</StatCardValue>
-          <StatCardMeta>pagos completados</StatCardMeta>
+          <StatCardMeta>Este mes: {stats.paymentsThisMonth}</StatCardMeta>
         </StatCard>
 
         <StatCard>
           <div className="flex items-center justify-between">
-            <StatCardTitle showArrow={false}>Este Mes (ARS)</StatCardTitle>
+            <StatCardTitle showArrow={false}>Total</StatCardTitle>
             <TrendingUp className="h-5 w-5 text-green-600" />
           </div>
-          <StatCardValue>
-            {new Intl.NumberFormat('es-AR', {
-              style: 'currency',
-              currency: 'ARS',
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            }).format(stats.totalAmountARS)}
+          <StatCardValue className="text-lg md:text-2xl">
+            {formatUSD(stats.historicalDollarized)}
           </StatCardValue>
-          <StatCardMeta>{stats.paymentsThisMonth} pagos</StatCardMeta>
+          <StatCardMeta>Este mes: {formatUSD(stats.monthlyDollarized)}</StatCardMeta>
         </StatCard>
 
         <StatCard>
           <div className="flex items-center justify-between">
-            <StatCardTitle showArrow={false}>Este Mes (USD)</StatCardTitle>
-            <CreditCard className="h-5 w-5 text-blue-600" />
+            <StatCardTitle showArrow={false}>Total (ARS)</StatCardTitle>
+            <Banknote className="h-5 w-5 text-blue-600" />
           </div>
-          <StatCardValue>
-            {new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'USD',
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }).format(stats.totalAmountUSD)}
+          <StatCardValue className="text-lg md:text-2xl">
+            {formatARS(stats.historicalARS)}
           </StatCardValue>
-          <StatCardMeta>{stats.paymentsThisMonth} pagos</StatCardMeta>
+          <StatCardMeta>Este mes: {formatARS(stats.monthlyARS)}</StatCardMeta>
+        </StatCard>
+
+        <StatCard>
+          <div className="flex items-center justify-between">
+            <StatCardTitle showArrow={false}>Total (USD)</StatCardTitle>
+            <CreditCard className="h-5 w-5 text-emerald-600" />
+          </div>
+          <StatCardValue className="text-lg md:text-2xl">
+            {formatUSD(stats.historicalUSD)}
+          </StatCardValue>
+          <StatCardMeta>Este mes: {formatUSD(stats.monthlyUSD)}</StatCardMeta>
         </StatCard>
       </div>
 
