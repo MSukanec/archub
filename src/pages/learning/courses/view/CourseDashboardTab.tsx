@@ -173,7 +173,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     if (enrollment?.expires_at) {
       const now = new Date();
       const expiresAt = new Date(enrollment.expires_at);
-      const startedAt = new Date(enrollment.started_at);
+      const startedAt = enrollment.started_at ? new Date(enrollment.started_at) : now;
       
       // Calculate days remaining
       const msRemaining = expiresAt.getTime() - now.getTime();
@@ -246,9 +246,22 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         {/* Content */}
         <div className="relative z-10 p-6 md:p-8">
           {/* Course Title */}
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
             {course?.title || 'Cargando...'}
           </h1>
+          
+          {/* Continue Button */}
+          {lastLesson && (
+            <Button
+              onClick={() => goToLesson(lastLesson.lesson_id, lastLesson.last_position_sec)}
+              className="mb-6 bg-white/20 hover:bg-white/30 text-white border-white/30"
+              variant="outline"
+              data-testid="button-continue-hero"
+            >
+              <Play className="mr-2 h-4 w-4" />
+              Continuar
+            </Button>
+          )}
           
           {/* KPIs Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -307,54 +320,10 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         </div>
       </div>
 
-      {/* Continue Watching and Discord Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        {/* Continue Watching Card - 3 columns */}
-        {lastLesson && (
-          <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-accent/10 hover:shadow-lg transition-all duration-200 lg:col-span-3">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                    Continuar viendo
-                  </p>
-                  <h3 className="font-semibold text-base mb-1 text-foreground">
-                    {lastLesson.lesson_title}
-                  </h3>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    <span>
-                      {Math.floor(lastLesson.last_position_sec / 60)}:{String(Math.floor(lastLesson.last_position_sec % 60)).padStart(2, '0')} / {Math.floor(lastLesson.duration_sec / 60)}:{String(Math.floor(lastLesson.duration_sec % 60)).padStart(2, '0')}
-                    </span>
-                  </div>
-                  {/* Progress bar */}
-                  <div className="mt-2 w-full bg-muted/30 rounded-full h-1.5">
-                    <div 
-                      className="bg-accent h-1.5 rounded-full transition-all duration-300"
-                      style={{ width: `${lastLesson.duration_sec > 0 ? (lastLesson.last_position_sec / lastLesson.duration_sec) * 100 : 0}%` }}
-                    />
-                  </div>
-                </div>
-                <Button
-                  onClick={() => goToLesson(lastLesson.lesson_id, lastLesson.last_position_sec)}
-                  className="flex-shrink-0"
-                  data-testid="button-continue-watching"
-                >
-                  <Play className="mr-2 h-4 w-4" />
-                  Continuar
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {/* Discord Widget */}
+      <DiscordWidget />
 
-        {/* Discord Widget - 1 column */}
-        <div className={lastLesson ? "lg:col-span-1" : "lg:col-span-4"}>
-          <DiscordWidget />
-        </div>
-      </div>
-
-      {/* Second Row - Forum, Notes and Markers */}
+      {/* Forum, Notes and Markers Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Forum Card - Navega a Foro */}
         <StatCard onCardClick={() => navigateToTab('Foro')}>
@@ -365,20 +334,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
                 icon={<MessageCircle />}
                 title="No hay posts aún"
                 description="Sé el primero en publicar en el foro del curso"
-                action={
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigateToTab('Foro');
-                    }}
-                    data-testid="button-go-to-forum"
-                  >
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    Ir al Foro
-                  </Button>
-                }
                 className="min-h-0 md:min-h-0"
               />
             ) : (
