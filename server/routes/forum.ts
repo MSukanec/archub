@@ -77,9 +77,40 @@ async function canAccessCategory(userId: string, categoryId: string): Promise<bo
   return allowedRoles.some((role: string) => userRoles.includes(role));
 }
 
+async function checkCourseEnrollment(userId: string, courseId: string): Promise<boolean> {
+  const { data: enrollment } = await supabaseAdmin
+    .from('course_enrollments')
+    .select('id')
+    .eq('course_id', courseId)
+    .eq('user_id', userId)
+    .maybeSingle();
+  
+  return !!enrollment;
+}
+
+async function canAccessCourseCategory(userId: string, categoryId: string, courseId: string): Promise<boolean> {
+  const userRoles = await getUserRoles(userId);
+  
+  if (userRoles.includes('admin')) return true;
+
+  const isEnrolled = await checkCourseEnrollment(userId, courseId);
+  if (!isEnrolled) return false;
+
+  const { data: category } = await supabaseAdmin
+    .from('forum_categories')
+    .select('allowed_roles, is_active, course_id')
+    .eq('id', categoryId)
+    .single();
+
+  if (!category || !category.is_active) return false;
+  if (category.course_id !== courseId) return false;
+
+  return true;
+}
+
 export function registerForumRoutes(app: Express, deps: RouteDeps): void {
 
-  // GET /api/forum/categories - List categories filtered by user's roles
+  // GET /api/forum/categories - List GLOBAL categories filtered by user's roles (course_id IS NULL)
   app.get("/api/forum/categories", async (req: Request, res: Response) => {
     try {
       const token = extractToken(req.headers.authorization);
@@ -90,11 +121,11 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
         .from('forum_categories')
         .select('*')
         .eq('is_active', true)
+        .is('course_id', null)
         .order('sort_order', { ascending: true });
 
       if (error) throw new HttpError(500, error.message);
 
-      // Admins see everything, others are filtered by role
       const isAdmin = userRoles.includes('admin');
       const filteredCategories = isAdmin 
         ? (categories || [])
@@ -109,6 +140,182 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
         return res.status(error.statusCode).json({ error: error.message });
       }
       return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
+  // GET /api/forum/courses/:courseId/categories - List categories for a specific course
+  app.get("/api/forum/courses/:courseId/categories", async (req: Request, res: Response) => {
+    try {
+      const token = extractToken(req.headers.authorization);
+      const user = await requireUser(token);
+      const { courseId } = req.params;
+      const userRoles = await getUserRoles(user.userId);
+      const isAdmin = userRoles.includes('admin');
+
+      if (!isAdmin) {
+        const isEnrolled = await checkCourseEnrollment(user.userId, courseId);
+        if (!isEnrolled) {
+          throw new HttpError(403, "No tienes acceso a este curso");
+        }
+      }
+
+      const { data: categories, error } = await supabaseAdmin
+        .from('forum_categories')
+        .select('*')
+        .eq('is_active', true)
+        .eq('course_id', courseId)
+        .order('sort_order', { ascending: true });
+
+      if (error) throw new HttpError(500, error.message);
+
+      return res.json(categories || []);
+    } catch (error: any) {
+      if (error instanceof HttpError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
+  // GET /api/forum/courses/:courseId/threads - List threads for a course forum
+  app.get("/api/forum/courses/:courseId/threads", async (req: Request, res: Response) => {
+    try {
+      const token = extractToken(req.headers.authorization);
+      const user = await requireUser(token);
+      const { courseId } = req.params;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+      const offset = (page - 1) * limit;
+      const categorySlug = req.query.category as string | undefined;
+
+      const userRoles = await getUserRoles(user.userId);
+      const isAdmin = userRoles.includes('admin');
+
+      if (!isAdmin) {
+        const isEnrolled = await checkCourseEnrollment(user.userId, courseId);
+        if (!isEnrolled) {
+          throw new HttpError(403, "No tienes acceso a este curso");
+        }
+      }
+
+      const { data: courseCategories } = await supabaseAdmin
+        .from('forum_categories')
+        .select('id, slug')
+        .eq('course_id', courseId)
+        .eq('is_active', true);
+
+      const categoryIds = (courseCategories || []).map(c => c.id);
+
+      if (categoryIds.length === 0) {
+        return res.json({
+          threads: [],
+          pagination: { page, limit, total: 0, totalPages: 0 }
+        });
+      }
+
+      let categoryId: string | null = null;
+      if (categorySlug && categorySlug !== 'all') {
+        const category = (courseCategories || []).find(c => c.slug === categorySlug);
+        if (category) {
+          categoryId = category.id;
+        }
+      }
+
+      let query = supabaseAdmin
+        .from('forum_threads')
+        .select(`
+          *,
+          author:users!forum_threads_author_id_fkey(id, full_name, avatar_url),
+          category:forum_categories!forum_threads_category_id_fkey(id, name, slug)
+        `, { count: 'exact' })
+        .eq('is_deleted', false)
+        .in('category_id', categoryIds);
+
+      if (categoryId) {
+        query = query.eq('category_id', categoryId);
+      }
+
+      const { data: threads, error, count } = await query
+        .order('is_pinned', { ascending: false })
+        .order('last_activity_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (error) throw new HttpError(500, error.message);
+
+      return res.json({
+        threads: threads || [],
+        pagination: {
+          page,
+          limit,
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limit)
+        }
+      });
+    } catch (error: any) {
+      if (error instanceof HttpError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
+  // POST /api/forum/courses/:courseId/categories - Create category for a course (admin only)
+  app.post("/api/forum/courses/:courseId/categories", async (req: Request, res: Response) => {
+    try {
+      await verifyAdminUser(req.headers.authorization);
+      const { courseId } = req.params;
+      const { 
+        name, 
+        description, 
+        icon = 'MessageSquare', 
+        color = '#3b82f6',
+        sort_order 
+      } = req.body;
+
+      if (!name) {
+        throw new HttpError(400, "Name is required");
+      }
+
+      const slug = slugify(name);
+
+      let finalSortOrder = sort_order;
+      if (finalSortOrder === undefined) {
+        const { data: lastCategory } = await supabaseAdmin
+          .from('forum_categories')
+          .select('sort_order')
+          .eq('course_id', courseId)
+          .order('sort_order', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        finalSortOrder = (lastCategory?.sort_order || 0) + 1;
+      }
+
+      const { data: category, error } = await supabaseAdmin
+        .from('forum_categories')
+        .insert([{
+          name,
+          slug,
+          description: description || null,
+          icon,
+          color,
+          allowed_roles: ['public'],
+          sort_order: finalSortOrder,
+          is_active: true,
+          is_read_only: false,
+          course_id: courseId,
+        }])
+        .select()
+        .single();
+
+      if (error) throw new HttpError(400, error.message);
+
+      return res.status(201).json(category);
+    } catch (error: any) {
+      if (error instanceof HttpError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      console.error('Forum course category error:', error);
+      return res.status(500).json({ error: error.message || "Internal error" });
     }
   });
 

@@ -13,10 +13,18 @@ create table public.forum_categories (
   allowed_roles text[] null default array['public'::text],
   is_read_only boolean null default false,
   is_active boolean null default true,
+  course_id uuid null,                          -- NULL = foro global, UUID = foro de curso específico
   created_at timestamp with time zone null default now(),
   constraint forum_categories_pkey primary key (id),
-  constraint forum_categories_slug_key unique (slug)
+  constraint forum_categories_course_id_fkey foreign key (course_id) references courses(id) on delete cascade
 ) TABLESPACE pg_default;
+
+-- Índice para categorías por curso
+create index idx_forum_categories_course on forum_categories(course_id) where course_id is not null;
+
+-- Índice único: slug único por contexto (global o por curso)
+create unique index forum_categories_slug_unique 
+on forum_categories (slug, coalesce(course_id, '00000000-0000-0000-0000-000000000000'::uuid));
 
 ---------- TABLA FORUM_POSTS:
 

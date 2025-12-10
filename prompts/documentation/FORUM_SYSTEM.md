@@ -9,6 +9,7 @@ El sistema de foro permite a los usuarios crear discusiones organizadas por cate
 - Reacciones (likes)
 - Adjuntos de imágenes
 - Control de acceso basado en roles
+- **Foros por curso** (cada curso tiene su propio foro independiente)
 
 ---
 
@@ -30,11 +31,23 @@ create table public.forum_categories (
   allowed_roles text[] null default array['public'::text],  -- Roles que pueden acceder
   is_read_only boolean null default false,      -- Si es solo lectura
   is_active boolean null default true,          -- Si está activa
+  course_id uuid null,                          -- NULL = foro global, UUID = foro de curso específico
   created_at timestamp with time zone null default now(),
   constraint forum_categories_pkey primary key (id),
-  constraint forum_categories_slug_key unique (slug)
+  constraint forum_categories_course_id_fkey foreign key (course_id) references courses(id) on delete cascade
 );
+
+-- Índice para categorías por curso
+create index idx_forum_categories_course on forum_categories(course_id) where course_id is not null;
+
+-- Índice único: slug único por contexto (global o por curso)
+create unique index forum_categories_slug_unique 
+on forum_categories (slug, coalesce(course_id, '00000000-0000-0000-0000-000000000000'::uuid));
 ```
+
+**Comportamiento de course_id:**
+- `course_id = NULL` → Categoría del foro global de fundadores
+- `course_id = UUID` → Categoría del foro específico de ese curso
 
 **Roles disponibles:**
 - `public` - Todos los usuarios autenticados
@@ -172,14 +185,22 @@ SELECT * FROM media_links WHERE forum_thread_id = '<thread_id>';
 
 **Archivo:** `server/routes/forum.ts`
 
-### Endpoints de Categorías
+### Endpoints de Categorías (Foro Global)
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/api/forum/categories` | Lista categorías filtradas por roles del usuario |
-| POST | `/api/forum/categories` | Crea nueva categoría (admin only) |
+| GET | `/api/forum/categories` | Lista categorías GLOBALES (course_id IS NULL) |
+| POST | `/api/forum/categories` | Crea nueva categoría global (admin only) |
 | PATCH | `/api/forum/categories/:id` | Actualiza categoría (admin only) |
 | DELETE | `/api/forum/categories/:id` | Elimina categoría (admin only) |
+
+### Endpoints de Foro por Curso
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/api/forum/courses/:courseId/categories` | Lista categorías del foro de un curso |
+| POST | `/api/forum/courses/:courseId/categories` | Crea categoría para un curso (admin only) |
+| GET | `/api/forum/courses/:courseId/threads` | Lista threads del foro de un curso |
 
 ### Endpoints de Threads
 
@@ -323,7 +344,7 @@ interface ForumPostWithAuthor {
 
 ---
 
-## Uso del Componente ForumPage
+## Uso del Componente ForumPage (Foro Global)
 
 El componente `ForumPage` acepta una prop `allowedRoles` para filtrar qué categorías mostrar:
 
@@ -337,6 +358,37 @@ El componente `ForumPage` acepta una prop `allowedRoles` para filtrar qué categ
 // Sin filtro (muestra según permisos del usuario autenticado)
 <ForumPage />
 ```
+
+---
+
+## Foro por Curso
+
+Cada curso puede tener su propio foro independiente con categorías exclusivas.
+
+### Componentes del Frontend
+
+**Tab de Estudiante:** `src/pages/learning/courses/view/CourseForumTab.tsx`
+```tsx
+<CourseForumTab courseId={course.id} />
+```
+- Muestra el foro del curso a estudiantes inscritos
+- Ubicada en la vista del curso, antes de la tab "Feedback"
+
+**Tab de Admin:** `src/pages/admin/courses/view/AdminCourseForumTab.tsx`
+```tsx
+<AdminCourseForumTab courseId={course.id} />
+```
+- Permite a admins crear/editar/eliminar categorías del foro del curso
+- Ubicada en la vista de administración del curso
+
+### Diferencias con Foro Global
+
+| Aspecto | Foro Global | Foro por Curso |
+|---------|-------------|----------------|
+| Acceso | Basado en roles (founder, admin) | Basado en inscripción al curso |
+| Categorías | Configuradas por admin en portal | Configuradas por admin en curso |
+| Columna course_id | NULL | UUID del curso |
+| Componente | ForumPage | CourseForumTab |
 
 ---
 

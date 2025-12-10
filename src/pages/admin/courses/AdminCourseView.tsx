@@ -9,6 +9,7 @@ import AdminCourseDataTab from './view/AdminCourseDataTab';
 import AdminCourseContentTab from './view/AdminCourseContentTab';
 import AdminCourseMarketingTab from './view/AdminCourseMarketingTab';
 import AdminCourseTestimonialsTab from './view/AdminCourseTestimonialsTab';
+import AdminCourseForumTab from './view/AdminCourseForumTab';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
 
@@ -163,6 +164,11 @@ export default function AdminCourseView() {
       isActive: activeTab === 'Contenido del Curso'
     },
     {
+      id: 'Foro',
+      label: 'Foro',
+      isActive: activeTab === 'Foro'
+    },
+    {
       id: 'Testimonios',
       label: 'Testimonios',
       isActive: activeTab === 'Testimonios'
@@ -215,6 +221,8 @@ export default function AdminCourseView() {
         return <AdminCourseMarketingTab courseId={id} />;
       case 'Contenido del Curso':
         return <AdminCourseContentTab courseId={id} modules={modules} lessons={lessons} />;
+      case 'Foro':
+        return <AdminCourseForumTab courseId={id} />;
       case 'Testimonios':
         return <AdminCourseTestimonialsTab courseId={id} />;
       default:

@@ -12,6 +12,7 @@ import CourseContentTab from './view/CourseContentTab';
 import CoursePlayerTab from './view/CoursePlayerTab';
 import CourseNotesTab from './view/CourseNotesTab';
 import CourseMarkersTab from './view/CourseMarkersTab';
+import CourseForumTab from './view/CourseForumTab';
 import CourseFeedbackTab from './view/CourseFeedbackTab';
 
 export default function CourseView() {
@@ -129,6 +130,11 @@ export default function CourseView() {
       id: 'Marcadores',
       label: 'Marcadores',
       isActive: activeTab === 'Marcadores'
+    },
+    {
+      id: 'Foro',
+      label: 'Foro',
+      isActive: activeTab === 'Foro'
     },
     {
       id: 'Feedback',
@@ -271,6 +277,8 @@ export default function CourseView() {
         return <CourseNotesTab courseId={course?.id} courseSlug={id} />;
       case 'Marcadores':
         return <CourseMarkersTab courseId={course?.id} courseSlug={id} />;
+      case 'Foro':
+        return <CourseForumTab courseId={course?.id} />;
       case 'Feedback':
         return <CourseFeedbackTab courseId={course?.id} />;
       default:
