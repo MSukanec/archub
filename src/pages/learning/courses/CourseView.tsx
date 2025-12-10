@@ -140,7 +140,8 @@ export default function CourseView() {
     {
       id: 'Feedback',
       label: 'Feedback',
-      isActive: activeTab === 'Feedback'
+      isActive: activeTab === 'Feedback',
+      badge: 'Nuevo'
     }
   ];
 

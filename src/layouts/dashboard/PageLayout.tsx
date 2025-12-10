@@ -403,7 +403,7 @@ export function PageLayout({
                       >
                         {tab.label}
                         {tab.badge && (
-                          <span className="px-1.5 py-0.5 text-xs bg-[var(--muted)] text-[var(--muted-foreground)] rounded-md">
+                          <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-[var(--accent)] text-white rounded">
                             {tab.badge}
                           </span>
                         )}
