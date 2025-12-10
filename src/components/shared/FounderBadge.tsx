@@ -1,4 +1,4 @@
-import { Trophy } from 'lucide-react';
+import { Award } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -25,7 +25,7 @@ export function FounderBadge({ isFounder, size = 'md' }: FounderBadgeProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex items-center gap-1">
-            <Trophy className={`${sizeClasses[size]} text-amber-500`} />
+            <Award className={`${sizeClasses[size]} text-amber-500`} />
           </div>
         </TooltipTrigger>
         <TooltipContent side="right">
