@@ -8,7 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Edit, Trash2, Building, Crown, Star } from 'lucide-react';
+import { Edit, Trash2, Building, Crown, Award } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';
 
 import { useToast } from '@/hooks/use-toast';
@@ -348,13 +348,12 @@ const AdminAdminOrganizations = () => {
     {
       key: 'founder',
       label: 'Fundador',
-      width: '8%',
+      width: '5%',
       render: (organization: Organization) => (
         organization.settings?.is_founder ? (
-          <Badge variant="default" className="bg-amber-500 text-white hover:bg-amber-500/90">
-            <Star className="w-3 h-3 mr-1 fill-current" />
-            Fundador
-          </Badge>
+          <div title="Organización Fundadora">
+            <Award className="w-5 h-5 text-amber-500" />
+          </div>
         ) : null
       )
     },
