@@ -1,6 +1,6 @@
 import React from 'react'
 import { TrendingDown } from 'lucide-react'
-import { usePartners, Partner } from '@/hooks/use-partners'
+import { usePartners, type Partner } from '@/features/partners'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { FormLabel } from '@/components/ui/form'

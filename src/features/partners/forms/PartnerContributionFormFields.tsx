@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -16,10 +16,9 @@ import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
-import { usePartners, Partner } from '@/hooks/use-partners'
+import { usePartners, useCreatePartnerContribution } from '../hooks'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
-import { useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import type { Partner } from '../types'
 
 const partnerContributionSchema = z.object({
   contribution_date: z.date({
@@ -58,7 +57,8 @@ function getPartnerDisplayName(partner: Partner): string {
 export interface PartnerContributionFormFieldsProps {
   projectId?: string;
   organizationId?: string;
-  mode: 'create' | 'edit';
+  contributionId?: string;
+  mode: 'create' | 'edit' | 'view';
   onSuccess: () => void;
   onCancel: () => void;
   hideActions?: boolean;
@@ -67,7 +67,8 @@ export interface PartnerContributionFormFieldsProps {
 
 export function PartnerContributionFormFields({ 
   projectId, 
-  organizationId, 
+  organizationId,
+  contributionId,
   mode, 
   onSuccess, 
   onCancel,
@@ -76,13 +77,13 @@ export function PartnerContributionFormFields({
 }: PartnerContributionFormFieldsProps) {
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
-  const queryClient = useQueryClient()
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { data: partners = [], isLoading: partnersLoading } = usePartners(organizationId, { enabled: !!organizationId })
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId || '')
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
+
+  const createMutation = useCreatePartnerContribution()
 
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
@@ -122,10 +123,8 @@ export function PartnerContributionFormFields({
       return
     }
 
-    setIsSubmitting(true)
-
     try {
-      const insertData = {
+      await createMutation.mutateAsync({
         organization_id: organizationId,
         project_id: projectId || null,
         partner_id: data.partner_id,
@@ -138,22 +137,12 @@ export function PartnerContributionFormFields({
         reference: data.reference || null,
         notes: data.notes || null,
         created_by: currentMember.id,
-      }
-
-      const { error } = await supabase
-        .from('partner_contributions')
-        .insert(insertData)
-
-      if (error) throw error
+      })
 
       toast({
         title: "Aporte registrado",
         description: "El aporte de socio se ha registrado correctamente",
       })
-
-      queryClient.invalidateQueries({ queryKey: ['unified-movements'] })
-      queryClient.invalidateQueries({ queryKey: ['partner-movements'] })
-      queryClient.invalidateQueries({ queryKey: ['partner-contributions'] })
 
       onSuccess()
     } catch (error: any) {
@@ -163,8 +152,6 @@ export function PartnerContributionFormFields({
         description: error.message || "Ocurrió un error al registrar el aporte",
         variant: "destructive",
       })
-    } finally {
-      setIsSubmitting(false)
     }
   }
 

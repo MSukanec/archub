@@ -21,6 +21,8 @@ create table public.client_payments (
   status text not null default 'confirmed'::text,
   created_by uuid null,
   functional_amount numeric(12, 2) null,
+  is_deleted boolean null default false,
+  deleted_at timestamp with time zone null,
   constraint client_payments_pkey primary key (id),
   constraint client_payments_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
   constraint fk_payment_schedule foreign KEY (schedule_id) references client_payment_schedule (id) on delete set null,
@@ -57,6 +59,13 @@ create index IF not exists idx_client_payments_view_project on public.client_pay
 
 create index IF not exists idx_client_payments_view_org on public.client_payments using btree (organization_id, payment_date desc) TABLESPACE pg_default;
 
+create index IF not exists idx_client_payments_not_deleted on public.client_payments using btree (organization_id, project_id) TABLESPACE pg_default
+where
+  (
+    (is_deleted is null)
+    or (is_deleted = false)
+  );
+
 create trigger set_client_payments_updated_at BEFORE
 update on client_payments for EACH row
 execute FUNCTION set_timestamp ();
@@ -79,6 +88,8 @@ create table public.material_payments (
   status text not null default 'confirmed'::text,
   created_by uuid null,
   purchase_id uuid null,
+  is_deleted boolean null default false,
+  deleted_at timestamp with time zone null,
   constraint material_payments_pkey primary key (id),
   constraint material_payments_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
   constraint material_payments_currency_id_fkey foreign KEY (currency_id) references currencies (id) on delete RESTRICT,
@@ -100,6 +111,13 @@ create table public.material_payments (
   ),
   constraint material_payments_amount_positive check ((amount > (0)::numeric))
 ) TABLESPACE pg_default;
+
+create index IF not exists idx_material_payments_not_deleted on public.material_payments using btree (organization_id, project_id) TABLESPACE pg_default
+where
+  (
+    (is_deleted is null)
+    or (is_deleted = false)
+  );
 
 create index IF not exists material_payments_organization_id_project_id_idx on public.material_payments using btree (organization_id, project_id) TABLESPACE pg_default;
 
@@ -187,7 +205,8 @@ create table public.partner_contributions (
   partner_id uuid null,
   status text not null default 'confirmed'::text,
   created_by uuid null,
-  file_url text null,
+  is_deleted boolean null default false,
+  deleted_at timestamp with time zone null,
   constraint partner_contributions_pkey primary key (id),
   constraint fk_contribution_currency foreign KEY (currency_id) references currencies (id) on delete RESTRICT,
   constraint fk_contribution_partner foreign KEY (partner_id) references partners (id) on delete set null,
@@ -211,6 +230,23 @@ create table public.partner_contributions (
   constraint partner_contributions_exchange_rate_positive check ((exchange_rate > (0)::numeric))
 ) TABLESPACE pg_default;
 
+create index IF not exists idx_partner_contributions_not_deleted on public.partner_contributions using btree (organization_id, project_id) TABLESPACE pg_default
+where
+  (
+    (is_deleted is null)
+    or (is_deleted = false)
+  );
+
+create index IF not exists idx_partner_contributions_org_project on public.partner_contributions using btree (organization_id, project_id) TABLESPACE pg_default;
+
+create index IF not exists idx_partner_contributions_partner on public.partner_contributions using btree (partner_id) TABLESPACE pg_default;
+
+create index IF not exists idx_partner_contributions_date on public.partner_contributions using btree (contribution_date) TABLESPACE pg_default;
+
+create index IF not exists idx_partner_contributions_view_project on public.partner_contributions using btree (project_id, contribution_date desc) TABLESPACE pg_default;
+
+create index IF not exists idx_partner_contributions_view_org on public.partner_contributions using btree (organization_id, contribution_date desc) TABLESPACE pg_default;
+
 ---------- TABLA PARTNER_WITHDRAWALS:
 
 create table public.partner_withdrawals (
@@ -229,7 +265,8 @@ create table public.partner_withdrawals (
   partner_id uuid null,
   status text not null default 'confirmed'::text,
   created_by uuid null,
-  file_url text null,
+  is_deleted boolean null default false,
+  deleted_at timestamp with time zone null,
   constraint partner_withdrawals_pkey primary key (id),
   constraint fk_withdrawal_currency foreign KEY (currency_id) references currencies (id) on delete RESTRICT,
   constraint fk_withdrawal_partner foreign KEY (partner_id) references partners (id) on delete set null,
@@ -263,3 +300,9 @@ create index IF not exists idx_partner_withdrawals_view_project on public.partne
 
 create index IF not exists idx_partner_withdrawals_view_org on public.partner_withdrawals using btree (organization_id, withdrawal_date desc) TABLESPACE pg_default;
 
+create index IF not exists idx_partner_withdrawals_not_deleted on public.partner_withdrawals using btree (organization_id, project_id) TABLESPACE pg_default
+where
+  (
+    (is_deleted is null)
+    or (is_deleted = false)
+  );

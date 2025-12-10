@@ -7,7 +7,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation } from '@tanstack/react-query';
-import { usePartners } from '@/hooks/use-partners';
+import { usePartners } from '@/features/partners';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
