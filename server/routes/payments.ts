@@ -979,4 +979,44 @@ export function registerPaymentRoutes(app: Express, deps: RouteDeps) {
       return res.status(500).json({ error: "Internal error" });
     }
   });
+
+  // DELETE /api/admin/payments/:id - Delete a payment (admin only)
+  app.delete("/api/admin/payments/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const authId = req.headers['x-auth-id'] as string;
+      const adminClient = getAdminClient();
+
+      if (!authId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Verify admin role
+      const { data: user, error: userError } = await adminClient
+        .from('users')
+        .select('role')
+        .eq('auth_id', authId)
+        .single();
+
+      if (userError || !user || user.role !== 'admin') {
+        return res.status(403).json({ error: "Forbidden" });
+      }
+
+      // Delete the payment
+      const { error: deleteError } = await adminClient
+        .from('payments')
+        .delete()
+        .eq('id', id);
+
+      if (deleteError) {
+        console.error("Error deleting payment:", deleteError);
+        return res.status(500).json({ error: "Failed to delete payment" });
+      }
+
+      return res.json({ success: true, message: "Payment deleted" });
+    } catch (error: any) {
+      console.error("Error in DELETE /api/admin/payments/:id:", error);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
 }

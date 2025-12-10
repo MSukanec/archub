@@ -1,14 +1,17 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';
-import { DollarSign, TrendingUp, CreditCard, Inbox, Search, Bell, Banknote, Eye } from 'lucide-react';
+import { DollarSign, TrendingUp, CreditCard, Inbox, Search, Bell, Banknote, Edit, Trash2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { supabase } from '@/lib/supabase';
 import { es } from 'date-fns/locale';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
+import { useGlobalModalStore } from '@/components/modal';
+import { useToast } from '@/hooks/use-toast';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 
 interface Payment {
   id: string;
@@ -43,6 +46,8 @@ interface Payment {
 
 const AdminPaymentsTab = () => {
   const isMobile = useMobile();
+  const { openModal } = useGlobalModalStore();
+  const { toast } = useToast();
   
   const { 
     setActions, 
@@ -86,6 +91,45 @@ const AdminPaymentsTab = () => {
   });
 
   const exchangeRate = exchangeRateData || 1200;
+
+  const deletePaymentMutation = useMutation({
+    mutationFn: async (paymentId: string) => {
+      return apiRequest('DELETE', `/api/admin/payments/${paymentId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/payments/all'] });
+      toast({
+        title: 'Pago eliminado',
+        description: 'El pago ha sido eliminado correctamente.',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar el pago.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const handleEdit = (payment: Payment) => {
+    toast({
+      title: 'Función no disponible',
+      description: 'La edición de pagos no está disponible actualmente.',
+    });
+  };
+
+  const handleDelete = (payment: Payment) => {
+    openModal('delete-confirmation', {
+      mode: 'dangerous',
+      title: 'Eliminar Pago',
+      description: `¿Estás seguro que deseas eliminar este pago de ${payment.users?.full_name || payment.users?.email}? Esta acción no se puede deshacer.`,
+      itemName: `${new Intl.NumberFormat('es-AR', { style: 'currency', currency: payment.currency, minimumFractionDigits: 0 }).format(payment.amount)} - ${payment.users?.full_name || payment.users?.email}`,
+      destructiveActionText: 'Eliminar Pago',
+      onDelete: () => deletePaymentMutation.mutate(payment.id),
+      isLoading: deletePaymentMutation.isPending,
+    });
+  };
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -372,11 +416,15 @@ const AdminPaymentsTab = () => {
         isLoading={isLoading}
         rowActions={(payment: Payment) => [
           {
-            icon: Eye,
-            label: 'Ver detalles',
-            onClick: () => {
-              console.log('Payment details:', payment);
-            },
+            icon: Edit,
+            label: 'Editar',
+            onClick: () => handleEdit(payment),
+          },
+          {
+            icon: Trash2,
+            label: 'Eliminar',
+            onClick: () => handleDelete(payment),
+            variant: 'destructive' as const,
           },
         ]}
         emptyStateConfig={{
