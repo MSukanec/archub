@@ -572,6 +572,8 @@ export interface ClientPaymentFormFieldsProps {
   mode: 'create' | 'edit' | 'view';
   onSuccess: () => void;
   onCancel: () => void;
+  hideActions?: boolean;
+  formRef?: React.RefObject<HTMLFormElement>;
 }
 
 export function ClientPaymentFormFields({ 
@@ -580,7 +582,9 @@ export function ClientPaymentFormFields({
   paymentId, 
   mode, 
   onSuccess, 
-  onCancel 
+  onCancel,
+  hideActions = false,
+  formRef
 }: ClientPaymentFormFieldsProps) {
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
@@ -869,22 +873,24 @@ export function ClientPaymentFormFields({
             attachments={attachments}
           />
         )}
-        <div className="flex justify-end pt-4 border-t">
-          <Button 
-            variant="secondary" 
-            onClick={onCancel}
-            data-testid="button-payment-close"
-          >
-            Cerrar
-          </Button>
-        </div>
+        {!hideActions && (
+          <div className="flex justify-end pt-4 border-t">
+            <Button 
+              variant="secondary" 
+              onClick={onCancel}
+              data-testid="button-payment-close"
+            >
+              Cerrar
+            </Button>
+          </div>
+        )}
       </div>
     )
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
+      <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
         <FormPanel
           form={form}
           onSubmit={onSubmit}
@@ -903,25 +909,27 @@ export function ClientPaymentFormFields({
           onExistingFileDelete={handleExistingFileDelete}
         />
         
-        <div className="flex gap-2 pt-4 border-t">
-          <Button 
-            type="button" 
-            variant="secondary" 
-            onClick={onCancel} 
-            className="flex-1"
-            data-testid="button-payment-cancel"
-          >
-            Cancelar
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={isSubmitting || !currentMember || isLoading} 
-            className="flex-[3]"
-            data-testid="button-payment-submit"
-          >
-            {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Guardar Cambios' : 'Registrar Pago'}
-          </Button>
-        </div>
+        {!hideActions && (
+          <div className="flex gap-2 pt-4 border-t">
+            <Button 
+              type="button" 
+              variant="secondary" 
+              onClick={onCancel} 
+              className="flex-1"
+              data-testid="button-payment-cancel"
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting || !currentMember || isLoading} 
+              className="flex-[3]"
+              data-testid="button-payment-submit"
+            >
+              {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Guardar Cambios' : 'Registrar Pago'}
+            </Button>
+          </div>
+        )}
       </form>
     </Form>
   )
