@@ -254,8 +254,8 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           {lastLesson && (
             <Button
               onClick={() => goToLesson(lastLesson.lesson_id, lastLesson.last_position_sec)}
-              className="mb-6 bg-white/20 hover:bg-white/30 text-white border-white/30"
-              variant="outline"
+              className="mb-6"
+              variant="default"
               data-testid="button-continue-hero"
             >
               <Play className="mr-2 h-4 w-4" />
