@@ -48,6 +48,8 @@ export interface UnifiedMovementWithRelations extends UnifiedMovement {
     name: string;
   } | null;
   signed_amount: number;
+  entity_name: string | null;
+  has_attachments: boolean;
 }
 
 /**
@@ -90,8 +92,16 @@ export async function getUnifiedMovements(
   const projectIds = Array.from(new Set(movements.map(m => m.project_id).filter(Boolean))) as string[];
   const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean))) as string[];
   const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean))) as string[];
+  
+  const clientPaymentIds = movements
+    .filter(m => m.movement_type === 'client_payment' && m.client_id)
+    .map(m => m.client_id) as string[];
+  const personnelIds = movements
+    .filter(m => m.movement_type === 'personnel_payment' && m.personnel_id)
+    .map(m => m.personnel_id) as string[];
+  const paymentIds = movements.map(m => m.id) as string[];
 
-  const [projectsResult, currenciesResult, walletsResult] = await Promise.all([
+  const [projectsResult, currenciesResult, walletsResult, clientsResult, personnelResult, attachmentsResult] = await Promise.all([
     projectIds.length > 0 
       ? supabase.from('projects').select('id, name, code, color').in('id', projectIds)
       : { data: [], error: null },
@@ -101,6 +111,17 @@ export async function getUnifiedMovements(
     walletIds.length > 0
       ? supabase.from('organization_wallets').select('id, wallets:wallet_id(id, name)').in('id', walletIds)
       : { data: [], error: null },
+    clientPaymentIds.length > 0
+      ? supabase.from('project_clients').select('id, contact:contacts(id, full_name, company_name)').in('id', clientPaymentIds)
+      : { data: [], error: null },
+    personnelIds.length > 0
+      ? supabase.from('organization_members').select('id, user:users(id, full_name)').in('id', personnelIds)
+      : { data: [], error: null },
+    paymentIds.length > 0
+      ? supabase.from('media_links').select('id, client_payment_id, material_payment_id, personnel_payment_id').or(
+          `client_payment_id.in.(${paymentIds.join(',')}),material_payment_id.in.(${paymentIds.join(',')}),personnel_payment_id.in.(${paymentIds.join(',')})`
+        )
+      : { data: [], error: null },
   ]);
 
   const projectsMap = new Map((projectsResult.data || []).map(p => [p.id, p]));
@@ -109,6 +130,34 @@ export async function getUnifiedMovements(
     w.id, 
     w.wallets ? { id: w.id, name: w.wallets.name } : null
   ]));
+  const clientsMap = new Map((clientsResult.data || []).map((c: any) => [
+    c.id,
+    c.contact?.full_name || c.contact?.company_name || null
+  ]));
+  const personnelMap = new Map((personnelResult.data || []).map((p: any) => [
+    p.id,
+    p.user?.full_name || null
+  ]));
+  
+  const attachmentsSet = new Set<string>();
+  (attachmentsResult.data || []).forEach((link: any) => {
+    if (link.client_payment_id) attachmentsSet.add(link.client_payment_id);
+    if (link.material_payment_id) attachmentsSet.add(link.material_payment_id);
+    if (link.personnel_payment_id) attachmentsSet.add(link.personnel_payment_id);
+  });
+
+  const getEntityName = (movement: any): string | null => {
+    switch (movement.movement_type) {
+      case 'client_payment':
+        return movement.client_id ? clientsMap.get(movement.client_id) || null : null;
+      case 'personnel_payment':
+        return movement.personnel_id ? personnelMap.get(movement.personnel_id) || null : null;
+      case 'material_payment':
+        return movement.description || null;
+      default:
+        return null;
+    }
+  };
 
   return movements.map((movement: any) => ({
     ...movement,
@@ -116,6 +165,8 @@ export async function getUnifiedMovements(
     currency: movement.currency_id ? currenciesMap.get(movement.currency_id) || null : null,
     wallet: movement.wallet_id ? walletsMap.get(movement.wallet_id) || null : null,
     signed_amount: movement.amount * movement.amount_sign,
+    entity_name: getEntityName(movement),
+    has_attachments: attachmentsSet.has(movement.id),
   }));
 }
 

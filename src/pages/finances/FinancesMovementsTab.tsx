@@ -9,28 +9,32 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
-import { DollarSign, Edit, Trash2 } from 'lucide-react';
+import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users } from 'lucide-react';
 import type { UnifiedMovementWithRelations } from '@/features/finances/services/getUnifiedMovements';
 
 const MOVEMENT_TYPE_CONFIG: Record<string, { 
   label: string; 
   color: string;
   modalType: string;
+  icon: typeof User;
 }> = {
   client_payment: { 
     label: 'Pago Cliente', 
     color: 'bg-green-600',
     modalType: 'client-payment',
+    icon: User,
   },
   material_payment: { 
     label: 'Pago Material', 
     color: 'bg-orange-600',
     modalType: 'material-payment',
+    icon: Package,
   },
   personnel_payment: { 
     label: 'Pago Personal', 
     color: 'bg-blue-600',
     modalType: 'personnel-payment',
+    icon: Users,
   },
 };
 
@@ -125,7 +129,7 @@ export function FinancesMovementsTab() {
       label: 'Fecha',
       sortable: true,
       sortType: 'date',
-      width: '14.28%',
+      width: '10%',
       render: (movement) => {
         const date = parseLocalDate(movement.payment_date);
         return date ? format(date, 'dd/MM/yyyy') : '-';
@@ -135,7 +139,7 @@ export function FinancesMovementsTab() {
       key: 'project',
       label: 'Proyecto',
       sortable: true,
-      width: '14.28%',
+      width: '12%',
       render: (movement) => {
         if (!movement.project) return <span className="text-muted-foreground">-</span>;
         return (
@@ -155,11 +159,12 @@ export function FinancesMovementsTab() {
       key: 'movement_type',
       label: 'Tipo',
       sortable: true,
-      width: '14.28%',
+      width: '10%',
       render: (movement) => {
         const config = MOVEMENT_TYPE_CONFIG[movement.movement_type] || {
           label: movement.movement_type,
-          color: 'bg-gray-600'
+          color: 'bg-gray-600',
+          icon: DollarSign,
         };
         return (
           <Badge className={`text-xs ${config.color} text-white border-0`}>
@@ -169,24 +174,53 @@ export function FinancesMovementsTab() {
       },
     },
     {
+      key: 'entity_name',
+      label: 'Entidad',
+      sortable: true,
+      width: '15%',
+      render: (movement) => {
+        const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
+        const IconComponent = config?.icon || DollarSign;
+        const entityName = movement.entity_name;
+        
+        if (!entityName) {
+          return <span className="text-muted-foreground">-</span>;
+        }
+        
+        return (
+          <div className="flex items-center gap-2 min-w-0">
+            <IconComponent className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="truncate font-medium" title={entityName}>
+              {entityName}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
       key: 'description',
       label: 'Detalle',
       sortable: true,
-      width: '14.28%',
+      width: '12%',
       render: (movement) => (
-        <span 
-          className="font-medium block truncate" 
-          title={movement.description || '-'}
-        >
-          {movement.description || '-'}
-        </span>
+        <div className="flex items-center gap-1.5 min-w-0">
+          {movement.has_attachments && (
+            <Paperclip className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          )}
+          <span 
+            className="font-medium block truncate" 
+            title={movement.description || '-'}
+          >
+            {movement.description || '-'}
+          </span>
+        </div>
       ),
     },
     {
       key: 'currency',
       label: 'Moneda',
       sortable: true,
-      width: '14.28%',
+      width: '8%',
       render: (movement) => (
         <span className="text-sm">{movement.currency?.code || '-'}</span>
       ),
@@ -195,9 +229,9 @@ export function FinancesMovementsTab() {
       key: 'wallet',
       label: 'Billetera',
       sortable: true,
-      width: '14.28%',
+      width: '10%',
       render: (movement) => (
-        <span className="text-sm">{movement.wallet?.name || '-'}</span>
+        <span className="text-sm truncate" title={movement.wallet?.name}>{movement.wallet?.name || '-'}</span>
       ),
     },
     {
@@ -205,7 +239,7 @@ export function FinancesMovementsTab() {
       label: 'Monto',
       sortable: true,
       sortType: 'number',
-      width: '14.28%',
+      width: '13%',
       align: 'right',
       render: (movement) => {
         const isPositive = movement.signed_amount >= 0;
