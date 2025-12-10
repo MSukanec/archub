@@ -85,9 +85,10 @@ export function PostCard({
             </span>
           </div>
 
-          <div className="text-sm text-[var(--text-default)] whitespace-pre-wrap">
-            {contentText}
-          </div>
+          <div 
+            className="prose prose-sm dark:prose-invert max-w-none text-[var(--text-default)]"
+            dangerouslySetInnerHTML={{ __html: contentText }}
+          />
 
           <div className="flex items-center gap-2 mt-2">
             <Button

@@ -256,9 +256,10 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
               </div>
 
               {contentText && (
-                <div className="prose prose-sm max-w-none text-[var(--text-default)] whitespace-pre-wrap">
-                  {contentText}
-                </div>
+                <div 
+                  className="prose prose-sm dark:prose-invert max-w-none text-[var(--text-default)]"
+                  dangerouslySetInnerHTML={{ __html: contentText }}
+                />
               )}
 
               {imageAttachments.length > 0 && (
