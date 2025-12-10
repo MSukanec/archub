@@ -56,7 +56,6 @@ interface NewMovementModalProps {
 
 export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) {
   const [selectedType, setSelectedType] = useState<MovementType | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
 
@@ -99,13 +98,26 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
   }
 
   return (
-    <ModalLayout onClose={onClose} size={selectedType ? 'lg' : 'md'}>
-      <ModalHeader
-        icon={selectedConfig?.icon || DollarSign}
-        title={selectedConfig?.label || 'Nuevo Movimiento'}
-        description={selectedConfig?.description || 'Selecciona el tipo de movimiento financiero a registrar'}
-      />
-
+    <ModalLayout 
+      onClose={onClose} 
+      size={selectedType ? 'lg' : 'md'}
+      headerContent={
+        <ModalHeader
+          icon={selectedConfig?.icon || DollarSign}
+          title={selectedConfig?.label || 'Nuevo Movimiento'}
+          description={selectedConfig?.description || 'Selecciona el tipo de movimiento financiero a registrar'}
+        />
+      }
+      footerContent={
+        <ModalFooter
+          leftLabel="Cancelar"
+          onLeftClick={onClose}
+          submitText={selectedConfig?.submitLabel || 'Continuar'}
+          onSubmit={handleSubmit}
+          submitDisabled={!selectedType}
+        />
+      }
+    >
       <ModalBody>
         <div className="space-y-2">
           <Label className="text-sm font-medium">Tipo de Movimiento</Label>
@@ -142,15 +154,6 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
           </div>
         )}
       </ModalBody>
-
-      <ModalFooter
-        leftLabel="Cancelar"
-        onLeftClick={onClose}
-        submitText={selectedConfig?.submitLabel || 'Continuar'}
-        onSubmit={handleSubmit}
-        submitDisabled={!selectedType}
-        isSubmitting={isSubmitting}
-      />
     </ModalLayout>
   )
 }
