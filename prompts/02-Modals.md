@@ -747,6 +747,236 @@ modalData: {
 
 ---
 
+## 14. PATRÓN AVANZADO: FORMULARIO AGNÓSTICO (Separación Total)
+
+### EL PROBLEMA con la arquitectura actual
+
+Incluso con `FormPanel` y `ViewPanel` separados, el componente sigue teniendo el `ModalLayout` adentro. Esto significa que:
+- NO se puede reutilizar el form en una página completa
+- NO se puede usar en un Sheet (panel lateral) sin duplicar código
+- El form está "casado" con el modal
+
+### LA SOLUCIÓN: 2 Archivos Completamente Separados
+
+```
+forms/
+├── FeatureFormFields.tsx    → Form PURO (sin modal)
+└── ...
+
+modals/
+├── FeatureModal.tsx         → Modal WRAPPER (tonto)
+└── ...
+```
+
+---
+
+### CAPA 1: FormFields (El Cerebro)
+
+**Ubicación:** `src/features/{feature}/forms/{Feature}FormFields.tsx`
+
+```tsx
+// Props del form puro
+interface FeatureFormFieldsProps {
+  projectId?: string;
+  organizationId?: string;
+  itemId?: string;
+  mode: 'create' | 'edit' | 'view';
+  onSuccess: () => void;  // Callback cuando se guarda
+  onCancel: () => void;   // Callback para cancelar
+}
+
+export function FeatureFormFields({
+  projectId,
+  organizationId,
+  itemId,
+  mode,
+  onSuccess,
+  onCancel
+}: FeatureFormFieldsProps) {
+  // Todos los hooks de datos
+  const { data: existingItem } = useItem(itemId);
+  const createMutation = useCreateItem();
+  const updateMutation = useUpdateItem();
+  
+  // Form setup
+  const form = useForm<FormData>({ resolver: zodResolver(schema) });
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      if (mode === 'edit') {
+        await updateMutation.mutateAsync({ ... });
+      } else {
+        await createMutation.mutateAsync({ ... });
+      }
+      toast({ title: 'Éxito' });
+      onSuccess();  // Notificar al parent
+    } catch (error) {
+      toast({ variant: 'destructive', ... });
+    }
+  };
+
+  // MODO VIEW
+  if (mode === 'view') {
+    return (
+      <div className="w-full space-y-6">
+        <ViewPanel data={existingItem} />
+        <div className="flex justify-end pt-4 border-t">
+          <Button variant="secondary" onClick={onCancel}>Cerrar</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // MODO CREATE/EDIT
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
+        {/* Grid fluido con campos */}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+          <FormField ... />
+          <FormField ... />
+        </div>
+
+        {/* BOTONES - Siempre al final del form, NO en ModalFooter */}
+        <div className="flex gap-2 pt-4 border-t">
+          <Button type="button" variant="secondary" onClick={onCancel} className="flex-1">
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={isSubmitting} className="flex-[3]">
+            {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Guardar' : 'Crear'}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
+```
+
+**REGLAS DEL FORMFIELDS:**
+- ❌ NO importa ModalLayout, ModalHeader, ModalBody, ModalFooter
+- ❌ NO tiene conocimiento de que está en un modal
+- ✅ Incluye botones de acción con Button de shadcn
+- ✅ Ocupa 100% del ancho (`className="w-full"`)
+- ✅ Maneja su propio isSubmitting
+
+---
+
+### CAPA 2: Modal Wrapper (El Envase Tonto)
+
+**Ubicación:** `src/features/{feature}/modals/{Feature}Modal.tsx`
+
+```tsx
+import { ModalLayout, ModalHeader, ModalBody } from '@/components/modal';
+import { FeatureFormFields } from '../forms/FeatureFormFields';
+
+interface FeatureModalProps {
+  modalData?: {
+    projectId?: string;
+    organizationId?: string;
+    itemId?: string;
+  };
+  onClose: () => void;
+  mode?: 'create' | 'edit' | 'view';
+}
+
+export function FeatureModal({ modalData, onClose, mode = 'create' }: FeatureModalProps) {
+  const getHeader = () => {
+    switch (mode) {
+      case 'view': return { title: 'Ver Elemento', description: 'Detalles' };
+      case 'edit': return { title: 'Editar', description: 'Modifica los datos' };
+      default: return { title: 'Nuevo', description: 'Crea un elemento' };
+    }
+  };
+  const header = getHeader();
+
+  return (
+    <ModalLayout onClose={onClose} size="lg">
+      <ModalHeader title={header.title} description={header.description} icon={Icon} />
+      <ModalBody>
+        <FeatureFormFields
+          projectId={modalData?.projectId}
+          organizationId={modalData?.organizationId}
+          itemId={modalData?.itemId}
+          mode={mode}
+          onSuccess={onClose}  // Conectar success a close
+          onCancel={onClose}   // Conectar cancel a close
+        />
+      </ModalBody>
+      {/* NO hay ModalFooter - los botones están en FormFields */}
+    </ModalLayout>
+  );
+}
+```
+
+**REGLAS DEL MODAL WRAPPER:**
+- ✅ Solo usa ModalLayout + ModalHeader + ModalBody
+- ❌ NO usa ModalFooter (botones están en FormFields)
+- ✅ Conecta `onSuccess={onClose}` y `onCancel={onClose}`
+- ✅ Solo gestiona títulos según mode
+
+---
+
+### RE-EXPORT PARA COMPATIBILIDAD
+
+Para no romper imports existentes:
+
+```tsx
+// src/features/{feature}/forms/{Feature}Form.tsx
+export { FeatureModal as FeatureForm } from '../modals/FeatureModal';
+export { FeatureModal } from '../modals/FeatureModal';
+export { FeatureFormFields } from './FeatureFormFields';
+export default FeatureModal;
+```
+
+---
+
+### ¿CUÁNDO USAR ESTE PATRÓN?
+
+| Situación | Usar Patrón Agnóstico? |
+|-----------|------------------------|
+| Form se usará SOLO en modal | Opcional (pero recomendado) |
+| Form se usará en modal Y página | **SÍ, obligatorio** |
+| Form se usará en Sheet lateral | **SÍ, obligatorio** |
+| Form simple (< 100 líneas) | Opcional |
+| Form complejo (> 150 líneas) | **SÍ, recomendado** |
+
+---
+
+### BENEFICIOS
+
+1. **Reutilización Total**: Usa el mismo FormFields en modal, página, sheet
+2. **Testing Aislado**: Testea el form sin preocuparte del modal
+3. **Mantenimiento**: Cambios en modal no afectan lógica del form
+4. **Flexibilidad**: Mañana puedes mover el form donde quieras
+
+---
+
+## 15. FORMULARIOS REFACTORIZADOS (Patrón Agnóstico)
+
+Lista de formularios que YA siguen el patrón de separación total:
+
+| Feature | FormFields | Modal Wrapper | Fecha |
+|---------|------------|---------------|-------|
+| ClientPayment | `forms/ClientPaymentFormFields.tsx` | `modals/ClientPaymentModal.tsx` | 2025-12-10 |
+| MaterialPayment | `forms/MaterialPaymentFormFields.tsx` | `modals/MaterialPaymentModal.tsx` | 2025-12-10 |
+| PersonnelPayment | `forms/PersonnelPaymentFormFields.tsx` | `modals/PersonnelPaymentModal.tsx` | 2025-12-10 |
+
+---
+
+## 16. FORMULARIOS PENDIENTES DE REFACTORIZAR
+
+Formularios que aún usan arquitectura antigua (form + modal mezclados):
+
+- [ ] GeneralCostPaymentForm
+- [ ] SubcontractFormModal
+- [ ] ContactForm
+- [ ] ProjectForm
+- [ ] ClientForm
+- [ ] (agregar según se identifiquen)
+
+---
+
 ## USO DEL PROMPT
 
 Cuando pidas crear o refactorizar un modal:
