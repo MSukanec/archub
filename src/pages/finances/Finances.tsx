@@ -26,6 +26,7 @@ export default function Finances() {
 
   return (
     <Layout
+      wide
       headerProps={{
         icon: DollarSign,
         title: "Finanzas",
