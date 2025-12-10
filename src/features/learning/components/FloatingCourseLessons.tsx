@@ -72,10 +72,28 @@ export function FloatingCourseLessons() {
     enabled: !!course?.id && !!supabase && modules.length > 0 && isOnCoursePlayerTab
   });
 
-  // Only show if we have data
-  if (!isOnCoursePlayerTab || modules.length === 0) {
-    return null;
-  }
+  // Fetch progress for all lessons in the course
+  const { data: progressData } = useQuery<any[]>({
+    queryKey: ['/api/courses', course?.id, 'progress'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+      
+      const res = await fetch(`/api/courses/${course?.id}/progress`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        return [];
+      }
+      
+      return res.json();
+    },
+    enabled: !!course?.id && !!supabase && isOnCoursePlayerTab
+  });
 
   // Auto-expandir el módulo que contiene la lección actual o el primer módulo
   useEffect(() => {
@@ -114,28 +132,10 @@ export function FloatingCourseLessons() {
     }
   }, [currentLessonId, lessons, modules]);
 
-  // Fetch progress for all lessons in the course
-  const { data: progressData } = useQuery<any[]>({
-    queryKey: ['/api/courses', course?.id, 'progress'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return [];
-      
-      const res = await fetch(`/api/courses/${course?.id}/progress`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        credentials: 'include'
-      });
-      
-      if (!res.ok) {
-        return [];
-      }
-      
-      return res.json();
-    },
-    enabled: !!course?.id && !!supabase && isOnCoursePlayerTab
-  });
+  // Only show if we have data (AFTER all hooks)
+  if (!isOnCoursePlayerTab || modules.length === 0) {
+    return null;
+  }
 
   // Create a map of lesson progress for quick lookup
   const progressMap = new Map(
