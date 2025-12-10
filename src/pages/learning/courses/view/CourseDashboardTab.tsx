@@ -1,7 +1,9 @@
-import { useMemo, useEffect } from 'react'
-import { queryClient } from '@/lib/queryClient'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui/stat-card'
-import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info, PlayCircle, Play } from 'lucide-react'
+import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { apiRequest } from '@/lib/queryClient'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui-custom/KPICard'
+import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info, PlayCircle, Play, MessageCircle } from 'lucide-react'
+import type { ThreadsResponse, ForumThreadWithAuthor } from '@/features/forum/services'
 import { 
   DiscordWidget, 
   useCourseProgress, 
@@ -101,6 +103,19 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
 
   // 🚀 Get user's monthly study time usando el hook del feature
   const { data: monthlyStudyTime } = useMonthlyStudyTime();
+
+  // 🚀 Get recent forum threads for this course
+  const { data: forumThreadsData } = useQuery<ThreadsResponse>({
+    queryKey: ['/api/forum/courses', courseId, 'threads', { recent: true }],
+    queryFn: async () => {
+      const res = await apiRequest('GET', `/api/forum/courses/${courseId}/threads?page=1&limit=3`);
+      if (!res.ok) throw new Error('Failed to fetch forum threads');
+      return res.json();
+    },
+    enabled: !!courseId,
+    staleTime: 60 * 1000,
+  });
+  const recentForumThreads = forumThreadsData?.threads || [];
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -214,15 +229,19 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
     <div className="space-y-6">
       {/* Hero Section with Course Cover Background and KPIs */}
       <div 
-        className="relative rounded-xl overflow-hidden"
+        className="relative rounded-xl overflow-hidden min-h-[200px]"
         style={{
           backgroundImage: course?.cover_url ? `url(${course.cover_url})` : undefined,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-black/60" />
+        {/* Background: either dark overlay on image or gradient fallback */}
+        {course?.cover_url ? (
+          <div className="absolute inset-0 bg-black/60" />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/80 via-accent/60 to-accent/40" />
+        )}
         
         {/* Content */}
         <div className="relative z-10 p-6 md:p-8">
@@ -335,8 +354,84 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         </div>
       </div>
 
-      {/* Second Row - Notes and Markers */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Second Row - Forum, Notes and Markers */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Forum Card - Navega a Foro */}
+        <StatCard onCardClick={() => navigateToTab('Foro')}>
+          <StatCardTitle>Últimos Posts del Foro</StatCardTitle>
+          <StatCardContent className={recentForumThreads.length === 0 ? "mt-2" : "mt-4"}>
+            {recentForumThreads.length === 0 ? (
+              <EmptyState
+                icon={<MessageCircle />}
+                title="No hay posts aún"
+                description="Sé el primero en publicar en el foro del curso"
+                action={
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigateToTab('Foro');
+                    }}
+                    data-testid="button-go-to-forum"
+                  >
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Ir al Foro
+                  </Button>
+                }
+                className="min-h-0 md:min-h-0"
+              />
+            ) : (
+              <>
+                <div className="space-y-2">
+                  {recentForumThreads.map((thread: ForumThreadWithAuthor) => (
+                    <div 
+                      key={thread.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        navigateToTab('Foro');
+                      }}
+                      className="group/item flex items-start gap-3 p-3 rounded-lg border border-border/40 bg-transparent hover:bg-accent/5 hover:border-accent/50 transition-all duration-200 cursor-pointer"
+                    >
+                      <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-accent/10">
+                        <MessageCircle className="w-4 h-4 text-accent" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium text-foreground group-hover/item:text-accent transition-colors truncate">
+                            {thread.title}
+                          </p>
+                          <span className="text-xs text-muted-foreground flex-shrink-0">
+                            {format(new Date(thread.created_at), 'dd/MM/yy', { locale: es })}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                          por {thread.author?.full_name || 'Anónimo'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 text-center">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      navigateToTab('Foro');
+                    }}
+                    className="text-xs text-accent hover:underline"
+                    data-testid="link-view-all-forum-threads"
+                  >
+                    Ver todos los posts
+                  </button>
+                </div>
+              </>
+            )}
+          </StatCardContent>
+        </StatCard>
+
         {/* Notes Card - Navega a Apuntes */}
         <StatCard onCardClick={() => navigateToTab('Apuntes')}>
           <StatCardTitle>Apuntes Creados</StatCardTitle>
