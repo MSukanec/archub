@@ -66,7 +66,7 @@ export default function AdminCourseForumTab({ courseId }: AdminCourseForumTabPro
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/forum/courses', courseId, 'categories'] });
+      queryClient.refetchQueries({ queryKey: ['/api/forum/courses', courseId, 'categories'] });
       toast({ title: 'Orden actualizado', description: 'El orden de las categorías se ha guardado' });
     },
     onError: (error: any) => {

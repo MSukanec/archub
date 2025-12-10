@@ -168,6 +168,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
 
       if (error) throw new HttpError(500, error.message);
 
+      res.set('Cache-Control', 'no-store');
       return res.json(categories || []);
     } catch (error: any) {
       if (error instanceof HttpError) {
