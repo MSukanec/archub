@@ -4,11 +4,203 @@ import { getPartnerWithdrawals } from './getPartnerWithdrawals';
 import { supabase } from '@/lib/supabase';
 import { parseLocalDate } from '@/lib/date-utils';
 import type { FinancialMovementWithRelations } from '../types';
+import type { MaterialPaymentWithRelations } from '@/features/materials/types';
+import type { PersonnelPaymentWithRelations } from '@/features/personnel/types';
+import type { GeneralCostPayment } from '@/features/general-costs/types';
 import { 
   mapClientPaymentsToFinancialMovements,
   mapPartnerContributionsToFinancialMovements,
-  mapPartnerWithdrawalsToFinancialMovements 
+  mapPartnerWithdrawalsToFinancialMovements,
+  mapMaterialPaymentsToFinancialMovements,
+  mapPersonnelPaymentsToFinancialMovements,
+  mapGeneralCostPaymentsToFinancialMovements,
+  mapLegacyMovementsToFinancialMovements,
+  type LegacyMovementWithRelations
 } from '../mappers';
+
+async function getMaterialPaymentsForOrganization(
+  organizationId: string,
+  projectId?: string | null
+): Promise<MaterialPaymentWithRelations[]> {
+  let query = supabase
+    .from('material_payments')
+    .select(`
+      *,
+      currency:currencies(id, code, symbol, name),
+      wallet:organization_wallets(
+        id, organization_id, wallet_id, is_active, is_default,
+        wallets:wallet_id(id, name, is_active, created_at, updated_at)
+      ),
+      project:projects(id, name, code, color)
+    `)
+    .eq('organization_id', organizationId)
+    .order('payment_date', { ascending: false });
+
+  if (projectId) {
+    query = query.eq('project_id', projectId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching material payments:', error);
+    return [];
+  }
+
+  const paymentsWithCreator = await Promise.all(
+    (data || []).map(async (payment) => {
+      let creator = null;
+      if (payment.created_by) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('id, email, full_name, avatar_url')
+          .eq('id', payment.created_by)
+          .single();
+        creator = userData;
+      }
+      return {
+        ...payment,
+        creator,
+        currency: Array.isArray(payment.currency) ? payment.currency[0] : payment.currency,
+        wallet: Array.isArray(payment.wallet) ? payment.wallet[0] : payment.wallet,
+        project: Array.isArray(payment.project) ? payment.project[0] : payment.project,
+      } as MaterialPaymentWithRelations;
+    })
+  );
+
+  return paymentsWithCreator;
+}
+
+async function getPersonnelPaymentsForOrganization(
+  organizationId: string,
+  projectId?: string | null
+): Promise<PersonnelPaymentWithRelations[]> {
+  let query = supabase
+    .from('personnel_payments')
+    .select(`
+      *,
+      currency:currencies(id, code, symbol),
+      wallet:organization_wallets(
+        id,
+        wallets:wallet_id(id, name)
+      ),
+      project:projects(id, name, color),
+      personnel:project_personnel(
+        id,
+        contact:contacts(id, first_name, last_name, full_name)
+      )
+    `)
+    .eq('organization_id', organizationId)
+    .order('payment_date', { ascending: false });
+
+  if (projectId) {
+    query = query.eq('project_id', projectId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching personnel payments:', error);
+    return [];
+  }
+
+  return (data || []).map((payment) => ({
+    ...payment,
+    currency: Array.isArray(payment.currency) ? payment.currency[0] : payment.currency,
+    wallet: Array.isArray(payment.wallet) ? payment.wallet[0] : payment.wallet,
+    project: Array.isArray(payment.project) ? payment.project[0] : payment.project,
+    personnel: Array.isArray(payment.personnel) ? payment.personnel[0] : payment.personnel,
+  })) as PersonnelPaymentWithRelations[];
+}
+
+async function getGeneralCostPaymentsForOrganization(
+  organizationId: string
+): Promise<GeneralCostPayment[]> {
+  const { data, error } = await supabase
+    .from('general_costs_payments')
+    .select(`
+      *,
+      currency:currencies(id, code, symbol, name),
+      wallet:organization_wallets(
+        id,
+        wallets:wallet_id(id, name)
+      ),
+      general_cost:general_costs(id, name, description),
+      creator:organization_members!created_by(
+        id,
+        users:user_id(id, full_name, avatar_url)
+      )
+    `)
+    .eq('organization_id', organizationId)
+    .order('payment_date', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching general cost payments:', error);
+    return [];
+  }
+
+  return (data || []).map((payment) => ({
+    ...payment,
+    currency: Array.isArray(payment.currency) ? payment.currency[0] : payment.currency,
+    wallet: Array.isArray(payment.wallet) ? payment.wallet[0] : payment.wallet,
+    general_cost: Array.isArray(payment.general_cost) ? payment.general_cost[0] : payment.general_cost,
+    creator: Array.isArray(payment.creator) ? payment.creator[0] : payment.creator,
+  })) as GeneralCostPayment[];
+}
+
+async function getLegacyMovementsForOrganization(
+  organizationId: string,
+  projectId?: string | null
+): Promise<LegacyMovementWithRelations[]> {
+  let query = supabase
+    .from('movements')
+    .select(`
+      id,
+      description,
+      amount,
+      exchange_rate,
+      created_at,
+      movement_date,
+      created_by,
+      organization_id,
+      project_id,
+      type_id,
+      category_id,
+      subcategory_id,
+      currency_id,
+      wallet_id,
+      is_favorite,
+      conversion_group_id,
+      transfer_group_id,
+      partner,
+      subcontract,
+      indirect_id,
+      general_cost_id,
+      projects(name, color, code),
+      movement_types:movement_concepts!movements_type_id_fkey(id, name),
+      movement_categories:movement_concepts!movements_category_id_fkey(id, name),
+      movement_subcategories:movement_concepts!movements_subcategory_id_fkey(id, name),
+      currencies(id, name, code, symbol),
+      organization_wallets(id, wallets(id, name)),
+      profiles(full_name, avatar_url),
+      indirect_costs(id, name)
+    `)
+    .eq('organization_id', organizationId)
+    .order('movement_date', { ascending: false });
+
+  if (projectId) {
+    query = query.eq('project_id', projectId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching legacy movements:', error);
+    return [];
+  }
+
+  return (data || []) as LegacyMovementWithRelations[];
+}
 
 /**
  * Obtiene TODOS los movimientos financieros de una organización o proyecto.
@@ -17,13 +209,10 @@ import {
  * - client_payments (Pagos de clientes)
  * - partner_contributions (Aportes de socios)
  * - partner_withdrawals (Retiros de socios)
- * 
- * En el futuro agregará:
- * - material_payments
- * - personnel_payments
- * - indirect_payments
- * - subcontract_payments
- * - general_cost_payments
+ * - material_payments (Pagos de materiales)
+ * - personnel_payments (Pagos de personal)
+ * - general_costs_payments (Pagos de gastos generales)
+ * - movements (Movimientos legacy con subcontratos/indirectos)
  * 
  * Eventualmente esto se reemplazará por una VISTA de base de datos
  * que agregue todas las tablas *_payments automáticamente.
@@ -41,20 +230,12 @@ export async function getAllFinancialMovements(
     return [];
   }
 
-  // TODO: Por ahora solo traemos client_payments
-  // En el futuro, agregar material_payments, personnel_payments, etc.
-  // O mejor aún, usar una VISTA de base de datos que agregue todo
-  
   try {
-    // If projectId is provided, get payments for that specific project
-    // Otherwise, get all payments from the organization
     let clientPayments;
     
     if (projectId) {
-      // Get payments for specific project using the existing CLIENTS module service
       clientPayments = await getClientPayments(projectId, organizationId);
     } else {
-      // Get ALL payments from the organization (across all projects)
       const { data: paymentsData, error } = await supabase
         .from('client_payments')
         .select(`
@@ -159,11 +340,8 @@ export async function getAllFinancialMovements(
       clientPayments = paymentsData || [];
     }
 
-    // Hydrate project and creator data for each payment
-    // TODO: In the future, create a database VIEW that includes these joins automatically
     const paymentsWithRelations = await Promise.all(
       clientPayments.map(async (payment) => {
-        // Fetch project data
         const { data: projectData } = await supabase
           .from('projects')
           .select('id, name, code, color')
@@ -171,7 +349,6 @@ export async function getAllFinancialMovements(
           .eq('is_deleted', false)
           .single();
 
-        // Fetch creator data
         const { data: creatorData } = await supabase
           .from('users')
           .select('id, email, full_name, avatar_url')
@@ -188,31 +365,39 @@ export async function getAllFinancialMovements(
 
     const clientMovements = mapClientPaymentsToFinancialMovements(paymentsWithRelations);
 
-    // Get partner movements (contributions and withdrawals)
-    const [partnerContributions, partnerWithdrawals] = await Promise.all([
+    const [
+      partnerContributions,
+      partnerWithdrawals,
+      materialPayments,
+      personnelPayments,
+      generalCostPayments,
+      legacyMovements,
+    ] = await Promise.all([
       getPartnerContributions(organizationId, projectId || undefined),
       getPartnerWithdrawals(organizationId, projectId || undefined),
+      getMaterialPaymentsForOrganization(organizationId, projectId),
+      getPersonnelPaymentsForOrganization(organizationId, projectId),
+      getGeneralCostPaymentsForOrganization(organizationId),
+      getLegacyMovementsForOrganization(organizationId, projectId),
     ]);
     
     const contributionMovements = mapPartnerContributionsToFinancialMovements(partnerContributions);
     const withdrawalMovements = mapPartnerWithdrawalsToFinancialMovements(partnerWithdrawals);
+    const materialMovements = mapMaterialPaymentsToFinancialMovements(materialPayments);
+    const personnelMovements = mapPersonnelPaymentsToFinancialMovements(personnelPayments);
+    const generalCostMovements = mapGeneralCostPaymentsToFinancialMovements(generalCostPayments);
+    const legacyMappedMovements = mapLegacyMovementsToFinancialMovements(legacyMovements);
 
-    // TODO: Agregar pagos de otros tipos aquí
-    // const materialMovements = await getMaterialPayments(organizationId);
-    // const personnelMovements = await getPersonnelPayments(organizationId);
-    // etc.
-
-    // Combine all movements
     const allMovements = [
       ...clientMovements,
       ...contributionMovements,
       ...withdrawalMovements,
-      // ...materialMovements,
-      // ...personnelMovements,
-      // etc.
+      ...materialMovements,
+      ...personnelMovements,
+      ...generalCostMovements,
+      ...legacyMappedMovements,
     ];
 
-    // Sort by payment date (most recent first)
     allMovements.sort((a, b) => {
       return parseLocalDate(b.payment_date)!.getTime() - parseLocalDate(a.payment_date)!.getTime();
     });

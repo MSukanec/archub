@@ -2,6 +2,41 @@ import type { ClientPaymentWithRelations } from '@/features/clients/types';
 import type { FinancialMovementWithRelations } from '../types';
 import type { PartnerContributionWithRelations } from '../services/getPartnerContributions';
 import type { PartnerWithdrawalWithRelations } from '../services/getPartnerWithdrawals';
+import type { MaterialPaymentWithRelations } from '@/features/materials/types';
+import type { PersonnelPaymentWithRelations } from '@/features/personnel/types';
+import type { GeneralCostPayment } from '@/features/general-costs/types';
+
+export interface LegacyMovementWithRelations {
+  id: string;
+  description: string;
+  amount: number;
+  exchange_rate?: number;
+  created_at: string;
+  movement_date: string;
+  created_by: string;
+  organization_id: string;
+  project_id: string;
+  type_id: string;
+  category_id: string;
+  subcategory_id?: string;
+  currency_id: string;
+  wallet_id: string;
+  is_favorite?: boolean;
+  conversion_group_id?: string;
+  transfer_group_id?: string;
+  partner?: string;
+  subcontract?: string;
+  indirect_id?: string;
+  general_cost_id?: string;
+  projects?: { name: string; color: string; code?: string };
+  movement_types?: { id: string; name: string };
+  movement_categories?: { id: string; name: string };
+  movement_subcategories?: { id: string; name: string };
+  currencies?: { id: string; name: string; code: string; symbol?: string };
+  organization_wallets?: { id: string; wallets?: { id: string; name: string } };
+  profiles?: { full_name?: string; avatar_url?: string };
+  indirect_costs?: { id: string; name: string };
+}
 
 /**
  * Transforms a client_payments record into a unified FinancialMovement.
@@ -371,4 +406,398 @@ export function mapPartnerWithdrawalsToFinancialMovements(
   withdrawals: PartnerWithdrawalWithRelations[]
 ): FinancialMovementWithRelations[] {
   return withdrawals.map(mapPartnerWithdrawalToFinancialMovement);
+}
+
+/**
+ * Transforms a material_payments record into a unified FinancialMovement.
+ * Material payments are expenses (egresos).
+ * 
+ * @param payment - Material payment with all relations
+ * @returns Unified financial movement
+ */
+export function mapMaterialPaymentToFinancialMovement(
+  payment: MaterialPaymentWithRelations
+): FinancialMovementWithRelations {
+  const description = payment.notes || 
+                      payment.reference || 
+                      'Pago de materiales';
+  
+  return {
+    id: payment.id,
+    organization_id: payment.organization_id,
+    project_id: payment.project_id,
+    
+    amount: -payment.amount,
+    currency_id: payment.currency_id,
+    exchange_rate: payment.exchange_rate ?? 1,
+    payment_date: payment.payment_date,
+    
+    description,
+    notes: payment.notes,
+    reference: payment.reference,
+    
+    wallet_id: payment.wallet_id,
+    status: payment.status,
+    file_url: payment.attachments?.[0]?.file_url || null,
+    
+    created_by: payment.created_by,
+    created_at: payment.created_at,
+    updated_at: payment.updated_at,
+    
+    movement_type: 'material_payment',
+    movement_category: 'Materiales',
+    movement_subcategory: null,
+    
+    client_id: null,
+    material_id: payment.purchase_id,
+    personnel_id: null,
+    indirect_id: null,
+    subcontract_id: null,
+    general_cost_id: null,
+    partner_id: null,
+    
+    project: payment.project ? {
+      id: payment.project.id,
+      name: payment.project.name,
+      code: payment.project.code || null,
+      color: payment.project.color,
+    } : null,
+    
+    currency: payment.currency ? {
+      id: payment.currency.id,
+      code: payment.currency.code,
+      symbol: payment.currency.symbol || '',
+      name: payment.currency.name,
+    } : null,
+    
+    wallet: payment.wallet?.wallets ? {
+      id: payment.wallet.wallets.id,
+      name: payment.wallet.wallets.name,
+    } : null,
+    
+    creator: payment.creator ? {
+      id: payment.creator.id,
+      email: payment.creator.email,
+      full_name: payment.creator.full_name,
+      avatar_url: payment.creator.avatar_url,
+    } : null,
+    
+    client: null,
+    material: null,
+    personnel: null,
+    indirect: null,
+    subcontract: null,
+    general_cost: null,
+    partner: null,
+  };
+}
+
+/**
+ * Maps an array of material payments to financial movements.
+ */
+export function mapMaterialPaymentsToFinancialMovements(
+  payments: MaterialPaymentWithRelations[]
+): FinancialMovementWithRelations[] {
+  return payments.map(mapMaterialPaymentToFinancialMovement);
+}
+
+/**
+ * Transforms a personnel_payments record into a unified FinancialMovement.
+ * Personnel payments are expenses (egresos).
+ * 
+ * @param payment - Personnel payment with all relations
+ * @returns Unified financial movement
+ */
+export function mapPersonnelPaymentToFinancialMovement(
+  payment: PersonnelPaymentWithRelations
+): FinancialMovementWithRelations {
+  const personnelName = payment.personnel?.contact?.full_name || 
+                        (payment.personnel?.contact?.first_name && payment.personnel?.contact?.last_name 
+                          ? `${payment.personnel.contact.first_name} ${payment.personnel.contact.last_name}` 
+                          : null) ||
+                        'Sin personal';
+  
+  const description = payment.notes || 
+                      payment.reference || 
+                      `Pago a ${personnelName}`;
+  
+  return {
+    id: payment.id,
+    organization_id: payment.organization_id,
+    project_id: payment.project_id,
+    
+    amount: -payment.amount,
+    currency_id: payment.currency_id,
+    exchange_rate: payment.exchange_rate ?? 1,
+    payment_date: payment.payment_date,
+    
+    description,
+    notes: payment.notes,
+    reference: payment.reference,
+    
+    wallet_id: payment.wallet_id,
+    status: payment.status,
+    file_url: null,
+    
+    created_by: payment.created_by,
+    created_at: payment.created_at,
+    updated_at: payment.updated_at,
+    
+    movement_type: 'personnel_payment',
+    movement_category: personnelName,
+    movement_subcategory: 'Mano de Obra',
+    
+    client_id: null,
+    material_id: null,
+    personnel_id: payment.personnel_id,
+    indirect_id: null,
+    subcontract_id: null,
+    general_cost_id: null,
+    partner_id: null,
+    
+    project: payment.project ? {
+      id: payment.project.id,
+      name: payment.project.name,
+      code: null,
+      color: payment.project.color,
+    } : null,
+    
+    currency: payment.currency ? {
+      id: payment.currency.id,
+      code: payment.currency.code,
+      symbol: payment.currency.symbol || '',
+      name: payment.currency.code,
+    } : null,
+    
+    wallet: payment.wallet?.wallets ? {
+      id: payment.wallet.wallets.id,
+      name: payment.wallet.wallets.name,
+    } : null,
+    
+    creator: null,
+    
+    client: null,
+    material: null,
+    personnel: payment.personnel ? {
+      id: payment.personnel.id,
+      name: personnelName,
+    } : null,
+    indirect: null,
+    subcontract: null,
+    general_cost: null,
+    partner: null,
+  };
+}
+
+/**
+ * Maps an array of personnel payments to financial movements.
+ */
+export function mapPersonnelPaymentsToFinancialMovements(
+  payments: PersonnelPaymentWithRelations[]
+): FinancialMovementWithRelations[] {
+  return payments.map(mapPersonnelPaymentToFinancialMovement);
+}
+
+/**
+ * Transforms a general_costs_payments record into a unified FinancialMovement.
+ * General cost payments are organization-level expenses (egresos).
+ * 
+ * @param payment - General cost payment with all relations
+ * @returns Unified financial movement
+ */
+export function mapGeneralCostPaymentToFinancialMovement(
+  payment: GeneralCostPayment
+): FinancialMovementWithRelations {
+  const generalCostName = payment.general_cost?.name || 'Gasto general';
+  
+  const description = payment.notes || 
+                      payment.reference || 
+                      `Pago: ${generalCostName}`;
+  
+  return {
+    id: payment.id,
+    organization_id: payment.organization_id,
+    project_id: null,
+    
+    amount: -payment.amount,
+    currency_id: payment.currency_id,
+    exchange_rate: payment.exchange_rate ?? 1,
+    payment_date: payment.payment_date,
+    
+    description,
+    notes: payment.notes,
+    reference: payment.reference,
+    
+    wallet_id: payment.wallet_id,
+    status: payment.status,
+    file_url: null,
+    
+    created_by: payment.created_by,
+    created_at: payment.created_at,
+    updated_at: payment.updated_at || payment.created_at,
+    
+    movement_type: 'general_cost_payment',
+    movement_category: generalCostName,
+    movement_subcategory: 'Gastos Generales',
+    
+    client_id: null,
+    material_id: null,
+    personnel_id: null,
+    indirect_id: null,
+    subcontract_id: null,
+    general_cost_id: payment.general_cost_id,
+    partner_id: null,
+    
+    project: null,
+    
+    currency: payment.currency ? {
+      id: payment.currency.id,
+      code: payment.currency.code,
+      symbol: payment.currency.symbol || '',
+      name: payment.currency.name,
+    } : null,
+    
+    wallet: payment.wallet?.wallets ? {
+      id: payment.wallet.wallets.id,
+      name: payment.wallet.wallets.name,
+    } : null,
+    
+    creator: payment.creator?.users ? {
+      id: payment.creator.users.id,
+      email: '',
+      full_name: payment.creator.users.full_name,
+      avatar_url: payment.creator.users.avatar_url,
+    } : null,
+    
+    client: null,
+    material: null,
+    personnel: null,
+    indirect: null,
+    subcontract: null,
+    general_cost: payment.general_cost ? {
+      id: payment.general_cost.id,
+      name: payment.general_cost.name,
+    } : null,
+    partner: null,
+  };
+}
+
+/**
+ * Maps an array of general cost payments to financial movements.
+ */
+export function mapGeneralCostPaymentsToFinancialMovements(
+  payments: GeneralCostPayment[]
+): FinancialMovementWithRelations[] {
+  return payments.map(mapGeneralCostPaymentToFinancialMovement);
+}
+
+/**
+ * Transforms a legacy movements record into a unified FinancialMovement.
+ * Legacy movements include subcontracts and indirect costs.
+ * 
+ * @param movement - Legacy movement with all relations
+ * @returns Unified financial movement
+ */
+export function mapLegacyMovementToFinancialMovement(
+  movement: LegacyMovementWithRelations
+): FinancialMovementWithRelations {
+  const typeName = movement.movement_types?.name || 'Movimiento';
+  const categoryName = movement.movement_categories?.name || null;
+  const subcategoryName = movement.movement_subcategories?.name || null;
+  
+  let movementType = 'legacy_movement';
+  if (movement.subcontract) {
+    movementType = 'subcontract_payment';
+  } else if (movement.indirect_id) {
+    movementType = 'indirect_payment';
+  } else if (movement.general_cost_id) {
+    movementType = 'general_cost_legacy';
+  }
+  
+  return {
+    id: movement.id,
+    organization_id: movement.organization_id,
+    project_id: movement.project_id,
+    
+    amount: movement.amount,
+    currency_id: movement.currency_id,
+    exchange_rate: movement.exchange_rate ?? 1,
+    payment_date: movement.movement_date,
+    
+    description: movement.description,
+    notes: null,
+    reference: null,
+    
+    wallet_id: movement.wallet_id,
+    status: 'confirmed',
+    file_url: null,
+    
+    created_by: movement.created_by,
+    created_at: movement.created_at,
+    updated_at: movement.created_at,
+    
+    movement_type: movementType,
+    movement_category: categoryName,
+    movement_subcategory: subcategoryName,
+    
+    client_id: null,
+    material_id: null,
+    personnel_id: null,
+    indirect_id: movement.indirect_id || null,
+    subcontract_id: movement.subcontract || null,
+    general_cost_id: movement.general_cost_id || null,
+    partner_id: movement.partner || null,
+    
+    project: movement.projects ? {
+      id: movement.project_id,
+      name: movement.projects.name,
+      code: movement.projects.code || null,
+      color: movement.projects.color,
+    } : null,
+    
+    currency: movement.currencies ? {
+      id: movement.currencies.id,
+      code: movement.currencies.code,
+      symbol: movement.currencies.symbol || '',
+      name: movement.currencies.name,
+    } : null,
+    
+    wallet: movement.organization_wallets?.wallets ? {
+      id: movement.organization_wallets.wallets.id,
+      name: movement.organization_wallets.wallets.name,
+    } : null,
+    
+    creator: movement.profiles ? {
+      id: movement.created_by,
+      email: '',
+      full_name: movement.profiles.full_name || null,
+      avatar_url: movement.profiles.avatar_url || null,
+    } : null,
+    
+    client: null,
+    material: null,
+    personnel: null,
+    indirect: movement.indirect_costs ? {
+      id: movement.indirect_costs.id,
+      name: movement.indirect_costs.name,
+    } : null,
+    subcontract: movement.subcontract ? {
+      id: movement.subcontract,
+      name: movement.subcontract,
+    } : null,
+    general_cost: null,
+    partner: movement.partner ? {
+      id: movement.partner,
+      name: movement.partner,
+    } : null,
+  };
+}
+
+/**
+ * Maps an array of legacy movements to financial movements.
+ */
+export function mapLegacyMovementsToFinancialMovements(
+  movements: LegacyMovementWithRelations[]
+): FinancialMovementWithRelations[] {
+  return movements.map(mapLegacyMovementToFinancialMovement);
 }
