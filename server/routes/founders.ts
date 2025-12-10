@@ -901,7 +901,6 @@ export function registerFounderRoutes(app: Express, deps: RouteDeps): void {
         .select(`
           id,
           name,
-          logo_url,
           created_at,
           created_by,
           settings
