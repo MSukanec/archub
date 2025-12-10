@@ -13,7 +13,7 @@ function slugify(text: string): string {
     .replace(/(^-|-$)+/g, '');
 }
 
-async function getUserRoles(userId: string): Promise<string[]> {
+async function getUserRoles(userId: string, authId?: string): Promise<string[]> {
   const roles: string[] = ['public'];
 
   // Run admin check and prefs query in parallel
@@ -21,7 +21,7 @@ async function getUserRoles(userId: string): Promise<string[]> {
     supabaseAdmin
       .from('admin_users')
       .select('auth_id')
-      .eq('auth_id', userId)
+      .eq('auth_id', authId || userId)
       .maybeSingle(),
     supabaseAdmin
       .from('user_preferences')
@@ -572,7 +572,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
 
       const [hasAccess, userRoles] = await Promise.all([
         canAccessCategory(user.userId, category_id),
-        getUserRoles(user.userId)
+        getUserRoles(user.userId, user.authId)
       ]);
       
       if (!hasAccess) {
@@ -760,14 +760,6 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
 
       if (thread.is_locked) {
         throw new HttpError(403, "Thread is locked");
-      }
-
-      const userRoles = await getUserRoles(user.userId);
-      const isAdmin = userRoles.includes('admin');
-
-      const threadCategory = Array.isArray(thread.category) ? thread.category[0] : thread.category;
-      if (threadCategory?.is_read_only && !isAdmin) {
-        throw new HttpError(403, "Esta categoría es solo para anuncios de administradores");
       }
 
       const hasAccess = await canAccessCategory(user.userId, thread.category_id);
