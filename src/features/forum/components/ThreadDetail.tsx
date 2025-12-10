@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { format, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { parseLocalDate } from '@/lib/date-utils';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -262,8 +261,8 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
                 <span>·</span>
                 <span>
                   {(() => {
-                    const date = parseLocalDate(thread.created_at);
-                    return date && isValid(date) 
+                    const date = new Date(thread.created_at);
+                    return isValid(date) 
                       ? format(date, "d 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })
                       : 'Fecha no disponible';
                   })()}

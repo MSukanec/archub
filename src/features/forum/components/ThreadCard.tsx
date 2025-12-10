@@ -26,6 +26,18 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
+function stripHtmlTags(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 interface ThreadCardProps {
   thread: ForumThreadWithAuthor;
   onClick?: () => void;
@@ -40,8 +52,13 @@ export function ThreadCard({ thread, onClick }: ThreadCardProps) {
 
   const authorName = thread.author?.full_name || 'Anónimo';
   const organizationName = thread.organization?.name;
-  const contentPreview = thread.content?.text
-    ? thread.content.text.slice(0, 150) + (thread.content.text.length > 150 ? '...' : '')
+  
+  const rawContent = typeof thread.content === 'string' 
+    ? thread.content 
+    : thread.content?.text || '';
+  const plainText = stripHtmlTags(rawContent);
+  const contentPreview = plainText
+    ? plainText.slice(0, 150) + (plainText.length > 150 ? '...' : '')
     : null;
 
   const currentUserId = currentUser?.user?.id;
