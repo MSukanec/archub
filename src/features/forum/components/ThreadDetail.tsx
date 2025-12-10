@@ -3,7 +3,7 @@ import { format, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/shared/RichTextEditor';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -373,12 +373,11 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
         <Card>
           <CardContent className="p-4">
             <form onSubmit={handleSubmitReply} className="space-y-3">
-              <Textarea
+              <RichTextEditor
                 placeholder="Escribe tu respuesta..."
                 value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                rows={3}
-                className="resize-none"
+                onChange={setReplyContent}
+                minHeight="100px"
                 data-testid="reply-textarea"
               />
               <div className="flex justify-end">
