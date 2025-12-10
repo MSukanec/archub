@@ -1,6 +1,5 @@
 import { useUnifiedMovements } from '@/features/finances/hooks/use-unified-movements';
 import { useProjectContext } from '@/stores/projectContext';
-import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
 import {
   Table,
   TableBody,
@@ -10,11 +9,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { formatDate } from '@/lib/date-utils';
-import { DollarSign, Plus } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 import type { UnifiedMovementWithRelations } from '@/features/finances/services/getUnifiedMovements';
 
 const MOVEMENT_TYPE_LABELS: Record<string, { label: string; color: string }> = {
@@ -25,18 +23,10 @@ const MOVEMENT_TYPE_LABELS: Record<string, { label: string; color: string }> = {
 
 export function FinancesMovementsTab() {
   const { currentOrganizationId, selectedProjectId } = useProjectContext();
-  const { openModal } = useGlobalModalStore();
   const { data: movements = [], isLoading, error } = useUnifiedMovements(
     currentOrganizationId || undefined,
     selectedProjectId
   );
-
-  const handleAddMovement = () => {
-    openModal('unified-payment', {
-      projectId: selectedProjectId,
-      organizationId: currentOrganizationId,
-    });
-  };
 
   const formatCurrency = (amount: number, currencySymbol: string = '$') => {
     return `${currencySymbol} ${new Intl.NumberFormat('es-AR', {
@@ -79,12 +69,6 @@ export function FinancesMovementsTab() {
 
   return (
     <div className="space-y-6" data-testid="finances-movements-tab">
-      <div className="flex justify-end">
-        <Button onClick={handleAddMovement} data-testid="button-add-movement">
-          <Plus className="w-4 h-4 mr-2" />
-          Agregar
-        </Button>
-      </div>
       <Table>
         <TableHeader>
           <TableRow>
