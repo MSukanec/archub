@@ -19,7 +19,8 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 const organizationSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   is_active: z.boolean(),
-  plan_id: z.string().min(1, 'El plan es requerido')
+  plan_id: z.string().min(1, 'El plan es requerido'),
+  is_founder: z.boolean()
 });
 
 type OrganizationFormData = z.infer<typeof organizationSchema>;
@@ -29,6 +30,10 @@ interface Organization {
   name: string;
   is_active: boolean;
   plan_id: string;
+  settings?: {
+    is_founder?: boolean;
+    [key: string]: any;
+  } | null;
 }
 
 interface OrganizationFormModalProps {
@@ -68,7 +73,8 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
     defaultValues: {
       name: organization?.name || '',
       is_active: organization?.is_active ?? true,
-      plan_id: organization?.plan_id || ''
+      plan_id: organization?.plan_id || '',
+      is_founder: organization?.settings?.is_founder ?? false
     }
   });
 
@@ -77,14 +83,16 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
       form.reset({
         name: organization.name || '',
         is_active: organization.is_active ?? true,
-        plan_id: organization.plan_id || ''
+        plan_id: organization.plan_id || '',
+        is_founder: organization.settings?.is_founder ?? false
       });
       setPanel('edit');
     } else {
       form.reset({
         name: '',
         is_active: true,
-        plan_id: ''
+        plan_id: '',
+        is_founder: false
       });
       setPanel('edit');
     }
@@ -101,13 +109,26 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
       if (!supabase) throw new Error('Supabase not initialized');
       
       if (organization) {
+        // Primero obtener settings actuales
+        const { data: currentOrg } = await supabase
+          .from('organizations')
+          .select('settings')
+          .eq('id', organization.id)
+          .single();
+        
+        const updatedSettings = {
+          ...(currentOrg?.settings || {}),
+          is_founder: data.is_founder
+        };
+        
         // Actualizar organización existente
         const { error } = await supabase
           .from('organizations')
           .update({
             name: data.name,
             is_active: data.is_active,
-            plan_id: data.plan_id
+            plan_id: data.plan_id,
+            settings: updatedSettings
           })
           .eq('id', organization.id);
         
@@ -121,7 +142,8 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
             is_active: data.is_active,
             plan_id: data.plan_id,
             is_system: false,
-            created_by: currentUser?.user?.id
+            created_by: currentUser?.user?.id,
+            settings: { is_founder: data.is_founder }
           });
         
         if (error) throw error;
@@ -207,6 +229,27 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
                 </SelectContent>
               </Select>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="is_founder"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 shadow-sm">
+              <div className="space-y-0.5">
+                <FormLabel className="text-amber-600 dark:text-amber-400">Organización Fundadora</FormLabel>
+                <div className="text-xs text-muted-foreground">
+                  Acceso al Portal de Fundadores y beneficios exclusivos
+                </div>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
             </FormItem>
           )}
         />

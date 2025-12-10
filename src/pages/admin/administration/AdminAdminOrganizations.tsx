@@ -9,7 +9,6 @@ import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Edit, Trash2, Building, Crown, Star } from 'lucide-react';
-import { apiRequest } from '@/lib/queryClient';
 import { useGlobalModalStore } from '@/components/modal';
 
 import { useToast } from '@/hooks/use-toast';
@@ -90,15 +89,12 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
   return (
     <div className="flex items-center gap-2" title={tooltip}>
       {isOnline ? (
-        <>
-          <span className="inline-block w-2 h-2 rounded-full bg-[var(--plan-free-bg)]" />
-          <Badge 
-            variant="default"
-            className="bg-[var(--plan-free-bg)] text-white hover:bg-[var(--plan-free-bg)]/90"
-          >
-            {label}
-          </Badge>
-        </>
+        <Badge 
+          variant="default"
+          className="bg-[var(--plan-free-bg)] text-white hover:bg-[var(--plan-free-bg)]/90"
+        >
+          {label}
+        </Badge>
       ) : (
         <span className="text-sm text-muted-foreground">{label}</span>
       )}
@@ -157,35 +153,50 @@ function useAllOrganizations() {
 
       console.log('Organizations with plans:', organizationsWithPlans);
 
-      // Obtener conteos de miembros, proyectos y última actividad para cada organización
-      const organizationsWithCounts = await Promise.all(
-        organizationsWithPlans.map(async (org) => {
-          const [membersResult, projectsResult, activityResult] = await Promise.all([
-            supabase!
-              .from('organization_members')
-              .select('id', { count: 'exact' })
-              .eq('organization_id', org.id),
-            supabase!
-              .from('projects')
-              .select('id', { count: 'exact' })
-              .eq('organization_id', org.id),
-            supabase!
-              .from('user_presence')
-              .select('last_seen_at')
-              .eq('org_id', org.id)
-              .order('last_seen_at', { ascending: false })
-              .limit(1)
-              .single()
-          ]);
+      // Obtener conteos y actividad en batch (optimizado)
+      const orgIds = organizationsWithPlans.map(org => org.id);
+      
+      const [membersResult, projectsResult, activityResult] = await Promise.all([
+        supabase!
+          .from('organization_members')
+          .select('organization_id')
+          .in('organization_id', orgIds),
+        supabase!
+          .from('projects')
+          .select('organization_id')
+          .in('organization_id', orgIds),
+        supabase!
+          .from('user_presence')
+          .select('org_id, last_seen_at')
+          .in('org_id', orgIds)
+          .order('last_seen_at', { ascending: false })
+      ]);
 
-          return {
-            ...org,
-            members_count: membersResult.count || 0,
-            projects_count: projectsResult.count || 0,
-            last_seen_at: activityResult.data?.last_seen_at || null
-          };
-        })
-      );
+      // Contar por organización
+      const membersCounts: Record<string, number> = {};
+      const projectsCounts: Record<string, number> = {};
+      const lastActivity: Record<string, string> = {};
+
+      membersResult.data?.forEach(m => {
+        membersCounts[m.organization_id] = (membersCounts[m.organization_id] || 0) + 1;
+      });
+
+      projectsResult.data?.forEach(p => {
+        projectsCounts[p.organization_id] = (projectsCounts[p.organization_id] || 0) + 1;
+      });
+
+      activityResult.data?.forEach(a => {
+        if (!lastActivity[a.org_id]) {
+          lastActivity[a.org_id] = a.last_seen_at;
+        }
+      });
+
+      const organizationsWithCounts = organizationsWithPlans.map(org => ({
+        ...org,
+        members_count: membersCounts[org.id] || 0,
+        projects_count: projectsCounts[org.id] || 0,
+        last_seen_at: lastActivity[org.id] || null
+      }));
 
       // Ordenar por última actividad (más reciente primero)
       const sortedOrganizations = organizationsWithCounts.sort((a, b) => {
@@ -261,31 +272,6 @@ const AdminAdminOrganizations = () => {
     }
   });
 
-  const toggleFounderMutation = useMutation({
-    mutationFn: async (organizationId: string) => {
-      const res = await apiRequest('POST', `/api/founders/admin/toggle-founder/${organizationId}`);
-      return res.json();
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
-      toast({
-        title: data.is_founder ? 'Fundador activado' : 'Fundador desactivado',
-        description: data.message
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo cambiar el estado de fundador.',
-        variant: 'destructive'
-      });
-    }
-  });
-
-  const handleToggleFounder = (organization: Organization) => {
-    toggleFounderMutation.mutate(organization.id);
-  };
-
   // Filtrar organizaciones
   const filteredOrganizations = organizations?.filter(org => {
     const matchesSearch = org.name.toLowerCase().includes(searchValue.toLowerCase());
@@ -356,13 +342,26 @@ const AdminAdminOrganizations = () => {
     {
       key: 'last_activity',
       label: 'Última Actividad',
-      width: '18%',
+      width: '14%',
       render: (organization: Organization) => <LastActivityCell lastSeen={organization.last_seen_at} />
+    },
+    {
+      key: 'founder',
+      label: 'Fundador',
+      width: '8%',
+      render: (organization: Organization) => (
+        organization.settings?.is_founder ? (
+          <Badge variant="default" className="bg-amber-500 text-white hover:bg-amber-500/90">
+            <Star className="w-3 h-3 mr-1 fill-current" />
+            Fundador
+          </Badge>
+        ) : null
+      )
     },
     {
       key: 'name',
       label: 'Organización',
-      width: '28%',
+      width: '24%',
       render: (organization: Organization) => (
         <div>
           <div className="font-bold">{organization.name}</div>
@@ -455,11 +454,6 @@ const AdminAdminOrganizations = () => {
         data={filteredOrganizations}
         isLoading={isLoading}
         rowActions={(organization) => [
-          {
-            icon: Star,
-            label: organization.settings?.is_founder ? 'Quitar Fundador' : 'Hacer Fundador',
-            onClick: () => handleToggleFounder(organization)
-          },
           {
             icon: Edit,
             label: 'Editar',
