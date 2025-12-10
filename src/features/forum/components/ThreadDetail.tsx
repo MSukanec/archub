@@ -8,7 +8,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Heart, Lock, Pin, Send, ArrowLeft, Eye, Image as ImageIcon } from 'lucide-react';
+import { Heart, Lock, Pin, Send, ArrowLeft, Eye, Image as ImageIcon, Pencil, Trash2, MoreHorizontal } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { PostCard } from './PostCard';
 import { cn } from '@/lib/utils';
 import {
@@ -148,6 +154,19 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
     });
   };
 
+  const handleEditThread = () => {
+    if (!thread) return;
+    openModal('forum-thread', {
+      thread: {
+        id: thread.id,
+        title: thread.title,
+        content: thread.content,
+        category_id: thread.category_id,
+      },
+      mode: 'edit',
+    });
+  };
+
   const handleEditPost = (post: ForumPostWithAuthor) => {
     openModal('forum-post', { 
       threadId: thread?.id, 
@@ -197,6 +216,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
     : thread.content?.text || '';
   const likeCount = reactions?.thread?.likes ?? 0;
   const isLiked = reactions?.thread?.userReaction === 'like';
+  const isThreadAuthor = userData?.user?.id && thread.author_id === userData.user.id;
 
   return (
     <div className="space-y-4" data-testid="thread-detail">
@@ -300,6 +320,27 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
                   <Heart className={cn('h-4 w-4', isLiked && 'fill-current')} />
                   <span>{likeCount}</span>
                 </Button>
+
+                {isThreadAuthor && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 ml-auto"
+                        data-testid="thread-actions-button"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={handleEditThread} data-testid="edit-thread-button">
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Editar tema
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
           </div>
