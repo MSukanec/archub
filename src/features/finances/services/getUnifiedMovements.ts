@@ -56,6 +56,12 @@ export interface UnifiedMovementWithRelations extends UnifiedMovement {
  * Obtiene todos los movimientos financieros unificados de la vista.
  * Las relaciones se obtienen por separado porque las vistas no tienen FK automáticas.
  * 
+ * NOTE: The `unified_financial_movements_view` database view needs to be updated in Supabase
+ * to filter out soft-deleted records. Add the following WHERE clause to each UNION component:
+ * - client_payments: WHERE (is_deleted IS NULL OR is_deleted = false)
+ * - material_payments: WHERE (is_deleted IS NULL OR is_deleted = false)
+ * - personnel_payments: WHERE (is_deleted IS NULL OR is_deleted = false)
+ * 
  * @param organizationId - ID de la organización
  * @param projectId - ID del proyecto (opcional)
  * @returns Array de movimientos unificados con relaciones

@@ -216,6 +216,7 @@ export async function listMaterialPayments(
       `)
       .eq('project_id', params.projectId)
       .eq('organization_id', params.organizationId)
+      .or('is_deleted.is.null,is_deleted.eq.false')
       .order('payment_date', { ascending: false });
 
     if (error) {
@@ -346,15 +347,18 @@ export async function getMaterialPaymentById(
         )
       `)
       .eq('id', params.paymentId)
-      .single();
+      .eq('project_id', params.projectId)
+      .eq('organization_id', params.organizationId)
+      .or('is_deleted.is.null,is_deleted.eq.false')
+      .maybeSingle();
 
-    if (error || !payment) {
+    if (error) {
       console.error('Error fetching material payment:', error);
       return { success: false, error: 'Payment not found' };
     }
 
-    if (payment.project_id !== params.projectId || payment.organization_id !== params.organizationId) {
-      return { success: false, error: 'Forbidden' };
+    if (!payment) {
+      return { success: false, error: 'Payment not found' };
     }
 
     const { data: attachments, error: attachmentsError } = await supabase
@@ -683,11 +687,14 @@ export async function deleteMaterialPayment(
 
     const { error: deleteError } = await supabase
       .from('material_payments')
-      .delete()
+      .update({ 
+        is_deleted: true, 
+        deleted_at: new Date().toISOString() 
+      })
       .eq('id', params.paymentId);
 
     if (deleteError) {
-      console.error('Error deleting material payment:', deleteError);
+      console.error('Error soft-deleting material payment:', deleteError);
       return { success: false, error: 'Failed to delete material payment' };
     }
 

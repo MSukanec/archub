@@ -157,6 +157,7 @@ export async function getClientPayments(
     `)
     .eq('organization_id', organizationId)
     .eq('project_id', projectId)
+    .or('is_deleted.is.null,is_deleted.eq.false')
     .order('payment_date', { ascending: false });
 
   if (error) {
@@ -347,6 +348,7 @@ export async function getClientPaymentById(
     `)
     .eq('id', paymentId)
     .eq('organization_id', organizationId)
+    .or('is_deleted.is.null,is_deleted.eq.false')
     .single();
 
   if (error) {
@@ -691,7 +693,10 @@ export async function deleteClientPayment(
 ): Promise<boolean> {
   const { error } = await supabase
     .from('client_payments')
-    .delete()
+    .update({ 
+      is_deleted: true, 
+      deleted_at: new Date().toISOString() 
+    })
     .eq('id', paymentId)
     .eq('organization_id', organizationId);
 
