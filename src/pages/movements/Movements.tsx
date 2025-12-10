@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { DollarSign } from "lucide-react";
-import { FinancesMovementsTab } from "./FinancesMovementsTab";
+import { OrgMovementsTab } from "./OrgMovementsTab";
+import { PartnerMovementsTab } from "./PartnerMovementsTab";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
 export default function Finances() {
@@ -10,6 +11,7 @@ export default function Finances() {
 
   const tabs = [
     { id: "movements", label: "Movimientos", isActive: activeTab === "movements" },
+    { id: "partner_movements", label: "Movimientos de Socios", isActive: activeTab === "partner_movements" },
   ];
 
   return (
@@ -17,7 +19,7 @@ export default function Finances() {
       headerProps={{
         icon: DollarSign,
         title: "Finanzas",
-        description: "Gestión financiera unificada",
+        description: "Gestión financiera de la organización",
         tabs,
         onTabChange: setActiveTab,
         organizationId: userData?.organization?.id,
@@ -25,7 +27,8 @@ export default function Finances() {
         showProjectSelector: true,
       }}
     >
-      {activeTab === "movements" && <FinancesMovementsTab />}
+      {activeTab === "movements" && <OrgMovementsTab />}
+      {activeTab === "partner_movements" && <PartnerMovementsTab />}
     </Layout>
   );
 }

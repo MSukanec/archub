@@ -12,7 +12,7 @@ import { formatDate } from '@/lib/date-utils';
 import { DollarSign } from 'lucide-react';
 import type { FinancialMovementWithRelations } from '@/features/finances';
 
-export function MovementsTab() {
+export function OrgMovementsTab() {
   const { currentOrganizationId, selectedProjectId } = useProjectContext();
   const { data: userData } = useCurrentUser();
   const { data: movements = [], isLoading, error } = useFinancialMovements(
