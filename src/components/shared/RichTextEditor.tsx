@@ -48,6 +48,7 @@ export function RichTextEditor({
       StarterKit.configure({
         bulletList: { keepMarks: true, keepAttributes: false },
         orderedList: { keepMarks: true, keepAttributes: false },
+        link: false, // Disable StarterKit's Link to use our custom config
       }),
       Link.configure({
         openOnClick: false,
