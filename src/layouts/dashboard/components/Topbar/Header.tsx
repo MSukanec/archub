@@ -11,6 +11,7 @@ interface Tab {
   onClick?: () => void;
   href?: string;
   badgeCount?: number;
+  badge?: string;
   disabled?: boolean;
   comingSoon?: boolean;
 }
@@ -126,6 +127,14 @@ export function Header({
                         style={{ backgroundColor: 'var(--accent)' }}
                       >
                         {tab.badgeCount > 99 ? '99+' : tab.badgeCount}
+                      </span>
+                    )}
+                    {tab.badge && !isDisabled && (
+                      <span 
+                        className="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-semibold text-white"
+                        style={{ backgroundColor: 'var(--accent)' }}
+                      >
+                        {tab.badge}
                       </span>
                     )}
                   </span>

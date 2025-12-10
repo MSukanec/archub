@@ -134,7 +134,8 @@ export default function CourseView() {
     {
       id: 'Foro',
       label: 'Foro',
-      isActive: activeTab === 'Foro'
+      isActive: activeTab === 'Foro',
+      badge: 'Nuevo'
     },
     {
       id: 'Feedback',

@@ -5,6 +5,7 @@ interface Tab {
   value: string
   label: string
   icon?: React.ReactNode
+  badge?: string
 }
 
 interface TabsProps {
@@ -44,6 +45,18 @@ export function Tabs({ tabs, value, onValueChange, className, fullWidth = false 
         >
           {tab.icon}
           {tab.label}
+          {tab.badge && (
+            <span 
+              className={cn(
+                "px-1.5 py-0.5 text-[10px] font-semibold rounded-full leading-none",
+                value === tab.value
+                  ? "bg-white/20 text-white"
+                  : "bg-[var(--accent)] text-white"
+              )}
+            >
+              {tab.badge}
+            </span>
+          )}
         </button>
       ))}
     </div>
