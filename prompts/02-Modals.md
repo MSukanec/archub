@@ -7,18 +7,61 @@ Este documento define el patrón arquitectónico para crear modales con formular
 ## 1. PRINCIPIO FUNDAMENTAL
 
 Los formularios son **agnósticos al contexto**. Pueden usarse en:
-- Modales
-- Páginas completas
+- Modales (con footer controlado por el modal)
+- Páginas completas (con botones propios)
 - Paneles laterales (Sheet)
 - Cualquier otro contenedor
 
 ---
 
-## 2. ARQUITECTURA DE 2 ARCHIVOS
+## 2. ARQUITECTURA DE MODAL
+
+### Estructura Obligatoria
+
+Todo modal DEBE tener 4 partes en orden:
+
+```
+┌─────────────────────────────────┐
+│  HEADER (fijo)                  │  ← ModalHeader via headerContent prop
+├─────────────────────────────────┤
+│                                 │
+│  BODY (scrollable)              │  ← ModalBody como children
+│                                 │
+├─────────────────────────────────┤
+│  FOOTER (fijo)                  │  ← ModalFooter via footerContent prop
+└─────────────────────────────────┘
+```
+
+### ⚠️ IMPORTANTE: Footer Fijo
+
+Para que el footer sea **FIJO** (no scrollee con el contenido):
+- **USAR**: `footerContent` prop de ModalLayout
+- **NO USAR**: ModalFooter como children directo
+
+```tsx
+// ✅ CORRECTO - Footer fijo
+<ModalLayout
+  headerContent={<ModalHeader ... />}
+  footerContent={<ModalFooter ... />}
+>
+  <ModalBody>...</ModalBody>
+</ModalLayout>
+
+// ❌ INCORRECTO - Footer scrollea con el body
+<ModalLayout>
+  <ModalHeader ... />
+  <ModalBody>...</ModalBody>
+  <ModalFooter ... />  // ← Esto NO funciona, el footer scrollea
+</ModalLayout>
+```
+
+---
+
+## 3. ARQUITECTURA DE 2 ARCHIVOS
 
 ```
 forms/
-├── FeatureFormFields.tsx    → Lógica del formulario (CEREBRO)
+├── FeatureFormFields.tsx    → Campos del formulario (CEREBRO)
 
 modals/
 ├── FeatureModal.tsx         → Contenedor del modal (ENVASE)
@@ -26,7 +69,7 @@ modals/
 
 ---
 
-## 3. FORMFIELDS (El Cerebro)
+## 4. FORMFIELDS (El Cerebro)
 
 **Ubicación:** `src/features/{feature}/forms/{Feature}FormFields.tsx`
 
@@ -35,7 +78,7 @@ modals/
 - Contiene `react-hook-form` con `zodResolver`
 - Contiene todos los hooks de datos (`useQuery`, `useMutation`)
 - Contiene la lógica de submit y validaciones
-- Incluye los botones de acción (Guardar/Cancelar)
+- **Props opcionales** `hideActions` y `formRef` para control externo
 - Ocupa el 100% del ancho disponible
 - **NO** importa `ModalLayout`, `ModalHeader`, `ModalBody`, `ModalFooter`
 - **NO** tiene conocimiento de que está dentro de un modal
@@ -55,6 +98,10 @@ export interface FeatureFormFieldsProps {
   // Callbacks
   onSuccess: () => void;
   onCancel: () => void;
+
+  // Control externo (para uso en modales con ModalFooter)
+  hideActions?: boolean;  // Default: false - oculta botones internos
+  formRef?: React.RefObject<HTMLFormElement>;  // Para submit externo
 }
 ```
 
@@ -67,7 +114,9 @@ export function FeatureFormFields({
   itemId,
   mode,
   onSuccess,
-  onCancel
+  onCancel,
+  hideActions = false,  // Por defecto muestra botones
+  formRef,
 }: FeatureFormFieldsProps) {
   // Hooks de datos
   const { data: existingItem, isLoading } = useItem(itemId);
@@ -107,11 +156,13 @@ export function FeatureFormFields({
     return (
       <div className="w-full space-y-6">
         <ViewContent data={existingItem} />
-        <div className="flex justify-end pt-4 border-t">
-          <Button variant="secondary" onClick={onCancel}>
-            Cerrar
-          </Button>
-        </div>
+        {!hideActions && (
+          <div className="flex justify-end pt-4 border-t">
+            <Button variant="secondary" onClick={onCancel}>
+              Cerrar
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -119,22 +170,28 @@ export function FeatureFormFields({
   // Modo CREATE/EDIT
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
+      <form 
+        ref={formRef}  // ← Permite submit externo
+        onSubmit={form.handleSubmit(onSubmit)} 
+        className="w-full space-y-4"
+      >
         {/* Grid fluido con campos */}
         <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
           <FormField control={form.control} name="field1" ... />
           <FormField control={form.control} name="field2" ... />
         </div>
 
-        {/* Botones de acción */}
-        <div className="flex gap-2 pt-4 border-t">
-          <Button type="button" variant="secondary" onClick={onCancel} className="flex-1">
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={isSubmitting} className="flex-[3]">
-            {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Guardar Cambios' : 'Crear'}
-          </Button>
-        </div>
+        {/* Botones de acción - solo si NO está controlado por modal */}
+        {!hideActions && (
+          <div className="flex gap-2 pt-4 border-t">
+            <Button type="button" variant="secondary" onClick={onCancel} className="flex-1">
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={isSubmitting} className="flex-[3]">
+              {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Guardar Cambios' : 'Crear'}
+            </Button>
+          </div>
+        )}
       </form>
     </Form>
   );
@@ -143,21 +200,22 @@ export function FeatureFormFields({
 
 ---
 
-## 4. MODAL (El Envase)
+## 5. MODAL (El Envase)
 
 **Ubicación:** `src/features/{feature}/modals/{Feature}Modal.tsx`
 
 ### Características
 
-- Solo importa y renderiza el FormFields
-- Configura `ModalHeader` con título/descripción según mode
-- **NO** usa `ModalFooter` (botones están en FormFields)
-- Conecta `onSuccess` y `onCancel` a `onClose`
+- Usa `headerContent` y `footerContent` props para header/footer fijos
+- `ModalBody` va como children
+- Pasa `hideActions={true}` y `formRef` al FormFields
+- Controla el submit via `formRef.current.requestSubmit()`
 
 ### Estructura del Componente
 
 ```tsx
-import { ModalLayout, ModalHeader, ModalBody } from '@/components/modal';
+import { useRef } from 'react';
+import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { FeatureFormFields } from '../forms/FeatureFormFields';
 import { IconComponent } from 'lucide-react';
 
@@ -172,6 +230,8 @@ interface FeatureModalProps {
 }
 
 export function FeatureModal({ modalData, onClose, mode = 'create' }: FeatureModalProps) {
+  const formRef = useRef<HTMLFormElement>(null);
+
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -183,15 +243,44 @@ export function FeatureModal({ modalData, onClose, mode = 'create' }: FeatureMod
     }
   };
 
+  const getSubmitText = () => {
+    switch (mode) {
+      case 'view': return 'Cerrar';
+      case 'edit': return 'Guardar Cambios';
+      default: return 'Crear';
+    }
+  };
+
+  const handleSubmit = () => {
+    if (mode === 'view') {
+      onClose();
+    } else if (formRef.current) {
+      formRef.current.requestSubmit();
+    }
+  };
+
   const header = getHeader();
 
   return (
-    <ModalLayout onClose={onClose} size="lg">
-      <ModalHeader
-        title={header.title}
-        description={header.description}
-        icon={IconComponent}
-      />
+    <ModalLayout 
+      onClose={onClose} 
+      size="lg"
+      headerContent={
+        <ModalHeader
+          title={header.title}
+          description={header.description}
+          icon={IconComponent}
+        />
+      }
+      footerContent={
+        <ModalFooter
+          leftLabel="Cancelar"
+          onLeftClick={onClose}
+          submitText={getSubmitText()}
+          onSubmit={handleSubmit}
+        />
+      }
+    >
       <ModalBody>
         <FeatureFormFields
           projectId={modalData?.projectId}
@@ -200,6 +289,8 @@ export function FeatureModal({ modalData, onClose, mode = 'create' }: FeatureMod
           mode={mode}
           onSuccess={onClose}
           onCancel={onClose}
+          hideActions={true}      // ← Oculta botones internos
+          formRef={formRef}       // ← Permite submit desde ModalFooter
         />
       </ModalBody>
     </ModalLayout>
@@ -209,7 +300,7 @@ export function FeatureModal({ modalData, onClose, mode = 'create' }: FeatureMod
 
 ---
 
-## 5. LAYOUT FLUIDO (Container-Aware)
+## 6. LAYOUT FLUIDO (Container-Aware)
 
 Usamos CSS Grid moderno para que el layout se adapte al contenedor:
 
@@ -233,7 +324,7 @@ Usamos CSS Grid moderno para que el layout se adapte al contenedor:
 
 ---
 
-## 6. REGISTRO EN registerModals.ts
+## 7. REGISTRO EN registerModals.ts
 
 ```typescript
 import { FeatureModal } from '@/features/feature/modals/FeatureModal';
@@ -251,7 +342,7 @@ registerModal('feature', FeatureModal as any, {
 
 ---
 
-## 7. EXPORTS EN index.ts
+## 8. EXPORTS EN index.ts
 
 ```typescript
 // src/features/feature/index.ts
@@ -265,7 +356,7 @@ export { FeatureFormFields } from './forms/FeatureFormFields';
 
 ---
 
-## 8. TAMAÑOS DE MODAL
+## 9. TAMAÑOS DE MODAL
 
 | Size | Ancho |
 |------|-------|
@@ -277,37 +368,52 @@ export { FeatureFormFields } from './forms/FeatureFormFields';
 
 ---
 
-## 9. REGLAS A SEGUIR
+## 10. REGLAS A SEGUIR
 
-1. **FormFields NO importa componentes de modal** - Nunca `ModalLayout`, `ModalHeader`, etc.
-2. **Botones van DENTRO del FormFields** - No en el Modal
-3. **FormFields recibe `onSuccess` y `onCancel`** - Para notificar al parent
-4. **Modal conecta callbacks a `onClose`** - `onSuccess={onClose}`, `onCancel={onClose}`
-5. **Mantener `data-testid` en elementos interactivos**
-6. **Usar grid fluido** - `grid-cols-[repeat(auto-fit,minmax(Xpx,1fr))]`
+### Estructura del Modal
+1. **SIEMPRE usar** `headerContent` prop para el header
+2. **SIEMPRE usar** `footerContent` prop para el footer
+3. **ModalBody** va como children de ModalLayout
+4. **Orden**: Layout → Header (prop) → Body (children) → Footer (prop)
+
+### FormFields
+5. **NO importa componentes de modal** - Nunca `ModalLayout`, `ModalHeader`, etc.
+6. **Acepta `hideActions` y `formRef`** - Props opcionales para control externo
+7. **Por defecto muestra botones** - `hideActions = false`
+8. **Usa `ref={formRef}`** en el `<form>` para permitir submit externo
+
+### Conexión Modal ↔ FormFields
+9. **Modal pasa `hideActions={true}`** - Para ocultar botones del form
+10. **Modal pasa `formRef`** - Para controlar submit desde ModalFooter
+11. **Modal usa `formRef.current.requestSubmit()`** - En el handler de submit
+
+### Testing
+12. **Mantener `data-testid`** en elementos interactivos
 
 ---
 
-## 10. BENEFICIOS
+## 11. BENEFICIOS
 
-1. **Reutilización Total**: El mismo FormFields funciona en modal, página, sheet
-2. **Testing Aislado**: Testea el form sin dependencias de modal
-3. **Mantenimiento**: Cambios en modal no afectan lógica del form
-4. **Flexibilidad**: Mover el form a cualquier contexto sin refactorizar
+1. **Footer Fijo**: El footer siempre está visible, no scrollea
+2. **Reutilización Total**: El mismo FormFields funciona en modal, página, sheet
+3. **Testing Aislado**: Testea el form sin dependencias de modal
+4. **Mantenimiento**: Cambios en modal no afectan lógica del form
+5. **Flexibilidad**: Mover el form a cualquier contexto sin refactorizar
 
 ---
 
-## 11. FORMULARIOS REFACTORIZADOS
+## 12. FORMULARIOS REFACTORIZADOS
 
 | Feature | FormFields | Modal | Fecha |
 |---------|------------|-------|-------|
 | ClientPayment | `forms/ClientPaymentFormFields.tsx` | `modals/ClientPaymentModal.tsx` | 2025-12-10 |
 | MaterialPayment | `forms/MaterialPaymentFormFields.tsx` | `modals/MaterialPaymentModal.tsx` | 2025-12-10 |
 | PersonnelPayment | `forms/PersonnelPaymentFormFields.tsx` | `modals/PersonnelPaymentModal.tsx` | 2025-12-10 |
+| NewMovement | (usa los 3 anteriores) | `modals/NewMovementModal.tsx` | 2025-12-10 |
 
 ---
 
-## 12. FORMULARIOS PENDIENTES
+## 13. FORMULARIOS PENDIENTES
 
 - [ ] GeneralCostPaymentForm
 - [ ] SubcontractFormModal
@@ -318,28 +424,83 @@ export { FeatureFormFields } from './forms/FeatureFormFields';
 
 ---
 
-## 13. CHECKLIST DE CREACIÓN
+## 14. CHECKLIST DE CREACIÓN
 
 Al crear un nuevo modal:
 
 - [ ] Crear `forms/FeatureFormFields.tsx` con toda la lógica
-- [ ] Crear `modals/FeatureModal.tsx` como wrapper tonto
-- [ ] FormFields NO importa componentes de modal
-- [ ] FormFields incluye botones Cancelar/Guardar
-- [ ] FormFields recibe `onSuccess` y `onCancel`
-- [ ] Modal conecta `onSuccess={onClose}` y `onCancel={onClose}`
+- [ ] FormFields acepta `hideActions` y `formRef` opcionales
+- [ ] FormFields usa `ref={formRef}` en el `<form>`
+- [ ] FormFields condiciona botones con `{!hideActions && ...}`
+- [ ] Crear `modals/FeatureModal.tsx` como wrapper
+- [ ] Modal usa `headerContent` prop para ModalHeader
+- [ ] Modal usa `footerContent` prop para ModalFooter
+- [ ] Modal usa `formRef` para controlar submit
+- [ ] Modal pasa `hideActions={true}` al FormFields
 - [ ] Registrar en `registerModals.ts`
 - [ ] Exportar en `index.ts` del feature
 - [ ] Agregar a la tabla de formularios refactorizados
 
 ---
 
-## 14. CHECKLIST QA
+## 15. CHECKLIST QA
 
-- [ ] Probar CREATE
-- [ ] Probar EDIT (campos precargados)
-- [ ] Probar VIEW (solo lectura)
-- [ ] Probar en contenedor angosto
+- [ ] Probar CREATE - formulario vacío, submit funciona
+- [ ] Probar EDIT - campos precargados correctamente
+- [ ] Probar VIEW - solo lectura, botón Cerrar funciona
+- [ ] Verificar FOOTER FIJO - scrollear contenido largo
 - [ ] Probar en mobile (drawer)
 - [ ] Verificar que no hay errores de import
 - [ ] Verificar botones funcionan correctamente
+
+---
+
+## 16. EJEMPLO COMPLETO: NewMovementModal
+
+Modal dinámico que cambia de formulario según selección:
+
+```tsx
+export function NewMovementModal({ modalData, onClose }: Props) {
+  const [selectedType, setSelectedType] = useState<MovementType | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleSubmit = () => {
+    if (formRef.current) {
+      formRef.current.requestSubmit();
+    }
+  };
+
+  return (
+    <ModalLayout 
+      onClose={onClose} 
+      size={selectedType ? 'lg' : 'md'}
+      headerContent={<ModalHeader ... />}
+      footerContent={
+        <ModalFooter
+          leftLabel="Cancelar"
+          onLeftClick={onClose}
+          submitText={getSubmitText()}
+          onSubmit={handleSubmit}
+          submitDisabled={!selectedType}
+        />
+      }
+    >
+      <ModalBody>
+        <Select value={selectedType} onValueChange={setSelectedType}>
+          ...
+        </Select>
+        
+        {selectedType === 'client_payment' && (
+          <ClientPaymentFormFields 
+            hideActions={true} 
+            formRef={formRef}
+            onSuccess={onClose}
+            onCancel={onClose}
+          />
+        )}
+        {/* ... otros tipos */}
+      </ModalBody>
+    </ModalLayout>
+  );
+}
+```
