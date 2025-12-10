@@ -33,6 +33,7 @@ import { HeroSectionForm } from '@/features/layout';
 import ForumThreadForm from '@/features/forum/forms/ForumThreadForm';
 import ForumPostForm from '@/features/forum/forms/ForumPostForm';
 import ForumCategoryForm from '@/features/forum/forms/ForumCategoryForm';
+import CourseForumCategoryForm from '@/features/forum/forms/CourseForumCategoryForm';
 
 const organizationConfig: ModalConfig = { category: 'organization', size: 'md' };
 const foundersConfig: ModalConfig = { category: 'founders', size: 'md' };
@@ -431,6 +432,17 @@ export function initializeModalRegistry(): void {
     ...forumConfig,
     mapDataToProps: (data) => ({
       modalData: {
+        category: data?.category,
+        mode: data?.category ? (data?.mode || 'edit') : (data?.mode || 'create'),
+      },
+    }),
+  });
+
+  registerModal('course-forum-category', CourseForumCategoryForm as any, {
+    ...forumConfig,
+    mapDataToProps: (data) => ({
+      modalData: {
+        courseId: data?.courseId,
         category: data?.category,
         mode: data?.category ? (data?.mode || 'edit') : (data?.mode || 'create'),
       },

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
-import { BookOpen, FolderPlus, FileVideo, Plus } from 'lucide-react';
+import { BookOpen, FolderPlus, FileVideo, Plus, MessageSquare } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
@@ -106,6 +106,11 @@ export default function AdminCourseView() {
     openModal('testimonial', { courseId: id });
   };
 
+  const handleCreateForumCategory = () => {
+    if (!id) return;
+    openModal('course-forum-category', { courseId: id, mode: 'create' });
+  };
+
   const getHeaderActions = () => {
     if (activeTab === 'Contenido del Curso') {
       return [
@@ -140,6 +145,20 @@ export default function AdminCourseView() {
         >
           <Plus className="w-4 h-4 mr-1" />
           Agregar Testimonio
+        </Button>
+      ];
+    }
+
+    if (activeTab === 'Foro') {
+      return [
+        <Button
+          key="create-forum-category"
+          onClick={handleCreateForumCategory}
+          className="h-8 px-3 text-xs"
+          data-testid="button-create-forum-category"
+        >
+          <MessageSquare className="w-4 h-4 mr-1" />
+          Agregar Categoría
         </Button>
       ];
     }
