@@ -227,7 +227,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
         .select(`
           *,
           author:users!forum_threads_author_id_fkey(id, full_name, avatar_url),
-          category:forum_categories!forum_threads_category_id_fkey(id, name, slug)
+          category:forum_categories!forum_threads_category_id_fkey(id, name, slug, is_read_only)
         `, { count: 'exact' })
         .eq('is_deleted', false)
         .in('category_id', categoryIds);
@@ -270,7 +270,8 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
         description, 
         icon = 'MessageSquare', 
         color = '#3b82f6',
-        sort_order 
+        sort_order,
+        is_read_only = false
       } = req.body;
 
       if (!name) {
@@ -302,7 +303,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
           allowed_roles: ['public'],
           sort_order: finalSortOrder,
           is_active: true,
-          is_read_only: false,
+          is_read_only: !!is_read_only,
           course_id: courseId,
         }])
         .select()
@@ -569,10 +570,16 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
         throw new HttpError(400, "Missing required fields: category_id, title, content");
       }
 
-      const hasAccess = await canAccessCategory(user.userId, category_id);
+      const [hasAccess, userRoles] = await Promise.all([
+        canAccessCategory(user.userId, category_id),
+        getUserRoles(user.userId)
+      ]);
+      
       if (!hasAccess) {
         throw new HttpError(403, "No access to this category");
       }
+
+      const isAdmin = userRoles.includes('admin');
 
       const { data: category } = await supabaseAdmin
         .from('forum_categories')
@@ -580,8 +587,8 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
         .eq('id', category_id)
         .single();
 
-      if (category?.is_read_only) {
-        throw new HttpError(403, "This category is read-only");
+      if (category?.is_read_only && !isAdmin) {
+        throw new HttpError(403, "Esta categoría es solo para anuncios de administradores");
       }
 
       const organizationId = await getUserOrgId(user.userId);
@@ -755,9 +762,12 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
         throw new HttpError(403, "Thread is locked");
       }
 
+      const userRoles = await getUserRoles(user.userId);
+      const isAdmin = userRoles.includes('admin');
+
       const threadCategory = Array.isArray(thread.category) ? thread.category[0] : thread.category;
-      if (threadCategory?.is_read_only) {
-        throw new HttpError(403, "Category is read-only");
+      if (threadCategory?.is_read_only && !isAdmin) {
+        throw new HttpError(403, "Esta categoría es solo para anuncios de administradores");
       }
 
       const hasAccess = await canAccessCategory(user.userId, thread.category_id);
@@ -1074,7 +1084,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
     try {
       await verifyAdminUser(req.headers.authorization);
       const { id } = req.params;
-      const { name, description, icon, color, allowed_roles, sort_order } = req.body;
+      const { name, description, icon, color, allowed_roles, sort_order, is_read_only } = req.body;
 
       const updateData: Record<string, any> = {};
       if (name !== undefined) {
@@ -1086,6 +1096,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
       if (color !== undefined) updateData.color = color;
       if (allowed_roles !== undefined) updateData.allowed_roles = allowed_roles;
       if (sort_order !== undefined) updateData.sort_order = sort_order;
+      if (is_read_only !== undefined) updateData.is_read_only = !!is_read_only;
 
       const { data: category, error } = await supabaseAdmin
         .from('forum_categories')

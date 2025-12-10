@@ -5,6 +5,7 @@ import { MessageSquare, Plus } from 'lucide-react';
 import { ThreadCard } from './ThreadCard';
 import { getIconComponent } from './CategoryList';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import type { ForumThreadWithAuthor, ForumCategoryWithCounts } from '../services';
 
 interface ThreadListProps {
@@ -48,11 +49,14 @@ export function ThreadList({
   selectedCategory,
   onNewThread,
 }: ThreadListProps) {
+  const isAdmin = useIsAdmin();
+
   if (isLoading) {
     return <ThreadListSkeleton />;
   }
 
   const hasThreads = threads.length > 0;
+  const canCreateThread = !selectedCategory?.is_read_only || isAdmin;
   const pinnedThreads = threads.filter((t) => t.is_pinned);
   const regularThreads = threads.filter((t) => !t.is_pinned);
 
@@ -93,7 +97,7 @@ export function ThreadList({
                   <h2 className="text-xl font-bold text-[var(--text-default)]">
                     {selectedCategory.name}
                   </h2>
-                  {onNewThread && !selectedCategory.is_read_only && (
+                  {onNewThread && canCreateThread && (
                     <Button
                       variant="default"
                       size="sm"
@@ -135,9 +139,9 @@ export function ThreadList({
         <EmptyState
           icon={<MessageSquare />}
           title="No hay temas en esta categoría"
-          description="Sé el primero en iniciar una conversación"
+          description={canCreateThread ? "Sé el primero en iniciar una conversación" : "Esta categoría es solo para anuncios oficiales"}
           action={
-            onNewThread && (!selectedCategory || !selectedCategory.is_read_only) ? (
+            onNewThread && canCreateThread ? (
               <Button
                 variant="default"
                 onClick={onNewThread}

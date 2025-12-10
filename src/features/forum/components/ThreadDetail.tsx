@@ -25,6 +25,7 @@ import {
 } from '../services';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { useGlobalModalStore } from '@/components/modal';
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox';
 
@@ -77,6 +78,7 @@ interface ThreadDetailProps {
 export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
+  const isAdmin = useIsAdmin();
   const { openModal } = useGlobalModalStore();
   const { data: thread, isLoading } = useForumThread(threadSlug);
   const { data: reactions } = useThreadReactions(thread?.id || '');
@@ -328,7 +330,7 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
         </Card>
       )}
 
-      {!thread.is_locked && (
+      {!thread.is_locked && (!thread.category?.is_read_only || isAdmin) && (
         <Card>
           <CardContent className="p-4">
             <form onSubmit={handleSubmitReply} className="space-y-3">
@@ -355,7 +357,18 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
         </Card>
       )}
 
-      {thread.is_locked && (
+      {thread.category?.is_read_only && !isAdmin && (
+        <Card className="bg-[var(--muted-bg)]">
+          <CardContent className="p-4 text-center">
+            <Lock className="h-5 w-5 mx-auto text-[var(--text-muted)] mb-2" />
+            <p className="text-sm text-[var(--text-muted)]">
+              Esta categoría es solo para anuncios oficiales
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {thread.is_locked && !thread.category?.is_read_only && (
         <Card className="bg-[var(--muted-bg)]">
           <CardContent className="p-4 text-center">
             <Lock className="h-5 w-5 mx-auto text-[var(--text-muted)] mb-2" />
