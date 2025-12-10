@@ -15,6 +15,8 @@ export interface FounderOrganization {
   name: string;
   logo_url: string | null;
   created_at: string;
+  created_by?: string;
+  creator_name?: string;
   settings: {
     is_founder?: boolean;
     country?: string;

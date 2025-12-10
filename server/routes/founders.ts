@@ -901,7 +901,9 @@ export function registerFounderRoutes(app: Express, deps: RouteDeps): void {
         .select(`
           id,
           name,
+          logo_url,
           created_at,
+          created_by,
           settings
         `)
         .eq('is_deleted', false)
@@ -916,6 +918,32 @@ export function registerFounderRoutes(app: Express, deps: RouteDeps): void {
       const founderOrgs = organizations?.filter((org: any) => 
         org.settings?.is_founder === true
       ) || [];
+
+      // Get creator names in batch if we have organizations
+      if (founderOrgs.length > 0) {
+        const creatorIds = founderOrgs.map(org => org.created_by).filter(Boolean);
+        let creatorMap: Record<string, string> = {};
+
+        if (creatorIds.length > 0) {
+          const { data: creators, error: creatorsError } = await supabaseAdmin
+            .from('users')
+            .select('id, full_name')
+            .in('id', creatorIds);
+
+          if (!creatorsError && creators) {
+            creatorMap = creators.reduce((acc, user) => {
+              acc[user.id] = user.full_name;
+              return acc;
+            }, {} as Record<string, string>);
+          }
+        }
+
+        // Add creator_name to each organization
+        return res.json(founderOrgs.map((org: any) => ({
+          ...org,
+          creator_name: org.created_by ? creatorMap[org.created_by] : undefined
+        })));
+      }
 
       return res.json(founderOrgs);
     } catch (error: any) {

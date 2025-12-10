@@ -23,28 +23,34 @@ function OrganizationCard({ org }: { org: FounderOrganization }) {
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
-          <Avatar className="h-14 w-14 rounded-lg">
+          <Avatar className="h-16 w-16 rounded-full">
             <AvatarImage src={org.logo_url || undefined} alt={org.name} />
-            <AvatarFallback className="rounded-lg bg-accent/10 text-accent">
+            <AvatarFallback className="rounded-full bg-accent/10 text-accent">
               {getInitials(org.name)}
             </AvatarFallback>
           </Avatar>
           
           <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-[var(--text-default)] truncate">
+            <h3 className="font-semibold text-sm text-[var(--text-default)] truncate">
               {org.name}
             </h3>
             
+            {org.creator_name && (
+              <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">
+                {org.creator_name}
+              </p>
+            )}
+            
             {country && (
-              <div className="flex items-center gap-1 mt-1 text-sm text-[var(--text-muted)]">
-                <MapPin className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-1 mt-1.5 text-xs text-[var(--text-muted)]">
+                <MapPin className="h-3 w-3" />
                 <span>{country}</span>
               </div>
             )}
             
             {org.member_count !== undefined && (
-              <div className="flex items-center gap-1 mt-1 text-sm text-[var(--text-muted)]">
-                <Users className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-1 mt-1 text-xs text-[var(--text-muted)]">
+                <Users className="h-3 w-3" />
                 <span>{org.member_count} miembros</span>
               </div>
             )}
