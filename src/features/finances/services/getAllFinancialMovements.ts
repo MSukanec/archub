@@ -199,7 +199,18 @@ async function getLegacyMovementsForOrganization(
     return [];
   }
 
-  return (data || []) as LegacyMovementWithRelations[];
+  // Normalize Supabase array responses to single objects
+  return (data || []).map((movement: any) => ({
+    ...movement,
+    projects: Array.isArray(movement.projects) ? movement.projects[0] : movement.projects,
+    movement_types: Array.isArray(movement.movement_types) ? movement.movement_types[0] : movement.movement_types,
+    movement_categories: Array.isArray(movement.movement_categories) ? movement.movement_categories[0] : movement.movement_categories,
+    movement_subcategories: Array.isArray(movement.movement_subcategories) ? movement.movement_subcategories[0] : movement.movement_subcategories,
+    currencies: Array.isArray(movement.currencies) ? movement.currencies[0] : movement.currencies,
+    organization_wallets: Array.isArray(movement.organization_wallets) ? movement.organization_wallets[0] : movement.organization_wallets,
+    profiles: Array.isArray(movement.profiles) ? movement.profiles[0] : movement.profiles,
+    indirect_costs: Array.isArray(movement.indirect_costs) ? movement.indirect_costs[0] : movement.indirect_costs,
+  })) as LegacyMovementWithRelations[];
 }
 
 /**

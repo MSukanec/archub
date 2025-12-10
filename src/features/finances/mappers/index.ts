@@ -70,7 +70,7 @@ export function mapClientPaymentToFinancialMovement(
     // Payment details
     amount: clientPayment.amount,
     currency_id: clientPayment.currency_id,
-    exchange_rate: clientPayment.exchange_rate,
+    exchange_rate: clientPayment.exchange_rate ?? 1,
     payment_date: clientPayment.payment_date,
     
     // Description and reference
@@ -81,7 +81,7 @@ export function mapClientPaymentToFinancialMovement(
     // Payment metadata
     wallet_id: clientPayment.wallet_id,
     status: clientPayment.status,
-    file_url: clientPayment.file_url,
+    file_url: clientPayment.file_url ?? null,
     
     // Audit fields
     created_by: clientPayment.created_by,
