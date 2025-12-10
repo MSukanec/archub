@@ -3,11 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';
-import { DollarSign, TrendingUp, CreditCard, Inbox, Search, Bell, Banknote } from 'lucide-react';
+import { DollarSign, TrendingUp, CreditCard, Inbox, Search, Bell, Banknote, Eye } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { supabase } from '@/lib/supabase';
 import { es } from 'date-fns/locale';
-import { useGlobalModalStore } from '@/components/modal';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 
@@ -43,7 +42,6 @@ interface Payment {
 }
 
 const AdminPaymentsTab = () => {
-  const { openModal } = useGlobalModalStore();
   const isMobile = useMobile();
   
   const { 
@@ -191,7 +189,6 @@ const AdminPaymentsTab = () => {
     {
       key: 'created_at',
       label: 'Fecha',
-      width: '12%',
       render: (payment: Payment) => (
         <span className="text-sm text-muted-foreground">
           {format(new Date(payment.created_at), 'dd/MM/yy HH:mm', { locale: es })}
@@ -201,7 +198,6 @@ const AdminPaymentsTab = () => {
     {
       key: 'user',
       label: 'Usuario',
-      width: '20%',
       render: (payment: Payment) => (
         <div className="flex flex-col">
           <span className="font-medium text-sm">
@@ -214,7 +210,6 @@ const AdminPaymentsTab = () => {
     {
       key: 'product',
       label: 'Producto',
-      width: '22%',
       render: (payment: Payment) => {
         if (payment.courses?.title) {
           return <span className="text-sm">{payment.courses.title}</span>;
@@ -233,7 +228,6 @@ const AdminPaymentsTab = () => {
     {
       key: 'provider',
       label: 'Proveedor',
-      width: '15%',
       render: (payment: Payment) => {
         const providerLabels: Record<string, string> = {
           'mercadopago': 'Mercado Pago',
@@ -264,7 +258,6 @@ const AdminPaymentsTab = () => {
     {
       key: 'amount',
       label: 'Monto',
-      width: '11%',
       render: (payment: Payment) => (
         <div className="flex flex-col">
           <span className="font-semibold text-sm">
@@ -281,7 +274,6 @@ const AdminPaymentsTab = () => {
     {
       key: 'coupon',
       label: 'Cupón',
-      width: '12%',
       render: (payment: Payment) => {
         const coupon = payment.coupon_redemptions;
         if (!coupon) {
@@ -304,7 +296,6 @@ const AdminPaymentsTab = () => {
     {
       key: 'status',
       label: 'Estado',
-      width: '11%',
       render: () => (
         <Badge variant="secondary" className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
           Completado
@@ -336,7 +327,7 @@ const AdminPaymentsTab = () => {
             <StatCardTitle showArrow={false}>Total Pagos</StatCardTitle>
             <DollarSign className="h-5 w-5 text-accent" />
           </div>
-          <StatCardValue>{stats.totalPayments}</StatCardValue>
+          <StatCardValue className="text-xl md:text-3xl">{stats.totalPayments}</StatCardValue>
           <StatCardMeta>Este mes: {stats.paymentsThisMonth}</StatCardMeta>
         </StatCard>
 
@@ -345,7 +336,7 @@ const AdminPaymentsTab = () => {
             <StatCardTitle showArrow={false}>Total</StatCardTitle>
             <TrendingUp className="h-5 w-5 text-green-600" />
           </div>
-          <StatCardValue className="text-lg md:text-2xl">
+          <StatCardValue className="text-xl md:text-3xl">
             {formatUSD(stats.historicalDollarized)}
           </StatCardValue>
           <StatCardMeta>Este mes: {formatUSD(stats.monthlyDollarized)}</StatCardMeta>
@@ -356,7 +347,7 @@ const AdminPaymentsTab = () => {
             <StatCardTitle showArrow={false}>Total (ARS)</StatCardTitle>
             <Banknote className="h-5 w-5 text-blue-600" />
           </div>
-          <StatCardValue className="text-lg md:text-2xl">
+          <StatCardValue className="text-xl md:text-3xl">
             {formatARS(stats.historicalARS)}
           </StatCardValue>
           <StatCardMeta>Este mes: {formatARS(stats.monthlyARS)}</StatCardMeta>
@@ -367,7 +358,7 @@ const AdminPaymentsTab = () => {
             <StatCardTitle showArrow={false}>Total (USD)</StatCardTitle>
             <CreditCard className="h-5 w-5 text-emerald-600" />
           </div>
-          <StatCardValue className="text-lg md:text-2xl">
+          <StatCardValue className="text-xl md:text-3xl">
             {formatUSD(stats.historicalUSD)}
           </StatCardValue>
           <StatCardMeta>Este mes: {formatUSD(stats.monthlyUSD)}</StatCardMeta>
@@ -379,6 +370,15 @@ const AdminPaymentsTab = () => {
         columns={columns}
         data={filteredPayments}
         isLoading={isLoading}
+        rowActions={(payment: Payment) => [
+          {
+            icon: Eye,
+            label: 'Ver detalles',
+            onClick: () => {
+              console.log('Payment details:', payment);
+            },
+          },
+        ]}
         emptyStateConfig={{
           icon: <Inbox />,
           title: isLoading ? 'Cargando...' : 'No hay pagos',
