@@ -227,12 +227,7 @@ export function FinancesMovementsTab() {
 
   return (
     <div className="space-y-6" data-testid="finances-movements-tab">
-      <Table
-        columns={columns}
-        data={movements}
-        isLoading={isLoading}
-        emptyStateConfig={{
-          icon: <DollarSign className="h-12 w-12 text-muted-foreground" />,
+round" />,
           title: 'No hay movimientos',
           description: 'No se encontraron movimientos financieros unificados.',
         }}
