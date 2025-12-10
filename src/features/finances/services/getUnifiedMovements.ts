@@ -52,6 +52,7 @@ export interface UnifiedMovementWithRelations extends UnifiedMovement {
 
 /**
  * Obtiene todos los movimientos financieros unificados de la vista.
+ * Las relaciones se obtienen por separado porque las vistas no tienen FK automáticas.
  * 
  * @param organizationId - ID de la organización
  * @param projectId - ID del proyecto (opcional)
@@ -67,15 +68,7 @@ export async function getUnifiedMovements(
 
   let query = supabase
     .from('unified_financial_movements_view')
-    .select(`
-      *,
-      project:projects(id, name, code, color),
-      currency:currencies(id, code, symbol, name),
-      wallet:organization_wallets(
-        id,
-        wallets:wallet_id(id, name)
-      )
-    `)
+    .select('*')
     .eq('organization_id', organizationId)
     .order('payment_date', { ascending: false });
 
@@ -83,29 +76,47 @@ export async function getUnifiedMovements(
     query = query.eq('project_id', projectId);
   }
 
-  const { data, error } = await query;
+  const { data: movements, error } = await query;
 
   if (error) {
     console.error('Error fetching unified movements:', error);
     return [];
   }
 
-  return (data || []).map((movement: any) => {
-    const project = Array.isArray(movement.project) ? movement.project[0] : movement.project;
-    const currency = Array.isArray(movement.currency) ? movement.currency[0] : movement.currency;
-    const walletData = Array.isArray(movement.wallet) ? movement.wallet[0] : movement.wallet;
-    
-    return {
-      ...movement,
-      project,
-      currency,
-      wallet: walletData?.wallets ? {
-        id: walletData.id,
-        name: walletData.wallets.name,
-      } : null,
-      signed_amount: movement.amount * movement.amount_sign,
-    };
-  });
+  if (!movements || movements.length === 0) {
+    return [];
+  }
+
+  const projectIds = Array.from(new Set(movements.map(m => m.project_id).filter(Boolean))) as string[];
+  const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean))) as string[];
+  const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean))) as string[];
+
+  const [projectsResult, currenciesResult, walletsResult] = await Promise.all([
+    projectIds.length > 0 
+      ? supabase.from('projects').select('id, name, code, color').in('id', projectIds)
+      : { data: [], error: null },
+    currencyIds.length > 0
+      ? supabase.from('currencies').select('id, code, symbol, name').in('id', currencyIds)
+      : { data: [], error: null },
+    walletIds.length > 0
+      ? supabase.from('organization_wallets').select('id, wallets:wallet_id(id, name)').in('id', walletIds)
+      : { data: [], error: null },
+  ]);
+
+  const projectsMap = new Map((projectsResult.data || []).map(p => [p.id, p]));
+  const currenciesMap = new Map((currenciesResult.data || []).map(c => [c.id, c]));
+  const walletsMap = new Map((walletsResult.data || []).map((w: any) => [
+    w.id, 
+    w.wallets ? { id: w.id, name: w.wallets.name } : null
+  ]));
+
+  return movements.map((movement: any) => ({
+    ...movement,
+    project: movement.project_id ? projectsMap.get(movement.project_id) || null : null,
+    currency: movement.currency_id ? currenciesMap.get(movement.currency_id) || null : null,
+    wallet: movement.wallet_id ? walletsMap.get(movement.wallet_id) || null : null,
+    signed_amount: movement.amount * movement.amount_sign,
+  }));
 }
 
 /**

@@ -236,6 +236,7 @@ export function LeftSidebar() {
         { id: 'activity', label: 'Actividad', icon: Activity, href: '/organization/activity' },
         { id: 'settings', label: 'Ajustes', icon: Settings, href: '/organization/settings' },
         { type: 'section-header', id: 'section-finanzas', label: 'Finanzas' },
+        { id: 'finances-unified', label: 'Finanzas', icon: DollarSign, href: '/finances', restricted: 'lab_user' },
         { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
         { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', restricted: 'lab_user' },
         { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'lab_user' },
