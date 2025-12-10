@@ -1,0 +1,41 @@
+ASUNTO: Implementación de Editor de Texto Enriquecido (Rich Text) con Tiptap para el Foro.
+
+CONTEXTO: Actualmente, los formularios de creación de "Hilos" (Threads) y "Respuestas" (Posts) usan un simple textarea. Esto es insuficiente. Necesito permitir a los usuarios dar formato a su contenido (negritas, listas) e insertar contenido multimedia (enlaces, videos de YouTube) para enriquecer la discusión.
+
+OBJETIVO TÉCNICO: Reemplazar los textarea del foro por un componente reutilizable de Rich Text Editor basado en la librería Tiptap.
+
+REQUISITOS DE IMPLEMENTACIÓN:
+
+Instalación de Dependencias: Instala @tiptap/react, @tiptap/starter-kit, @tiptap/extension-link, @tiptap/extension-youtube y @tiptap/extension-placeholder.
+
+Creación del Componente RichTextEditor:
+
+El componente debe aceptar value (contenido inicial) y onChange (para actualizar el estado).
+
+Debe tener una Barra de Herramientas (Toolbar) en la parte superior del editor.
+
+Funcionalidades de la Barra de Herramientas: Usa botones pequeños y elegantes (tipo Shadcn UI Button variant="ghost" size="sm") con iconos de Lucide React para:
+
+Formato de Texto: Negrita (B), Cursiva (I), Tachado.
+
+Listas: Lista desordenada (Bullet points), Lista ordenada.
+
+Multimedia:
+
+Link: Un botón que abra un pequeño prompt o popover para pegar la URL y convertir el texto seleccionado en enlace.
+
+YouTube: Un botón que pida la URL del video e inserte el embed del video de YouTube directamente en el editor.
+
+Estética (UI/UX):
+
+El editor debe tener un borde sutil (border-input), esquinas redondeadas y un min-height cómodo (ej. 150px).
+
+Cuando el editor está vacío, debe mostrar un placeholder gris: "Escribe aquí tu mensaje...".
+
+Usa la clase prose (de Tailwind Typography) dentro del editor para que los estilos (h1, p, ul, a) se vean bien automáticamente.
+
+Persistencia:
+
+El componente debe devolver el contenido en formato HTML string para guardarlo fácilmente en el campo content (jsonb/text) de la base de datos.
+
+ENTREGABLE: El componente RichTextEditor.tsx listo para ser importado en el modal de CreateThread y en el formulario de CreatePost.
