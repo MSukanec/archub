@@ -35,6 +35,7 @@ import { useMobileMenuStore } from "./useMobileMenuStore";
 import { useProjects } from "@/features/projects";
 import { PlanRestricted } from "@/features/users";
 import { ComingSoonRestricted } from "@/components/shared/restrictions/guards/ComingSoonRestricted";
+import { RoleRestricted } from "@/components/shared/restrictions/guards/RoleRestricted";
 import { useProjectContext } from "@/stores/projectContext";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -199,10 +200,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
               {sidebarLevel === 'general' ? (
                 <>
                   {CONTEXT_BUTTONS.map((contextButton) => {
-                    if (contextButton.adminOnly && !isAdmin) {
-                      return null;
-                    }
-
                     const hasProjects = projectsData && projectsData.length > 0;
 
                     if (contextButton.id === 'project') {
@@ -236,6 +233,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       location.startsWith(`/${contextButton.id}`);
 
                     const handleClick = () => {
+                      if (contextButton.adminOnly && !isAdmin) return;
                       setSidebarLevel(contextButton.id);
                       if (contextButton.href) {
                         navigate(contextButton.href);
@@ -245,7 +243,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
                     const button = (
                       <MobileMenuButton
-                        key={contextButton.id}
                         icon={contextButton.icon}
                         label={contextButton.label}
                         onClick={handleClick}
@@ -255,6 +252,16 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       />
                     );
 
+                    // Apply RoleRestricted for founders and community (same as desktop)
+                    if (contextButton.id === 'founders' || contextButton.id === 'community') {
+                      return (
+                        <RoleRestricted key={contextButton.id} requiredRole="admin" hideCompletely showAsPreview>
+                          {button}
+                        </RoleRestricted>
+                      );
+                    }
+
+                    // Apply ComingSoonRestricted for coming_soon items
                     if (contextButton.restricted === "coming_soon") {
                       return (
                         <ComingSoonRestricted key={contextButton.id}>
@@ -263,7 +270,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       );
                     }
 
-                    return button;
+                    // Skip admin-only buttons for non-admins
+                    if (contextButton.adminOnly && !isAdmin) {
+                      return null;
+                    }
+
+                    return <div key={contextButton.id}>{button}</div>;
                   })}
                 </>
               ) : (
@@ -305,6 +317,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                                   <ComingSoonRestricted>
                                     {button}
                                   </ComingSoonRestricted>
+                                ) : item.restricted === "lab_user" ? (
+                                  <RoleRestricted requiredRole="lab_user" hideCompletely>
+                                    {button}
+                                  </RoleRestricted>
                                 ) : (
                                   button
                                 )}
@@ -356,6 +372,10 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                           <ComingSoonRestricted>
                             {button}
                           </ComingSoonRestricted>
+                        ) : item.restricted === "lab_user" ? (
+                          <RoleRestricted requiredRole="lab_user" hideCompletely>
+                            {button}
+                          </RoleRestricted>
                         ) : (
                           button
                         )}
