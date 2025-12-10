@@ -1,20 +1,32 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useGlobalModalStore } from '@/components/modal';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
-import { Button } from '@/components/ui/button';
-import { MessageSquare, Pencil, Trash2, Inbox } from 'lucide-react';
+import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/HierarchicalTree';
+import { Inbox } from 'lucide-react';
 import type { ForumCategory } from '@/features/forum/services';
 
 interface AdminCourseForumTabProps {
   courseId: string;
 }
 
+interface CategoryTreeNode {
+  id: string;
+  name: string;
+  code?: string;
+  children?: CategoryTreeNode[];
+  order?: number;
+  color?: string;
+  description?: string | null;
+  icon?: string | null;
+}
+
 export default function AdminCourseForumTab({ courseId }: AdminCourseForumTabProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { openModal } = useGlobalModalStore();
+  const [expandedCategories] = useState<Set<string>>(new Set());
 
   const { data: categories = [], isLoading } = useQuery<ForumCategory[]>({
     queryKey: ['/api/forum/courses', courseId, 'categories'],
@@ -44,83 +56,58 @@ export default function AdminCourseForumTab({ courseId }: AdminCourseForumTabPro
     },
   });
 
-  const handleEdit = (category: ForumCategory) => {
-    openModal('course-forum-category', { courseId, category, mode: 'edit' });
+  const reorderMutation = useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      const res = await apiRequest('POST', `/api/forum/courses/${courseId}/categories/reorder`, { orderedIds });
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.error || 'Error al reordenar categorías');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/forum/courses', courseId, 'categories'] });
+      toast({ title: 'Orden actualizado', description: 'El orden de las categorías se ha guardado' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  const handleEdit = (category: CategoryTreeNode) => {
+    const originalCategory = categories.find(c => c.id === category.id);
+    if (originalCategory) {
+      openModal('course-forum-category', { courseId, category: originalCategory, mode: 'edit' });
+    }
   };
 
-  const handleDelete = (category: ForumCategory) => {
-    openModal('delete-confirmation', {
-      mode: 'delete',
-      title: 'Eliminar Categoría',
-      description: 'Esta acción eliminará la categoría y todos sus hilos asociados.',
-      itemName: category.name,
-      onDelete: () => deleteMutation.mutate(category.id),
-    });
+  const handleDelete = (categoryId: string) => {
+    const category = categories.find(c => c.id === categoryId);
+    if (category) {
+      openModal('delete-confirmation', {
+        mode: 'delete',
+        title: 'Eliminar Categoría',
+        description: 'Esta acción eliminará la categoría y todos sus hilos asociados.',
+        itemName: category.name,
+        onDelete: () => deleteMutation.mutate(categoryId),
+      });
+    }
   };
 
-  const columns = [
-    {
-      key: 'name',
-      label: 'Categoría',
-      render: (category: ForumCategory) => (
-        <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: `${category.color}20` }}
-          >
-            <MessageSquare className="w-4 h-4" style={{ color: category.color || undefined }} />
-          </div>
-          <div>
-            <p className="font-medium text-sm">{category.name}</p>
-            {category.description && (
-              <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                {category.description}
-              </p>
-            )}
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'sort_order',
-      label: 'Orden',
-      render: (category: ForumCategory) => (
-        <span className="text-sm text-muted-foreground">{category.sort_order}</span>
-      ),
-    },
-    {
-      key: 'id',
-      label: 'Acciones',
-      render: (category: ForumCategory) => (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEdit(category);
-            }}
-            data-testid={`button-edit-category-${category.id}`}
-          >
-            <Pencil className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-destructive hover:text-destructive"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDelete(category);
-            }}
-            data-testid={`button-delete-category-${category.id}`}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      ),
-    },
-  ];
+  const handleReorder = (reorderedItems: CategoryTreeNode[]) => {
+    const orderedIds = reorderedItems.map(item => item.id);
+    reorderMutation.mutate(orderedIds);
+  };
+
+  const treeCategories: CategoryTreeNode[] = categories.map((cat, index) => ({
+    id: cat.id,
+    name: cat.name,
+    code: cat.icon || 'MessageSquare',
+    order: cat.sort_order ?? index,
+    color: cat.color || '#3b82f6',
+    description: cat.description,
+    icon: cat.icon,
+  }));
 
   if (isLoading) {
     return (
@@ -150,10 +137,16 @@ export default function AdminCourseForumTab({ courseId }: AdminCourseForumTabPro
 
   return (
     <div className="p-6" data-testid="admin-course-forum-tab">
-      <Table
-        data={categories}
-        columns={columns}
-        emptyMessage="No hay categorías configuradas"
+      <HierarchicalTree
+        categories={treeCategories}
+        expandedCategories={expandedCategories}
+        onToggleExpanded={() => {}}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onTemplate={() => {}}
+        enableDragAndDrop={true}
+        onReorder={handleReorder}
+        showOrderNumber={true}
       />
     </div>
   );

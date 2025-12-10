@@ -1104,6 +1104,34 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
     }
   });
 
+  // POST /api/forum/courses/:courseId/categories/reorder - Reorder categories (admin only)
+  app.post("/api/forum/courses/:courseId/categories/reorder", async (req: Request, res: Response) => {
+    try {
+      await verifyAdminUser(req.headers.authorization);
+      const { courseId } = req.params;
+      const { orderedIds } = req.body;
+
+      if (!Array.isArray(orderedIds)) {
+        throw new HttpError(400, "orderedIds must be an array");
+      }
+
+      for (let i = 0; i < orderedIds.length; i++) {
+        await supabaseAdmin
+          .from('forum_categories')
+          .update({ sort_order: i })
+          .eq('id', orderedIds[i])
+          .eq('course_id', courseId);
+      }
+
+      return res.json({ success: true });
+    } catch (error: any) {
+      if (error instanceof HttpError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
+
   // DELETE /api/forum/categories/:id - Delete category (admin only)
   app.delete("/api/forum/categories/:id", async (req: Request, res: Response) => {
     try {
