@@ -215,8 +215,8 @@ export function FinancesMovementsTab() {
               {isPositive ? '+' : '-'}{formatCurrency(movement.amount, movement.currency?.symbol)}
             </span>
             {movement.exchange_rate && (
-              <span className="text-xs text-muted-foreground">
-                @ {movement.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+              <span className="text-[10px] text-muted-foreground">
+                Cot. {movement.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
               </span>
             )}
           </div>
