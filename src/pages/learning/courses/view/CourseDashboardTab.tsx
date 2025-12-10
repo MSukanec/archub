@@ -5,7 +5,6 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent }
 import { BookOpen, CheckCircle, Clock, FileText, Bookmark, Megaphone, Info, PlayCircle, Play, MessageCircle } from 'lucide-react'
 import type { ThreadsResponse, ForumThreadWithAuthor } from '@/features/forum/services'
 import { 
-  DiscordWidget, 
   useCourseProgress, 
   useCourseEnrollment, 
   useLastLessonInProgress, 
@@ -319,9 +318,6 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
           </div>
         </div>
       </div>
-
-      {/* Discord Widget */}
-      <DiscordWidget />
 
       {/* Forum, Notes and Markers Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
