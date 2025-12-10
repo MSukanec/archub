@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { MessagesSquare, Loader2 } from 'lucide-react';
+import { MessagesSquare } from 'lucide-react';
 
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RichTextEditor } from '@/components/shared/RichTextEditor';
 import { FileUploader } from '@/components/shared/FileUploader';
 import { useForumCategories, useCreateThread, useUpdateThread, ForumThreadWithAuthor } from '../services';
 import { useToast } from '@/hooks/use-toast';
@@ -223,10 +223,11 @@ export default function ForumThreadForm({ modalData, onClose }: ForumThreadFormP
                 <FormItem>
                   <FormLabel>Contenido</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <RichTextEditor
+                      value={field.value || ''}
+                      onChange={field.onChange}
                       placeholder="Describe tu tema o pregunta..."
-                      rows={5}
-                      {...field}
+                      minHeight="150px"
                       data-testid="input-thread-content"
                     />
                   </FormControl>

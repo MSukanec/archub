@@ -5,7 +5,7 @@ import { MessageSquare } from 'lucide-react';
 
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/shared/RichTextEditor';
 import { useCreatePost, useUpdatePost, ForumPostWithAuthor } from '../services';
 import { useToast } from '@/hooks/use-toast';
 
@@ -118,10 +118,11 @@ export default function ForumPostForm({ modalData, onClose, mode = 'create' }: F
                 <FormItem>
                   <FormLabel>Contenido</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <RichTextEditor
+                      value={field.value || ''}
+                      onChange={field.onChange}
                       placeholder="Escribe tu respuesta..."
-                      rows={6}
-                      {...field}
+                      minHeight="120px"
                       data-testid="input-post-content"
                     />
                   </FormControl>
