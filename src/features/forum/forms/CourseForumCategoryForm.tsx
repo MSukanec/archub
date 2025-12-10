@@ -6,9 +6,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FolderPlus, Pencil } from 'lucide-react';
 
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import type { ForumCategory } from '../services';
@@ -18,6 +19,7 @@ const categorySchema = z.object({
   description: z.string().optional(),
   icon: z.string().optional(),
   color: z.string().optional(),
+  is_read_only: z.boolean().optional(),
 });
 
 type CategoryFormData = z.infer<typeof categorySchema>;
@@ -47,6 +49,7 @@ export default function CourseForumCategoryForm({ modalData, onClose }: CourseFo
       description: '',
       icon: 'MessageSquare',
       color: '#3b82f6',
+      is_read_only: false,
     },
   });
 
@@ -57,6 +60,7 @@ export default function CourseForumCategoryForm({ modalData, onClose }: CourseFo
         description: category.description || '',
         icon: category.icon || 'MessageSquare',
         color: category.color || '#3b82f6',
+        is_read_only: category.is_read_only || false,
       });
     }
   }, [category, isEditing, form]);
@@ -189,6 +193,28 @@ export default function CourseForumCategoryForm({ modalData, onClose }: CourseFo
                     />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="is_read_only"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <FormLabel>Solo administradores</FormLabel>
+                    <FormDescription className="text-xs">
+                      Solo los administradores pueden crear hilos en esta categoría
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      data-testid="switch-read-only"
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />
