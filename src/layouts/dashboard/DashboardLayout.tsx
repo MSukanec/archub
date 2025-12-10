@@ -35,8 +35,9 @@ interface Tab {
   id: string;
   label: string;
   isActive: boolean;
-  badgeCount?: number; // Opcional: contador para mostrar en la tab
-  disabled?: boolean; // Opcional: deshabilitar la tab
+  badgeCount?: number;
+  badge?: string;
+  disabled?: boolean;
 }
 
 interface LayoutProps {
@@ -280,6 +281,7 @@ function LayoutContent({
                         isActive: tab.isActive,
                         onClick: () => headerProps.onTabChange?.(tab.id),
                         badgeCount: tab.badgeCount,
+                        badge: tab.badge,
                         isDisabled: tab.disabled,
                       }))}
                       onTabChange={headerProps.onTabChange}
