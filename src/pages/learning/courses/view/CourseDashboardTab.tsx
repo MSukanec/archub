@@ -13,7 +13,8 @@ import {
   useMonthlyStudyTime,
   useCourseRecentNotes,
   useCourseRecentMarkers,
-  useCoursePlayerStore
+  useCoursePlayerStore,
+  useCourseOverview
 } from '@/features/learning'
 import { useLocation, useParams } from 'wouter'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -34,6 +35,7 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
   const setActiveTab = useCoursePlayerStore(s => s.setActiveTab);
   const { data: userData } = useCurrentUser();
+  const { data: course } = useCourseOverview(courseSlug);
 
   // Handler to navigate to a specific tab
   const navigateToTab = (tab: string) => {
@@ -210,6 +212,82 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
 
   return (
     <div className="space-y-6">
+      {/* Hero Section with Course Cover Background and KPIs */}
+      <div 
+        className="relative rounded-xl overflow-hidden"
+        style={{
+          backgroundImage: course?.cover_url ? `url(${course.cover_url})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/60" />
+        
+        {/* Content */}
+        <div className="relative z-10 p-6 md:p-8">
+          {/* Course Title */}
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">
+            {course?.title || 'Cargando...'}
+          </h1>
+          
+          {/* KPIs Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {/* Subscription Days */}
+            <div className="text-center">
+              <p className="text-xs font-medium text-white/70 uppercase tracking-wide mb-1">
+                Tiempo Restante
+              </p>
+              <p className="text-2xl md:text-3xl font-bold text-white">
+                {stats.subscriptionFormatted}
+              </p>
+              <p className="text-xs text-white/60 mt-1">
+                {stats.subscriptionMetaFormatted}
+              </p>
+            </div>
+            
+            {/* Progress */}
+            <div className="text-center">
+              <p className="text-xs font-medium text-white/70 uppercase tracking-wide mb-1">
+                Progreso Total
+              </p>
+              <p className="text-2xl md:text-3xl font-bold text-white">
+                {stats.progressPct}%
+              </p>
+              <p className="text-xs text-white/60 mt-1">
+                {stats.doneLessons} de {stats.totalLessons} lecciones
+              </p>
+            </div>
+            
+            {/* Study Time */}
+            <div className="text-center">
+              <p className="text-xs font-medium text-white/70 uppercase tracking-wide mb-1">
+                Tiempo de Estudio
+              </p>
+              <p className="text-2xl md:text-3xl font-bold text-white">
+                {stats.studyTimeFormatted}
+              </p>
+              <p className="text-xs text-white/60 mt-1">
+                {stats.courseDurationFormatted}
+              </p>
+            </div>
+            
+            {/* This Month */}
+            <div className="text-center">
+              <p className="text-xs font-medium text-white/70 uppercase tracking-wide mb-1">
+                Este Mes
+              </p>
+              <p className="text-2xl md:text-3xl font-bold text-white">
+                {stats.monthTimeFormatted}
+              </p>
+              <p className="text-xs text-white/60 mt-1">
+                dedicadas en total
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Continue Watching and Discord Row */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* Continue Watching Card - 3 columns */}
@@ -252,42 +330,9 @@ export default function CourseDashboardTab({ courseId }: CourseDashboardTabProps
         )}
 
         {/* Discord Widget - 1 column */}
-        <div className="lg:col-span-1">
+        <div className={lastLesson ? "lg:col-span-1" : "lg:col-span-4"}>
           <DiscordWidget />
         </div>
-      </div>
-
-      {/* Top Row - Main Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Subscription Days Card - No clickeable */}
-        <StatCard>
-          <StatCardTitle showArrow={false}>Tiempo Restante</StatCardTitle>
-          <StatCardValue>{stats.subscriptionFormatted}</StatCardValue>
-          <StatCardMeta>{stats.subscriptionMetaFormatted}</StatCardMeta>
-        </StatCard>
-
-        {/* Progress Card - No clickeable */}
-        <StatCard>
-          <StatCardTitle showArrow={false}>Progreso Total</StatCardTitle>
-          <StatCardValue>{stats.progressPct}%</StatCardValue>
-          <StatCardMeta>
-            {stats.doneLessons} de {stats.totalLessons} lecciones
-          </StatCardMeta>
-        </StatCard>
-
-        {/* Study Time Card - No clickeable */}
-        <StatCard>
-          <StatCardTitle showArrow={false}>Tiempo de Estudio</StatCardTitle>
-          <StatCardValue>{stats.studyTimeFormatted}</StatCardValue>
-          <StatCardMeta>{stats.courseDurationFormatted}</StatCardMeta>
-        </StatCard>
-
-        {/* This Month Study Time Card - No clickeable */}
-        <StatCard>
-          <StatCardTitle showArrow={false}>Este Mes</StatCardTitle>
-          <StatCardValue>{stats.monthTimeFormatted}</StatCardValue>
-          <StatCardMeta>dedicadas en total</StatCardMeta>
-        </StatCard>
       </div>
 
       {/* Second Row - Notes and Markers */}
