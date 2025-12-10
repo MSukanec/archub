@@ -9,7 +9,7 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
-import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users } from 'lucide-react';
+import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users, TrendingUp, TrendingDown } from 'lucide-react';
 import type { UnifiedMovementWithRelations } from '@/features/finances/services/getUnifiedMovements';
 
 const MOVEMENT_TYPE_CONFIG: Record<string, { 
@@ -35,6 +35,18 @@ const MOVEMENT_TYPE_CONFIG: Record<string, {
     color: 'bg-blue-600',
     modalType: 'personnel-payment',
     icon: Users,
+  },
+  partner_contribution: { 
+    label: 'Aporte Socio', 
+    color: 'bg-emerald-600',
+    modalType: 'partner-contribution',
+    icon: TrendingUp,
+  },
+  partner_withdrawal: { 
+    label: 'Retiro Socio', 
+    color: 'bg-rose-600',
+    modalType: 'partner-withdrawal',
+    icon: TrendingDown,
   },
 };
 

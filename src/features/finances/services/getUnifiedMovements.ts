@@ -19,11 +19,12 @@ export interface UnifiedMovement {
   created_by: string | null;
   created_at: string;
   updated_at: string;
-  movement_type: 'client_payment' | 'material_payment' | 'personnel_payment';
+  movement_type: 'client_payment' | 'material_payment' | 'personnel_payment' | 'partner_contribution' | 'partner_withdrawal';
   client_id: string | null;
   material_id: string | null;
   personnel_id: string | null;
   purchase_id: string | null;
+  partner_id: string | null;
   amount_sign: number;
 }
 
@@ -105,9 +106,12 @@ export async function getUnifiedMovements(
   const personnelIds = movements
     .filter(m => m.movement_type === 'personnel_payment' && m.personnel_id)
     .map(m => m.personnel_id) as string[];
+  const partnerIds = movements
+    .filter(m => (m.movement_type === 'partner_contribution' || m.movement_type === 'partner_withdrawal') && m.partner_id)
+    .map(m => m.partner_id) as string[];
   const paymentIds = movements.map(m => m.id) as string[];
 
-  const [projectsResult, currenciesResult, walletsResult, clientsResult, personnelResult, attachmentsResult] = await Promise.all([
+  const [projectsResult, currenciesResult, walletsResult, clientsResult, personnelResult, partnersResult, attachmentsResult] = await Promise.all([
     projectIds.length > 0 
       ? supabase.from('projects').select('id, name, code, color').in('id', projectIds)
       : { data: [], error: null },
@@ -123,9 +127,12 @@ export async function getUnifiedMovements(
     personnelIds.length > 0
       ? supabase.from('organization_members').select('id, user:users(id, full_name)').in('id', personnelIds)
       : { data: [], error: null },
+    partnerIds.length > 0
+      ? supabase.from('partners').select('id, contact:contacts(id, full_name, company_name)').in('id', partnerIds)
+      : { data: [], error: null },
     paymentIds.length > 0
-      ? supabase.from('media_links').select('id, client_payment_id, material_payment_id, personnel_payment_id').or(
-          `client_payment_id.in.(${paymentIds.join(',')}),material_payment_id.in.(${paymentIds.join(',')}),personnel_payment_id.in.(${paymentIds.join(',')})`
+      ? supabase.from('media_links').select('id, client_payment_id, material_payment_id, personnel_payment_id, partner_contribution_id, partner_withdrawal_id').or(
+          `client_payment_id.in.(${paymentIds.join(',')}),material_payment_id.in.(${paymentIds.join(',')}),personnel_payment_id.in.(${paymentIds.join(',')}),partner_contribution_id.in.(${paymentIds.join(',')}),partner_withdrawal_id.in.(${paymentIds.join(',')})`
         )
       : { data: [], error: null },
   ]);
@@ -144,12 +151,18 @@ export async function getUnifiedMovements(
     p.id,
     p.user?.full_name || null
   ]));
+  const partnersMap = new Map((partnersResult.data || []).map((p: any) => [
+    p.id,
+    p.contact?.full_name || p.contact?.company_name || null
+  ]));
   
   const attachmentsSet = new Set<string>();
   (attachmentsResult.data || []).forEach((link: any) => {
     if (link.client_payment_id) attachmentsSet.add(link.client_payment_id);
     if (link.material_payment_id) attachmentsSet.add(link.material_payment_id);
     if (link.personnel_payment_id) attachmentsSet.add(link.personnel_payment_id);
+    if (link.partner_contribution_id) attachmentsSet.add(link.partner_contribution_id);
+    if (link.partner_withdrawal_id) attachmentsSet.add(link.partner_withdrawal_id);
   });
 
   const getEntityName = (movement: any): string | null => {
@@ -160,6 +173,9 @@ export async function getUnifiedMovements(
         return movement.personnel_id ? personnelMap.get(movement.personnel_id) || null : null;
       case 'material_payment':
         return movement.description || null;
+      case 'partner_contribution':
+      case 'partner_withdrawal':
+        return movement.partner_id ? partnersMap.get(movement.partner_id) || null : null;
       default:
         return null;
     }

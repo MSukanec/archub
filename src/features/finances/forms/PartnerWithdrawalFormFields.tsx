@@ -1,0 +1,400 @@
+import { useState, useMemo, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { formatDateForDB } from '@/lib/date-utils'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CalendarIcon } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { useToast } from '@/hooks/use-toast'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { useOrganizationCurrencies } from '@/hooks/use-currencies'
+import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
+import { usePartners, Partner } from '@/hooks/use-partners'
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
+import { useQueryClient } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
+
+const partnerWithdrawalSchema = z.object({
+  withdrawal_date: z.date({
+    required_error: "Fecha es requerida",
+  }),
+  partner_id: z.string().min(1, 'Socio es requerido'),
+  wallet_id: z.string().min(1, 'Billetera es requerida'),
+  amount: z.number().min(0.01, 'Monto debe ser mayor a 0'),
+  currency_id: z.string().min(1, 'Moneda es requerida'),
+  exchange_rate: z.number().min(0.0001, 'Tipo de cambio debe ser mayor a 0').optional().nullable(),
+  status: z.enum(['confirmed', 'pending', 'rejected', 'void']),
+  reference: z.string().optional(),
+  notes: z.string().optional(),
+})
+
+type PartnerWithdrawalFormData = z.infer<typeof partnerWithdrawalSchema>
+
+function getPartnerDisplayName(partner: Partner): string {
+  if (!partner?.contacts) return 'Socio sin nombre'
+  
+  const { contacts } = partner
+  if (contacts.company_name) {
+    return contacts.company_name
+  } else {
+    const fullName = `${contacts.first_name || ''} ${contacts.last_name || ''}`.trim()
+    if (fullName) {
+      return fullName
+    } else if (contacts.email) {
+      return contacts.email
+    } else {
+      return 'Socio sin nombre'
+    }
+  }
+}
+
+export interface PartnerWithdrawalFormFieldsProps {
+  projectId?: string;
+  organizationId?: string;
+  mode: 'create' | 'edit';
+  onSuccess: () => void;
+  onCancel: () => void;
+  hideActions?: boolean;
+  formRef?: React.RefObject<HTMLFormElement>;
+}
+
+export function PartnerWithdrawalFormFields({ 
+  projectId, 
+  organizationId, 
+  mode, 
+  onSuccess, 
+  onCancel,
+  hideActions = false,
+  formRef
+}: PartnerWithdrawalFormFieldsProps) {
+  const { data: userData } = useCurrentUser()
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { data: partners = [], isLoading: partnersLoading } = usePartners(organizationId, { enabled: !!organizationId })
+  const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
+  const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId || '')
+  const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
+
+  const currentMember = useMemo(() => {
+    return members.find(m => m.user_id === userData?.user?.id) || null
+  }, [members, userData?.user?.id])
+
+  const partnerOptions = useMemo(() => {
+    return partners.map(partner => ({
+      value: partner.id,
+      label: getPartnerDisplayName(partner)
+    })).sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
+  }, [partners])
+
+  const form = useForm<PartnerWithdrawalFormData>({
+    resolver: zodResolver(partnerWithdrawalSchema),
+    defaultValues: {
+      withdrawal_date: new Date(),
+      partner_id: '',
+      wallet_id: '',
+      amount: 0,
+      currency_id: '',
+      exchange_rate: undefined,
+      status: 'confirmed',
+      reference: '',
+      notes: '',
+    }
+  })
+
+  const isLoading = partnersLoading || currenciesLoading || walletsLoading || membersLoading
+
+  const onSubmit = async (data: PartnerWithdrawalFormData) => {
+    if (!organizationId || !currentMember) {
+      toast({
+        title: "Error",
+        description: "No se encontró la organización o el usuario actual",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const insertData = {
+        organization_id: organizationId,
+        project_id: projectId || null,
+        partner_id: data.partner_id,
+        amount: data.amount,
+        currency_id: data.currency_id,
+        exchange_rate: data.exchange_rate || 1,
+        withdrawal_date: formatDateForDB(data.withdrawal_date),
+        wallet_id: data.wallet_id,
+        status: data.status,
+        reference: data.reference || null,
+        notes: data.notes || null,
+        created_by: currentMember.id,
+      }
+
+      const { error } = await supabase
+        .from('partner_withdrawals')
+        .insert(insertData)
+
+      if (error) throw error
+
+      toast({
+        title: "Retiro registrado",
+        description: "El retiro de socio se ha registrado correctamente",
+      })
+
+      queryClient.invalidateQueries({ queryKey: ['unified-movements'] })
+      queryClient.invalidateQueries({ queryKey: ['partner-movements'] })
+      queryClient.invalidateQueries({ queryKey: ['partner-withdrawals'] })
+
+      onSuccess()
+    } catch (error: any) {
+      console.error('Error creating partner withdrawal:', error)
+      toast({
+        title: "Error al registrar retiro",
+        description: error.message || "Ocurrió un error al registrar el retiro",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
+          <p className="text-sm text-muted-foreground mt-2">Cargando datos del formulario...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <Form {...form}>
+      <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="withdrawal_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Fecha <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <div className="relative">
+                        <Input
+                          placeholder="Seleccionar fecha"
+                          value={field.value ? format(field.value, 'dd/MM/yyyy', { locale: es }) : ''}
+                          className="pr-10 cursor-pointer"
+                          readOnly
+                          data-testid="input-partner-withdrawal-date"
+                        />
+                        <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date > new Date()}
+                        initialFocus
+                        locale={es}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="partner_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Socio <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <ComboBox
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    options={partnerOptions}
+                    placeholder="Seleccionar socio"
+                    searchPlaceholder="Buscar socio..."
+                    emptyMessage="No se encontraron socios"
+                    data-testid="combobox-partner-withdrawal-partner"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="wallet_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Billetera <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange} disabled={walletsLoading}>
+                    <SelectTrigger data-testid="select-partner-withdrawal-wallet">
+                      <SelectValue placeholder="Seleccionar billetera" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {wallets?.map((orgWallet) => (
+                        <SelectItem 
+                          key={orgWallet.id} 
+                          value={orgWallet.id}
+                        >
+                          {orgWallet.wallets?.name || 'Sin nombre'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Monto <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    {...field}
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    data-testid="input-partner-withdrawal-amount"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="currency_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Moneda <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange} disabled={currenciesLoading}>
+                    <SelectTrigger data-testid="select-partner-withdrawal-currency">
+                      <SelectValue placeholder="Seleccionar moneda" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies?.map((orgCurrency) => (
+                        <SelectItem 
+                          key={orgCurrency.currency?.id} 
+                          value={orgCurrency.currency?.id || ''}
+                        >
+                          {orgCurrency.currency?.name} ({orgCurrency.currency?.symbol})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="exchange_rate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cotización (opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    min="0.0001"
+                    placeholder="1.0000"
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                    data-testid="input-partner-withdrawal-exchange-rate"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="reference"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Referencia (opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: TRX-12345"
+                  {...field}
+                  data-testid="input-partner-withdrawal-reference"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notas (opcional)</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Agregar notas adicionales..."
+                  rows={2}
+                  {...field}
+                  data-testid="textarea-partner-withdrawal-notes"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
+  )
+}

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { DollarSign, Users, Package, CreditCard } from 'lucide-react'
+import { DollarSign, Users, Package, CreditCard, TrendingUp, TrendingDown } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -7,8 +7,10 @@ import { useProjectContext } from '@/stores/projectContext'
 import { ClientPaymentFormFields } from '@/features/clients/forms/ClientPaymentFormFields'
 import { MaterialPaymentFormFields } from '@/features/materials/forms/MaterialPaymentFormFields'
 import { PersonnelPaymentFormFields } from '@/features/personnel/forms/PersonnelPaymentFormFields'
+import { PartnerContributionFormFields } from '@/features/finances/forms/PartnerContributionFormFields'
+import { PartnerWithdrawalFormFields } from '@/features/finances/forms/PartnerWithdrawalFormFields'
 
-type MovementType = 'client_payment' | 'material_payment' | 'personnel_payment'
+type MovementType = 'client_payment' | 'material_payment' | 'personnel_payment' | 'partner_contribution' | 'partner_withdrawal'
 
 interface MovementTypeConfig {
   id: MovementType
@@ -43,6 +45,22 @@ const MOVEMENT_TYPES: MovementTypeConfig[] = [
     icon: Users,
     color: 'text-blue-600',
     submitLabel: 'Registrar Pago de Personal',
+  },
+  {
+    id: 'partner_contribution',
+    label: 'Aporte de Socio',
+    description: 'Registrar aporte de capital de un socio',
+    icon: TrendingUp,
+    color: 'text-emerald-600',
+    submitLabel: 'Registrar Aporte',
+  },
+  {
+    id: 'partner_withdrawal',
+    label: 'Retiro de Socio',
+    description: 'Registrar retiro de capital de un socio',
+    icon: TrendingDown,
+    color: 'text-rose-600',
+    submitLabel: 'Registrar Retiro',
   },
 ]
 
@@ -92,6 +110,10 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
         return <MaterialPaymentFormFields {...commonProps} />
       case 'personnel_payment':
         return <PersonnelPaymentFormFields {...commonProps} />
+      case 'partner_contribution':
+        return <PartnerContributionFormFields {...commonProps} />
+      case 'partner_withdrawal':
+        return <PartnerWithdrawalFormFields {...commonProps} />
       default:
         return null
     }
