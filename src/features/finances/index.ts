@@ -7,9 +7,11 @@
 
 // Services
 export * from './services/getAllFinancialMovements';
+export * from './services/getUnifiedMovements';
 
 // Hooks
 export * from './hooks/use-financial-movements';
+export * from './hooks/use-unified-movements';
 export * from './hooks/use-financial-metrics';
 export * from './hooks/use-partner-movements';
 export * from './hooks/use-partner-metrics';
