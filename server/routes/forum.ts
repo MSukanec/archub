@@ -208,6 +208,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
       const categoryIds = (courseCategories || []).map(c => c.id);
 
       if (categoryIds.length === 0) {
+        res.set('Cache-Control', 'no-store');
         return res.json({
           threads: [],
           pagination: { page, limit, total: 0, totalPages: 0 }
@@ -243,6 +244,7 @@ export function registerForumRoutes(app: Express, deps: RouteDeps): void {
 
       if (error) throw new HttpError(500, error.message);
 
+      res.set('Cache-Control', 'no-store');
       return res.json({
         threads: threads || [],
         pagination: {
