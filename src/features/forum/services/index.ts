@@ -123,6 +123,13 @@ export interface ReactionsResponse {
 export function useForumCategories() {
   return useQuery<ForumCategoryWithCounts[]>({
     queryKey: FORUM_QUERY_KEYS.categories,
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/forum/categories');
+      if (!res.ok) throw new Error('Failed to fetch categories');
+      return res.json();
+    },
+    staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 }
 
@@ -135,6 +142,8 @@ export function useForumThreads(categorySlug: string | null, page: number = 1, l
       if (!res.ok) throw new Error('Failed to fetch threads');
       return res.json();
     },
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 }
 
@@ -147,6 +156,8 @@ export function useForumThread(threadSlug: string) {
       return res.json();
     },
     enabled: !!threadSlug,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 }
 
@@ -159,6 +170,8 @@ export function useThreadReactions(threadId: string) {
       return res.json();
     },
     enabled: !!threadId,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 }
 

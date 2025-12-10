@@ -26,16 +26,6 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox';
 
 function getInitials(name: string): string {
@@ -97,7 +87,6 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
   const incrementViewMutation = useIncrementViewCount();
 
   const [replyContent, setReplyContent] = useState('');
-  const [postToDelete, setPostToDelete] = useState<string | null>(null);
 
   // Calculate image attachments for lightbox - must be before any conditional returns
   const imageAttachments = useMemo(() => {
@@ -167,27 +156,20 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
     });
   };
 
-  const handleDeletePost = async (postId: string) => {
-    setPostToDelete(postId);
-  };
-
-  const confirmDeletePost = async () => {
-    if (!postToDelete) return;
-    try {
-      await deletePostMutation.mutateAsync(postToDelete);
-      toast({
-        title: 'Respuesta eliminada',
-        description: 'La respuesta ha sido eliminada correctamente',
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo eliminar la respuesta',
-        variant: 'destructive',
-      });
-    } finally {
-      setPostToDelete(null);
-    }
+  const handleDeletePost = (postId: string) => {
+    openModal('delete-confirmation', {
+      mode: 'delete',
+      title: 'Eliminar respuesta',
+      description: 'La respuesta será eliminada permanentemente del foro.',
+      itemName: 'Respuesta',
+      onDelete: async () => {
+        await deletePostMutation.mutateAsync(postId);
+        toast({
+          title: 'Respuesta eliminada',
+          description: 'La respuesta ha sido eliminada correctamente',
+        });
+      },
+    });
   };
 
   if (isLoading) {
@@ -392,26 +374,6 @@ export function ThreadDetail({ threadSlug, onBack }: ThreadDetailProps) {
           onClose={closeLightbox}
         />
       )}
-
-      <AlertDialog open={!!postToDelete} onOpenChange={() => setPostToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar respuesta?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. La respuesta será eliminada permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDeletePost}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
