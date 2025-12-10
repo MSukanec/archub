@@ -34,7 +34,7 @@ import ForumThreadForm from '@/features/forum/forms/ForumThreadForm';
 import ForumPostForm from '@/features/forum/forms/ForumPostForm';
 import ForumCategoryForm from '@/features/forum/forms/ForumCategoryForm';
 import CourseForumCategoryForm from '@/features/forum/forms/CourseForumCategoryForm';
-import UnifiedPaymentForm from '@/features/finances/forms/UnifiedPaymentForm';
+import { NewMovementModal } from '@/features/finances/modals/NewMovementModal';
 
 const organizationConfig: ModalConfig = { category: 'organization', size: 'md' };
 const foundersConfig: ModalConfig = { category: 'founders', size: 'md' };
@@ -450,12 +450,15 @@ export function initializeModalRegistry(): void {
     }),
   });
 
-  registerModal('unified-payment', UnifiedPaymentForm as any, {
+  registerModal('unified-payment', NewMovementModal as any, {
     ...financeConfig,
-    size: 'md',
+    size: 'lg',
     mapDataToProps: (data) => ({
-      modalData: data,
-      mode: 'create',
+      modalData: {
+        ...data,
+        projectId: data?.projectId,
+        organizationId: data?.organizationId,
+      },
     }),
   });
 }
