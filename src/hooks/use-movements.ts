@@ -92,9 +92,6 @@ export function useMovements(organizationId?: string | undefined, projectId?: st
         throw new Error('Supabase client not initialized')
       }
 
-      // Query directly from movements table with JOINs
-      // NOTE: FK hints are only required when there are multiple FKs to the same table (e.g., movement_concepts)
-      // For tables with single FK relationships, Supabase can infer automatically
       let query = supabase
         .from('movements')
         .select(`
@@ -119,9 +116,6 @@ export function useMovements(organizationId?: string | undefined, projectId?: st
           partner,
           indirect_id,
           projects(name, color),
-          movement_types:movement_concepts!movements_type_id_fkey(id, name),
-          movement_categories:movement_concepts!movements_category_id_fkey(id, name),
-          movement_subcategories:movement_concepts!movements_subcategory_id_fkey(id, name),
           currencies(id, name, code, symbol, country),
           organization_wallets(
             id,

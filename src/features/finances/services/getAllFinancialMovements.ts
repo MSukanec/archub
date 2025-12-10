@@ -14,8 +14,6 @@ import {
   mapMaterialPaymentsToFinancialMovements,
   mapPersonnelPaymentsToFinancialMovements,
   mapGeneralCostPaymentsToFinancialMovements,
-  mapLegacyMovementsToFinancialMovements,
-  type LegacyMovementWithRelations
 } from '../mappers';
 
 async function getMaterialPaymentsForOrganization(
@@ -148,71 +146,6 @@ async function getGeneralCostPaymentsForOrganization(
   })) as GeneralCostPayment[];
 }
 
-async function getLegacyMovementsForOrganization(
-  organizationId: string,
-  projectId?: string | null
-): Promise<LegacyMovementWithRelations[]> {
-  let query = supabase
-    .from('movements')
-    .select(`
-      id,
-      description,
-      amount,
-      exchange_rate,
-      created_at,
-      movement_date,
-      created_by,
-      organization_id,
-      project_id,
-      type_id,
-      category_id,
-      subcategory_id,
-      currency_id,
-      wallet_id,
-      is_favorite,
-      conversion_group_id,
-      transfer_group_id,
-      partner,
-      subcontract,
-      indirect_id,
-      general_cost_id,
-      projects(name, color, code),
-      movement_types:movement_concepts!movements_type_id_fkey(id, name),
-      movement_categories:movement_concepts!movements_category_id_fkey(id, name),
-      movement_subcategories:movement_concepts!movements_subcategory_id_fkey(id, name),
-      currencies(id, name, code, symbol),
-      organization_wallets(id, wallets(id, name)),
-      profiles(full_name, avatar_url),
-      indirect_costs(id, name)
-    `)
-    .eq('organization_id', organizationId)
-    .order('movement_date', { ascending: false });
-
-  if (projectId) {
-    query = query.eq('project_id', projectId);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error('Error fetching legacy movements:', error);
-    return [];
-  }
-
-  // Normalize Supabase array responses to single objects
-  return (data || []).map((movement: any) => ({
-    ...movement,
-    projects: Array.isArray(movement.projects) ? movement.projects[0] : movement.projects,
-    movement_types: Array.isArray(movement.movement_types) ? movement.movement_types[0] : movement.movement_types,
-    movement_categories: Array.isArray(movement.movement_categories) ? movement.movement_categories[0] : movement.movement_categories,
-    movement_subcategories: Array.isArray(movement.movement_subcategories) ? movement.movement_subcategories[0] : movement.movement_subcategories,
-    currencies: Array.isArray(movement.currencies) ? movement.currencies[0] : movement.currencies,
-    organization_wallets: Array.isArray(movement.organization_wallets) ? movement.organization_wallets[0] : movement.organization_wallets,
-    profiles: Array.isArray(movement.profiles) ? movement.profiles[0] : movement.profiles,
-    indirect_costs: Array.isArray(movement.indirect_costs) ? movement.indirect_costs[0] : movement.indirect_costs,
-  })) as LegacyMovementWithRelations[];
-}
-
 /**
  * Obtiene TODOS los movimientos financieros de una organización o proyecto.
  * 
@@ -223,10 +156,6 @@ async function getLegacyMovementsForOrganization(
  * - material_payments (Pagos de materiales)
  * - personnel_payments (Pagos de personal)
  * - general_costs_payments (Pagos de gastos generales)
- * - movements (Movimientos legacy con subcontratos/indirectos)
- * 
- * Eventualmente esto se reemplazará por una VISTA de base de datos
- * que agregue todas las tablas *_payments automáticamente.
  * 
  * @param organizationId - ID de la organización
  * @param projectId - ID del proyecto (opcional). Si se provee, filtra por proyecto. Si es null, muestra toda la organización.
@@ -382,14 +311,12 @@ export async function getAllFinancialMovements(
       materialPayments,
       personnelPayments,
       generalCostPayments,
-      legacyMovements,
     ] = await Promise.all([
       getPartnerContributions(organizationId, projectId || undefined),
       getPartnerWithdrawals(organizationId, projectId || undefined),
       getMaterialPaymentsForOrganization(organizationId, projectId),
       getPersonnelPaymentsForOrganization(organizationId, projectId),
       getGeneralCostPaymentsForOrganization(organizationId),
-      getLegacyMovementsForOrganization(organizationId, projectId),
     ]);
     
     const contributionMovements = mapPartnerContributionsToFinancialMovements(partnerContributions);
@@ -397,7 +324,6 @@ export async function getAllFinancialMovements(
     const materialMovements = mapMaterialPaymentsToFinancialMovements(materialPayments);
     const personnelMovements = mapPersonnelPaymentsToFinancialMovements(personnelPayments);
     const generalCostMovements = mapGeneralCostPaymentsToFinancialMovements(generalCostPayments);
-    const legacyMappedMovements = mapLegacyMovementsToFinancialMovements(legacyMovements);
 
     const allMovements = [
       ...clientMovements,
@@ -406,7 +332,6 @@ export async function getAllFinancialMovements(
       ...materialMovements,
       ...personnelMovements,
       ...generalCostMovements,
-      ...legacyMappedMovements,
     ];
 
     allMovements.sort((a, b) => {

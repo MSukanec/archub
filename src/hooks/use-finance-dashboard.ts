@@ -78,22 +78,7 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
         thisMonthBalance: 0
       }
 
-      // Get unique type IDs
-      const typeIds = [...new Set(movements.map(m => m.type_id).filter(Boolean))]
-      
-      // Get movement concepts
-      const { data: concepts } = await supabase
-        .from('movement_concepts')
-        .select('id, name')
-        .in('id', typeIds)
-
-      // Create lookup map
-      const conceptsMap = new Map()
-      concepts?.forEach(concept => {
-        conceptsMap.set(concept.id, concept.name)
-      })
-
-      // Calculate totals
+      // Calculate totals using amount sign (positive = income, negative = expense)
       let totalIncome = 0
       let totalExpenses = 0
       let thisMonthIncome = 0
@@ -105,10 +90,9 @@ export function useFinancialSummary(organizationId: string | undefined, projectI
 
       movements.forEach(movement => {
         const amount = movement.amount || 0
-        const typeName = conceptsMap.get(movement.type_id)?.toLowerCase() || ''
         const movementDate = new Date(movement.movement_date)
         
-        const isIncome = typeName.includes('ingreso')
+        const isIncome = amount > 0
         const isThisMonth = movementDate >= monthStart && movementDate <= monthEnd
 
         if (isIncome) {
@@ -161,22 +145,7 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
       if (error) throw error
       if (!movements) return []
 
-      // Get unique type IDs
-      const typeIds = [...new Set(movements.map(m => m.type_id).filter(Boolean))]
-      
-      // Get movement concepts
-      const { data: concepts } = await supabase
-        .from('movement_concepts')
-        .select('id, name')
-        .in('id', typeIds)
-
-      // Create lookup map
-      const conceptsMap = new Map()
-      concepts?.forEach(concept => {
-        conceptsMap.set(concept.id, concept.name)
-      })
-
-      // Group by month
+      // Group by month using amount sign (positive = income, negative = expense)
       const monthlyData: MonthlyFlowData[] = months.map(month => {
         const monthStart = startOfMonth(month)
         const monthEnd = endOfMonth(month)
@@ -187,13 +156,12 @@ export function useMonthlyFlowData(organizationId: string | undefined, projectId
         movements.forEach(movement => {
           const movementDate = new Date(movement.movement_date)
           if (movementDate >= monthStart && movementDate <= monthEnd) {
-            const amount = Math.abs(movement.amount || 0)
-            const typeName = conceptsMap.get(movement.type_id)?.toLowerCase() || ''
+            const amount = movement.amount || 0
             
-            if (typeName.includes('ingreso')) {
-              income += amount
+            if (amount > 0) {
+              income += Math.abs(amount)
             } else {
-              expenses += amount
+              expenses += Math.abs(amount)
             }
           }
         })
@@ -218,15 +186,13 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
     queryFn: async (): Promise<WalletBalance[]> => {
       if (!organizationId || !supabase) return []
 
-      // Build query
       let query = supabase
         .from('movements')
         .select(`
           amount,
           wallet_id,
           type_id,
-          wallets!movements_wallet_id_fkey (name),
-          movement_concepts!movements_type_id_fkey (name)
+          organization_wallets(id, wallets(id, name))
         `)
         .eq('organization_id', organizationId)
 
@@ -242,11 +208,16 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
       const walletBalances: { [key: string]: number } = {}
       const walletNames: { [key: string]: string } = {}
 
-      movements?.forEach(movement => {
+      movements?.forEach((movement: any) => {
         const walletId = movement.wallet_id
-        const walletName = movement.wallets?.name || 'Sin billetera'
+        const orgWallet = Array.isArray(movement.organization_wallets) 
+          ? movement.organization_wallets[0] 
+          : movement.organization_wallets
+        const walletData = Array.isArray(orgWallet?.wallets) 
+          ? orgWallet?.wallets[0] 
+          : orgWallet?.wallets
+        const walletName = walletData?.name || 'Sin billetera'
         const amount = movement.amount || 0
-        const typeName = movement.movement_concepts?.name?.toLowerCase() || ''
         
         walletNames[walletId] = walletName
         
@@ -254,7 +225,7 @@ export function useWalletBalances(organizationId: string | undefined, projectId:
           walletBalances[walletId] = 0
         }
 
-        if (typeName.includes('ingreso')) {
+        if (amount > 0) {
           walletBalances[walletId] += Math.abs(amount)
         } else {
           walletBalances[walletId] -= Math.abs(amount)
@@ -289,7 +260,6 @@ export function useRecentMovements(organizationId: string | undefined, projectId
     queryFn: async () => {
       if (!organizationId || !supabase) return []
 
-      // Build query
       let query = supabase
         .from('movements')
         .select(`
@@ -298,13 +268,8 @@ export function useRecentMovements(organizationId: string | undefined, projectId
           amount,
           movement_date,
           created_by,
-          movement_concepts!movements_type_id_fkey (name),
-          organization_members!movements_created_by_fkey (
-            users (
-              full_name,
-              avatar_url
-            )
-          )
+          type_id,
+          profiles(full_name, avatar_url)
         `)
         .eq('organization_id', organizationId)
         .order('movement_date', { ascending: false })
