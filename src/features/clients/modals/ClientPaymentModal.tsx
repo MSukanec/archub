@@ -1,5 +1,6 @@
+import { useRef } from 'react'
 import { DollarSign } from 'lucide-react'
-import { ModalLayout, ModalHeader, ModalBody } from '@/components/modal'
+import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { ClientPaymentFormFields } from '../forms/ClientPaymentFormFields'
 
 interface ClientPaymentModalProps {
@@ -13,6 +14,8 @@ interface ClientPaymentModalProps {
 }
 
 export function ClientPaymentModal({ modalData, onClose, mode = 'create' }: ClientPaymentModalProps) {
+  const formRef = useRef<HTMLFormElement>(null)
+
   const getHeader = () => {
     switch (mode) {
       case 'view':
@@ -34,15 +37,48 @@ export function ClientPaymentModal({ modalData, onClose, mode = 'create' }: Clie
     }
   };
 
+  const getSubmitText = () => {
+    switch (mode) {
+      case 'view':
+        return 'Cerrar';
+      case 'edit':
+        return 'Guardar Cambios';
+      case 'create':
+      default:
+        return 'Registrar Pago';
+    }
+  };
+
+  const handleSubmit = () => {
+    if (mode === 'view') {
+      onClose();
+    } else if (formRef.current) {
+      formRef.current.requestSubmit();
+    }
+  };
+
   const header = getHeader();
 
   return (
-    <ModalLayout onClose={onClose} size="lg">
-      <ModalHeader
-        title={header.title}
-        description={header.description}
-        icon={DollarSign}
-      />
+    <ModalLayout 
+      onClose={onClose} 
+      size="lg"
+      headerContent={
+        <ModalHeader
+          title={header.title}
+          description={header.description}
+          icon={DollarSign}
+        />
+      }
+      footerContent={
+        <ModalFooter
+          leftLabel="Cancelar"
+          onLeftClick={onClose}
+          submitText={getSubmitText()}
+          onSubmit={handleSubmit}
+        />
+      }
+    >
       <ModalBody>
         <ClientPaymentFormFields
           projectId={modalData?.projectId}
@@ -51,6 +87,8 @@ export function ClientPaymentModal({ modalData, onClose, mode = 'create' }: Clie
           mode={mode}
           onSuccess={onClose}
           onCancel={onClose}
+          hideActions={true}
+          formRef={formRef}
         />
       </ModalBody>
     </ModalLayout>
