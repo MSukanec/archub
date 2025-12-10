@@ -25,8 +25,9 @@ export { PersonnelAttendanceModal } from './modals/PersonnelAttendanceModal';
 export { PersonnelRatesModal } from './modals/PersonnelRatesModal';
 export { AdminLaborModal } from './modals/admin/AdminLaborModal';
 
-// Export forms
-export { PersonnelPaymentForm } from './forms/PersonnelPaymentForm';
+// Export modals (nuevo patrón agnóstico)
+export { PersonnelPaymentModal } from './modals/PersonnelPaymentModal';
+export { PersonnelPaymentFormFields } from './forms/PersonnelPaymentFormFields';
 
 // Export utils
 export { getPersonnelPaymentStatusBadgeConfig } from './utils/statusBadge';

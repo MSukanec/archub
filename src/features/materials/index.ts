@@ -48,9 +48,12 @@ export * from './mappers/materialMapper';
 export * from './utils/statusBadge';
 
 // ============ FORMS ============
-export { MaterialPaymentForm } from './forms/MaterialPaymentForm';
 export { PurchaseOrderForm } from './forms/PurchaseOrderForm';
 export { MaterialPurchaseForm } from './forms/MaterialPurchaseForm';
+
+// Payment Modal (nuevo patrón agnóstico)
+export { MaterialPaymentModal } from './modals/MaterialPaymentModal';
+export { MaterialPaymentFormFields } from './forms/MaterialPaymentFormFields';
 
 // ============ MODALS ============
 export { MaterialModal } from './modals/MaterialModal';

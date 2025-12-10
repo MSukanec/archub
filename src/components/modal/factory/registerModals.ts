@@ -6,7 +6,7 @@ import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, Bud
 import ContactForm from '@/features/contacts/forms/ContactForm';
 import { ContactTypeForm } from '@/features/contacts/forms/ContactTypeForm';
 import { ClientForm } from '@/features/clients/forms/ClientForm';
-import ClientPaymentForm from '@/features/clients/forms/ClientPaymentForm';
+import { ClientPaymentModal } from '@/features/clients/modals/ClientPaymentModal';
 import ClientRoleForm from '@/features/clients/forms/ClientRoleForm';
 import { ClientCommitmentForm } from '@/features/clients/forms/ClientCommitmentForm';
 import { ClientScheduleItemForm } from '@/features/clients/forms/ClientScheduleItemForm';
@@ -15,13 +15,13 @@ import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConf
 import { default as PaymentFeedbackModal } from '@/components/forms/PaymentFeedbackModal';
 import { default as MemberActionConfirmationForm } from '@/features/organization/forms/MemberActionConfirmationForm';
 import { UniversalImportForm } from '@/features/imports';
-import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal, MaterialPaymentForm, PurchaseOrderForm, MaterialPurchaseForm } from '@/features/materials';
+import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal, MaterialPaymentModal, PurchaseOrderForm, MaterialPurchaseForm } from '@/features/materials';
 import { UserFormModal, ChangelogFormModal, NotificationFormModal, AnnouncementFormModal, SupportConversationStartModal, PlanFormModal, PlanPriceFormModal, DowngradeModal, UpgradeModal, ResetTestDataModal } from '@/features/users';
 import SiteLogForm from '@/features/sitelog/forms/SiteLogForm';
 import { SiteLogTypeForm } from '@/features/sitelog/forms/SiteLogTypeForm';
 import { ProjectTypeForm } from '@/features/projects/forms/ProjectTypeForm';
 import { ProjectModalityForm } from '@/features/projects/forms/ProjectModalityForm';
-import { PersonnelAttendanceModal, PersonnelAddModal, PersonnelDataModal, PersonnelRatesModal, AdminLaborModal, PersonnelPaymentForm } from '@/features/personnel';
+import { PersonnelAttendanceModal, PersonnelAddModal, PersonnelDataModal, PersonnelRatesModal, AdminLaborModal, PersonnelPaymentModal } from '@/features/personnel';
 import { SubcontractFormModal, SubcontractBidFormModal, SubcontractAwardModal, SubcontractTaskFormModal } from '@/features/subcontracts';
 import { PDFExporterModal } from '@/features/pdf';
 import GeneralCostForm from '@/features/general-costs/forms/GeneralCostForm';
@@ -159,7 +159,7 @@ export function initializeModalRegistry(): void {
       mode: data?.clientId ? (data?.mode || 'edit') : (data?.mode || 'create')
     })
   });
-  registerModal('client-payment', ClientPaymentForm as any, { 
+  registerModal('client-payment', ClientPaymentModal as any, { 
     ...financeConfig,
     mapDataToProps: (data) => ({
       projectId: data?.projectId,
@@ -168,7 +168,7 @@ export function initializeModalRegistry(): void {
       mode: data?.paymentId ? (data?.mode || 'edit') : (data?.mode || 'create')
     })
   });
-  registerModal('installment', ClientPaymentForm as any, { 
+  registerModal('installment', ClientPaymentModal as any, { 
     ...financeConfig,
     mapDataToProps: (data) => ({
       projectId: data?.projectId,
@@ -269,7 +269,7 @@ export function initializeModalRegistry(): void {
   registerModal('unit-presentation-form', UnitPresentationFormModal as any, { ...projectConfig, size: 'md' });
   registerModal('provider-product', ProviderProductModal as any, projectConfig);
   registerModal('custom-product', ProductModal as any, projectConfig);
-  registerModal('material-payment', MaterialPaymentForm as any, {
+  registerModal('material-payment', MaterialPaymentModal as any, {
     ...financeConfig,
     mapDataToProps: (data) => ({
       projectId: data?.projectId,
@@ -303,7 +303,7 @@ export function initializeModalRegistry(): void {
   registerModal('personnel', PersonnelAddModal as any, projectConfig);
   registerModal('personnel-data', PersonnelDataModal as any, projectConfig);
   registerModal('personnelRates', PersonnelRatesModal as any, projectConfig);
-  registerModal('personnel-payment', PersonnelPaymentForm as any, {
+  registerModal('personnel-payment', PersonnelPaymentModal as any, {
     ...financeConfig,
     mapDataToProps: (data) => ({
       projectId: data?.projectId,
