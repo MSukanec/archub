@@ -74,3 +74,21 @@ Preferred communication style: Simple, everyday language.
 - **browser-image-compression**: Client-side image compression.
 - **@dnd-kit**: Modern drag-and-drop toolkit.
 - **node-cron**: Scheduled tasks.
+
+## Documentation
+
+### Subscription & Billing System
+Complete technical documentation for the payment, subscription, and billing architecture is maintained in:
+- **`prompts/documentation/SUBSCRIPTIONS_BILLING_SYSTEM.md`**: Consolidated reference covering:
+  - Data model (plans, subscriptions, payments, billing cycles)
+  - Plan hierarchy and limits (read from `plans.features` JSON)
+  - PayPal and MercadoPago gateway integrations
+  - Proration calculations for upgrades
+  - Seat-based billing for TEAMS plan
+  - Coupon system (including 100% coupons)
+  - Invitation and member management with limit checks
+  - Soft-lock system (`is_over_limit` flags)
+  - Founders Program (bonus course enrollments)
+  - Automated cron jobs (downgrade execution, expiry notifications)
+  - API endpoints reference
+  - Critical rules (auth_id resolution, price validation)
