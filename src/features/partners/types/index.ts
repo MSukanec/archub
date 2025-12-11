@@ -14,7 +14,7 @@ export interface PartnerContact {
   phone: string | null
   company_name: string | null
   avatar_url: string | null
-  linked_user: PartnerLinkedUser | null
+  linked_user_id: string | null
 }
 
 export interface Partner {
@@ -22,7 +22,7 @@ export interface Partner {
   created_at: string
   contact_id: string
   organization_id: string
-  contacts: PartnerContact
+  contacts: PartnerContact | null
 }
 
 export interface PartnerContribution {

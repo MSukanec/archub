@@ -33,7 +33,7 @@ export function PartnersListTab() {
       ...partner,
       partnerName: partner.contacts?.full_name || 
                   `${partner.contacts?.first_name || ''} ${partner.contacts?.last_name || ''}`.trim() || 
-                  partner.contacts?.linked_user?.full_name ||
+                  partner.contacts?.email ||
                   partner.contacts?.company_name || '-'
     }));
   }, [partners]);
@@ -131,13 +131,13 @@ export function PartnersListTab() {
       label: 'Socio',
       sortable: true,
       render: (partner: EnrichedPartner) => {
-        const avatarUrl = partner.contacts?.avatar_url || partner.contacts?.linked_user?.avatar_url;
+        const avatarUrl = partner.contacts?.avatar_url;
         const displayName = partner.contacts?.full_name || 
                            `${partner.contacts?.first_name || ''} ${partner.contacts?.last_name || ''}`.trim() ||
-                           partner.contacts?.linked_user?.full_name ||
+                           partner.contacts?.email ||
                            partner.contacts?.company_name;
         const initials = displayName 
-          ? displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) 
+          ? displayName.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2) 
           : '?';
         
         return (

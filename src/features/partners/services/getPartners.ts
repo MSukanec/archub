@@ -11,7 +11,7 @@ export async function getPartners(organizationId: string): Promise<Partner[]> {
       created_at, 
       contact_id,
       organization_id,
-      contacts!inner(
+      contacts(
         id, 
         first_name, 
         last_name, 
@@ -20,7 +20,7 @@ export async function getPartners(organizationId: string): Promise<Partner[]> {
         phone, 
         company_name,
         avatar_url,
-        linked_user:users!linked_user_id(id, full_name, email, avatar_url)
+        linked_user_id
       )
     `)
     .eq('organization_id', organizationId)
@@ -34,14 +34,9 @@ export async function getPartners(organizationId: string): Promise<Partner[]> {
     const rawContacts = partner.contacts;
     const contact: PartnerContact = Array.isArray(rawContacts) ? rawContacts[0] : rawContacts;
     
-    if (contact && contact.linked_user) {
-      const rawLinkedUser = contact.linked_user;
-      contact.linked_user = Array.isArray(rawLinkedUser) ? rawLinkedUser[0] : rawLinkedUser;
-    }
-    
     return {
       ...partner,
-      contacts: contact,
+      contacts: contact || null,
     } as Partner;
   });
 }
