@@ -78,6 +78,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Documentation
 
+### Multicurrency System
+Centralized multicurrency handling is documented in:
+- **`prompts/documentation/MULTICURRENCY_SYSTEM.md`**: Complete reference covering:
+  - Central rule: `amount_in_base = amount * exchange_rate` (never store precalculated columns)
+  - Core module: `/lib/money.ts` with `convert`, `convertToBaseCurrency`, `format`, `formatKPI`, `sumByCurrency`, `explainBreakdown`
+  - Usage patterns for hooks, services, and components
+  - KPI display pattern (converted total + breakdown by currency)
+- **`prompts/documentation/FINANCE_CURRENCY_AUDIT.md`**: Audit report and refactoring decisions
+
 ### Subscription & Billing System
 Complete technical documentation for the payment, subscription, and billing architecture is maintained in:
 - **`prompts/documentation/SUBSCRIPTIONS_BILLING_SYSTEM.md`**: Consolidated reference covering:

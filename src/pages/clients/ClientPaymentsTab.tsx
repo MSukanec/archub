@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, CheckCircle2, AlertCircle, Calendar, Upload, Download } from 'lucide-react'
+import { convert } from '@/lib/money'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
@@ -167,7 +168,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       let convertedAmount = payment.amount;
       if (commitmentCurrency && payment.currency.id !== commitmentCurrency.id) {
         if (payment.exchange_rate && payment.exchange_rate > 0) {
-          convertedAmount = payment.amount * payment.exchange_rate;
+          convertedAmount = convert(payment.amount, payment.exchange_rate);
         } else {
           countSkipped += 1;
           convertedAmount = 0; // Skip if no exchange rate

@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { DollarSign, Plus, Edit, Trash2, CheckCircle2, Calendar } from 'lucide-react'
+import { convert } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
@@ -108,7 +109,7 @@ export default function PersonnelPaymentsTab({ projectId }: PersonnelPaymentsTab
       let convertedAmount = payment.amount;
       if (referenceCurrency && payment.currency.id !== referenceCurrency.id) {
         if (payment.exchange_rate && payment.exchange_rate > 0) {
-          convertedAmount = payment.amount / payment.exchange_rate;
+          convertedAmount = convert(payment.amount, payment.exchange_rate, { direction: 'divide' });
         } else {
           countSkipped += 1;
           convertedAmount = 0;

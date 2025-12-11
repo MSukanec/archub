@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { convertToBaseCurrency } from '@/lib/money';
 import type { FinancialMovementWithRelations } from '../types';
 
 interface PartnerBalance {
@@ -28,22 +29,6 @@ export function usePartnerMetrics(
   primaryCurrencyCode?: string
 ): PartnerMetrics {
   return useMemo(() => {
-    // Helper: Convert amount to primary currency using exchange rate
-    const convertToPrimaryCurrency = (movement: FinancialMovementWithRelations): number => {
-      // If no primary currency is provided, we cannot safely convert
-      // Return 0 to avoid mixing currencies
-      if (!primaryCurrencyCode) return 0;
-      
-      // If already in primary currency, return as-is
-      if (movement.currency?.code === primaryCurrencyCode) {
-        return movement.amount;
-      }
-      
-      // Convert using exchange_rate (stored rate converts this currency to primary)
-      const exchangeRate = movement.exchange_rate || 1;
-      return movement.amount * exchangeRate;
-    };
-
     // Calcular balance por moneda (sin conversión)
     const currencyMap = new Map<string, {
       currencyCode: string;
@@ -82,15 +67,16 @@ export function usePartnerMetrics(
     }));
 
     // Calcular total en moneda principal (convertir TODOS los movimientos)
+    // Usar onMissingBase: 'zero' para evitar mezclar monedas cuando no hay moneda base
     const totalInPrimaryCurrency = movements.reduce((sum, movement) => {
-      return sum + convertToPrimaryCurrency(movement);
+      return sum + convertToBaseCurrency(movement, primaryCurrencyCode, { onMissingBase: 'zero' });
     }, 0);
 
     // Calcular total de aportes en moneda principal
     const totalContributions = movements
       .filter(m => m.amount >= 0)
       .reduce((sum, movement) => {
-        return sum + convertToPrimaryCurrency(movement);
+        return sum + convertToBaseCurrency(movement, primaryCurrencyCode, { onMissingBase: 'zero' });
       }, 0);
 
     // Calcular total de retiros en moneda principal
@@ -98,7 +84,7 @@ export function usePartnerMetrics(
       movements
         .filter(m => m.amount < 0)
         .reduce((sum, movement) => {
-          return sum + convertToPrimaryCurrency(movement);
+          return sum + convertToBaseCurrency(movement, primaryCurrencyCode, { onMissingBase: 'zero' });
         }, 0)
     );
 
@@ -125,7 +111,7 @@ export function usePartnerMetrics(
       }
 
       const partner = partnerMap.get(partnerId)!;
-      const convertedAmount = convertToPrimaryCurrency(movement);
+      const convertedAmount = convertToBaseCurrency(movement, primaryCurrencyCode, { onMissingBase: 'zero' });
 
       if (movement.amount >= 0) {
         partner.contributions += convertedAmount;

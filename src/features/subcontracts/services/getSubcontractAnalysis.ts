@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { convert } from '@/lib/money';
 
 export interface SubcontractAnalysisData {
   id: string;
@@ -53,10 +54,9 @@ export async function getSubcontractAnalysis(projectId: string): Promise<Subcont
       
       if (movement && movement.type_id === 'bdb66fac-ade1-46de-a13d-918edf1b94c7') {
         const movementAmount = movement.amount || 0;
-        const exchangeRate = movement.exchange_rate || 1;
         
         const convertedAmount = movement.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f'
-          ? movementAmount * exchangeRate
+          ? convert(movementAmount, movement.exchange_rate)
           : movementAmount;
         
         return sum + convertedAmount;
@@ -67,7 +67,7 @@ export async function getSubcontractAnalysis(projectId: string): Promise<Subcont
     const totalAmountOriginal = subcontract.amount_total || 0;
     const totalAmountUSD = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f'
       ? totalAmountOriginal
-      : totalAmountOriginal / (subcontract.exchange_rate || 1);
+      : convert(totalAmountOriginal, subcontract.exchange_rate, { direction: 'divide' });
 
     const totalPaidUSD = (subcontract.movement_subcontracts || []).reduce((sum, ms) => {
       const movement = Array.isArray(ms.movement) ? ms.movement[0] : ms.movement;
@@ -76,7 +76,7 @@ export async function getSubcontractAnalysis(projectId: string): Promise<Subcont
         const movementAmount = movement.amount || 0;
         const movementAmountUSD = movement.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f'
           ? movementAmount
-          : movementAmount / (movement.exchange_rate || 1);
+          : convert(movementAmount, movement.exchange_rate, { direction: 'divide' });
         return sum + movementAmountUSD;
       }
       return sum;

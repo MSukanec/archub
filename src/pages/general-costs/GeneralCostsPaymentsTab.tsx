@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, Calendar, TrendingUp, Filter, Search, Bell } from 'lucide-react';
 import { format } from 'date-fns';
+import { convert } from '@/lib/money';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
@@ -114,15 +115,11 @@ export default function GeneralCostsPaymentsTab() {
       // Calculate total confirmed in default currency
       if (payment.status === 'confirmed') {
         if (!defaultCurrency) {
-          // If no default currency, just sum in original currency (fallback)
           totalConfirmedInDefaultCurrency += payment.amount;
         } else if (payment.currency?.id === defaultCurrency.id) {
-          // Same currency, no conversion needed
           totalConfirmedInDefaultCurrency += payment.amount;
         } else {
-          // Different currency, convert using exchange_rate (use 1 as fallback if not specified)
-          const rate = payment.exchange_rate ?? 1;
-          totalConfirmedInDefaultCurrency += payment.amount * rate;
+          totalConfirmedInDefaultCurrency += convert(payment.amount, payment.exchange_rate);
         }
       }
     });

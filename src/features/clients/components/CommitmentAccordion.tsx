@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { ChevronDown, Building2, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { convert } from '@/lib/money';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -117,7 +118,7 @@ function CommitmentItem({
         } else if (p.exchange_rate && p.exchange_rate > 0) {
           // exchange_rate represents: 1 unit of payment currency = X units of commitment currency
           // Example: 1 USD = 1420 ARS, so payment in USD * 1420 = amount in ARS
-          return sum + (p.amount * p.exchange_rate);
+          return sum + convert(p.amount, p.exchange_rate);
         }
         return sum + p.amount;
       }, 0);

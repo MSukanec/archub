@@ -19,7 +19,7 @@ export interface MoneyItem {
     code?: string;
     symbol?: string;
     name?: string;
-  };
+  } | null;
   exchange_rate?: number | null;
 }
 
@@ -290,29 +290,50 @@ export function getEffectiveExchangeRate(
   return 1;
 }
 
+export interface ConvertToBaseOptions {
+  /**
+   * Qué hacer cuando no hay moneda base definida:
+   * - 'passthrough': Retorna el amount sin convertir (default, usado en financial-metrics)
+   * - 'zero': Retorna 0 para evitar mezclar monedas (usado en partner-metrics)
+   */
+  onMissingBase?: 'passthrough' | 'zero';
+}
+
 /**
  * Convierte un monto de una moneda a la moneda base, manejando correctamente
  * el caso donde el movimiento ya está en moneda base.
  * 
  * Esta es la función principal para usar en hooks y servicios.
+ * Acepta tanto código de moneda (e.g., "ARS", "USD") como ID de moneda.
  * 
  * @param item - Item con amount, currency y exchange_rate
- * @param baseCurrencyId - ID de la moneda base de la organización
+ * @param baseCurrencyCodeOrId - Código (e.g., "ARS") o ID de la moneda base
+ * @param options - Opciones de conversión
  * @returns Monto convertido a moneda base
  */
 export function convertToBaseCurrency(
   item: MoneyItem,
-  baseCurrencyId?: string
+  baseCurrencyCodeOrId?: string,
+  options: ConvertToBaseOptions = {}
 ): number {
-  const currencyId = item.currency?.id || item.currency_id;
+  const { onMissingBase = 'passthrough' } = options;
   
-  // Si ya está en moneda base, retornar sin conversión
-  if (currencyId === baseCurrencyId) {
-    return item.amount;
+  // Si no hay moneda base definida, usar estrategia configurada
+  if (!baseCurrencyCodeOrId) {
+    return onMissingBase === 'zero' ? 0 : item.amount;
   }
   
-  // Si no hay baseCurrencyId definido, no podemos convertir con seguridad
-  if (!baseCurrencyId) {
+  // Obtener identificadores del item
+  const currencyId = item.currency?.id || item.currency_id;
+  const currencyCode = item.currency?.code;
+  
+  // Comparar tanto por ID como por código (baseCurrencyCodeOrId puede ser cualquiera)
+  const isAlreadyInBaseCurrency = 
+    currencyId === baseCurrencyCodeOrId || 
+    currencyCode === baseCurrencyCodeOrId;
+  
+  // Si ya está en moneda base, retornar sin conversión
+  if (isAlreadyInBaseCurrency) {
     return item.amount;
   }
   

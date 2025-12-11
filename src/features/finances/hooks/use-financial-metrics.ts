@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { convertToBaseCurrency } from '@/lib/money';
 import type { FinancialMovementWithRelations } from '../types';
 
 interface FinancialMetrics {
@@ -21,20 +22,6 @@ export function useFinancialMetrics(
   primaryCurrencyCode?: string
 ): FinancialMetrics {
   return useMemo(() => {
-    // Helper: Convert amount to primary currency using exchange rate
-    const convertToPrimaryCurrency = (movement: FinancialMovementWithRelations): number => {
-      if (!primaryCurrencyCode) return movement.amount;
-      
-      // If already in primary currency, return as-is
-      if (movement.currency?.code === primaryCurrencyCode) {
-        return movement.amount;
-      }
-      
-      // Convert using exchange_rate (stored rate converts this currency to primary)
-      const exchangeRate = movement.exchange_rate || 1;
-      return movement.amount * exchangeRate;
-    };
-
     // Calcular balance por moneda (sin conversión)
     const currencyMap = new Map<string, {
       currencyCode: string;
@@ -71,7 +58,7 @@ export function useFinancialMetrics(
 
     // Calcular total en moneda principal (convertir TODOS los movimientos)
     const totalInPrimaryCurrency = movements.reduce((sum, movement) => {
-      return sum + convertToPrimaryCurrency(movement);
+      return sum + convertToBaseCurrency(movement, primaryCurrencyCode);
     }, 0);
 
     // Crear timeline (últimos 14 días) - convertir a moneda principal
@@ -85,7 +72,7 @@ export function useFinancialMetrics(
     movements.forEach(movement => {
       const date = movement.payment_date.split('T')[0];
       const current = dailyTotals.get(date) || 0;
-      const convertedAmount = convertToPrimaryCurrency(movement);
+      const convertedAmount = convertToBaseCurrency(movement, primaryCurrencyCode);
       dailyTotals.set(date, current + convertedAmount);
     });
 
