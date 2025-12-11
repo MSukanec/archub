@@ -143,6 +143,10 @@ export async function uploadFile(
       if (context.link_to.client_payment_id) mediaLinkData.client_payment_id = context.link_to.client_payment_id;
       if (context.link_to.material_payment_id) mediaLinkData.material_payment_id = context.link_to.material_payment_id;
       if (context.link_to.material_purchase_id) mediaLinkData.material_purchase_id = context.link_to.material_purchase_id;
+      if (context.link_to.personnel_payment_id) mediaLinkData.personnel_payment_id = context.link_to.personnel_payment_id;
+      if (context.link_to.partner_contribution_id) mediaLinkData.partner_contribution_id = context.link_to.partner_contribution_id;
+      if (context.link_to.partner_withdrawal_id) mediaLinkData.partner_withdrawal_id = context.link_to.partner_withdrawal_id;
+      if (context.link_to.testimonial_id) mediaLinkData.testimonial_id = context.link_to.testimonial_id;
       if (context.link_to.hero_section_id) mediaLinkData.hero_section_id = context.link_to.hero_section_id;
       if (context.link_to.forum_thread_id) mediaLinkData.forum_thread_id = context.link_to.forum_thread_id;
       if (context.category) mediaLinkData.category = context.category;
