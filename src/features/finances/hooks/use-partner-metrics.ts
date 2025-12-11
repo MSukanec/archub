@@ -10,10 +10,18 @@ interface PartnerBalance {
   withdrawals: number;
 }
 
+interface CurrencyBreakdownItem {
+  currencyCode: string;
+  currencySymbol: string;
+  amount: number;
+}
+
 interface PartnerMetrics {
   totalInPrimaryCurrency: number;
   totalContributions: number;
   totalWithdrawals: number;
+  contributionsByCurrency: CurrencyBreakdownItem[];
+  withdrawalsByCurrency: CurrencyBreakdownItem[];
   balanceByCurrency: Array<{
     currencyCode: string;
     currencySymbol: string;
@@ -65,6 +73,23 @@ export function usePartnerMetrics(
       ...curr,
       balance: curr.contributions - curr.withdrawals,
     }));
+
+    // Extraer breakdowns por moneda para contribuciones y retiros
+    const contributionsByCurrency: CurrencyBreakdownItem[] = Array.from(currencyMap.values())
+      .filter(curr => curr.contributions > 0)
+      .map(curr => ({
+        currencyCode: curr.currencyCode,
+        currencySymbol: curr.currencySymbol,
+        amount: curr.contributions,
+      }));
+
+    const withdrawalsByCurrency: CurrencyBreakdownItem[] = Array.from(currencyMap.values())
+      .filter(curr => curr.withdrawals > 0)
+      .map(curr => ({
+        currencyCode: curr.currencyCode,
+        currencySymbol: curr.currencySymbol,
+        amount: curr.withdrawals,
+      }));
 
     // Calcular total en moneda principal (convertir TODOS los movimientos)
     // Usar onMissingBase: 'zero' para evitar mezclar monedas cuando no hay moneda base
@@ -131,6 +156,8 @@ export function usePartnerMetrics(
       totalInPrimaryCurrency,
       totalContributions,
       totalWithdrawals,
+      contributionsByCurrency,
+      withdrawalsByCurrency,
       balanceByCurrency,
       balanceByPartner,
     };
