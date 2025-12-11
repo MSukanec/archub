@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
@@ -6,10 +6,7 @@ import { es } from 'date-fns/locale';
 import { 
   Users, 
   CreditCard, 
-  Calendar,
-  Mail,
   Shield,
-  Plus,
   UserPlus,
   Loader2,
   DollarSign,
@@ -18,12 +15,13 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { DrawerSection } from '@/components/drawer';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { apiRequest } from '@/lib/queryClient';
 
 interface OrganizationMember {
   id: string;
@@ -197,6 +195,24 @@ function useRoles() {
   });
 }
 
+interface AdminUser {
+  id: string;
+  email: string;
+  full_name: string;
+  avatar_url?: string;
+  is_active: boolean;
+}
+
+function useAdminUsers() {
+  return useQuery({
+    queryKey: ['admin-users-list'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/admin/users');
+      return response.json() as Promise<AdminUser[]>;
+    }
+  });
+}
+
 export function OrganizationDetailContent({
   organization,
   onSuccess,
@@ -206,13 +222,29 @@ export function OrganizationDetailContent({
   const queryClient = useQueryClient();
   
   const [showAddMember, setShowAddMember] = useState(false);
-  const [newMemberEmail, setNewMemberEmail] = useState('');
+  const [newMemberUserId, setNewMemberUserId] = useState('');
   const [newMemberRoleId, setNewMemberRoleId] = useState('');
   const [newMemberIsBillable, setNewMemberIsBillable] = useState(false);
   
   const { data: members, isLoading: membersLoading } = useOrganizationMembers(organization.id);
   const { data: subscription, isLoading: subscriptionLoading } = useOrganizationSubscription(organization.id);
   const { data: roles } = useRoles();
+  const { data: allUsers, isLoading: usersLoading } = useAdminUsers();
+  
+  const existingMemberIds = useMemo(() => 
+    new Set(members?.map(m => m.user_id) || []), 
+    [members]
+  );
+  
+  const userOptions = useMemo(() => {
+    if (!allUsers) return [];
+    return allUsers
+      .filter(user => !existingMemberIds.has(user.id))
+      .map(user => ({
+        value: user.id,
+        label: `${user.full_name || user.email} (${user.email})`
+      }));
+  }, [allUsers, existingMemberIds]);
   
   const updateMemberMutation = useMutation({
     mutationFn: async ({ memberId, is_billable }: { memberId: string; is_billable: boolean }) => {
@@ -239,32 +271,15 @@ export function OrganizationDetailContent({
     mutationFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      const { data: user, error: userError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', newMemberEmail.trim().toLowerCase())
-        .single();
-      
-      if (userError || !user) {
-        throw new Error('Usuario no encontrado con ese email');
-      }
-      
-      const { data: existing } = await supabase
-        .from('organization_members')
-        .select('id')
-        .eq('organization_id', organization.id)
-        .eq('user_id', user.id)
-        .single();
-      
-      if (existing) {
-        throw new Error('El usuario ya es miembro de esta organización');
+      if (!newMemberUserId) {
+        throw new Error('Selecciona un usuario');
       }
       
       const { error } = await supabase
         .from('organization_members')
         .insert({
           organization_id: organization.id,
-          user_id: user.id,
+          user_id: newMemberUserId,
           role_id: newMemberRoleId,
           is_billable: newMemberIsBillable,
           joined_at: new Date().toISOString()
@@ -277,7 +292,7 @@ export function OrganizationDetailContent({
       queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
       toast({ title: 'Miembro agregado correctamente' });
       setShowAddMember(false);
-      setNewMemberEmail('');
+      setNewMemberUserId('');
       setNewMemberRoleId('');
       setNewMemberIsBillable(false);
       onSuccess?.();
@@ -295,7 +310,7 @@ export function OrganizationDetailContent({
   };
   
   const handleAddMember = () => {
-    if (!newMemberEmail.trim() || !newMemberRoleId) {
+    if (!newMemberUserId || !newMemberRoleId) {
       toast({ title: 'Completa todos los campos', variant: 'destructive' });
       return;
     }
@@ -418,21 +433,19 @@ export function OrganizationDetailContent({
         <div className="space-y-3">
           {showAddMember && (
             <div className="p-3 border border-border rounded-lg bg-muted/30 space-y-3">
-              <p className="text-sm font-medium">Agregar Miembro Manual</p>
+              <p className="text-sm font-medium">Agregar Miembro</p>
               <div className="space-y-2">
                 <div>
-                  <Label className="text-xs">Email del usuario</Label>
-                  <Input
-                    type="email"
-                    placeholder="usuario@email.com"
-                    value={newMemberEmail}
-                    onChange={(e) => setNewMemberEmail(e.target.value)}
-                    className="h-8"
-                    data-testid="new-member-email"
+                  <Label className="text-xs">Usuario</Label>
+                  <ComboBox
+                    value={newMemberUserId}
+                    onValueChange={setNewMemberUserId}
+                    options={userOptions}
+                    placeholder={usersLoading ? "Cargando usuarios..." : "Seleccionar usuario"}
+                    searchPlaceholder="Buscar por nombre o email..."
+                    emptyMessage="No se encontraron usuarios disponibles"
+                    disabled={usersLoading}
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    El usuario debe existir en la plataforma
-                  </p>
                 </div>
                 <div>
                   <Label className="text-xs">Rol</Label>
@@ -464,7 +477,12 @@ export function OrganizationDetailContent({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowAddMember(false)}
+                  onClick={() => {
+                    setShowAddMember(false);
+                    setNewMemberUserId('');
+                    setNewMemberRoleId('');
+                    setNewMemberIsBillable(false);
+                  }}
                   className="flex-1"
                 >
                   Cancelar
@@ -472,7 +490,7 @@ export function OrganizationDetailContent({
                 <Button
                   size="sm"
                   onClick={handleAddMember}
-                  disabled={addMemberMutation.isPending}
+                  disabled={addMemberMutation.isPending || !newMemberUserId || !newMemberRoleId}
                   className="flex-1"
                   data-testid="confirm-add-member"
                 >
