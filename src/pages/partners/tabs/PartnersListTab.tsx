@@ -1,35 +1,60 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { useMemo } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { Users, Plus, Edit, Trash2, HandHeart, Calendar, TrendingUp } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Trash2, HandHeart } from 'lucide-react';
-
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
 import { useGlobalModalStore } from '@/components/modal';
-import { useToast } from '@/hooks/use-toast';
-import { useMutation } from '@tanstack/react-query';
-import { usePartners } from '@/features/partners';
+import { parseLocalDate } from '@/lib/date-utils';
+import { useMobile } from '@/hooks/use-mobile';
+import { usePartners, usePartnerContributions } from '@/features/partners';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import type { Partner } from '@/features/partners/types';
 
-function getInitials(name: string): string {
-  if (!name) return '?';
-  return name
-    .split(' ')
-    .map(word => word.charAt(0))
-    .join('')
-    .substring(0, 2)
-    .toUpperCase();
-}
+type EnrichedPartner = Partner & { partnerName: string };
 
 export function PartnersListTab() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
+  const isMobile = useMobile();
   
   const organizationId = userData?.organization?.id;
 
   const { data: partners = [], isLoading } = usePartners(organizationId);
+  const { data: contributions = [] } = usePartnerContributions(organizationId);
+
+  const enrichedPartners = useMemo<EnrichedPartner[]>(() => {
+    return partners.map(partner => ({
+      ...partner,
+      partnerName: partner.contacts?.full_name || 
+                  `${partner.contacts?.first_name || ''} ${partner.contacts?.last_name || ''}`.trim() || 
+                  partner.contacts?.company_name || '-'
+    }));
+  }, [partners]);
+
+  const metrics = useMemo(() => {
+    const now = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(now.getMonth() - 1);
+
+    const confirmedContributions = contributions.filter(c => c.status === 'confirmed');
+    
+    const recentContributions = contributions.filter(contribution => {
+      const contributionDate = parseLocalDate(contribution.contribution_date);
+      return contributionDate && contributionDate >= oneMonthAgo && contributionDate <= now;
+    });
+
+    return {
+      totalPartners: partners.length,
+      totalContributions: confirmedContributions.length,
+      recentContributions: recentContributions.length,
+    };
+  }, [partners, contributions]);
 
   const removeMemberMutation = useMutation({
     mutationFn: async (partnerId: string) => {
@@ -56,101 +81,195 @@ export function PartnersListTab() {
     },
   });
 
-  const handleDeletePartner = (partner: any) => {
+  const handleDelete = (partner: EnrichedPartner) => {
     openModal('delete-confirmation', {
       mode: 'dangerous',
-      title: 'Eliminar socio',
-      description: 'Esta acción eliminará permanentemente el socio de la organización. Perderá acceso a todos los proyectos y datos.',
-      itemName: `${partner.contacts?.first_name || ''} ${partner.contacts?.last_name || ''}`.trim() || partner.contacts?.email || 'Socio',
-      destructiveActionText: 'Eliminar',
-      onConfirm: () => removeMemberMutation.mutate(partner.id),
-      isLoading: removeMemberMutation.isPending
+      title: 'Eliminar Socio',
+      description: 'Se eliminará este socio de la organización. Esta acción no se puede deshacer.',
+      itemName: partner.partnerName,
+      itemType: 'socio',
+      onConfirm: async () => {
+        try {
+          await removeMemberMutation.mutateAsync(partner.id);
+        } catch (error: any) {
+          toast({
+            title: 'Error al eliminar socio',
+            description: error.message,
+            variant: 'destructive',
+          });
+        }
+      },
     });
   };
 
-  if (isLoading) {
+  const handleEdit = (partner: EnrichedPartner) => {
+    openModal('partner', {
+      organizationId,
+      partnerId: partner.id,
+      mode: 'edit',
+    });
+  };
+
+  const handleAddPartner = () => {
+    openModal('partner', {
+      organizationId,
+    });
+  };
+
+  if (!organizationId) {
     return (
-      <div className="flex items-center justify-center h-32">
-        <LoadingSpinner size="md" />
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">No se pudo cargar la información de la organización</p>
       </div>
     );
   }
 
+  const columns = [
+    {
+      key: 'partnerName',
+      label: 'Socio',
+      sortable: true,
+      render: (partner: EnrichedPartner) => {
+        const avatarUrl = (partner.contacts as any)?.avatar_url;
+        const initials = partner.contacts?.first_name?.[0] && partner.contacts?.last_name?.[0]
+          ? `${partner.contacts.first_name[0]}${partner.contacts.last_name[0]}`
+          : partner.contacts?.first_name?.[0] || '?';
+        
+        const displayName = partner.contacts?.full_name || 
+                           `${partner.contacts?.first_name || ''} ${partner.contacts?.last_name || ''}`.trim() ||
+                           partner.contacts?.company_name;
+        
+        return (
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
+              <AvatarFallback>
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="font-semibold">{displayName || '-'}</span>
+              {partner.ownership_percentage && (
+                <span className="text-muted-foreground" style={{ fontSize: '12px', fontWeight: 'normal' }}>
+                  {partner.ownership_percentage}% participación
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: 'email',
+      label: 'Mail',
+      sortable: true,
+      render: (partner: EnrichedPartner) => {
+        return partner.contacts?.email || '-';
+      },
+    },
+    {
+      key: 'phone',
+      label: 'Teléfono',
+      sortable: true,
+      render: (partner: EnrichedPartner) => {
+        return partner.contacts?.phone || '-';
+      },
+    },
+    {
+      key: 'notes',
+      label: 'Notas',
+      sortable: false,
+      render: (partner: EnrichedPartner) => {
+        if (!partner.notes) return '-';
+        const truncated = partner.notes.length > 100 
+          ? partner.notes.substring(0, 100) + '...' 
+          : partner.notes;
+        return <span className="text-muted-foreground">{truncated}</span>;
+      },
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <div>
-        <div className="flex items-center gap-2 mb-6">
-          <HandHeart className="h-5 w-5 text-[var(--accent)]" />
-          <h2 className="text-lg font-semibold">Socios</h2>
+    <div className="space-y-6">
+      {enrichedPartners.length > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard data-testid="stat-card-total-partners" className="col-span-2">
+            <StatCardTitle showArrow={false}>
+              <Users className="w-4 h-4 inline mr-1" />
+              Total Socios
+            </StatCardTitle>
+            <StatCardValue>
+              {metrics.totalPartners}
+            </StatCardValue>
+            <StatCardMeta>
+              Socios en la organización
+            </StatCardMeta>
+          </StatCard>
+
+          <StatCard data-testid="stat-card-total-contributions">
+            <StatCardTitle showArrow={false}>
+              <TrendingUp className="w-4 h-4 inline mr-1" />
+              Aportes
+            </StatCardTitle>
+            <StatCardValue>
+              {metrics.totalContributions}
+            </StatCardValue>
+            <StatCardMeta>
+              Aportes confirmados
+            </StatCardMeta>
+          </StatCard>
+
+          <StatCard data-testid="stat-card-recent-contributions">
+            <StatCardTitle showArrow={false}>
+              <Calendar className="w-4 h-4 inline mr-1" />
+              Recientes
+            </StatCardTitle>
+            <StatCardValue>
+              {metrics.recentContributions}
+            </StatCardValue>
+            <StatCardMeta>
+              Aportes del último mes
+            </StatCardMeta>
+          </StatCard>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Gestiona los socios de la organización y sus participaciones. Define permisos y roles para una administración efectiva.
-        </p>
-      </div>
+      )}
 
-      <div>
-        {partners.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <HandHeart className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-medium text-muted-foreground mb-2">
-              No hay socios en esta organización.
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Ingresa al primer socio para comenzar.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {partners.map((partner) => {
-              const contact = partner.contacts;
-              const fullName = `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim();
-              const displayName = contact?.company_name || fullName || contact?.email || 'Sin nombre';
-              
-              return (
-                <Card key={partner.id} className="p-4">
-                  <CardContent className="p-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 border-2 border-background">
-                          {(contact as any)?.avatar_url ? (
-                            <AvatarImage 
-                              src={(contact as any).avatar_url} 
-                              alt={displayName} 
-                            />
-                          ) : (
-                            <AvatarFallback className="bg-[var(--accent)]/10 text-[var(--accent)] font-medium">
-                              {getInitials(displayName)}
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
-                        
-                        <div className="flex-1">
-                          <h4 className="font-medium text-sm">
-                            {displayName}
-                          </h4>
-                          <p className="text-xs text-muted-foreground">
-                            {contact?.email || 'Sin email'}
-                          </p>
-                        </div>
-                      </div>
-
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => handleDeletePartner(partner)}
-                        data-testid={`button-delete-partner-${partner.id}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      <Table
+        columns={columns}
+        data={enrichedPartners}
+        isLoading={isLoading}
+        showDoubleHeader={false}
+        defaultSort={{ key: 'partnerName', direction: 'asc' }}
+        onRowClick={handleEdit}
+        emptyStateConfig={{
+          icon: <HandHeart className="h-12 w-12 text-muted-foreground" />,
+          title: 'No hay socios en esta organización',
+          description: 'Agrega socios para gestionar las participaciones de tu organización.',
+          action: (
+            <Button
+              onClick={handleAddPartner}
+              size="sm"
+              data-testid="button-add-partner-empty"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar Socio
+            </Button>
+          ),
+        }}
+        rowActions={(partner: EnrichedPartner) => [
+          {
+            label: 'Editar Socio',
+            icon: Edit,
+            onClick: () => handleEdit(partner),
+          },
+          {
+            label: 'Eliminar',
+            icon: Trash2,
+            onClick: () => handleDelete(partner),
+            variant: 'destructive',
+          },
+        ]}
+      />
     </div>
   );
 }
