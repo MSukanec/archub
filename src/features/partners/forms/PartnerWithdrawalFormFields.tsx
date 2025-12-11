@@ -94,9 +94,8 @@ export function PartnerWithdrawalFormFields({
 
   const createMutation = useCreatePartnerWithdrawal()
   const { data: existingWithdrawal, isLoading: loadingWithdrawal } = usePartnerWithdrawal(
-    organizationId,
     withdrawalId,
-    { enabled: mode !== 'create' && !!withdrawalId && !!organizationId }
+    organizationId
   )
 
   const currentMember = useMemo(() => {

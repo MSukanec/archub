@@ -94,9 +94,8 @@ export function PartnerContributionFormFields({
 
   const createMutation = useCreatePartnerContribution()
   const { data: existingContribution, isLoading: loadingContribution } = usePartnerContribution(
-    organizationId,
     contributionId,
-    { enabled: mode !== 'create' && !!contributionId && !!organizationId }
+    organizationId
   )
 
   const currentMember = useMemo(() => {
