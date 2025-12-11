@@ -9,10 +9,14 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PARTNER_QUERY_KEYS } from '../constants';
 
 const partnerSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
+  notes: z.string().optional(),
+  status: z.enum(['active', 'inactive']).default('active'),
 });
 
 type PartnerFormData = z.infer<typeof partnerSchema>;
@@ -95,7 +99,7 @@ export function PartnerFormFields({
       
       const { data, error } = await supabase
         .from('partners')
-        .select('id, contact_id')
+        .select('id, contact_id, notes, status')
         .eq('id', partnerId)
         .single();
 
@@ -109,6 +113,8 @@ export function PartnerFormFields({
     resolver: zodResolver(partnerSchema),
     defaultValues: {
       contactId: existingPartner?.contact_id || '',
+      notes: existingPartner?.notes || '',
+      status: (existingPartner?.status as 'active' | 'inactive') || 'active',
     },
   });
 
@@ -116,6 +122,8 @@ export function PartnerFormFields({
     if (existingPartner && mode === 'edit') {
       form.reset({
         contactId: existingPartner.contact_id || '',
+        notes: existingPartner.notes || '',
+        status: (existingPartner.status as 'active' | 'inactive') || 'active',
       });
     }
   }, [existingPartner, mode, form]);
@@ -129,6 +137,9 @@ export function PartnerFormFields({
         .insert({
           organization_id: orgId,
           contact_id: data.contactId,
+          notes: data.notes || null,
+          status: data.status || 'active',
+          created_by: userData?.memberships?.[0]?.id || null,
         })
         .select();
 
@@ -161,6 +172,9 @@ export function PartnerFormFields({
         .from('partners')
         .update({
           contact_id: data.contactId,
+          notes: data.notes || null,
+          status: data.status || 'active',
+          updated_at: new Date().toISOString(),
         })
         .eq('id', partnerId)
         .select();
@@ -241,6 +255,48 @@ export function PartnerFormFields({
                   className="w-full"
                   disabled={contactsLoading}
                   data-testid="combobox-contact"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estado</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger data-testid="select-status">
+                    <SelectValue placeholder="Seleccionar estado..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="active">Activo</SelectItem>
+                  <SelectItem value="inactive">Inactivo</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notas</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  placeholder="Notas adicionales sobre el socio..."
+                  className="resize-none"
+                  rows={3}
+                  data-testid="textarea-notes"
                 />
               </FormControl>
               <FormMessage />

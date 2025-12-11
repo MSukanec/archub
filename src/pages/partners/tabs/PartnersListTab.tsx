@@ -131,11 +131,14 @@ export function PartnersListTab() {
       label: 'Socio',
       sortable: true,
       render: (partner: EnrichedPartner) => {
-        const avatarUrl = partner.contacts?.avatar_url;
-        const displayName = partner.contacts?.full_name || 
-                           `${partner.contacts?.first_name || ''} ${partner.contacts?.last_name || ''}`.trim() ||
-                           partner.contacts?.email ||
-                           partner.contacts?.company_name;
+        const contact = partner.contacts;
+        const avatarUrl = contact?.image_bucket && contact?.image_path 
+          ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${contact.image_bucket}/${contact.image_path}`
+          : null;
+        const displayName = contact?.full_name || 
+                           `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() ||
+                           contact?.email ||
+                           contact?.company_name;
         const initials = displayName 
           ? displayName.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2) 
           : '?';

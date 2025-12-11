@@ -14,8 +14,14 @@ export async function getPartners(organizationId: string): Promise<Partner[]> {
     .select(`
       id, 
       created_at, 
+      updated_at,
       contact_id,
       organization_id,
+      notes,
+      status,
+      created_by,
+      is_deleted,
+      deleted_at,
       contacts(
         id, 
         first_name, 
@@ -24,11 +30,13 @@ export async function getPartners(organizationId: string): Promise<Partner[]> {
         email, 
         phone, 
         company_name,
-        avatar_url,
-        linked_user_id
+        linked_user_id,
+        image_bucket,
+        image_path
       )
     `)
     .eq('organization_id', organizationId)
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (error) {

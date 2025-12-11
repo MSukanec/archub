@@ -13,16 +13,37 @@ export interface PartnerContact {
   email: string | null
   phone: string | null
   company_name: string | null
-  avatar_url: string | null
   linked_user_id: string | null
+  image_bucket: string | null
+  image_path: string | null
 }
 
 export interface Partner {
   id: string
   created_at: string
+  updated_at: string | null
   contact_id: string
   organization_id: string
+  notes: string | null
+  status: 'active' | 'inactive' | 'deleted'
+  created_by: string | null
+  is_deleted: boolean
+  deleted_at: string | null
   contacts: PartnerContact | null
+}
+
+export interface PartnerCreateInput {
+  contact_id: string
+  organization_id: string
+  notes?: string | null
+  status?: 'active' | 'inactive'
+  created_by?: string | null
+}
+
+export interface PartnerUpdateInput {
+  contact_id?: string
+  notes?: string | null
+  status?: 'active' | 'inactive' | 'deleted'
 }
 
 export interface PartnerContribution {
