@@ -27,7 +27,6 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects, ProjectItemCard, updateProjectLastActive } from '@/features/projects';
 import { useContacts } from '@/features/contacts';
 import { useSiteLogs } from '@/features/sitelog/hooks/use-site-logs';
-import { useMovements } from '@/hooks/use-movements';
 import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization';
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
@@ -58,7 +57,6 @@ export default function OrganizationDashboard() {
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined);
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId);
   const { data: siteLogs = [], isLoading: siteLogsLoading } = useSiteLogs(undefined, organizationId);
-  const { data: movements = [], isLoading: movementsLoading } = useMovements(organizationId, null);
   const { data: userOrgPrefs } = useUserOrganizationPreferences(userId, organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id;
   const { setSidebarLevel, sidebarLevel } = useNavigationStore();
