@@ -44,18 +44,20 @@ function getPartnerDisplayName(partner: Partner): string {
   if (!partner?.contacts) return 'Socio sin nombre'
   
   const { contacts } = partner
+  if (contacts.full_name) {
+    return contacts.full_name
+  }
+  const constructedName = `${contacts.first_name || ''} ${contacts.last_name || ''}`.trim()
+  if (constructedName) {
+    return constructedName
+  }
   if (contacts.company_name) {
     return contacts.company_name
-  } else {
-    const fullName = `${contacts.first_name || ''} ${contacts.last_name || ''}`.trim()
-    if (fullName) {
-      return fullName
-    } else if (contacts.email) {
-      return contacts.email
-    } else {
-      return 'Socio sin nombre'
-    }
   }
+  if (contacts.email) {
+    return contacts.email
+  }
+  return 'Socio sin nombre'
 }
 
 export interface PartnerContributionFormFieldsProps {
