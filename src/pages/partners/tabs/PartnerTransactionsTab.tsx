@@ -9,6 +9,7 @@ import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
 import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import {
   usePartnerContributions,
@@ -287,23 +288,23 @@ export function PartnerTransactionsTab() {
   // Show only empty state when no transactions
   if (transactions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <ArrowDownCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
-        <h3 className="text-lg font-semibold mb-2">No hay transacciones</h3>
-        <p className="text-muted-foreground mb-6 max-w-md">
-          Aún no se han registrado aportes ni retiros de socios.
-        </p>
-        <div className="flex items-center gap-2">
-          <Button onClick={handleAddContribution} data-testid="button-empty-add-contribution">
-            <Plus className="h-4 w-4 mr-1" />
-            Nuevo Aporte
-          </Button>
-          <Button onClick={handleAddWithdrawal} data-testid="button-empty-add-withdrawal">
-            <Plus className="h-4 w-4 mr-1" />
-            Nuevo Retiro
-          </Button>
-        </div>
-      </div>
+      <EmptyState
+        icon={<ArrowDownCircle />}
+        title="No hay transacciones"
+        description="Aún no se han registrado aportes ni retiros de socios."
+        action={
+          <div className="flex items-center gap-2">
+            <Button onClick={handleAddContribution} data-testid="button-empty-add-contribution">
+              <Plus className="h-4 w-4 mr-1" />
+              Nuevo Aporte
+            </Button>
+            <Button onClick={handleAddWithdrawal} data-testid="button-empty-add-withdrawal">
+              <Plus className="h-4 w-4 mr-1" />
+              Nuevo Retiro
+            </Button>
+          </div>
+        }
+      />
     );
   }
 

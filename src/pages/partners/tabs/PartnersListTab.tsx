@@ -7,6 +7,7 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGlobalModalStore } from '@/components/modal';
 import { parseLocalDate } from '@/lib/date-utils';
 import { useMobile } from '@/hooks/use-mobile';
@@ -179,17 +180,17 @@ export function PartnersListTab() {
   // Show only empty state when no partners
   if (!isLoading && enrichedPartners.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <HandHeart className="h-12 w-12 text-muted-foreground/50 mb-4" />
-        <h3 className="text-lg font-semibold mb-2">No hay socios en esta organización</h3>
-        <p className="text-muted-foreground mb-6 max-w-md">
-          Agrega socios para gestionar las participaciones de tu organización.
-        </p>
-        <Button onClick={handleAddPartner} data-testid="button-add-partner-empty">
-          <Plus className="h-4 w-4 mr-2" />
-          Agregar Socio
-        </Button>
-      </div>
+      <EmptyState
+        icon={<HandHeart />}
+        title="No hay socios en esta organización"
+        description="Agrega socios para gestionar las participaciones de tu organización."
+        action={
+          <Button onClick={handleAddPartner} data-testid="button-add-partner-empty">
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Socio
+          </Button>
+        }
+      />
     );
   }
 
