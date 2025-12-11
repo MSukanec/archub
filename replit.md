@@ -40,6 +40,7 @@ Preferred communication style: Simple, everyday language.
 - **Date Utilities**: All date handling MUST use `src/lib/date-utils.ts` to avoid timezone issues.
 - **Project Activity Tracking**: `last_active_at` timestamp updated automatically via backend API.
 - **Modal Naming Standard**: Modals follow `<Entity>Form.tsx` naming convention, stored in `forms/` folders, and support CREATE/EDIT/VIEW modes.
+- **Drawer Architecture**: Enterprise SaaS-level drawer system mirroring the modal architecture with DrawerLayout, DrawerHeader, DrawerBody, DrawerFooter, and DrawerSection components. Follows the same agnostic pattern where content components are separate from container components.
 - **Delete/Replace Pattern**: Universal delete confirmation modal with optional replace functionality.
 - **Universal Import System**: 5-step wizard with reusable hooks for parsing, auto-mapping, validation, and AI-powered suggestions.
 - **Subscription Expiry Notification System**: Scheduled daily job for multi-recipient email notifications before and on subscription expiry.
