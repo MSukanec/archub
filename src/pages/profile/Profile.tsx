@@ -8,6 +8,7 @@ import { ProfilePreferences } from './ProfilePreferences';
 import { ProfileOrganizations } from './ProfileOrganizations';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useGlobalModalStore } from '@/components/modal';
 
@@ -15,6 +16,7 @@ export default function Profile() {
   const [location, setLocation] = useLocation();
   const { data: userData, isLoading } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
+  const isAdmin = useIsAdmin();
   
   // Determinar el tab activo basado en la URL
   const getActiveTabFromUrl = (url: string): string => {
@@ -72,7 +74,7 @@ export default function Profile() {
     description: 'Administra tu información personal, preferencias de la aplicación y las organizaciones a las que perteneces.',
     tabs: headerTabs,
     onTabChange: handleTabChange,
-    ...(activeTab === 'Organizaciones' && {
+    ...(activeTab === 'Organizaciones' && isAdmin && {
       actionButton: {
         label: 'Nueva Organización',
         icon: Plus,
