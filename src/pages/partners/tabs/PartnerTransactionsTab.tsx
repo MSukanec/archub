@@ -91,9 +91,12 @@ export function PartnerTransactionsTab() {
       original: w,
     }));
 
-    return [...contributionItems, ...withdrawalItems].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
+    return [...contributionItems, ...withdrawalItems].sort((a, b) => {
+      const dateComparison = new Date(b.date).getTime() - new Date(a.date).getTime();
+      if (dateComparison !== 0) return dateComparison;
+      // Si las fechas son iguales, ordenar por fecha de creación (más recientes primero)
+      return new Date(b.original.created_at).getTime() - new Date(a.original.created_at).getTime();
+    });
   }, [contributions, withdrawals]);
 
   const metrics = useMemo(() => {

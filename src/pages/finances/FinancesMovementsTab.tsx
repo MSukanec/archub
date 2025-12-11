@@ -1,3 +1,4 @@
+import React, { useMemo } from 'react';
 import { useUnifiedMovements } from '@/features/finances/hooks/use-unified-movements';
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
@@ -55,10 +56,20 @@ export function FinancesMovementsTab() {
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
   
-  const { data: movements = [], isLoading } = useUnifiedMovements(
+  const { data: rawMovements = [], isLoading } = useUnifiedMovements(
     currentOrganizationId || undefined,
     selectedProjectId
   );
+
+  // Sort by payment_date DESC, then by created_at DESC
+  const movements = useMemo(() => {
+    return [...rawMovements].sort((a, b) => {
+      const dateComparison = new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
+      if (dateComparison !== 0) return dateComparison;
+      // Si las fechas son iguales, ordenar por fecha de creación (más recientes primero)
+      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+    });
+  }, [rawMovements]);
 
   const deleteClientPaymentMutation = useDeleteClientPayment();
   const deleteMaterialPaymentMutation = useDeleteMaterialPayment();

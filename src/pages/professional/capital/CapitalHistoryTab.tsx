@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { formatDate } from '@/lib/date-utils'
 import { Edit, Trash2 } from 'lucide-react'
 
@@ -64,19 +64,28 @@ export function CapitalHistoryTab({
   onEdit, 
   onDelete 
 }: CapitalHistoryProps) {
-  // Filter movements based on search
-  const filteredMovements = movements.filter(movement => {
-    if (!searchValue) return true
-    
-    const searchLower = searchValue.toLowerCase()
-    const memberName = movement.member?.user?.full_name?.toLowerCase() || ''
-    const description = movement.description?.toLowerCase() || ''
-    const categoryName = movement.category_name?.toLowerCase() || ''
-    
-    return memberName.includes(searchLower) || 
-           description.includes(searchLower) ||
-           categoryName.includes(searchLower)
-  })
+  // Filter movements based on search, then sort by movement_date DESC, then by created_at DESC
+  const filteredMovements = useMemo(() => {
+    const filtered = movements.filter(movement => {
+      if (!searchValue) return true
+      
+      const searchLower = searchValue.toLowerCase()
+      const memberName = movement.member?.user?.full_name?.toLowerCase() || ''
+      const description = movement.description?.toLowerCase() || ''
+      const categoryName = movement.category_name?.toLowerCase() || ''
+      
+      return memberName.includes(searchLower) || 
+             description.includes(searchLower) ||
+             categoryName.includes(searchLower)
+    })
+
+    return [...filtered].sort((a, b) => {
+      const dateComparison = new Date(b.movement_date).getTime() - new Date(a.movement_date).getTime()
+      if (dateComparison !== 0) return dateComparison
+      // Si las fechas son iguales, ordenar por fecha de creación (más recientes primero)
+      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+    })
+  }, [movements, searchValue])
 
   // Detailed table columns
   const detailColumns = [
