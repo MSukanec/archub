@@ -1,6 +1,7 @@
 import { registerModal, ModalConfig } from './registry';
 
 import { MemberFormModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, PartnerModal, OrganizationFormModal, ProfileOrganizationFormModal } from '@/features/organization';
+import { PartnerContributionModal, PartnerWithdrawalModal } from '@/features/partners';
 import { ProjectForm } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
 import ContactForm from '@/features/contacts/forms/ContactForm';
@@ -59,6 +60,28 @@ export function initializeModalRegistry(): void {
     }),
   });
   registerModal('partner', PartnerModal as any, organizationConfig);
+  registerModal('partner-contribution', PartnerContributionModal as any, {
+    ...financeConfig,
+    mapDataToProps: (data) => ({
+      modalData: {
+        projectId: data?.projectId,
+        organizationId: data?.organizationId,
+        contributionId: data?.contributionId,
+      },
+      mode: data?.contributionId ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
+  registerModal('partner-withdrawal', PartnerWithdrawalModal as any, {
+    ...financeConfig,
+    mapDataToProps: (data) => ({
+      modalData: {
+        projectId: data?.projectId,
+        organizationId: data?.organizationId,
+        withdrawalId: data?.withdrawalId,
+      },
+      mode: data?.withdrawalId ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
   registerModal('board', BoardFormModal as any, organizationConfig);
   registerModal('card', CardFormModal as any, organizationConfig);
   registerModal('list', ListFormModal as any, organizationConfig);
