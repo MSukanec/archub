@@ -98,18 +98,31 @@ export function OrganizationFormFields({
     mutationFn: async (data: OrganizationFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
-      const { error } = await supabase
-        .from('organizations')
-        .insert({
-          name: data.name,
-          is_active: data.is_active,
-          plan_id: data.plan_id,
-          is_system: false,
-          created_by: currentUser?.user?.id,
-          settings: { is_founder: data.is_founder }
+      const { data: orgId, error } = await supabase
+        .rpc('handle_new_organization', {
+          _organization_name: data.name,
+          _user_id: currentUser?.user?.id
         });
       
       if (error) throw error;
+      
+      if (orgId && (data.plan_id || data.is_founder || !data.is_active)) {
+        const updates: Record<string, any> = {};
+        if (data.plan_id) updates.plan_id = data.plan_id;
+        if (!data.is_active) updates.is_active = false;
+        if (data.is_founder) updates.settings = { is_founder: true };
+        
+        if (Object.keys(updates).length > 0) {
+          const { error: updateError } = await supabase
+            .from('organizations')
+            .update(updates)
+            .eq('id', orgId);
+          
+          if (updateError) console.error('Error updating organization settings:', updateError);
+        }
+      }
+      
+      return orgId;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
