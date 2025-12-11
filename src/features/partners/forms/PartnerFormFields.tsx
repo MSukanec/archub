@@ -1,0 +1,274 @@
+import React, { useRef, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
+import { Button } from '@/components/ui/button';
+import { PARTNER_QUERY_KEYS } from '../constants';
+
+const partnerSchema = z.object({
+  contactId: z.string().min(1, 'Debe seleccionar un contacto'),
+});
+
+type PartnerFormData = z.infer<typeof partnerSchema>;
+
+interface LinkedUser {
+  id: string;
+  full_name: string | null;
+}
+
+interface Contact {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  full_name: string | null;
+  email: string | null;
+  company_name: string | null;
+  linked_user: LinkedUser | LinkedUser[] | null;
+}
+
+export interface PartnerFormFieldsProps {
+  organizationId?: string;
+  partnerId?: string;
+  mode: 'create' | 'edit';
+  onSuccess: () => void;
+  onCancel: () => void;
+  hideActions?: boolean;
+  formRef?: React.RefObject<HTMLFormElement>;
+}
+
+export function PartnerFormFields({
+  organizationId,
+  partnerId,
+  mode,
+  onSuccess,
+  onCancel,
+  hideActions = false,
+  formRef,
+}: PartnerFormFieldsProps) {
+  const { toast } = useToast();
+  const { data: userData } = useCurrentUser();
+  const queryClient = useQueryClient();
+  const internalFormRef = useRef<HTMLFormElement>(null);
+  const actualFormRef = formRef || internalFormRef;
+
+  const orgId = organizationId || userData?.preferences?.last_organization_id;
+
+  const { data: contacts = [], isLoading: contactsLoading } = useQuery<Contact[]>({
+    queryKey: ['contacts-for-partner', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      
+      const { data, error } = await supabase
+        .from('contacts')
+        .select(`
+          id, 
+          first_name, 
+          last_name, 
+          full_name,
+          email,
+          company_name,
+          linked_user:users!linked_user_id(id, full_name)
+        `)
+        .eq('organization_id', orgId)
+        .eq('is_deleted', false)
+        .order('first_name');
+
+      if (error) {
+        console.error('Error fetching contacts:', error);
+        throw error;
+      }
+      return data || [];
+    },
+    enabled: !!orgId,
+  });
+
+  const { data: existingPartner, isLoading: partnerLoading } = useQuery({
+    queryKey: ['partner', partnerId],
+    queryFn: async () => {
+      if (!partnerId) return null;
+      
+      const { data, error } = await supabase
+        .from('partners')
+        .select('id, contact_id')
+        .eq('id', partnerId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!partnerId && mode === 'edit',
+  });
+
+  const form = useForm<PartnerFormData>({
+    resolver: zodResolver(partnerSchema),
+    defaultValues: {
+      contactId: existingPartner?.contact_id || '',
+    },
+  });
+
+  React.useEffect(() => {
+    if (existingPartner && mode === 'edit') {
+      form.reset({
+        contactId: existingPartner.contact_id || '',
+      });
+    }
+  }, [existingPartner, mode, form]);
+
+  const createMutation = useMutation({
+    mutationFn: async (data: PartnerFormData) => {
+      if (!orgId) throw new Error('No hay organización seleccionada');
+
+      const { data: result, error } = await supabase
+        .from('partners')
+        .insert({
+          organization_id: orgId,
+          contact_id: data.contactId,
+        })
+        .select();
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.partners(orgId || '') });
+      queryClient.invalidateQueries({ queryKey: ['partners'] });
+      toast({
+        title: 'Socio agregado',
+        description: 'El socio ha sido agregado correctamente',
+      });
+      onSuccess();
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error al agregar socio',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: PartnerFormData) => {
+      if (!partnerId) throw new Error('ID de socio no encontrado');
+
+      const { data: result, error } = await supabase
+        .from('partners')
+        .update({
+          contact_id: data.contactId,
+        })
+        .eq('id', partnerId)
+        .select();
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.partners(orgId || '') });
+      queryClient.invalidateQueries({ queryKey: ['partners'] });
+      toast({
+        title: 'Socio actualizado',
+        description: 'Los datos del socio han sido actualizados',
+      });
+      onSuccess();
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error al actualizar socio',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const handleSubmit = async (data: PartnerFormData) => {
+    if (mode === 'edit') {
+      await updateMutation.mutateAsync(data);
+    } else {
+      await createMutation.mutateAsync(data);
+    }
+  };
+
+  const getContactDisplayName = (contact: Contact): string => {
+    const linkedUser = Array.isArray(contact.linked_user) 
+      ? contact.linked_user[0] 
+      : contact.linked_user;
+    
+    return contact.full_name || 
+           `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || 
+           linkedUser?.full_name || 
+           contact.company_name || 
+           contact.email ||
+           'Sin nombre';
+  };
+
+  const contactOptions = useMemo(() => {
+    if (!contacts || !Array.isArray(contacts)) return [];
+    return contacts.map(contact => ({
+      value: contact.id,
+      label: getContactDisplayName(contact),
+    }));
+  }, [contacts]);
+
+  const isLoading = contactsLoading || partnerLoading || createMutation.isPending || updateMutation.isPending;
+
+  return (
+    <Form {...form}>
+      <form 
+        ref={actualFormRef}
+        onSubmit={form.handleSubmit(handleSubmit)} 
+        className="space-y-4"
+      >
+        <FormField
+          control={form.control}
+          name="contactId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contacto <span className="text-red-500">*</span></FormLabel>
+              <FormControl>
+                <ComboBox
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={contactOptions}
+                  placeholder="Seleccionar contacto..."
+                  searchPlaceholder="Buscar contacto..."
+                  emptyMessage="No se encontraron contactos."
+                  className="w-full"
+                  disabled={contactsLoading}
+                  data-testid="combobox-contact"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {!hideActions && (
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isLoading}
+              data-testid="button-cancel"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              data-testid="button-submit"
+            >
+              {isLoading ? 'Guardando...' : mode === 'edit' ? 'Actualizar' : 'Agregar Socio'}
+            </Button>
+          </div>
+        )}
+      </form>
+    </Form>
+  );
+}

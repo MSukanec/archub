@@ -1,14 +1,28 @@
+export interface PartnerLinkedUser {
+  id: string
+  full_name: string | null
+  email: string
+  avatar_url: string | null
+}
+
+export interface PartnerContact {
+  id: string
+  first_name: string | null
+  last_name: string | null
+  full_name: string | null
+  email: string | null
+  phone: string | null
+  company_name: string | null
+  avatar_url: string | null
+  linked_user: PartnerLinkedUser | null
+}
+
 export interface Partner {
   id: string
   created_at: string
-  contacts: {
-    id: string
-    first_name: string | null
-    last_name: string | null
-    email: string | null
-    phone: string | null
-    company_name: string | null
-  }
+  contact_id: string
+  organization_id: string
+  contacts: PartnerContact
 }
 
 export interface PartnerContribution {

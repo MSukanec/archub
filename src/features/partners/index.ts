@@ -10,9 +10,11 @@ export * from './services/deletePartnerWithdrawal';
 
 export * from './hooks';
 
+export { PartnerFormFields } from './forms/PartnerFormFields';
 export { PartnerContributionFormFields } from './forms/PartnerContributionFormFields';
 export { PartnerWithdrawalFormFields } from './forms/PartnerWithdrawalFormFields';
 
+export { PartnerModal } from './modals/PartnerModal';
 export { PartnerContributionModal } from './modals/PartnerContributionModal';
 export { PartnerWithdrawalModal } from './modals/PartnerWithdrawalModal';
 

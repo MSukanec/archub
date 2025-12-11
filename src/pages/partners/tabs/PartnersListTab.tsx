@@ -33,6 +33,7 @@ export function PartnersListTab() {
       ...partner,
       partnerName: partner.contacts?.full_name || 
                   `${partner.contacts?.first_name || ''} ${partner.contacts?.last_name || ''}`.trim() || 
+                  partner.contacts?.linked_user?.full_name ||
                   partner.contacts?.company_name || '-'
     }));
   }, [partners]);
@@ -130,14 +131,14 @@ export function PartnersListTab() {
       label: 'Socio',
       sortable: true,
       render: (partner: EnrichedPartner) => {
-        const avatarUrl = (partner.contacts as any)?.avatar_url;
-        const initials = partner.contacts?.first_name?.[0] && partner.contacts?.last_name?.[0]
-          ? `${partner.contacts.first_name[0]}${partner.contacts.last_name[0]}`
-          : partner.contacts?.first_name?.[0] || '?';
-        
+        const avatarUrl = partner.contacts?.avatar_url || partner.contacts?.linked_user?.avatar_url;
         const displayName = partner.contacts?.full_name || 
                            `${partner.contacts?.first_name || ''} ${partner.contacts?.last_name || ''}`.trim() ||
+                           partner.contacts?.linked_user?.full_name ||
                            partner.contacts?.company_name;
+        const initials = displayName 
+          ? displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) 
+          : '?';
         
         return (
           <div className="flex items-center gap-3">
@@ -149,11 +150,6 @@ export function PartnersListTab() {
             </Avatar>
             <div className="flex flex-col">
               <span className="font-semibold">{displayName || '-'}</span>
-              {partner.ownership_percentage && (
-                <span className="text-muted-foreground" style={{ fontSize: '12px', fontWeight: 'normal' }}>
-                  {partner.ownership_percentage}% participación
-                </span>
-              )}
             </div>
           </div>
         );
@@ -173,18 +169,6 @@ export function PartnersListTab() {
       sortable: true,
       render: (partner: EnrichedPartner) => {
         return partner.contacts?.phone || '-';
-      },
-    },
-    {
-      key: 'notes',
-      label: 'Notas',
-      sortable: false,
-      render: (partner: EnrichedPartner) => {
-        if (!partner.notes) return '-';
-        const truncated = partner.notes.length > 100 
-          ? partner.notes.substring(0, 100) + '...' 
-          : partner.notes;
-        return <span className="text-muted-foreground">{truncated}</span>;
       },
     },
   ];
