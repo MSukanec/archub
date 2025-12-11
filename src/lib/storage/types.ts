@@ -17,6 +17,8 @@ export type EntityType =
   | 'material_payment_attachment'
   | 'material_purchase_attachment'
   | 'personnel_payment_attachment'
+  | 'partner_contribution_attachment'
+  | 'partner_withdrawal_attachment'
   | 'sitelog_attachment'
   | 'project_photo'
   | 'sitelog_photo'
@@ -48,6 +50,8 @@ export interface UploadContext {
     material_payment_id?: string;
     material_purchase_id?: string;
     personnel_payment_id?: string;
+    partner_contribution_id?: string;
+    partner_withdrawal_id?: string;
     testimonial_id?: string;
     hero_section_id?: string;
     forum_thread_id?: string;

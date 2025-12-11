@@ -117,6 +117,18 @@ export const ENTITY_CONFIG: Record<EntityType, EntityConfig> = {
     compressionPreset: 'document',
     visibility: 'organization'
   },
+  'partner_contribution_attachment': {
+    bucket: 'private-assets',
+    basePath: 'organizations/{org_id}/finance/partner-contributions',
+    compressionPreset: 'document',
+    visibility: 'organization'
+  },
+  'partner_withdrawal_attachment': {
+    bucket: 'private-assets',
+    basePath: 'organizations/{org_id}/finance/partner-withdrawals',
+    compressionPreset: 'document',
+    visibility: 'organization'
+  },
   'sitelog_attachment': {
     bucket: 'private-assets',
     basePath: 'organizations/{org_id}/sitelogs/{project_id}',
