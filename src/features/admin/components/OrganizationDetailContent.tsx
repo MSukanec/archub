@@ -22,7 +22,6 @@ import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { DrawerSection } from '@/components/drawer';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { apiRequest } from '@/lib/queryClient';
 
 interface OrganizationMember {
   id: string;
@@ -206,12 +205,8 @@ interface AdminUser {
 }
 
 function useAdminUsers() {
-  return useQuery({
-    queryKey: ['admin-users-list'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/admin/users');
-      return response.json() as Promise<AdminUser[]>;
-    }
+  return useQuery<AdminUser[]>({
+    queryKey: ['/api/admin/users'],
   });
 }
 
