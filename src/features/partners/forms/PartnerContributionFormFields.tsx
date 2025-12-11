@@ -105,22 +105,14 @@ export function PartnerContributionFormFields({
     })).sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
   }, [partners])
 
-  const defaultCurrencyId = useMemo(() => {
-    return currencies && currencies.length > 0 ? currencies[0].id : '';
-  }, [currencies]);
-
-  const defaultWalletId = useMemo(() => {
-    return wallets && wallets.length > 0 ? wallets[0].id : '';
-  }, [wallets]);
-
   const form = useForm<PartnerContributionFormData>({
     resolver: zodResolver(partnerContributionSchema),
     defaultValues: {
       contribution_date: new Date(),
       partner_id: '',
-      wallet_id: defaultWalletId,
+      wallet_id: '',
       amount: 0,
-      currency_id: defaultCurrencyId,
+      currency_id: '',
       exchange_rate: undefined,
       status: 'confirmed',
       reference: '',
@@ -129,6 +121,19 @@ export function PartnerContributionFormFields({
   })
 
   const isLoading = partnersLoading || currenciesLoading || walletsLoading || membersLoading
+
+  // Set default wallet and currency when they load
+  useEffect(() => {
+    if (!currenciesLoading && currencies && currencies.length > 0) {
+      form.setValue('currency_id', currencies[0].currency?.id || '')
+    }
+  }, [currencies, currenciesLoading, form])
+
+  useEffect(() => {
+    if (!walletsLoading && wallets && wallets.length > 0) {
+      form.setValue('wallet_id', wallets[0].id || '')
+    }
+  }, [wallets, walletsLoading, form])
 
   useEffect(() => {
     const fetchAttachments = async () => {
