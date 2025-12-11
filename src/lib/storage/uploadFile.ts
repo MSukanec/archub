@@ -91,6 +91,17 @@ export async function uploadFile(
     // Nota: session ya fue verificada al inicio de la función
     const createdById = context.created_by_member_id || session?.user?.id || context.user_id;
 
+    console.log('[uploadFile] Attempting to create media_files record:', {
+      bucket: storagePath.bucket,
+      file_path: storagePath.path,
+      file_name: file.name,
+      file_type: fileType,
+      file_size: processedFile.size,
+      is_public: isPublic,
+      organization_id: context.organization_id,
+      created_by: createdById
+    });
+
     const { data: mediaFile, error: mediaFileError } = await supabase
       .from('media_files')
       .insert({
@@ -107,6 +118,14 @@ export async function uploadFile(
       })
       .select()
       .single();
+
+    console.log('[uploadFile] Media files insert response:', {
+      hasData: !!mediaFile,
+      hasError: !!mediaFileError,
+      mediaFileId: mediaFile?.id,
+      errorMessage: mediaFileError?.message,
+      errorDetails: mediaFileError
+    });
 
     if (mediaFileError || !mediaFile) {
       await supabase.storage.from(storagePath.bucket).remove([storagePath.path]);
