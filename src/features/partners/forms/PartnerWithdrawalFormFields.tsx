@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -18,6 +18,10 @@ import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { usePartners, useCreatePartnerWithdrawal } from '../hooks'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
+import { FileUploader } from '@/components/shared/FileUploader'
+import { uploadFile, deleteFile } from '@/lib/storage'
+import { useQueryClient } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
 import type { Partner } from '../types'
 
 const partnerWithdrawalSchema = z.object({
@@ -77,6 +81,9 @@ export function PartnerWithdrawalFormFields({
 }: PartnerWithdrawalFormFieldsProps) {
   const { data: userData } = useCurrentUser()
   const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const [filesToUpload, setFilesToUpload] = useState<any[]>([])
+  const [attachments, setAttachments] = useState<any[]>([])
 
   const { data: partners = [], isLoading: partnersLoading } = usePartners(organizationId, { enabled: !!organizationId })
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
@@ -113,6 +120,87 @@ export function PartnerWithdrawalFormFields({
 
   const isLoading = partnersLoading || currenciesLoading || walletsLoading || membersLoading
 
+  useEffect(() => {
+    const fetchAttachments = async () => {
+      if (!withdrawalId || !organizationId) return
+      
+      try {
+        const { data, error } = await supabase
+          .from('media_links')
+          .select(`
+            id,
+            description,
+            category,
+            created_at,
+            media_file:media_file_id (
+              id,
+              file_url,
+              file_name,
+              file_type,
+              file_size
+            )
+          `)
+          .eq('partner_withdrawal_id', withdrawalId)
+          .eq('organization_id', organizationId)
+          .order('created_at', { ascending: true })
+        
+        if (error) {
+          console.error('Error fetching withdrawal attachments:', error)
+          return
+        }
+        
+        const transformedData = (data || []).map((item: any) => ({
+          id: item.id,
+          description: item.description,
+          category: item.category,
+          created_at: item.created_at,
+          media_file: Array.isArray(item.media_file) && item.media_file.length > 0
+            ? item.media_file[0]
+            : item.media_file
+        }))
+        
+        setAttachments(transformedData)
+      } catch (error) {
+        console.error('Error fetching withdrawal attachments:', error)
+      }
+    }
+    
+    if (mode === 'edit' || mode === 'view') {
+      fetchAttachments()
+    }
+  }, [withdrawalId, organizationId, mode])
+
+  const existingFiles = useMemo(() => {
+    if (!attachments || attachments.length === 0) return []
+    
+    return attachments.map((attachment: any) => ({
+      id: attachment.media_file?.id || attachment.id,
+      file_name: attachment.media_file?.file_name || 'Archivo adjunto',
+      file_type: attachment.media_file?.file_type || 'document',
+      file_size: attachment.media_file?.file_size || 0,
+      file_url: attachment.media_file?.file_url || '',
+      isExisting: true,
+    }))
+  }, [attachments])
+
+  const handleExistingFileDelete = async (fileId: string) => {
+    try {
+      await deleteFile(fileId, false)
+      setAttachments(prev => prev.filter(a => (a.media_file?.id || a.id) !== fileId))
+      queryClient.invalidateQueries({ queryKey: ['partner-withdrawal-media', withdrawalId] })
+      toast({
+        title: 'Archivo eliminado',
+        description: 'El archivo ha sido eliminado correctamente',
+      })
+    } catch (error: any) {
+      toast({
+        title: 'Error al eliminar archivo',
+        description: error.message,
+        variant: 'destructive',
+      })
+    }
+  }
+
   const onSubmit = async (data: PartnerWithdrawalFormData) => {
     if (!organizationId || !currentMember) {
       toast({
@@ -124,7 +212,7 @@ export function PartnerWithdrawalFormFields({
     }
 
     try {
-      await createMutation.mutateAsync({
+      const result = await createMutation.mutateAsync({
         organization_id: organizationId,
         project_id: projectId || null,
         partner_id: data.partner_id,
@@ -138,6 +226,36 @@ export function PartnerWithdrawalFormFields({
         notes: data.notes || null,
         created_by: currentMember.id,
       })
+
+      const createdWithdrawalId = result?.id || withdrawalId
+
+      if (filesToUpload.length > 0 && createdWithdrawalId) {
+        for (const fileInput of filesToUpload) {
+          try {
+            if (!fileInput.file) continue
+            
+            await uploadFile(fileInput.file, {
+              entity: 'partner_withdrawal_attachment',
+              organization_id: organizationId,
+              project_id: projectId,
+              created_by_member_id: currentMember?.id,
+              link_to: {
+                partner_withdrawal_id: createdWithdrawalId,
+              },
+              category: 'document',
+              description: fileInput.description || fileInput.file.name,
+            })
+          } catch (uploadError: any) {
+            console.error('Error uploading file:', uploadError)
+            toast({
+              variant: 'destructive',
+              title: 'Error al subir archivo',
+              description: uploadError?.message || 'Error desconocido',
+            })
+          }
+        }
+        setFilesToUpload([])
+      }
 
       toast({
         title: "Retiro registrado",
@@ -381,6 +499,29 @@ export function PartnerWithdrawalFormFields({
             </FormItem>
           )}
         />
+
+        <div>
+          <FileUploader
+            mode="multiple"
+            filesToUpload={filesToUpload}
+            existingFiles={existingFiles}
+            onFilesChange={setFilesToUpload}
+            maxSize={10 * 1024 * 1024}
+            accept={{
+              'image/*': ['.png', '.jpg', '.jpeg'],
+              'application/pdf': ['.pdf'],
+              'application/msword': ['.doc'],
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+              'application/vnd.ms-excel': ['.xls'],
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+            }}
+            compressionPreset="document"
+            onExistingFileDelete={handleExistingFileDelete}
+            emptyStateTitle="Sin archivos adjuntos"
+            emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
+            newFileBadgeText="Nuevo"
+          />
+        </div>
       </form>
     </Form>
   )
