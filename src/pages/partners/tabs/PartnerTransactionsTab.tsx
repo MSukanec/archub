@@ -103,31 +103,53 @@ export function PartnerTransactionsTab() {
   }, [contributions, withdrawals]);
 
   const metrics = useMemo(() => {
-    let totalContributions = 0;
-    let totalWithdrawals = 0;
-    let countContributions = 0;
-    let countWithdrawals = 0;
+    const contributionsByCurrency: Record<string, { symbol: string; amount: number }> = {};
+    const withdrawalsByCurrency: Record<string, { symbol: string; amount: number }> = {};
 
     transactions.forEach((t) => {
       if (t.status === 'confirmed') {
+        const key = t.currency_id;
         if (t.type === 'contribution') {
-          totalContributions += t.amount;
-          countContributions += 1;
+          if (!contributionsByCurrency[key]) {
+            contributionsByCurrency[key] = { symbol: t.currency_symbol, amount: 0 };
+          }
+          contributionsByCurrency[key].amount += t.amount;
         } else {
-          totalWithdrawals += t.amount;
-          countWithdrawals += 1;
+          if (!withdrawalsByCurrency[key]) {
+            withdrawalsByCurrency[key] = { symbol: t.currency_symbol, amount: 0 };
+          }
+          withdrawalsByCurrency[key].amount += t.amount;
         }
       }
     });
 
+    // Calcular saldo neto por moneda
+    const allCurrencyIds = new Set([
+      ...Object.keys(contributionsByCurrency),
+      ...Object.keys(withdrawalsByCurrency),
+    ]);
+    const netByCurrency: Record<string, { symbol: string; amount: number }> = {};
+    allCurrencyIds.forEach((currencyId) => {
+      const contrib = contributionsByCurrency[currencyId]?.amount || 0;
+      const withdraw = withdrawalsByCurrency[currencyId]?.amount || 0;
+      const symbol = contributionsByCurrency[currencyId]?.symbol || withdrawalsByCurrency[currencyId]?.symbol || '$';
+      netByCurrency[currencyId] = { symbol, amount: contrib - withdraw };
+    });
+
     return {
-      totalContributions,
-      totalWithdrawals,
-      netBalance: totalContributions - totalWithdrawals,
-      countContributions,
-      countWithdrawals,
+      contributionsByCurrency: Object.values(contributionsByCurrency),
+      withdrawalsByCurrency: Object.values(withdrawalsByCurrency),
+      netByCurrency: Object.values(netByCurrency),
     };
   }, [transactions]);
+
+  // Formato para mostrar breakdown de monedas
+  const formatBreakdown = (items: Array<{ symbol: string; amount: number }>) => {
+    if (items.length === 0) return '$0,00';
+    return items
+      .map((item) => `${item.symbol} ${item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`)
+      .join(' + ');
+  };
 
   const handleEdit = (transaction: UnifiedTransaction) => {
     if (!organizationId) {
@@ -207,7 +229,7 @@ export function PartnerTransactionsTab() {
     {
       key: 'date',
       label: 'Fecha',
-      width: '120px',
+      width: '1fr',
       sortType: 'date' as const,
       render: (item: UnifiedTransaction) => (
         <span className="text-sm text-muted-foreground">
@@ -218,7 +240,7 @@ export function PartnerTransactionsTab() {
     {
       key: 'type',
       label: 'Tipo',
-      width: '120px',
+      width: '1fr',
       render: (item: UnifiedTransaction) => (
         <div className="flex items-center gap-2">
           {item.type === 'contribution' ? (
@@ -238,7 +260,7 @@ export function PartnerTransactionsTab() {
     {
       key: 'partner_name',
       label: 'Socio',
-      width: '120px',
+      width: '1fr',
       render: (item: UnifiedTransaction) => (
         <span className="text-sm font-medium">{item.partner_name}</span>
       ),
@@ -246,7 +268,7 @@ export function PartnerTransactionsTab() {
     {
       key: 'amount',
       label: 'Monto',
-      width: '140px',
+      width: '1fr',
       align: 'right' as const,
       sortType: 'number' as const,
       render: (item: UnifiedTransaction) => (
@@ -265,7 +287,7 @@ export function PartnerTransactionsTab() {
     {
       key: 'status',
       label: 'Estado',
-      width: '120px',
+      width: '1fr',
       render: (item: UnifiedTransaction) => {
         const config = getClientPaymentStatusBadgeConfig(item.status);
         return (
@@ -328,25 +350,22 @@ export function PartnerTransactionsTab() {
         <StatCard data-testid="card-total-contributions">
           <StatCardTitle showArrow={false}>Total Aportes</StatCardTitle>
           <StatCardValue className="text-green-600">
-            ${metrics.totalContributions.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {formatBreakdown(metrics.contributionsByCurrency)}
           </StatCardValue>
-          <StatCardMeta>{metrics.countContributions} aportes confirmados</StatCardMeta>
         </StatCard>
 
         <StatCard data-testid="card-total-withdrawals">
           <StatCardTitle showArrow={false}>Total Retiros</StatCardTitle>
           <StatCardValue className="text-red-600">
-            ${metrics.totalWithdrawals.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {formatBreakdown(metrics.withdrawalsByCurrency)}
           </StatCardValue>
-          <StatCardMeta>{metrics.countWithdrawals} retiros confirmados</StatCardMeta>
         </StatCard>
 
         <StatCard data-testid="card-net-balance">
           <StatCardTitle showArrow={false}>Saldo Neto</StatCardTitle>
-          <StatCardValue className={metrics.netBalance >= 0 ? 'text-green-600' : 'text-red-600'}>
-            ${metrics.netBalance.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <StatCardValue className={metrics.netByCurrency.every(c => c.amount >= 0) ? 'text-green-600' : 'text-red-600'}>
+            {formatBreakdown(metrics.netByCurrency)}
           </StatCardValue>
-          <StatCardMeta>Aportes - Retiros</StatCardMeta>
         </StatCard>
       </div>
 
