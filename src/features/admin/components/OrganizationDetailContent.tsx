@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { DrawerSection } from '@/components/drawer';
+import { useGlobalModalStore } from '@/components/modal';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -314,7 +315,6 @@ export function OrganizationDetailContent({
       queryClient.invalidateQueries({ queryKey: ['admin-organization-members', organization.id] });
       queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
       toast({ title: 'Miembro eliminado' });
-      onSuccess?.();
     },
     onError: (error) => {
       console.error('Error deleting member:', error);
@@ -329,10 +329,24 @@ export function OrganizationDetailContent({
     });
   };
   
+  const { openModal } = useGlobalModalStore();
+  
   const handleDeleteMember = (member: OrganizationMember) => {
-    if (confirm(`¿Eliminar a ${member.user?.full_name || member.user?.email || 'este miembro'} de la organización?`)) {
-      deleteMemberMutation.mutate(member.id);
-    }
+    const memberName = member.user?.full_name || member.user?.email || 'este miembro';
+    openModal('delete-confirmation', {
+      mode: 'delete',
+      title: 'Eliminar Miembro',
+      description: `¿Estás seguro de que deseas eliminar a "${memberName}" de la organización "${organization.name}"?`,
+      itemName: memberName,
+      itemType: 'miembro',
+      consequences: [
+        'El usuario ya no tendrá acceso a esta organización',
+        'Se eliminarán sus permisos asociados'
+      ],
+      onDelete: () => {
+        deleteMemberMutation.mutate(member.id);
+      }
+    });
   };
   
   const handleAddMember = () => {
