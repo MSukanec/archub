@@ -180,14 +180,15 @@ function useOrganizationSubscription(organizationId: string) {
   });
 }
 
-function useRoles() {
+function useOrganizationRoles() {
   return useQuery({
-    queryKey: ['roles'],
+    queryKey: ['organization-roles'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
       const { data, error } = await supabase
         .from('roles')
-        .select('id, name')
+        .select('id, name, type')
+        .eq('type', 'organization')
         .order('name');
       if (error) throw error;
       return data;
@@ -228,7 +229,7 @@ export function OrganizationDetailContent({
   
   const { data: members, isLoading: membersLoading } = useOrganizationMembers(organization.id);
   const { data: subscription, isLoading: subscriptionLoading } = useOrganizationSubscription(organization.id);
-  const { data: roles } = useRoles();
+  const { data: roles } = useOrganizationRoles();
   const { data: allUsers, isLoading: usersLoading } = useAdminUsers();
   
   const existingMemberIds = useMemo(() => 
