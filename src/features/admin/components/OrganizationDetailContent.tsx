@@ -10,7 +10,8 @@ import {
   UserPlus,
   Loader2,
   DollarSign,
-  Building
+  Building,
+  Trash2
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -303,11 +304,40 @@ export function OrganizationDetailContent({
     }
   });
   
+  const deleteMemberMutation = useMutation({
+    mutationFn: async (memberId: string) => {
+      if (!supabase) throw new Error('Supabase not initialized');
+      
+      const { error } = await supabase
+        .from('organization_members')
+        .delete()
+        .eq('id', memberId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-organization-members', organization.id] });
+      queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
+      toast({ title: 'Miembro eliminado' });
+      onSuccess?.();
+    },
+    onError: (error) => {
+      console.error('Error deleting member:', error);
+      toast({ title: 'Error al eliminar miembro', variant: 'destructive' });
+    }
+  });
+
   const handleToggleBillable = (member: OrganizationMember) => {
     updateMemberMutation.mutate({
       memberId: member.id,
       is_billable: !member.is_billable
     });
+  };
+  
+  const handleDeleteMember = (member: OrganizationMember) => {
+    if (confirm(`¿Eliminar a ${member.user?.full_name || member.user?.email || 'este miembro'} de la organización?`)) {
+      deleteMemberMutation.mutate(member.id);
+    }
   };
   
   const handleAddMember = () => {
@@ -572,6 +602,21 @@ export function OrganizationDetailContent({
                         Bloqueado
                       </Badge>
                     )}
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteMember(member)}
+                      disabled={deleteMemberMutation.isPending}
+                      className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                      data-testid={`delete-member-${member.id}`}
+                    >
+                      {deleteMemberMutation.isPending ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-3 w-3" />
+                      )}
+                    </Button>
                   </div>
                 </div>
               ))}
