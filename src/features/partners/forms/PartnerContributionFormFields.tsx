@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
-import { usePartners, useCreatePartnerContribution, usePartnerContribution } from '../hooks'
+import { usePartners, useCreatePartnerContribution, useUpdatePartnerContribution, usePartnerContribution } from '../hooks'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { FileUploader } from '@/components/shared/FileUploader'
 import { uploadFile, deleteFile } from '@/lib/storage'
@@ -93,6 +93,7 @@ export function PartnerContributionFormFields({
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
 
   const createMutation = useCreatePartnerContribution()
+  const updateMutation = useUpdatePartnerContribution()
   const { data: existingContribution, isLoading: loadingContribution } = usePartnerContribution(
     contributionId,
     organizationId
@@ -254,20 +255,40 @@ export function PartnerContributionFormFields({
     }
 
     try {
-      const result = await createMutation.mutateAsync({
-        organization_id: organizationId,
-        project_id: projectId || null,
-        partner_id: data.partner_id,
-        amount: data.amount,
-        currency_id: data.currency_id,
-        exchange_rate: data.exchange_rate || 1,
-        contribution_date: formatDateForDB(data.contribution_date),
-        wallet_id: data.wallet_id,
-        status: data.status,
-        reference: data.reference || null,
-        notes: data.notes || null,
-        created_by: currentMember.id,
-      })
+      let result;
+      
+      if (mode === 'edit' && contributionId) {
+        result = await updateMutation.mutateAsync({
+          contributionId,
+          updates: {
+            partner_id: data.partner_id,
+            amount: data.amount,
+            currency_id: data.currency_id,
+            exchange_rate: data.exchange_rate || 1,
+            contribution_date: formatDateForDB(data.contribution_date),
+            wallet_id: data.wallet_id,
+            status: data.status,
+            reference: data.reference || null,
+            notes: data.notes || null,
+          },
+          organizationId,
+        })
+      } else {
+        result = await createMutation.mutateAsync({
+          organization_id: organizationId,
+          project_id: projectId || null,
+          partner_id: data.partner_id,
+          amount: data.amount,
+          currency_id: data.currency_id,
+          exchange_rate: data.exchange_rate || 1,
+          contribution_date: formatDateForDB(data.contribution_date),
+          wallet_id: data.wallet_id,
+          status: data.status,
+          reference: data.reference || null,
+          notes: data.notes || null,
+          created_by: currentMember.id,
+        })
+      }
 
       const createdContributionId = result?.id || contributionId
 
