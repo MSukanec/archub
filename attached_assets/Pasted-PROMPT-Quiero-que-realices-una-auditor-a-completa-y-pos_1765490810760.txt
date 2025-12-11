@@ -1,0 +1,180 @@
+PROMPT:
+
+Quiero que realices una auditoría completa y posterior refactorización del manejo de multimoneda dentro de mi proyecto Seencel.
+
+🎯 OBJETIVO GENERAL:
+
+Unificar completamente cómo el sistema maneja:
+
+conversiones de moneda
+
+exchange rates
+
+sumatorias y KPIs
+
+formateo
+
+consistencia entre backend y frontend
+
+El estándar correcto que debés aplicar SIEMPRE es el siguiente:
+
+🔥 REGLA CENTRAL DEL SISTEMA MULTIMONEDA (OBLIGATORIA)
+
+Nunca se deben guardar columnas "precalculadas" como amount_converted o similares.
+
+Cada movimiento o entidad monetaria debe guardar SIEMPRE:
+
+amount (monto original)
+
+currency_id (moneda original)
+
+exchange_rate (cotización del momento del movimiento)
+
+created_at (para orden histórico)
+
+Las conversiones SIEMPRE se calculan así:
+
+amount_in_base = amount * exchange_rate
+
+
+Esto debe hacerse:
+
+en un módulo centralizado
+
+nunca repetido
+
+nunca hardcodeado
+
+nunca disperso en componentes
+
+📦 CREÁ UN MÓDULO ÚNICO LLAMADO /lib/money.ts
+
+Debe contener las siguientes funciones:
+
+✔ convert(amount, currencyId, orgCurrencyId, exchangeRate, options?)
+
+Devuelve el valor convertido a la moneda principal de la organización.
+
+✔ format(amount, currencyId, style?)
+
+Devuelve el número formateado correctamente según moneda.
+
+✔ sumByCurrency(items)
+
+Suma montos respetando moneda y cotización.
+
+✔ sumAllInBaseCurrency(items, orgCurrencyId)
+
+Convierte todo a la moneda base aplicando exchange rate.
+
+✔ explainBreakdown(items)
+
+Devuelve un objeto así:
+
+{
+   base_total: 150000,
+   breakdown: {
+       USD: 75000,
+       ARS: 150000000
+   }
+}
+
+✔ helpers visuales
+
+formatKPI(value)
+
+formatSubValue(valueByCurrency)
+
+getEffectiveExchangeRate(currencyId, date?)
+
+🔍 AUDITORÍA OBLIGATORIA ANTES DE REFRACTOR
+
+Debés inspeccionar TODO EL PROYECTO buscando:
+
+lógica hardcodeada de multiplicación por exchange rate
+
+lugares donde el KPI realiza conversiones manuales
+
+componentes que manejan montos sin usar helpers
+
+API routes donde se suman montos incorrectamente
+
+páginas con cálculos dispersos (dashboard, finanzas, movimientos, proyectos)
+
+cualquier función duplicada relacionada a moneda
+
+cualquier inconsistencia entre frontend y backend
+
+Generá UN INFORME en /docs/FINANCE_CURRENCY_AUDIT.md con:
+
+qué encontraste
+
+qué está bien
+
+qué está mal
+
+qué archivos requieren refactor
+
+qué cálculos están duplicados
+
+qué cálculos son incorrectos
+
+🔧 REFRACTOR POST-AUDITORÍA
+
+Refactorizá SOLO las partes necesarias, siguiendo este orden:
+
+1. Primero, reemplazá lógica duplicada por funciones del módulo money.
+2. Actualizá los KPIs para que SIEMPRE funcionen así:
+
+valor grande: total convertido a la moneda principal
+
+valor chico: breakdown real por moneda (USD 75.000 + ARS 150.000.000)
+
+3. Asegurate que todos los KPIs usen las mismas funciones centralizadas.
+4. Asegurate de NO modificar nada que no sea monetario.
+
+(no reescribas layout, no cambies estilos, no modifiques texto, no cambies estructura de componentes)
+
+5. Documentá TODO en:
+
+/docs/CURRENCY_SYSTEM_DESIGN.md
+
+Incluyendo:
+
+reglas del sistema
+
+ejemplos de uso
+
+cómo extender a nuevas monedas
+
+cómo usar estas funciones desde APIs
+
+cómo usar estas funciones desde componentes React
+
+❗ IMPORTANTE – NO HACER
+
+No agregar nuevas columnas en ninguna tabla.
+No recalcular movimientos históricos.
+No cambiar datos de tablas.
+No aplicar migraciones sin pedirlo explícitamente.
+No borrar conversión manual si todavía no terminaste de migrarla al módulo nuevo.
+
+📌 RESULTADO ESPERADO
+
+Al terminar, el proyecto debe tener:
+
+un sistema multimoneda profesional
+
+una API coherente
+
+KPIs consistentes
+
+cálculos unificados
+
+sin duplicación de lógica
+
+sin cálculos hardcodeados
+
+sin riesgo de inconsistencia histórica
+
+FIN DEL PROMPT
