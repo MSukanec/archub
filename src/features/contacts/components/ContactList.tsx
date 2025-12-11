@@ -22,8 +22,8 @@ export default function ContactList({
   // Sort contacts alphabetically by name
   const sortedContacts = useMemo(() => {
     return [...contacts].sort((a, b) => {
-      const nameA = `${a.first_name || ''} ${a.last_name || ''}`.trim().toLowerCase();
-      const nameB = `${b.first_name || ''} ${b.last_name || ''}`.trim().toLowerCase();
+      const nameA = (a.full_name || `${a.first_name || ''} ${a.last_name || ''}`.trim() || a.linked_user?.full_name || '').toLowerCase();
+      const nameB = (b.full_name || `${b.first_name || ''} ${b.last_name || ''}`.trim() || b.linked_user?.full_name || '').toLowerCase();
       return nameA.localeCompare(nameB);
     });
   }, [contacts]);
@@ -57,7 +57,7 @@ export default function ContactList({
       label: "Nombre",
       sortable: false,
       render: (contact: ContactWithRelations) => {
-        const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || '—';
+        const fullName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.linked_user?.full_name || '—';
         
         return (
           <div className="flex items-center gap-3">

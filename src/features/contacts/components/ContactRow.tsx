@@ -69,7 +69,7 @@ export default function ContactRow({
     linked_user,
   } = contact;
 
-  const displayName = full_name || `${first_name} ${last_name || ""}`.trim();
+  const displayName = full_name || `${first_name || ''} ${last_name || ""}`.trim() || linked_user?.full_name || "";
 
   let subtitle = email || company_name || "";
 
