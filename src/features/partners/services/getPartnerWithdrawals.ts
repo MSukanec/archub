@@ -47,7 +47,23 @@ export async function getPartnerWithdrawalById(
         created_at,
         contacts!inner(id, first_name, last_name, email, phone, company_name)
       ),
-      currency:currencies(id, name, symbol, code)
+      currency:currencies(id, name, symbol, code),
+      media_links(
+        id,
+        media_file_id,
+        media_file:media_files(
+          id,
+          file_name,
+          file_url,
+          file_type,
+          file_size,
+          bucket,
+          file_path
+        ),
+        category,
+        description,
+        is_cover
+      )
     `)
     .eq('id', id)
     .eq('organization_id', organizationId)

@@ -46,6 +46,25 @@ export interface PartnerUpdateInput {
   status?: 'active' | 'inactive' | 'deleted'
 }
 
+export interface MediaFile {
+  id: string
+  file_name: string | null
+  file_url: string | null
+  file_type: string
+  file_size: number | null
+  bucket: string
+  file_path: string
+}
+
+export interface MediaLink {
+  id: string
+  media_file_id: string
+  media_file: MediaFile
+  category: string | null
+  description: string | null
+  is_cover: boolean | null
+}
+
 export interface PartnerContribution {
   id: string
   project_id: string | null
@@ -65,6 +84,7 @@ export interface PartnerContribution {
   deleted_at?: string | null
   partner?: Partner
   currency?: { id: string; name: string; symbol: string; code: string }
+  media_links?: MediaLink[]
 }
 
 export interface PartnerWithdrawal {
@@ -86,6 +106,7 @@ export interface PartnerWithdrawal {
   deleted_at?: string | null
   partner?: Partner
   currency?: { id: string; name: string; symbol: string; code: string }
+  media_links?: MediaLink[]
 }
 
 export interface PartnerContributionCreateInput {

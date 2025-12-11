@@ -164,66 +164,29 @@ export function PartnerWithdrawalFormFields({
   }, [wallets, walletsLoading, mode, withdrawalId, form])
 
   useEffect(() => {
-    const fetchAttachments = async () => {
-      if (!withdrawalId || !organizationId) return
-      
-      try {
-        const { data, error } = await supabase
-          .from('media_links')
-          .select(`
-            id,
-            description,
-            category,
-            created_at,
-            media_file:media_file_id (
-              id,
-              file_url,
-              file_name,
-              file_type,
-              file_size
-            )
-          `)
-          .eq('partner_withdrawal_id', withdrawalId)
-          .eq('organization_id', organizationId)
-          .order('created_at', { ascending: true })
-        
-        if (error) {
-          console.error('Error fetching withdrawal attachments:', error)
-          return
-        }
-        
-        const transformedData = (data || []).map((item: any) => ({
-          id: item.id,
-          description: item.description,
-          category: item.category,
-          created_at: item.created_at,
-          media_file: Array.isArray(item.media_file) && item.media_file.length > 0
-            ? item.media_file[0]
-            : item.media_file
-        }))
-        
-        setAttachments(transformedData)
-      } catch (error) {
-        console.error('Error fetching withdrawal attachments:', error)
+    if (mode === 'edit' || mode === 'view') {
+      if (existingWithdrawal?.media_links) {
+        setAttachments(existingWithdrawal.media_links)
+      } else {
+        setAttachments([])
       }
     }
-    
-    if (mode === 'edit' || mode === 'view') {
-      fetchAttachments()
-    }
-  }, [withdrawalId, organizationId, mode])
+  }, [existingWithdrawal, mode])
 
   const existingFiles = useMemo(() => {
     if (!attachments || attachments.length === 0) return []
     
-    return attachments.map((attachment: any) => ({
-      id: attachment.media_file?.id || attachment.id,
-      file_name: attachment.media_file?.file_name || 'Archivo adjunto',
-      file_type: attachment.media_file?.file_type || 'document',
-      file_size: attachment.media_file?.file_size || 0,
-      file_url: attachment.media_file?.file_url || '',
-      isExisting: true,
-    }))
+    return attachments.map((attachment: any) => {
+      const mediaFile = attachment.media_file || attachment
+      return {
+        id: attachment.id || mediaFile.id,
+        file_name: mediaFile.file_name || 'Archivo adjunto',
+        file_type: mediaFile.file_type || 'document',
+        file_size: mediaFile.file_size || 0,
+        file_url: mediaFile.file_url || '',
+        isExisting: true,
+      }
+    })
   }, [attachments])
 
   const handleExistingFileDelete = async (fileId: string) => {
