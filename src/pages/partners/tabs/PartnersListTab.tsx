@@ -176,50 +176,65 @@ export function PartnersListTab() {
     },
   ];
 
+  // Show only empty state when no partners
+  if (!isLoading && enrichedPartners.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <HandHeart className="h-12 w-12 text-muted-foreground/50 mb-4" />
+        <h3 className="text-lg font-semibold mb-2">No hay socios en esta organización</h3>
+        <p className="text-muted-foreground mb-6 max-w-md">
+          Agrega socios para gestionar las participaciones de tu organización.
+        </p>
+        <Button onClick={handleAddPartner} data-testid="button-add-partner-empty">
+          <Plus className="h-4 w-4 mr-2" />
+          Agregar Socio
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {enrichedPartners.length > 0 && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard data-testid="stat-card-total-partners" className="col-span-2">
-            <StatCardTitle showArrow={false}>
-              <Users className="w-4 h-4 inline mr-1" />
-              Total Socios
-            </StatCardTitle>
-            <StatCardValue>
-              {metrics.totalPartners}
-            </StatCardValue>
-            <StatCardMeta>
-              Socios en la organización
-            </StatCardMeta>
-          </StatCard>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard data-testid="stat-card-total-partners" className="col-span-2">
+          <StatCardTitle showArrow={false}>
+            <Users className="w-4 h-4 inline mr-1" />
+            Total Socios
+          </StatCardTitle>
+          <StatCardValue>
+            {metrics.totalPartners}
+          </StatCardValue>
+          <StatCardMeta>
+            Socios en la organización
+          </StatCardMeta>
+        </StatCard>
 
-          <StatCard data-testid="stat-card-total-contributions">
-            <StatCardTitle showArrow={false}>
-              <TrendingUp className="w-4 h-4 inline mr-1" />
-              Aportes
-            </StatCardTitle>
-            <StatCardValue>
-              {metrics.totalContributions}
-            </StatCardValue>
-            <StatCardMeta>
-              Aportes confirmados
-            </StatCardMeta>
-          </StatCard>
+        <StatCard data-testid="stat-card-total-contributions">
+          <StatCardTitle showArrow={false}>
+            <TrendingUp className="w-4 h-4 inline mr-1" />
+            Aportes
+          </StatCardTitle>
+          <StatCardValue>
+            {metrics.totalContributions}
+          </StatCardValue>
+          <StatCardMeta>
+            Aportes confirmados
+          </StatCardMeta>
+        </StatCard>
 
-          <StatCard data-testid="stat-card-recent-contributions">
-            <StatCardTitle showArrow={false}>
-              <Calendar className="w-4 h-4 inline mr-1" />
-              Recientes
-            </StatCardTitle>
-            <StatCardValue>
-              {metrics.recentContributions}
-            </StatCardValue>
-            <StatCardMeta>
-              Aportes del último mes
-            </StatCardMeta>
-          </StatCard>
-        </div>
-      )}
+        <StatCard data-testid="stat-card-recent-contributions">
+          <StatCardTitle showArrow={false}>
+            <Calendar className="w-4 h-4 inline mr-1" />
+            Recientes
+          </StatCardTitle>
+          <StatCardValue>
+            {metrics.recentContributions}
+          </StatCardValue>
+          <StatCardMeta>
+            Aportes del último mes
+          </StatCardMeta>
+        </StatCard>
+      </div>
 
       <Table
         columns={columns}
@@ -228,21 +243,6 @@ export function PartnersListTab() {
         showDoubleHeader={false}
         defaultSort={{ key: 'partnerName', direction: 'asc' }}
         onRowClick={handleEdit}
-        emptyStateConfig={{
-          icon: <HandHeart className="h-12 w-12 text-muted-foreground" />,
-          title: 'No hay socios en esta organización',
-          description: 'Agrega socios para gestionar las participaciones de tu organización.',
-          action: (
-            <Button
-              onClick={handleAddPartner}
-              size="sm"
-              data-testid="button-add-partner-empty"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Agregar Socio
-            </Button>
-          ),
-        }}
         rowActions={(partner: EnrichedPartner) => [
           {
             label: 'Editar Socio',

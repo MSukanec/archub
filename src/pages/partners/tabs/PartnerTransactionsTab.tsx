@@ -284,6 +284,29 @@ export function PartnerTransactionsTab() {
     );
   }
 
+  // Show only empty state when no transactions
+  if (transactions.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <ArrowDownCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
+        <h3 className="text-lg font-semibold mb-2">No hay transacciones</h3>
+        <p className="text-muted-foreground mb-6 max-w-md">
+          Aún no se han registrado aportes ni retiros de socios.
+        </p>
+        <div className="flex items-center gap-2">
+          <Button onClick={handleAddContribution} data-testid="button-empty-add-contribution">
+            <Plus className="h-4 w-4 mr-1" />
+            Nuevo Aporte
+          </Button>
+          <Button onClick={handleAddWithdrawal} data-testid="button-empty-add-withdrawal">
+            <Plus className="h-4 w-4 mr-1" />
+            Nuevo Retiro
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -319,45 +342,6 @@ export function PartnerTransactionsTab() {
         defaultSort={{ key: 'date', direction: 'desc' }}
         topBar={{
           showSearch: true,
-          customActions: (
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAddContribution}
-                data-testid="button-add-contribution"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Aporte
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAddWithdrawal}
-                data-testid="button-add-withdrawal"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Retiro
-              </Button>
-            </div>
-          ),
-        }}
-        emptyStateConfig={{
-          icon: <ArrowDownCircle className="h-12 w-12 text-muted-foreground/50" />,
-          title: 'No hay transacciones',
-          description: 'Aún no se han registrado aportes ni retiros de socios.',
-          action: (
-            <div className="flex items-center gap-2">
-              <Button onClick={handleAddContribution} data-testid="button-empty-add-contribution">
-                <Plus className="h-4 w-4 mr-1" />
-                Nuevo Aporte
-              </Button>
-              <Button variant="outline" onClick={handleAddWithdrawal} data-testid="button-empty-add-withdrawal">
-                <Plus className="h-4 w-4 mr-1" />
-                Nuevo Retiro
-              </Button>
-            </div>
-          ),
         }}
         renderCard={(item: UnifiedTransaction) => (
           <div className="p-4 border rounded-lg space-y-3">
