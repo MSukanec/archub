@@ -410,6 +410,7 @@ export { FeatureFormFields } from './forms/FeatureFormFields';
 | MaterialPayment | `forms/MaterialPaymentFormFields.tsx` | `modals/MaterialPaymentModal.tsx` | 2025-12-10 |
 | PersonnelPayment | `forms/PersonnelPaymentFormFields.tsx` | `modals/PersonnelPaymentModal.tsx` | 2025-12-10 |
 | NewMovement | (usa los 3 anteriores) | `modals/NewMovementModal.tsx` | 2025-12-10 |
+| Organization | `forms/OrganizationFormFields.tsx` | `modals/admin/OrganizationFormModal.tsx` | 2025-12-11 |
 
 ---
 

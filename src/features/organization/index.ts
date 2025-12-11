@@ -14,5 +14,6 @@ export { ContactAttachmentsSubform } from './modals/contact-forms/ContactAttachm
 export { ProfileOrganizationFormModal } from './modals/ProfileOrganizationFormModal';
 
 export { OrganizationFormModal } from './modals/admin/OrganizationFormModal';
+export { OrganizationFormFields } from './forms/OrganizationFormFields';
 
 export { default as AdminOrganizationRow } from './components/admin/AdminOrganizationRow';

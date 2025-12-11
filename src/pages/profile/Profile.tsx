@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User } from 'lucide-react';
+import { User, Plus } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
@@ -9,10 +9,12 @@ import { ProfileOrganizations } from './ProfileOrganizations';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { useGlobalModalStore } from '@/components/modal';
 
 export default function Profile() {
   const [location, setLocation] = useLocation();
   const { data: userData, isLoading } = useCurrentUser();
+  const { openModal } = useGlobalModalStore();
   
   // Determinar el tab activo basado en la URL
   const getActiveTabFromUrl = (url: string): string => {
@@ -69,7 +71,14 @@ export default function Profile() {
     subtitle: `${user?.email || 'Usuario'} • Perfil Personal`,
     description: 'Administra tu información personal, preferencias de la aplicación y las organizaciones a las que perteneces.',
     tabs: headerTabs,
-    onTabChange: handleTabChange
+    onTabChange: handleTabChange,
+    ...(activeTab === 'Organizaciones' && {
+      actionButton: {
+        label: 'Nueva Organización',
+        icon: Plus,
+        onClick: () => openModal('organization')
+      }
+    })
   };
 
   if (isLoading) {
