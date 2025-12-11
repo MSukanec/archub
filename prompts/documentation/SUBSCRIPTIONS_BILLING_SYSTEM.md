@@ -27,6 +27,12 @@
 17. [Reglas Críticas](#17-reglas-críticas)
 18. [Escenarios de Negocio](#18-escenarios-de-negocio)
 19. [Propuesta de Mejoras](#19-propuesta-de-mejoras)
+20. [Auditoría Técnica - Preguntas Críticas](#20-auditoría-técnica---preguntas-críticas)
+21. [Flujos Detallados a Documentar](#21-flujos-detallados-a-documentar)
+22. [Mapa de Validaciones y Dependencias](#22-mapa-de-validaciones-y-dependencias)
+23. [Roadmap de Correcciones](#23-roadmap-de-correcciones)
+24. [Tabla Comparativa: Actual vs Ideal](#24-tabla-comparativa-actual-vs-ideal)
+25. [Instrucciones de Mantenimiento](#25-instrucciones-de-mantenimiento) ⚠️ **LEER SIEMPRE**
 
 ---
 
@@ -1070,6 +1076,265 @@ WHERE EXISTS (
   SELECT 1 FROM organization_members WHERE organization_id = o.id AND is_over_limit = true
 );
 ```
+
+---
+
+## 20. AUDITORÍA TÉCNICA - PREGUNTAS CRÍTICAS
+
+> **IMPORTANTE**: Esta sección contiene las preguntas que DEBEN responderse explícitamente cada vez que se realice una auditoría del sistema de billing.
+
+### 20.1 Preguntas de Validación de Arquitectura
+
+| # | Pregunta | Respuesta Esperada | Estado Actual |
+|---|----------|-------------------|---------------|
+| 1 | ¿Hay algún lugar donde se consulta "subscription" para validar permisos o features? | NO debería haber | ⚠️ PENDIENTE VERIFICAR |
+| 2 | ¿Hay algún lugar que bloquea invitaciones por no tener suscripción, aunque el plan sea Teams regalado? | NO debería haber | ⚠️ PENDIENTE VERIFICAR |
+| 3 | ¿Está bien implementado el cupón 100%? | Debe crear suscripción sin gateway | ✅ IMPLEMENTADO |
+| 4 | ¿Se crea correctamente la suscripción con `provider_subscription_id = NULL`? | SÍ para cupones 100% | ✅ IMPLEMENTADO |
+| 5 | ¿Dónde falla exactamente el upgrade a Teams? | No debería fallar | ⚠️ PENDIENTE VERIFICAR |
+| 6 | ¿Qué pasa hoy si se invita un miembro facturable sin método de pago? | Debería exigir método de pago | ⚠️ PENDIENTE IMPLEMENTAR |
+| 7 | ¿Qué pasa hoy si se invita un miembro NO facturable? | Debería permitirse sin restricciones | ⚠️ PENDIENTE VERIFICAR |
+| 8 | ¿El sistema distingue correctamente entre: owner, miembros gratis, miembros facturables? | SÍ via `is_billable` | ✅ PARCIAL |
+| 9 | ¿Hay dependencias incorrectas con Mercado Pago o PayPal? | NO debería haber | ⚠️ PENDIENTE VERIFICAR |
+| 10 | ¿El backend y el frontend usan la misma lógica o hay contradicciones? | Misma lógica | ⚠️ PENDIENTE VERIFICAR |
+
+### 20.2 Principios de SaaS Seat-Based Moderno
+
+Estas son las reglas que el sistema DEBE cumplir:
+
+1. **Features dependen SOLO de `organizations.plan_id`**, NO del estado de la suscripción
+2. **Seats facturables dependen de `organization_members.is_billable = true`**
+3. **Invitar miembros facturables solo requiere método de pago**, no suscripción activa si el plan fue regalado
+4. **Cupones 100% crean suscripciones válidas** sin pasar por PayPal/MercadoPago
+5. **Plan Teams regalado permite invitar miembros NO facturables** sin errores
+6. **Plan Teams regalado exige método de pago** solo cuando se agrega el primer miembro facturable
+7. **Ninguna parte del código bloquea acciones** por falta de suscripción si el plan es válido
+8. **La UI no chequea "suscripción activa" para features**, solo para billing
+
+---
+
+## 21. FLUJOS DETALLADOS A DOCUMENTAR
+
+### 21.1 Creación de Organización FREE
+
+```
+1. Usuario se registra
+2. Se crea organization con plan_id = FREE
+3. Se crea organization_member (owner, is_billable = false)
+4. NO se crea organization_subscription (FREE no requiere)
+5. Features limitados según plans.features del FREE
+```
+
+### 21.2 Creación de Suscripción Normal (Pago)
+
+```
+1. Usuario selecciona plan (PRO/TEAMS)
+2. Usuario selecciona período (monthly/annual)
+3. Usuario selecciona gateway (PayPal/MP)
+4. Se crea preferencia/orden en gateway
+5. Usuario paga en gateway externo
+6. Webhook/callback confirma pago
+7. Se crea payment record
+8. Se crea organization_subscription
+9. Se actualiza organizations.plan_id
+10. Se crea billing_cycle
+11. Si es annual → aplicar Founders Program
+```
+
+### 21.3 Creación de Suscripción con Cupón 100%
+
+```
+1. Usuario aplica cupón en checkout
+2. Backend valida cupón (validate_subscription_coupon RPC)
+3. Si amount_after_discount = 0:
+   a. NO se pasa por gateway
+   b. Se crea organization_subscription directamente
+   c. provider_subscription_id = NULL
+   d. Se marca owner como is_billable = false
+   e. Se registra coupon_redemption
+4. Se actualiza organizations.plan_id
+5. Features activados inmediatamente
+```
+
+### 21.4 Invitación de Miembro
+
+```
+1. Admin hace click en "Invitar"
+2. Backend verifica:
+   a. ¿Admin tiene permisos? (role check)
+   b. ¿Límite de miembros del plan alcanzado? (max_members check)
+3. Si pasa validaciones → crear invitation
+4. Si usuario existe → notificación in-app
+5. Si usuario no existe → email de invitación
+```
+
+### 21.5 Invitación de Miembro Facturable (TEAMS)
+
+```
+1. Mismo flujo que 21.4
+2. ADICIONAL: verificar provider_subscription_id
+   a. Si NULL y is_billable = true → ERROR "Debe configurar método de pago"
+   b. Si existe → calcular proration del seat
+   c. Crear pago del seat prorrateado
+   d. Actualizar transaction_amount en suscripción recurrente
+3. Crear invitation con is_billable = true
+```
+
+### 21.6 Invitación de Miembro NO Facturable
+
+```
+1. Mismo flujo que 21.4
+2. NO requiere provider_subscription_id
+3. NO cobra seat adicional
+4. Crear invitation con is_billable = false
+```
+
+### 21.7 Upgrade de Plan
+
+```
+1. Usuario en plan X quiere plan Y (Y > X)
+2. Calcular proration (días restantes × precio actual)
+3. Precio final = precio nuevo - crédito proration
+4. Si gateway = MP:
+   a. Crear preference de pago único (diferencia)
+   b. Crear preapproval diferido (start_date = expires_at actual)
+5. Usuario paga
+6. Cancelar suscripción anterior
+7. Activar nuevo plan INMEDIATAMENTE
+8. Reactivar bonus course enrollments si aplica
+```
+
+### 21.8 Owner con Cupón 100% Agregando Primer Miembro Pagado
+
+```
+1. Org tiene plan TEAMS via cupón 100%
+2. provider_subscription_id = NULL (nunca pagó)
+3. Admin quiere agregar miembro facturable
+4. Sistema detecta: no hay suscripción recurrente
+5. CREAR nueva suscripción en MP (no actualizar):
+   a. Precio = precio por seat del plan
+   b. Guardar nuevo provider_subscription_id
+6. Cobrar seat prorrateado
+7. Crear invitation con is_billable = true
+```
+
+---
+
+## 22. MAPA DE VALIDACIONES Y DEPENDENCIAS
+
+### 22.1 Archivos que Consultan Plans/Subscriptions
+
+| Archivo | Qué Consulta | Propósito | Correcto? |
+|---------|--------------|-----------|-----------|
+| `server/lib/handlers/organization/inviteMember.ts` | `plans.features` | Límite de miembros | ✅ |
+| `server/lib/handlers/checkout/shared/plan-limits.ts` | `plans.features` | Soft-lock | ✅ |
+| `src/utils/planHelpers.ts` | `plan.slug` | Verificar plan pagado | ✅ |
+| `src/features/shared-content/pricing/*` | `plans.*` | UI de pricing | ✅ |
+
+### 22.2 Lugares Donde Se Mezcla Features con Billing
+
+> IMPORTANTE: Documentar aquí cada lugar donde se encuentre esta mezcla incorrecta.
+
+| Archivo | Línea | Problema | Corrección |
+|---------|-------|----------|------------|
+| *Pendiente auditar* | - | - | - |
+
+### 22.3 Lugares Que Bloquean por Ausencia de Suscripción
+
+> IMPORTANTE: Estos son ERRORES si el plan es válido.
+
+| Archivo | Línea | Problema | Corrección |
+|---------|-------|----------|------------|
+| *Pendiente auditar* | - | - | - |
+
+### 22.4 Dependencias de Gateways
+
+| Archivo | Gateway | Problema Potencial |
+|---------|---------|-------------------|
+| `server/lib/handlers/checkout/mp/*` | MercadoPago | Correcto (handler específico) |
+| `server/lib/handlers/checkout/paypal/*` | PayPal | Correcto (handler específico) |
+
+---
+
+## 23. ROADMAP DE CORRECCIONES
+
+### P0 - Crítico (Bloquea funcionalidad core)
+
+| # | Descripción | Archivo | Estado |
+|---|-------------|---------|--------|
+| 1 | Verificar `provider_subscription_id` antes de agregar seats facturables | `inviteMember.ts` | ⚠️ PENDIENTE |
+| 2 | Permitir miembros NO facturables sin método de pago | `inviteMember.ts` | ⚠️ PENDIENTE |
+| 3 | UI para marcar miembro como `is_billable = false` | `InvitationModal.tsx` | ⚠️ PENDIENTE |
+
+### P1 - Importante (Mejora experiencia)
+
+| # | Descripción | Archivo | Estado |
+|---|-------------|---------|--------|
+| 1 | Proration para PayPal | `paypal/*` | ⚠️ PENDIENTE |
+| 2 | Crear suscripción recurrente al primer seat pagado en org con cupón 100% | `mp/createSeatSubscription.ts` | ⚠️ PENDIENTE |
+
+### P2 - Mejora (Nice to have)
+
+| # | Descripción | Archivo | Estado |
+|---|-------------|---------|--------|
+| 1 | Dashboard de monitoreo de suscripciones | - | ⚠️ PENDIENTE |
+| 2 | Alertas de pagos fallidos | - | ⚠️ PENDIENTE |
+
+---
+
+## 24. TABLA COMPARATIVA: ACTUAL vs IDEAL
+
+| Aspecto | Estado Actual | Estado Ideal |
+|---------|---------------|--------------|
+| Features dependen de... | `plan_id` | ✅ `plan_id` |
+| Billing depende de... | `subscription.status` | ✅ `subscription.status` |
+| Invitar miembro NO facturable | Requiere verificar límite | ✅ Solo verificar límite |
+| Invitar miembro facturable | Requiere verificar límite | Verificar límite + `provider_subscription_id` |
+| Cupón 100% crea suscripción | ✅ Sin gateway | ✅ Sin gateway |
+| Primer seat en org con cupón 100% | ⚠️ Posible error | Crear nueva suscripción recurrente |
+| UI para `is_billable` | ❌ No existe | Checkbox en InvitationModal |
+
+---
+
+## 25. INSTRUCCIONES DE MANTENIMIENTO
+
+### ⚠️ REGLA CRÍTICA DE AUTO-ACTUALIZACIÓN
+
+> **CADA VEZ QUE SE IMPLEMENTE ALGO NUEVO EN EL SISTEMA DE BILLING/SUSCRIPCIONES, ESTA DOCUMENTACIÓN DEBE ACTUALIZARSE.**
+
+### Cuándo Actualizar Este Documento
+
+1. **Nuevo endpoint de billing** → Agregar a sección 13 (Endpoints API)
+2. **Nuevo flujo de pago** → Agregar a sección 4 o 21 (Flujos)
+3. **Cambio en modelo de datos** → Actualizar sección 2 (Modelo de Datos)
+4. **Nuevo cron job** → Agregar a sección 11 (Cron Jobs)
+5. **Fix de bug crítico** → Documentar en sección 22/23 y marcar como resuelto
+6. **Nueva integración de gateway** → Agregar a sección 12 (Gateways)
+7. **Cambio en límites de plan** → Actualizar sección 3 (Jerarquía de Planes)
+8. **Nuevo componente frontend** → Agregar a sección 14 (Componentes Frontend)
+
+### Formato de Actualización
+
+```markdown
+### [Fecha] - [Descripción breve]
+
+**Archivos modificados:**
+- `path/to/file.ts` - Descripción del cambio
+
+**Impacto:**
+- [Qué funcionalidad cambia]
+
+**Testing requerido:**
+- [ ] Test 1
+- [ ] Test 2
+```
+
+### Historial de Cambios
+
+| Fecha | Cambio | Autor |
+|-------|--------|-------|
+| 2025-12-11 | Documentación consolidada inicial | Auditoría Técnica |
+| 2025-12-11 | Agregadas secciones 20-25 con auditoría exhaustiva | Prompt de Auditoría |
 
 ---
 
