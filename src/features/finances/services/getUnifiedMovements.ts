@@ -109,7 +109,31 @@ export async function getUnifiedMovements(
   const partnerIds = movements
     .filter(m => (m.movement_type === 'partner_contribution' || m.movement_type === 'partner_withdrawal') && m.partner_id)
     .map(m => m.partner_id) as string[];
-  const paymentIds = movements.map(m => m.id) as string[];
+
+  // Build separate ID arrays for each payment type for more efficient media_links query
+  const clientPaymentIdSet = new Set(movements.filter(m => m.movement_type === 'client_payment').map(m => m.id));
+  const materialPaymentIdSet = new Set(movements.filter(m => m.movement_type === 'material_payment').map(m => m.id));
+  const personnelPaymentIdSet = new Set(movements.filter(m => m.movement_type === 'personnel_payment').map(m => m.id));
+  const partnerContributionIdSet = new Set(movements.filter(m => m.movement_type === 'partner_contribution').map(m => m.id));
+  const partnerWithdrawalIdSet = new Set(movements.filter(m => m.movement_type === 'partner_withdrawal').map(m => m.id));
+
+  // Build the OR filter parts only for types that have payments
+  const orFilterParts: string[] = [];
+  if (clientPaymentIdSet.size > 0) {
+    orFilterParts.push(`client_payment_id.in.(${Array.from(clientPaymentIdSet).join(',')})`);
+  }
+  if (materialPaymentIdSet.size > 0) {
+    orFilterParts.push(`material_payment_id.in.(${Array.from(materialPaymentIdSet).join(',')})`);
+  }
+  if (personnelPaymentIdSet.size > 0) {
+    orFilterParts.push(`personnel_payment_id.in.(${Array.from(personnelPaymentIdSet).join(',')})`);
+  }
+  if (partnerContributionIdSet.size > 0) {
+    orFilterParts.push(`partner_contribution_id.in.(${Array.from(partnerContributionIdSet).join(',')})`);
+  }
+  if (partnerWithdrawalIdSet.size > 0) {
+    orFilterParts.push(`partner_withdrawal_id.in.(${Array.from(partnerWithdrawalIdSet).join(',')})`);
+  }
 
   const [projectsResult, currenciesResult, walletsResult, clientsResult, personnelResult, partnersResult, attachmentsResult] = await Promise.all([
     projectIds.length > 0 
@@ -130,10 +154,10 @@ export async function getUnifiedMovements(
     partnerIds.length > 0
       ? supabase.from('partners').select('id, contact:contacts(id, full_name, company_name)').in('id', partnerIds)
       : { data: [], error: null },
-    paymentIds.length > 0
-      ? supabase.from('media_links').select('id, client_payment_id, material_payment_id, personnel_payment_id, partner_contribution_id, partner_withdrawal_id').or(
-          `client_payment_id.in.(${paymentIds.join(',')}),material_payment_id.in.(${paymentIds.join(',')}),personnel_payment_id.in.(${paymentIds.join(',')}),partner_contribution_id.in.(${paymentIds.join(',')}),partner_withdrawal_id.in.(${paymentIds.join(',')})`
-        )
+    orFilterParts.length > 0
+      ? supabase.from('media_links')
+          .select('id, client_payment_id, material_payment_id, personnel_payment_id, partner_contribution_id, partner_withdrawal_id')
+          .or(orFilterParts.join(','))
       : { data: [], error: null },
   ]);
 
