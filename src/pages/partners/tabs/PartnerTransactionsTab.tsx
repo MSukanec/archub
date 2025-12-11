@@ -201,7 +201,7 @@ export function PartnerTransactionsTab() {
     {
       key: 'date',
       label: 'Fecha',
-      width: '110px',
+      width: '120px',
       sortType: 'date' as const,
       render: (item: UnifiedTransaction) => (
         <span className="text-sm text-muted-foreground">
@@ -212,7 +212,7 @@ export function PartnerTransactionsTab() {
     {
       key: 'type',
       label: 'Tipo',
-      width: '110px',
+      width: '120px',
       render: (item: UnifiedTransaction) => (
         <div className="flex items-center gap-2">
           {item.type === 'contribution' ? (
@@ -232,7 +232,7 @@ export function PartnerTransactionsTab() {
     {
       key: 'partner_name',
       label: 'Socio',
-      width: '150px',
+      width: '120px',
       render: (item: UnifiedTransaction) => (
         <span className="text-sm font-medium">{item.partner_name}</span>
       ),
@@ -240,7 +240,7 @@ export function PartnerTransactionsTab() {
     {
       key: 'amount',
       label: 'Monto',
-      width: '140px',
+      width: '120px',
       align: 'right' as const,
       sortType: 'number' as const,
       render: (item: UnifiedTransaction) => (
@@ -252,7 +252,7 @@ export function PartnerTransactionsTab() {
     {
       key: 'status',
       label: 'Estado',
-      width: '110px',
+      width: '120px',
       render: (item: UnifiedTransaction) => {
         const config = getClientPaymentStatusBadgeConfig(item.status);
         return (
