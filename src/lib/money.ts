@@ -297,6 +297,16 @@ export interface ConvertToBaseOptions {
    * - 'zero': Retorna 0 para evitar mezclar monedas (usado en partner-metrics)
    */
   onMissingBase?: 'passthrough' | 'zero';
+  
+  /**
+   * Código de la moneda que se usa como referencia en el exchange_rate.
+   * Por defecto es 'USD'. El exchange_rate siempre significa "1 [quoteCurrency] = X [otra moneda]".
+   * 
+   * Ejemplo con quoteCurrency='USD' y exchange_rate=1000:
+   * - Si item está en USD y base es ARS → multiplica (100 USD * 1000 = 100,000 ARS)
+   * - Si item está en ARS y base es USD → divide (100,000 ARS / 1000 = 100 USD)
+   */
+  quoteCurrency?: string;
 }
 
 /**
@@ -305,6 +315,13 @@ export interface ConvertToBaseOptions {
  * 
  * Esta es la función principal para usar en hooks y servicios.
  * Acepta tanto código de moneda (e.g., "ARS", "USD") como ID de moneda.
+ * 
+ * IMPORTANTE: El exchange_rate siempre está definido como "1 [quoteCurrency] = X [otra moneda]"
+ * Por ejemplo, si quoteCurrency='USD' y exchange_rate=1000, significa 1 USD = 1000 ARS.
+ * 
+ * La dirección de conversión se determina automáticamente:
+ * - Si el item está en quoteCurrency (USD) y base es otra (ARS) → multiplica
+ * - Si el item está en otra moneda (ARS) y base es quoteCurrency (USD) → divide
  * 
  * @param item - Item con amount, currency y exchange_rate
  * @param baseCurrencyCodeOrId - Código (e.g., "ARS") o ID de la moneda base
@@ -316,7 +333,7 @@ export function convertToBaseCurrency(
   baseCurrencyCodeOrId?: string,
   options: ConvertToBaseOptions = {}
 ): number {
-  const { onMissingBase = 'passthrough' } = options;
+  const { onMissingBase = 'passthrough', quoteCurrency = 'USD' } = options;
   
   // Si no hay moneda base definida, usar estrategia configurada
   if (!baseCurrencyCodeOrId) {
@@ -337,8 +354,17 @@ export function convertToBaseCurrency(
     return item.amount;
   }
   
-  // Convertir usando exchange_rate
-  return convert(item.amount, item.exchange_rate);
+  // Determinar dirección de conversión basada en quoteCurrency
+  // El exchange_rate siempre significa "1 [quoteCurrency] = X [otra moneda]"
+  // 
+  // Ejemplo con quoteCurrency='USD' y exchange_rate=1000:
+  // - Item en USD, base es ARS: USD → ARS = amount * rate (100 * 1000 = 100,000)
+  // - Item en ARS, base es USD: ARS → USD = amount / rate (100,000 / 1000 = 100)
+  
+  const itemIsQuoteCurrency = currencyCode === quoteCurrency;
+  const direction: 'multiply' | 'divide' = itemIsQuoteCurrency ? 'multiply' : 'divide';
+  
+  return convert(item.amount, item.exchange_rate, { direction });
 }
 
 /**

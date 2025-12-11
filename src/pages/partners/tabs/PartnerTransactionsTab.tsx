@@ -32,6 +32,7 @@ interface UnifiedTransaction {
   amount: number;
   currency_symbol: string;
   currency_id: string;
+  exchange_rate: number | null;
   status: 'confirmed' | 'pending' | 'rejected' | 'void';
   notes: string | null;
   reference: string | null;
@@ -70,6 +71,7 @@ export function PartnerTransactionsTab() {
       amount: c.amount,
       currency_symbol: c.currency?.symbol || '$',
       currency_id: c.currency_id,
+      exchange_rate: c.exchange_rate || null,
       status: c.status,
       notes: c.notes,
       reference: c.reference,
@@ -85,6 +87,7 @@ export function PartnerTransactionsTab() {
       amount: w.amount,
       currency_symbol: w.currency?.symbol || '$',
       currency_id: w.currency_id,
+      exchange_rate: w.exchange_rate || null,
       status: w.status,
       notes: w.notes,
       reference: w.reference,
@@ -243,13 +246,20 @@ export function PartnerTransactionsTab() {
     {
       key: 'amount',
       label: 'Monto',
-      width: '120px',
+      width: '140px',
       align: 'right' as const,
       sortType: 'number' as const,
       render: (item: UnifiedTransaction) => (
-        <span className={`text-sm font-medium ${item.type === 'contribution' ? 'text-green-600' : 'text-red-600'}`}>
-          {item.type === 'contribution' ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-        </span>
+        <div className="flex flex-col items-end">
+          <span className={`text-sm font-medium ${item.type === 'contribution' ? 'text-green-600' : 'text-red-600'}`}>
+            {item.type === 'contribution' ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
+          {item.exchange_rate && item.exchange_rate !== 1 && (
+            <span className="text-xs text-muted-foreground">
+              Cot. {item.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+            </span>
+          )}
+        </div>
       ),
     },
     {
@@ -368,9 +378,16 @@ export function PartnerTransactionsTab() {
               <span className="text-sm text-muted-foreground">{format(parseLocalDate(item.date) || new Date(), 'dd/MM/yyyy')}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className={`text-lg font-bold ${item.type === 'contribution' ? 'text-green-600' : 'text-red-600'}`}>
-                {item.type === 'contribution' ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
+              <div className="flex flex-col">
+                <span className={`text-lg font-bold ${item.type === 'contribution' ? 'text-green-600' : 'text-red-600'}`}>
+                  {item.type === 'contribution' ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                {item.exchange_rate && item.exchange_rate !== 1 && (
+                  <span className="text-xs text-muted-foreground">
+                    Cot. {item.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-1">
                 <Button variant="ghost" size="icon-sm" onClick={() => handleEdit(item)} data-testid={`button-edit-transaction-${item.id}`}>
                   <Edit className="h-4 w-4" />
