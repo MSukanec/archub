@@ -1,6 +1,12 @@
 /**
  * Utilidades globales para formateo de monedas
  * Asegura que NUNCA se muestren decimales en toda la aplicación
+ * 
+ * @deprecated Para nuevas implementaciones, usar `/lib/money.ts` que incluye
+ * funciones de conversión Y formateo centralizadas.
+ * Este archivo se mantiene por compatibilidad con código existente.
+ * 
+ * @see /lib/money.ts para el módulo centralizado de multimoneda
  */
 
 /**
