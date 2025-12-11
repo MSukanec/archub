@@ -11,7 +11,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGlobalModalStore } from '@/components/modal';
 import { parseLocalDate } from '@/lib/date-utils';
 import { useMobile } from '@/hooks/use-mobile';
-import { usePartners, usePartnerContributions } from '@/features/partners';
+import { usePartners, usePartnerContributions, usePartnerWithdrawals } from '@/features/partners';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import type { Partner } from '@/features/partners/types';
@@ -28,6 +28,7 @@ export function PartnersListTab() {
 
   const { data: partners = [], isLoading } = usePartners(organizationId);
   const { data: contributions = [] } = usePartnerContributions(organizationId);
+  const { data: withdrawals = [] } = usePartnerWithdrawals(organizationId);
 
   const enrichedPartners = useMemo<EnrichedPartner[]>(() => {
     return partners.map(partner => ({
@@ -58,17 +59,19 @@ export function PartnersListTab() {
     };
   }, [partners, contributions]);
 
-  const removeMemberMutation = useMutation({
+  const deletePartnerMutation = useMutation({
     mutationFn: async (partnerId: string) => {
       const { error } = await supabase
         .from('partners')
-        .delete()
+        .update({ is_deleted: true })
         .eq('id', partnerId);
 
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['partners'] });
+      queryClient.invalidateQueries({ queryKey: ['partner-contributions'] });
+      queryClient.invalidateQueries({ queryKey: ['partner-withdrawals'] });
       toast({
         title: "Socio eliminado",
         description: "El socio ha sido eliminado de la organización.",
@@ -84,23 +87,43 @@ export function PartnersListTab() {
   });
 
   const handleDelete = (partner: EnrichedPartner) => {
+    const associated = [
+      ...contributions.filter(c => c.partner_id === partner.id),
+      ...withdrawals.filter(w => w.partner_id === partner.id),
+    ];
+    
+    const otherPartners = partners.filter(p => p.id !== partner.id);
+    const canReplace = associated.length > 0 && otherPartners.length > 0;
+    
+    const consequences: string[] = [];
+    if (associated.length > 0) {
+      consequences.push(
+        `${associated.length} transacción${associated.length === 1 ? '' : 'es'} relacionada${associated.length === 1 ? '' : 's'} será${associated.length === 1 ? 'á' : 'n'} afectada${associated.length === 1 ? '' : 's'}`
+      );
+    }
+    
+    const replacementOptions = otherPartners
+      .map(p => ({
+        label: p.contacts?.full_name || `${p.contacts?.first_name || ''} ${p.contacts?.last_name || ''}`.trim() || p.contacts?.email || 'Socio',
+        value: p.id
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
+
     openModal('delete-confirmation', {
-      mode: 'dangerous',
+      mode: canReplace ? 'replace' : 'delete',
       title: 'Eliminar Socio',
-      description: 'Se eliminará este socio de la organización. Esta acción no se puede deshacer.',
+      description: `¿Estás seguro de que quieres eliminar "${partner.partnerName}"?`,
       itemName: partner.partnerName,
-      itemType: 'socio',
-      onConfirm: async () => {
-        try {
-          await removeMemberMutation.mutateAsync(partner.id);
-        } catch (error: any) {
-          toast({
-            title: 'Error al eliminar socio',
-            description: error.message,
-            variant: 'destructive',
-          });
-        }
+      consequences: consequences.length > 0 ? consequences : undefined,
+      replacementOptions: canReplace ? replacementOptions : undefined,
+      currentId: partner.id,
+      onDelete: () => {
+        deletePartnerMutation.mutate(partner.id);
       },
+      onReplace: (newId: string) => {
+        // For now, just delete without replacing
+        deletePartnerMutation.mutate(partner.id);
+      }
     });
   };
 

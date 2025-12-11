@@ -105,14 +105,22 @@ export function PartnerWithdrawalFormFields({
     })).sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
   }, [partners])
 
+  const defaultCurrencyId = useMemo(() => {
+    return currencies && currencies.length > 0 ? currencies[0].id : '';
+  }, [currencies]);
+
+  const defaultWalletId = useMemo(() => {
+    return wallets && wallets.length > 0 ? wallets[0].id : '';
+  }, [wallets]);
+
   const form = useForm<PartnerWithdrawalFormData>({
     resolver: zodResolver(partnerWithdrawalSchema),
     defaultValues: {
       withdrawal_date: new Date(),
       partner_id: '',
-      wallet_id: '',
+      wallet_id: defaultWalletId,
       amount: 0,
-      currency_id: '',
+      currency_id: defaultCurrencyId,
       exchange_rate: undefined,
       status: 'confirmed',
       reference: '',
