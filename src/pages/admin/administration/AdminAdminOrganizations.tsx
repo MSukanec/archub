@@ -8,11 +8,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Edit, Trash2, Building, Crown, Award } from 'lucide-react';
+import { Edit, Trash2, Building, Crown, Award, Eye } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';
 
 import { useToast } from '@/hooks/use-toast';
 import AdminOrganizationRow from '@/features/organization/components/admin/AdminOrganizationRow';
+import { OrganizationDetailDrawer } from '@/features/admin';
 
 interface Organization {
   id: string;
@@ -215,6 +216,8 @@ const AdminAdminOrganizations = () => {
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -228,6 +231,17 @@ const AdminAdminOrganizations = () => {
     free: organizations?.filter(org => org.plan?.name === 'Free').length || 0,
     pro: organizations?.filter(org => org.plan?.name === 'Pro').length || 0,
     teams: organizations?.filter(org => org.plan?.name === 'Teams').length || 0
+  };
+
+  const handleViewDetails = (organization: Organization) => {
+    setSelectedOrganization(organization);
+    setIsDrawerOpen(true);
+  };
+  
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedOrganization(null);
+    queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
   };
 
   const handleEdit = (organization: Organization) => {
@@ -452,7 +466,13 @@ const AdminAdminOrganizations = () => {
         columns={tableColumns}
         data={filteredOrganizations}
         isLoading={isLoading}
+        onRowClick={(organization) => handleViewDetails(organization)}
         rowActions={(organization) => [
+          {
+            icon: Eye,
+            label: 'Ver Detalles',
+            onClick: () => handleViewDetails(organization)
+          },
           {
             icon: Edit,
             label: 'Editar',
@@ -479,6 +499,12 @@ const AdminAdminOrganizations = () => {
             <p className="text-xs">No hay organizaciones que coincidan con los filtros aplicados.</p>
           </div>
         }
+      />
+      
+      <OrganizationDetailDrawer
+        organization={selectedOrganization}
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
       />
     </div>
   );
