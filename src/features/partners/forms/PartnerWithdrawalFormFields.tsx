@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { formatDateForDB } from '@/lib/date-utils'
+import { formatDateForDB, parseLocalDate } from '@/lib/date-utils'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
-import { usePartners, useCreatePartnerWithdrawal } from '../hooks'
+import { usePartners, useCreatePartnerWithdrawal, usePartnerWithdrawal } from '../hooks'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { FileUploader } from '@/components/shared/FileUploader'
 import { uploadFile, deleteFile } from '@/lib/storage'
@@ -93,6 +93,11 @@ export function PartnerWithdrawalFormFields({
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
 
   const createMutation = useCreatePartnerWithdrawal()
+  const { data: existingWithdrawal, isLoading: loadingWithdrawal } = usePartnerWithdrawal(
+    organizationId,
+    withdrawalId,
+    { enabled: mode !== 'create' && !!withdrawalId && !!organizationId }
+  )
 
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
@@ -120,20 +125,43 @@ export function PartnerWithdrawalFormFields({
     }
   })
 
-  const isLoading = partnersLoading || currenciesLoading || walletsLoading || membersLoading
+  const isLoading = partnersLoading || currenciesLoading || walletsLoading || membersLoading || loadingWithdrawal
 
-  // Set default wallet and currency when they load
+  // Load existing withdrawal data in edit/view mode
   useEffect(() => {
-    if (!currenciesLoading && currencies && currencies.length > 0) {
-      form.setValue('currency_id', currencies[0].currency?.id || '')
+    if (existingWithdrawal && (mode === 'edit' || mode === 'view')) {
+      const withdrawalDate = parseLocalDate(existingWithdrawal.withdrawal_date) || new Date()
+      
+      form.reset({
+        withdrawal_date: withdrawalDate,
+        partner_id: existingWithdrawal.partner_id || '',
+        wallet_id: existingWithdrawal.wallet_id || '',
+        amount: existingWithdrawal.amount || 0,
+        currency_id: existingWithdrawal.currency_id || '',
+        exchange_rate: existingWithdrawal.exchange_rate || undefined,
+        status: existingWithdrawal.status || 'confirmed',
+        reference: existingWithdrawal.reference || '',
+        notes: existingWithdrawal.notes || '',
+      })
     }
-  }, [currencies, currenciesLoading, form])
+  }, [existingWithdrawal, mode, form])
+
+  // Set default wallet and currency when they load (create mode only)
+  useEffect(() => {
+    if (mode === 'create' && !withdrawalId) {
+      if (!currenciesLoading && currencies && currencies.length > 0) {
+        form.setValue('currency_id', currencies[0].currency?.id || '')
+      }
+    }
+  }, [currencies, currenciesLoading, mode, withdrawalId, form])
 
   useEffect(() => {
-    if (!walletsLoading && wallets && wallets.length > 0) {
-      form.setValue('wallet_id', wallets[0].id || '')
+    if (mode === 'create' && !withdrawalId) {
+      if (!walletsLoading && wallets && wallets.length > 0) {
+        form.setValue('wallet_id', wallets[0].id || '')
+      }
     }
-  }, [wallets, walletsLoading, form])
+  }, [wallets, walletsLoading, mode, withdrawalId, form])
 
   useEffect(() => {
     const fetchAttachments = async () => {

@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { formatDateForDB } from '@/lib/date-utils'
+import { formatDateForDB, parseLocalDate } from '@/lib/date-utils'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
-import { usePartners, useCreatePartnerContribution } from '../hooks'
+import { usePartners, useCreatePartnerContribution, usePartnerContribution } from '../hooks'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { FileUploader } from '@/components/shared/FileUploader'
 import { uploadFile, deleteFile } from '@/lib/storage'
@@ -93,6 +93,11 @@ export function PartnerContributionFormFields({
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
 
   const createMutation = useCreatePartnerContribution()
+  const { data: existingContribution, isLoading: loadingContribution } = usePartnerContribution(
+    organizationId,
+    contributionId,
+    { enabled: mode !== 'create' && !!contributionId && !!organizationId }
+  )
 
   const currentMember = useMemo(() => {
     return members.find(m => m.user_id === userData?.user?.id) || null
@@ -120,20 +125,43 @@ export function PartnerContributionFormFields({
     }
   })
 
-  const isLoading = partnersLoading || currenciesLoading || walletsLoading || membersLoading
+  const isLoading = partnersLoading || currenciesLoading || walletsLoading || membersLoading || loadingContribution
 
-  // Set default wallet and currency when they load
+  // Load existing contribution data in edit/view mode
   useEffect(() => {
-    if (!currenciesLoading && currencies && currencies.length > 0) {
-      form.setValue('currency_id', currencies[0].currency?.id || '')
+    if (existingContribution && (mode === 'edit' || mode === 'view')) {
+      const contributionDate = parseLocalDate(existingContribution.contribution_date) || new Date()
+      
+      form.reset({
+        contribution_date: contributionDate,
+        partner_id: existingContribution.partner_id || '',
+        wallet_id: existingContribution.wallet_id || '',
+        amount: existingContribution.amount || 0,
+        currency_id: existingContribution.currency_id || '',
+        exchange_rate: existingContribution.exchange_rate || undefined,
+        status: existingContribution.status || 'confirmed',
+        reference: existingContribution.reference || '',
+        notes: existingContribution.notes || '',
+      })
     }
-  }, [currencies, currenciesLoading, form])
+  }, [existingContribution, mode, form])
+
+  // Set default wallet and currency when they load (create mode only)
+  useEffect(() => {
+    if (mode === 'create' && !contributionId) {
+      if (!currenciesLoading && currencies && currencies.length > 0) {
+        form.setValue('currency_id', currencies[0].currency?.id || '')
+      }
+    }
+  }, [currencies, currenciesLoading, mode, contributionId, form])
 
   useEffect(() => {
-    if (!walletsLoading && wallets && wallets.length > 0) {
-      form.setValue('wallet_id', wallets[0].id || '')
+    if (mode === 'create' && !contributionId) {
+      if (!walletsLoading && wallets && wallets.length > 0) {
+        form.setValue('wallet_id', wallets[0].id || '')
+      }
     }
-  }, [wallets, walletsLoading, form])
+  }, [wallets, walletsLoading, mode, contributionId, form])
 
   useEffect(() => {
     const fetchAttachments = async () => {
