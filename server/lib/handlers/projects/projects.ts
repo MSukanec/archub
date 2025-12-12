@@ -77,7 +77,7 @@ export async function createProject(
     // Create new project
     const { data: newProject, error: projectError } = await supabase
       .from('projects')
-      .upsert({
+      .insert({
         organization_id: params.organization_id,
         name: params.name,
         status: params.status || 'active',
@@ -88,8 +88,6 @@ export async function createProject(
         use_custom_color: params.use_custom_color || false,
         custom_color_h: params.custom_color_h || null,
         custom_color_hex: params.custom_color_hex || null,
-      }, {
-        onConflict: 'id'
       })
       .select()
       .maybeSingle();
