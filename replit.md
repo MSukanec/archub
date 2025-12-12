@@ -99,6 +99,11 @@ Centralized headless KPI calculation logic (no UI/JSX) is implemented in:
   - All monetary KPIs use `convertToBaseCurrency()` with explicit signatures (fromCurrencyId, toCurrencyId)
   - Standard return type: `{ value, formatted, meta?, breakdown? }`
   - No UI components - works with any KPI display component (StatCard, etc.)
+- **Auto-update on currency change**: KPIs use `useOrganizationDefaultCurrency()` hook which automatically refetches when default currency changes
+- **Currency symbol display**: KPI values show currency symbol (e.g., "$ 150.000", "USD 75.000") using `format()` function from `/lib/money.ts`
+- **Recently refactored pages** (2025-12-12):
+  - `src/pages/general-costs/GeneralCostsPaymentsTab.tsx` - "Total Pagos" (count) and "Pagos a la Fecha" (monetary) KPIs
+  - `src/pages/partners/tabs/PartnerTransactionsTab.tsx` - "Total Aportes", "Total Retiros", "Saldo Neto" (all monetary) KPIs
 
 ### Subscription & Billing System
 Complete technical documentation for the payment, subscription, and billing architecture is maintained in:
