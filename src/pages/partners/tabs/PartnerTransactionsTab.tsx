@@ -8,7 +8,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
 import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
-import { formatKPI } from '@/lib/money';
+import { formatKPI, format as formatMoneyAmount } from '@/lib/money';
 import { calculateMonetaryKPI, formatBreakdown as kpiFormatBreakdown } from '@/lib/kpis';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
@@ -352,7 +352,10 @@ export function PartnerTransactionsTab() {
         <StatCard data-testid="card-total-contributions">
           <StatCardTitle showArrow={false}>Total Aportes</StatCardTitle>
           <StatCardValue className="text-green-600">
-            {formatKPI(metrics.contributions_kpi.value)}
+            {metrics.contributions_kpi.breakdown && metrics.contributions_kpi.breakdown.length > 0
+              ? formatMoneyAmount(metrics.contributions_kpi.value, metrics.contributions_kpi.breakdown[0].currencySymbol)
+              : formatKPI(metrics.contributions_kpi.value)
+            }
           </StatCardValue>
           <StatCardMeta>
             {metrics.contributions_kpi.breakdown && metrics.contributions_kpi.breakdown.length > 0
@@ -365,7 +368,10 @@ export function PartnerTransactionsTab() {
         <StatCard data-testid="card-total-withdrawals">
           <StatCardTitle showArrow={false}>Total Retiros</StatCardTitle>
           <StatCardValue className="text-red-600">
-            {formatKPI(metrics.withdrawals_kpi.value)}
+            {metrics.withdrawals_kpi.breakdown && metrics.withdrawals_kpi.breakdown.length > 0
+              ? formatMoneyAmount(metrics.withdrawals_kpi.value, metrics.withdrawals_kpi.breakdown[0].currencySymbol)
+              : formatKPI(metrics.withdrawals_kpi.value)
+            }
           </StatCardValue>
           <StatCardMeta>
             {metrics.withdrawals_kpi.breakdown && metrics.withdrawals_kpi.breakdown.length > 0
@@ -378,7 +384,10 @@ export function PartnerTransactionsTab() {
         <StatCard data-testid="card-net-balance">
           <StatCardTitle showArrow={false}>Saldo Neto</StatCardTitle>
           <StatCardValue className={metrics.net_balance_kpi.value >= 0 ? 'text-green-600' : 'text-red-600'}>
-            {formatKPI(metrics.net_balance_kpi.value)}
+            {metrics.net_balance_kpi.breakdown && metrics.net_balance_kpi.breakdown.length > 0
+              ? formatMoneyAmount(metrics.net_balance_kpi.value, metrics.net_balance_kpi.breakdown[0].currencySymbol)
+              : formatKPI(metrics.net_balance_kpi.value)
+            }
           </StatCardValue>
           <StatCardMeta>
             {metrics.net_balance_kpi.breakdown && metrics.net_balance_kpi.breakdown.length > 0

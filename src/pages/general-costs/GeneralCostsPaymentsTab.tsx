@@ -23,6 +23,7 @@ import { parseLocalDate } from '@/lib/date-utils';
 import { useOrganizationWallets } from '@/features/organization/hooks';
 import { useGeneralCosts, useCreateGeneralCostPayment } from '@/features/general-costs';
 import { useToast } from '@/hooks/use-toast';
+import { format as formatMoneyAmount } from '@/lib/money';
 import type { TargetField, ImportConfig } from '@/features/imports/types';
 
 export default function GeneralCostsPaymentsTab() {
@@ -712,7 +713,10 @@ export default function GeneralCostsPaymentsTab() {
             Pagos a la Fecha
           </StatCardTitle>
           <StatCardValue>
-            {formatKPI(metricsData?.total_confirmed_kpi?.value ?? 0)}
+            {metricsData?.total_confirmed_kpi?.breakdown && metricsData.total_confirmed_kpi.breakdown.length > 0
+              ? formatMoneyAmount(metricsData.total_confirmed_kpi.value, metricsData.total_confirmed_kpi.breakdown[0].currencySymbol)
+              : formatKPI(metricsData?.total_confirmed_kpi?.value ?? 0)
+            }
           </StatCardValue>
           <StatCardMeta>
             {metricsData?.total_confirmed_kpi?.breakdown && metricsData.total_confirmed_kpi.breakdown.length > 0
