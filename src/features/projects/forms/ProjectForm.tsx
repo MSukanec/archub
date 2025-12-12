@@ -18,6 +18,7 @@ import { useOrganizationMembers } from "@/features/organization";
 import { useProjectTypes, useProjectModalities } from "@/features/projects";
 import { useProjectContext } from "@/stores/projectContext";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganizationCurrencies } from "@/hooks/use-currencies";
 import { useUpdateChecklist } from "@/hooks/use-update-checklist";
 import { supabase } from "@/lib/supabase";
 
@@ -53,6 +54,7 @@ const projectSchema = z.object({
   name: z.string().min(1, "El nombre del proyecto es requerido"),
   project_type_id: z.string().optional(),
   project_modality_id: z.string().optional(),
+  currency_id: z.string().optional(),
   status: z.enum(["active", "inactive", "completed", "paused"]).default("active"),
   color: z.string().optional(),
   use_custom_color: z.boolean().default(false),
@@ -99,6 +101,7 @@ function FormPanel({
   onSubmit,
   projectTypes,
   projectModalities,
+  organizationCurrencies,
   organizationId,
   currentImageUrl,
   imagePreviewUrl,
@@ -108,6 +111,7 @@ function FormPanel({
   onSubmit: (data: ProjectFormData) => void;
   projectTypes: any[];
   projectModalities: any[];
+  organizationCurrencies: any[];
   organizationId: string | undefined;
   currentImageUrl: string | null | undefined;
   imagePreviewUrl: string | null;
@@ -209,6 +213,31 @@ function FormPanel({
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="currency_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Moneda del Proyecto</FormLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <FormControl>
+                  <SelectTrigger data-testid="select-currency">
+                    <SelectValue placeholder="Seleccionar moneda" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {organizationCurrencies.map((oc) => (
+                    <SelectItem key={oc.currency_id} value={oc.currency_id}>
+                      {oc.currency?.symbol} – {oc.currency?.code}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div className="space-y-2">
           <FormLabel>Imagen Principal (opcional)</FormLabel>
@@ -385,8 +414,12 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
   const { data: projectTypes = [] } = useProjectTypes(organizationId);
   const { data: projectModalities = [] } = useProjectModalities(organizationId);
+  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(organizationId);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Get default currency ID (is_default = true)
+  const defaultCurrencyId = organizationCurrencies.find(oc => oc.is_default)?.currency_id || '';
 
   const createProjectMutation = useCreateProject();
   const updateProjectMutation = useUpdateProject();
@@ -418,6 +451,7 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
         name: project.name || "",
         project_type_id: project.project_data?.project_type_id || "",
         project_modality_id: project.project_data?.project_modality_id || "",
+        currency_id: project.currency_id || "",
         status: (project.status as "active" | "inactive" | "completed" | "paused") || "active",
         color: project.color || "#84cc16",
         use_custom_color: project.use_custom_color || false,
@@ -429,6 +463,7 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
       name: "",
       project_type_id: "",
       project_modality_id: "",
+      currency_id: defaultCurrencyId,
       status: "active",
       color: "#84cc16",
       use_custom_color: false,
@@ -535,6 +570,7 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
       custom_color_hex: data.custom_color_hex || null,
       project_type_id: data.project_type_id || null,
       project_modality_id: data.project_modality_id || null,
+      currency_id: data.currency_id || defaultCurrencyId || null,
     };
 
     try {
@@ -687,6 +723,7 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
           onSubmit={onSubmit}
           projectTypes={projectTypes}
           projectModalities={projectModalities}
+          organizationCurrencies={organizationCurrencies}
           organizationId={organizationId}
           currentImageUrl={mode === 'edit' ? currentImageUrl : null}
           imagePreviewUrl={imagePreviewUrl}

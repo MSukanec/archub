@@ -367,6 +367,15 @@ export default function ProjectList() {
       )
     },
     {
+      key: 'currency',
+      label: 'Moneda',
+      render: (project: any) => (
+        <div className="text-sm">
+          {project.currency?.symbol} – {project.currency?.code || 'Sin especificar'}
+        </div>
+      )
+    },
+    {
       key: 'status',
       label: 'Estado',
       render: (project: any) => getStatusBadge(project.status)
