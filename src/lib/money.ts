@@ -44,14 +44,16 @@ export interface ConvertOptions {
 }
 
 /**
- * Convierte un monto a la moneda base de la organización.
+ * Convierte un monto usando el exchange rate.
  * 
- * Regla: amount_in_base = amount * exchange_rate
+ * Regla: 
+ * - Si direction='multiply': amount * exchangeRate
+ * - Si direction='divide': amount / exchangeRate
  * 
  * @param amount - Monto original
  * @param exchangeRate - Cotización del momento del movimiento
  * @param options - Opciones de conversión
- * @returns Monto convertido a moneda base
+ * @returns Monto convertido
  * 
  * @example
  * // Convertir 100 USD a ARS con cotización 1000
@@ -192,9 +194,168 @@ export function sumByCurrency(items: MoneyItem[]): CurrencyBreakdown[] {
   return Array.from(map.values()).sort((a, b) => Math.abs(b.total) - Math.abs(a.total));
 }
 
+export interface ConvertToBaseOptions {
+  /**
+   * Qué hacer cuando no hay moneda base definida:
+   * - 'passthrough': Retorna el amount sin convertir (default, usado en financial-metrics)
+   * - 'zero': Retorna 0 para evitar mezclar monedas (usado en partner-metrics)
+   */
+  onMissingBase?: 'passthrough' | 'zero';
+  
+  /**
+   * Código de la moneda que se usa como referencia en el exchange_rate.
+   * Por defecto es 'USD'. El exchange_rate siempre significa "1 [quoteCurrency] = X [otra moneda]".
+   * 
+   * Ejemplo con quoteCurrency='USD' y exchange_rate=1000:
+   * - Si item está en USD y base es ARS → multiplica (100 USD * 1000 = 100,000 ARS)
+   * - Si item está en ARS y base es USD → divide (100,000 ARS / 1000 = 100 USD)
+   */
+  quoteCurrency?: string;
+  defaultRate?: number;
+}
+
+/**
+ * Convierte un monto entre dos monedas explícitamente.
+ * 
+ * Esta es la función central para conversiones bidireccionales correctas.
+ * 
+ * LÓGICA:
+ * - Si fromCurrencyId === toCurrencyId, retorna amount sin convertir
+ * - Si son distintas:
+ *   - Si fromCurrencyId === quoteCurrency, multiplica por el exchange_rate
+ *   - Si toCurrencyId === quoteCurrency, divide por el exchange_rate
+ *   - Caso contrario, multiplica (comportamiento por defecto)
+ * 
+ * DEFINICIÓN DE EXCHANGE_RATE:
+ * El exchange_rate siempre significa "1 [quoteCurrency] = X [otra moneda]"
+ * 
+ * Ejemplo con quoteCurrency='USD' y exchange_rate=1000:
+ * - convertToBaseCurrency('USD', 'ARS', 100, 1000) → 100 * 1000 = 100,000 (100 USD = 100,000 ARS)
+ * - convertToBaseCurrency('ARS', 'USD', 100000, 1000) → 100,000 / 1000 = 100 (100,000 ARS = 100 USD)
+ * 
+ * @param fromCurrencyId - ID o código de la moneda origen
+ * @param toCurrencyId - ID o código de la moneda destino
+ * @param amount - Monto a convertir
+ * @param exchangeRate - Cotización (significa "1 [quoteCurrency] = X [otra moneda]")
+ * @param options - Opciones (quoteCurrency, defaultRate, etc.)
+ * @returns Monto convertido a moneda destino
+ */
+export function convertExplicit(
+  fromCurrencyId?: string | null,
+  toCurrencyId?: string | null,
+  amount: number = 0,
+  exchangeRate?: number | null,
+  options: ConvertToBaseOptions = {}
+): number {
+  const { quoteCurrency = 'USD', defaultRate = 1 } = options;
+  
+  // Si no hay IDs, retornar amount
+  if (!fromCurrencyId || !toCurrencyId) {
+    return amount;
+  }
+  
+  // Si son iguales, no convertir
+  if (fromCurrencyId === toCurrencyId) {
+    return amount;
+  }
+  
+  // Determinar dirección de conversión basada en quoteCurrency
+  let direction: 'multiply' | 'divide' = 'multiply';
+  
+  if (toCurrencyId === quoteCurrency && fromCurrencyId !== quoteCurrency) {
+    // Convertir desde otra moneda al quote → dividir
+    direction = 'divide';
+  }
+  // Si fromCurrencyId === quoteCurrency o ninguno lo es → multiplicar (default)
+  
+  const rate = exchangeRate ?? defaultRate;
+  if (rate === 0) return amount;
+  
+  return direction === 'multiply' ? amount * rate : amount / rate;
+}
+
+/**
+ * OVERLOAD 1: Signatura explícita
+ * Convierte un monto de una moneda a otra, recibiendo todos los parámetros explícitamente.
+ */
+export function convertToBaseCurrency(
+  fromCurrencyId: string,
+  toCurrencyId: string | undefined,
+  amount: number,
+  exchangeRate: number | null,
+  options?: ConvertToBaseOptions
+): number;
+
+/**
+ * OVERLOAD 2: Signatura implícita (compatibilidad hacia atrás)
+ * Convierte un item monetario a la moneda base, inferiendo los IDs del item.
+ */
+export function convertToBaseCurrency(
+  item: MoneyItem,
+  baseCurrencyCodeOrId?: string,
+  options?: ConvertToBaseOptions
+): number;
+
+/**
+ * IMPLEMENTACIÓN
+ */
+export function convertToBaseCurrency(
+  itemOrFromId: MoneyItem | string,
+  toCurrencyIdOrBaseCurrency?: string,
+  amountOrOptions?: number | ConvertToBaseOptions,
+  exchangeRateOrOptions?: number | null | ConvertToBaseOptions,
+  options?: ConvertToBaseOptions
+): number {
+  // OVERLOAD 1: Signatura explícita (fromCurrencyId es string)
+  if (typeof itemOrFromId === 'string') {
+    const fromCurrencyId = itemOrFromId;
+    const toCurrencyId = toCurrencyIdOrBaseCurrency;
+    const amount = amountOrOptions as number;
+    const exchangeRate = exchangeRateOrOptions as number | null;
+    const opts = options || {};
+    
+    return convertExplicit(fromCurrencyId, toCurrencyId, amount, exchangeRate, opts);
+  }
+  
+  // OVERLOAD 2: Signatura implícita (item es MoneyItem)
+  const item = itemOrFromId as MoneyItem;
+  const baseCurrencyCodeOrId = toCurrencyIdOrBaseCurrency;
+  const opts = (typeof amountOrOptions === 'object' ? amountOrOptions : exchangeRateOrOptions) as ConvertToBaseOptions | undefined;
+  
+  const { onMissingBase = 'passthrough', quoteCurrency = 'USD', defaultRate = 1 } = opts || {};
+  
+  // Si no hay moneda base definida, usar estrategia configurada
+  if (!baseCurrencyCodeOrId) {
+    return onMissingBase === 'zero' ? 0 : item.amount;
+  }
+  
+  // Obtener identificadores del item
+  const currencyId = item.currency?.id || item.currency_id;
+  const currencyCode = item.currency?.code;
+  
+  // Comparar tanto por ID como por código (baseCurrencyCodeOrId puede ser cualquiera)
+  const isAlreadyInBaseCurrency = 
+    currencyId === baseCurrencyCodeOrId || 
+    currencyCode === baseCurrencyCodeOrId;
+  
+  // Si ya está en moneda base, retornar sin conversión
+  if (isAlreadyInBaseCurrency) {
+    return item.amount;
+  }
+  
+  // Usar la lógica explícita con los datos del item
+  return convertExplicit(
+    currencyCode || currencyId || 'unknown',
+    baseCurrencyCodeOrId,
+    item.amount,
+    item.exchange_rate,
+    { quoteCurrency, defaultRate }
+  );
+}
+
 /**
  * Suma todos los items convirtiéndolos a la moneda base.
- * Usa la fórmula: amount * exchange_rate.
+ * Usa convertExplicit para asegurar que cada conversión es correcta.
  * 
  * @param items - Array de items con amount, currency y exchange_rate
  * @param baseCurrencyId - ID de la moneda base de la organización
@@ -202,8 +363,8 @@ export function sumByCurrency(items: MoneyItem[]): CurrencyBreakdown[] {
  * 
  * @example
  * const items = [
- *   { amount: 100, currency: { id: 'usd' }, exchange_rate: 1000 },
- *   { amount: 50000, currency: { id: 'ars' }, exchange_rate: 1 }
+ *   { amount: 100, currency: { id: 'usd', code: 'USD' }, exchange_rate: 1000 },
+ *   { amount: 50000, currency: { id: 'ars', code: 'ARS' }, exchange_rate: 1 }
  * ];
  * sumAllInBaseCurrency(items, 'ars') // => 100000 + 50000 = 150000
  */
@@ -213,14 +374,15 @@ export function sumAllInBaseCurrency(
 ): number {
   return items.reduce((sum, item) => {
     const currencyId = item.currency?.id || item.currency_id;
+    const currencyCode = item.currency?.code;
     
-    // Si ya está en moneda base, no convertir
-    if (currencyId === baseCurrencyId) {
-      return sum + item.amount;
-    }
-    
-    // Convertir usando exchange_rate
-    return sum + convert(item.amount, item.exchange_rate);
+    // Usar convertExplicit directamente para evitar ambigüedad de overloads
+    return sum + convertExplicit(
+      currencyCode || currencyId || 'unknown',
+      baseCurrencyId,
+      item.amount,
+      item.exchange_rate ?? null
+    );
   }, 0);
 }
 
@@ -290,83 +452,6 @@ export function getEffectiveExchangeRate(
   return 1;
 }
 
-export interface ConvertToBaseOptions {
-  /**
-   * Qué hacer cuando no hay moneda base definida:
-   * - 'passthrough': Retorna el amount sin convertir (default, usado en financial-metrics)
-   * - 'zero': Retorna 0 para evitar mezclar monedas (usado en partner-metrics)
-   */
-  onMissingBase?: 'passthrough' | 'zero';
-  
-  /**
-   * Código de la moneda que se usa como referencia en el exchange_rate.
-   * Por defecto es 'USD'. El exchange_rate siempre significa "1 [quoteCurrency] = X [otra moneda]".
-   * 
-   * Ejemplo con quoteCurrency='USD' y exchange_rate=1000:
-   * - Si item está en USD y base es ARS → multiplica (100 USD * 1000 = 100,000 ARS)
-   * - Si item está en ARS y base es USD → divide (100,000 ARS / 1000 = 100 USD)
-   */
-  quoteCurrency?: string;
-}
-
-/**
- * Convierte un monto de una moneda a la moneda base, manejando correctamente
- * el caso donde el movimiento ya está en moneda base.
- * 
- * Esta es la función principal para usar en hooks y servicios.
- * Acepta tanto código de moneda (e.g., "ARS", "USD") como ID de moneda.
- * 
- * IMPORTANTE: El exchange_rate siempre está definido como "1 [quoteCurrency] = X [otra moneda]"
- * Por ejemplo, si quoteCurrency='USD' y exchange_rate=1000, significa 1 USD = 1000 ARS.
- * 
- * La dirección de conversión se determina automáticamente:
- * - Si el item está en quoteCurrency (USD) y base es otra (ARS) → multiplica
- * - Si el item está en otra moneda (ARS) y base es quoteCurrency (USD) → divide
- * 
- * @param item - Item con amount, currency y exchange_rate
- * @param baseCurrencyCodeOrId - Código (e.g., "ARS") o ID de la moneda base
- * @param options - Opciones de conversión
- * @returns Monto convertido a moneda base
- */
-export function convertToBaseCurrency(
-  item: MoneyItem,
-  baseCurrencyCodeOrId?: string,
-  options: ConvertToBaseOptions = {}
-): number {
-  const { onMissingBase = 'passthrough', quoteCurrency = 'USD' } = options;
-  
-  // Si no hay moneda base definida, usar estrategia configurada
-  if (!baseCurrencyCodeOrId) {
-    return onMissingBase === 'zero' ? 0 : item.amount;
-  }
-  
-  // Obtener identificadores del item
-  const currencyId = item.currency?.id || item.currency_id;
-  const currencyCode = item.currency?.code;
-  
-  // Comparar tanto por ID como por código (baseCurrencyCodeOrId puede ser cualquiera)
-  const isAlreadyInBaseCurrency = 
-    currencyId === baseCurrencyCodeOrId || 
-    currencyCode === baseCurrencyCodeOrId;
-  
-  // Si ya está en moneda base, retornar sin conversión
-  if (isAlreadyInBaseCurrency) {
-    return item.amount;
-  }
-  
-  // Determinar dirección de conversión basada en quoteCurrency
-  // El exchange_rate siempre significa "1 [quoteCurrency] = X [otra moneda]"
-  // 
-  // Ejemplo con quoteCurrency='USD' y exchange_rate=1000:
-  // - Item en USD, base es ARS: USD → ARS = amount * rate (100 * 1000 = 100,000)
-  // - Item en ARS, base es USD: ARS → USD = amount / rate (100,000 / 1000 = 100)
-  
-  const itemIsQuoteCurrency = currencyCode === quoteCurrency;
-  const direction: 'multiply' | 'divide' = itemIsQuoteCurrency ? 'multiply' : 'divide';
-  
-  return convert(item.amount, item.exchange_rate, { direction });
-}
-
 /**
  * Formatea un exchange rate para mostrar en UI.
  * 
@@ -401,11 +486,12 @@ export function isValidMoneyItem(item: unknown): item is MoneyItem {
  * @example
  * import { money } from '@/lib/money';
  * money.convert(100, 1000);
- * money.format(150000, 'USD');
+ * money.convertToBaseCurrency('USD', 'ARS', 100, 1000);
  */
 export const money = {
   convert,
   convertToBaseCurrency,
+  convertExplicit,
   format,
   formatKPI,
   formatSubValue,
