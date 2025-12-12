@@ -118,7 +118,7 @@ export function PartnerTransactionsTab() {
         .map(t => ({
           amount: t.amount,
           currency_id: t.currency_id,
-          currency: { code: t.currency_id, symbol: t.currency_symbol },
+          currency: { id: t.currency_id, code: t.original.currency?.code, symbol: t.currency_symbol },
           exchange_rate: t.exchange_rate
         })),
       baseCurrencyId: defaultCurrency?.code
@@ -131,7 +131,7 @@ export function PartnerTransactionsTab() {
         .map(t => ({
           amount: t.amount,
           currency_id: t.currency_id,
-          currency: { code: t.currency_id, symbol: t.currency_symbol },
+          currency: { id: t.currency_id, code: t.original.currency?.code, symbol: t.currency_symbol },
           exchange_rate: t.exchange_rate
         })),
       baseCurrencyId: defaultCurrency?.code
