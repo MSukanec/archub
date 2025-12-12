@@ -283,15 +283,12 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
             Pagado
           </StatCardTitle>
           <StatCardValue>
-            {kpis.totalPaidKPI?.breakdown && kpis.totalPaidKPI.breakdown.length > 0
-              ? formatMoney(kpis.totalPaidAmount, kpis.totalPaidKPI.breakdown[0].currencySymbol)
-              : formatKPI(kpis.totalPaidAmount)
-            }
+            {formatMoney(kpis.totalPaidAmount, commitmentCurrency?.symbol || '$')}
           </StatCardValue>
           <StatCardMeta>
-            {kpis.totalPaidKPI?.breakdown && kpis.totalPaidKPI.breakdown.length > 0
+            {kpis.totalPaidKPI?.breakdown && kpis.totalPaidKPI.breakdown.length > 1
               ? formatBreakdown(kpis.totalPaidKPI)
-              : 'Sin compromisos registrados'
+              : commitmentCurrency?.code || '-'
             }
           </StatCardMeta>
         </StatCard>
@@ -303,15 +300,12 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
             Saldo
           </StatCardTitle>
           <StatCardValue>
-            {kpis.totalBalanceKPI?.breakdown && kpis.totalBalanceKPI.breakdown.length > 0
-              ? formatMoney(kpis.totalBalanceDue, kpis.totalBalanceKPI.breakdown[0].currencySymbol)
-              : formatKPI(kpis.totalBalanceDue)
-            }
+            {formatMoney(kpis.totalBalanceDue, commitmentCurrency?.symbol || '$')}
           </StatCardValue>
           <StatCardMeta>
-            {kpis.totalBalanceKPI?.breakdown && kpis.totalBalanceKPI.breakdown.length > 0
+            {kpis.totalBalanceKPI?.breakdown && kpis.totalBalanceKPI.breakdown.length > 1
               ? formatBreakdown(kpis.totalBalanceKPI)
-              : 'Sin compromisos registrados'
+              : commitmentCurrency?.code || '-'
             }
           </StatCardMeta>
         </StatCard>
