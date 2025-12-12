@@ -418,8 +418,11 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get default currency ID (is_default = true)
-  const defaultCurrencyId = organizationCurrencies.find(oc => oc.is_default)?.currency_id || '';
+  // Get default currency ID (is_default = true) - recalculate when currencies load
+  const defaultCurrencyId = useMemo(
+    () => organizationCurrencies.find(oc => oc.is_default)?.currency_id || '',
+    [organizationCurrencies]
+  );
 
   const createProjectMutation = useCreateProject();
   const updateProjectMutation = useUpdateProject();
