@@ -586,6 +586,11 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
           }
         });
 
+        // Refetch to ensure UI updates immediately
+        await queryClient.refetchQueries({
+          queryKey: [QUERY_KEYS.PROJECTS, organizationId]
+        });
+
         const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
         await logActivity({
           organization_id: organizationId,
