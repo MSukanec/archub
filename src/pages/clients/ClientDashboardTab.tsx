@@ -73,7 +73,7 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
         amount: financial.total_committed_amount,
         currency_id: financial.currency?.id || '',
         currency: financial.currency,
-        exchange_rate: financial.exchange_rate || null
+        exchange_rate: null
       }))
     );
     const totalCommittedKPI = calculateMonetaryKPI({
@@ -88,7 +88,7 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
         amount: financial.balance_due,
         currency_id: financial.currency?.id || '',
         currency: financial.currency,
-        exchange_rate: financial.exchange_rate || null
+        exchange_rate: null
       }))
     );
     const totalBalanceKPI = calculateMonetaryKPI({
@@ -215,18 +215,12 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
     if (!currencyData) return '-';
     
     const amount = currencyData[field];
-    const hasConversionWarning = field === 'total_paid_amount' && (currencyData.payments_missing_rate || 0) > 0;
     
     return (
       <div className="flex flex-col">
         <span className="font-semibold" style={{ fontSize: '14px' }}>
           {formatCurrency(amount, currencyData.currency)}
         </span>
-        {hasConversionWarning && (
-          <span className="text-xs text-orange-500">
-            {currencyData.payments_missing_rate} pago(s) sin tasa de cambio
-          </span>
-        )}
       </div>
     );
   };

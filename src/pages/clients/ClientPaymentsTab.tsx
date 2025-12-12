@@ -214,7 +214,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         const clientName = formatContactName(payment.client.contact);
         if (clientName && clientName !== 'Cliente') clients.add(clientName);
       }
-      if (payment.client?.unit) units.add(payment.client.unit);
+      // Unit comes from commitment, not project client
+      if (payment.commitment?.unit_name) units.add(payment.commitment.unit_name);
     });
 
     return {
@@ -248,8 +249,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         if (clientName !== filterClient) return false;
       }
       
-      // Filter by unit
-      if (filterUnit !== 'all' && payment.client?.unit !== filterUnit) return false;
+      // Filter by unit (from commitment)
+      if (filterUnit !== 'all' && payment.commitment?.unit_name !== filterUnit) return false;
       
       // Filter by status
       if (filterStatus !== 'all' && payment.status !== filterStatus) return false;
@@ -972,7 +973,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         
         const displayName = formatContactName(payment.client?.contact);
         
-        const unit = payment.client?.unit;
+        // Unit comes from commitment, not project client
+        const unit = payment.commitment?.unit_name;
         
         return (
           <div className="flex items-center gap-3">
