@@ -12,12 +12,13 @@ import { Link, useLocation } from 'wouter'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard'
+import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis'
+import { format as formatMoney, formatKPI } from '@/lib/money'
+import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies'
 import {
   useClientDashboard,
   useDeleteProjectClient,
   mapToClientSummaries,
-  calculateDashboardKPIs,
-  formatCurrencyAmount,
   type ProjectClientSummary,
   type CurrencyFinancial,
 } from '@/features/clients'
@@ -47,10 +48,64 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
     return mapToClientSummaries(dashboardData.clients, dashboardData.financialSummaries);
   }, [dashboardData]);
 
-  // Calculate KPIs using mapper function
+  // Get default currency for auto-update
+  const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
+
+  // Calculate KPIs using headless KPI system
   const kpis = useMemo(() => {
-    return calculateDashboardKPIs(projectClients, dashboardData?.payments || []);
-  }, [projectClients, dashboardData?.payments]);
+    const allPayments = dashboardData?.payments || [];
+    
+    // KPI 1: Total Clientes (count)
+    const totalClientsKPI = calculateCountKPI({
+      count: projectClients.length,
+      label: 'Clientes'
+    });
+
+    // KPI 2: Total Pagos (count)
+    const totalPaymentsKPI = calculateCountKPI({
+      count: allPayments.length,
+      label: 'Pagos'
+    });
+
+    // KPI 3: Compromiso Total (monetary)
+    const committedItems = projectClients.flatMap(client => 
+      client.financialByCurrency.map(financial => ({
+        amount: financial.total_committed_amount,
+        currency_id: financial.currency?.id || '',
+        currency: financial.currency,
+        exchange_rate: financial.exchange_rate || null
+      }))
+    );
+    const totalCommittedKPI = calculateMonetaryKPI({
+      items: committedItems,
+      baseCurrencyId: defaultCurrency?.code || defaultCurrency?.id
+    });
+
+    // KPI 4: Balance Pendiente (monetary)
+    const balanceItems = projectClients.flatMap(client => 
+      client.financialByCurrency.map(financial => ({
+        amount: financial.balance_due,
+        currency_id: financial.currency?.id || '',
+        currency: financial.currency,
+        exchange_rate: financial.exchange_rate || null
+      }))
+    );
+    const totalBalanceKPI = calculateMonetaryKPI({
+      items: balanceItems,
+      baseCurrencyId: defaultCurrency?.code || defaultCurrency?.id
+    });
+
+    return {
+      totalClientsKPI,
+      totalPaymentsKPI,
+      totalCommittedKPI,
+      totalBalanceKPI,
+      totalClients: totalClientsKPI.value,
+      totalPayments: totalPaymentsKPI.value,
+      totalCommittedAmount: totalCommittedKPI.value,
+      totalBalanceDue: totalBalanceKPI.value
+    };
+  }, [projectClients, dashboardData?.payments, defaultCurrency]);
 
   // Delete mutation using feature hook
   const deleteClientMutation = useDeleteProjectClient();
