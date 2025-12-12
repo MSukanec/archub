@@ -67,7 +67,7 @@ export const useOrganizationDefaultCurrency = (organizationId?: string) => {
       
       const { data, error } = await supabase
         .from('organization_currencies')
-        .select('currency:currencies(*)')
+        .select('*, currency:currency_id(id, name, symbol, code)')
         .eq('organization_id', organizationId)
         .eq('is_default', true)
         .maybeSingle()
