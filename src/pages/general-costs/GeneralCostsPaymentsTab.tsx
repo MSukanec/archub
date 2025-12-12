@@ -614,7 +614,7 @@ export default function GeneralCostsPaymentsTab() {
       key: 'wallet',
       label: 'Billetera',
       sortable: true,
-      align: 'right' as const,
+      align: 'left' as const,
       cellClassName: 'font-bold',
       render: (payment: GeneralCostPayment) => payment.wallet?.wallets?.name || '-',
     },
