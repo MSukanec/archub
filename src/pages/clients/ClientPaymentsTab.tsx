@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, CheckCircle2, AlertCircle, Calendar, Upload, Download } from 'lucide-react'
-import { convert } from '@/lib/money'
+import { convertToBaseCurrency } from '@/lib/money'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
@@ -163,12 +163,20 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       const currencySymbol = payment.currency.symbol;
 
       // Convert amount to commitment currency using payment's exchange_rate
-      // exchange_rate represents: 1 unit of payment currency = X units of commitment currency
-      // So to convert: payment_amount * exchange_rate = amount in commitment currency
+      // exchange_rate represents: 1 USD = X units of commitment currency
+      // convertToBaseCurrency automatically handles multiply vs divide based on currencies
       let convertedAmount = payment.amount;
       if (commitmentCurrency && payment.currency.id !== commitmentCurrency.id) {
         if (payment.exchange_rate && payment.exchange_rate > 0) {
-          convertedAmount = convert(payment.amount, payment.exchange_rate);
+          convertedAmount = convertToBaseCurrency(
+            {
+              amount: payment.amount,
+              currency: payment.currency,
+              exchange_rate: payment.exchange_rate,
+            },
+            commitmentCurrency.code || commitmentCurrency.id,
+            { quoteCurrency: 'USD' }
+          );
         } else {
           countSkipped += 1;
           convertedAmount = 0; // Skip if no exchange rate
