@@ -8,6 +8,8 @@ import { useGlobalModalStore } from '@/components/modal';
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
 import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
+import { formatKPI } from '@/lib/money';
+import { calculateMonetaryKPI, formatBreakdown as kpiFormatBreakdown } from '@/lib/kpis';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
@@ -102,54 +104,53 @@ export function PartnerTransactionsTab() {
     });
   }, [contributions, withdrawals]);
 
+  // KPI system - REFACTORIZADO
   const metrics = useMemo(() => {
-    const contributionsByCurrency: Record<string, { symbol: string; amount: number }> = {};
-    const withdrawalsByCurrency: Record<string, { symbol: string; amount: number }> = {};
-
-    transactions.forEach((t) => {
-      if (t.status === 'confirmed') {
-        const key = t.currency_id;
-        if (t.type === 'contribution') {
-          if (!contributionsByCurrency[key]) {
-            contributionsByCurrency[key] = { symbol: t.currency_symbol, amount: 0 };
-          }
-          contributionsByCurrency[key].amount += t.amount;
-        } else {
-          if (!withdrawalsByCurrency[key]) {
-            withdrawalsByCurrency[key] = { symbol: t.currency_symbol, amount: 0 };
-          }
-          withdrawalsByCurrency[key].amount += t.amount;
-        }
-      }
+    const organizationCurrencyCode = userData?.organization?.preferences?.default_currency?.code;
+    
+    // Filter confirmed transactions
+    const confirmedTransactions = transactions.filter(t => t.status === 'confirmed');
+    
+    // KPI: Total Aportes (contributions)
+    const contributionsKPI = calculateMonetaryKPI({
+      items: confirmedTransactions
+        .filter(t => t.type === 'contribution')
+        .map(t => ({
+          amount: t.amount,
+          currency_id: t.currency_id,
+          currency: { code: t.currency_id, symbol: t.currency_symbol },
+          exchange_rate: t.exchange_rate
+        })),
+      baseCurrencyId: organizationCurrencyCode
     });
 
-    // Calcular saldo neto por moneda
-    const allCurrencyIds = new Set([
-      ...Object.keys(contributionsByCurrency),
-      ...Object.keys(withdrawalsByCurrency),
-    ]);
-    const netByCurrency: Record<string, { symbol: string; amount: number }> = {};
-    allCurrencyIds.forEach((currencyId) => {
-      const contrib = contributionsByCurrency[currencyId]?.amount || 0;
-      const withdraw = withdrawalsByCurrency[currencyId]?.amount || 0;
-      const symbol = contributionsByCurrency[currencyId]?.symbol || withdrawalsByCurrency[currencyId]?.symbol || '$';
-      netByCurrency[currencyId] = { symbol, amount: contrib - withdraw };
+    // KPI: Total Retiros (withdrawals)
+    const withdrawalsKPI = calculateMonetaryKPI({
+      items: confirmedTransactions
+        .filter(t => t.type === 'withdrawal')
+        .map(t => ({
+          amount: t.amount,
+          currency_id: t.currency_id,
+          currency: { code: t.currency_id, symbol: t.currency_symbol },
+          exchange_rate: t.exchange_rate
+        })),
+      baseCurrencyId: organizationCurrencyCode
     });
+
+    // KPI: Saldo Neto (net balance = contributions - withdrawals)
+    const netBalance = contributionsKPI.value - withdrawalsKPI.value;
+    const netBalanceKPI = {
+      ...contributionsKPI,
+      value: netBalance,
+      formatted: formatKPI(netBalance)
+    };
 
     return {
-      contributionsByCurrency: Object.values(contributionsByCurrency),
-      withdrawalsByCurrency: Object.values(withdrawalsByCurrency),
-      netByCurrency: Object.values(netByCurrency),
+      contributions_kpi: contributionsKPI,
+      withdrawals_kpi: withdrawalsKPI,
+      net_balance_kpi: netBalanceKPI,
     };
-  }, [transactions]);
-
-  // Formato para mostrar breakdown de monedas
-  const formatBreakdown = (items: Array<{ symbol: string; amount: number }>) => {
-    if (items.length === 0) return '$0,00';
-    return items
-      .map((item) => `${item.symbol} ${item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`)
-      .join(' + ');
-  };
+  }, [transactions, userData]);
 
   const handleEdit = (transaction: UnifiedTransaction) => {
     if (!organizationId) {
@@ -347,25 +348,43 @@ export function PartnerTransactionsTab() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Total Aportes - REFACTORIZADO */}
         <StatCard data-testid="card-total-contributions">
           <StatCardTitle showArrow={false}>Total Aportes</StatCardTitle>
           <StatCardValue className="text-green-600">
-            {formatBreakdown(metrics.contributionsByCurrency)}
+            {formatKPI(metrics.contributions_kpi.value)}
           </StatCardValue>
+          <StatCardMeta>
+            {metrics.contributions_kpi.breakdown && metrics.contributions_kpi.breakdown.length > 0
+              ? kpiFormatBreakdown(metrics.contributions_kpi)
+              : 'Sin aportes confirmados'}
+          </StatCardMeta>
         </StatCard>
 
+        {/* Total Retiros - REFACTORIZADO */}
         <StatCard data-testid="card-total-withdrawals">
           <StatCardTitle showArrow={false}>Total Retiros</StatCardTitle>
           <StatCardValue className="text-red-600">
-            {formatBreakdown(metrics.withdrawalsByCurrency)}
+            {formatKPI(metrics.withdrawals_kpi.value)}
           </StatCardValue>
+          <StatCardMeta>
+            {metrics.withdrawals_kpi.breakdown && metrics.withdrawals_kpi.breakdown.length > 0
+              ? kpiFormatBreakdown(metrics.withdrawals_kpi)
+              : 'Sin retiros confirmados'}
+          </StatCardMeta>
         </StatCard>
 
+        {/* Saldo Neto - REFACTORIZADO */}
         <StatCard data-testid="card-net-balance">
           <StatCardTitle showArrow={false}>Saldo Neto</StatCardTitle>
-          <StatCardValue className={metrics.netByCurrency.every(c => c.amount >= 0) ? 'text-green-600' : 'text-red-600'}>
-            {formatBreakdown(metrics.netByCurrency)}
+          <StatCardValue className={metrics.net_balance_kpi.value >= 0 ? 'text-green-600' : 'text-red-600'}>
+            {formatKPI(metrics.net_balance_kpi.value)}
           </StatCardValue>
+          <StatCardMeta>
+            {metrics.net_balance_kpi.breakdown && metrics.net_balance_kpi.breakdown.length > 0
+              ? kpiFormatBreakdown(metrics.net_balance_kpi)
+              : 'Sin saldo'}
+          </StatCardMeta>
         </StatCard>
       </div>
 
