@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects, useProjectsCount, updateProjectLastActive } from '@/features/projects'
 import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization'
+import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { Folder, Edit, Trash2, Plus, CheckCircle2, Search, Filter, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -27,7 +28,14 @@ export default function ProjectList() {
   const organizationId = userData?.organization?.id
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined)
   const { data: projectsCount = 0 } = useProjectsCount(organizationId || undefined)
+  const { data: organizationCurrencies = [] } = useOrganizationCurrencies(organizationId)
   const { toast } = useToast()
+  
+  // Get default currency for organization
+  const defaultCurrency = useMemo(
+    () => organizationCurrencies.find(oc => oc.is_default)?.currency,
+    [organizationCurrencies]
+  )
   const queryClient = useQueryClient()
   const { setSelectedProject } = useProjectContext()
   const { setSidebarLevel } = useNavigationStore()
@@ -369,11 +377,14 @@ export default function ProjectList() {
     {
       key: 'currency',
       label: 'Moneda',
-      render: (project: any) => (
-        <div className="text-sm">
-          {project.currency?.name ? `${project.currency.name} (${project.currency.symbol})` : 'Sin especificar'}
-        </div>
-      )
+      render: (project: any) => {
+        const currency = project.currency || defaultCurrency;
+        return (
+          <div className="text-sm">
+            {currency?.name ? `${currency.name} (${currency.symbol})` : 'Sin especificar'}
+          </div>
+        );
+      }
     },
     {
       key: 'status',
