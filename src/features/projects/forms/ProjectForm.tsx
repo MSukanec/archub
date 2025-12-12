@@ -227,7 +227,7 @@ function FormPanel({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {organizationCurrencies.map((oc) => (
+                  {organizationCurrencies.filter(oc => oc.is_active).map((oc) => (
                     <SelectItem key={oc.currency_id} value={oc.currency_id}>
                       {oc.currency?.symbol} – {oc.currency?.code}
                     </SelectItem>
@@ -451,7 +451,7 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
         name: project.name || "",
         project_type_id: project.project_data?.project_type_id || "",
         project_modality_id: project.project_data?.project_modality_id || "",
-        currency_id: project.currency_id || "",
+        currency_id: project.currency_id || defaultCurrencyId || "",
         status: (project.status as "active" | "inactive" | "completed" | "paused") || "active",
         color: project.color || "#84cc16",
         use_custom_color: project.use_custom_color || false,
@@ -463,7 +463,7 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
       name: "",
       project_type_id: "",
       project_modality_id: "",
-      currency_id: defaultCurrencyId,
+      currency_id: defaultCurrencyId || "",
       status: "active",
       color: "#84cc16",
       use_custom_color: false,
