@@ -145,102 +145,61 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     return mostCommon.currency;
   }, [commitmentsData]);
 
-  // Calculate metrics client-side from payments data
-  const metricsData = useMemo<PaymentMetrics>(() => {
-    let totalConfirmed = 0;
-    let totalPending = 0;
-    let totalRejected = 0;
-    let countConfirmed = 0;
-    let countPending = 0;
-    let countRejected = 0;
-    let countSkipped = 0;
-    let latestPaymentDate: string | null = null;
+  // Calculate KPIs using headless system
+  const metricsKPIs = useMemo(() => {
+    const confirmedPayments = allPayments.filter(p => p.status === 'confirmed');
+    const latestDate = allPayments.length > 0 
+      ? allPayments.reduce((latest, p) => p.payment_date > latest.payment_date ? p : latest).payment_date
+      : null;
+    
+    const totalConfirmedKPI = calculateMonetaryKPI({
+      items: confirmedPayments.map(p => ({
+        amount: p.amount,
+        currency_id: p.currency_id,
+        currency: p.currency,
+        exchange_rate: p.exchange_rate
+      })),
+      baseCurrencyId: defaultCurrency?.code || defaultCurrency?.id
+    });
 
-    // Track totals by original currency for breakdown
-    const confirmedByCurrency = new Map<string, { symbol: string; amount: number }>();
-    const pendingByCurrency = new Map<string, { symbol: string; amount: number }>();
+    const totalPaymentsKPI = calculateCountKPI({
+      count: allPayments.length,
+      label: 'Pagos'
+    });
 
-    allPayments.forEach(payment => {
-      if (!payment.currency) return;
-
-      const currencySymbol = payment.currency.symbol;
-
-      // Convert amount to commitment currency using payment's exchange_rate
-      // exchange_rate represents: 1 USD = X units of commitment currency
-      // convertToBaseCurrency automatically handles multiply vs divide based on currencies
-      let convertedAmount = payment.amount;
-      if (commitmentCurrency && payment.currency.id !== commitmentCurrency.id) {
-        if (payment.exchange_rate && payment.exchange_rate > 0) {
-          convertedAmount = convertToBaseCurrency(
-            {
-              amount: payment.amount,
-              currency: payment.currency,
-              exchange_rate: payment.exchange_rate,
-            },
-            commitmentCurrency.code || commitmentCurrency.id,
-            { quoteCurrency: 'USD' }
-          );
-        } else {
-          countSkipped += 1;
-          convertedAmount = 0; // Skip if no exchange rate
-        }
-      }
-
-      if (payment.status === 'confirmed') {
-        totalConfirmed += convertedAmount;
-        countConfirmed += 1;
-        
-        // Track by original currency (unconverted amounts)
-        const existing = confirmedByCurrency.get(currencySymbol);
-        if (existing) {
-          existing.amount += payment.amount;
-        } else {
-          confirmedByCurrency.set(currencySymbol, { symbol: currencySymbol, amount: payment.amount });
-        }
-      } else if (payment.status === 'pending') {
-        totalPending += convertedAmount;
-        countPending += 1;
-        
-        // Track by original currency (unconverted amounts)
-        const existing = pendingByCurrency.get(currencySymbol);
-        if (existing) {
-          existing.amount += payment.amount;
-        } else {
-          pendingByCurrency.set(currencySymbol, { symbol: currencySymbol, amount: payment.amount });
-        }
-      } else if (payment.status === 'rejected') {
-        totalRejected += convertedAmount;
-        countRejected += 1;
-      }
-
-      if (!latestPaymentDate || payment.payment_date > latestPaymentDate) {
-        latestPaymentDate = payment.payment_date;
-      }
+    const lastPaymentKPI = calculateTextKPI({
+      text: latestDate ? format(parseLocalDate(latestDate)!, 'd/M/yyyy') : '-',
+      icon: 'calendar'
     });
 
     return {
+      total_confirmado_kpi: totalConfirmedKPI,
+      total_count_kpi: totalPaymentsKPI,
+      latest_payment_kpi: lastPaymentKPI,
       total_count: allPayments.length,
-      commitment_currency_id: commitmentCurrency?.id || null,
-      commitment_currency_code: commitmentCurrency?.code || null,
-      commitment_currency_symbol: commitmentCurrency?.symbol || null,
-      total_confirmed: totalConfirmed,
-      total_pending: totalPending,
-      total_rejected: totalRejected,
-      count_confirmed: countConfirmed,
-      count_pending: countPending,
-      count_rejected: countRejected,
-      count_skipped: countSkipped,
-      latest_payment_date: latestPaymentDate,
-      confirmed_by_currency: Array.from(confirmedByCurrency.values()).map(c => ({
-        currency_symbol: c.symbol,
-        amount: c.amount,
-      })),
-      pending_by_currency: Array.from(pendingByCurrency.values()).map(c => ({
-        currency_symbol: c.symbol,
-        amount: c.amount,
-      })),
+      latest_payment_date: latestDate
     };
-  }, [allPayments, commitmentCurrency]);
+  }, [allPayments, defaultCurrency]);
+
+  // Keep metricsData for backward compatibility
+  const metricsData = useMemo<PaymentMetrics>(() => {
+    return {
+      total_count: metricsKPIs.total_count,
+      commitment_currency_id: null,
+      commitment_currency_code: null,
+      commitment_currency_symbol: null,
+      total_confirmed: metricsKPIs.total_confirmado_kpi?.value ?? 0,
+      total_pending: 0,
+      total_rejected: 0,
+      count_confirmed: 0,
+      count_pending: 0,
+      count_rejected: 0,
+      count_skipped: 0,
+      latest_payment_date: metricsKPIs.latest_payment_date,
+      confirmed_by_currency: metricsKPIs.total_confirmado_kpi?.breakdown?.map(b => ({ currency_symbol: b.currencySymbol, amount: b.total })) || [],
+      pending_by_currency: [],
+    };
+  }, [metricsKPIs]);
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
@@ -1132,14 +1091,14 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
             Total Confirmado
           </StatCardTitle>
           <StatCardValue>
-            {metricsData?.total_confirmed > 0
-              ? formatCurrencyKPI(metricsData.total_confirmed, metricsData.commitment_currency_symbol)
-              : <span>-</span>
+            {metricsKPIs?.total_confirmado_kpi?.breakdown && metricsKPIs.total_confirmado_kpi.breakdown.length > 0
+              ? formatMoney(metricsKPIs.total_confirmado_kpi.value, metricsKPIs.total_confirmado_kpi.breakdown[0].currencySymbol)
+              : formatKPI(metricsKPIs?.total_confirmado_kpi?.value ?? 0)
             }
           </StatCardValue>
           <StatCardMeta>
-            {metricsData?.confirmed_by_currency && metricsData.confirmed_by_currency.length > 0
-              ? formatCurrencyBreakdown(metricsData.confirmed_by_currency)
+            {metricsKPIs?.total_confirmado_kpi?.breakdown && metricsKPIs.total_confirmado_kpi.breakdown.length > 0
+              ? formatBreakdown(metricsKPIs.total_confirmado_kpi)
               : 'Sin pagos confirmados'
             }
           </StatCardMeta>

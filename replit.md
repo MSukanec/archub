@@ -104,6 +104,9 @@ Centralized headless KPI calculation logic (no UI/JSX) is implemented in:
 - **Recently refactored pages** (2025-12-12):
   - `src/pages/general-costs/GeneralCostsPaymentsTab.tsx` - "Total Pagos" (count) and "Pagos a la Fecha" (monetary) KPIs
   - `src/pages/partners/tabs/PartnerTransactionsTab.tsx` - "Total Aportes", "Total Retiros", "Saldo Neto" (all monetary) KPIs
+  - `src/pages/clients/ClientDashboardTab.tsx` - "Total Clientes" (count), "Total Pagos" (count), "Compromiso Total" (monetary), "Balance Pendiente" (monetary) KPIs
+  - `src/pages/clients/ClientPaymentsTab.tsx` - "Total Confirmado" (monetary), "Total Pagos" (count), "Último Pago" (text) KPIs
+  - `src/pages/clients/ClientObligationsTab.tsx` - "Compromiso Total" (monetary), "Pagado" (monetary), "Saldo" (monetary), "Items de Pago" (count) KPIs
 
 ### Subscription & Billing System
 Complete technical documentation for the payment, subscription, and billing architecture is maintained in:

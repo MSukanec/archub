@@ -367,9 +367,17 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
             Compromiso Total
           </StatCardTitle>
           <StatCardValue className="text-2xl md:text-3xl">
-            {formatCurrencyAmount(kpis.totalCommittedAmount)}
+            {kpis.totalCommittedKPI?.breakdown && kpis.totalCommittedKPI.breakdown.length > 0
+              ? formatMoney(kpis.totalCommittedAmount, kpis.totalCommittedKPI.breakdown[0].currencySymbol)
+              : formatKPI(kpis.totalCommittedAmount)
+            }
           </StatCardValue>
-          <StatCardMeta>Monto comprometido</StatCardMeta>
+          <StatCardMeta>
+            {kpis.totalCommittedKPI?.breakdown && kpis.totalCommittedKPI.breakdown.length > 0
+              ? formatBreakdown(kpis.totalCommittedKPI)
+              : 'Monto comprometido'
+            }
+          </StatCardMeta>
         </StatCard>
 
         {/* 4. Balance Pendiente */}
@@ -382,9 +390,17 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
             Balance Pendiente
           </StatCardTitle>
           <StatCardValue className={`text-2xl md:text-3xl ${kpis.totalBalanceDue > 0 ? 'text-destructive' : 'text-green-600'}`}>
-            {formatCurrencyAmount(kpis.totalBalanceDue)}
+            {kpis.totalBalanceKPI?.breakdown && kpis.totalBalanceKPI.breakdown.length > 0
+              ? formatMoney(kpis.totalBalanceDue, kpis.totalBalanceKPI.breakdown[0].currencySymbol)
+              : formatKPI(kpis.totalBalanceDue)
+            }
           </StatCardValue>
-          <StatCardMeta>Saldo por cobrar</StatCardMeta>
+          <StatCardMeta>
+            {kpis.totalBalanceKPI?.breakdown && kpis.totalBalanceKPI.breakdown.length > 0
+              ? formatBreakdown(kpis.totalBalanceKPI)
+              : 'Saldo por cobrar'
+            }
+          </StatCardMeta>
         </StatCard>
       </div>
 
