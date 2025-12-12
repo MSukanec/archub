@@ -86,6 +86,7 @@ export function OrganizationSettingsFinancesTab() {
     onSuccess: () => {
       toast({ title: 'Moneda por defecto actualizada', description: 'La configuración se ha guardado exitosamente.' });
       queryClient.invalidateQueries({ queryKey: ['organization-currencies', userData?.organization?.id] });
+      queryClient.invalidateQueries({ queryKey: ['organization-default-currency', userData?.organization?.id] });
     },
     onError: (error) => {
       toast({ 
