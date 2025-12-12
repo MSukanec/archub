@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis'
 import { format as formatMoney, formatKPI } from '@/lib/money'
-import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies'
 import { useToast } from '@/hooks/use-toast'
 import { Plus, DollarSign, CheckCircle2, AlertCircle, ListChecks, FileText } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -36,7 +35,6 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
   const { data: dashboardData, isLoading } = useClientDashboard(activeProjectId || undefined, organizationId);
   const { data: commitmentsData } = useClientCommitments(activeProjectId || undefined, organizationId);
   const { data: paymentsData } = useClientPayments(activeProjectId || undefined, organizationId);
-  const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
 
   // Transform dashboard data using mappers (no inline calculations)
   const projectClients = useMemo(() => {
@@ -163,12 +161,26 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
 
   // Calculate KPIs using headless system
   const kpis = useMemo(() => {
+    if (!commitmentCurrency) {
+      return {
+        totalCommittedKPI: { value: 0, formatted: '0', breakdown: [] },
+        totalPaidKPI: { value: 0, formatted: '0', breakdown: [] },
+        totalBalanceKPI: { value: 0, formatted: '0', breakdown: [] },
+        totalScheduleItems: 0,
+        totalSchedulePaid: 0,
+        schedulePercentage: 0,
+        totalCommittedAmount: 0,
+        totalPaidAmount: 0,
+        totalBalanceDue: 0,
+      };
+    }
+
     const committedItems = projectClients.flatMap(client => 
       client.financialByCurrency.map(financial => ({
         amount: financial.total_committed_amount,
         currency_id: financial.currency?.id || '',
         currency: financial.currency,
-        exchange_rate: financial.exchange_rate || null
+        exchange_rate: null
       }))
     );
     
@@ -182,12 +194,12 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
 
     const totalCommittedKPI = calculateMonetaryKPI({
       items: committedItems,
-      baseCurrencyId: defaultCurrency?.code || defaultCurrency?.id
+      baseCurrencyId: commitmentCurrency?.code || commitmentCurrency?.id
     });
 
     const totalPaidKPI = calculateMonetaryKPI({
       items: paidItems,
-      baseCurrencyId: defaultCurrency?.code || defaultCurrency?.id
+      baseCurrencyId: commitmentCurrency?.code || commitmentCurrency?.id
     });
 
     const totalBalance = totalCommittedKPI.value - totalPaidKPI.value;
@@ -212,7 +224,7 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
       totalPaidAmount: totalPaidKPI.value,
       totalBalanceDue: totalBalance,
     };
-  }, [projectClients, paymentsData, defaultCurrency]);
+  }, [projectClients, paymentsData, commitmentCurrency]);
 
   const handleAddCommitment = () => {
     openModal('client-commitment', { projectId: activeProjectId, organizationId });

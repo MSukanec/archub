@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, CheckCircle2, AlertCircle, Calendar, Upload, Download } from 'lucide-react'
 import { convertToBaseCurrency, formatKPI, format as formatMoney } from '@/lib/money'
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakdown } from '@/lib/kpis'
-import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
@@ -103,7 +102,6 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   const { data: paymentsData, isLoading } = useClientPayments(activeProjectId || undefined, organizationId);
   const { data: commitmentsData } = useClientCommitments(activeProjectId || undefined, organizationId);
   const { data: projectClientsData } = useProjectClients(activeProjectId || undefined, organizationId);
-  const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
 
   // Use payments data directly
   const allPayments = useMemo(() => {
@@ -145,7 +143,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     return mostCommon.currency;
   }, [commitmentsData]);
 
-  // Calculate KPIs using headless system
+  // Calculate KPIs using headless system (use commitmentCurrency as base)
   const metricsKPIs = useMemo(() => {
     const confirmedPayments = allPayments.filter(p => p.status === 'confirmed');
     const latestDate = allPayments.length > 0 
@@ -159,7 +157,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         currency: p.currency,
         exchange_rate: p.exchange_rate
       })),
-      baseCurrencyId: defaultCurrency?.code || defaultCurrency?.id
+      baseCurrencyId: commitmentCurrency?.code || commitmentCurrency?.id
     });
 
     const totalPaymentsKPI = calculateCountKPI({
@@ -179,7 +177,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       total_count: allPayments.length,
       latest_payment_date: latestDate
     };
-  }, [allPayments, defaultCurrency]);
+  }, [allPayments, commitmentCurrency]);
 
   // Keep metricsData for backward compatibility
   const metricsData = useMemo<PaymentMetrics>(() => {
