@@ -13,6 +13,7 @@ import { calculateMonetaryKPI, formatBreakdown as kpiFormatBreakdown } from '@/l
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import {
   usePartnerContributions,
   usePartnerWithdrawals,
@@ -57,6 +58,7 @@ export function PartnerTransactionsTab() {
 
   const { data: contributions = [], isLoading: loadingContributions } = usePartnerContributions(organizationId);
   const { data: withdrawals = [], isLoading: loadingWithdrawals } = usePartnerWithdrawals(organizationId);
+  const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
 
   const deleteContributionMutation = useDeletePartnerContribution();
   const deleteWithdrawalMutation = useDeletePartnerWithdrawal();
@@ -106,8 +108,6 @@ export function PartnerTransactionsTab() {
 
   // KPI system - REFACTORIZADO
   const metrics = useMemo(() => {
-    const organizationCurrencyCode = userData?.organization?.preferences?.default_currency?.code;
-    
     // Filter confirmed transactions
     const confirmedTransactions = transactions.filter(t => t.status === 'confirmed');
     
@@ -121,7 +121,7 @@ export function PartnerTransactionsTab() {
           currency: { code: t.currency_id, symbol: t.currency_symbol },
           exchange_rate: t.exchange_rate
         })),
-      baseCurrencyId: organizationCurrencyCode
+      baseCurrencyId: defaultCurrency?.code
     });
 
     // KPI: Total Retiros (withdrawals)
@@ -134,7 +134,7 @@ export function PartnerTransactionsTab() {
           currency: { code: t.currency_id, symbol: t.currency_symbol },
           exchange_rate: t.exchange_rate
         })),
-      baseCurrencyId: organizationCurrencyCode
+      baseCurrencyId: defaultCurrency?.code
     });
 
     // KPI: Saldo Neto (net balance = contributions - withdrawals)
@@ -150,7 +150,7 @@ export function PartnerTransactionsTab() {
       withdrawals_kpi: withdrawalsKPI,
       net_balance_kpi: netBalanceKPI,
     };
-  }, [transactions, userData]);
+  }, [transactions, defaultCurrency]);
 
   const handleEdit = (transaction: UnifiedTransaction) => {
     if (!organizationId) {
