@@ -229,7 +229,7 @@ function FormPanel({
                 <SelectContent>
                   {organizationCurrencies.filter(oc => oc.is_active).map((oc) => (
                     <SelectItem key={oc.currency_id} value={oc.currency_id}>
-                      {oc.currency?.symbol} – {oc.currency?.code}
+                      {oc.currency?.name} ({oc.currency?.symbol})
                     </SelectItem>
                   ))}
                 </SelectContent>

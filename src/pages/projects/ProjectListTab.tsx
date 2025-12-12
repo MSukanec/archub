@@ -371,7 +371,7 @@ export default function ProjectList() {
       label: 'Moneda',
       render: (project: any) => (
         <div className="text-sm">
-          {project.currency?.symbol} – {project.currency?.code || 'Sin especificar'}
+          {project.currency?.name ? `${project.currency.name} (${project.currency.symbol})` : 'Sin especificar'}
         </div>
       )
     },
