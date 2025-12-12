@@ -87,6 +87,19 @@ Centralized multicurrency handling is documented in:
   - KPI display pattern (converted total + breakdown by currency)
 - **`prompts/documentation/FINANCE_CURRENCY_AUDIT.md`**: Audit report and refactoring decisions
 
+### KPI System (Headless)
+Centralized headless KPI calculation logic (no UI/JSX) is implemented in:
+- **`/lib/kpis.ts`**: Pure logic for KPI calculation, providing:
+  - `calculateMonetaryKPI()` - Total convertido a moneda base + breakdown por moneda
+  - `calculateCountKPI()` - Conteos simples
+  - `calculatePercentageKPI()` - Ratios y porcentajes
+  - `calculateTextKPI()` - Valores de texto
+  - `calculateAggregateMonetaryKPI()` - Suma de múltiples KPIs
+  - Helpers: `formatBreakdown()`, `hasMultipleCurrencies()`, `getDominantCurrency()`
+  - All monetary KPIs use `convertToBaseCurrency()` with explicit signatures (fromCurrencyId, toCurrencyId)
+  - Standard return type: `{ value, formatted, meta?, breakdown? }`
+  - No UI components - works with any KPI display component (StatCard, etc.)
+
 ### Subscription & Billing System
 Complete technical documentation for the payment, subscription, and billing architecture is maintained in:
 - **`prompts/documentation/SUBSCRIPTIONS_BILLING_SYSTEM.md`**: Consolidated reference covering:
