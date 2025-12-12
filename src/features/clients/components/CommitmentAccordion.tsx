@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ChevronDown, Building2, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { convert } from '@/lib/money';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -109,20 +108,9 @@ function CommitmentItem({
   
   const totalPaid = useMemo(() => {
     return payments
-      .filter(p => p.commitment_id === commitment.id && p.status === 'confirmed')
-      .reduce((sum, p) => {
-        if (!p.currency || !commitment.currency) return sum + p.amount;
-        
-        if (p.currency.id === commitment.currency.id) {
-          return sum + p.amount;
-        } else if (p.exchange_rate && p.exchange_rate > 0) {
-          // exchange_rate represents: 1 unit of payment currency = X units of commitment currency
-          // Example: 1 USD = 1420 ARS, so payment in USD * 1420 = amount in ARS
-          return sum + convert(p.amount, p.exchange_rate);
-        }
-        return sum + p.amount;
-      }, 0);
-  }, [payments, commitment.id, commitment.currency]);
+      .filter(p => p.commitment_id === commitment.id && p.status === 'confirmed' && p.currency?.id === commitment.currency?.id)
+      .reduce((sum, p) => sum + p.amount, 0);
+  }, [payments, commitment.id, commitment.currency?.id]);
   
   const remainingAmount = totalCommitted - totalPaid;
   const paymentPercentage = totalCommitted > 0 ? (totalPaid / totalCommitted) * 100 : 0;
