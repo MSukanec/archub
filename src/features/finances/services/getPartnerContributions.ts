@@ -92,7 +92,7 @@ export async function getPartnerContributions(
       *,
       partner:partners(
         id,
-        contacts(
+        contacts!inner(
           id,
           first_name,
           last_name,
