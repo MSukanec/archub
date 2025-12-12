@@ -14,8 +14,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useOrganizationCurrencies } from '@/hooks/use-currencies'
+import { useOrganizationCurrencies, useOrgCurrencyContext } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
+import { getCurrencyFieldsVisibility } from '@/lib/currency-visibility'
 import { usePartners, useCreatePartnerContribution, useUpdatePartnerContribution, usePartnerContribution } from '../hooks'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { FileUploader } from '@/components/shared/FileUploader'
@@ -91,6 +92,8 @@ export function PartnerContributionFormFields({
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId || '')
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
+  
+  const orgCurrencyContext = useOrgCurrencyContext(organizationId)
 
   const createMutation = useCreatePartnerContribution()
   const updateMutation = useUpdatePartnerContribution()
@@ -147,13 +150,18 @@ export function PartnerContributionFormFields({
   }, [existingContribution, mode, form])
 
   // Set default wallet and currency when they load (create mode only)
+  // Para organizaciones monomoneda, siempre usar la moneda por defecto
   useEffect(() => {
     if (mode === 'create' && !contributionId) {
-      if (!currenciesLoading && currencies && currencies.length > 0) {
+      // Usar la moneda por defecto de la organización
+      if (orgCurrencyContext.defaultCurrencyId && !orgCurrencyContext.isLoading) {
+        form.setValue('currency_id', orgCurrencyContext.defaultCurrencyId)
+      } else if (!currenciesLoading && currencies && currencies.length > 0) {
+        // Fallback si no hay default currency
         form.setValue('currency_id', currencies[0].currency?.id || '')
       }
     }
-  }, [currencies, currenciesLoading, mode, contributionId, form])
+  }, [currencies, currenciesLoading, mode, contributionId, form, orgCurrencyContext.defaultCurrencyId, orgCurrencyContext.isLoading])
 
   useEffect(() => {
     if (mode === 'create' && !contributionId) {
@@ -220,6 +228,11 @@ export function PartnerContributionFormFields({
     try {
       let result;
       
+      // Determinar si el exchange_rate debe ser usado o forzado a 1
+      // Si la moneda es la misma que la por defecto o si es monomoneda, exchange_rate = 1
+      const shouldUseExchangeRate = orgCurrencyContext.shouldShowExchangeRate(data.currency_id);
+      const effectiveExchangeRate = shouldUseExchangeRate ? (data.exchange_rate || 1) : 1;
+      
       if (mode === 'edit' && contributionId) {
         result = await updateMutation.mutateAsync({
           contributionId,
@@ -227,7 +240,7 @@ export function PartnerContributionFormFields({
             partner_id: data.partner_id,
             amount: data.amount,
             currency_id: data.currency_id,
-            exchange_rate: data.exchange_rate || 1,
+            exchange_rate: effectiveExchangeRate,
             contribution_date: formatDateForDB(data.contribution_date),
             wallet_id: data.wallet_id,
             status: data.status,
@@ -243,7 +256,7 @@ export function PartnerContributionFormFields({
           partner_id: data.partner_id,
           amount: data.amount,
           currency_id: data.currency_id,
-          exchange_rate: data.exchange_rate || 1,
+          exchange_rate: effectiveExchangeRate,
           contribution_date: formatDateForDB(data.contribution_date),
           wallet_id: data.wallet_id,
           status: data.status,
@@ -435,59 +448,75 @@ export function PartnerContributionFormFields({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="currency_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Moneda <span className="text-red-500">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange} disabled={currenciesLoading}>
-                    <SelectTrigger data-testid="select-partner-contribution-currency">
-                      <SelectValue placeholder="Seleccionar moneda" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencies?.map((orgCurrency) => (
-                        <SelectItem 
-                          key={orgCurrency.currency?.id} 
-                          value={orgCurrency.currency?.id || ''}
-                        >
-                          {orgCurrency.currency?.name} ({orgCurrency.currency?.symbol})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Campos de moneda - visibilidad condicional basada en isMultiCurrency */}
+        {(() => {
+          const visibility = getCurrencyFieldsVisibility({
+            context: orgCurrencyContext,
+            selectedCurrencyId: form.watch('currency_id')
+          });
+          
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {visibility.showCurrencySelector ? (
+                <FormField
+                  control={form.control}
+                  name="currency_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Moneda <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Select value={field.value} onValueChange={field.onChange} disabled={currenciesLoading}>
+                          <SelectTrigger data-testid="select-partner-contribution-currency">
+                            <SelectValue placeholder="Seleccionar moneda" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {currencies?.map((orgCurrency) => (
+                              <SelectItem 
+                                key={orgCurrency.currency?.id} 
+                                value={orgCurrency.currency?.id || ''}
+                              >
+                                {orgCurrency.currency?.name} ({orgCurrency.currency?.symbol})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                <input type="hidden" {...form.register('currency_id')} />
+              )}
 
-          <FormField
-            control={form.control}
-            name="exchange_rate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cotización (opcional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.0001"
-                    min="0.0001"
-                    placeholder="1.0000"
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                    data-testid="input-partner-contribution-exchange-rate"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+              {visibility.showExchangeRate && (
+                <FormField
+                  control={form.control}
+                  name="exchange_rate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cotización</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.0001"
+                          min="0.0001"
+                          placeholder="1.0000"
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                          data-testid="input-partner-contribution-exchange-rate"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+          );
+        })()}
 
         <FormField
           control={form.control}

@@ -78,3 +78,119 @@ export const useOrganizationDefaultCurrency = (organizationId?: string) => {
     enabled: !!organizationId,
   })
 }
+
+/**
+ * ============================================================================
+ * CONTEXTO GLOBAL DE MONEDA DE ORGANIZACIÓN
+ * ============================================================================
+ * 
+ * Hook centralizado que determina si una organización es MULTIMONEDA o MONOMONEDA.
+ * 
+ * REGLA PRINCIPAL (NO NEGOCIABLE):
+ * - Una organización es MULTIMONEDA solo si tiene más de una moneda activa
+ * - Si tiene 1 sola moneda activa → comportamiento MONOMONEDA
+ * - Si tiene 2 o más monedas activas → comportamiento MULTIMONEDA
+ * 
+ * Esta regla se resuelve en un solo lugar (este hook), no duplicada por componentes.
+ * 
+ * @example
+ * const { isMultiCurrency, defaultCurrency, activeCurrencies, isLoading } = useOrgCurrencyContext(orgId);
+ * 
+ * // En componentes de UI:
+ * {isMultiCurrency && <CurrencySelector />}
+ * {isMultiCurrency && showExchangeRate && <ExchangeRateField />}
+ */
+export interface OrgCurrencyContext {
+  /** TRUE si la organización tiene más de 1 moneda activa */
+  isMultiCurrency: boolean
+  
+  /** Moneda por defecto de la organización */
+  defaultCurrency: Currency | null
+  
+  /** ID de la moneda por defecto (shortcut) */
+  defaultCurrencyId: string | null
+  
+  /** Código de la moneda por defecto (shortcut para KPIs) */
+  defaultCurrencyCode: string | null
+  
+  /** Símbolo de la moneda por defecto */
+  defaultCurrencySymbol: string
+  
+  /** Lista de monedas activas de la organización */
+  activeCurrencies: OrganizationCurrency[]
+  
+  /** Número de monedas activas */
+  activeCurrencyCount: number
+  
+  /** Loading state */
+  isLoading: boolean
+  
+  /** Error state */
+  error: Error | null
+  
+  /**
+   * Determina si se debe mostrar el campo de cotización.
+   * Solo se muestra si:
+   * 1. La org es multimoneda Y
+   * 2. La moneda del movimiento es diferente a la moneda por defecto
+   */
+  shouldShowExchangeRate: (currencyId?: string | null) => boolean
+  
+  /**
+   * Determina si una moneda es la moneda por defecto.
+   */
+  isDefaultCurrency: (currencyId?: string | null) => boolean
+}
+
+export const useOrgCurrencyContext = (organizationId?: string): OrgCurrencyContext => {
+  const { 
+    data: orgCurrencies = [], 
+    isLoading: isLoadingCurrencies,
+    error: currenciesError 
+  } = useOrganizationCurrencies(organizationId)
+  
+  const {
+    data: defaultCurrency = null,
+    isLoading: isLoadingDefault,
+    error: defaultError
+  } = useOrganizationDefaultCurrency(organizationId)
+  
+  // Filtrar solo monedas activas
+  const activeCurrencies = orgCurrencies.filter(oc => oc.is_active)
+  const activeCurrencyCount = activeCurrencies.length
+  
+  // REGLA PRINCIPAL: isMultiCurrency solo si hay más de 1 moneda activa
+  const isMultiCurrency = activeCurrencyCount > 1
+  
+  // Shortcuts para acceso rápido
+  const defaultCurrencyId = defaultCurrency?.id ?? null
+  const defaultCurrencyCode = defaultCurrency?.code ?? null
+  const defaultCurrencySymbol = defaultCurrency?.symbol ?? '$'
+  
+  // Helper: determina si mostrar cotización
+  const shouldShowExchangeRate = (currencyId?: string | null): boolean => {
+    if (!isMultiCurrency) return false
+    if (!currencyId || !defaultCurrencyId) return false
+    return currencyId !== defaultCurrencyId
+  }
+  
+  // Helper: verifica si es la moneda por defecto
+  const isDefaultCurrency = (currencyId?: string | null): boolean => {
+    if (!currencyId || !defaultCurrencyId) return false
+    return currencyId === defaultCurrencyId
+  }
+  
+  return {
+    isMultiCurrency,
+    defaultCurrency,
+    defaultCurrencyId,
+    defaultCurrencyCode,
+    defaultCurrencySymbol,
+    activeCurrencies,
+    activeCurrencyCount,
+    isLoading: isLoadingCurrencies || isLoadingDefault,
+    error: currenciesError || defaultError || null,
+    shouldShowExchangeRate,
+    isDefaultCurrency,
+  }
+}
