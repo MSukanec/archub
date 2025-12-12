@@ -119,14 +119,15 @@ export default function GeneralCostsPaymentsTab() {
         currency: p.currency,
         exchange_rate: p.exchange_rate
       })),
-      baseCurrencyId: defaultCurrency?.id || defaultCurrencyId
+      baseCurrencyId: defaultCurrency?.code, // Pasar el código de moneda, no el ID
+      quoteCurrency: 'USD' // Asegurar que el quoteCurrency es correcto
     });
 
     return {
       total_count_kpi: totalPagosKPI,
       total_confirmed_kpi: pagosALaFechaKPI,
     };
-  }, [allPayments, defaultCurrency, defaultCurrencyId]);
+  }, [allPayments, defaultCurrency]);
 
   const handleEdit = (payment: GeneralCostPayment) => {
     if (!organizationId) return;
