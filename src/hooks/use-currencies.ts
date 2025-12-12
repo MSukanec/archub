@@ -66,15 +66,14 @@ export const useOrganizationDefaultCurrency = (organizationId?: string) => {
       if (!organizationId) return null
       
       const { data, error } = await supabase
-        .from('organization_preferences')
-        .select(`
-          default_currency:currencies(*)
-        `)
+        .from('organization_currencies')
+        .select('currency:currencies(*)')
         .eq('organization_id', organizationId)
-        .single()
+        .eq('is_default', true)
+        .maybeSingle()
       
       if (error) throw error
-      return (data?.default_currency || null) as unknown as Currency | null
+      return (data?.currency || null) as unknown as Currency | null
     },
     enabled: !!organizationId,
   })
