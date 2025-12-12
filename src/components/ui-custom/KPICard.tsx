@@ -44,12 +44,11 @@ const StatCard = forwardRef<HTMLDivElement, StatCardProps>(
     };
 
     return (
-      <div
+      <Card
         ref={ref}
         className={cn(
           statCardVariants({ variant }),
-          "border border-border rounded-lg bg-transparent",
-          isClickable && "relative group cursor-pointer hover:border-foreground/50 transition-colors",
+          isClickable && "relative group cursor-pointer hover:shadow-md transition-shadow",
           className
         )}
         onClick={isClickable ? handleClick : undefined}
