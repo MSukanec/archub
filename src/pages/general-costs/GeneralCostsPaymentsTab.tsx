@@ -1,7 +1,8 @@
 import { useMemo, useState, useEffect } from 'react';
 import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, Calendar, TrendingUp, Filter, Search, Bell } from 'lucide-react';
 import { format } from 'date-fns';
-import { convert } from '@/lib/money';
+import { convertToBaseCurrency, formatKPI, formatSubValue } from '@/lib/money';
+import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
@@ -101,35 +102,31 @@ export default function GeneralCostsPaymentsTab() {
     });
   }, [filteredPayments]);
 
-  // Calculate metrics
+  // Calculate metrics using new KPI system
   const metricsData = useMemo(() => {
-    let latestPaymentDate: string | null = null;
-    let totalConfirmedInDefaultCurrency = 0;
+    // KPI 1: Total Pagos (conteo)
+    const totalPagosKPI = calculateCountKPI({
+      count: allPayments.length,
+      label: 'Cantidad de pagos'
+    });
 
-    allPayments.forEach(payment => {
-      // Track latest payment date
-      if (!latestPaymentDate || payment.payment_date > latestPaymentDate) {
-        latestPaymentDate = payment.payment_date;
-      }
-
-      // Calculate total confirmed in default currency
-      if (payment.status === 'confirmed') {
-        if (!defaultCurrency) {
-          totalConfirmedInDefaultCurrency += payment.amount;
-        } else if (payment.currency?.id === defaultCurrency.id) {
-          totalConfirmedInDefaultCurrency += payment.amount;
-        } else {
-          totalConfirmedInDefaultCurrency += convert(payment.amount, payment.exchange_rate);
-        }
-      }
+    // KPI 2: Pagos a la Fecha (monetaria, solo confirmados)
+    const confirmedPayments = allPayments.filter(p => p.status === 'confirmed');
+    const pagosALaFechaKPI = calculateMonetaryKPI({
+      items: confirmedPayments.map(p => ({
+        amount: p.amount,
+        currency_id: p.currency_id,
+        currency: p.currency,
+        exchange_rate: p.exchange_rate
+      })),
+      baseCurrencyId: defaultCurrency?.id || defaultCurrencyId
     });
 
     return {
-      total_count: allPayments.length,
-      total_confirmed_default_currency: totalConfirmedInDefaultCurrency,
-      latest_payment_date: latestPaymentDate,
+      total_count_kpi: totalPagosKPI,
+      total_confirmed_kpi: pagosALaFechaKPI,
     };
-  }, [allPayments, defaultCurrency]);
+  }, [allPayments, defaultCurrency, defaultCurrencyId]);
 
   const handleEdit = (payment: GeneralCostPayment) => {
     if (!organizationId) return;
@@ -695,32 +692,32 @@ export default function GeneralCostsPaymentsTab() {
     <div className="space-y-6">
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Total Pagos (2 columnas) */}
+        {/* Total Pagos (2 columnas) - REFACTORIZADO */}
         <StatCard data-testid="stat-card-total-pagos" className="col-span-2">
           <StatCardTitle showArrow={false}>
             <DollarSign className="w-4 h-4 inline mr-1" />
             Total Pagos
           </StatCardTitle>
           <StatCardValue>
-            {metricsData?.total_count ?? 0}
+            {metricsData?.total_count_kpi?.formatted ?? '0'}
           </StatCardValue>
-          <StatCardMeta>Cantidad de pagos registrados</StatCardMeta>
+          <StatCardMeta>{metricsData?.total_count_kpi?.meta?.unit}</StatCardMeta>
         </StatCard>
 
-        {/* Pagos a la Fecha (2 columnas) */}
+        {/* Pagos a la Fecha (2 columnas) - REFACTORIZADO */}
         <StatCard data-testid="stat-card-pagos-fecha" className="col-span-2">
           <StatCardTitle showArrow={false}>
             <TrendingUp className="w-4 h-4 inline mr-1" />
             Pagos a la Fecha
           </StatCardTitle>
           <StatCardValue>
-            {metricsData?.total_confirmed_default_currency 
-              ? formatCurrencyAmount(metricsData.total_confirmed_default_currency, defaultCurrency?.symbol)
-              : '-'
-            }
+            {formatKPI(metricsData?.total_confirmed_kpi?.value ?? 0)}
           </StatCardValue>
           <StatCardMeta>
-            Total de pagos confirmados en {defaultCurrency?.code || 'moneda principal'}
+            {metricsData?.total_confirmed_kpi?.breakdown && metricsData.total_confirmed_kpi.breakdown.length > 0
+              ? formatBreakdown(metricsData.total_confirmed_kpi)
+              : `Total de pagos confirmados en ${defaultCurrency?.code || 'moneda principal'}`
+            }
           </StatCardMeta>
         </StatCard>
       </div>
