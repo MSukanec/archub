@@ -1,0 +1,186 @@
+Contexto general
+Estoy desarrollando una SaaS multi-tenant llamada Seencel.
+La app soporta multimoneda, pero la multimoneda NO debe ser visible ni afectar la UX si no es necesaria.
+
+Necesito que audites e implementes una lógica global, centralizada y escalable para manejar monedas, cotizaciones, KPIs y visibilidad de campos, siguiendo criterios de producto reales (no hardcodeados por pantalla).
+
+1️⃣ REGLA PRINCIPAL (NO NEGOCIABLE)
+
+Una organización es MULTIMONEDA solo si tiene más de una moneda activa.
+
+Si tiene 1 sola moneda activa → comportamiento MONOMONEDA
+
+Si tiene 2 o más monedas activas → comportamiento MULTIMONEDA
+
+Esta regla debe resolverse en un solo lugar, no duplicada por componentes.
+
+2️⃣ CREAR CONTEXTO GLOBAL DE MONEDA DE ORGANIZACIÓN
+
+Auditar si ya existe algo similar.
+Si no existe, crear un helper / hook / servicio headless (sin UI), por ejemplo:
+
+useOrgCurrencyContext()
+
+
+Este contexto debe devolver como mínimo:
+
+isMultiCurrency: boolean
+
+defaultCurrencyId
+
+activeCurrencies[]
+
+helpers de conversión (si corresponde)
+
+⚠️ No usar lógica en componentes visuales
+⚠️ No hacer cálculos sueltos en KPIs o tablas
+
+3️⃣ REGLAS DE VISIBILIDAD (MUY IMPORTANTE)
+
+Usando isMultiCurrency, aplicar estas reglas:
+
+🟢 Organización MONOMONEDA
+
+NO mostrar:
+
+selectores de moneda
+
+campos de cotización
+
+columnas de moneda
+
+columnas de cotización
+
+breakdowns por moneda en KPIs
+
+SÍ mostrar:
+
+montos simples en la moneda por defecto
+
+KPIs limpias
+
+tablas sin ruido extra
+
+El usuario no debe notar que existe multimoneda.
+
+🟡 Organización MULTIMONEDA
+
+SÍ mostrar:
+
+selector de moneda (solo donde tenga sentido)
+
+campo cotización solo cuando la moneda del movimiento ≠ moneda de referencia
+
+breakdown por moneda en KPIs
+
+subtítulos explicativos en KPIs
+
+⚠️ Nunca mostrar cotización “porque sí”.
+
+4️⃣ MONEDA DE CONTEXTO (ORGANIZACIÓN vs PROYECTO)
+
+La app tiene:
+
+moneda por organización
+
+moneda por proyecto (ya implementada)
+
+Regla:
+
+Las KPIs y sumatorias deben usar la moneda del contexto actual
+(ej: si estoy dentro de un proyecto, usar la moneda del proyecto).
+
+No resolver esto en el front “a mano”, sino desde helpers reutilizables.
+
+5️⃣ CONVERSIÓN CORRECTA (CLAVE)
+
+Auditar todas las sumatorias monetarias actuales.
+
+Regla correcta:
+
+Si el movimiento está en la misma moneda del contexto → usar monto directo
+
+Si está en otra moneda:
+
+convertir hacia la moneda del contexto
+
+multiplicar o dividir según corresponda, nunca asumir una sola operación
+
+❌ Error común a corregir:
+
+multiplicar siempre por cotización
+
+6️⃣ KPIs – LÓGICA HEADLESS (NO VISUAL)
+
+NO tocar el diseño de KPIs.
+
+Crear o completar una lógica headless para KPIs que soporte al menos estos tipos:
+
+currency (montos)
+
+count (conteos)
+
+percentage
+
+text
+
+Para KPIs monetarias:
+
+valor principal siempre en moneda del contexto
+
+breakdown secundario solo si isMultiCurrency === true
+
+7️⃣ GRÁFICOS (SI APLICAN)
+
+Los gráficos monetarios deben:
+
+usar la misma lógica de conversión que las KPIs
+
+recibir datos ya normalizados (no calcular dentro del gráfico)
+
+8️⃣ AUDITORÍA Y DOCUMENTACIÓN
+
+Antes de refactorizar:
+
+auditar cómo se están calculando hoy las sumatorias
+
+identificar errores de conversión
+
+Después:
+
+documentar en un archivo Markdown:
+
+reglas de multimoneda
+
+helpers creados
+
+qué se refactorizó y dónde
+
+qué NO se tocó
+
+📄 Ejemplo de archivo:
+
+docs/multicurrency-system.md
+
+9️⃣ RESTRICCIONES IMPORTANTES
+
+❌ NO refactorizar toda la app a ciegas
+❌ NO tocar pantallas que no usen montos
+❌ NO cambiar diseño
+❌ NO duplicar lógica por componente
+
+✅ Implementar base sólida
+✅ Centralizar lógica
+✅ Preparar sistema para escalar
+
+10️⃣ OBJETIVO FINAL
+
+Que la app:
+
+sea simple para usuarios monomoneda (Europa / USA / Chile)
+
+potente para usuarios multimoneda (Argentina)
+
+consistente en KPIs, tablas y gráficos
+
+sin hardcodeo ni lógica dispersa
