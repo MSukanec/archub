@@ -194,12 +194,14 @@ export default function ClientObligationsTab({ projectId }: ClientListTabProps) 
 
     const totalCommittedKPI = calculateMonetaryKPI({
       items: committedItems,
-      baseCurrencyId: commitmentCurrency?.code || commitmentCurrency?.id
+      baseCurrencyId: commitmentCurrency?.code || commitmentCurrency?.id,
+      symbol: commitmentCurrency?.symbol
     });
 
     const totalPaidKPI = calculateMonetaryKPI({
       items: paidItems,
-      baseCurrencyId: commitmentCurrency?.code || commitmentCurrency?.id
+      baseCurrencyId: commitmentCurrency?.code || commitmentCurrency?.id,
+      symbol: commitmentCurrency?.symbol
     });
 
     const totalBalance = totalCommittedKPI.value - totalPaidKPI.value;

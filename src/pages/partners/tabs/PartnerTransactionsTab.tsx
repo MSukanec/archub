@@ -121,7 +121,8 @@ export function PartnerTransactionsTab() {
           currency: { id: t.currency_id, code: t.original.currency?.code, symbol: t.currency_symbol },
           exchange_rate: t.exchange_rate
         })),
-      baseCurrencyId: defaultCurrency?.code
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol  // Use base currency symbol
     });
 
     // KPI: Total Retiros (withdrawals)
@@ -134,7 +135,8 @@ export function PartnerTransactionsTab() {
           currency: { id: t.currency_id, code: t.original.currency?.code, symbol: t.currency_symbol },
           exchange_rate: t.exchange_rate
         })),
-      baseCurrencyId: defaultCurrency?.code
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol  // Use base currency symbol
     });
 
     // KPI: Saldo Neto (net balance = contributions - withdrawals)

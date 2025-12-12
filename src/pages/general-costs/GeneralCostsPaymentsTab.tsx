@@ -121,6 +121,7 @@ export default function GeneralCostsPaymentsTab() {
         exchange_rate: p.exchange_rate
       })),
       baseCurrencyId: defaultCurrency?.code, // Pasar el código de moneda, no el ID
+      symbol: defaultCurrency?.symbol, // Use base currency symbol
       quoteCurrency: 'USD' // Asegurar que el quoteCurrency es correcto
     });
 

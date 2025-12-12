@@ -157,7 +157,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         currency: p.currency,
         exchange_rate: p.exchange_rate
       })),
-      baseCurrencyId: commitmentCurrency?.code || commitmentCurrency?.id
+      baseCurrencyId: commitmentCurrency?.code || commitmentCurrency?.id,
+      symbol: commitmentCurrency?.symbol
     });
 
     const totalPaymentsKPI = calculateCountKPI({

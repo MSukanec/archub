@@ -78,7 +78,8 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
     );
     const totalCommittedKPI = calculateMonetaryKPI({
       items: committedItems,
-      baseCurrencyId: defaultCurrency?.code || defaultCurrency?.id
+      baseCurrencyId: defaultCurrency?.code || defaultCurrency?.id,
+      symbol: defaultCurrency?.symbol
     });
 
     // KPI 4: Balance Pendiente (monetary)
@@ -92,7 +93,8 @@ export default function ClientDashboardTab({ projectId, onTabChange }: ClientLis
     );
     const totalBalanceKPI = calculateMonetaryKPI({
       items: balanceItems,
-      baseCurrencyId: defaultCurrency?.code || defaultCurrency?.id
+      baseCurrencyId: defaultCurrency?.code || defaultCurrency?.id,
+      symbol: defaultCurrency?.symbol
     });
 
     return {
