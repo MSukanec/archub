@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { ChevronDown, Building2, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { calculateMonetaryKPI } from '@/lib/kpis';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -107,10 +108,27 @@ function CommitmentItem({
   const totalCommitted = commitment.amount || 0;
   
   const totalPaid = useMemo(() => {
-    return payments
-      .filter(p => p.commitment_id === commitment.id && p.status === 'confirmed' && p.currency?.id === commitment.currency?.id)
-      .reduce((sum, p) => sum + p.amount, 0);
-  }, [payments, commitment.id, commitment.currency?.id]);
+    const commitmentPayments = payments
+      .filter(p => p.commitment_id === commitment.id && p.status === 'confirmed')
+      .map(payment => ({
+        amount: payment.amount,
+        currency_id: payment.currency_id,
+        currency: payment.currency,
+        exchange_rate: payment.exchange_rate
+      }));
+    
+    if (commitmentPayments.length === 0 || !commitment.currency) {
+      return 0;
+    }
+    
+    const kpi = calculateMonetaryKPI({
+      items: commitmentPayments,
+      baseCurrencyId: commitment.currency.code || commitment.currency.id,
+      symbol: commitment.currency.symbol
+    });
+    
+    return kpi.value;
+  }, [payments, commitment.id, commitment.currency]);
   
   const remainingAmount = totalCommitted - totalPaid;
   const paymentPercentage = totalCommitted > 0 ? (totalPaid / totalCommitted) * 100 : 0;
