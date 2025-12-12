@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { PartnersListTab } from '@/pages/partners/tabs/PartnersListTab';
+import { PartnerBalancesTab } from '@/pages/partners/tabs/PartnerBalancesTab';
 import { PartnerTransactionsTab } from '@/pages/partners/tabs/PartnerTransactionsTab';
 import { HandHeart, Plus, TrendingUp, TrendingDown } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
@@ -40,6 +41,7 @@ export default function Partners() {
 
   const tabs = [
     { id: 'list', label: 'Lista de Socios', isActive: activeTab === 'list' },
+    { id: 'balances', label: 'Balance por Socio', isActive: activeTab === 'balances' },
     { id: 'transactions', label: 'Transacciones', isActive: activeTab === 'transactions' }
   ];
 
@@ -47,6 +49,8 @@ export default function Partners() {
     switch (activeTab) {
       case 'list':
         return <PartnersListTab />;
+      case 'balances':
+        return <PartnerBalancesTab />;
       case 'transactions':
         return <PartnerTransactionsTab />;
       default:
