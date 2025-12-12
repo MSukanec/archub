@@ -19,6 +19,10 @@ export async function createProject(data: CreateProjectData): Promise<Project> {
     throw new Error('Organization ID required');
   }
 
+  if (!data.currency_id) {
+    throw new Error('Currency ID required');
+  }
+
   const response = await apiRequest('POST', '/api/projects', {
     organization_id: data.organization_id,
     name: data.name,
@@ -29,6 +33,7 @@ export async function createProject(data: CreateProjectData): Promise<Project> {
     custom_color_hex: data.custom_color_hex,
     project_type_id: data.project_type_id,
     project_modality_id: data.project_modality_id,
+    currency_id: data.currency_id,
   });
 
   // Si HTTP 200, el JSON ES el proyecto directamente

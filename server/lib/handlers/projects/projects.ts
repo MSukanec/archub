@@ -12,6 +12,7 @@ export interface CreateProjectParams {
   custom_color_hex?: string | null;
   project_type_id?: string | null;
   project_modality_id?: string | null;
+  currency_id: string;
 }
 
 export interface UpdateProjectParams {
@@ -64,6 +65,10 @@ export async function createProject(
       return { success: false, error: 'organization_id and name are required' };
     }
 
+    if (!params.currency_id) {
+      return { success: false, error: 'currency_id is required' };
+    }
+
     const authResult = await ensureAuth(ctx);
     if (!authResult.success) {
       return authResult;
@@ -88,6 +93,7 @@ export async function createProject(
         use_custom_color: params.use_custom_color || false,
         custom_color_h: params.custom_color_h || null,
         custom_color_hex: params.custom_color_hex || null,
+        currency_id: params.currency_id,
       })
       .select()
       .maybeSingle();

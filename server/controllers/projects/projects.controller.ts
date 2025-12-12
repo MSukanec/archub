@@ -94,7 +94,8 @@ export async function handleCreateProject(req: Request, res: Response) {
       custom_color_h: req.body.custom_color_h,
       custom_color_hex: req.body.custom_color_hex,
       project_type_id: req.body.project_type_id,
-      project_modality_id: req.body.project_modality_id
+      project_modality_id: req.body.project_modality_id,
+      currency_id: req.body.currency_id,
     };
 
     const result = await createProject(ctx, params);
