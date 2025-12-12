@@ -20,6 +20,8 @@ export interface Project {
   deleted_at?: string | null;
   last_active_at?: string | null;
   updated_at?: string;
+  currency_id?: string | null;
+  currency?: { id: string; name: string; symbol: string } | null;
   project_data?: ProjectData;
   creator?: ProjectCreator;
 }
@@ -71,6 +73,7 @@ export interface CreateProjectData {
   custom_color_hex?: string | null;
   project_type_id?: string | null;
   project_modality_id?: string | null;
+  currency_id?: string | null;
 }
 
 export interface UpdateProjectData {
@@ -82,6 +85,7 @@ export interface UpdateProjectData {
   custom_color_hex?: string | null;
   project_type_id?: string | null;
   project_modality_id?: string | null;
+  currency_id?: string | null;
   organization_id: string;
 }
 
