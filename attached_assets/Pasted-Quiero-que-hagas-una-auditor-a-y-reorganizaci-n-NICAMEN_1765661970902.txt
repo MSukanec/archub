@@ -1,0 +1,105 @@
+Quiero que hagas una auditoría y reorganización ÚNICAMENTE del nivel de componentes
+que corresponden a lo que vamos a llamar “Nivel 2: Dashboard Building Blocks”.
+
+⚠️ IMPORTANTE:
+- NO inventes nuevos componentes
+- NO cambies diseño ni comportamiento
+- NO refactorices lógica de negocio
+- SOLO ordenar y mover archivos existentes
+- Si tenés dudas sobre un archivo, NO lo muevas
+
+---
+
+CONTEXTO DE ARQUITECTURA
+
+El proyecto ya tiene correctamente definido el Nivel 1:
+- components/ui
+- components/charts
+
+Eso NO se toca.
+
+Ahora vamos a definir y organizar el NIVEL 2, que es el estándar internacional
+usado en dashboards modernos (Linear, Notion, Vercel, etc.).
+
+Nivel 2 = componentes reutilizables que:
+- combinan UI y/o charts
+- renderizan información visual (cards, métricas, contenedores)
+- NO saben nada del dominio (gastos, materiales, proyectos)
+- NO consultan datos
+- NO hacen cálculos
+
+Ejemplos típicos:
+- KPI cards
+- Metric cards
+- Chart containers
+- Summary cards
+- Trend cards
+
+---
+
+TAREA 1 — CREAR CARPETA
+
+Crear la carpeta:
+
+components/dashboard
+
+Usar este nombre exactamente. Es un estándar internacional.
+
+---
+
+TAREA 2 — AUDITORÍA
+
+Recorrer el proyecto e identificar componentes existentes que cumplan TODAS estas condiciones:
+- Son componentes visuales reutilizables
+- Usan componentes de ui/ o charts/
+- Reciben datos por props
+- No tienen lógica de negocio
+- No están ligados a una feature específica
+
+---
+
+TAREA 3 — REORGANIZACIÓN
+
+Mover esos componentes identificados a:
+
+components/dashboard/
+
+Respetar nombres de archivos y exports.
+NO renombrar componentes.
+NO cambiar imports salvo los necesarios por el cambio de ruta.
+
+---
+
+TAREA 4 — DOCUMENTACIÓN
+
+Crear un archivo:
+
+components/dashboard/README.md
+
+Explicando claramente:
+- Qué es el Nivel 2
+- Qué tipo de componentes van en esta carpeta
+- Qué NO debe ir acá
+- Ejemplos de uso
+- Relación con:
+  - Nivel 1 (ui, charts)
+  - Nivel 3 (widgets semánticos, que NO se tocan todavía)
+
+Este README debe servir para que en el futuro yo pueda decir:
+“agregá un nuevo componente de dashboard” y se entienda qué hacer.
+
+---
+
+TAREA 5 — NO TOCAR
+
+NO crear widgets nuevos
+NO crear dashboards
+NO tocar features existentes
+NO tocar hooks ni adapters
+NO tocar estilos globales
+
+---
+
+Objetivo final:
+Que yo pueda entender claramente, mirando components/dashboard,
+cuáles son TODOS los componentes que pertenecen al Nivel 2.
