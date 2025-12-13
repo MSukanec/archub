@@ -269,6 +269,7 @@ export function PartnerTransactionsTab() {
       render: (item: UnifiedTransaction) => (
         <IdentityBadge 
           name={item.partner_name}
+          linkedUser={item.original.partner?.contacts?.linked_user}
           size="sm"
         />
       ),

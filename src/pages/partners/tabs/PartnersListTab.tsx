@@ -157,13 +157,6 @@ export function PartnersListTab() {
       render: (partner: EnrichedPartner) => {
         const contact = partner.contacts;
         
-        // Get avatar URL from linked user
-        const linkedUser = Array.isArray(contact?.linked_user)
-          ? contact?.linked_user[0]
-          : contact?.linked_user;
-        
-        const avatarUrl = linkedUser?.avatar_url || null;
-        
         const displayName = contact?.full_name || 
                            `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() ||
                            contact?.email ||
@@ -172,7 +165,7 @@ export function PartnersListTab() {
         return (
           <IdentityBadge 
             name={displayName || '-'}
-            avatarUrl={avatarUrl}
+            linkedUser={contact?.linked_user}
             size="sm"
           />
         );

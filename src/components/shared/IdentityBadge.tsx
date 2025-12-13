@@ -10,7 +10,7 @@ import {
 
 interface IdentityBadgeBadge {
   label: string;
-  variant?: 'default' | 'secondary' | 'success' | 'warning' | 'destructive';
+  variant?: 'default' | 'secondary' | 'destructive' | 'outline';
 }
 
 interface IdentityBadgeProps {
@@ -18,6 +18,8 @@ interface IdentityBadgeProps {
   name: string | null | undefined;
   /** Avatar image URL */
   avatarUrl?: string | null;
+  /** Linked user object with avatar_url property (for automatic avatar extraction) */
+  linkedUser?: { avatar_url?: string | null } | { avatar_url?: string | null }[] | null;
   /** Size variant */
   size?: 'xs' | 'sm' | 'md' | 'lg';
   /** Layout direction */
@@ -50,6 +52,7 @@ interface IdentityBadgeProps {
 export function IdentityBadge({
   name,
   avatarUrl,
+  linkedUser,
   size = 'md',
   layout = 'row',
   showName = true,
@@ -58,6 +61,21 @@ export function IdentityBadge({
   interactive = false,
   className,
 }: IdentityBadgeProps) {
+  // Resolve avatar URL: prefer explicit avatarUrl, then linkedUser.avatar_url
+  const resolveAvatarUrl = (): string | null | undefined => {
+    if (avatarUrl) return avatarUrl;
+    
+    if (!linkedUser) return null;
+    
+    if (Array.isArray(linkedUser)) {
+      return linkedUser[0]?.avatar_url || null;
+    }
+    
+    return linkedUser.avatar_url || null;
+  };
+
+  const finalAvatarUrl = resolveAvatarUrl();
+
   // Generate initials from name
   const getInitials = (fullName: string | null | undefined): string => {
     if (!fullName || fullName.trim() === '') return '?';
@@ -191,7 +209,7 @@ export function IdentityBadge({
           '--tw-ring-color': 'var(--accent)',
         } as React.CSSProperties}
       >
-        {avatarUrl && <AvatarImage src={avatarUrl} alt={name || 'User'} />}
+        {finalAvatarUrl && <AvatarImage src={finalAvatarUrl} alt={name || 'User'} />}
         <AvatarFallback className={cn('font-semibold', fallbackSizeMap[size])}>
           {initials}
         </AvatarFallback>

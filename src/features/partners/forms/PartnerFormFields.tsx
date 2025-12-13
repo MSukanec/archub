@@ -262,17 +262,10 @@ export function PartnerFormFields({
     const contact = option.contact as Contact;
     const displayName = getContactDisplayName(contact);
     
-    // Get avatar URL from linked user
-    const linkedUser = Array.isArray(contact.linked_user) 
-      ? contact.linked_user[0] 
-      : contact.linked_user;
-    
-    const avatarUrl = linkedUser?.avatar_url || null;
-    
     return (
       <IdentityBadge 
         name={displayName}
-        avatarUrl={avatarUrl}
+        linkedUser={contact.linked_user}
         size="sm"
       />
     );
