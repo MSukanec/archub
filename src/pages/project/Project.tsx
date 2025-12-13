@@ -17,7 +17,7 @@ import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui-custom/KPICard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/dashboard';
 import { Badge } from '@/components/ui/badge';
 
 export default function Project() {

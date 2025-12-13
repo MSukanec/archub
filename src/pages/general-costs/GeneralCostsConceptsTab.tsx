@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Button } from "@/components/ui/button";
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from '@/components/modal';

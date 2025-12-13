@@ -7,7 +7,7 @@ import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { useGeneralCostsPayments } from '@/hooks/use-general-costs-payments';
 import { useGeneralCostsMonthlySummary } from '@/features/general-costs/hooks/use-general-costs-monthly-summary';
 import { useGeneralCostsByCategory } from '@/features/general-costs/hooks/use-general-costs-by-category';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';

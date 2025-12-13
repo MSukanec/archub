@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard'
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard'
 import {
   useMaterialPayments,
   useDeleteMaterialPayment,

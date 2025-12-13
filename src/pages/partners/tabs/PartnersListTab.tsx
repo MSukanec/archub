@@ -5,7 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Button } from '@/components/ui/button';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGlobalModalStore } from '@/components/modal';
 import { parseLocalDate } from '@/lib/date-utils';

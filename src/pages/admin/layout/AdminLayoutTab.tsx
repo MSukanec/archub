@@ -12,7 +12,7 @@ import {
   StatCardValue, 
   StatCardMeta, 
   StatCardContent 
-} from '@/components/ui-custom/KPICard';
+} from '@/components/dashboard';
 import { Button } from '@/components/ui/button';
 import { Home, Users, DollarSign, TrendingUp } from 'lucide-react';
 

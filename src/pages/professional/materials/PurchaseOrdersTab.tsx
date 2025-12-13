@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import {
   usePurchaseOrders,
   useDeletePurchaseOrder,

@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
 import { formatKPI, format as formatMoneyAmount } from '@/lib/money';
 import { calculateMonetaryKPI, formatBreakdown as kpiFormatBreakdown } from '@/lib/kpis';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';

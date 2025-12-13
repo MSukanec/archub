@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Edit, Trash2 } from 'lucide-react';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import ContactAvatar from './ContactAvatar';
 import type { ContactWithRelations } from '@/features/contacts/types';
 

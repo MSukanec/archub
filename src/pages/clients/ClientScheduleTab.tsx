@@ -25,7 +25,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { format, isPast, isToday, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { parseLocalDate } from '@/lib/date-utils';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import {
   useClientPaymentSchedule,
   useDeleteClientPaymentSchedule,

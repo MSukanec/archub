@@ -2,7 +2,7 @@ import { TrendingUp, TrendingDown, Wallet, HandHeart } from 'lucide-react';
 import { useMemo } from 'react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { usePartnerMovements } from '@/features/finances/hooks/use-partner-movements';

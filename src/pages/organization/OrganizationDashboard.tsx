@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGlobalModalStore } from '@/components/modal';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/ui-custom/KPICard';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/dashboard';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects, ProjectItemCard, updateProjectLastActive } from '@/features/projects';
