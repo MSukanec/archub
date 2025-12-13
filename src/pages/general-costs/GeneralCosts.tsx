@@ -16,8 +16,6 @@ export default function GeneralCosts() {
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
   const [activeTab, setActiveTab] = useState("dashboard")
-  const [shouldHighlightCreateButton, setShouldHighlightCreateButton] = useState(false)
-  const [fromEmptyStateCTA, setFromEmptyStateCTA] = useState(false)
   
   // Get general costs to check if we should disable the Pagos tab
   const { data: generalCosts = [] } = useGeneralCosts(organizationId ?? null)
@@ -27,28 +25,6 @@ export default function GeneralCosts() {
   useEffect(() => {
     setSidebarContext('organization')
   }, [setSidebarContext])
-
-  // Activate highlight when navigating to Conceptos from Empty State
-  useEffect(() => {
-    if (fromEmptyStateCTA && activeTab === "conceptos") {
-      setShouldHighlightCreateButton(true)
-      
-      // Deactivate highlight after 4 seconds
-      const timer = setTimeout(() => {
-        setShouldHighlightCreateButton(false)
-        setFromEmptyStateCTA(false)
-      }, 4000)
-      
-      return () => clearTimeout(timer)
-    }
-  }, [fromEmptyStateCTA, activeTab])
-
-  // Deactivate highlight on button click
-  const handleNewGeneralCostWithHighlight = () => {
-    setShouldHighlightCreateButton(false)
-    setFromEmptyStateCTA(false)
-    handleNewGeneralCost()
-  }
 
   // Header tabs configuration
   const headerTabs = [
@@ -93,9 +69,7 @@ export default function GeneralCosts() {
       return {
         label: "Nuevo Gasto General",
         icon: Plus,
-        onClick: handleNewGeneralCostWithHighlight,
-        highlighted: shouldHighlightCreateButton,
-        highlightVariant: "pulse" as const
+        onClick: handleNewGeneralCost
       }
     }
     if (activeTab === "pagos") {
@@ -124,12 +98,7 @@ export default function GeneralCosts() {
 
   return (
     <Layout headerProps={headerProps} wide={false}>
-      {activeTab === "dashboard" && (
-        <GeneralCostsDashboardTab 
-          onNavigateToConceptos={() => setActiveTab('conceptos')}
-          onEmptyStateCTA={() => setFromEmptyStateCTA(true)}
-        />
-      )}
+      {activeTab === "dashboard" && <GeneralCostsDashboardTab onNavigateToConceptos={() => setActiveTab('conceptos')} />}
       {activeTab === "conceptos" && <GeneralCostsConceptsTab onNewGeneralCost={handleNewGeneralCost} />}
       {activeTab === "pagos" && <GeneralCostsPaymentsTab />}
       {activeTab === "ajustes" && <GeneralCostsSettingsTab />}

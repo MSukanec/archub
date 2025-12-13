@@ -162,8 +162,6 @@ interface PageLayoutProps {
       onClick: () => void;
       variant?: "ghost" | "default" | "secondary";
     };
-    highlighted?: boolean;
-    highlightVariant?: "pulse" | "glow" | "outline";
   };
   
   // Acciones personalizadas (para PlanRestricted y otros)
@@ -633,8 +631,6 @@ export function PageLayout({
                           size="sm"
                           onClick={actionButton.onClick}
                           className="h-8 px-3 text-xs font-medium"
-                          highlighted={actionButton.highlighted}
-                          highlightVariant={actionButton.highlightVariant}
                         >
                           {actionButton.icon && (
                             <actionButton.icon className="w-4 h-4 mr-1.5" />
