@@ -911,12 +911,12 @@ input[type="number"] {
   animation: borderPulse 3s ease-in-out infinite;
 }
 
-.animate-breathe {
+button.animate-breathe {
   position: relative;
   overflow: visible;
 }
 
-.animate-breathe::before {
+button.animate-breathe::before {
   content: "";
   position: absolute;
   inset: 0;
