@@ -113,6 +113,7 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
           )
         `)
         .eq('organization_id', organizationId)
+        .eq('is_deleted', false)
         .order('payment_date', { ascending: false })
 
       if (error) {
@@ -153,7 +154,10 @@ export function useDeleteGeneralCostPayment() {
 
       const { error } = await supabase
         .from('general_costs_payments')
-        .delete()
+        .update({
+          is_deleted: true,
+          deleted_at: new Date().toISOString()
+        })
         .eq('id', paymentId)
         .eq('organization_id', organizationId)
 
