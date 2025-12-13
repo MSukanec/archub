@@ -91,7 +91,12 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
           general_cost:general_costs(
             id,
             name,
-            description
+            description,
+            category_id,
+            category:general_cost_categories(
+              id,
+              name
+            )
           ),
           currency:currencies(
             id,
@@ -127,9 +132,15 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
       return (data || []).map(payment => {
         // Supabase returns single relations as arrays, convert to single objects
         const walletData = Array.isArray(payment.wallet) ? payment.wallet[0] : payment.wallet
+        const generalCost = Array.isArray(payment.general_cost) ? payment.general_cost[0] : payment.general_cost
+        const processedGeneralCost = generalCost ? {
+          ...generalCost,
+          category: Array.isArray(generalCost.category) ? generalCost.category[0] : generalCost.category
+        } : null
+        
         return {
           ...payment,
-          general_cost: Array.isArray(payment.general_cost) ? payment.general_cost[0] : payment.general_cost,
+          general_cost: processedGeneralCost,
           currency: Array.isArray(payment.currency) ? payment.currency[0] : payment.currency,
           wallet: walletData ? {
             ...walletData,

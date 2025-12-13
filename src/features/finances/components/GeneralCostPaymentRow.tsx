@@ -25,6 +25,11 @@ interface GeneralCostPayment {
     id: string;
     name: string;
     description: string | null;
+    category_id?: string | null;
+    category?: {
+      id: string;
+      name: string;
+    } | null;
   } | null;
   currency?: {
     id: string;
@@ -152,9 +157,9 @@ export default function GeneralCostPaymentRow({
         <div className="font-semibold text-sm truncate">
           {getGeneralCostName(payment)}
         </div>
-        {/* Línea 2: Billetera */}
+        {/* Línea 2: Categoría */}
         <div className="text-muted-foreground text-sm truncate">
-          {payment.wallet?.wallets?.name || 'Sin billetera'}
+          {payment.general_cost?.category?.name || 'Sin categoría'}
         </div>
         {/* Línea 3: Fecha de pago */}
         <div className="text-muted-foreground text-sm truncate">
