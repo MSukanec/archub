@@ -9,6 +9,7 @@ interface PartnerBalanceData {
   balance: number;
   contributions: number;
   withdrawals: number;
+  linkedUser?: { avatar_url?: string | null } | null;
 }
 
 interface PartnerBalanceAccordionProps {
@@ -77,6 +78,7 @@ function PartnerBalanceItem({
             name={partner.partnerName}
             size="md"
             layout="row"
+            linkedUser={partner.linkedUser}
             subLabel={!isOpen ? `Balance: ${partner.balance >= 0 ? '' : '-'}${formatCurrency(partner.balance, currencySymbol)}` : undefined}
           />
         </div>

@@ -4,10 +4,13 @@ import { usePartners, type Partner } from '@/features/partners'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
 import { FormLabel } from '@/components/ui/form'
-import type { PartnerItem } from '@/hooks/use-movement-partners'
+import { IdentityBadge } from '@/components/shared/IdentityBadge'
 
 // Re-export for compatibility
-export type PartnerWithdrawalItem = PartnerItem
+export interface PartnerWithdrawalItem {
+  partner_id: string
+  partner_name: string
+}
 
 interface PartnerWithdrawalsFieldsProps {
   selectedPartnerWithdrawals: PartnerWithdrawalItem[]
@@ -45,10 +48,11 @@ export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> =
     }
   }
 
-  // Create options for ComboBox
+  // Create options for ComboBox with linkedUser for avatar rendering
   const partnerOptions = partners.map(partner => ({
     value: partner.id,
-    label: getPartnerDisplayName(partner)
+    label: getPartnerDisplayName(partner),
+    linkedUser: partner.contacts?.linked_user || null
   }))
 
   // Handle partner change
@@ -88,6 +92,14 @@ export const PartnerWithdrawalsFields: React.FC<PartnerWithdrawalsFieldsProps> =
           searchPlaceholder="Buscar socio..."
           emptyMessage={isLoading ? "Cargando..." : "No hay socios disponibles"}
           disabled={isLoading}
+          renderOption={(option) => (
+            <IdentityBadge
+              name={option.label}
+              linkedUser={option.linkedUser}
+              size="sm"
+              layout="row"
+            />
+          )}
         />
       </div>
     </div>

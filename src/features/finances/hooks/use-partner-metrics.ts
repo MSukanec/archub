@@ -8,6 +8,7 @@ interface PartnerBalance {
   balance: number;
   contributions: number;
   withdrawals: number;
+  linkedUser?: { avatar_url?: string | null } | null;
 }
 
 interface CurrencyBreakdownItem {
@@ -119,6 +120,7 @@ export function usePartnerMetrics(
       partnerName: string;
       contributions: number;
       withdrawals: number;
+      linkedUser: { avatar_url?: string | null } | null;
     }>();
 
     movements.forEach(movement => {
@@ -132,6 +134,7 @@ export function usePartnerMetrics(
           partnerName,
           contributions: 0,
           withdrawals: 0,
+          linkedUser: null,
         });
       }
 
