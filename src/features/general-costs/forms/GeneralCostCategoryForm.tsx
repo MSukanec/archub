@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
@@ -124,9 +125,9 @@ function ViewPanel({
 
       {category.is_system ? (
         <div className="pt-4 border-t border-border">
-          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+          <Badge variant="secondary" data-testid="badge-system-category">
             Categoría del Sistema - No se puede modificar
-          </span>
+          </Badge>
         </div>
       ) : (
         <div className="flex gap-2 pt-4 border-t border-border">

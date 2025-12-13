@@ -1,5 +1,6 @@
 import { FolderOpen, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGeneralCostCategories, useDeleteGeneralCostCategory } from '@/features/general-costs/hooks/use-general-cost-categories';
 import { useReplaceGeneralCostCategory } from '@/features/general-costs/hooks/use-replace-general-cost-category';
@@ -159,9 +160,9 @@ export default function GeneralCostsSettingsTab() {
               </div>
               <div className="flex items-center gap-1 ml-4">
                 {category.is_system ? (
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                  <Badge variant="secondary" data-testid="badge-category-system">
                     Sistema
-                  </span>
+                  </Badge>
                 ) : (
                   <>
                     <Button
