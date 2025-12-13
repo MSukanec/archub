@@ -301,7 +301,7 @@ export function initializeModalRegistry(): void {
   });
   registerModal('generalCostCategory', GeneralCostCategoryForm as any, { 
     ...generalConfig, 
-    size: 'sm',
+    size: 'md',
     mapDataToProps: (data) => ({
       modalData: { category: data?.category },
       mode: data?.category ? (data?.mode || 'edit') : (data?.mode || 'create')
