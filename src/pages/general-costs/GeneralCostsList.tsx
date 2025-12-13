@@ -219,13 +219,13 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
         if (item.paymentCount === 0) {
           return <div className="text-sm text-muted-foreground">—</div>;
         }
-        const breakdownText = item.totalPaidKPI.breakdown && item.totalPaidKPI.breakdown.length > 1
+        const breakdownText = item.totalPaidKPI.breakdown && item.totalPaidKPI.breakdown.length > 0
           ? formatSubValue(item.totalPaidKPI.breakdown)
           : undefined;
         return (
           <div className="flex flex-col gap-0.5">
             <div className="text-sm font-bold">
-              {formatMoneyAmount(item.totalPaidKPI.value, defaultCurrency?.symbol || '$')}
+              {formatMoneyAmount(item.totalPaidKPI.value, defaultCurrency?.code || defaultCurrency?.symbol || '$')}
             </div>
             {breakdownText && (
               <div className="text-xs text-muted-foreground">
