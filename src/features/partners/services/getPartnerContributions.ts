@@ -14,7 +14,7 @@ export async function getPartnerContributions(
       partner:partners(
         id,
         created_at,
-        contacts!inner(id, first_name, last_name, email, phone, company_name)
+        contacts(id, full_name, first_name, last_name, email, phone, company_name)
       ),
       currency:currencies(id, name, symbol, code)
     `)
@@ -45,7 +45,7 @@ export async function getPartnerContributionById(
       partner:partners(
         id,
         created_at,
-        contacts!inner(id, first_name, last_name, email, phone, company_name)
+        contacts(id, full_name, first_name, last_name, email, phone, company_name)
       ),
       currency:currencies(id, name, symbol, code),
       media_links(

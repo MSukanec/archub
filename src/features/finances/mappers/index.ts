@@ -178,11 +178,15 @@ export function mapClientPaymentsToFinancialMovements(
 export function mapPartnerContributionToFinancialMovement(
   contribution: PartnerContributionWithRelations
 ): FinancialMovementWithRelations {
-  // Extract partner name for category
+  // Extract partner name for category (prioritize full_name)
   const partnerContact = contribution.partner?.contacts;
-  const partnerName = partnerContact?.first_name && partnerContact?.last_name
-    ? `${partnerContact.first_name} ${partnerContact.last_name}`
-    : partnerContact?.company_name || 'Sin socio';
+  const partnerName = partnerContact?.full_name ||
+    (partnerContact?.first_name && partnerContact?.last_name
+      ? `${partnerContact.first_name} ${partnerContact.last_name}`
+      : null) ||
+    partnerContact?.company_name || 
+    partnerContact?.email || 
+    'Sin socio';
   
   // Build description from notes or reference
   const description = contribution.notes || 
@@ -286,11 +290,15 @@ export function mapPartnerContributionToFinancialMovement(
 export function mapPartnerWithdrawalToFinancialMovement(
   withdrawal: PartnerWithdrawalWithRelations
 ): FinancialMovementWithRelations {
-  // Extract partner name for category
+  // Extract partner name for category (prioritize full_name)
   const partnerContact = withdrawal.partner?.contacts;
-  const partnerName = partnerContact?.first_name && partnerContact?.last_name
-    ? `${partnerContact.first_name} ${partnerContact.last_name}`
-    : partnerContact?.company_name || 'Sin socio';
+  const partnerName = partnerContact?.full_name ||
+    (partnerContact?.first_name && partnerContact?.last_name
+      ? `${partnerContact.first_name} ${partnerContact.last_name}`
+      : null) ||
+    partnerContact?.company_name || 
+    partnerContact?.email || 
+    'Sin socio';
   
   // Build description from notes or reference
   const description = withdrawal.notes || 

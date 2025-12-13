@@ -25,6 +25,7 @@ export interface PartnerContributionWithRelations {
     id: string;
     contacts: {
       id: string;
+      full_name: string | null;
       first_name: string | null;
       last_name: string | null;
       email: string | null;
@@ -92,8 +93,9 @@ export async function getPartnerContributions(
       *,
       partner:partners(
         id,
-        contacts!inner(
+        contacts(
           id,
+          full_name,
           first_name,
           last_name,
           email,

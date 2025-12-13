@@ -42,11 +42,12 @@ interface UnifiedTransaction {
   original: PartnerContribution | PartnerWithdrawal;
 }
 
-function formatPartnerName(partner?: { contacts: { first_name: string | null; last_name: string | null; company_name: string | null } }): string {
+function formatPartnerName(partner?: { contacts: { full_name: string | null; first_name: string | null; last_name: string | null; company_name: string | null; email?: string | null } | null }): string {
   if (!partner?.contacts) return 'Sin socio';
-  const { first_name, last_name, company_name } = partner.contacts;
-  const fullName = `${first_name || ''} ${last_name || ''}`.trim();
-  return fullName || company_name || 'Sin nombre';
+  const { full_name, first_name, last_name, company_name, email } = partner.contacts;
+  if (full_name) return full_name;
+  const constructedName = `${first_name || ''} ${last_name || ''}`.trim();
+  return constructedName || company_name || email || 'Sin nombre';
 }
 
 export function PartnerTransactionsTab() {
