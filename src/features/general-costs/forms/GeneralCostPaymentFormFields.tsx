@@ -243,6 +243,32 @@ function FormPanel({
 
       <FormField
         control={form.control}
+        name="status"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>
+              Estado <span className="text-red-500">*</span>
+            </FormLabel>
+            <FormControl>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger data-testid="select-general-cost-payment-status">
+                  <SelectValue placeholder="Seleccionar estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">Pendiente</SelectItem>
+                  <SelectItem value="confirmed">Confirmado</SelectItem>
+                  <SelectItem value="overdue">Vencido</SelectItem>
+                  <SelectItem value="cancelled">Cancelado</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
         name="notes"
         render={({ field }) => (
           <FormItem>
@@ -370,7 +396,7 @@ export function GeneralCostPaymentFormFields({
       exchange_rate: existingPayment.exchange_rate ?? undefined,
       notes: existingPayment.notes || '',
       reference: existingPayment.reference || '',
-      status: (existingPayment.status || 'confirmed') as 'confirmed' | 'pending' | 'rejected' | 'void',
+      status: (existingPayment.status || 'confirmed') as 'pending' | 'confirmed' | 'overdue' | 'cancelled',
     })
   }, [paymentId, paymentLoaded, existingPayment, mode, form])
 
@@ -463,7 +489,7 @@ export function GeneralCostPaymentFormFields({
       exchange_rate: data.exchange_rate ?? undefined,
       reference: data.reference || null,
       general_cost_id: data.general_cost_id || null,
-      status: (data.status || 'confirmed') as 'confirmed' | 'pending' | 'rejected' | 'void',
+      status: (data.status || 'confirmed') as 'pending' | 'confirmed' | 'overdue' | 'cancelled',
       created_by: currentMember.id,
     }
 

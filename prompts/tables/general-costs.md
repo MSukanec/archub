@@ -4,7 +4,7 @@
 
 create table public.general_cost_categories (
   id uuid not null default gen_random_uuid (),
-  organization_id uuid not null,
+  organization_id uuid null,
   name text not null,
   description text null,
   created_at timestamp with time zone not null default now(),
@@ -13,8 +13,36 @@ create table public.general_cost_categories (
   deleted_at timestamp with time zone null,
   updated_at timestamp with time zone not null default now(),
   constraint general_cost_categories_pkey primary key (id),
-  constraint fk_gc_cat_org foreign KEY (organization_id) references organizations (id) on delete CASCADE
+  constraint fk_gc_cat_org foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint general_cost_categories_system_org_check check (
+    (
+      (
+        (is_system = true)
+        and (organization_id is null)
+      )
+      or (
+        (is_system = false)
+        and (organization_id is not null)
+      )
+    )
+  )
 ) TABLESPACE pg_default;
+
+create unique INDEX IF not exists uq_gc_categories_system_name on public.general_cost_categories using btree (lower(name)) TABLESPACE pg_default
+where
+  (
+    (is_system = true)
+    and (is_deleted = false)
+  );
+
+create unique INDEX IF not exists uq_gc_categories_org_name on public.general_cost_categories using btree (organization_id, lower(name)) TABLESPACE pg_default
+where
+  (
+    (is_system = false)
+    and (is_deleted = false)
+  );
+
+create index IF not exists idx_gc_categories_list on public.general_cost_categories using btree (is_system, organization_id, is_deleted, name) TABLESPACE pg_default;
 
 create trigger trg_set_updated_at_general_cost_categories BEFORE
 update on general_cost_categories for EACH row
@@ -75,14 +103,34 @@ create table public.general_costs_payments (
   general_cost_id uuid null,
   status text not null default 'confirmed'::text,
   created_by uuid null,
+  is_deleted boolean not null default false,
+  deleted_at timestamp with time zone null,
   constraint general_costs_payments_pkey primary key (id),
   constraint fk_gc_payment_currency foreign KEY (currency_id) references currencies (id) on delete RESTRICT,
   constraint fk_gc_payment_general_cost foreign KEY (general_cost_id) references general_costs (id) on delete set null,
-  constraint fk_gc_payment_created_by foreign KEY (created_by) references organization_members (id) on delete set null,
   constraint fk_gc_payment_org foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint fk_gc_payment_created_by foreign KEY (created_by) references organization_members (id) on delete set null,
   constraint general_costs_payments_wallet_id_fkey foreign KEY (wallet_id) references organization_wallets (id) on delete RESTRICT,
+  constraint general_costs_payments_status_check check (
+    (
+      status = any (
+        array[
+          'pending'::text,
+          'confirmed'::text,
+          'overdue'::text,
+          'cancelled'::text
+        ]
+      )
+    )
+  ),
   constraint general_costs_payments_amount_positive check ((amount > (0)::numeric))
 ) TABLESPACE pg_default;
+
+create index IF not exists idx_gc_payments_org_date on public.general_costs_payments using btree (organization_id, payment_date) TABLESPACE pg_default;
+
+create index IF not exists idx_gc_payments_general_cost on public.general_costs_payments using btree (general_cost_id) TABLESPACE pg_default;
+
+create index IF not exists idx_gc_payments_wallet on public.general_costs_payments using btree (wallet_id) TABLESPACE pg_default;
 
 ---------- VISTA GENERAL_COSTS_BY_CATEGORY_VIEW:
 

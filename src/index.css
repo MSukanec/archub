@@ -131,7 +131,7 @@ html {
 
   --destructive: hsl(0, 84%, 60%);
   --destructive-text: hsl(0, 0%, 100%);
-  --success: hsl(120, 18%, 35%);
+  --success: hsl(80, 90%, 40%);
   --success-text: hsl(0, 0%, 100%);
   --warning: hsl(45, 90%, 50%);
   --warning-text: hsl(240, 10%, 4%);

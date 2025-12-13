@@ -465,14 +465,14 @@ export default function GeneralCostsPaymentsTab() {
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  const getStatusBadgeConfig = (status: 'confirmed' | 'pending' | 'rejected' | 'void') => {
+  const getStatusBadgeConfig = (status: 'confirmed' | 'pending' | 'overdue' | 'cancelled') => {
     const statusConfig: Record<string, { label: string; colorVar: string }> = {
       confirmed: { label: 'Confirmado', colorVar: '--badge-status-success' },
       pending: { label: 'Pendiente', colorVar: '--badge-status-warning' },
-      rejected: { label: 'Rechazado', colorVar: '--badge-status-destructive' },
-      void: { label: 'Anulado', colorVar: '--badge-status-neutral' },
+      overdue: { label: 'Vencido', colorVar: '--badge-status-destructive' },
+      cancelled: { label: 'Cancelado', colorVar: '--badge-status-neutral' },
     };
-    return statusConfig[status];
+    return statusConfig[status] || { label: status, colorVar: '--badge-status-neutral' };
   };
 
   const formatCurrencyAmount = (amount: number, currencySymbol?: string) => {
