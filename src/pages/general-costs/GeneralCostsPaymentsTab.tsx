@@ -717,7 +717,7 @@ export default function GeneralCostsPaymentsTab() {
                 <Plus className="w-4 h-4 mr-2" />
                 Nuevo Pago
               </Button>
-              <Button onClick={handleImport} variant="outline" data-testid="button-import-payments">
+              <Button onClick={handleImport} variant="secondary" data-testid="button-import-payments">
                 <Upload className="w-4 h-4 mr-2" />
                 Importar Pagos
               </Button>
