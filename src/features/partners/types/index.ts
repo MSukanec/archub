@@ -16,6 +16,7 @@ export interface PartnerContact {
   linked_user_id: string | null
   image_bucket: string | null
   image_path: string | null
+  linked_user: PartnerLinkedUser | PartnerLinkedUser[] | null
 }
 
 export interface Partner {

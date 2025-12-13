@@ -25,12 +25,7 @@ type PartnerFormData = z.infer<typeof partnerSchema>;
 interface LinkedUser {
   id: string;
   full_name: string | null;
-}
-
-interface ContactAttachment {
-  id: string;
-  storage_bucket: string;
-  storage_path: string;
+  avatar_url: string | null;
 }
 
 interface Contact {
@@ -41,10 +36,6 @@ interface Contact {
   email: string | null;
   company_name: string | null;
   linked_user: LinkedUser | LinkedUser[] | null;
-  image_bucket: string | null;
-  image_path: string | null;
-  avatar_attachment_id: string | null;
-  contact_attachments: ContactAttachment[];
 }
 
 export interface PartnerFormFieldsProps {
@@ -88,10 +79,7 @@ export function PartnerFormFields({
           full_name,
           email,
           company_name,
-          image_bucket,
-          image_path,
-          avatar_attachment_id,
-          linked_user:users!linked_user_id(id, full_name)
+          linked_user:users!linked_user_id(id, full_name, avatar_url)
         `)
         .eq('organization_id', orgId)
         .eq('is_deleted', false)
@@ -101,32 +89,7 @@ export function PartnerFormFields({
         console.error('Error fetching contacts:', error);
         throw error;
       }
-
-      // Fetch contact attachments separately
-      const contactIds = (data || []).map((c: any) => c.id);
-      const attachmentsMap = new Map<string, ContactAttachment[]>();
-      
-      if (contactIds.length > 0) {
-        const { data: attachments, error: attachmentsError } = await supabase
-          .from('contact_attachments')
-          .select('contact_id, id, storage_bucket, storage_path')
-          .in('contact_id', contactIds);
-
-        if (!attachmentsError && attachments) {
-          attachments.forEach((att: any) => {
-            if (!attachmentsMap.has(att.contact_id)) {
-              attachmentsMap.set(att.contact_id, []);
-            }
-            attachmentsMap.get(att.contact_id)!.push(att);
-          });
-        }
-      }
-
-      // Add contact_attachments to each contact
-      return (data || []).map((contact: any) => ({
-        ...contact,
-        contact_attachments: attachmentsMap.get(contact.id) || []
-      }));
+      return data || [];
     },
     enabled: !!orgId,
   });
@@ -299,19 +262,12 @@ export function PartnerFormFields({
     const contact = option.contact as Contact;
     const displayName = getContactDisplayName(contact);
     
-    // Get avatar URL from attachment if it exists
-    let avatarUrl: string | null = null;
-    if (contact.avatar_attachment_id && contact.contact_attachments && contact.contact_attachments.length > 0) {
-      const avatarAttachment = contact.contact_attachments.find(a => a.id === contact.avatar_attachment_id);
-      if (avatarAttachment) {
-        avatarUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${avatarAttachment.storage_bucket}/${avatarAttachment.storage_path}`;
-      }
-    }
+    // Get avatar URL from linked user
+    const linkedUser = Array.isArray(contact.linked_user) 
+      ? contact.linked_user[0] 
+      : contact.linked_user;
     
-    // Fallback to image_bucket/image_path if no attachment avatar
-    if (!avatarUrl && contact.image_bucket && contact.image_path) {
-      avatarUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${contact.image_bucket}/${contact.image_path}`;
-    }
+    const avatarUrl = linkedUser?.avatar_url || null;
     
     return (
       <IdentityBadge 
