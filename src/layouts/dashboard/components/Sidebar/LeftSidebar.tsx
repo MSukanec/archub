@@ -473,10 +473,10 @@ export function LeftSidebar() {
           {/* SIDEBAR IZQUIERDO - CONTEXTOS (siempre visible, 50px, altura total) */}
           <div className="bg-[var(--main-sidebar-bg)] w-[50px] h-full rounded-lg flex flex-col">
             {/* SECCIÓN: Botones de contexto con scroll */}
-            <div className="px-0 pt-0 overflow-y-auto flex-1">
+            <div className="px-0 pt-0 overflow-y-auto flex-1 flex flex-col items-center">
                 <div className="flex flex-col gap-[2px] items-center pt-3">
                   {/* Logo */}
-                  <div className="h-[32px] flex items-center justify-center w-8 mb-3">
+                  <div className="h-[32px] flex items-center justify-center mb-3">
                     <img 
                       src="/seencel-logo-192.png" 
                       alt="Seencel Logo" 
