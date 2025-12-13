@@ -109,6 +109,26 @@ export function PartnerFormFields({
     enabled: !!partnerId && mode === 'edit',
   });
 
+  const { data: existingPartnerContactIds = [] } = useQuery<string[]>({
+    queryKey: ['partner-contact-ids', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      
+      const { data, error } = await supabase
+        .from('partners')
+        .select('contact_id')
+        .eq('organization_id', orgId)
+        .eq('is_deleted', false);
+
+      if (error) {
+        console.error('Error fetching existing partner contact ids:', error);
+        return [];
+      }
+      return (data || []).map(p => p.contact_id).filter(Boolean);
+    },
+    enabled: !!orgId && mode === 'create',
+  });
+
   const form = useForm<PartnerFormData>({
     resolver: zodResolver(partnerSchema),
     defaultValues: {
@@ -223,11 +243,17 @@ export function PartnerFormFields({
 
   const contactOptions = useMemo(() => {
     if (!contacts || !Array.isArray(contacts)) return [];
-    return contacts.map(contact => ({
+    
+    // In create mode, filter out contacts that are already partners
+    const availableContacts = mode === 'create' 
+      ? contacts.filter(contact => !existingPartnerContactIds.includes(contact.id))
+      : contacts;
+    
+    return availableContacts.map(contact => ({
       value: contact.id,
       label: getContactDisplayName(contact),
     }));
-  }, [contacts]);
+  }, [contacts, existingPartnerContactIds, mode]);
 
   const isLoading = contactsLoading || partnerLoading || createMutation.isPending || updateMutation.isPending;
 
