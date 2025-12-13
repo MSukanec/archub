@@ -30,7 +30,7 @@ export default function GeneralCosts() {
   const headerTabs = [
     {
       id: "dashboard",
-      label: "Dashboard",
+      label: "Visión General",
       isActive: activeTab === "dashboard"
     },
     {
