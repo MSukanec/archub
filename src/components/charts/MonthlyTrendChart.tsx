@@ -48,7 +48,13 @@ export function MonthlyTrendChart({
   const sortedData = [...data].sort((a, b) => a.month.localeCompare(b.month))
 
   const formatMonth = (month: string) => {
-    const date = new Date(month + '-01')
+    if (!month) return ''
+    const parts = month.split('-')
+    if (parts.length !== 2) return month
+    const [year, m] = parts
+    const paddedMonth = m.padStart(2, '0')
+    const date = new Date(`${year}-${paddedMonth}-01T00:00:00`)
+    if (isNaN(date.getTime())) return month
     return date.toLocaleDateString('es-AR', { month: 'short' })
   }
 
