@@ -35,6 +35,8 @@ interface Contact {
   email: string | null;
   company_name: string | null;
   linked_user: LinkedUser | LinkedUser[] | null;
+  image_bucket: string | null;
+  image_path: string | null;
 }
 
 export interface PartnerFormFieldsProps {
@@ -78,6 +80,8 @@ export function PartnerFormFields({
           full_name,
           email,
           company_name,
+          image_bucket,
+          image_path,
           linked_user:users!linked_user_id(id, full_name)
         `)
         .eq('organization_id', orgId)
@@ -260,9 +264,13 @@ export function PartnerFormFields({
   const renderContactOption = (option: any) => {
     const contact = option.contact as Contact;
     const displayName = getContactDisplayName(contact);
+    const avatarUrl = contact.image_bucket && contact.image_path
+      ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${contact.image_bucket}/${contact.image_path}`
+      : null;
     return (
       <IdentityBadge 
         name={displayName}
+        avatarUrl={avatarUrl}
         size="sm"
       />
     );
