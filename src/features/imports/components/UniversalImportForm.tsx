@@ -796,10 +796,17 @@ function ImportFormContent({ config, onClose }: ImportFormContentProps) {
         }
 
         mappedRows.push(mappedRow);
-        setImportProgress(Math.round(((i + 1) / parsedData.rows.length) * 100));
       }
 
-      await config.onImport(mappedRows);
+      // Reset progress to 0 before starting actual import
+      setImportProgress(0);
+
+      // Create progress callback for the actual import process
+      const onProgress = (current: number, total: number) => {
+        setImportProgress(Math.round((current / total) * 100));
+      };
+
+      await config.onImport(mappedRows, onProgress);
 
       toast({
         title: "Importación exitosa",

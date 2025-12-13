@@ -30,7 +30,7 @@ export interface ImportConfig {
   targetSchema: TargetField[];
   smartColumnMapping?: Record<string, string>;
   valueMapConfig?: Record<string, Record<string, string>>;
-  onImport: (rows: Record<string, any>[]) => Promise<void>;
+  onImport: (rows: Record<string, any>[], onProgress?: (current: number, total: number) => void) => Promise<void>;
   aiSuggestMapping?: (header: string, schema: TargetField[]) => Promise<string | null>;
   
   /** Contexto de proyecto/organización para la importación */

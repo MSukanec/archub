@@ -356,7 +356,7 @@ export default function GeneralCostsPaymentsTab() {
             linkPath: '/general-costs',
           },
         },
-        onImport: async (rows: any[]) => {
+        onImport: async (rows: any[], onProgress?: (current: number, total: number) => void) => {
           const isValidUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
           const generalCostsMap = new Map<string, string>();
@@ -454,6 +454,9 @@ export default function GeneralCostsPaymentsTab() {
           let successCount = 0;
           let failCount = 0;
 
+          const totalToImport = validRowsToImport.length;
+          let currentIndex = 0;
+
           for (const { row, resolvedCurrencyId, resolvedGeneralCostId, resolvedWalletId } of validRowsToImport) {
             try {
               await createPaymentMutation.mutateAsync({
@@ -467,13 +470,15 @@ export default function GeneralCostsPaymentsTab() {
                 status: row.status || 'confirmed',
                 reference: row.reference || undefined,
                 notes: row.notes || undefined,
-                created_by: userData?.memberships?.[0]?.id,
+                created_by: userData?.memberships?.[0]?.membership_id,
               });
               successCount++;
             } catch (error) {
               console.error('Error importing row:', error);
               failCount++;
             }
+            currentIndex++;
+            onProgress?.(currentIndex, totalToImport);
           }
 
           if (failCount > 0) {
@@ -809,6 +814,7 @@ export default function GeneralCostsPaymentsTab() {
         data={sortedPayments}
         isLoading={isLoading}
         showDoubleHeader={false}
+        selectable={true}
         onRowClick={(payment) => handleView(payment)}
         renderCard={(payment: GeneralCostPayment) => (
           <GeneralCostPaymentRow
@@ -915,8 +921,8 @@ export default function GeneralCostsPaymentsTab() {
                     <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="confirmed">Confirmado</SelectItem>
                     <SelectItem value="pending">Pendiente</SelectItem>
-                    <SelectItem value="rejected">Rechazado</SelectItem>
-                    <SelectItem value="void">Anulado</SelectItem>
+                    <SelectItem value="overdue">Vencido</SelectItem>
+                    <SelectItem value="cancelled">Cancelado</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
