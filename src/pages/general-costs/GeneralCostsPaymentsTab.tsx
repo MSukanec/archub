@@ -170,6 +170,53 @@ export default function GeneralCostsPaymentsTab() {
     });
   };
 
+  const handleBulkDelete = () => {
+    if (!organizationId || selectedPayments.length === 0) return;
+
+    const count = selectedPayments.length;
+    
+    showDeleteConfirmation({
+      mode: 'simple',
+      title: `Eliminar ${count} ${count === 1 ? 'pago' : 'pagos'}`,
+      description: `¿Estás seguro de que querés eliminar ${count === 1 ? 'este pago' : `estos ${count} pagos`}? Esta acción no se puede deshacer.`,
+      itemName: `${count} ${count === 1 ? 'pago seleccionado' : 'pagos seleccionados'}`,
+      destructiveActionText: `Eliminar ${count === 1 ? 'pago' : 'pagos'}`,
+      onDelete: async () => {
+        let successCount = 0;
+        let failCount = 0;
+        
+        for (const payment of selectedPayments) {
+          try {
+            await deletePaymentMutation.mutateAsync({
+              paymentId: payment.id,
+              organizationId,
+            });
+            successCount++;
+          } catch (error) {
+            console.error('Error deleting payment:', error);
+            failCount++;
+          }
+        }
+        
+        setSelectedPayments([]);
+        
+        if (failCount > 0) {
+          toast({
+            title: 'Eliminación parcial',
+            description: `Se eliminaron ${successCount} de ${count} pagos. ${failCount} fallaron.`,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Pagos eliminados',
+            description: `Se eliminaron ${successCount} pagos correctamente.`,
+          });
+        }
+      },
+      isLoading: deletePaymentMutation.isPending
+    });
+  };
+
   const handleView = (payment: GeneralCostPayment) => {
     if (!organizationId) return;
     openModal('general-costs-payment-view', {
@@ -868,6 +915,9 @@ export default function GeneralCostsPaymentsTab() {
           onClearFilters: handleClearFilters,
           showImport: true,
           onImport: handleImport,
+          bulkActions: {
+            onDelete: handleBulkDelete,
+          },
           renderFilterContent: () => (
             <div className="space-y-3 p-2 min-w-[200px]">
               {/* Filter by General Cost */}
