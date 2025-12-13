@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 interface ComboBoxOption {
   value: string;
   label: string;
+  [key: string]: any; // Allow additional fields for custom rendering
 }
 
 interface ComboBoxProps {
@@ -24,6 +25,7 @@ interface ComboBoxProps {
   createIcon?: React.ReactNode;
   onSearchChange?: (value: string) => void;
   searchQuery?: string;
+  renderOption?: (option: ComboBoxOption, isSelected: boolean) => React.ReactNode;
 }
 
 export function ComboBox({
@@ -40,7 +42,8 @@ export function ComboBox({
   createLabel = (value) => `Crear "${value}"`,
   createIcon,
   onSearchChange,
-  searchQuery = ""
+  searchQuery = "",
+  renderOption
 }: ComboBoxProps) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -146,11 +149,13 @@ export function ComboBox({
                   {value === option.value && (
                     <Check className="mr-2 h-3 w-3 flex-shrink-0 text-accent" />
                   )}
-                  <span className={cn(
-                    "text-foreground group-hover:text-accent-foreground group-focus:text-accent-foreground group-data-[selected=true]:text-accent-foreground truncate",
+                  <div className={cn(
+                    "flex-1 text-foreground group-hover:text-accent-foreground group-focus:text-accent-foreground group-data-[selected=true]:text-accent-foreground",
                     value !== option.value && "ml-5" // Add left margin when check is not visible
                   )}>
-                    {option.label && option.label.includes(' - ') ? (
+                    {renderOption ? (
+                      renderOption(option, value === option.value)
+                    ) : option.label && option.label.includes(' - ') ? (
                       <div className="flex items-center gap-2">
                         <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded font-mono">
                           {option.label.split(' - ')[0]}
@@ -160,7 +165,7 @@ export function ComboBox({
                     ) : (
                       option.label || ''
                     )}
-                  </span>
+                  </div>
                 </CommandItem>
               ))}
             </CommandGroup>

@@ -116,8 +116,11 @@ export function IdentityBadge({
           avatarSizeMap[size],
           'flex-shrink-0',
           // Visible accent border for migration tracking
-          'ring-2 ring-offset-0 ring-primary/60'
+          'ring-2 ring-offset-0'
         )}
+        style={{
+          '--tw-ring-color': 'var(--accent)',
+        } as React.CSSProperties}
       >
         {avatarUrl && <AvatarImage src={avatarUrl} alt={name || 'User'} />}
         <AvatarFallback className={cn('font-semibold', fallbackSizeMap[size])}>

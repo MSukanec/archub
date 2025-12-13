@@ -11,6 +11,7 @@ import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { PARTNER_QUERY_KEYS } from '../constants';
 
 const partnerSchema = z.object({
@@ -252,8 +253,20 @@ export function PartnerFormFields({
     return availableContacts.map(contact => ({
       value: contact.id,
       label: getContactDisplayName(contact),
+      contact, // Include full contact object for rendering
     }));
   }, [contacts, existingPartnerContactIds, mode]);
+
+  const renderContactOption = (option: any) => {
+    const contact = option.contact as Contact;
+    const displayName = getContactDisplayName(contact);
+    return (
+      <IdentityBadge 
+        name={displayName}
+        size="sm"
+      />
+    );
+  };
 
   const isLoading = contactsLoading || partnerLoading || createMutation.isPending || updateMutation.isPending;
 
@@ -281,6 +294,7 @@ export function PartnerFormFields({
                   className="w-full"
                   disabled={contactsLoading}
                   data-testid="combobox-contact"
+                  renderOption={renderContactOption}
                 />
               </FormControl>
               <FormMessage />
