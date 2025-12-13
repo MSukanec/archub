@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
-import { CreditCard, Plus, Edit, Trash2, DollarSign, Receipt, Calendar, Search, Filter, Bell } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Filter, Bell } from "lucide-react";
+import { format } from "date-fns";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
 
@@ -17,6 +17,9 @@ import GeneralCostRow from "@/features/finances/components/GeneralCostRow";
 import type { GeneralCost } from "@/features/general-costs/types";
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
+import { convertToBaseCurrency, format as formatMoneyAmount, formatSubValue } from '@/lib/money';
+import { calculateMonetaryKPI, calculateCountKPI } from '@/lib/kpis';
+import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { parseLocalDate } from '@/lib/date-utils';
 
 interface GeneralCostsListProps {
@@ -58,10 +61,12 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       });
     }
   };
-  const { data: generalCosts = [], isLoading } = useGeneralCosts(organizationId);
-  const { data: payments = [] } = useGeneralCostsPayments(organizationId);
 
-  // Configure Mobile Action Bar - Always show 5 buttons
+  const { data: generalCosts = [], isLoading } = useGeneralCosts(organizationId);
+  const { data: payments = [] } = useGeneralCostsPayments(organizationId ?? undefined);
+  const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId ?? undefined);
+
+  // Configure Mobile Action Bar
   useEffect(() => {
     if (!isMobile) return;
 
@@ -70,7 +75,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
         id: 'search',
         icon: Search,
         label: 'Buscar',
-        onClick: () => { }, // Popover is handled in ActionBarMobile
+        onClick: () => { },
       },
       create: {
         id: 'create',
@@ -83,138 +88,203 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
         id: 'filter',
         icon: Filter,
         label: 'Filtros',
-        onClick: () => { }, // Popover is handled in ActionBarMobile
+        onClick: () => { },
       },
       notifications: {
         id: 'notifications',
         icon: Bell,
         label: 'Notificaciones',
-        onClick: () => { }, // Popover is handled in ActionBarMobile
+        onClick: () => { },
       },
     });
     setShowActionBar(true);
 
-    // Cleanup when component unmounts
     return () => {
       clearActions();
       setShowActionBar(false);
       setMobileSearchValue('');
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile]);
+  }, [isMobile, setActions, setShowActionBar, clearActions, setMobileSearchValue]);
 
-  // Calcular métricas reales
-  const metrics = useMemo(() => {
-    const now = new Date();
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(now.getMonth() - 1);
-
-    const recentPayments = payments.filter(payment => {
-      const paymentDate = parseLocalDate(payment.payment_date)!;
-      return paymentDate >= oneMonthAgo && paymentDate <= now;
-    });
+  // Calculate KPIs
+  const kpis = useMemo(() => {
+    const totalConcepts = generalCosts.length;
+    const usedConcepts = generalCosts.filter(gc => 
+      payments.some(p => p.general_cost_id === gc.id)
+    ).length;
+    const unusedConcepts = totalConcepts - usedConcepts;
 
     return {
-      totalConcepts: generalCosts.length,
-      totalPayments: payments.length,
-      recentPayments: recentPayments.length,
+      totalConcepts: calculateCountKPI({
+        count: totalConcepts,
+        label: 'Conceptos activos'
+      }),
+      usedConcepts: calculateCountKPI({
+        count: usedConcepts,
+        label: 'Con pagos asociados'
+      }),
+      unusedConcepts: calculateCountKPI({
+        count: unusedConcepts,
+        label: 'Sin pagos'
+      })
     };
   }, [generalCosts, payments]);
 
-  // Filtrar y ordenar gastos generales por búsqueda y orden alfabético
-  const filteredGeneralCosts = generalCosts
-    .filter(generalCost => {
-      // Búsqueda por texto
-      const searchLower = searchQuery.toLowerCase();
-      const nameMatch = generalCost.name?.toLowerCase().includes(searchLower);
-      const descriptionMatch = generalCost.description?.toLowerCase().includes(searchLower);
-      const searchMatch = !searchQuery || nameMatch || descriptionMatch;
-      
-      return searchMatch;
-    })
-    .sort((a, b) => {
-      // Ordenar alfabéticamente por nombre
-      return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
-    });
+  // Filter and sort
+  const filteredGeneralCosts = useMemo(() => {
+    return generalCosts
+      .filter(gc => {
+        const searchLower = searchQuery.toLowerCase();
+        const nameMatch = gc.name?.toLowerCase().includes(searchLower);
+        const descriptionMatch = gc.description?.toLowerCase().includes(searchLower);
+        const categoryMatch = gc.category?.name?.toLowerCase().includes(searchLower);
+        return !searchQuery || nameMatch || descriptionMatch || categoryMatch;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+  }, [generalCosts, searchQuery]);
 
-  // Función para editar gasto general
-  const handleEdit = (generalCost: GeneralCost) => {
+  // Build enriched data for table
+  const enrichedGeneralCosts = useMemo(() => {
+    return filteredGeneralCosts.map(gc => {
+      const associatedPayments = payments.filter(p => p.general_cost_id === gc.id);
+      const lastPayment = associatedPayments.length > 0 
+        ? associatedPayments.sort((a, b) => 
+            parseLocalDate(b.payment_date)!.getTime() - parseLocalDate(a.payment_date)!.getTime()
+          )[0]
+        : null;
+
+      // Calculate total paid
+      const totalPaidKPI = calculateMonetaryKPI({
+        items: associatedPayments.map(p => ({
+          amount: p.amount,
+          currency_id: p.currency_id,
+          exchange_rate: p.exchange_rate
+        })),
+        baseCurrencyId: defaultCurrency?.id,
+        symbol: defaultCurrency?.symbol || '$'
+      });
+
+      return {
+        ...gc,
+        paymentCount: associatedPayments.length,
+        lastPaymentDate: lastPayment?.payment_date,
+        totalPaidKPI,
+        associatedPayments
+      };
+    });
+  }, [filteredGeneralCosts, payments, organizationId, defaultCurrency?.id]);
+
+  // Column definitions
+  const columns = [
+    {
+      key: 'name',
+      label: 'Gasto General',
+      render: (item: typeof enrichedGeneralCosts[0]) => (
+        <div className="space-y-1">
+          <div className="font-medium text-sm">{item.name}</div>
+          <div className="text-xs text-muted-foreground">
+            {item.category?.name || 'Sin categoría'}
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'usage',
+      label: 'Uso',
+      render: (item: typeof enrichedGeneralCosts[0]) => {
+        if (item.paymentCount === 0) {
+          return (
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-muted-foreground">Sin uso</div>
+            </div>
+          );
+        }
+        return (
+          <div className="space-y-1">
+            <div className="text-sm font-medium">Usado {item.paymentCount} {item.paymentCount === 1 ? 'vez' : 'veces'}</div>
+            {item.lastPaymentDate && (
+              <div className="text-xs text-muted-foreground">
+                Último pago: {format(parseLocalDate(item.lastPaymentDate)!, 'dd/MM/yyyy')}
+              </div>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'totalPaid',
+      label: 'Total Pagado',
+      render: (item: typeof enrichedGeneralCosts[0]) => {
+        if (item.paymentCount === 0) {
+          return <div className="text-sm text-muted-foreground">—</div>;
+        }
+        const breakdownText = item.totalPaidKPI.breakdown && item.totalPaidKPI.breakdown.length > 1
+          ? formatSubValue(item.totalPaidKPI.breakdown)
+          : undefined;
+        return (
+          <div className="space-y-1">
+            <div className="text-sm font-medium">
+              {formatMoneyAmount(item.totalPaidKPI.value, defaultCurrency?.symbol || '$')}
+            </div>
+            {breakdownText && (
+              <div className="text-xs text-muted-foreground">
+                {breakdownText}
+              </div>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'description',
+      label: 'Descripción',
+      render: (item: typeof enrichedGeneralCosts[0]) => (
+        <div className="text-sm text-muted-foreground line-clamp-2">
+          {item.description || '—'}
+        </div>
+      )
+    }
+  ];
+
+  // Handle edit
+  const handleEdit = (gc: GeneralCost) => {
     openModal('general-costs', {
       organizationId: userData?.organization?.id,
-      generalCostId: generalCost.id
+      generalCostId: gc.id
     });
   };
 
-  // Función para eliminar gasto general
-  const handleDelete = (generalCost: GeneralCost) => {
-    // Contar cuántos pagos están asociados a este concepto
-    const associatedPayments = payments.filter(p => p.general_cost_id === generalCost.id);
-    const otherGeneralCosts = generalCosts.filter(gc => gc.id !== generalCost.id);
+  // Handle delete with replace logic
+  const handleDelete = (gc: GeneralCost) => {
+    const otherGeneralCosts = generalCosts.filter(g => g.id !== gc.id);
     const hasReplacements = otherGeneralCosts.length > 0;
-    
-    // Siempre usar modo 'replace' si hay otros gastos disponibles
     const mode = hasReplacements ? 'replace' : 'delete';
+    const associatedPayments = payments.filter(p => p.general_cost_id === gc.id);
     
-    // Preparar opciones de reemplazo (ordenadas alfabéticamente)
-    const replacementOptions = otherGeneralCosts
-      .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
-      .map(gc => ({
-        label: gc.name,
-        value: gc.id
-      }));
-    
-    // Preparar consecuencias
     const consequences: string[] = [];
     if (associatedPayments.length > 0) {
-      consequences.push(`${associatedPayments.length} pago${associatedPayments.length === 1 ? '' : 's'} está${associatedPayments.length === 1 ? '' : 'n'} asociado${associatedPayments.length === 1 ? '' : 's'} a este concepto`);
+      consequences.push(`${associatedPayments.length} pago${associatedPayments.length === 1 ? '' : 's'} está${associatedPayments.length === 1 ? '' : 'n'} asociado${associatedPayments.length === 1 ? '' : 's'}`);
       consequences.push('Puedes reemplazarlos con otro concepto o eliminar sin reemplazar');
     }
     
     openModal('delete-confirmation', {
       mode,
       title: 'Eliminar concepto de gasto',
-      description: `¿Estás seguro de que quieres eliminar "${generalCost.name}"?`,
-      itemName: generalCost.name,
+      description: `¿Estás seguro de que quieres eliminar "${gc.name}"?`,
+      itemName: gc.name,
       consequences: consequences.length > 0 ? consequences : undefined,
-      replacementOptions: mode === 'replace' ? replacementOptions : undefined,
-      currentId: generalCost.id,
+      replacementOptions: mode === 'replace' ? otherGeneralCosts
+        .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+        .map(g => ({ label: g.name, value: g.id })) : undefined,
+      currentId: gc.id,
       onDelete: () => {
-        deleteGeneralCost.mutate(generalCost.id);
+        deleteGeneralCost.mutate(gc.id);
       },
       onReplace: (newId: string) => {
-        replaceGeneralCost.mutate({ oldId: generalCost.id, newId });
+        replaceGeneralCost.mutate({ oldId: gc.id, newId });
       }
     });
   };
-
-  // Configuración de las columnas de la tabla
-  const columns = [
-    {
-      key: 'name',
-      label: 'Gasto General',
-      render: (generalCost: GeneralCost) => (
-        <div className="font-medium">{generalCost.name}</div>
-      )
-    },
-    {
-      key: 'category',
-      label: 'Categoría',
-      render: (generalCost: GeneralCost) => (
-        <div className="text-sm text-muted-foreground">
-          {generalCost.category?.name || '-'}
-        </div>
-      )
-    },
-    {
-      key: 'description',
-      label: 'Descripción',
-      render: (generalCost: GeneralCost) => (
-        <div className="text-sm text-muted-foreground line-clamp-2">
-          {generalCost.description || '-'}
-        </div>
-      )
-    }
-  ];
 
   if (isLoading) {
     return (
@@ -224,14 +294,13 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
     );
   }
 
-  // Si no hay datos, mostrar EmptyState
   if (generalCosts.length === 0) {
     return (
       <div className="h-full flex items-center justify-center">
         <EmptyState
-          icon={<CreditCard className="w-8 h-8 text-muted-foreground" />}
+          icon={<Plus className="w-8 h-8 text-muted-foreground" />}
           title="No hay conceptos de gastos generales"
-          description="Comienza agregando tu primer concepto de gasto general para el análisis financiero, por ejemplo: Alquiler, Servicios, Honorarios, etc."
+          description="Comienza agregando tu primer concepto para organizar tus gastos generales."
           action={
             <Button onClick={handleCreateGeneralCost}>
               <Plus className="w-4 h-4 mr-2" />
@@ -245,75 +314,70 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
 
   return (
     <div className="space-y-6">
-      {/* 3 KPIs con datos reales */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 1: Total Conceptos - Ocupa 2 columnas */}
-        <StatCard data-testid="stat-card-total-concepts" className="col-span-2">
+      {/* KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <StatCard data-testid="stat-card-total-concepts">
           <StatCardTitle showArrow={false}>
-            <CreditCard className="w-4 h-4 inline mr-1" />
             Total Conceptos
           </StatCardTitle>
           <StatCardValue>
-            {metrics.totalConcepts}
+            {kpis.totalConcepts.value}
           </StatCardValue>
           <StatCardMeta>
-            Conceptos de gastos generales
+            {typeof kpis.totalConcepts.meta === 'string' ? kpis.totalConcepts.meta : 'Conceptos activos'}
           </StatCardMeta>
         </StatCard>
 
-        {/* KPI 2: Pagos Totales - Ocupa 1 columna */}
-        <StatCard data-testid="stat-card-total-payments">
+        <StatCard data-testid="stat-card-used-concepts">
           <StatCardTitle showArrow={false}>
-            <Receipt className="w-4 h-4 inline mr-1" />
-            Pagos Totales
+            Utilizados
           </StatCardTitle>
           <StatCardValue>
-            {metrics.totalPayments}
+            {kpis.usedConcepts.value}
           </StatCardValue>
           <StatCardMeta>
-            Cantidad de pagos realizados
+            {typeof kpis.usedConcepts.meta === 'string' ? kpis.usedConcepts.meta : 'Con pagos'}
           </StatCardMeta>
         </StatCard>
 
-        {/* KPI 3: Recientes - Ocupa 1 columna */}
-        <StatCard data-testid="stat-card-recent">
+        <StatCard data-testid="stat-card-unused-concepts">
           <StatCardTitle showArrow={false}>
-            <Calendar className="w-4 h-4 inline mr-1" />
-            Recientes
+            Sin Uso
           </StatCardTitle>
           <StatCardValue>
-            {metrics.recentPayments}
+            {kpis.unusedConcepts.value}
           </StatCardValue>
           <StatCardMeta>
-            Pagos del último mes
+            {typeof kpis.unusedConcepts.meta === 'string' ? kpis.unusedConcepts.meta : 'Sin pagos'}
           </StatCardMeta>
         </StatCard>
       </div>
 
+      {/* Table */}
       <Table
-        data={filteredGeneralCosts}
+        data={enrichedGeneralCosts}
         columns={columns}
         topBar={{
           searchValue: searchQuery,
           onSearchChange: setSearchQuery,
           showSearch: true
         }}
-        rowActions={(generalCost) => [
+        rowActions={(item) => [
           {
             icon: Edit,
             label: 'Editar',
-            onClick: () => handleEdit(generalCost)
+            onClick: () => handleEdit(item)
           },
           {
             icon: Trash2,
             label: 'Eliminar',
-            onClick: () => handleDelete(generalCost),
+            onClick: () => handleDelete(item),
             variant: 'destructive' as const
           }
         ]}
-        renderCard={(generalCost) => (
+        renderCard={(item) => (
           <GeneralCostRow
-            generalCost={generalCost}
+            generalCost={item}
             onEdit={handleEdit}
             onDelete={handleDelete}
             enableSwipe={true}

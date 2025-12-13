@@ -1,0 +1,169 @@
+Estamos trabajando en la sección Gastos Generales de Seencel.
+Esta sección tiene varias tabs: Dashboard, Lista, Pagos y Ajustes.
+
+El objetivo de la tab Lista es funcionar como un catálogo de conceptos de gastos generales, no como un histórico financiero (eso es responsabilidad de la tab Pagos).
+
+La tab Lista debe responder rápidamente a estas preguntas:
+
+¿Qué gastos generales existen?
+
+¿A qué categoría pertenecen?
+
+¿Se usan o no?
+
+¿Cuánto impacto tuvieron hasta ahora?
+
+¿Cuál fue la última vez que se pagaron?
+
+🧩 OBJETIVO DE LA TAB “LISTA”
+
+👉 Mostrar conceptos de gasto general, con contexto de uso, pero sin volverse una tabla financiera pesada.
+
+👉 NO debe repetir la lógica ni la densidad de la tab Pagos.
+
+📊 KPIs SUPERIORES (TAB LISTA)
+
+Los KPIs actuales están bien, pero deben quedar definidos así:
+
+Total Conceptos
+
+Cantidad total de gastos generales activos (no eliminados)
+
+Conceptos Utilizados
+
+Cantidad de gastos generales que tienen al menos 1 pago asociado
+
+Conceptos Sin Uso
+
+Cantidad de gastos generales que aún no tienen pagos
+
+👉 NO mostrar montos en los KPIs de esta tab
+👉 Los montos viven en Pagos y en el detalle, no acá
+
+📋 TABLA PRINCIPAL – DEFINICIÓN FINAL
+
+La tabla de la tab Lista debe tener exactamente estas columnas, en este orden:
+
+1️⃣ Gasto General
+
+Nombre del gasto general (ej: “Contador”, “Abogado”)
+
+Debajo, en texto secundario:
+
+Categoría (ej: “Servicios Profesionales”)
+
+NO avatar
+
+Esta columna es la identidad principal del concepto
+
+2️⃣ Uso
+
+Mostrar información resumida de uso, en formato compacto:
+
+Texto principal:
+
+Usado X veces
+
+Texto secundario:
+
+Último pago: DD/MM/YYYY
+
+Si nunca fue usado:
+
+Mostrar badge o texto tenue: Sin uso
+
+👉 No usar gráficos acá
+👉 Solo texto claro y legible
+
+3️⃣ Total Pagado
+
+Mostrar la sumatoria total de pagos asociados a ese gasto general
+
+Formato:
+
+Monto principal en moneda base
+
+Abajo, si aplica, aclaración de conversión
+
+Si no tiene pagos:
+
+Mostrar — o $0
+
+4️⃣ Descripción
+
+Texto descriptivo del gasto general
+
+Máximo 2 líneas
+
+Cortar con ellipsis si es largo
+
+El texto completo se ve en el modal de detalle
+
+5️⃣ Acciones
+
+Menú contextual (⋯)
+
+Acciones típicas:
+
+Ver detalle
+
+Editar
+
+Eliminar (soft delete)
+
+🚫 COSAS QUE NO DEBEN ESTAR EN ESTA TABLA
+
+No agregar:
+
+Fecha de creación
+
+Usuario creador
+
+Billetera
+
+Estado
+
+Pagos individuales
+
+Cotizaciones
+
+Eso pertenece exclusivamente a la tab Pagos o al detalle del concepto.
+
+🧱 COMPONENTES Y ARQUITECTURA
+
+Si los bloques de “Uso” o “Total Pagado” pueden reutilizarse en otras tablas:
+
+Crear componentes agnósticos (ej: UsageSummary, AmountSummary)
+
+No duplicar lógica ni UI innecesariamente
+
+Mantener columnas con ancho consistente (no auto-resize por contenido)
+
+🧠 CRITERIO UX FINAL
+
+Esta tab debe sentirse como:
+
+“Estoy viendo mis conceptos de gasto y entiendo su importancia sin entrar al detalle financiero”
+
+Si el usuario quiere ver pagos:
+👉 Va a la tab Pagos
+
+Si quiere editar el concepto:
+👉 Usa acciones o modal
+
+Si quiere análisis profundo:
+👉 Va al Dashboard o detalle
+
+✅ OBJETIVO FINAL
+
+Dejar la tab Lista:
+
+Clara
+
+Informativa
+
+No redundante
+
+Escalable
+
+Profesional a nivel SaaS internacional
