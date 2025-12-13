@@ -242,10 +242,14 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
       <EmptyState 
         title="Sin Pagos Registrados"
         description="Comienza creando un concepto para registrar tus primeros pagos."
-        primaryAction={{
-          label: "Crear Primer Concepto",
-          onClick: onNavigateToConceptos
-        }}
+        action={
+          <button
+            onClick={onNavigateToConceptos}
+            className="px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors"
+          >
+            Crear Primer Concepto
+          </button>
+        }
       />
     );
   }

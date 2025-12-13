@@ -9,6 +9,7 @@ interface Tab {
   id: string;
   label: string;
   isActive: boolean;
+  disabled?: boolean;
 }
 
 interface HeaderMobileProps {
@@ -98,12 +99,15 @@ export function HeaderMobile({
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => onTabChange?.(tab.id)}
+                  onClick={() => !tab.disabled && onTabChange?.(tab.id)}
+                  disabled={tab.disabled}
                   className={`
                     px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-all duration-200
-                    ${tab.isActive 
-                      ? 'bg-[var(--accent)] text-white' 
-                      : 'bg-[var(--card-bg)] text-[var(--main-sidebar-fg)] border border-[var(--main-sidebar-border)] hover:bg-[var(--card-hover-bg)]'
+                    ${tab.disabled
+                      ? 'bg-[var(--card-bg)] text-[var(--muted-foreground)] border border-[var(--main-sidebar-border)] cursor-not-allowed opacity-50'
+                      : tab.isActive 
+                        ? 'bg-[var(--accent)] text-white' 
+                        : 'bg-[var(--card-bg)] text-[var(--main-sidebar-fg)] border border-[var(--main-sidebar-border)] hover:bg-[var(--card-hover-bg)]'
                     }
                   `}
                 >

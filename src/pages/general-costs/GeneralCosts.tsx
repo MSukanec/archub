@@ -42,7 +42,7 @@ export default function GeneralCosts() {
       id: "pagos",
       label: "Pagos",
       isActive: activeTab === "pagos",
-      isDisabled: !hasGeneralCosts
+      disabled: !hasGeneralCosts
     },
     {
       id: "ajustes",
