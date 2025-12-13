@@ -18,6 +18,7 @@ import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { usePartners, useCreatePartnerWithdrawal, useUpdatePartnerWithdrawal, usePartnerWithdrawal } from '../hooks'
 import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
+import { IdentityBadge } from '@/components/shared/IdentityBadge'
 import { FileUploader } from '@/components/shared/FileUploader'
 import { uploadFile, deleteFile } from '@/lib/storage'
 import { useQueryClient } from '@tanstack/react-query'
@@ -104,10 +105,16 @@ export function PartnerWithdrawalFormFields({
   }, [members, userData?.user?.id])
 
   const partnerOptions = useMemo(() => {
-    return partners.map(partner => ({
-      value: partner.id,
-      label: getPartnerDisplayName(partner)
-    })).sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
+    return partners.map(partner => {
+      const linkedUser = Array.isArray(partner.contacts?.linked_user) 
+        ? partner.contacts?.linked_user[0]
+        : partner.contacts?.linked_user;
+      return {
+        value: partner.id,
+        label: getPartnerDisplayName(partner),
+        linkedUser,
+      };
+    }).sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
   }, [partners])
 
   const form = useForm<PartnerWithdrawalFormData>({
@@ -370,6 +377,14 @@ export function PartnerWithdrawalFormFields({
                     searchPlaceholder="Buscar socio..."
                     emptyMessage="No se encontraron socios"
                     data-testid="combobox-partner-withdrawal-partner"
+                    renderOption={(option) => (
+                      <IdentityBadge
+                        name={option.label}
+                        linkedUser={option.linkedUser}
+                        size="sm"
+                        layout="row"
+                      />
+                    )}
                   />
                 </FormControl>
                 <FormMessage />
