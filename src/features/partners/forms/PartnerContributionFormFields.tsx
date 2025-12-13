@@ -537,24 +537,6 @@ export function PartnerContributionFormFields({
 
         <FormField
           control={form.control}
-          name="reference"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Referencia (opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ej: TRX-12345"
-                  {...field}
-                  data-testid="input-partner-contribution-reference"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="notes"
           render={({ field }) => (
             <FormItem>
@@ -565,6 +547,24 @@ export function PartnerContributionFormFields({
                   rows={2}
                   {...field}
                   data-testid="textarea-partner-contribution-notes"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="reference"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Referencia (opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: TRX-12345"
+                  {...field}
+                  data-testid="input-partner-contribution-reference"
                 />
               </FormControl>
               <FormMessage />

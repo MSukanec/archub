@@ -506,24 +506,6 @@ export function PartnerWithdrawalFormFields({
 
         <FormField
           control={form.control}
-          name="reference"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Referencia (opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ej: TRX-12345"
-                  {...field}
-                  data-testid="input-partner-withdrawal-reference"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="notes"
           render={({ field }) => (
             <FormItem>
@@ -534,6 +516,24 @@ export function PartnerWithdrawalFormFields({
                   rows={2}
                   {...field}
                   data-testid="textarea-partner-withdrawal-notes"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="reference"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Referencia (opcional)</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: TRX-12345"
+                  {...field}
+                  data-testid="input-partner-withdrawal-reference"
                 />
               </FormControl>
               <FormMessage />
