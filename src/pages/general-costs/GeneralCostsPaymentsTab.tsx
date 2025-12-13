@@ -274,8 +274,8 @@ export default function GeneralCostsPaymentsTab() {
           options: [
             { label: 'Confirmado', value: 'confirmed' },
             { label: 'Pendiente', value: 'pending' },
-            { label: 'Rechazado', value: 'rejected' },
-            { label: 'Anulado', value: 'void' },
+            { label: 'Vencido', value: 'overdue' },
+            { label: 'Cancelado', value: 'cancelled' },
           ],
         },
       },
@@ -326,8 +326,8 @@ export default function GeneralCostsPaymentsTab() {
       status: {
         'confirmado': 'confirmed',
         'pendiente': 'pending',
-        'rechazado': 'rejected',
-        'anulado': 'void',
+        'vencido': 'overdue',
+        'cancelado': 'cancelled',
       },
       wallet_name: walletValueMap,
       general_cost_name: generalCostValueMap,
@@ -573,8 +573,8 @@ export default function GeneralCostsPaymentsTab() {
             options: [
               { value: 'confirmed', label: 'Confirmado' },
               { value: 'pending', label: 'Pendiente' },
-              { value: 'rejected', label: 'Rechazado' },
-              { value: 'void', label: 'Anulado' }
+              { value: 'overdue', label: 'Vencido' },
+              { value: 'cancelled', label: 'Cancelado' }
             ]
           }
         ],
