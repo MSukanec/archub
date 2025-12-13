@@ -357,15 +357,22 @@ export default function GeneralCostsPaymentsTab() {
           },
         },
         onImport: async (rows: any[]) => {
+          const isValidUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
           const generalCostsMap = new Map<string, string>();
           generalCostsData.forEach(gc => {
-            generalCostsMap.set(gc.name.toLowerCase(), gc.id);
+            const normalized = gc.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+            generalCostsMap.set(normalized, gc.id);
           });
 
           const currenciesMap = new Map<string, string>();
           organizationCurrencies.forEach(oc => {
             if (oc.currency?.code && oc.currency_id) {
-              currenciesMap.set(oc.currency.code.toLowerCase(), oc.currency_id);
+              currenciesMap.set(oc.currency.code.toLowerCase().trim(), oc.currency_id);
+              if (oc.currency.name) {
+                const normalized = oc.currency.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+                currenciesMap.set(normalized, oc.currency_id);
+              }
             }
           });
 
@@ -386,22 +393,54 @@ export default function GeneralCostsPaymentsTab() {
           }
 
           const invalidRows: Array<{ index: number; reason: string }> = [];
-          const validRowsToImport: typeof rows = [];
+          const validRowsToImport: Array<{ row: any; resolvedCurrencyId: string; resolvedGeneralCostId: string; resolvedWalletId: string | null }> = [];
 
           rows.forEach((row, idx) => {
-            const generalCostId = row.general_cost_name;
-            if (!generalCostId) {
+            const rawGeneralCost = row.general_cost_name;
+            if (!rawGeneralCost) {
               invalidRows.push({ index: idx + 1, reason: 'Sin gasto general asignado' });
               return;
             }
+            let resolvedGeneralCostId = rawGeneralCost;
+            if (!isValidUUID(rawGeneralCost)) {
+              const normalized = String(rawGeneralCost).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+              resolvedGeneralCostId = generalCostsMap.get(normalized) || null;
+              if (!resolvedGeneralCostId) {
+                invalidRows.push({ index: idx + 1, reason: `Gasto general "${rawGeneralCost}" no encontrado` });
+                return;
+              }
+            }
 
-            const currencyId = row.currency_code;
-            if (!currencyId) {
+            const rawCurrency = row.currency_code;
+            if (!rawCurrency) {
               invalidRows.push({ index: idx + 1, reason: 'Sin moneda asignada' });
               return;
             }
+            let resolvedCurrencyId = rawCurrency;
+            if (!isValidUUID(rawCurrency)) {
+              const normalized = String(rawCurrency).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+              resolvedCurrencyId = currenciesMap.get(normalized) || null;
+              if (!resolvedCurrencyId) {
+                invalidRows.push({ index: idx + 1, reason: `Moneda "${rawCurrency}" no encontrada` });
+                return;
+              }
+            }
 
-            validRowsToImport.push(row);
+            let resolvedWalletId: string | null = null;
+            const rawWallet = row.wallet_name;
+            if (rawWallet) {
+              if (isValidUUID(rawWallet)) {
+                resolvedWalletId = rawWallet;
+              } else {
+                const normalized = String(rawWallet).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+                resolvedWalletId = walletsMap.get(normalized) || null;
+              }
+            }
+            if (!resolvedWalletId) {
+              resolvedWalletId = defaultWalletId;
+            }
+
+            validRowsToImport.push({ row, resolvedCurrencyId, resolvedGeneralCostId, resolvedWalletId });
           });
 
           if (invalidRows.length > 0) {
@@ -415,18 +454,16 @@ export default function GeneralCostsPaymentsTab() {
           let successCount = 0;
           let failCount = 0;
 
-          for (const row of validRowsToImport) {
+          for (const { row, resolvedCurrencyId, resolvedGeneralCostId, resolvedWalletId } of validRowsToImport) {
             try {
-              const walletId = row.wallet_name || defaultWalletId;
-
               await createPaymentMutation.mutateAsync({
                 organization_id: organizationId!,
                 payment_date: row.payment_date,
                 amount: parseFloat(String(row.amount).replace(/[^0-9.-]/g, '')),
-                currency_id: row.currency_code,
+                currency_id: resolvedCurrencyId,
                 exchange_rate: row.exchange_rate ? parseFloat(String(row.exchange_rate).replace(/[^0-9.-]/g, '')) : undefined,
-                wallet_id: walletId || undefined,
-                general_cost_id: row.general_cost_name,
+                wallet_id: resolvedWalletId || undefined,
+                general_cost_id: resolvedGeneralCostId,
                 status: row.status || 'confirmed',
                 reference: row.reference || undefined,
                 notes: row.notes || undefined,
