@@ -3,7 +3,7 @@ import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { useNavigationStore } from '@/stores/navigationStore'
 import { CreditCard, Plus } from 'lucide-react'
 import GeneralCostsDashboardTab from './GeneralCostsDashboardTab'
-import GeneralCostsList from './GeneralCostsList'
+import GeneralCostsConceptsTab from './GeneralCostsConceptsTab'
 import GeneralCostsPaymentsTab from './GeneralCostsPaymentsTab'
 import GeneralCostsSettingsTab from './GeneralCostsSettingsTab'
 import { useGlobalModalStore } from '@/components/modal'
@@ -34,9 +34,9 @@ export default function GeneralCosts() {
       isActive: activeTab === "dashboard"
     },
     {
-      id: "lista",
-      label: "Lista", 
-      isActive: activeTab === "lista"
+      id: "conceptos",
+      label: "Conceptos", 
+      isActive: activeTab === "conceptos"
     },
     {
       id: "pagos",
@@ -65,7 +65,7 @@ export default function GeneralCosts() {
 
   // Action button based on active tab
   const getActionButton = () => {
-    if (activeTab === "lista") {
+    if (activeTab === "conceptos") {
       return {
         label: "Nuevo Gasto General",
         icon: Plus,
@@ -98,8 +98,8 @@ export default function GeneralCosts() {
 
   return (
     <Layout headerProps={headerProps} wide={false}>
-      {activeTab === "dashboard" && <GeneralCostsDashboardTab />}
-      {activeTab === "lista" && <GeneralCostsList onNewGeneralCost={handleNewGeneralCost} />}
+      {activeTab === "dashboard" && <GeneralCostsDashboardTab onNavigateToConceptos={() => setActiveTab('conceptos')} />}
+      {activeTab === "conceptos" && <GeneralCostsConceptsTab onNewGeneralCost={handleNewGeneralCost} />}
       {activeTab === "pagos" && <GeneralCostsPaymentsTab />}
       {activeTab === "ajustes" && <GeneralCostsSettingsTab />}
     </Layout>

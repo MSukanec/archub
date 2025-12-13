@@ -13,10 +13,15 @@ import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { cn } from '@/lib/utils';
 import { formatDateShort } from '@/lib/date-utils';
 
-export default function GeneralCostsDashboardTab() {
+interface GeneralCostsDashboardTabProps {
+  onNavigateToConceptos?: () => void;
+}
+
+export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: GeneralCostsDashboardTabProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   
@@ -229,6 +234,19 @@ export default function GeneralCostsDashboardTab() {
           <Skeleton className="h-80" />
         </div>
       </div>
+    );
+  }
+
+  if (allPayments.length === 0) {
+    return (
+      <EmptyState 
+        title="Sin Pagos Registrados"
+        description="Comienza creando un concepto para registrar tus primeros pagos."
+        primaryAction={{
+          label: "Crear Primer Concepto",
+          onClick: onNavigateToConceptos
+        }}
+      />
     );
   }
 
