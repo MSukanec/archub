@@ -724,8 +724,8 @@ export default function GeneralCostsPaymentsTab() {
     <div className="space-y-6">
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Total Pagos (2 columnas) - REFACTORIZADO */}
-        <StatCard data-testid="stat-card-total-pagos" className="col-span-2">
+        {/* Total Pagos - Mobile: 1 col, Desktop: 2 cols */}
+        <StatCard data-testid="stat-card-total-pagos" className="col-span-1 lg:col-span-2">
           <StatCardTitle showArrow={false}>
             <DollarSign className="w-4 h-4 inline mr-1" />
             Total Pagos
@@ -736,8 +736,8 @@ export default function GeneralCostsPaymentsTab() {
           <StatCardMeta>{metricsData?.total_count_kpi?.meta?.unit}</StatCardMeta>
         </StatCard>
 
-        {/* Pagos a la Fecha (2 columnas) - REFACTORIZADO */}
-        <StatCard data-testid="stat-card-pagos-fecha" className="col-span-2">
+        {/* Pagos a la Fecha - Mobile: 1 col, Desktop: 2 cols */}
+        <StatCard data-testid="stat-card-pagos-fecha" className="col-span-1 lg:col-span-2">
           <StatCardTitle showArrow={false}>
             <TrendingUp className="w-4 h-4 inline mr-1" />
             Pagos a la Fecha
