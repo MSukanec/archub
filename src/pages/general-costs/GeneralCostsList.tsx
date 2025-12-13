@@ -153,14 +153,15 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
           )[0]
         : null;
 
-      // Calculate total paid
+      // Calculate total paid - pass currency object with code for proper conversion
       const totalPaidKPI = calculateMonetaryKPI({
         items: associatedPayments.map(p => ({
           amount: p.amount,
           currency_id: p.currency_id,
+          currency: p.currency,
           exchange_rate: p.exchange_rate
         })),
-        baseCurrencyId: defaultCurrency?.id,
+        baseCurrencyId: defaultCurrency?.code,
         symbol: defaultCurrency?.symbol || '$'
       });
 
@@ -172,7 +173,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
         associatedPayments
       };
     });
-  }, [filteredGeneralCosts, payments, organizationId, defaultCurrency?.id]);
+  }, [filteredGeneralCosts, payments, defaultCurrency]);
 
   // Column definitions
   const columns = [
