@@ -5,6 +5,7 @@ import { CreditCard, Plus } from 'lucide-react'
 import GeneralCostsDashboardTab from './GeneralCostsDashboardTab'
 import GeneralCostsList from './GeneralCostsList'
 import GeneralCostsPaymentsTab from './GeneralCostsPaymentsTab'
+import GeneralCostsSettingsTab from './GeneralCostsSettingsTab'
 import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGeneralCosts } from '@/features/general-costs/hooks/use-general-costs'
@@ -42,6 +43,11 @@ export default function GeneralCosts() {
       label: "Pagos",
       isActive: activeTab === "pagos",
       isDisabled: !hasGeneralCosts
+    },
+    {
+      id: "ajustes",
+      label: "Ajustes",
+      isActive: activeTab === "ajustes"
     }
   ]
 
@@ -95,6 +101,7 @@ export default function GeneralCosts() {
       {activeTab === "dashboard" && <GeneralCostsDashboardTab />}
       {activeTab === "lista" && <GeneralCostsList onNewGeneralCost={handleNewGeneralCost} />}
       {activeTab === "pagos" && <GeneralCostsPaymentsTab />}
+      {activeTab === "ajustes" && <GeneralCostsSettingsTab />}
     </Layout>
   )
 }
