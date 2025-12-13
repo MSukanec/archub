@@ -29,6 +29,7 @@ import GeneralCostForm from '@/features/general-costs/forms/GeneralCostForm';
 import GeneralCostView from '@/features/general-costs/forms/GeneralCostView';
 import GeneralCostPaymentForm from '@/features/general-costs/forms/GeneralCostPaymentForm';
 import GeneralCostPaymentView from '@/features/general-costs/forms/GeneralCostPaymentView';
+import GeneralCostCategoryForm from '@/features/general-costs/forms/GeneralCostCategoryForm';
 import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal, TestimonialForm } from '@/features/learning';
 import { HeroSectionForm } from '@/features/layout';
 import ForumThreadForm from '@/features/forum/forms/ForumThreadForm';
@@ -296,6 +297,14 @@ export function initializeModalRegistry(): void {
     mapDataToProps: (data) => ({
       organizationId: data?.organizationId,
       paymentId: data?.paymentId,
+    })
+  });
+  registerModal('generalCostCategory', GeneralCostCategoryForm as any, { 
+    ...generalConfig, 
+    size: 'sm',
+    mapDataToProps: (data) => ({
+      category: data?.category,
+      mode: data?.category ? (data?.mode || 'edit') : (data?.mode || 'create')
     })
   });
   
