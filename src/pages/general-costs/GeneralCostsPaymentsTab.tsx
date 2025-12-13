@@ -23,8 +23,9 @@ import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { parseLocalDate } from '@/lib/date-utils';
 import { useOrganizationWallets } from '@/features/organization/hooks';
-import { useGeneralCosts, useCreateGeneralCostPayment } from '@/features/general-costs';
+import { useGeneralCosts, useCreateGeneralCostPayment, GENERAL_COSTS_QUERY_KEYS } from '@/features/general-costs';
 import { useToast } from '@/hooks/use-toast';
+import { queryClient } from '@/lib/queryClient';
 import { format as formatMoneyAmount } from '@/lib/money';
 import type { TargetField, ImportConfig } from '@/features/imports/types';
 
@@ -492,6 +493,13 @@ export default function GeneralCostsPaymentsTab() {
               title: 'Importación exitosa',
               description: `Se importaron ${successCount} pagos correctamente.`,
             });
+          }
+
+          // Invalidar cache para refrescar la lista y dashboard
+          if (successCount > 0) {
+            queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.payments() });
+            queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.monthlySummary() });
+            queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.byCategory() });
           }
         },
       } as ImportConfig,
