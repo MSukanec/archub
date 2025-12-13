@@ -130,6 +130,7 @@ interface TableProps<T = any> {
     title: string;
     description?: React.ReactNode;
     action?: React.ReactNode;
+    secondaryAction?: React.ReactNode;
     actionButton?: {
       label: string;
       onClick: () => void;

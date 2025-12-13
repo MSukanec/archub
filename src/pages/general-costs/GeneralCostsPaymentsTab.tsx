@@ -790,7 +790,18 @@ export default function GeneralCostsPaymentsTab() {
               data-testid="button-add-payment-empty"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Agregar Pago
+              Nuevo Pago
+            </Button>
+          ),
+          secondaryAction: (
+            <Button
+              onClick={handleImport}
+              size="sm"
+              variant="secondary"
+              data-testid="button-import-payments-empty"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Importar Pagos
             </Button>
           ),
         }}
