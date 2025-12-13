@@ -23,3 +23,5 @@ export * from './hooks/use-update-general-cost-payment';
 export * from './hooks/use-delete-general-cost-payment';
 export * from './hooks/use-general-cost-payment';
 export * from './hooks/use-general-cost-payment-media';
+
+export { GeneralCostPaymentFormFields } from './forms/GeneralCostPaymentFormFields';
