@@ -17,6 +17,18 @@ html {
   scrollbar-gutter: stable;
 }
 
+body {
+  scrollbar-gutter: stable;
+}
+
+/* Apply scrollbar-gutter to all overflow containers */
+[class*="overflow-auto"],
+[class*="overflow-y"],
+.overflow-auto,
+.overflow-y-auto {
+  scrollbar-gutter: stable;
+}
+
 /* ========================================
    🌞 LIGHT THEME - ROOT VARIABLES
    ======================================== */
