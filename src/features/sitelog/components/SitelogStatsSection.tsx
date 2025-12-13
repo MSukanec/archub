@@ -1,7 +1,7 @@
 import { Paperclip } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
-import { MiniTrendChart } from '@/components/charts/MiniTrendChart';
+import { MiniTrendChart } from '@/components/charts/legacy/MiniTrendChart';
 
 import { useSitelogMetrics } from '../hooks/use-sitelog-metrics';
 

@@ -2,7 +2,7 @@ import { Image, Video, LayoutGrid, Grid3X3 } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MiniTrendChart } from '@/components/charts/MiniTrendChart';
+import { MiniTrendChart } from '@/components/charts/legacy/MiniTrendChart';
 
 import { useMediaMetrics } from '../hooks/use-media-metrics';
 import type { GalleryFile } from '../types';
