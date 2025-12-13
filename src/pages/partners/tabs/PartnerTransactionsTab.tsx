@@ -16,6 +16,7 @@ import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import {
+  usePartners,
   usePartnerContributions,
   usePartnerWithdrawals,
   useDeletePartnerContribution,
@@ -41,6 +42,7 @@ interface UnifiedTransaction {
   notes: string | null;
   reference: string | null;
   original: PartnerContribution | PartnerWithdrawal;
+  linkedUser?: { avatar_url?: string | null } | null;
 }
 
 function formatPartnerName(partner?: { contacts: { full_name: string | null; first_name: string | null; last_name: string | null; company_name: string | null; email?: string | null } | null }): string {
@@ -61,11 +63,12 @@ export function PartnerTransactionsTab() {
   const { data: contributions = [], isLoading: loadingContributions } = usePartnerContributions(organizationId);
   const { data: withdrawals = [], isLoading: loadingWithdrawals } = usePartnerWithdrawals(organizationId);
   const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
+  const { data: partners = [], isLoading: loadingPartners } = usePartners(organizationId, { enabled: !!organizationId });
 
   const deleteContributionMutation = useDeletePartnerContribution();
   const deleteWithdrawalMutation = useDeletePartnerWithdrawal();
 
-  const isLoading = loadingContributions || loadingWithdrawals;
+  const isLoading = loadingContributions || loadingWithdrawals || loadingPartners;
 
   const transactions = useMemo<UnifiedTransaction[]>(() => {
     const contributionItems: UnifiedTransaction[] = contributions.map((c) => ({
@@ -107,6 +110,20 @@ export function PartnerTransactionsTab() {
       return new Date(b.original.created_at).getTime() - new Date(a.original.created_at).getTime();
     });
   }, [contributions, withdrawals]);
+
+  // Enrich transactions with linkedUser from partners
+  const transactionsWithLinkedUser = useMemo(() => {
+    return transactions.map(transaction => {
+      const partnerData = partners.find(p => p.id === transaction.partner_id);
+      const linkedUser = partnerData?.contacts?.linked_user;
+      const resolvedLinkedUser = Array.isArray(linkedUser) ? linkedUser[0] : linkedUser;
+      
+      return {
+        ...transaction,
+        linkedUser: resolvedLinkedUser,
+      };
+    });
+  }, [transactions, partners]);
 
   // KPI system - REFACTORIZADO
   const metrics = useMemo(() => {
@@ -269,7 +286,7 @@ export function PartnerTransactionsTab() {
       render: (item: UnifiedTransaction) => (
         <IdentityBadge 
           name={item.partner_name}
-          linkedUser={item.original.partner?.contacts?.linked_user}
+          linkedUser={item.linkedUser}
           size="sm"
         />
       ),
@@ -407,7 +424,7 @@ export function PartnerTransactionsTab() {
 
       <Table
         columns={columns}
-        data={transactions}
+        data={transactionsWithLinkedUser}
         rowActions={rowActions}
         defaultSort={{ key: 'date', direction: 'desc' }}
         topBar={{
