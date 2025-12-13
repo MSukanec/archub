@@ -115,6 +115,14 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
               name,
               is_active
             )
+          ),
+          creator:organization_members(
+            id,
+            users(
+              id,
+              full_name,
+              avatar_url
+            )
           )
         `)
         .eq('organization_id', organizationId)
@@ -137,6 +145,11 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
           ...generalCost,
           category: Array.isArray(generalCost.category) ? generalCost.category[0] : generalCost.category
         } : null
+        const creatorData = Array.isArray(payment.creator) ? payment.creator[0] : payment.creator
+        const processedCreator = creatorData ? {
+          ...creatorData,
+          users: Array.isArray(creatorData.users) ? creatorData.users[0] : creatorData.users
+        } : null
         
         return {
           ...payment,
@@ -146,6 +159,7 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
             ...walletData,
             wallets: Array.isArray(walletData.wallets) ? walletData.wallets[0] : walletData.wallets
           } : null,
+          creator: processedCreator,
           attachments_count: 0 // TODO: Calculate from media_links count if needed for list view
         }
       }) as unknown as GeneralCostPayment[]

@@ -1,6 +1,8 @@
 import { useMemo, useState, useEffect } from 'react';
 import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, Calendar, TrendingUp, Filter, Search, Bell } from 'lucide-react';
 import { format } from 'date-fns';
+import { IdentityBadge } from '@/components/shared/IdentityBadge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { convertToBaseCurrency, formatKPI, formatSubValue } from '@/lib/money';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis';
 
@@ -591,15 +593,34 @@ export default function GeneralCostsPaymentsTab() {
       key: 'general_cost',
       label: 'Gasto General',
       sortable: true,
-      width: '220px',
+      width: '280px',
       render: (payment: GeneralCostPayment) => (
-        <div>
-          <div className="font-bold">{payment.general_cost?.name || 'Sin categoría'}</div>
-          {payment.general_cost?.category ? (
-            <div className="text-xs text-muted-foreground line-clamp-1">{payment.general_cost.category.name}</div>
-          ) : (
-            <div className="text-xs text-muted-foreground">Sin categoría</div>
-          )}
+        <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <div>
+                  <IdentityBadge 
+                    name={payment.creator?.users?.full_name}
+                    avatarUrl={payment.creator?.users?.avatar_url}
+                    showName={false}
+                    size="sm"
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                {payment.creator?.users?.full_name || 'Sin creador'}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <div className="flex-1 min-w-0">
+            <div className="font-bold text-sm">{payment.general_cost?.name || 'Sin categoría'}</div>
+            {payment.general_cost?.category ? (
+              <div className="text-xs text-muted-foreground line-clamp-1">{payment.general_cost.category.name}</div>
+            ) : (
+              <div className="text-xs text-muted-foreground">Sin categoría</div>
+            )}
+          </div>
         </div>
       ),
     },
