@@ -180,8 +180,8 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       key: 'name',
       label: 'Gasto General',
       render: (item: typeof enrichedGeneralCosts[0]) => (
-        <div className="space-y-1">
-          <div className="font-medium text-sm">{item.name}</div>
+        <div className="flex flex-col gap-0.5">
+          <div className="font-bold text-sm">{item.name}</div>
           <div className="text-xs text-muted-foreground">
             {item.category?.name || 'Sin categoría'}
           </div>
@@ -194,14 +194,14 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       render: (item: typeof enrichedGeneralCosts[0]) => {
         if (item.paymentCount === 0) {
           return (
-            <div className="space-y-1">
-              <div className="text-sm font-medium text-muted-foreground">Sin uso</div>
+            <div className="flex flex-col gap-0.5">
+              <div className="text-sm text-muted-foreground">Sin uso</div>
             </div>
           );
         }
         return (
-          <div className="space-y-1">
-            <div className="text-sm font-medium">Usado {item.paymentCount} {item.paymentCount === 1 ? 'vez' : 'veces'}</div>
+          <div className="flex flex-col gap-0.5">
+            <div className="text-sm font-bold">Usado {item.paymentCount} {item.paymentCount === 1 ? 'vez' : 'veces'}</div>
             {item.lastPaymentDate && (
               <div className="text-xs text-muted-foreground">
                 Último pago: {format(parseLocalDate(item.lastPaymentDate)!, 'dd/MM/yyyy')}
@@ -222,8 +222,8 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
           ? formatSubValue(item.totalPaidKPI.breakdown)
           : undefined;
         return (
-          <div className="space-y-1">
-            <div className="text-sm font-medium">
+          <div className="flex flex-col gap-0.5">
+            <div className="text-sm font-bold">
               {formatMoneyAmount(item.totalPaidKPI.value, defaultCurrency?.symbol || '$')}
             </div>
             {breakdownText && (
