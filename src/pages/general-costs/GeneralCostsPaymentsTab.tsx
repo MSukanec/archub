@@ -521,7 +521,7 @@ export default function GeneralCostsPaymentsTab() {
                 status: row.status || 'confirmed',
                 reference: row.reference || undefined,
                 notes: row.notes || undefined,
-                created_by: userData?.memberships?.[0]?.membership_id,
+                created_by: userData?.memberships?.find(m => m.organization_id === organizationId)?.membership_id,
               });
               successCount++;
             } catch (error) {
