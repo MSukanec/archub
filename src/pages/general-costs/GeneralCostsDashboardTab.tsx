@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { TrendingUp, Calendar, Tag, DollarSign, CreditCard, Lightbulb, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, AlertCircle, ChevronRight, Plus } from 'lucide-react';
+import { TrendingUp, Calendar, Tag, DollarSign, CreditCard, Lightbulb, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, Plus } from 'lucide-react';
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakdown } from '@/lib/kpis';
-import { formatKPI, format, convertToBaseCurrency } from '@/lib/money';
+import { format, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { useGeneralCostsPayments } from '@/hooks/use-general-costs-payments';
@@ -33,17 +33,13 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
 
   const isLoading = isLoadingPayments || isLoadingMonthlySummary || isLoadingByCategory;
 
-  const currentYear = new Date().getFullYear();
-  const currentYearPayments = useMemo(() => {
-    return allPayments.filter(p => {
-      const paymentYear = new Date(p.payment_date).getFullYear();
-      return paymentYear === currentYear && p.status === 'confirmed';
-    });
-  }, [allPayments, currentYear]);
+  const confirmedPayments = useMemo(() => {
+    return allPayments.filter(p => p.status === 'confirmed');
+  }, [allPayments]);
 
   const kpis = useMemo(() => {
-    const totalYTD = calculateMonetaryKPI({
-      items: currentYearPayments.map(p => ({
+    const totalGasto = calculateMonetaryKPI({
+      items: confirmedPayments.map(p => ({
         amount: p.amount,
         currency_id: p.currency_id,
         currency: p.currency,
@@ -54,13 +50,13 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
       quoteCurrency: 'USD'
     });
 
-    const months = new Set(currentYearPayments.map(p => {
+    const months = new Set(confirmedPayments.map(p => {
       const date = new Date(p.payment_date);
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }));
     const monthCount = months.size || 1;
 
-    const averageMonthlyItems = currentYearPayments.map(p => ({
+    const averageMonthlyItems = confirmedPayments.map(p => ({
       amount: p.amount / monthCount,
       currency_id: p.currency_id,
       currency: p.currency,
@@ -74,7 +70,6 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
       quoteCurrency: 'USD'
     });
 
-    const confirmedPayments = allPayments.filter(p => p.status === 'confirmed');
     const totalPayments = calculateCountKPI({
       count: confirmedPayments.length,
       label: 'pagos'
@@ -102,24 +97,19 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
     });
 
     return {
-      totalYTD,
+      totalGasto,
       averageMonthly,
       totalPayments,
       topCategory: topCategoryKPI
     };
-  }, [currentYearPayments, allPayments, defaultCurrency, byCategory]);
+  }, [confirmedPayments, defaultCurrency, byCategory]);
 
   const monthlyChartData = useMemo(() => {
-    const thisYearMonths = monthlySummary.filter(m => {
-      const year = parseInt(m.payment_month.split('-')[0]);
-      return year === currentYear;
-    });
-
-    return thisYearMonths.map(m => ({
+    return monthlySummary.map(m => ({
       month: m.payment_month,
       value: Number(m.total_amount) || 0
     })).sort((a, b) => a.month.localeCompare(b.month));
-  }, [monthlySummary, currentYear]);
+  }, [monthlySummary]);
 
   const allCategoryData = useMemo(() => {
     const categoryTotals = new Map<string, number>();
@@ -141,27 +131,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
   const insights = useMemo(() => {
     const messages: Array<{ text: string; type: 'positive' | 'negative' | 'neutral' }> = [];
     
-    if (kpis.totalYTD.value > 0 && kpis.averageMonthly.value > 0) {
-      const currentMonth = new Date().getMonth();
-      const expectedTotal = kpis.averageMonthly.value * (currentMonth + 1);
-      const difference = ((kpis.totalYTD.value - expectedTotal) / expectedTotal) * 100;
-      
-      if (Math.abs(difference) > 10) {
-        if (difference > 0) {
-          messages.push({
-            text: `El gasto acumulado está ${Math.round(Math.abs(difference))}% por encima del promedio proyectado`,
-            type: 'negative'
-          });
-        } else {
-          messages.push({
-            text: `El gasto acumulado está ${Math.round(Math.abs(difference))}% por debajo del promedio proyectado`,
-            type: 'positive'
-          });
-        }
-      }
-    }
-    
-    if (allCategoryData.length > 0 && kpis.totalYTD.value > 0) {
+    if (allCategoryData.length > 0 && kpis.totalGasto.value > 0) {
       const topCategoryValue = allCategoryData[0]?.value || 0;
       const topCategoryName = allCategoryData[0]?.name || '';
       const allCategoriesTotal = allCategoryData.reduce((sum, c) => sum + c.value, 0);
@@ -177,9 +147,9 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
       }
     }
     
-    const thisMonthPayments = currentYearPayments.filter(p => {
+    const now = new Date();
+    const thisMonthPayments = confirmedPayments.filter(p => {
       const paymentDate = new Date(p.payment_date);
-      const now = new Date();
       return paymentDate.getMonth() === now.getMonth() && paymentDate.getFullYear() === now.getFullYear();
     });
     
@@ -212,8 +182,15 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
       }
     }
     
+    if (confirmedPayments.length > 0) {
+      messages.push({
+        text: `${confirmedPayments.length} pago${confirmedPayments.length > 1 ? 's' : ''} confirmado${confirmedPayments.length > 1 ? 's' : ''} en total`,
+        type: 'neutral'
+      });
+    }
+    
     return messages.slice(0, 4);
-  }, [kpis, categoryChartData, currentYearPayments, monthlyChartData]);
+  }, [kpis, allCategoryData, confirmedPayments, monthlyChartData]);
 
   const recentPayments = useMemo(() => {
     return allPayments
@@ -260,13 +237,13 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
   return (
     <div className="space-y-6" data-testid="general-costs-dashboard">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard data-testid="kpi-total-ytd">
+        <StatCard data-testid="kpi-total-gasto">
           <StatCardTitle>
             <DollarSign className="h-4 w-4" />
-            Gasto Total YTD
+            Gasto Total
           </StatCardTitle>
-          <StatCardValue>{kpis.totalYTD.formatted}</StatCardValue>
-          <StatCardMeta>{formatBreakdown(kpis.totalYTD)}</StatCardMeta>
+          <StatCardValue>{kpis.totalGasto.formatted}</StatCardValue>
+          <StatCardMeta>{formatBreakdown(kpis.totalGasto)}</StatCardMeta>
         </StatCard>
 
         <StatCard data-testid="kpi-average-monthly">
@@ -300,13 +277,13 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card data-testid="chart-monthly-trend">
           <CardHeader>
-            <CardTitle className="text-base font-medium">Evolución Mensual {currentYear}</CardTitle>
+            <CardTitle className="text-base font-medium">Evolución Mensual</CardTitle>
           </CardHeader>
           <CardContent>
             <MonthlyTrendChart 
               data={monthlyChartData}
               height={280}
-              emptyText="No hay datos de gastos para este año"
+              emptyText="No hay datos de gastos registrados"
             />
           </CardContent>
         </Card>
@@ -399,13 +376,12 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
                               payment.exchange_rate ?? null,
                               { quoteCurrency: 'USD' }
                             ),
-                            defaultCurrency?.code || 'ARS',
-                            { symbol: defaultCurrency?.symbol }
+                            defaultCurrency?.symbol || '$'
                           )}
                         </span>
                         {payment.currency?.code !== defaultCurrency?.code && (
                           <span className="text-xs text-muted-foreground whitespace-nowrap">
-                            {format(payment.amount, payment.currency?.code || 'ARS', { symbol: payment.currency?.symbol })}
+                            {format(payment.amount, payment.currency?.symbol || '$')}
                           </span>
                         )}
                       </div>
