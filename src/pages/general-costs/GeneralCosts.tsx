@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { useNavigationStore } from '@/stores/navigationStore'
 import { CreditCard, Plus } from 'lucide-react'
+import GeneralCostsDashboardTab from './GeneralCostsDashboardTab'
 import GeneralCostsList from './GeneralCostsList'
 import GeneralCostsPaymentsTab from './GeneralCostsPaymentsTab'
 import { useGlobalModalStore } from '@/components/modal'
@@ -13,7 +14,7 @@ export default function GeneralCosts() {
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
-  const [activeTab, setActiveTab] = useState("lista")
+  const [activeTab, setActiveTab] = useState("dashboard")
   
   // Get general costs to check if we should disable the Pagos tab
   const { data: generalCosts = [] } = useGeneralCosts(organizationId ?? null)
@@ -26,6 +27,11 @@ export default function GeneralCosts() {
 
   // Header tabs configuration
   const headerTabs = [
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      isActive: activeTab === "dashboard"
+    },
     {
       id: "lista",
       label: "Lista", 
@@ -86,6 +92,7 @@ export default function GeneralCosts() {
 
   return (
     <Layout headerProps={headerProps} wide={false}>
+      {activeTab === "dashboard" && <GeneralCostsDashboardTab />}
       {activeTab === "lista" && <GeneralCostsList onNewGeneralCost={handleNewGeneralCost} />}
       {activeTab === "pagos" && <GeneralCostsPaymentsTab />}
     </Layout>

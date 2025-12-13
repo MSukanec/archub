@@ -7,6 +7,10 @@ export const GENERAL_COSTS_QUERY_KEYS = {
   payments: () => [...GENERAL_COSTS_QUERY_KEYS.all, 'payment'] as const,
   paymentsList: (organizationId: string | null) => [...GENERAL_COSTS_QUERY_KEYS.payments(), organizationId] as const,
   payment: (id: string | null) => [...GENERAL_COSTS_QUERY_KEYS.payments(), id] as const,
+  monthlySummary: () => [...GENERAL_COSTS_QUERY_KEYS.all, 'monthly-summary'] as const,
+  monthlySummaryList: (organizationId: string | null) => [...GENERAL_COSTS_QUERY_KEYS.monthlySummary(), organizationId] as const,
+  byCategory: () => [...GENERAL_COSTS_QUERY_KEYS.all, 'by-category'] as const,
+  byCategoryList: (organizationId: string | null) => [...GENERAL_COSTS_QUERY_KEYS.byCategory(), organizationId] as const,
 } as const;
 
 export const STATUS_LABELS = {
