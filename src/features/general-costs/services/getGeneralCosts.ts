@@ -29,7 +29,12 @@ export async function getGeneralCosts(organizationId: string): Promise<GeneralCo
       created_at,
       updated_at,
       is_deleted,
-      deleted_at
+      deleted_at,
+      category_id,
+      category:general_cost_categories(
+        id,
+        name
+      )
     `)
     .eq('organization_id', organizationId)
     .or('is_deleted.is.null,is_deleted.eq.false')
@@ -43,5 +48,8 @@ export async function getGeneralCosts(organizationId: string): Promise<GeneralCo
     return [];
   }
 
-  return data;
+  return data.map(gc => ({
+    ...gc,
+    category: Array.isArray(gc.category) ? gc.category[0] : gc.category
+  }));
 }

@@ -7,10 +7,12 @@ import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/m
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
 import { useOrganizationMembers } from '@/features/organization'
+import { useGeneralCostCategories } from '../hooks/use-general-cost-categories'
 import { useCreateGeneralCost } from '../hooks/use-create-general-cost'
 import { useUpdateGeneralCost } from '../hooks/use-update-general-cost'
 import { useGeneralCost } from '../hooks/use-general-cost'
@@ -37,17 +39,19 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
     mode === 'edit' ? modalData?.generalCostId || null : null
   )
   const { data: allGeneralCosts = [] } = useGeneralCosts(organizationId || null)
+  const { data: categories = [] } = useGeneralCostCategories(organizationId)
 
   const form = useForm<GeneralCostFormData>({
     resolver: zodResolver(generalCostSchema),
-    defaultValues: { name: '', description: '' }
+    defaultValues: { name: '', description: '', category_id: '' }
   })
 
   useEffect(() => {
     if (existingGeneralCost) {
       form.reset({
         name: existingGeneralCost.name || '',
-        description: existingGeneralCost.description || ''
+        description: existingGeneralCost.description || '',
+        category_id: existingGeneralCost.category_id || ''
       })
     }
   }, [existingGeneralCost, form])
@@ -88,7 +92,8 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
           generalCostId: modalData.generalCostId,
           generalCost: {
             name: data.name,
-            description: data.description || undefined
+            description: data.description || undefined,
+            category_id: data.category_id || undefined
           }
         })
       } else {
@@ -106,7 +111,8 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
           organization_id: organizationId,
           name: data.name,
           description: data.description || undefined,
-          created_by: currentMember.id
+          created_by: currentMember.id,
+          category_id: data.category_id || undefined
         })
       }
 
@@ -155,6 +161,32 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
                       {...field}
                       data-testid="input-general-cost-name"
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoría</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger data-testid="select-general-cost-category">
+                        <SelectValue placeholder="Seleccionar categoría (opcional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Sin categoría</SelectItem>
+                        {categories?.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

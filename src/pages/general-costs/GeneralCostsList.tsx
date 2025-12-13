@@ -197,6 +197,15 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       )
     },
     {
+      key: 'category',
+      label: 'Categoría',
+      render: (generalCost: GeneralCost) => (
+        <div className="text-sm text-muted-foreground">
+          {generalCost.category?.name || '-'}
+        </div>
+      )
+    },
+    {
       key: 'description',
       label: 'Descripción',
       render: (generalCost: GeneralCost) => (

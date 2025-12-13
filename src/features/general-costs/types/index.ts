@@ -8,6 +8,11 @@ export interface GeneralCost {
   is_deleted?: boolean | null;
   deleted_at?: string | null;
   created_by?: string | null;
+  category_id?: string | null;
+  category?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 export interface InsertGeneralCost {
@@ -15,6 +20,7 @@ export interface InsertGeneralCost {
   name: string;
   description?: string | null;
   created_by?: string | null;
+  category_id?: string | null;
 }
 
 export interface GeneralCostValue {
