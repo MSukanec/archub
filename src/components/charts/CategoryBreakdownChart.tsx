@@ -91,9 +91,16 @@ export function CategoryBreakdownChart({
               if (active && payload && payload.length) {
                 const item = payload[0].payload
                 return (
-                  <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
+                  <div 
+                    className="rounded-lg p-3 shadow-lg border"
+                    style={{
+                      backgroundColor: 'var(--popover-bg)',
+                      color: 'var(--popover-fg)',
+                      borderColor: 'var(--border)'
+                    }}
+                  >
                     <p className="font-medium text-sm mb-1">{item.name}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm" style={{ color: 'var(--popover-fg)', opacity: 0.8 }}>
                       {valueFormatter(item.value)} ({item.percentage}%)
                     </p>
                   </div>
