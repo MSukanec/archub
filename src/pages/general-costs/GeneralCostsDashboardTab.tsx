@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TrendingUp, Calendar, Tag, DollarSign, Lightbulb, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, AlertCircle, ChevronRight, Plus } from 'lucide-react';
+import { TrendingUp, Calendar, Tag, DollarSign, CreditCard, Lightbulb, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, AlertCircle, ChevronRight, Plus } from 'lucide-react';
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakdown } from '@/lib/kpis';
 import { formatKPI, format, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -241,9 +241,9 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
   if (allPayments.length === 0) {
     return (
       <EmptyState 
-        icon={<DollarSign className="w-12 h-12" />}
-        title="Sin Pagos Registrados"
-        description="Comienza creando un concepto para registrar tus primeros pagos."
+        icon={<CreditCard className="w-12 h-12" />}
+        title="Todavía no tenés gastos generales registrados"
+        description="Comienza creando un concepto para registrar tus primeros pagos (por ejemplo: Contador, Alquiler, Electricidad)."
         action={
           <Button
             onClick={onNavigateToConceptos}
