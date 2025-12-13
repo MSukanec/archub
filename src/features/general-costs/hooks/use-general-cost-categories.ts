@@ -111,6 +111,12 @@ export function useDeleteGeneralCostCategory() {
       queryClient.invalidateQueries({
         queryKey: GENERAL_COSTS_QUERY_KEYS.categoriesList(variables.organizationId),
       });
+      queryClient.invalidateQueries({
+        queryKey: GENERAL_COSTS_QUERY_KEYS.list(variables.organizationId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: GENERAL_COSTS_QUERY_KEYS.byCategoryList(variables.organizationId),
+      });
       toast({
         title: 'Categoría eliminada',
         description: 'La categoría se eliminó correctamente',

@@ -122,26 +122,34 @@ function ViewPanel({
         </div>
       </div>
 
-      <div className="flex gap-2 pt-4 border-t border-border">
-        <Button 
-          size="sm" 
-          variant="outline" 
-          onClick={onEdit}
-          data-testid="button-edit-category"
-        >
-          <Pencil className="w-4 h-4 mr-2" />
-          Editar
-        </Button>
-        <Button 
-          size="sm" 
-          variant="outline" 
-          onClick={onDelete}
-          data-testid="button-delete-category"
-        >
-          <Trash2 className="w-4 h-4 mr-2" />
-          Eliminar
-        </Button>
-      </div>
+      {category.is_system ? (
+        <div className="pt-4 border-t border-border">
+          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+            Categoría del Sistema - No se puede modificar
+          </span>
+        </div>
+      ) : (
+        <div className="flex gap-2 pt-4 border-t border-border">
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={onEdit}
+            data-testid="button-edit-category"
+          >
+            <Pencil className="w-4 h-4 mr-2" />
+            Editar
+          </Button>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={onDelete}
+            data-testid="button-delete-category"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Eliminar
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

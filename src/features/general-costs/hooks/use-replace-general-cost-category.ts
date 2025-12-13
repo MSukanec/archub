@@ -22,6 +22,15 @@ export function useReplaceGeneralCostCategory(organizationId: string | null) {
       queryClient.invalidateQueries({
         queryKey: GENERAL_COSTS_QUERY_KEYS.list(organizationId),
       });
+      queryClient.invalidateQueries({
+        queryKey: GENERAL_COSTS_QUERY_KEYS.paymentsList(organizationId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: GENERAL_COSTS_QUERY_KEYS.monthlySummaryList(organizationId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: GENERAL_COSTS_QUERY_KEYS.byCategoryList(organizationId),
+      });
       toast({
         title: 'Categoría reemplazada',
         description: 'Los gastos se reasignaron y la categoría se eliminó correctamente',
