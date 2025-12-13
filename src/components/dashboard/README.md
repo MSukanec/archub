@@ -1,93 +1,95 @@
 # Dashboard Building Blocks (Nivel 2)
 
-## ¿Qué es el Nivel 2?
+## ¿Qué es un Dashboard Block?
 
-El Nivel 2 contiene **componentes reutilizables de dashboard** que:
-- Combinan componentes de UI primitivos (Nivel 1) para crear bloques visuales
-- Renderizan información visual (cards, métricas, gráficos)
-- **NO saben nada del dominio** (gastos, materiales, proyectos)
+Los Dashboard Blocks son **componentes reutilizables de dashboard** que:
+- **SÍ usan Card** y otros contenedores de UI
+- **SÍ combinan UI + Charts + Métricas**
+- **SÍ definen layout interno y jerarquía visual**
+- **NO conocen el dominio** (no "gastos", no "materiales")
 - **NO consultan datos** (reciben todo por props)
 - **NO hacen cálculos de negocio**
 
-Este patrón es el estándar internacional usado en dashboards modernos (Linear, Notion, Vercel, Stripe).
+## Diferencia entre tipos de bloques
 
-## Arquitectura de Niveles
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  Nivel 3: Widgets Semánticos (features/*)               │
-│  → Componentes específicos de dominio                   │
-│  → Consultan datos con hooks                            │
-│  → Ej: GeneralCostsDashboardTab, ProjectFinancesWidget  │
-├─────────────────────────────────────────────────────────┤
-│  Nivel 2: Dashboard Building Blocks (components/dashboard) │  ← ESTA CARPETA
-│  → Componentes visuales reutilizables                   │
-│  → Reciben datos por props                              │
-│  → Ej: StatCard, MonthlyTrendChart                      │
-├─────────────────────────────────────────────────────────┤
-│  Nivel 1: UI Primitivos (components/ui, components/charts) │
-│  → Componentes atómicos base                            │
-│  → Ej: Button, Card, Input, Tooltip                     │
-└─────────────────────────────────────────────────────────┘
-```
+| Tipo | Usa Card | Contiene Chart | Muestra Valor | Ejemplo |
+|------|----------|----------------|---------------|---------|
+| KPI Card | ✅ | ❌ | ✅ | StatCard |
+| Chart Card | ✅ | ✅ | ❌ | (futuro) ChartCard |
+| Metric Card | ✅ | Mini | ✅ | (futuro) MetricCard |
 
 ## Componentes en esta carpeta
 
-| Componente | Descripción | Props principales |
-|------------|-------------|-------------------|
-| `StatCard` | Card para KPIs y métricas | `href`, `onCardClick`, variantes |
-| `StatCardTitle` | Título con ícono para StatCard | `children`, `showArrow` |
-| `StatCardValue` | Valor principal grande | `children` |
-| `StatCardMeta` | Texto secundario/breakdown | `children` |
-| `MonthlyTrendChart` | Gráfico de línea/área mensual | `data`, `height`, `valueFormatter` |
-| `CategoryBreakdownChart` | Gráfico de torta por categoría | `data`, `height`, `showLegend` |
+### StatCard (KPI Card)
 
-## ¿Qué SÍ va en esta carpeta?
-
-- KPI cards
-- Metric cards  
-- Trend charts genéricos
-- Summary cards
-- Progress indicators visuales
-- Contenedores de dashboard genéricos
-
-## ¿Qué NO va en esta carpeta?
-
-- Componentes con lógica de negocio
-- Componentes que consultan datos (usan hooks de fetch)
-- Componentes específicos de una feature (GanttChart, CourseProgress)
-- Componentes que conocen el dominio (FinancialCards con CurrencyBalance)
-
-## Ejemplo de uso
+Bloque para mostrar métricas/KPIs con:
+- Título con ícono
+- Valor principal grande
+- Meta/breakdown secundario
+- Navegación opcional (href, onClick)
 
 ```tsx
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard/KPICard';
-import { MonthlyTrendChart } from '@/components/dashboard/MonthlyTrendChart';
+import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
+import { DollarSign } from 'lucide-react';
 
-// En un widget de Nivel 3:
-function MyFeatureDashboard() {
-  const { data } = useMyFeatureData(); // El widget consulta datos
-  
-  const kpi = calculateKPI(data); // El widget hace cálculos
-  
-  return (
-    <StatCard>
-      <StatCardTitle>
-        <DollarSign className="h-4 w-4" />
-        Mi Métrica
-      </StatCardTitle>
-      <StatCardValue>{kpi.formatted}</StatCardValue>
-      <StatCardMeta>{kpi.breakdown}</StatCardMeta>
-    </StatCard>
-  );
-}
+<StatCard href="/finanzas">
+  <StatCardTitle>
+    <DollarSign className="h-4 w-4" />
+    Gasto Total
+  </StatCardTitle>
+  <StatCardValue>$ 150.000</StatCardValue>
+  <StatCardMeta>+12% vs mes anterior</StatCardMeta>
+</StatCard>
 ```
 
-## Cómo agregar un nuevo componente
+## Por qué usamos Card
 
-1. Verificar que cumple TODOS los criterios de Nivel 2
-2. El componente debe recibir datos por props, no consultarlos
-3. No debe tener tipos específicos del dominio
-4. Colocarlo en esta carpeta
-5. Exportarlo desde `index.ts`
-6. Actualizar esta documentación
+Los Dashboard Blocks usan Card porque:
+1. Definen una **superficie visual** consistente
+2. Agregan **padding, bordes, sombras** estandarizados
+3. Permiten **hover states** y navegación
+4. Mantienen coherencia visual en todo el dashboard
+
+## Regla de reutilización
+
+Un Dashboard Block debe ser **agnóstico al negocio**:
+
+```tsx
+// ✅ CORRECTO: Genérico, recibe datos por props
+<StatCard>
+  <StatCardTitle>{title}</StatCardTitle>
+  <StatCardValue>{value}</StatCardValue>
+</StatCard>
+
+// ❌ INCORRECTO: Conoce el dominio, consulta datos
+<GastosTotalesCard organizationId={id} />  // ← Esto es un Widget (Nivel 3)
+```
+
+## Relación con otros niveles
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Nivel 3: Widgets Semánticos (pages/*, features/*)     │
+│  → Consultan datos, hacen cálculos                     │
+│  → Conocen el dominio (gastos, materiales, etc.)       │
+├─────────────────────────────────────────────────────────┤
+│  Nivel 2: Dashboard Blocks (components/dashboard/)     │  ← ESTA CARPETA
+│  → Bloques visuales reutilizables                      │
+│  → StatCard, ChartCard, MetricCard                     │
+├─────────────────────────────────────────────────────────┤
+│  Nivel 1: Charts (components/charts/)                  │
+│  → Gráficos puros sin contenedor                       │
+├─────────────────────────────────────────────────────────┤
+│  Nivel 0: UI Primitives (components/ui/)               │
+│  → Card, Button, Badge, etc.                           │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Cómo agregar un nuevo Dashboard Block
+
+1. Verificar que cumple los criterios de Nivel 2
+2. DEBE usar Card u otro contenedor de UI
+3. DEBE recibir datos por props
+4. NO debe conocer el dominio de negocio
+5. Colocarlo en esta carpeta
+6. Exportarlo desde `index.ts`

@@ -1,0 +1,182 @@
+Contexto general (leer completo antes de actuar):
+Estamos reorganizando la arquitectura de componentes de una aplicación SaaS profesional.
+Ya existe correctamente el Nivel 0 (UI primitives) y el Nivel 1 (Charts puros).
+El problema actual es que se mezclaron Charts (nivel 1) con Dashboard Blocks (nivel 2).
+Tu tarea es ordenar, no rediseñar.
+
+🎯 OBJETIVOS (OBLIGATORIOS)
+
+Separar correctamente Nivel 1 (charts) y Nivel 2 (dashboard blocks)
+
+Eliminar duplicaciones conceptuales
+
+Crear documentación .md en cada carpeta clave explicando:
+
+qué tipo de componentes van ahí
+
+qué NO debe ir ahí
+
+ejemplos
+
+responsabilidades
+
+🧱 DEFINICIÓN DE NIVELES (NO CAMBIAR)
+🔹 Nivel 0 — UI Primitives
+
+📁 src/components/ui
+
+Componentes atómicos y visuales: Card, Button, Badge, Avatar, etc.
+
+NO conocen negocio
+
+NO conocen dashboards
+
+NO manejan datos
+
+❗️NO mover nada acá
+❗️NO agregar lógica nueva
+
+🔹 Nivel 1 — Charts (puros, agnósticos)
+
+📁 src/components/charts
+
+Reglas estrictas:
+
+Son gráficos puros
+
+NO usan Card
+
+NO tienen títulos
+
+NO manejan layout
+
+Solo reciben data, config, height, etc.
+
+Ejemplos válidos:
+
+MonthlyTrendChart
+
+CategoryBreakdownChart
+
+👉 Si existe un chart duplicado dentro de dashboard/, debe eliminarse o reemplazarse por el del Nivel 1.
+
+🔹 Nivel 2 — Dashboard Blocks
+
+📁 src/components/dashboard
+
+Reglas:
+
+Son bloques reutilizables de dashboard
+
+SI usan Card
+
+SI combinan UI + charts + métricas
+
+SI definen tamaños, jerarquía visual y layout interno
+
+NO conocen páginas específicas (no “general costs”, no “materials”, etc.)
+
+Ejemplos válidos:
+
+KPICard
+
+ChartCard
+
+StatCard
+
+MetricCard
+
+❌ No deben existir charts puros acá
+❌ No deben existir duplicados de components/charts
+
+🛠️ TAREAS CONCRETAS
+1️⃣ Auditoría y orden
+
+Revisar src/components/dashboard
+
+Identificar archivos que sean charts puros
+
+Mover o reemplazar esos charts para que vivan solo en src/components/charts
+
+Eliminar duplicaciones innecesarias
+
+Asegurar que:
+
+dashboard/ solo contenga dashboard blocks
+
+charts/ solo contenga charts puros
+
+⚠️ NO cambiar APIs públicas de los componentes
+⚠️ NO romper imports existentes (ajustarlos si es necesario)
+
+2️⃣ Documentación obligatoria (.md)
+
+Crear los siguientes archivos:
+
+📄 src/components/charts/README.md
+
+Debe explicar:
+
+Qué es un Chart de nivel 1
+
+Qué responsabilidades tiene
+
+Qué NO debe hacer
+
+Ejemplo de uso correcto
+
+Ejemplo de uso incorrecto
+
+📄 src/components/dashboard/README.md
+
+Debe explicar:
+
+Qué es un Dashboard Block
+
+Diferencia entre:
+
+Chart
+
+KPI Card
+
+Chart Card
+
+Por qué estos componentes usan Card
+
+Ejemplo de composición correcta
+
+Regla de reutilización (agnóstico al negocio)
+
+📄 src/components/ui/README.md (si no existe)
+
+Debe explicar:
+
+Qué son UI primitives
+
+Por qué nunca deben contener lógica de negocio
+
+Por qué cambiar estética global se hace acá
+
+🧠 CRITERIOS DE CALIDAD (MUY IMPORTANTE)
+
+Usar naming internacional estándar
+
+No inventar carpetas nuevas
+
+No introducir lógica de dominio
+
+No hacer refactors estéticos
+
+Priorizar claridad y mantenibilidad
+
+Documentación clara, pensada para un desarrollador nuevo que entra al proyecto
+
+✅ RESULTADO ESPERADO
+
+Arquitectura limpia por niveles
+
+Sin charts duplicados
+
+Cada carpeta con su README claro
+
+Base sólida para escalar dashboards complejos (estilo Procore / Linear / Notion)
