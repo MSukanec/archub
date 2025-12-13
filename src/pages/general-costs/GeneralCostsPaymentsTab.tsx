@@ -95,7 +95,10 @@ export default function GeneralCostsPaymentsTab() {
   const sortedPayments = useMemo(() => {
     return [...filteredPayments].sort((a, b) => {
       // Primero por payment_date (más reciente primero)
-      const dateComparison = parseLocalDate(b.payment_date)!.getTime() - parseLocalDate(a.payment_date)!.getTime();
+      const dateA = new Date(a.payment_date).getTime();
+      const dateB = new Date(b.payment_date).getTime();
+      const dateComparison = dateB - dateA;
+      
       if (dateComparison !== 0) return dateComparison;
       
       // Si tienen la misma fecha de pago, por created_at (más nuevo primero)
