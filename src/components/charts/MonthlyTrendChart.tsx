@@ -68,16 +68,18 @@ export function MonthlyTrendChart({
               <stop offset="95%" stopColor={color} stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+          <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
           <XAxis 
             dataKey="month" 
             tickFormatter={formatMonth}
-            tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
-            axisLine={{ stroke: 'var(--border)' }}
+            tick={{ fontSize: 12 }}
+            className="text-muted-foreground fill-muted-foreground"
+            axisLine={false}
             tickLine={false}
           />
           <YAxis 
-            tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+            tick={{ fontSize: 12 }}
+            className="text-muted-foreground fill-muted-foreground"
             tickFormatter={valueFormatter}
             axisLine={false}
             tickLine={false}
@@ -88,16 +90,9 @@ export function MonthlyTrendChart({
               if (active && payload && payload.length) {
                 const monthLabel = formatMonth(label)
                 return (
-                  <div 
-                    className="rounded-lg p-3 shadow-lg border"
-                    style={{
-                      backgroundColor: 'var(--popover-bg)',
-                      color: 'var(--popover-fg)',
-                      borderColor: 'var(--border)'
-                    }}
-                  >
-                    <p className="font-medium text-sm mb-1">{monthLabel}</p>
-                    <p className="text-sm" style={{ color: 'var(--popover-fg)', opacity: 0.8 }}>
+                  <div className="rounded-lg p-3 shadow-lg border border-border bg-popover text-popover-foreground">
+                    <p className="font-medium text-sm mb-1 capitalize">{monthLabel}</p>
+                    <p className="text-sm opacity-80">
                       {new Intl.NumberFormat('es-AR', {
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0
