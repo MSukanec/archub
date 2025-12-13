@@ -107,13 +107,14 @@ export default function GeneralCostsPaymentsTab() {
 
   // Calculate metrics using new KPI system
   const metricsData = useMemo(() => {
-    // KPI 1: Total Pagos (conteo)
+    // KPI 1: Total Pagos (conteo simple)
     const totalPagosKPI = calculateCountKPI({
       count: allPayments.length,
       label: 'Cantidad de pagos'
     });
 
-    // KPI 2: Pagos a la Fecha (monetaria, solo confirmados)
+    // KPI 2: Pagos a la Fecha (monetaria - TOTAL convertido a moneda base + breakdown original)
+    // Solo incluye pagos confirmados
     const confirmedPayments = allPayments.filter(p => p.status === 'confirmed');
     const pagosALaFechaKPI = calculateMonetaryKPI({
       items: confirmedPayments.map(p => ({
@@ -122,16 +123,14 @@ export default function GeneralCostsPaymentsTab() {
         currency: p.currency,
         exchange_rate: p.exchange_rate
       })),
-      baseCurrencyId: defaultCurrency?.code, // Pasar el código de moneda, no el ID
-      symbol: defaultCurrency?.symbol, // Use base currency symbol
-      quoteCurrency: 'USD' // Asegurar que el quoteCurrency es correcto
+      baseCurrencyId: defaultCurrency?.code  // Moneda para convertir (se refetcha automáticamente)
     });
 
     return {
       total_count_kpi: totalPagosKPI,
       total_confirmed_kpi: pagosALaFechaKPI,
     };
-  }, [allPayments, defaultCurrency]);
+  }, [allPayments, defaultCurrency]);  // ← CRÍTICO: defaultCurrency en dependencias
 
   const handleEdit = (payment: GeneralCostPayment) => {
     if (!organizationId) return;

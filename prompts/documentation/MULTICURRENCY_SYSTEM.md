@@ -11,6 +11,22 @@ Seencel implementa un sistema **centralizado y headless** de multimoneda que:
 
 ---
 
+## 📋 Índice
+
+1. [Arquitectura del Sistema](#arquitectura-del-sistema)
+2. [Regla Central](#regla-central-del-sistema)
+3. [Módulo `/lib/money.ts`](#1-módulo-central-libmoneyts)
+4. [Sistema Headless de KPIs](#2-sistema-headless-de-kpis-libkpists)
+5. [Integración en Componentes](#3-integración-en-componentes)
+6. [Flujo de Actualización Automática](#4-flujo-de-actualización-automática)
+7. [Casos de Uso Reales](#5-casos-de-uso-reales)
+8. [Checklist de Implementación](#6-checklist-de-implementación)
+9. [Auditoría y Refactorización](#7-auditoría-y-refactorización)
+10. [Debugging](#8-debugging)
+11. [Roadmap Futuro](#9-roadmap-futuro)
+
+---
+
 ## Arquitectura del Sistema
 
 ### Capas Implementadas
@@ -20,17 +36,22 @@ Seencel implementa un sistema **centralizado y headless** de multimoneda que:
 │  UI Components (StatCard, Table, etc.)                  │
 ├─────────────────────────────────────────────────────────┤
 │  KPI System (/lib/kpis.ts)                              │
-│  - calculateMonetaryKPI()                               │
-│  - calculateCountKPI()                                  │
-│  - calculatePercentageKPI()                             │
-│  - calculateTextKPI()                                   │
-│  - formatBreakdown()                                    │
+│  - calculateMonetaryKPI()       (Total + breakdown)     │
+│  - calculateCountKPI()          (Conteos simples)       │
+│  - calculatePercentageKPI()     (Ratios)                │
+│  - calculateTextKPI()           (Valores de texto)      │
+│  - calculateAggregateMonetaryKPI() (Suma de KPIs)       │
+│  - formatBreakdown()            (String formateado)     │
 ├─────────────────────────────────────────────────────────┤
 │  Money Module (/lib/money.ts)                           │
 │  - convertToBaseCurrency() (explícita e implícita)      │
-│  - format(), formatKPI(), formatSubValue()              │
-│  - sumByCurrency(), sumAllInBaseCurrency()              │
-│  - explainBreakdown()                                   │
+│  - convert()                (Conversión básica)         │
+│  - format()                 (Con símbolo)               │
+│  - formatKPI()              (Solo número)               │
+│  - formatSubValue()         (Desglose)                  │
+│  - sumByCurrency()          (Sin convertir)             │
+│  - sumAllInBaseCurrency()   (Suma convertida)           │
+│  - explainBreakdown()       (Total + breakdown)         │
 ├─────────────────────────────────────────────────────────┤
 │  useOrganizationDefaultCurrency() Hook                  │
 │  (se refetcha automáticamente cuando cambia)            │
@@ -43,7 +64,7 @@ Seencel implementa un sistema **centralizado y headless** de multimoneda que:
 
 ## Regla Central del Sistema
 
-### OBLIGATORIA: Nunca precalcular conversiones
+### 🚨 OBLIGATORIA: Nunca precalcular conversiones
 
 ```typescript
 // ❌ INCORRECTO - Guardar amount_converted
@@ -63,7 +84,7 @@ Seencel implementa un sistema **centralizado y headless** de multimoneda que:
 }
 ```
 
-Las conversiones **siempre** se calculan al renderizar usando `convertToBaseCurrency()`.
+**Las conversiones SIEMPRE se calculan al renderizar** usando `convertToBaseCurrency()`.
 
 ---
 
@@ -139,17 +160,6 @@ convertToBaseCurrency(payment, 'ARS')
 // Funciona con ID de moneda
 convertToBaseCurrency(payment, 'uuid-ars') 
 // => 100000
-
-// Si ya está en moneda base (por código O id)
-convertToBaseCurrency({ amount: 50000, currency: { code: 'ARS' } }, 'ARS') 
-// => 50000
-
-// Sin moneda base definida
-convertToBaseCurrency(payment, undefined) 
-// => 100 (passthrough - retorna amount sin convertir)
-
-convertToBaseCurrency(payment, undefined, { onMissingBase: 'zero' }) 
-// => 0 (evita mezclar monedas)
 ```
 
 ### 1.2 Definición de Exchange Rate (CRÍTICO)
@@ -158,13 +168,7 @@ convertToBaseCurrency(payment, undefined, { onMissingBase: 'zero' })
 El exchange_rate SIEMPRE significa: "1 [quoteCurrency] = X [otra moneda]"
 ```
 
-Por defecto `quoteCurrency='USD'`, entonces:
-
-```
-1 USD = X [otra moneda]
-
-Ejemplo: exchange_rate = 1000 significa 1 USD = 1000 ARS
-```
+Por defecto `quoteCurrency='USD'`, entonces: `1 USD = X [otra moneda]`
 
 **Tabla de conversiones:**
 
@@ -172,103 +176,43 @@ Ejemplo: exchange_rate = 1000 significa 1 USD = 1000 ARS
 |---|---|---|
 | 100 USD → ARS | 100 × 1000 | 100,000 ARS |
 | 100,000 ARS → USD | 100,000 ÷ 1000 | 100 USD |
-| 50 USD → ARS | 50 × 1000 | 50,000 ARS |
 
 ### 1.3 Otras Funciones de `/lib/money.ts`
 
 #### `convert(amount, exchangeRate, options?): number`
-
 Convierte usando dirección explícita.
 
-```typescript
-// Multiplicación (default)
-convert(100, 1000) // => 100000
-
-// División
-convert(100000, 1000, { direction: 'divide' }) // => 100
-
-// Con rate por defecto
-convert(100, null, { defaultRate: 1 }) // => 100
-```
-
 #### `format(amount, symbol, options?): string`
-
 Formatea como moneda CON símbolo y separadores de miles.
-
 ```typescript
 format(150000, 'USD')        // => "USD 150.000"
 format(150000, '$')          // => "$ 150.000"
-format(-50000, '$')          // => "$ -50.000"
-format(100000, 'ARS', { showSign: true }) // => "ARS +100.000"
 ```
 
 #### `formatKPI(value, locale?): string`
-
 Formatea solo el NÚMERO (sin símbolo). Ideal para valores grandes en KPIs.
-
 ```typescript
 formatKPI(1500000)  // => "1.500.000"
-formatKPI(-50000)   // => "50.000" (valor absoluto)
 ```
 
 #### `formatSubValue(breakdown, options?): string`
-
 Formatea desglose por moneda para mostrar debajo del KPI.
-
 ```typescript
 formatSubValue([
   { currencySymbol: 'USD', total: 75000 },
   { currencySymbol: 'ARS', total: 150000000 }
 ])
 // => "USD 75.000 + ARS 150.000.000"
-
-formatSubValue(breakdown, { separator: ' | ' })
-// => "USD 75.000 | ARS 150.000.000"
 ```
 
 #### `sumByCurrency(items): CurrencyBreakdown[]`
-
 Agrupa y suma items por moneda SIN convertir.
 
-```typescript
-sumByCurrency([
-  { amount: 100, currency: { code: 'USD', symbol: '$' } },
-  { amount: 200, currency: { code: 'USD', symbol: '$' } },
-  { amount: 50000, currency: { code: 'ARS', symbol: '$' } }
-])
-// => [
-//   { currencyId: 'usd', currencyCode: 'USD', currencySymbol: '$', total: 300, count: 2 },
-//   { currencyId: 'ars', currencyCode: 'ARS', currencySymbol: '$', total: 50000, count: 1 }
-// ]
-```
-
 #### `sumAllInBaseCurrency(items, baseCurrencyId): number`
-
-Suma todos convertidos a moneda base (usa signatura explícita).
-
-```typescript
-sumAllInBaseCurrency([
-  { amount: 100, currency: { code: 'USD' }, exchange_rate: 1000 },
-  { amount: 50000, currency: { code: 'ARS' }, exchange_rate: 1 }
-], 'ARS')
-// => 100000 + 50000 = 150000
-```
+Suma todos convertidos a moneda base.
 
 #### `explainBreakdown(items, baseCurrencyId): BreakdownResult`
-
 Retorna total convertido Y desglose por moneda. **Ideal para KPIs**.
-
-```typescript
-explainBreakdown(items, 'ars')
-// => {
-//   baseTotal: 150000,
-//   breakdown: [
-//     { currencyId: 'usd', currencyCode: 'USD', currencySymbol: '$', total: 100, count: 1 },
-//     { currencyId: 'ars', currencyCode: 'ARS', currencySymbol: '$', total: 50000, count: 1 }
-//   ],
-//   breakdownMap: { USD: 100, ARS: 50000 }
-// }
-```
 
 ---
 
@@ -325,78 +269,31 @@ const kpi = calculateCountKPI({
   label: 'Cantidad de pagos'
 });
 
-// {
-//   value: 5,
-//   formatted: "5",
-//   meta: { unit: 'Cantidad de pagos' }
-// }
+// { value: 5, formatted: "5", meta: { unit: 'Cantidad de pagos' } }
 ```
 
 ### 2.4 `calculatePercentageKPI(config): KPIResult`
 
 Para ratios y variaciones.
 
-```typescript
-const kpi = calculatePercentageKPI({
-  numerator: 10,
-  denominator: 30,
-  decimals: 2
-});
-
-// {
-//   value: 33.33,
-//   formatted: "33,33%",
-//   meta: { unit: '%' }
-// }
-```
-
 ### 2.5 `calculateTextKPI(config): KPIResult`
 
 Para valores no-numéricos.
-
-```typescript
-const kpi = calculateTextKPI({
-  text: "En progreso",
-  icon: "clock"
-});
-
-// {
-//   value: 0,
-//   formatted: "En progreso",
-//   meta: { icon: 'clock' }
-// }
-```
 
 ### 2.6 `calculateAggregateMonetaryKPI(config): KPIResult`
 
 Suma múltiples KPIs monetarias en una sola cifra.
 
-```typescript
-const combined = calculateAggregateMonetaryKPI({
-  kpis: [contributionsKPI, withdrawalsKPI]
-});
-
-// Suma los values y combina los breakdowns
-```
-
 ### 2.7 Helper Functions
 
 #### `formatBreakdown(kpi, locale?): string`
 
-Convierte un KPI a string formateado.
+Convierte un KPI a string formateado. Usa `formatSubValue()` internamente.
 
 ```typescript
 formatBreakdown(kpi)
 // => "USD 100 + ARS 50.000"
 ```
-
-#### `hasMultipleCurrencies(kpi): boolean`
-
-Verifica si un KPI tiene múltiples monedas.
-
-#### `getDominantCurrency(kpi): string | null`
-
-Obtiene la moneda con mayor valor.
 
 ---
 
@@ -412,12 +309,10 @@ export function MyComponent() {
   
   // Se refetcha automáticamente cuando cambia
   const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
-  
-  // defaultCurrency = { id: '...', code: 'ARS', symbol: '$', name: 'Peso Argentino' }
 }
 ```
 
-### 3.2 Patrón Completo: GeneralCostsPaymentsTab
+### 3.2 Patrón Completo: GeneralCostsPaymentsTab ✅
 
 ```typescript
 import { calculateCountKPI, calculateMonetaryKPI, formatBreakdown } from '@/lib/kpis';
@@ -428,13 +323,13 @@ export default function GeneralCostsPaymentsTab() {
   const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
   
   const metricsData = useMemo(() => {
-    // KPI 1: Total Pagos (conteo)
+    // KPI 1: Total Pagos (conteo simple)
     const totalPagosKPI = calculateCountKPI({
       count: allPayments.length,
       label: 'Cantidad de pagos'
     });
 
-    // KPI 2: Pagos a la Fecha (monetaria)
+    // KPI 2: Pagos a la Fecha (monetaria, solo confirmados)
     const confirmedPayments = allPayments.filter(p => p.status === 'confirmed');
     const pagosALaFechaKPI = calculateMonetaryKPI({
       items: confirmedPayments.map(p => ({
@@ -454,89 +349,36 @@ export default function GeneralCostsPaymentsTab() {
 
   return (
     <>
-      {/* Mostrar el número grande CON SÍMBOLO */}
-      <StatCardValue>
-        {metricsData?.total_confirmed_kpi?.breakdown && 
-         metricsData.total_confirmed_kpi.breakdown.length > 0
-          ? formatMoneyAmount(
-              metricsData.total_confirmed_kpi.value,
-              metricsData.total_confirmed_kpi.breakdown[0].currencySymbol
-            )
-          : formatKPI(metricsData?.total_confirmed_kpi?.value ?? 0)
-        }
-      </StatCardValue>
-      
-      {/* Mostrar el breakdown debajo */}
-      <StatCardMeta>
-        {metricsData?.total_confirmed_kpi?.breakdown && 
-         metricsData.total_confirmed_kpi.breakdown.length > 0
-          ? formatBreakdown(metricsData.total_confirmed_kpi)
-          : `Total de pagos confirmados`
-        }
-      </StatCardMeta>
-    </>
-  );
-}
-```
+      {/* KPI 1: Total Pagos */}
+      <StatCard>
+        <StatCardTitle>Total Pagos</StatCardTitle>
+        <StatCardValue>
+          {metricsData?.total_count_kpi?.formatted ?? '0'}
+        </StatCardValue>
+        <StatCardMeta>{metricsData?.total_count_kpi?.meta?.unit}</StatCardMeta>
+      </StatCard>
 
-### 3.3 Patrón Completo: PartnerTransactionsTab
-
-```typescript
-import { calculateMonetaryKPI, formatBreakdown } from '@/lib/kpis';
-import { formatKPI, format as formatMoneyAmount } from '@/lib/money';
-import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
-
-export function PartnerTransactionsTab() {
-  const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
-
-  const metrics = useMemo(() => {
-    const confirmedTransactions = transactions.filter(t => t.status === 'confirmed');
-    
-    // KPI: Total Aportes
-    const contributionsKPI = calculateMonetaryKPI({
-      items: confirmedTransactions
-        .filter(t => t.type === 'contribution')
-        .map(t => ({
-          amount: t.amount,
-          currency_id: t.currency_id,
-          currency: { code: t.currency_id, symbol: t.currency_symbol },
-          exchange_rate: t.exchange_rate
-        })),
-      baseCurrencyId: defaultCurrency?.code  // ← SE REFETCHA AUTOMÁTICAMENTE
-    });
-
-    // KPI: Total Retiros
-    const withdrawalsKPI = calculateMonetaryKPI({
-      items: confirmedTransactions.filter(t => t.type === 'withdrawal').map(...),
-      baseCurrencyId: defaultCurrency?.code
-    });
-
-    // KPI: Saldo Neto (cálculo derivado)
-    const netBalance = contributionsKPI.value - withdrawalsKPI.value;
-    const netBalanceKPI = {
-      ...contributionsKPI,
-      value: netBalance,
-      formatted: formatKPI(netBalance)
-    };
-
-    return { contributions_kpi: contributionsKPI, withdrawals_kpi: withdrawalsKPI, net_balance_kpi: netBalanceKPI };
-  }, [transactions, defaultCurrency]);  // ← Dependencia crítica
-
-  return (
-    <>
-      {/* Total Aportes CON SÍMBOLO */}
-      <StatCardValue className="text-green-600">
-        {metrics.contributions_kpi.breakdown && metrics.contributions_kpi.breakdown.length > 0
-          ? formatMoneyAmount(metrics.contributions_kpi.value, metrics.contributions_kpi.breakdown[0].currencySymbol)
-          : formatKPI(metrics.contributions_kpi.value)
-        }
-      </StatCardValue>
-      <StatCardMeta>
-        {metrics.contributions_kpi.breakdown && metrics.contributions_kpi.breakdown.length > 0
-          ? formatBreakdown(metrics.contributions_kpi)
-          : 'Sin aportes confirmados'
-        }
-      </StatCardMeta>
+      {/* KPI 2: Pagos a la Fecha */}
+      <StatCard>
+        <StatCardTitle>Pagos a la Fecha</StatCardTitle>
+        <StatCardValue>
+          {metricsData?.total_confirmed_kpi?.breakdown && 
+           metricsData.total_confirmed_kpi.breakdown.length > 0
+            ? formatMoneyAmount(
+                metricsData.total_confirmed_kpi.value,
+                metricsData.total_confirmed_kpi.breakdown[0].currencySymbol
+              )
+            : formatKPI(metricsData?.total_confirmed_kpi?.value ?? 0)
+          }
+        </StatCardValue>
+        <StatCardMeta>
+          {metricsData?.total_confirmed_kpi?.breakdown && 
+           metricsData.total_confirmed_kpi.breakdown.length > 0
+            ? formatBreakdown(metricsData.total_confirmed_kpi)
+            : `Total de pagos confirmados`
+          }
+        </StatCardMeta>
+      </StatCard>
     </>
   );
 }
@@ -564,76 +406,26 @@ Cuando el usuario cambia la moneda por defecto de la organización:
 7. UI se actualiza con los nuevos valores
 ```
 
-**CRÍTICO:** `defaultCurrency` debe estar **SIEMPRE** en las dependencias del `useMemo()` que calcula KPIs.
-
-```typescript
-const metrics = useMemo(() => {
-  // ... cálculos usando defaultCurrency?.code
-}, [transactions, defaultCurrency]);  // ← OBLIGATORIO
-```
+**🚨 CRÍTICO:** `defaultCurrency` debe estar **SIEMPRE** en las dependencias del `useMemo()` que calcula KPIs.
 
 ---
 
 ## 5. Casos de Uso Reales
 
-### Caso 1: Mostrar un pago en múltiples monedas
+### Caso 1: Una sola moneda
+Si todos los pagos son en USD y la moneda base es USD:
+- Valor mostrado: "$ 300" (sin símbolo adicional)
+- Breakdown: "USD 300"
 
-```typescript
-const payment = {
-  amount: 100,
-  currency: { code: 'USD', symbol: 'USD' },
-  exchange_rate: 1000,
-  status: 'confirmed'
-};
+### Caso 2: Múltiples monedas
+Pagos en USD y ARS con moneda base ARS:
+- Valor mostrado: "$ 350.000" (total convertido a ARS)
+- Breakdown: "USD 300 + ARS 50.000" (cantidades originales)
 
-const kpi = calculateMonetaryKPI({
-  items: [payment],
-  baseCurrencyId: 'ARS'
-});
-
-// UI:
-// Valor grande:  "USD 100.000"       (usando format())
-// Breakdown:     "USD 100"             (cantidad en USD)
-```
-
-### Caso 2: Sumar múltiples pagos en diferentes monedas
-
-```typescript
-const payments = [
-  { amount: 100, currency: { code: 'USD', symbol: 'USD' }, exchange_rate: 1000 },
-  { amount: 50000, currency: { code: 'ARS', symbol: '$' }, exchange_rate: 1 },
-  { amount: 200, currency: { code: 'USD', symbol: 'USD' }, exchange_rate: 1000 }
-];
-
-const kpi = calculateMonetaryKPI({
-  items: payments,
-  baseCurrencyId: 'ARS'
-});
-
-// value = (100 * 1000) + 50000 + (200 * 1000) = 350000 ARS
-// breakdown = [
-//   { currencyCode: 'USD', total: 300 },    // 100 + 200
-//   { currencyCode: 'ARS', total: 50000 }
-// ]
-
-// UI:
-// Valor grande:  "$ 350.000"            (total convertido a ARS)
-// Breakdown:     "USD 300 + ARS 50.000" (original de cada moneda)
-```
-
-### Caso 3: Cambiar moneda por defecto dinámicamente
-
-```typescript
-// Usuario cambia de ARS a USD como moneda por defecto
-
-// ANTES (ARS base):
-// Valor: "$ 350.000" (350,000 ARS)
-// Breakdown: "USD 300 + ARS 50.000"
-
-// DESPUÉS (USD base, automáticamente):
-// Valor: "USD 350" (350 USD)
-// Breakdown: "USD 300 + ARS 50"
-```
+### Caso 3: Cambiar moneda dinámicamente
+Si el usuario cambia de ARS a USD como moneda base:
+- **ANTES**: Valor "$ 350.000", Breakdown "USD 300 + ARS 50.000"
+- **DESPUÉS** (automáticamente): Valor "USD 350", Breakdown "USD 300 + ARS 50"
 
 ---
 
@@ -642,35 +434,50 @@ const kpi = calculateMonetaryKPI({
 Al agregar nuevas KPIs monetarias a una página:
 
 - [ ] Importar `useOrganizationDefaultCurrency` de `@/hooks/use-currencies`
-- [ ] Importar `calculateMonetaryKPI` de `@/lib/kpis`
-- [ ] Importar `format`, `formatKPI` de `@/lib/money`
+- [ ] Importar `calculateMonetaryKPI` y `formatBreakdown` de `@/lib/kpis`
+- [ ] Importar `format` y `formatKPI` de `@/lib/money`
 - [ ] Llamar a `useOrganizationDefaultCurrency(organizationId)`
 - [ ] Usar `calculateMonetaryKPI()` para cada KPI monetaria
 - [ ] Agregar `defaultCurrency` a las dependencias del `useMemo()`
-- [ ] Mostrar el número grande con símbolo: `format(kpi.value, kpi.breakdown[0].currencySymbol)`
+- [ ] Mostrar el número grande con símbolo: `format(kpi.value, kpi.breakdown[0].currencySymbol)` o `formatMoneyAmount()`
 - [ ] Mostrar el breakdown debajo: `formatBreakdown(kpi)`
 - [ ] Testear que se actualiza al cambiar la moneda por defecto
 
 ---
 
-## 7. Archivos Modificados Recientemente (2025-12-12)
+## 7. Auditoría y Refactorización
 
-### Componentes con KPIs refactorizadas:
+### 7.1 Qué se encontró
 
-#### Gastos Generales:
+Se realizó una auditoría completa del manejo de multimoneda. Se identificaron múltiples instancias de lógica duplicada y dispersa para conversiones de moneda, las cuales fueron centralizadas en `/lib/money.ts`.
+
+| Archivo | Patrón Encontrado | Estado |
+|---------|-------------------|--------|
+| `use-financial-metrics.ts` | `convertToPrimaryCurrency` interno | ✅ Refactorizado |
+| `use-partner-metrics.ts` | `convertToPrimaryCurrency` duplicado | ✅ Refactorizado |
+| `ClientPaymentsTab.tsx` | `amount * exchange_rate` | ✅ Refactorizado |
+| `GeneralCostsPaymentsTab.tsx` | Lógica dispersa | ✅ Refactorizado |
+
+### 7.2 Qué estaba bien
+
+1. **Estructura de datos correcta**: Los movimientos guardaban `amount`, `currency_id`, y `exchange_rate`.
+2. **KPIs con breakdown**: Los hooks ya implementaban el patrón de `balanceByCurrency` + `totalInPrimaryCurrency`.
+3. **No hay columnas precalculadas**: Ninguna tabla tiene columnas como `amount_converted`.
+
+### 7.3 Archivos refactorizados recientemente (2025-12-12)
+
+#### Componentes con KPIs actualizadas:
+
 - `src/pages/general-costs/GeneralCostsPaymentsTab.tsx` - KPIs "Total Pagos" (conteo) y "Pagos a la Fecha" (monetaria)
+- `src/pages/partners/tabs/PartnerTransactionsTab.tsx` - KPIs "Total Aportes", "Total Retiros", "Saldo Neto"
+- `src/pages/clients/ClientDashboardTab.tsx` - KPIs de clientes y pagos
+- `src/pages/clients/ClientPaymentsTab.tsx` - KPIs de confirmación de pagos
+- `src/pages/clients/ClientObligationsTab.tsx` - KPIs de compromisos
 
-#### Socios:
-- `src/pages/partners/tabs/PartnerTransactionsTab.tsx` - KPIs "Total Aportes", "Total Retiros", "Saldo Neto" (todas monetarias)
+#### Cambios principales:
 
-#### Clientes:
-- `src/pages/clients/ClientDashboardTab.tsx` - KPIs "Total Clientes" (conteo), "Total Pagos" (conteo), "Compromiso Total" (monetaria), "Balance Pendiente" (monetaria)
-- `src/pages/clients/ClientPaymentsTab.tsx` - KPIs "Total Confirmado" (monetaria), "Total Pagos" (conteo), "Último Pago" (texto)
-- `src/pages/clients/ClientObligationsTab.tsx` - KPIs "Compromiso Total" (monetaria), "Pagado" (monetaria), "Saldo" (monetaria), "Items de Pago" (conteo)
-
-### Cambios principales:
-1. Agregada importación de `useOrganizationDefaultCurrency` para refetch automático
-2. Refactorizado `useMemo()` para usar `calculateMonetaryKPI()` 
+1. Agregada importación de `useOrganizationDefaultCurrency`
+2. Refactorizado `useMemo()` para usar `calculateMonetaryKPI()`
 3. Agregado `defaultCurrency` a dependencias de useMemo
 4. Mostrar símbolo en el número grande usando `format()` en lugar de `formatKPI()`
 5. Mostrar breakdown con `formatBreakdown()` en el meta
@@ -703,18 +510,6 @@ const metrics = useMemo(() => {
 }, [items, defaultCurrency]);  // ✅ Incluye defaultCurrency
 ```
 
-### Problema: Los valores se muestran incorrectamente en la conversión
-
-**Causa probable:** Interpretación incorrecta del `exchange_rate`.
-
-```
-Regla: 1 USD = exchange_rate [otra moneda]
-
-Si exchange_rate = 1000:
-- USD → ARS:  amount * 1000
-- ARS → USD:  amount / 1000
-```
-
 ### Problema: El símbolo no aparece en el KPI
 
 ```typescript
@@ -730,30 +525,41 @@ Si exchange_rate = 1000:
 </StatCardValue>
 ```
 
+### Problema: El desglose se ve confuso
+
+Si `formatBreakdown()` no devuelve el formato esperado, verifica:
+1. Que el KPI tenga un `breakdown` array no vacío
+2. Que cada item en `breakdown` tenga `currencyCode`, `currencySymbol`, y `total`
+3. Que `formatSubValue()` esté formateando correctamente (usa `toLocaleString('es-AR')`)
+
 ---
 
 ## 9. Roadmap Futuro
 
-- [ ] Soporte para múltiples monedas base (por proyecto)
-- [ ] Caché de exchange rates con validación de antigüedad
-- [ ] Funciones de análisis de variación de monedas
-- [ ] Exportación de datos con desglose por moneda
-- [ ] Gráficos de tendencia de conversión
+### Corto Plazo
+1. Migrar gradualmente el resto de componentes que usan `toLocaleString` directamente
+2. Actualizar componentes de charts para usar `format()` del módulo
+3. Crear hook `useMoneyFormatter` que combine currency info con formateo
+
+### Mediano Plazo
+1. Implementar cache de exchange rates por fecha
+2. Soporte para exchange rates históricos desde API externa
+
+### Largo Plazo
+1. Considerar alertas de discrepancia de cotización
+2. Integración con servicios de datos de monedas en tiempo real
 
 ---
 
-## 10. Referencias
+## 📞 Resumen
 
-- Directorio principal: `/lib/money.ts`, `/lib/kpis.ts`
-- Hook para moneda: `/hooks/use-currencies.ts`
-- Ejemplos de uso:
-  - `src/pages/general-costs/GeneralCostsPaymentsTab.tsx`
-  - `src/pages/partners/tabs/PartnerTransactionsTab.tsx`
-  - `src/pages/clients/ClientDashboardTab.tsx`
-  - `src/pages/clients/ClientPaymentsTab.tsx`
-  - `src/pages/clients/ClientObligationsTab.tsx`
-- Tipos e interfaces: Ver docstrings en los archivos fuente
+Este documento consolida **TODO** sobre el sistema multimoneda de Seencel:
 
----
+- **Regla central**: Nunca precalcular, siempre convertir al renderizar
+- **Módulo centralizado**: `/lib/money.ts` para conversiones
+- **KPIs headless**: `/lib/kpis.ts` sin UI, retorna datos estructurados
+- **Patrón de uso**: `calculateMonetaryKPI()` + `formatBreakdown()` en componentes
+- **Actualización automática**: `useOrganizationDefaultCurrency()` con React Query
+- **Desglose claro**: Mostrar símbolo en valor grande, breakdown en meta
 
-**Última actualización:** 2025-12-13 (Agregadas páginas de Clientes a la lista de componentes refactorizados)
+¡Todo funciona automáticamente cuando la moneda por defecto cambia!
