@@ -596,9 +596,9 @@ export function LeftSidebar() {
                         );
                         
                         if (button.wrapper) {
-                          return <div key={button.id}>{button.wrapper(buttonElement)}</div>;
+                          return <div key={button.id} className="flex justify-center w-full">{button.wrapper(buttonElement)}</div>;
                         }
-                        return <div key={button.id}>{buttonElement}</div>;
+                        return <div key={button.id} className="flex justify-center w-full">{buttonElement}</div>;
                       });
                   })()}
                 </div>
