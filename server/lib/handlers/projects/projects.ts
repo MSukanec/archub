@@ -100,6 +100,9 @@ export async function createProject(
 
     if (projectError) {
       console.error('Error creating project:', projectError);
+      if (projectError.code === '23505' && projectError.message?.includes('projects_org_name_lower_uniq')) {
+        return { success: false, error: 'Ya existe un proyecto con este nombre en tu organización' };
+      }
       return { success: false, error: 'Failed to create project' };
     }
 

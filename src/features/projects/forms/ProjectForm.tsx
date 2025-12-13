@@ -480,6 +480,12 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
     defaultValues: getDefaultValues(),
   });
 
+  // Set default currency when it loads (for create mode)
+  const currentCurrencyId = form.watch('currency_id');
+  if (mode === 'create' && !currentCurrencyId && defaultCurrencyId) {
+    form.setValue('currency_id', defaultCurrencyId);
+  }
+
   const handleFileSelect = (file: File | null) => {
     if (!file) {
       setSelectedImageFile(null);
