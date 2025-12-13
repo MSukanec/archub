@@ -216,7 +216,7 @@ function LayoutContent({
       <GlobalAnnouncement />
       
       <div 
-        className={isMobile ? "min-h-screen flex flex-col" : "h-screen flex flex-col overflow-hidden"}
+        className={isMobile ? "min-h-screen flex flex-col" : "flex flex-col min-h-screen"}
         style={{
           paddingTop: hasActiveAnnouncement 
             ? `${isMobile ? ANNOUNCEMENT_HEIGHT_MOBILE : ANNOUNCEMENT_HEIGHT}px` 
@@ -247,8 +247,8 @@ function LayoutContent({
       ) : (
         /* Desktop View - Sidebar + MainHeader + Content + RightSidebar */
         <div className="flex-1 flex min-h-0">
-          {/* Sidebar - Full height with padding */}
-          <div className="flex-shrink-0 p-1">
+          {/* Sidebar - Full height with padding, sticky to stay visible on scroll */}
+          <div className="flex-shrink-0 p-1 sticky top-0 h-screen overflow-hidden">
             <LeftSidebar />
           </div>
 
@@ -259,9 +259,9 @@ function LayoutContent({
 
             {/* Page Content with rounded corners and framing effect */}
             <div className={`flex-1 flex min-h-0 min-w-0 relative ${isDocked ? 'gap-3' : ''}`}>
-              <div className="flex-1 py-1 overflow-x-hidden min-w-0">
+              <div className="flex-1 py-1 min-w-0">
                 <main
-                  className={`h-full flex flex-col rounded-lg overflow-hidden min-w-0 ${!isDocked ? 'w-full' : ''}`}
+                  className={`h-full flex flex-col rounded-lg min-w-0 ${!isDocked ? 'w-full' : ''}`}
                   style={{
                     background: contentBackground
                   }}
@@ -304,7 +304,7 @@ function LayoutContent({
                       {children}
                     </PageLayout>
                   ) : (
-                    <div className="h-full w-full overflow-auto">
+                    <div className="h-full w-full">
                       {children}
                     </div>
                   )}
