@@ -32,7 +32,13 @@ export async function getPartners(organizationId: string): Promise<Partner[]> {
         company_name,
         linked_user_id,
         image_bucket,
-        image_path
+        image_path,
+        avatar_attachment_id,
+        contact_attachments!contact_id(
+          id,
+          storage_bucket,
+          storage_path
+        )
       )
     `)
     .eq('organization_id', organizationId)

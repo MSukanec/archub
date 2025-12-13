@@ -27,6 +27,12 @@ interface LinkedUser {
   full_name: string | null;
 }
 
+interface ContactAttachment {
+  id: string;
+  storage_bucket: string;
+  storage_path: string;
+}
+
 interface Contact {
   id: string;
   first_name: string | null;
@@ -37,6 +43,8 @@ interface Contact {
   linked_user: LinkedUser | LinkedUser[] | null;
   image_bucket: string | null;
   image_path: string | null;
+  avatar_attachment_id: string | null;
+  contact_attachments: ContactAttachment[];
 }
 
 export interface PartnerFormFieldsProps {
@@ -82,6 +90,12 @@ export function PartnerFormFields({
           company_name,
           image_bucket,
           image_path,
+          avatar_attachment_id,
+          contact_attachments!contact_id(
+            id,
+            storage_bucket,
+            storage_path
+          ),
           linked_user:users!linked_user_id(id, full_name)
         `)
         .eq('organization_id', orgId)
@@ -264,9 +278,21 @@ export function PartnerFormFields({
   const renderContactOption = (option: any) => {
     const contact = option.contact as Contact;
     const displayName = getContactDisplayName(contact);
-    const avatarUrl = contact.image_bucket && contact.image_path
-      ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${contact.image_bucket}/${contact.image_path}`
-      : null;
+    
+    // Get avatar URL from attachment if it exists
+    let avatarUrl: string | null = null;
+    if (contact.avatar_attachment_id && contact.contact_attachments && contact.contact_attachments.length > 0) {
+      const avatarAttachment = contact.contact_attachments.find(a => a.id === contact.avatar_attachment_id);
+      if (avatarAttachment) {
+        avatarUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${avatarAttachment.storage_bucket}/${avatarAttachment.storage_path}`;
+      }
+    }
+    
+    // Fallback to image_bucket/image_path if no attachment avatar
+    if (!avatarUrl && contact.image_bucket && contact.image_path) {
+      avatarUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${contact.image_bucket}/${contact.image_path}`;
+    }
+    
     return (
       <IdentityBadge 
         name={displayName}

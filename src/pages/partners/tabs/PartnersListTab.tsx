@@ -156,9 +156,21 @@ export function PartnersListTab() {
       sortable: true,
       render: (partner: EnrichedPartner) => {
         const contact = partner.contacts;
-        const avatarUrl = contact?.image_bucket && contact?.image_path 
-          ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${contact.image_bucket}/${contact.image_path}`
-          : null;
+        let avatarUrl: string | null = null;
+        
+        // Get avatar URL from attachment if it exists
+        if (contact && 'avatar_attachment_id' in contact && contact.avatar_attachment_id && 'contact_attachments' in contact && Array.isArray(contact.contact_attachments) && contact.contact_attachments.length > 0) {
+          const avatarAttachment = contact.contact_attachments.find((a: any) => a.id === contact.avatar_attachment_id);
+          if (avatarAttachment) {
+            avatarUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${avatarAttachment.storage_bucket}/${avatarAttachment.storage_path}`;
+          }
+        }
+        
+        // Fallback to image_bucket/image_path if no attachment avatar
+        if (!avatarUrl && contact?.image_bucket && contact?.image_path) {
+          avatarUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${contact.image_bucket}/${contact.image_path}`;
+        }
+        
         const displayName = contact?.full_name || 
                            `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() ||
                            contact?.email ||
