@@ -29,7 +29,7 @@ const buttonVariants = cva(
         "icon-sm": "h-6 w-6 p-0",
       },
       highlighted: {
-        pulse: "animate-pulse",
+        pulse: "animate-breathe",
         glow: "shadow-lg shadow-accent/50",
         outline: "ring-2 ring-accent ring-offset-2",
       },

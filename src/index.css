@@ -884,10 +884,25 @@ input[type="number"] {
   }
 }
 
+@keyframes button-breathe {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(132, 204, 22, 0.15), 0 4px 14px 0 rgba(0, 0, 0, 0.15);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px 6px rgba(132, 204, 22, 0.25), 0 8px 20px 0 rgba(0, 0, 0, 0.2);
+    transform: scale(1.01);
+  }
+}
+
 .accent-fade-in {
   animation: accentFadeIn 500ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .accent-border-pulse {
   animation: borderPulse 3s ease-in-out infinite;
+}
+
+.animate-breathe {
+  animation: button-breathe 3s ease-in-out infinite;
 }
