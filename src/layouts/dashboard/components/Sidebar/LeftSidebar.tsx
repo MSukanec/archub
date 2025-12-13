@@ -587,6 +587,7 @@ export function LeftSidebar() {
                       .map((button) => {
                         const buttonElement = (
                           <SidebarIconButton
+                            key={button.id}
                             icon={button.icon}
                             isActive={sidebarLevel === button.id}
                             onClick={button.onClick}
@@ -595,9 +596,9 @@ export function LeftSidebar() {
                         );
                         
                         if (button.wrapper) {
-                          return <div key={button.id}>{button.wrapper(buttonElement)}</div>;
+                          return button.wrapper(buttonElement);
                         }
-                        return <div key={button.id}>{buttonElement}</div>;
+                        return buttonElement;
                       });
                   })()}
               </div>
