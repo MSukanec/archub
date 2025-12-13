@@ -49,11 +49,17 @@ export const PartnerContributionsFields: React.FC<PartnerContributionsFieldsProp
   }
 
   // Create options for ComboBox with linkedUser for avatar rendering
-  const partnerOptions = partners.map(partner => ({
-    value: partner.id,
-    label: getPartnerDisplayName(partner),
-    linkedUser: partner.contacts?.linked_user || null
-  }))
+  const partnerOptions = partners.map(partner => {
+    const linkedUser = Array.isArray(partner.contacts?.linked_user) 
+      ? partner.contacts?.linked_user[0]
+      : partner.contacts?.linked_user;
+    return {
+      value: partner.id,
+      label: getPartnerDisplayName(partner),
+      linkedUser,
+      partnerName: getPartnerDisplayName(partner)
+    };
+  })
 
   // Handle partner change
   const handlePartnerChange = (partnerId: string) => {

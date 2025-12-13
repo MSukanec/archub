@@ -31,6 +31,8 @@ export async function getPartners(organizationId: string): Promise<Partner[]> {
         phone, 
         company_name,
         linked_user_id,
+        image_bucket,
+        image_path,
         linked_user:users!linked_user_id(id, full_name, avatar_url)
       )
     `)
@@ -44,12 +46,16 @@ export async function getPartners(organizationId: string): Promise<Partner[]> {
   }
   
   console.log('[getPartners] Raw data received:', data?.length, 'partners');
+  if (data && data.length > 0) {
+    console.log('[getPartners] First partner:', data[0]);
+  }
   
   if (!data) return [];
   
   return data.map((partner: any) => {
     const rawContacts = partner.contacts;
     const contact: PartnerContact = Array.isArray(rawContacts) ? rawContacts[0] : rawContacts;
+    console.log('[getPartners] Processing partner, contact has linked_user:', !!contact?.linked_user, contact?.linked_user);
     
     return {
       ...partner,
