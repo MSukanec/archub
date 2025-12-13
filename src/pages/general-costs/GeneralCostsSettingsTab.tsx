@@ -160,7 +160,7 @@ export default function GeneralCostsSettingsTab() {
               </div>
               <div className="flex items-center gap-1 ml-4">
                 {category.is_system ? (
-                  <Badge variant="secondary" data-testid="badge-category-system">
+                  <Badge variant="default" data-testid="badge-category-system">
                     Sistema
                   </Badge>
                 ) : (

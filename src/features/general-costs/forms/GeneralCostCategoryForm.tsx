@@ -125,7 +125,7 @@ function ViewPanel({
 
       {category.is_system ? (
         <div className="pt-4 border-t border-border">
-          <Badge variant="secondary" data-testid="badge-system-category">
+          <Badge variant="default" data-testid="badge-system-category">
             Categoría del Sistema - No se puede modificar
           </Badge>
         </div>
