@@ -596,7 +596,6 @@ export default function GeneralCostsPaymentsTab() {
       key: 'general_cost',
       label: 'Gasto General',
       sortable: true,
-      width: '280px',
       render: (payment: GeneralCostPayment) => (
         <div className="flex items-center gap-2">
           <TooltipProvider>
@@ -631,7 +630,6 @@ export default function GeneralCostsPaymentsTab() {
       key: 'notes',
       label: 'Notas',
       sortable: true,
-      width: '400px',
       render: (payment: GeneralCostPayment) => (
         <div className="max-w-full truncate text-xs" title={payment.notes || ''}>
           {payment.notes || '-'}
