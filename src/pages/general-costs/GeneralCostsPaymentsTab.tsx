@@ -21,7 +21,7 @@ import GeneralCostPaymentRow from '@/features/finances/components/GeneralCostPay
 import { useOrganizationDefaultCurrency, useOrganizationCurrencies } from '@/hooks/use-currencies';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
-import { formatDate as formatDateUtil } from '@/lib/date-utils';
+import { parseLocalDate } from '@/lib/date-utils';
 import { useOrganizationWallets } from '@/features/organization/hooks';
 import { useGeneralCosts, useCreateGeneralCostPayment } from '@/features/general-costs';
 import { useToast } from '@/hooks/use-toast';
@@ -456,6 +456,14 @@ export default function GeneralCostsPaymentsTab() {
     });
   };
 
+  const formatDate = (dateString: string) => {
+    try {
+      const date = parseLocalDate(dateString);
+      return date ? format(date, 'dd/MM/yyyy') : '-';
+    } catch {
+      return '-';
+    }
+  };
 
   const formatAmount = (amount: number, currencySymbol: string | undefined) => {
     const symbol = currencySymbol || '$';
@@ -582,7 +590,7 @@ export default function GeneralCostsPaymentsTab() {
       label: 'Fecha de Pago',
       sortable: true,
       align: 'left' as const,
-      render: (payment: GeneralCostPayment) => formatDateUtil(payment.payment_date),
+      render: (payment: GeneralCostPayment) => formatDate(payment.payment_date),
     },
     {
       key: 'general_cost',
