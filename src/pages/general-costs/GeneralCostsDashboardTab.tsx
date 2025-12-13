@@ -20,9 +20,10 @@ import { formatDateShort } from '@/lib/date-utils';
 
 interface GeneralCostsDashboardTabProps {
   onNavigateToConceptos?: () => void;
+  onEmptyStateCTA?: () => void;
 }
 
-export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: GeneralCostsDashboardTabProps) {
+export default function GeneralCostsDashboardTab({ onNavigateToConceptos, onEmptyStateCTA }: GeneralCostsDashboardTabProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   
@@ -239,6 +240,11 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
   }
 
   if (allPayments.length === 0) {
+    const handleCTAClick = () => {
+      onEmptyStateCTA?.()
+      onNavigateToConceptos?.()
+    }
+
     return (
       <EmptyState 
         icon={<CreditCard className="w-12 h-12" />}
@@ -246,7 +252,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
         description="Comienza creando un concepto para registrar tus primeros pagos (por ejemplo: Contador, Alquiler, Electricidad)."
         action={
           <Button
-            onClick={onNavigateToConceptos}
+            onClick={handleCTAClick}
             data-testid="button-create-first-concept"
           >
             <Plus className="w-4 h-4 mr-2" />

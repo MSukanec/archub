@@ -28,6 +28,11 @@ const buttonVariants = cva(
         icon: "h-8 w-8 p-0 [&_svg]:size-5",
         "icon-sm": "h-6 w-6 p-0",
       },
+      highlighted: {
+        pulse: "animate-pulse",
+        glow: "shadow-lg shadow-accent/50",
+        outline: "ring-2 ring-accent ring-offset-2",
+      },
     },
     defaultVariants: {
       variant: "default",
@@ -40,14 +45,20 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  highlighted?: boolean;
+  highlightVariant?: "pulse" | "glow" | "outline";
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, highlighted = false, highlightVariant = "pulse", ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
+    
+    // Apply highlight variant if highlighted is true
+    const highlightClass = highlighted && highlightVariant ? buttonVariants({ highlighted: highlightVariant }) : "";
+    
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size }), highlightClass, className)}
         ref={ref}
         {...props}
       />
