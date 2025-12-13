@@ -19,10 +19,13 @@ create table public.projects (
   is_deleted boolean not null default false,
   deleted_at timestamp with time zone null,
   last_active_at timestamp with time zone null,
+  is_over_limit boolean null default false,
+  currency_id uuid not null,
   constraint projects_pkey primary key (id),
   constraint projects_id_key unique (id),
   constraint projects_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
   constraint projects_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint projects_currency_id_fkey foreign KEY (currency_id) references currencies (id) on delete RESTRICT,
   constraint projects_custom_color_h_check check (
     (
       (custom_color_h >= 0)
@@ -38,15 +41,21 @@ create index IF not exists projects_created_by_idx on public.projects using btre
 
 create index IF not exists projects_org_active_idx on public.projects using btree (organization_id, is_active) TABLESPACE pg_default;
 
-create unique INDEX IF not exists projects_org_name_lower_uniq on public.projects using btree (organization_id, lower(name)) TABLESPACE pg_default;
-
 create index IF not exists projects_created_at_idx on public.projects using btree (created_at) TABLESPACE pg_default;
 
 create unique INDEX IF not exists projects_org_code_uniq on public.projects using btree (organization_id, code) TABLESPACE pg_default
 where
   (code is not null);
 
+create index IF not exists idx_projects_org_status_active on public.projects using btree (organization_id, status, is_active, is_deleted) TABLESPACE pg_default;
+
 create index IF not exists idx_projects_code on public.projects using btree (code) TABLESPACE pg_default;
+
+create unique INDEX IF not exists projects_org_name_lower_uniq on public.projects using btree (organization_id, lower(name)) TABLESPACE pg_default
+where
+  (is_deleted = false);
+
+create index IF not exists projects_over_limit_idx on public.projects using btree (organization_id, is_over_limit) TABLESPACE pg_default;
 
 create trigger projects_set_updated_at BEFORE
 update on projects for EACH row
