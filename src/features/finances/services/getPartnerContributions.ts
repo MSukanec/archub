@@ -139,7 +139,8 @@ export async function getPartnerContributions(
         color
       )
     `)
-    .eq('organization_id', organizationId);
+    .eq('organization_id', organizationId)
+    .or('is_deleted.is.null,is_deleted.eq.false');
 
   // Filter by project if provided
   if (projectId) {
