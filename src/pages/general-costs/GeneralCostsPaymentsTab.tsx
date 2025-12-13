@@ -465,12 +465,12 @@ export default function GeneralCostsPaymentsTab() {
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  const getStatusBadge = (status: 'confirmed' | 'pending' | 'rejected' | 'void') => {
-    const statusConfig = {
-      confirmed: { label: 'Confirmado', className: 'bg-green-600 text-white hover:bg-green-600' },
-      pending: { label: 'Pendiente', className: 'bg-orange-600 text-white hover:bg-orange-600' },
-      rejected: { label: 'Rechazado', className: 'bg-red-600 text-white hover:bg-red-600' },
-      void: { label: 'Anulado', className: 'bg-gray-600 text-white hover:bg-gray-600' },
+  const getStatusBadgeConfig = (status: 'confirmed' | 'pending' | 'rejected' | 'void') => {
+    const statusConfig: Record<string, { label: string; colorVar: string }> = {
+      confirmed: { label: 'Confirmado', colorVar: '--badge-status-success' },
+      pending: { label: 'Pendiente', colorVar: '--badge-status-warning' },
+      rejected: { label: 'Rechazado', colorVar: '--badge-status-destructive' },
+      void: { label: 'Anulado', colorVar: '--badge-status-neutral' },
     };
     return statusConfig[status];
   };
@@ -641,10 +641,17 @@ export default function GeneralCostsPaymentsTab() {
       label: 'Estado',
       sortable: true,
       render: (payment: GeneralCostPayment) => {
-        const statusInfo = getStatusBadge(payment.status);
+        const statusConfig = getStatusBadgeConfig(payment.status);
         return (
-          <Badge className={statusInfo.className}>
-            {statusInfo.label}
+          <Badge 
+            variant="default"
+            style={{
+              color: `var(${statusConfig.colorVar})`,
+              backgroundColor: `color-mix(in srgb, var(${statusConfig.colorVar}) 10%, transparent)`,
+              borderColor: `color-mix(in srgb, var(${statusConfig.colorVar}) 30%, transparent)`,
+            } as React.CSSProperties}
+          >
+            {statusConfig.label}
           </Badge>
         );
       },

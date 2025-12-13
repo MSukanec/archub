@@ -136,6 +136,12 @@ html {
   --warning: hsl(45, 90%, 50%);
   --warning-text: hsl(240, 10%, 4%);
 
+  /* Badge Status Colors */
+  --badge-status-success: var(--success);
+  --badge-status-warning: var(--warning);
+  --badge-status-destructive: var(--destructive);
+  --badge-status-neutral: hsl(0, 0%, 50%);
+
   /* Charts */
   --chart-1: hsl(76, 100%, 40%);
   --chart-2: hsl(173, 58%, 39%);
