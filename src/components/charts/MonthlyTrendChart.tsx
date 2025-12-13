@@ -49,13 +49,27 @@ export function MonthlyTrendChart({
 
   const formatMonth = (month: string) => {
     if (!month) return ''
-    const parts = month.split('-')
-    if (parts.length !== 2) return month
-    const [year, m] = parts
-    const paddedMonth = m.padStart(2, '0')
-    const date = new Date(`${year}-${paddedMonth}-01T00:00:00`)
+    
+    let date: Date
+    
+    if (month.includes('T')) {
+      date = new Date(month)
+    } else {
+      const parts = month.split('-')
+      if (parts.length >= 2) {
+        const [year, m] = parts
+        const paddedMonth = m.padStart(2, '0')
+        date = new Date(`${year}-${paddedMonth}-01T00:00:00`)
+      } else {
+        return month
+      }
+    }
+    
     if (isNaN(date.getTime())) return month
-    return date.toLocaleDateString('es-AR', { month: 'short' })
+    
+    const monthName = date.toLocaleDateString('es-AR', { month: 'short' })
+    const year = date.getFullYear()
+    return `${monthName} ${year}`
   }
 
   return (
