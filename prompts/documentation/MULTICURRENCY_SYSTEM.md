@@ -656,8 +656,17 @@ Al agregar nuevas KPIs monetarias a una página:
 ## 7. Archivos Modificados Recientemente (2025-12-12)
 
 ### Componentes con KPIs refactorizadas:
-- `src/pages/general-costs/GeneralCostsPaymentsTab.tsx` - KPIs "Total Pagos" y "Pagos a la Fecha"
-- `src/pages/partners/tabs/PartnerTransactionsTab.tsx` - KPIs "Total Aportes", "Total Retiros", "Saldo Neto"
+
+#### Gastos Generales:
+- `src/pages/general-costs/GeneralCostsPaymentsTab.tsx` - KPIs "Total Pagos" (conteo) y "Pagos a la Fecha" (monetaria)
+
+#### Socios:
+- `src/pages/partners/tabs/PartnerTransactionsTab.tsx` - KPIs "Total Aportes", "Total Retiros", "Saldo Neto" (todas monetarias)
+
+#### Clientes:
+- `src/pages/clients/ClientDashboardTab.tsx` - KPIs "Total Clientes" (conteo), "Total Pagos" (conteo), "Compromiso Total" (monetaria), "Balance Pendiente" (monetaria)
+- `src/pages/clients/ClientPaymentsTab.tsx` - KPIs "Total Confirmado" (monetaria), "Total Pagos" (conteo), "Último Pago" (texto)
+- `src/pages/clients/ClientObligationsTab.tsx` - KPIs "Compromiso Total" (monetaria), "Pagado" (monetaria), "Saldo" (monetaria), "Items de Pago" (conteo)
 
 ### Cambios principales:
 1. Agregada importación de `useOrganizationDefaultCurrency` para refetch automático
@@ -737,9 +746,14 @@ Si exchange_rate = 1000:
 
 - Directorio principal: `/lib/money.ts`, `/lib/kpis.ts`
 - Hook para moneda: `/hooks/use-currencies.ts`
-- Ejemplos de uso: `src/pages/general-costs/GeneralCostsPaymentsTab.tsx`, `src/pages/partners/tabs/PartnerTransactionsTab.tsx`
+- Ejemplos de uso:
+  - `src/pages/general-costs/GeneralCostsPaymentsTab.tsx`
+  - `src/pages/partners/tabs/PartnerTransactionsTab.tsx`
+  - `src/pages/clients/ClientDashboardTab.tsx`
+  - `src/pages/clients/ClientPaymentsTab.tsx`
+  - `src/pages/clients/ClientObligationsTab.tsx`
 - Tipos e interfaces: Ver docstrings en los archivos fuente
 
 ---
 
-**Última actualización:** 2025-12-12 (Turno 3 - Documentación Completa)
+**Última actualización:** 2025-12-13 (Agregadas páginas de Clientes a la lista de componentes refactorizados)

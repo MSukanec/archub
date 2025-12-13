@@ -267,7 +267,7 @@ export interface FinancialMovement {
 }
 ```
 
-### 3.2 Servicio de Agregación (Incompleto)
+### 3.2 Servicio de Agregación (En Progreso)
 
 **Archivo**: `src/features/finances/services/getAllFinancialMovements.ts`
 
@@ -275,13 +275,36 @@ Actualmente solo agrega:
 - ✅ client_payments
 - ✅ partner_contributions
 - ✅ partner_withdrawals
-- ❌ material_payments (TODO)
-- ❌ personnel_payments (TODO)
-- ❌ general_cost_payments (TODO)
+- ✅ material_payments
+- ✅ personnel_payments
+- ✅ general_cost_payments (agregado 2025-12-13 vía vista SQL)
 - ❌ subcontract_payments (TODO)
 - ❌ indirect_payments (TODO)
 
-### 3.3 Mappers Existentes
+### 3.3 Modal de Nuevo Movimiento
+
+**Archivo**: `src/features/finances/modals/NewMovementModal.tsx`
+
+Modal unificado para crear movimientos desde la página de Finanzas:
+
+**Tipos soportados**:
+- ✅ client_payment (Pago de Cliente)
+- ✅ partner_contribution (Aporte de Socio)
+- ✅ partner_withdrawal (Retiro de Socio)
+- ✅ material_payment (Pago de Material)
+- ✅ personnel_payment (Pago de Personal)
+- ✅ general_cost_payment (Pago de Gasto General - agregado 2025-12-13)
+- ❌ subcontract_payment (TODO)
+
+**Patrón de integración**:
+Cada tipo de movimiento usa un formulario agnóstico (`*FormFields.tsx`) que:
+- No importa componentes de modal
+- Recibe props: projectId, organizationId, mode, onSuccess, onCancel, hideActions, formRef
+- El modal controla submit vía `formRef.current.requestSubmit()`
+
+**Ejemplo**: `GeneralCostPaymentFormFields.tsx` creado en `src/features/general-costs/forms/`
+
+### 3.4 Mappers Existentes
 
 **Archivo**: `src/features/finances/mappers/index.ts`
 
@@ -580,4 +603,4 @@ El sistema legacy maneja conversiones y transferencias como pares de movimientos
 ---
 
 *Documento creado: Diciembre 2025*
-*Última actualización: [Fecha actual]*
+*Última actualización: 2025-12-13 (Agregado modal NewMovementModal con general_cost_payment)*
