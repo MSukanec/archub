@@ -743,15 +743,17 @@ export default function GeneralCostsPaymentsTab() {
             Pagos a la Fecha
           </StatCardTitle>
           <StatCardValue>
-            {metricsData?.total_confirmed_kpi?.breakdown && metricsData.total_confirmed_kpi.breakdown.length > 0
-              ? formatMoneyAmount(metricsData.total_confirmed_kpi.value, metricsData.total_confirmed_kpi.breakdown[0].currencySymbol)
-              : formatKPI(metricsData?.total_confirmed_kpi?.value ?? 0)
-            }
+            {/* Mostrar total con símbolo de la MONEDA BASE de la organización (ej: USD 1.000) */}
+            {formatMoneyAmount(
+              metricsData?.total_confirmed_kpi?.value ?? 0, 
+              defaultCurrency?.code || defaultCurrency?.symbol || '$'
+            )}
           </StatCardValue>
           <StatCardMeta>
+            {/* Mostrar desglose por moneda original (ej: ARS 1.140.000) */}
             {metricsData?.total_confirmed_kpi?.breakdown && metricsData.total_confirmed_kpi.breakdown.length > 0
-              ? formatBreakdown(metricsData.total_confirmed_kpi)
-              : `Total de pagos confirmados en ${defaultCurrency?.code || 'moneda principal'}`
+              ? `Detalle: ${formatBreakdown(metricsData.total_confirmed_kpi)}`
+              : `Total de pagos confirmados`
             }
           </StatCardMeta>
         </StatCard>
