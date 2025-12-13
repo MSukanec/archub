@@ -1,4 +1,5 @@
 import { TrendingUp, TrendingDown, Wallet, HandHeart } from 'lucide-react';
+import { useMemo } from 'react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
@@ -6,6 +7,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { usePartnerMovements } from '@/features/finances/hooks/use-partner-movements';
 import { usePartnerMetrics } from '@/features/finances/hooks/use-partner-metrics';
+import { usePartners } from '@/features/partners';
 import PartnerBalanceAccordion from '@/features/finances/components/PartnerBalanceAccordion';
 
 export function PartnerBalancesTab() {
@@ -14,6 +16,7 @@ export function PartnerBalancesTab() {
 
   const { data: movements = [], isLoading: loadingMovements } = usePartnerMovements(organizationId);
   const { data: defaultCurrency, isLoading: loadingCurrency } = useOrganizationDefaultCurrency(organizationId);
+  const { data: partners = [], isLoading: loadingPartners } = usePartners(organizationId, { enabled: !!organizationId });
 
   const {
     totalContributions,
@@ -25,7 +28,21 @@ export function PartnerBalancesTab() {
     balanceByPartner,
   } = usePartnerMetrics(movements, defaultCurrency?.code);
 
-  const isLoading = loadingMovements || loadingCurrency;
+  // Enrich balance data with linkedUser from partners
+  const balanceByPartnerWithLinkedUser = useMemo(() => {
+    return balanceByPartner.map(balance => {
+      const partnerData = partners.find(p => p.id === balance.partnerId);
+      const linkedUser = partnerData?.contacts?.linked_user;
+      const resolvedLinkedUser = Array.isArray(linkedUser) ? linkedUser[0] : linkedUser;
+      
+      return {
+        ...balance,
+        linkedUser: resolvedLinkedUser,
+      };
+    });
+  }, [balanceByPartner, partners]);
+
+  const isLoading = loadingMovements || loadingCurrency || loadingPartners;
   const currencySymbol = defaultCurrency?.symbol || '$';
 
   const formatCurrency = (amount: number) => {
@@ -129,7 +146,7 @@ export function PartnerBalancesTab() {
       </div>
 
       <PartnerBalanceAccordion 
-        partners={balanceByPartner}
+        partners={balanceByPartnerWithLinkedUser}
         currencySymbol={currencySymbol}
       />
     </div>
