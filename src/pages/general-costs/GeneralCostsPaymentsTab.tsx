@@ -467,7 +467,7 @@ export default function GeneralCostsPaymentsTab() {
                 status: row.status || 'confirmed',
                 reference: row.reference || undefined,
                 notes: row.notes || undefined,
-                created_by: userData?.user?.id,
+                created_by: userData?.memberships?.[0]?.id,
               });
               successCount++;
             } catch (error) {
