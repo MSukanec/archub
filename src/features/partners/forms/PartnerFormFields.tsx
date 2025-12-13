@@ -91,11 +91,6 @@ export function PartnerFormFields({
           image_bucket,
           image_path,
           avatar_attachment_id,
-          contact_attachments!contact_id(
-            id,
-            storage_bucket,
-            storage_path
-          ),
           linked_user:users!linked_user_id(id, full_name)
         `)
         .eq('organization_id', orgId)
@@ -106,7 +101,32 @@ export function PartnerFormFields({
         console.error('Error fetching contacts:', error);
         throw error;
       }
-      return data || [];
+
+      // Fetch contact attachments separately
+      const contactIds = (data || []).map((c: any) => c.id);
+      const attachmentsMap = new Map<string, ContactAttachment[]>();
+      
+      if (contactIds.length > 0) {
+        const { data: attachments, error: attachmentsError } = await supabase
+          .from('contact_attachments')
+          .select('contact_id, id, storage_bucket, storage_path')
+          .in('contact_id', contactIds);
+
+        if (!attachmentsError && attachments) {
+          attachments.forEach((att: any) => {
+            if (!attachmentsMap.has(att.contact_id)) {
+              attachmentsMap.set(att.contact_id, []);
+            }
+            attachmentsMap.get(att.contact_id)!.push(att);
+          });
+        }
+      }
+
+      // Add contact_attachments to each contact
+      return (data || []).map((contact: any) => ({
+        ...contact,
+        contact_attachments: attachmentsMap.get(contact.id) || []
+      }));
     },
     enabled: !!orgId,
   });
