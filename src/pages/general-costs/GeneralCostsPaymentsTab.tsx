@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, Calendar, TrendingUp, Filter, Search, Bell } from 'lucide-react';
+import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, Calendar, TrendingUp, Filter, Search, Bell, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -712,10 +712,16 @@ export default function GeneralCostsPaymentsTab() {
           title="No hay pagos registrados"
           description="Comienza agregando tus pagos de gastos generales para llevar un registro detallado de los egresos de la organización. Los pagos incluyen información de monto, billetera, fecha, estado y archivos adjuntos."
           action={
-            <Button onClick={handleAddPayment} data-testid="button-add-payment">
-              <Plus className="w-4 h-4 mr-2" />
-              Nuevo Pago
-            </Button>
+            <div className="flex gap-3">
+              <Button onClick={handleAddPayment} data-testid="button-add-payment">
+                <Plus className="w-4 h-4 mr-2" />
+                Nuevo Pago
+              </Button>
+              <Button onClick={handleImport} variant="outline" data-testid="button-import-payments">
+                <Upload className="w-4 h-4 mr-2" />
+                Importar Pagos
+              </Button>
+            </div>
           }
         />
       </div>
