@@ -595,8 +595,10 @@ export default function GeneralCostsPaymentsTab() {
       render: (payment: GeneralCostPayment) => (
         <div>
           <div className="font-bold">{payment.general_cost?.name || 'Sin categoría'}</div>
-          {payment.general_cost?.description && (
-            <div className="text-xs text-muted-foreground line-clamp-1">{payment.general_cost.description}</div>
+          {payment.general_cost?.category ? (
+            <div className="text-xs text-muted-foreground line-clamp-1">{payment.general_cost.category.name}</div>
+          ) : (
+            <div className="text-xs text-muted-foreground">Sin categoría</div>
           )}
         </div>
       ),
