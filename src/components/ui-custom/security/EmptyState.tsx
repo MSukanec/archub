@@ -30,27 +30,19 @@ export function EmptyState({
         "border-2 border-dashed rounded-xl",
         "bg-background/50 backdrop-blur-sm transition-all duration-300",
         "hover:bg-background/70",
-        "flex flex-col justify-center items-center relative overflow-hidden",
+        "flex flex-col justify-center items-center relative",
         className
       )}
       style={{
         borderColor: 'var(--accent)',
+        backgroundImage: `repeating-linear-gradient(
+          45deg,
+          rgba(var(--accent-rgb), 0.1) 0px,
+          rgba(var(--accent-rgb), 0.1) 1px,
+          transparent 1px,
+          transparent 12px
+        )`
       }}>
-        {/* Diagonal Hatch Background Pattern */}
-        <div className="absolute inset-0 z-[-1] overflow-hidden">
-          <div 
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: `repeating-linear-gradient(
-                45deg,
-                var(--accent) 0px,
-                var(--accent) 1px,
-                transparent 1px,
-                transparent 12px
-              )`
-            }}
-          />
-        </div>
 
         {/* Icon container */}
         {icon && (
