@@ -11,6 +11,9 @@ export const GENERAL_COSTS_QUERY_KEYS = {
   monthlySummaryList: (organizationId: string | null) => [...GENERAL_COSTS_QUERY_KEYS.monthlySummary(), organizationId] as const,
   byCategory: () => [...GENERAL_COSTS_QUERY_KEYS.all, 'by-category'] as const,
   byCategoryList: (organizationId: string | null) => [...GENERAL_COSTS_QUERY_KEYS.byCategory(), organizationId] as const,
+  categories: () => [...GENERAL_COSTS_QUERY_KEYS.all, 'categories'] as const,
+  categoriesList: (organizationId: string | null) => [...GENERAL_COSTS_QUERY_KEYS.categories(), organizationId] as const,
+  category: (id: string | null) => [...GENERAL_COSTS_QUERY_KEYS.categories(), id] as const,
 } as const;
 
 export const STATUS_LABELS = {

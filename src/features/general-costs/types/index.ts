@@ -82,3 +82,15 @@ export interface InsertGeneralCostPayment {
   status?: string;
   created_by?: string | null;
 }
+
+export interface GeneralCostCategory {
+  id: string;
+  organization_id: string;
+  name: string;
+  description: string | null;
+  is_system: boolean;
+  is_deleted: boolean;
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
