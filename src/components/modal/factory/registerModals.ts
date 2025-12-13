@@ -303,7 +303,7 @@ export function initializeModalRegistry(): void {
     ...generalConfig, 
     size: 'sm',
     mapDataToProps: (data) => ({
-      category: data?.category,
+      modalData: { category: data?.category },
       mode: data?.category ? (data?.mode || 'edit') : (data?.mode || 'create')
     })
   });
