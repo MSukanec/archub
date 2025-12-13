@@ -94,9 +94,9 @@ export default function GeneralCostsPaymentsTab() {
   // Sort by payment_date DESC, then by created_at DESC
   const sortedPayments = useMemo(() => {
     return [...filteredPayments].sort((a, b) => {
-      // Primero por payment_date (más reciente primero)
-      const dateA = new Date(a.payment_date).getTime();
-      const dateB = new Date(b.payment_date).getTime();
+      // Primero por payment_date (más reciente primero) - usar parseLocalDate para evitar timezone shift
+      const dateA = parseLocalDate(a.payment_date)?.getTime() ?? 0;
+      const dateB = parseLocalDate(b.payment_date)?.getTime() ?? 0;
       const dateComparison = dateB - dateA;
       
       if (dateComparison !== 0) return dateComparison;
@@ -458,7 +458,8 @@ export default function GeneralCostsPaymentsTab() {
 
   const formatDate = (dateString: string) => {
     try {
-      return format(new Date(dateString), 'dd/MM/yyyy');
+      const date = parseLocalDate(dateString);
+      return date ? format(date, 'dd/MM/yyyy') : '-';
     } catch {
       return '-';
     }
