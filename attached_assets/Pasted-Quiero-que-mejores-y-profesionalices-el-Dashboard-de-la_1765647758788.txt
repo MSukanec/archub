@@ -1,0 +1,126 @@
+Quiero que mejores y profesionalices el Dashboard de la sección
+“Gastos Generales” de Seencel, llevándolo a un nivel comparable con
+productos como Procore, Linear, Notion o Stripe Dashboard.
+
+IMPORTANTE:
+- NO modificar las tabs “Lista” ni “Pagos”, ya están cerradas.
+- NO duplicar tablas existentes.
+- El Dashboard debe servir para análisis y toma de decisiones, no para CRUD.
+- Respetar soft-delete (is_deleted), no usar deletes.
+- Usar los cálculos y funciones ya existentes para KPIs y métricas.
+- Mantener coherencia visual con el resto de la app.
+
+────────────────────────────────────
+1. ESTRUCTURA GENERAL DEL DASHBOARD
+────────────────────────────────────
+
+Organizar el Dashboard en 4 bloques verticales:
+
+A) KPIs superiores
+B) Gráficos principales
+C) Bloque de insights automáticos
+D) Actividad reciente (ligera)
+
+────────────────────────────────────
+2. KPIs SUPERIORES (fila 1)
+────────────────────────────────────
+
+Mostrar entre 4 y 5 KPIs, usando un componente reutilizable (ej: KpiCard):
+
+1. Gasto Total del período actual
+   - Monto total pagado
+   - Moneda principal de la organización
+
+2. Variación vs período anterior
+   - Porcentaje (+ / -)
+   - Indicador visual (verde / rojo)
+   - Texto contextual (ej: “vs mes anterior”)
+
+3. Promedio mensual de gasto
+   - Basado en los meses con pagos
+
+4. Categoría con mayor gasto
+   - Nombre de la categoría
+   - Monto total
+
+5. Concepto de gasto más costoso
+   - Nombre del gasto general
+   - Total acumulado
+
+Los KPIs deben:
+- Tener jerarquía visual clara
+- Ser clickeables si corresponde
+- No repetir información redundante
+
+────────────────────────────────────
+3. GRÁFICOS PRINCIPALES (fila 2)
+────────────────────────────────────
+
+Izquierda (≈70% ancho):
+- Gráfico de evolución temporal del gasto
+- Preferentemente por mes
+- Mostrar montos agregados
+- Soportar cambio de período (YTD / último año)
+
+Derecha (≈30% ancho):
+- Gráfico de distribución por categoría
+- Tipo donut
+- Mostrar porcentaje + monto
+- Leyenda clara
+
+IMPORTANTE:
+- Los gráficos deben ser componentes AGNÓSTICOS
+- Crear carpeta /components/charts/
+- Ejemplos:
+  - TimeSeriesChart
+  - DonutDistributionChart
+- Nada hardcodeado a “gastos generales”
+
+────────────────────────────────────
+4. BLOQUE DE INSIGHTS (fila 3)
+────────────────────────────────────
+
+Agregar un bloque tipo “Insights” con mensajes automáticos,
+basados en reglas simples (sin IA por ahora).
+
+Ejemplos:
+- “Este mes el gasto fue un 18% mayor que el promedio”
+- “Servicios Profesionales representa el 62% del gasto total”
+- “El último pago se realizó hace 3 días”
+- “El concepto Contador tuvo 3 pagos este año”
+
+Formato:
+- Cards simples o lista con iconos
+- Texto claro y accionable
+- Máximo 4–5 insights visibles
+
+────────────────────────────────────
+5. ACTIVIDAD RECIENTE (fila 4)
+────────────────────────────────────
+
+Mostrar:
+- Últimos 5 pagos realizados
+- Concepto
+- Fecha
+- Monto
+- Estado
+
+NO usar tabla completa.
+Debe ser un resumen visual ligero.
+Al hacer click, navegar a la tab “Pagos”.
+
+────────────────────────────────────
+6. CALIDAD Y ESCALABILIDAD
+────────────────────────────────────
+
+- Componentes reutilizables
+- Nada específico del dominio hardcodeado
+- Preparado para futuras features:
+  - Gastos recurrentes
+  - Comparativas interanuales
+  - Filtros avanzados
+- UX clara, limpia y moderna
+- Mantener estética Seencel (no sobrecargar)
+
+El objetivo final es que el usuario entre al Dashboard y piense:
+“Wow, acá entiendo perfectamente mis gastos.”
