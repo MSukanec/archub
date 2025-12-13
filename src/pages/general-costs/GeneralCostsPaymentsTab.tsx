@@ -22,7 +22,7 @@ import { useOrganizationDefaultCurrency, useOrganizationCurrencies } from '@/hoo
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { parseLocalDate } from '@/lib/date-utils';
-import { useOrganizationWallets } from '@/features/organization/hooks';
+import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization/hooks';
 import { useGeneralCosts, useCreateGeneralCostPayment, GENERAL_COSTS_QUERY_KEYS } from '@/features/general-costs';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
@@ -53,8 +53,14 @@ export default function GeneralCostsPaymentsTab() {
   const { data: organizationWallets = [] } = useOrganizationWallets(organizationId);
   const { data: organizationCurrencies = [] } = useOrganizationCurrencies(organizationId);
   const { data: generalCostsData = [] } = useGeneralCosts(organizationId ?? null);
+  const { data: members = [] } = useOrganizationMembers(organizationId);
   const createPaymentMutation = useCreateGeneralCostPayment();
   const { toast } = useToast();
+
+  // Obtener el member actual del usuario (igual que en el formulario de pagos)
+  const currentMember = useMemo(() => {
+    return members.find((m: any) => m.user_id === userData?.user?.id);
+  }, [members, userData?.user?.id]);
 
   // Mobile Action Bar
   const {
@@ -521,7 +527,7 @@ export default function GeneralCostsPaymentsTab() {
                 status: row.status || 'confirmed',
                 reference: row.reference || undefined,
                 notes: row.notes || undefined,
-                created_by: userData?.memberships?.find(m => m.organization_id === organizationId)?.membership_id,
+                created_by: currentMember?.id,
               });
               successCount++;
             } catch (error) {
