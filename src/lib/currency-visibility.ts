@@ -38,8 +38,7 @@ export function shouldShowCurrencySelector(context: OrgCurrencyContext): boolean
  * 
  * REGLAS:
  * 1. Si la org NO es multimoneda → NUNCA mostrar
- * 2. Si es multimoneda y la moneda seleccionada es la por defecto → NO mostrar
- * 3. Si es multimoneda y la moneda seleccionada es diferente a la por defecto → SÍ mostrar
+ * 2. Si es multimoneda → SÍ mostrar (siempre, para cualquier moneda)
  * 
  * @param context - Contexto de moneda de la organización
  * @param selectedCurrencyId - ID de la moneda seleccionada en el formulario
@@ -52,11 +51,8 @@ export function shouldShowExchangeRateField(
   // Si no es multimoneda, nunca mostrar
   if (!context.isMultiCurrency) return false;
   
-  // Si no hay moneda seleccionada o no hay default, no mostrar
-  if (!selectedCurrencyId || !context.defaultCurrencyId) return false;
-  
-  // Mostrar solo si la moneda seleccionada es diferente a la por defecto
-  return selectedCurrencyId !== context.defaultCurrencyId;
+  // Si es multimoneda y hay moneda seleccionada, mostrar siempre
+  return !!selectedCurrencyId;
 }
 
 /**
