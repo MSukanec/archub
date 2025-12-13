@@ -7,11 +7,11 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard'
 import { useGlobalModalStore } from '@/components/modal'
+import { IdentityBadge } from '@/components/shared/IdentityBadge'
 import { Link, useLocation } from 'wouter'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -303,33 +303,27 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       label: 'Cliente',
       sortable: true,
       render: (client: EnrichedClient) => {
-        const avatarUrl = client.contacts?.linked_user?.avatar_url;
-        const initials = client.contacts?.first_name?.[0] && client.contacts?.last_name?.[0]
-          ? `${client.contacts.first_name[0]}${client.contacts.last_name[0]}`
-          : client.contacts?.first_name?.[0] || '?';
+        // Get avatar URL from contact image
+        const avatarUrl = client.contacts?.image_bucket && client.contacts?.image_path 
+          ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${client.contacts.image_bucket}/${client.contacts.image_path}`
+          : null;
         
         // Priority: full_name > first_name + last_name > company_name
         const displayName = client.contacts?.full_name || 
                            `${client.contacts?.first_name || ''} ${client.contacts?.last_name || ''}`.trim() ||
                            client.contacts?.company_name;
         
+        // Build badges array for role
+        const badgesArray = client.role?.name ? [{ label: client.role.name, variant: 'secondary' as const }] : undefined;
+        
         return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
-              <AvatarFallback>
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-semibold">{displayName || '-'}</span>
-              {client.role?.name && (
-                <span className="text-muted-foreground" style={{ fontSize: '12px', fontWeight: 'normal' }}>
-                  {client.role.name}
-                </span>
-              )}
-            </div>
-          </div>
+          <IdentityBadge 
+            name={displayName || '-'}
+            avatarUrl={avatarUrl}
+            size="sm"
+            subLabel={client.role?.name || undefined}
+            badges={badgesArray}
+          />
         );
       },
     },

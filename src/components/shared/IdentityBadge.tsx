@@ -1,5 +1,17 @@
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+
+interface IdentityBadgeBadge {
+  label: string;
+  variant?: 'default' | 'secondary' | 'success' | 'warning' | 'destructive';
+}
 
 interface IdentityBadgeProps {
   /** Name of the person (user, contact, partner, etc.) */
@@ -12,8 +24,10 @@ interface IdentityBadgeProps {
   layout?: 'row' | 'column';
   /** Whether to show the name text */
   showName?: boolean;
-  /** Optional label below the name */
+  /** Optional label below the name (e.g., email, organization) */
   subLabel?: string | null;
+  /** Semantic badges for roles/types (e.g., Cliente, Proveedor) */
+  badges?: IdentityBadgeBadge[];
   /** Whether to apply interactive styles (hover, cursor pointer) */
   interactive?: boolean;
   /** Additional CSS classes */
@@ -22,14 +36,16 @@ interface IdentityBadgeProps {
 
 /**
  * Universal identity badge component for displaying people (users, contacts, partners, etc.)
- * 
+ *
  * Features:
  * - Automatic initials generation from name
  * - Fallback to placeholder when no name
  * - Flexible sizing and layout options
  * - Professional SaaS-style appearance
- * - Accessible markup
+ * - Accessible markup with tooltip support
  * - Visible accent border for visual identification during migration
+ * - Optional semantic badges for roles/types
+ * - Secondary text for disambiguation (email, organization, etc.)
  */
 export function IdentityBadge({
   name,
@@ -38,18 +54,24 @@ export function IdentityBadge({
   layout = 'row',
   showName = true,
   subLabel,
+  badges,
   interactive = false,
   className,
 }: IdentityBadgeProps) {
   // Generate initials from name
   const getInitials = (fullName: string | null | undefined): string => {
     if (!fullName || fullName.trim() === '') return '?';
-    
+
     const words = fullName.trim().split(/\s+/);
     if (words.length >= 2) {
       return (words[0]?.[0] + words[1]?.[0]).toUpperCase();
     }
     return fullName.trim().slice(0, 2).toUpperCase();
+  };
+
+  // Check if text is truncated
+  const isTruncated = (text: string | null | undefined): boolean => {
+    return !!text && text.length > 30;
   };
 
   // Avatar size mapping
@@ -84,7 +106,17 @@ export function IdentityBadge({
     lg: 'text-sm',
   };
 
+  // Badge size mapping
+  const badgeSizeMap = {
+    xs: 'px-1.5 py-0.5 text-xs',
+    sm: 'px-1.5 py-0.5 text-xs',
+    md: 'px-2 py-1 text-xs',
+    lg: 'px-2 py-1 text-sm',
+  };
+
   const initials = getInitials(name);
+  const nameTruncated = isTruncated(name);
+  const subLabelTruncated = isTruncated(subLabel);
 
   const container = cn(
     'flex gap-2',
@@ -97,13 +129,50 @@ export function IdentityBadge({
   const textContent = (
     <div className="flex-1 min-w-0">
       {showName && name && (
-        <div className={cn('font-medium truncate', textSizeMap[size])}>
-          {name}
-        </div>
+        <TooltipProvider>
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
+              <div className={cn('font-medium truncate', textSizeMap[size])}>
+                {name}
+              </div>
+            </TooltipTrigger>
+            {nameTruncated && (
+              <TooltipContent side="top" className="text-sm">
+                {name}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       )}
+
       {subLabel && (
-        <div className={cn('text-muted-foreground truncate', subLabelSizeMap[size])}>
-          {subLabel}
+        <TooltipProvider>
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
+              <div className={cn('text-muted-foreground truncate', subLabelSizeMap[size])}>
+                {subLabel}
+              </div>
+            </TooltipTrigger>
+            {subLabelTruncated && (
+              <TooltipContent side="top" className="text-sm">
+                {subLabel}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      )}
+
+      {badges && badges.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-1">
+          {badges.map((badge, idx) => (
+            <Badge
+              key={idx}
+              variant={badge.variant || 'default'}
+              className={badgeSizeMap[size]}
+            >
+              {badge.label}
+            </Badge>
+          ))}
         </div>
       )}
     </div>
@@ -133,4 +202,4 @@ export function IdentityBadge({
   );
 }
 
-export type { IdentityBadgeProps };
+export type { IdentityBadgeProps, IdentityBadgeBadge };
