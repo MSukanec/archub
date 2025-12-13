@@ -89,7 +89,9 @@ export function useDeletePartnerContribution() {
         queryKey: PARTNER_QUERY_KEYS.contributions(variables.organizationId, variables.projectId),
       });
       queryClient.invalidateQueries({ queryKey: ['unified-movements'] });
-      queryClient.invalidateQueries({ queryKey: ['partner-movements'] });
+      queryClient.invalidateQueries({
+        queryKey: ['partner-movements', variables.organizationId, variables.projectId],
+      });
     },
   });
 }
