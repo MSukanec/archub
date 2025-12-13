@@ -17,6 +17,8 @@ create table public.general_costs (
   constraint general_costs_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
+create index IF not exists idx_general_costs_org_deleted on public.general_costs using btree (organization_id, is_deleted) TABLESPACE pg_default;
+
 ---------- TABLA GENERAL_COSTS_PAYMENTS:
 
 create table public.general_costs_payments (
