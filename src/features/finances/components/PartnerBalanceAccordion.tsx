@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { IdentityBadge } from '@/components/shared/IdentityBadge';
 
 interface PartnerBalanceData {
   partnerId: string;
@@ -72,21 +72,13 @@ function PartnerBalanceItem({
         )}
         data-testid={`partner-balance-accordion-trigger-${partner.partnerId}`}
       >
-        <Avatar className="h-10 w-10 flex-shrink-0">
-          <AvatarFallback className="text-sm font-medium">
-            {initials}
-          </AvatarFallback>
-        </Avatar>
-        
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm truncate">
-            {partner.partnerName}
-          </div>
-          {!isOpen && (
-            <div className="text-muted-foreground text-xs mt-0.5">
-              Balance: {partner.balance >= 0 ? '' : '-'}{formatCurrency(partner.balance, currencySymbol)}
-            </div>
-          )}
+          <IdentityBadge 
+            name={partner.partnerName}
+            size="md"
+            layout="row"
+            subLabel={!isOpen ? `Balance: ${partner.balance >= 0 ? '' : '-'}${formatCurrency(partner.balance, currencySymbol)}` : undefined}
+          />
         </div>
         
         <div className={cn(

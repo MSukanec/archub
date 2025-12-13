@@ -14,6 +14,7 @@ import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/componen
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import {
   usePartnerContributions,
   usePartnerWithdrawals,
@@ -266,7 +267,10 @@ export function PartnerTransactionsTab() {
       label: 'Socio',
       width: '1fr',
       render: (item: UnifiedTransaction) => (
-        <span className="text-sm font-medium">{item.partner_name}</span>
+        <IdentityBadge 
+          name={item.partner_name}
+          size="sm"
+        />
       ),
     },
     {

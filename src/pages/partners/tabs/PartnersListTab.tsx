@@ -4,7 +4,6 @@ import { Users, Plus, Edit, Trash2, HandHeart, Calendar, TrendingUp } from 'luci
 import { useMutation } from '@tanstack/react-query';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui-custom/KPICard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
@@ -12,6 +11,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { parseLocalDate } from '@/lib/date-utils';
 import { useMobile } from '@/hooks/use-mobile';
 import { usePartners, usePartnerContributions, usePartnerWithdrawals } from '@/features/partners';
+import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import type { Partner } from '@/features/partners/types';
@@ -163,22 +163,13 @@ export function PartnersListTab() {
                            `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() ||
                            contact?.email ||
                            contact?.company_name;
-        const initials = displayName 
-          ? displayName.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2) 
-          : '?';
         
         return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
-              <AvatarFallback>
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-semibold">{displayName || '-'}</span>
-            </div>
-          </div>
+          <IdentityBadge 
+            name={displayName || '-'}
+            avatarUrl={avatarUrl}
+            size="sm"
+          />
         );
       },
     },
