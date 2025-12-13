@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TrendingUp, Calendar, Tag, DollarSign, Lightbulb, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, AlertCircle, ChevronRight } from 'lucide-react';
+import { TrendingUp, Calendar, Tag, DollarSign, Lightbulb, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, AlertCircle, ChevronRight, Plus } from 'lucide-react';
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakdown } from '@/lib/kpis';
 import { formatKPI, format, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -13,6 +13,7 @@ import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { cn } from '@/lib/utils';
 import { formatDateShort } from '@/lib/date-utils';
@@ -240,15 +241,17 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
   if (allPayments.length === 0) {
     return (
       <EmptyState 
+        icon={<DollarSign className="w-12 h-12" />}
         title="Sin Pagos Registrados"
         description="Comienza creando un concepto para registrar tus primeros pagos."
         action={
-          <button
+          <Button
             onClick={onNavigateToConceptos}
-            className="px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors"
+            data-testid="button-create-first-concept"
           >
+            <Plus className="w-4 h-4 mr-2" />
             Crear Primer Concepto
-          </button>
+          </Button>
         }
       />
     );
