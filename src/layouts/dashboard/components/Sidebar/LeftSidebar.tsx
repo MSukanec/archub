@@ -485,7 +485,7 @@ export function LeftSidebar() {
                   </div>
 
                   {/* Espacio vacío del tamaño de un botón */}
-                  <div className="h-[32px] w-full" />
+                  <div className="h-[32px]" />
 
                   {/* BOTONES DE CONTEXTO - Renderizados según el modo del usuario */}
                   {(() => {
