@@ -43,6 +43,9 @@ export default function GeneralCostsPaymentsTab() {
   const [filterGeneralCost, setFilterGeneralCost] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
+  // Selection state
+  const [selectedPayments, setSelectedPayments] = useState<GeneralCostPayment[]>([]);
+
   const { data: allPayments = [], isLoading } = useGeneralCostsPayments(organizationId);
   const deletePaymentMutation = useDeleteGeneralCostPayment();
   const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
@@ -823,6 +826,9 @@ export default function GeneralCostsPaymentsTab() {
         isLoading={isLoading}
         showDoubleHeader={false}
         selectable={true}
+        selectedItems={selectedPayments}
+        onSelectionChange={setSelectedPayments}
+        getItemId={(payment) => payment.id}
         onRowClick={(payment) => handleView(payment)}
         renderCard={(payment: GeneralCostPayment) => (
           <GeneralCostPaymentRow
