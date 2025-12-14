@@ -121,8 +121,8 @@ body {
   --muted-fg: hsl(0, 0%, 45%);
 
   /* Popover/Dropdown */
-  --popover-bg: hsl(0, 0%, 97%);
-  --popover-fg: hsl(0, 0%, 35%);
+  --popover: hsl(0, 0%, 97%);
+  --popover-foreground: hsl(0, 0%, 35%);
   --accent-bg: hsl(90, 50%, 90%);
 
   /* Toast */
@@ -312,8 +312,8 @@ body {
   --muted-fg: hsl(0, 0%, 60%);
 
   /* Popover/Dropdown */
-  --popover-bg: hsl(0, 0%, 14%);
-  --popover-fg: hsl(0, 0%, 98%);
+  --popover: hsl(0, 0%, 14%);
+  --popover-foreground: hsl(0, 0%, 98%);
   --accent-bg: hsl(90, 30%, 20%);
 
   /* Toast */
