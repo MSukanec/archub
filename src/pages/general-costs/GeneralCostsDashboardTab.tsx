@@ -7,14 +7,23 @@ import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { useGeneralCostsPayments } from '@/hooks/use-general-costs-payments';
 import { useGeneralCostsMonthlySummary } from '@/features/general-costs/hooks/use-general-costs-monthly-summary';
 import { useGeneralCostsByCategory } from '@/features/general-costs/hooks/use-general-costs-by-category';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  StatCard, 
+  StatCardTitle, 
+  StatCardValue, 
+  StatCardMeta,
+  DashboardCard,
+  InsightCard,
+  ActivityCard,
+  EmptyDashboardState,
+  type InsightItem,
+  type ActivityItem
+} from '@/components/dashboard';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { cn } from '@/lib/utils';
 import { formatDateShort } from '@/lib/date-utils';
 
@@ -128,8 +137,8 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
     return allCategoryData.slice(0, 8);
   }, [allCategoryData]);
 
-  const insights = useMemo(() => {
-    const messages: Array<{ text: string; type: 'positive' | 'negative' | 'neutral' }> = [];
+  const insights = useMemo((): InsightItem[] => {
+    const messages: InsightItem[] = [];
     
     if (allCategoryData.length > 0 && kpis.totalGasto.value > 0) {
       const topCategoryValue = allCategoryData[0]?.value || 0;
@@ -141,8 +150,8 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
       
       if (percentage >= 50) {
         messages.push({
-          text: `"${topCategoryName}" representa el ${percentage}% del gasto total`,
-          type: 'neutral'
+          title: `"${topCategoryName}" representa el ${percentage}% del gasto total`,
+          variant: 'info'
         });
       }
     }
@@ -155,8 +164,8 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
     
     if (thisMonthPayments.length > 0) {
       messages.push({
-        text: `${thisMonthPayments.length} pago${thisMonthPayments.length > 1 ? 's' : ''} registrado${thisMonthPayments.length > 1 ? 's' : ''} este mes`,
-        type: 'neutral'
+        title: `${thisMonthPayments.length} pago${thisMonthPayments.length > 1 ? 's' : ''} registrado${thisMonthPayments.length > 1 ? 's' : ''} este mes`,
+        variant: 'info'
       });
     }
     
@@ -169,13 +178,15 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
         if (Math.abs(change) > 15) {
           if (change > 0) {
             messages.push({
-              text: `El último mes aumentó ${Math.round(change)}% respecto al anterior`,
-              type: 'negative'
+              title: `El último mes aumentó ${Math.round(change)}% respecto al anterior`,
+              icon: <ArrowUpRight className="h-3 w-3 text-red-600 dark:text-red-400" />,
+              variant: 'danger'
             });
           } else {
             messages.push({
-              text: `El último mes disminuyó ${Math.round(Math.abs(change))}% respecto al anterior`,
-              type: 'positive'
+              title: `El último mes disminuyó ${Math.round(Math.abs(change))}% respecto al anterior`,
+              icon: <ArrowDownRight className="h-3 w-3 text-green-600 dark:text-green-400" />,
+              variant: 'success'
             });
           }
         }
@@ -184,20 +195,58 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
     
     if (confirmedPayments.length > 0) {
       messages.push({
-        text: `${confirmedPayments.length} pago${confirmedPayments.length > 1 ? 's' : ''} confirmado${confirmedPayments.length > 1 ? 's' : ''} en total`,
-        type: 'neutral'
+        title: `${confirmedPayments.length} pago${confirmedPayments.length > 1 ? 's' : ''} confirmado${confirmedPayments.length > 1 ? 's' : ''} en total`,
+        variant: 'info'
       });
     }
     
     return messages.slice(0, 4);
   }, [kpis, allCategoryData, confirmedPayments, monthlyChartData]);
 
-  const recentPayments = useMemo(() => {
+  const recentActivityItems = useMemo((): ActivityItem[] => {
     return allPayments
       .filter(p => p.status === 'confirmed')
       .sort((a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())
-      .slice(0, 5);
-  }, [allPayments]);
+      .slice(0, 5)
+      .map((payment) => ({
+        id: payment.id,
+        title: payment.general_cost?.name || 'Sin concepto',
+        subtitle: formatDateShort(payment.payment_date),
+        rightContent: (
+          <div className="text-right">
+            <span className="text-sm font-medium whitespace-nowrap block">
+              {format(
+                convertToBaseCurrency(
+                  payment.currency?.code || 'ARS',
+                  defaultCurrency?.code,
+                  payment.amount,
+                  payment.exchange_rate ?? null,
+                  { quoteCurrency: 'USD' }
+                ),
+                defaultCurrency?.symbol || '$'
+              )}
+            </span>
+            {payment.currency?.code !== defaultCurrency?.code && (
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                {format(payment.amount, payment.currency?.symbol || '$')}
+              </span>
+            )}
+          </div>
+        ),
+        badge: (
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "text-xs",
+              "border-green-500 text-green-600 dark:text-green-400"
+            )}
+          >
+            <CheckCircle2 className="h-3 w-3 mr-1" />
+            Confirmado
+          </Badge>
+        )
+      }));
+  }, [allPayments, defaultCurrency]);
 
   if (isLoading) {
     return (
@@ -217,7 +266,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
 
   if (allPayments.length === 0) {
     return (
-      <EmptyState 
+      <EmptyDashboardState 
         icon={<CreditCard className="w-12 h-12" />}
         title="Todavía no tenés gastos generales registrados"
         description="Comienza creando un concepto para registrar tus primeros pagos (por ejemplo: Contador, Alquiler, Electricidad)."
@@ -230,6 +279,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
             Crear Primer Concepto
           </Button>
         }
+        data-testid="empty-dashboard-state"
       />
     );
   }
@@ -275,133 +325,46 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card data-testid="chart-monthly-trend">
-          <CardHeader>
-            <CardTitle className="text-base font-medium">Evolución Mensual</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <MonthlyTrendChart 
-              data={monthlyChartData}
-              height={280}
-              emptyText="No hay datos de gastos registrados"
-            />
-          </CardContent>
-        </Card>
+        <DashboardCard 
+          title="Evolución Mensual"
+          data-testid="chart-monthly-trend"
+        >
+          <MonthlyTrendChart 
+            data={monthlyChartData}
+            height={280}
+            emptyText="No hay datos de gastos registrados"
+          />
+        </DashboardCard>
 
-        <Card data-testid="chart-category-breakdown">
-          <CardHeader>
-            <CardTitle className="text-base font-medium">Distribución por Categoría</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CategoryBreakdownChart 
-              data={categoryChartData}
-              height={280}
-              emptyText="No hay categorías con gastos registrados"
-            />
-          </CardContent>
-        </Card>
+        <DashboardCard 
+          title="Distribución por Categoría"
+          data-testid="chart-category-breakdown"
+        >
+          <CategoryBreakdownChart 
+            data={categoryChartData}
+            height={280}
+            emptyText="No hay categorías con gastos registrados"
+          />
+        </DashboardCard>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {insights.length > 0 && (
-          <Card data-testid="insights-section">
-            <CardHeader>
-              <CardTitle className="text-base font-medium flex items-center gap-2">
-                <Lightbulb className="h-4 w-4" />
-                Insights
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {insights.map((insight, index) => (
-                  <li 
-                    key={index} 
-                    className="flex items-start gap-3"
-                    data-testid={`insight-item-${index}`}
-                  >
-                    <div className={cn(
-                      "mt-0.5 p-1 rounded-full",
-                      insight.type === 'positive' && "bg-green-100 dark:bg-green-900/30",
-                      insight.type === 'negative' && "bg-red-100 dark:bg-red-900/30",
-                      insight.type === 'neutral' && "bg-muted"
-                    )}>
-                      {insight.type === 'positive' && <ArrowDownRight className="h-3 w-3 text-green-600 dark:text-green-400" />}
-                      {insight.type === 'negative' && <ArrowUpRight className="h-3 w-3 text-red-600 dark:text-red-400" />}
-                      {insight.type === 'neutral' && <TrendingUp className="h-3 w-3 text-muted-foreground" />}
-                    </div>
-                    <span className="text-sm text-muted-foreground">{insight.text}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+          <InsightCard
+            title="Insights"
+            titleIcon={<Lightbulb className="h-4 w-4 text-muted-foreground" />}
+            items={insights}
+            data-testid="insights-section"
+          />
         )}
 
-        <Card data-testid="recent-activity-section">
-          <CardHeader>
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Actividad Reciente
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {recentPayments.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">
-                No hay pagos registrados
-              </p>
-            ) : (
-              <ul className="space-y-3">
-                {recentPayments.map((payment, index) => (
-                  <li 
-                    key={payment.id} 
-                    className="flex items-center justify-between gap-4 py-2 border-b border-border last:border-0"
-                    data-testid={`recent-payment-${index}`}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {payment.general_cost?.name || 'Sin concepto'}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDateShort(payment.payment_date)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <span className="text-sm font-medium whitespace-nowrap block">
-                          {format(
-                            convertToBaseCurrency(
-                              payment.currency?.code || 'ARS',
-                              defaultCurrency?.code,
-                              payment.amount,
-                              payment.exchange_rate ?? null,
-                              { quoteCurrency: 'USD' }
-                            ),
-                            defaultCurrency?.symbol || '$'
-                          )}
-                        </span>
-                        {payment.currency?.code !== defaultCurrency?.code && (
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">
-                            {format(payment.amount, payment.currency?.symbol || '$')}
-                          </span>
-                        )}
-                      </div>
-                      <Badge 
-                        variant="outline" 
-                        className={cn(
-                          "text-xs",
-                          payment.status === 'confirmed' && "border-green-500 text-green-600 dark:text-green-400"
-                        )}
-                      >
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Confirmado
-                      </Badge>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
+        <ActivityCard
+          title="Actividad Reciente"
+          titleIcon={<Clock className="h-4 w-4 text-muted-foreground" />}
+          items={recentActivityItems}
+          emptyText="No hay pagos registrados"
+          data-testid="recent-activity-section"
+        />
       </div>
     </div>
   );

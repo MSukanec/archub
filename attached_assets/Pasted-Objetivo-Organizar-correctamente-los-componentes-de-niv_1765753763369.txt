@@ -1,0 +1,158 @@
+Objetivo:
+Organizar correctamente los componentes de nivel 2 del Dashboard siguiendo estándares internacionales de diseño de dashboards SaaS (KPI, cards, insights, activity), sin mezclar UI base ni charts puros.
+
+1️⃣ Nombres y estructura (NO cambiar KPICard)
+
+Mantener el archivo existente:
+
+src/components/dashboard/KPICard.tsx
+
+
+El nombre es correcto internacionalmente y no debe modificarse.
+
+2️⃣ Crear nuevos componentes de Dashboard (nivel 2)
+
+En la carpeta:
+
+src/components/dashboard/
+
+
+Crear los siguientes componentes:
+
+a) DashboardCard.tsx
+
+Rol: contenedor estándar para bloques del dashboard (gráficos, tablas, widgets).
+
+Usa internamente el componente Card de UI.
+
+Props sugeridas:
+
+title?: string
+
+description?: string
+
+actions?: ReactNode
+
+children: ReactNode
+
+Define:
+
+header (title + actions)
+
+spacing interno
+
+layout consistente
+
+NO define estilos globales (solo layout).
+
+b) InsightCard.tsx
+
+Rol: mostrar insights automáticos, alertas o mensajes interpretativos.
+
+Usa Card internamente.
+
+Props:
+
+icon
+
+title
+
+description
+
+variant (info | warning | success | danger)
+
+c) ActivityCard.tsx
+
+Rol: mostrar actividad reciente (pagos, eventos, cambios).
+
+Usa Card internamente.
+
+Contiene una lista simple (no tabla).
+
+Pensado para dashboard, no para vistas completas.
+
+d) EmptyDashboardState.tsx
+
+Rol: empty state cuando no hay datos suficientes para mostrar el dashboard.
+
+Mensaje claro y orientado a acción.
+
+Botón principal configurable (ej: “Crear primer concepto”).
+
+NO navega directamente: solo expone callbacks.
+
+3️⃣ Exportaciones
+
+Actualizar:
+
+src/components/dashboard/index.ts
+
+
+Para exportar:
+
+KPICard
+
+DashboardCard
+
+InsightCard
+
+ActivityCard
+
+EmptyDashboardState
+
+4️⃣ Documentación obligatoria
+
+Crear / actualizar:
+
+src/components/dashboard/README.md
+
+
+El README debe explicar:
+
+Qué es el nivel Dashboard
+
+Qué tipo de componentes van ahí
+
+Diferencia entre:
+
+KPICard
+
+DashboardCard
+
+charts puros
+
+Ejemplos de uso
+
+Qué NO debe colocarse en esta carpeta
+
+5️⃣ Refactor de la página “Gastos Generales → Dashboard”
+
+Modificar la página del dashboard de gastos generales para:
+
+Usar KPICard solo para métricas principales.
+
+Envolver gráficos dentro de DashboardCard (no usar Card UI directo).
+
+Usar InsightCard para insights automáticos.
+
+Usar ActivityCard para actividad reciente.
+
+Mostrar EmptyDashboardState cuando no haya datos.
+
+❗ Importante:
+
+No duplicar lógica.
+
+No mover charts de components/charts.
+
+No agregar estilos hardcodeados.
+
+6️⃣ Principios que debés respetar
+
+Un componente = una responsabilidad clara.
+
+Los tamaños de texto de KPI los define KPICard, no la página.
+
+La página solo orquesta, no diseña.
+
+Ejecutar los cambios de forma incremental, clara y documentada.
