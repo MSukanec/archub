@@ -1,9 +1,6 @@
 export { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from './KPICard';
 export type { StatCardProps } from './KPICard';
 
-export { DashboardCardHeader } from './DashboardCardHeader';
-export type { DashboardCardHeaderProps } from './DashboardCardHeader';
-
 export { DashboardCard } from './DashboardCard';
 export type { DashboardCardProps } from './DashboardCard';
 

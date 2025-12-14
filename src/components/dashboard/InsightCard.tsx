@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Card } from '@/components/ui/card';
-import { DashboardCardHeader } from './DashboardCardHeader';
+import { DashboardCardHeader } from './internal/DashboardCardHeader';
 import { cn } from '@/lib/utils';
 import { Info, AlertTriangle, CheckCircle2, XCircle, LucideIcon } from 'lucide-react';
 

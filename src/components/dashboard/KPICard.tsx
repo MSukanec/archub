@@ -68,7 +68,7 @@ interface StatCardTitleProps extends React.HTMLAttributes<HTMLDivElement> {
 const StatCardTitle = ({ children, className, showArrow = true, ...props }: StatCardTitleProps) => {
   return (
     <div className={cn(
-      "flex items-center gap-1.5 text-xs font-semibold text-muted-foreground",
+      "flex items-center gap-1.5 text-sm font-medium text-muted-foreground",
       "group-hover:underline transition-all",
       className
     )} {...props}>
