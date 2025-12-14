@@ -9,6 +9,3 @@ export type { InsightCardProps, InsightItem } from './InsightCard';
 
 export { ActivityCard } from './ActivityCard';
 export type { ActivityCardProps, ActivityItem } from './ActivityCard';
-
-export { EmptyDashboardState } from './EmptyDashboardState';
-export type { EmptyDashboardStateProps } from './EmptyDashboardState';

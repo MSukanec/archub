@@ -18,7 +18,6 @@ Los Dashboard Blocks son **componentes reutilizables de dashboard** que:
 | `DashboardCard` | Contenedor estándar para gráficos/widgets | ✅ |
 | `InsightCard` | Insights automáticos, alertas, mensajes | ✅ |
 | `ActivityCard` | Actividad reciente (lista simple) | ✅ |
-| `EmptyDashboardState` | Estado vacío cuando no hay datos | ❌ |
 
 ## Estructura interna
 

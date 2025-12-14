@@ -15,10 +15,10 @@ import {
   DashboardCard,
   InsightCard,
   ActivityCard,
-  EmptyDashboardState,
   type InsightItem,
   type ActivityItem
 } from '@/components/dashboard';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -266,7 +266,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
 
   if (allPayments.length === 0) {
     return (
-      <EmptyDashboardState 
+      <EmptyState 
         icon={<CreditCard className="w-12 h-12" />}
         title="Todavía no tenés gastos generales registrados"
         description="Comienza creando un concepto para registrar tus primeros pagos (por ejemplo: Contador, Alquiler, Electricidad)."
