@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { Card } from '@/components/ui/card';
+import { DashboardCardHeader } from './DashboardCardHeader';
 import { cn } from '@/lib/utils';
 import { Info, AlertTriangle, CheckCircle2, XCircle, LucideIcon } from 'lucide-react';
 
@@ -55,10 +56,10 @@ export function InsightCard({
   return (
     <Card className={cn('p-4', className)} data-testid={testId}>
       {title && (
-        <div className="flex items-center gap-2 mb-4">
-          {titleIcon}
-          <h3 className="text-base font-medium">{title}</h3>
-        </div>
+        <DashboardCardHeader
+          icon={titleIcon}
+          title={title}
+        />
       )}
       <ul className="space-y-3">
         {items.map((item, index) => {

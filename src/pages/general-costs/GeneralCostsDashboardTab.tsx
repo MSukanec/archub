@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TrendingUp, Calendar, Tag, DollarSign, CreditCard, Lightbulb, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, Plus } from 'lucide-react';
+import { TrendingUp, Calendar, Tag, DollarSign, CreditCard, Lightbulb, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, Plus, BarChart3, PieChart } from 'lucide-react';
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakdown } from '@/lib/kpis';
 import { format, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -327,6 +327,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DashboardCard 
           title="Evolución Mensual"
+          icon={<BarChart3 />}
           data-testid="chart-monthly-trend"
         >
           <MonthlyTrendChart 
@@ -338,6 +339,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
 
         <DashboardCard 
           title="Distribución por Categoría"
+          icon={<PieChart />}
           data-testid="chart-category-breakdown"
         >
           <CategoryBreakdownChart 
@@ -352,7 +354,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
         {insights.length > 0 && (
           <InsightCard
             title="Insights"
-            titleIcon={<Lightbulb className="h-4 w-4 text-muted-foreground" />}
+            titleIcon={<Lightbulb />}
             items={insights}
             data-testid="insights-section"
           />
@@ -360,7 +362,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
 
         <ActivityCard
           title="Actividad Reciente"
-          titleIcon={<Clock className="h-4 w-4 text-muted-foreground" />}
+          titleIcon={<Clock />}
           items={recentActivityItems}
           emptyText="No hay pagos registrados"
           data-testid="recent-activity-section"

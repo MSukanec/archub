@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { DashboardCardHeader } from './DashboardCardHeader';
 import { cn } from '@/lib/utils';
 
 export interface DashboardCardProps {
@@ -23,27 +24,19 @@ export function DashboardCard({
   contentClassName,
   'data-testid': testId,
 }: DashboardCardProps) {
-  const hasHeader = title || description || icon || actions;
+  const hasHeader = title || icon;
 
   return (
-    <Card className={cn(className)} data-testid={testId}>
+    <Card className={cn('p-4', className)} data-testid={testId}>
       {hasHeader && (
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <div className="flex items-center gap-2">
-            {icon && <span className="text-muted-foreground">{icon}</span>}
-            <div>
-              {title && (
-                <CardTitle className="text-base font-medium">{title}</CardTitle>
-              )}
-              {description && (
-                <CardDescription className="text-sm">{description}</CardDescription>
-              )}
-            </div>
-          </div>
-          {actions && <div className="flex items-center gap-2">{actions}</div>}
-        </CardHeader>
+        <DashboardCardHeader
+          icon={icon}
+          title={title || ''}
+          description={description}
+          actions={actions}
+        />
       )}
-      <CardContent className={cn(contentClassName)}>{children}</CardContent>
+      <div className={cn(contentClassName)}>{children}</div>
     </Card>
   );
 }

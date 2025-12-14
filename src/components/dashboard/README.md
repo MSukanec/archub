@@ -19,6 +19,32 @@ Los Dashboard Blocks son **componentes reutilizables de dashboard** que:
 | `InsightCard` | Insights automáticos, alertas, mensajes | ✅ |
 | `ActivityCard` | Actividad reciente (lista simple) | ✅ |
 | `EmptyDashboardState` | Estado vacío cuando no hay datos | ❌ |
+| `DashboardCardHeader` | Header compartido para unificar estilos | - |
+
+---
+
+## DashboardCardHeader (Header Unificado)
+
+Componente interno que unifica el estilo visual de todos los headers de cards.
+
+**Especificaciones de diseño:**
+- Íconos: `16px` (h-4 w-4) en `text-muted-foreground`
+- Título: `text-sm font-medium text-foreground`
+- Descripción: `text-xs text-muted-foreground`
+- Espaciado: `pb-3`
+
+Este componente es usado internamente por `DashboardCard`, `InsightCard` y `ActivityCard` para garantizar consistencia visual.
+
+```tsx
+import { DashboardCardHeader } from '@/components/dashboard';
+import { BarChart3 } from 'lucide-react';
+
+<DashboardCardHeader
+  icon={<BarChart3 />}
+  title="Evolución Mensual"
+  description="Últimos 12 meses"
+/>
+```
 
 ---
 

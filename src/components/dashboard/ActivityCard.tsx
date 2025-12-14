@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { Card } from '@/components/ui/card';
+import { DashboardCardHeader } from './DashboardCardHeader';
 import { cn } from '@/lib/utils';
 
 export interface ActivityItem {
@@ -30,10 +31,10 @@ export function ActivityCard({
   return (
     <Card className={cn('p-4', className)} data-testid={testId}>
       {title && (
-        <div className="flex items-center gap-2 mb-4">
-          {titleIcon}
-          <h3 className="text-base font-medium">{title}</h3>
-        </div>
+        <DashboardCardHeader
+          icon={titleIcon}
+          title={title}
+        />
       )}
       {items.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-6">{emptyText}</p>
