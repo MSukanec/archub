@@ -264,7 +264,11 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
         if (item.paymentCount === 0) {
           return <div className="text-sm text-muted-foreground">—</div>;
         }
-        const breakdownText = item.totalPaidKPI.breakdown && item.totalPaidKPI.breakdown.length > 0
+        // Check if there are multiple unique currencies in payments
+        const uniqueCurrencies = new Set(item.associatedPayments.map(p => p.currency_id));
+        const hasMultipleCurrencies = uniqueCurrencies.size > 1;
+        
+        const breakdownText = hasMultipleCurrencies && item.totalPaidKPI.breakdown && item.totalPaidKPI.breakdown.length > 0
           ? formatSubValue(item.totalPaidKPI.breakdown)
           : undefined;
         return (
