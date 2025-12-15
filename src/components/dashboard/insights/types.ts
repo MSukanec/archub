@@ -45,6 +45,7 @@ export interface InsightContext {
   paymentsByConcept: PaymentsByConceptData[];
   isShortPeriod: boolean;
   daysCount: number;
+  currentMonth?: number;
 }
 
 export type InsightRule = (context: InsightContext) => Insight | null;

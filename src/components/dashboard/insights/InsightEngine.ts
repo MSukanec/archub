@@ -43,6 +43,7 @@ export function buildInsightContext(params: {
   paymentsByConcept?: PaymentsByConceptData[];
   isShortPeriod?: boolean;
   daysCount?: number;
+  currentMonth?: number;
 }): InsightContext {
   const { 
     totalGasto, 
@@ -54,7 +55,8 @@ export function buildInsightContext(params: {
     monthCount,
     paymentsByConcept = [],
     isShortPeriod = false,
-    daysCount = 0
+    daysCount = 0,
+    currentMonth = new Date().getMonth() + 1
   } = params;
   
   let topCategoryName = '';
@@ -83,6 +85,7 @@ export function buildInsightContext(params: {
     topCategoryName,
     paymentsByConcept,
     isShortPeriod,
-    daysCount
+    daysCount,
+    currentMonth
   };
 }

@@ -1,4 +1,5 @@
 import { type Insight, type InsightContext, type InsightRule, type InsightAction } from './types';
+import { detectTrendDirection, projectYearEndSpend, formatProjectionInsight } from '@/lib/analytics';
 
 /**
  * Insight 1 – Crecimiento explicado (narrativo)
@@ -400,10 +401,159 @@ export const consolidationOpportunityInsight: InsightRule = (context: InsightCon
   };
 };
 
+/**
+ * Insight 6 – Tendencia sostenida de gasto
+ * Detecta si hay una tendencia clara (ascendente/descendente) en los últimos meses
+ */
+export const sustainedTrendInsight: InsightRule = (context: InsightContext): Insight | null => {
+  if (context.isShortPeriod || context.monthlyData.length < 3) return null;
+
+  const values = context.monthlyData.map(m => m.value);
+  const trend = detectTrendDirection(values, { minDataPoints: 3, stableThresholdPercent: 8 });
+
+  if (!trend || trend.direction === 'stable') return null;
+  if (trend.confidence === 'low') return null;
+
+  const changePercent = Math.abs(trend.monthlyChangePercent);
+  if (changePercent < 10) return null;
+
+  const isIncreasing = trend.direction === 'increasing';
+  const confidenceText = trend.confidence === 'high' ? 'consistente' : 'moderada';
+
+  return {
+    id: isIncreasing ? 'sustained-trend-up' : 'sustained-trend-down',
+    type: isIncreasing ? 'warning' : 'info',
+    title: isIncreasing ? 'Tendencia de aumento sostenido' : 'Tendencia de reducción sostenida',
+    description: `El gasto ${isIncreasing ? 'aumenta' : 'disminuye'} ~${Math.round(changePercent)}% mensual en promedio.`,
+    icon: isIncreasing ? 'TrendingUp' : 'TrendingDown',
+    priority: 2,
+    context: `Tendencia ${confidenceText} basada en ${context.monthlyData.length} meses de datos.`,
+    actionHint: isIncreasing 
+      ? 'Revisá qué categorías están impulsando el aumento.'
+      : 'Verificá si esta reducción es planificada.',
+    actions: [
+      {
+        id: 'view-monthly-trend',
+        label: 'Ver evolución',
+        type: 'open',
+        payload: { panel: 'monthlyChart' }
+      }
+    ]
+  };
+};
+
+/**
+ * Insight 7 – Proyección de cierre anual
+ * Proyecta el gasto al cierre del año basándose en la tendencia actual
+ * Solo considera los meses del año actual (últimos N meses según currentMonth)
+ */
+export const yearEndProjectionInsight: InsightRule = (context: InsightContext): Insight | null => {
+  if (context.isShortPeriod || context.monthlyData.length < 3) return null;
+
+  const currentMonth = context.currentMonth ?? new Date().getMonth() + 1;
+  
+  if (currentMonth >= 11) return null;
+
+  const allValues = context.monthlyData.map(m => m.value);
+  const currentYearMonths = Math.min(currentMonth, allValues.length);
+  const currentYearValues = allValues.slice(-currentYearMonths);
+
+  if (currentYearValues.length < 3) return null;
+
+  const projection = projectYearEndSpend(currentYearValues, currentMonth, { minDataPoints: 3 });
+
+  if (!projection) return null;
+  if (projection.direction === 'stable') return null;
+  if (projection.confidence === 'low') return null;
+
+  const changePercent = Math.abs(projection.changePercent);
+  if (changePercent < 10) return null;
+
+  const isUp = projection.direction === 'up';
+  const projectionText = formatProjectionInsight(projection, 'yearEnd');
+
+  return {
+    id: isUp ? 'year-end-projection-up' : 'year-end-projection-down',
+    type: isUp ? 'warning' : 'info',
+    title: 'Proyección de cierre anual',
+    description: projectionText,
+    icon: 'Calendar',
+    priority: 3,
+    context: `Proyección basada en ${currentYearValues.length} meses del año actual, quedan ${projection.monthsRemaining} meses.`,
+    actionHint: isUp 
+      ? 'Considerá ajustar el presupuesto si el aumento no es planificado.'
+      : 'El gasto proyectado está por debajo del promedio histórico.',
+    actions: [
+      {
+        id: 'view-monthly-trend',
+        label: 'Ver evolución',
+        type: 'open',
+        payload: { panel: 'monthlyChart' }
+      }
+    ]
+  };
+};
+
+/**
+ * Insight 8 – Alerta de aceleración del gasto
+ * Detecta si el gasto está acelerando (aumento del ritmo de crecimiento)
+ */
+export const spendAccelerationInsight: InsightRule = (context: InsightContext): Insight | null => {
+  if (context.isShortPeriod || context.monthlyData.length < 4) return null;
+
+  const values = context.monthlyData.map(m => m.value);
+  
+  const midPoint = Math.floor(values.length / 2);
+  const firstHalf = values.slice(0, midPoint);
+  const secondHalf = values.slice(midPoint);
+
+  if (firstHalf.length < 2 || secondHalf.length < 2) return null;
+
+  const firstHalfTrend = detectTrendDirection(firstHalf, { minDataPoints: 2 });
+  const secondHalfTrend = detectTrendDirection(secondHalf, { minDataPoints: 2 });
+
+  if (!firstHalfTrend || !secondHalfTrend) return null;
+
+  const accelerationDelta = secondHalfTrend.monthlyChangePercent - firstHalfTrend.monthlyChangePercent;
+
+  if (Math.abs(accelerationDelta) < 10) return null;
+
+  const isAccelerating = accelerationDelta > 0;
+
+  if (isAccelerating && secondHalfTrend.direction !== 'increasing') return null;
+  if (!isAccelerating && secondHalfTrend.direction !== 'decreasing') return null;
+
+  return {
+    id: isAccelerating ? 'spend-accelerating' : 'spend-decelerating',
+    type: isAccelerating ? 'alert' : 'info',
+    title: isAccelerating ? 'El gasto está acelerando' : 'El gasto está desacelerando',
+    description: isAccelerating
+      ? `El ritmo de aumento pasó de ${Math.round(firstHalfTrend.monthlyChangePercent)}% a ${Math.round(secondHalfTrend.monthlyChangePercent)}% mensual.`
+      : `El ritmo de cambio pasó de ${Math.round(firstHalfTrend.monthlyChangePercent)}% a ${Math.round(secondHalfTrend.monthlyChangePercent)}% mensual.`,
+    icon: isAccelerating ? 'Zap' : 'Minus',
+    priority: isAccelerating ? 1 : 4,
+    context: `Comparando la primera y segunda mitad del período seleccionado.`,
+    actionHint: isAccelerating 
+      ? 'El gasto crece cada vez más rápido. Revisá las causas.'
+      : 'El ritmo de cambio se está moderando.',
+    actions: [
+      {
+        id: 'view-monthly-trend',
+        label: 'Ver evolución',
+        type: 'open',
+        payload: { panel: 'monthlyChart' }
+      }
+    ]
+  };
+};
+
 export const allInsightRules: InsightRule[] = [
   growthExplainedInsight,
   concentrationNarrativeInsight,
   operationalLoadInsight,
   repeatedPatternInsight,
-  consolidationOpportunityInsight
+  consolidationOpportunityInsight,
+  sustainedTrendInsight,
+  yearEndProjectionInsight,
+  spendAccelerationInsight
 ];

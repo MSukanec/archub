@@ -270,6 +270,9 @@ interface Insight {
 | `operationalLoad` | ≥15 pagos/mes o ≥3.5/semana | navigate → payments |
 | `repeatedPattern` | Patrón 3+ meses consecutivos | open → monthlyChart |
 | `consolidation` | Concepto con muchos pagos pequeños | navigate → concepts con filtro concepto |
+| `sustainedTrend` | Tendencia >10% mensual sostenida | open → monthlyChart |
+| `yearEndProjection` | Proyección >10% vs baseline anual | open → monthlyChart |
+| `spendAcceleration` | Aceleración >10% entre mitades del período | open → monthlyChart |
 
 ### 4.4 Uso Completo
 
@@ -400,6 +403,63 @@ const labels = getKPILabels(periodMeta);
 |---------|-----------|--------------|
 | < 2 meses | "Gasto del período" | "Promedio diario" |
 | >= 2 meses | "Gasto Total" | "Promedio Mensual" |
+
+### 5.3 Sistema de Proyecciones
+
+**Ubicación:** `src/lib/analytics/projections.ts`
+
+Sistema de proyección de gasto basado en tendencias históricas. **No usa IA**, solo análisis estadístico simple.
+
+#### Funciones Disponibles
+
+| Función | Propósito | Retorno |
+|---------|-----------|---------|
+| `detectTrendDirection` | Detecta dirección de tendencia | `TrendAnalysis` |
+| `projectMonthlySpend` | Proyecta gasto a X meses | `SpendProjection` |
+| `projectYearEndSpend` | Proyecta cierre anual | `YearEndProjection` |
+| `calculateLinearRegression` | Regresión lineal simple | `{ slope, intercept, rSquared }` |
+| `formatProjectionInsight` | Formatea texto de insight | `string` |
+
+#### Uso
+
+```typescript
+import { detectTrendDirection, projectYearEndSpend, formatProjectionInsight } from '@/lib/analytics';
+
+// 1. Detectar tendencia
+const trend = detectTrendDirection(monthlyValues, { minDataPoints: 3 });
+// { direction: 'increasing', monthlyChangePercent: 12.5, confidence: 'high' }
+
+// 2. Proyectar cierre anual
+const projection = projectYearEndSpend(monthlyValues, currentMonth);
+// { projectedAnnualSpend, changePercent, direction, monthsRemaining, confidence }
+
+// 3. Formatear para insight
+const text = formatProjectionInsight(projection, 'yearEnd');
+// "Si el gasto continúa a este ritmo, el cierre anual sería mayor en un 18%."
+```
+
+#### Niveles de Confianza
+
+| Confianza | Criterio |
+|-----------|----------|
+| `high` | ≥6 meses de datos, ≥70% consistencia en dirección |
+| `medium` | ≥4 meses de datos, ≥50% consistencia |
+| `low` | <4 meses o baja consistencia |
+
+#### Insights de Proyección Implementados
+
+| Regla | Condición | Descripción |
+|-------|-----------|-------------|
+| `sustainedTrendInsight` | Tendencia >10% mensual | "El gasto aumenta/disminuye ~X% mensual" |
+| `yearEndProjectionInsight` | Proyección >10% vs baseline | "Si continúa a este ritmo, el cierre anual sería +X%" |
+| `spendAccelerationInsight` | Aceleración >10% entre mitades | "El gasto está acelerando/desacelerando" |
+
+#### Limitaciones y Supuestos
+
+1. **Modelo lineal simple**: Las proyecciones asumen continuidad de tendencia. No detecta estacionalidad.
+2. **Mínimo 3 meses**: Requiere al menos 3 puntos de datos para proyecciones.
+3. **No considera factores externos**: Inflación, cambios de precios, eventos excepcionales.
+4. **Confianza variable**: Insights de baja confianza no se muestran al usuario.
 
 ---
 
@@ -641,8 +701,12 @@ Agregar tests de integración para:
 ## Última Actualización
 
 **Fecha:** 15 Diciembre 2025  
-**Versión:** 1.0  
+**Versión:** 1.1  
 **Cambios recientes:**
+- Sistema de Proyecciones de Gasto implementado (sin IA)
+- 3 nuevas reglas de insight: sustainedTrend, yearEndProjection, spendAcceleration
+- Funciones: detectTrendDirection, projectMonthlySpend, projectYearEndSpend
+- InsightContext extendido con currentMonth
 - Sistema de Insights Accionables implementado
 - Soporte para períodos cortos en insights
 - Comparación histórica en StatCard

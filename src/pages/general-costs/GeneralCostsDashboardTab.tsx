@@ -560,7 +560,8 @@ export default function GeneralCostsDashboardTab({
       monthCount: kpis.monthCount,
       paymentsByConcept,
       isShortPeriod: periodMeta.isShortPeriod,
-      daysCount: periodMeta.daysCount
+      daysCount: periodMeta.daysCount,
+      currentMonth: new Date().getMonth() + 1
     });
     return generateInsights(context, 3);
   }, [kpis, allCategoryData, previousCategoryData, monthlyChartData, confirmedPayments, paymentsByConcept, periodMeta]);
