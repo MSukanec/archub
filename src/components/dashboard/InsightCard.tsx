@@ -99,7 +99,7 @@ export function InsightCard({
                       {item.actions.map((action) => (
                         <Button
                           key={action.id}
-                          variant="ghost"
+                          variant="secondary"
                           size="sm"
                           className="h-7 px-2 text-xs"
                           onClick={() => onAction(action)}

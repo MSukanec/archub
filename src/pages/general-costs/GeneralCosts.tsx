@@ -171,7 +171,21 @@ export default function GeneralCosts() {
 
   return (
     <Layout headerProps={headerProps} wide={false}>
-      {activeTab === "dashboard" && <GeneralCostsDashboardTab onNavigateToConceptos={() => setActiveTab('conceptos')} selectedPeriod={validSelectedPeriod} />}
+      {activeTab === "dashboard" && (
+        <GeneralCostsDashboardTab 
+          onNavigateToConceptos={() => setActiveTab('conceptos')} 
+          onNavigateToPayments={() => setActiveTab('pagos')}
+          onNavigateToTab={(tab) => {
+            if (tab === 'concepts') setActiveTab('conceptos');
+            else if (tab === 'payments') setActiveTab('pagos');
+          }}
+          onScrollToPanel={(panelId) => {
+            const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart' ? 'monthly-trend' : panelId}"]`);
+            element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
+          selectedPeriod={validSelectedPeriod} 
+        />
+      )}
       {activeTab === "conceptos" && <GeneralCostsConceptsTab onNewGeneralCost={handleNewGeneralCost} />}
       {activeTab === "pagos" && <GeneralCostsPaymentsTab />}
       {activeTab === "ajustes" && <GeneralCostsSettingsTab />}
