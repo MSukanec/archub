@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { Plus, Edit, Trash2, Search, Filter, Bell } from "lucide-react";
-import { format } from "date-fns";
+import { Plus, Edit, Trash2, Search, Filter, Bell, Layers, CheckCircle, XCircle, DollarSign } from "lucide-react";
+import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
+import { MiniTrendChart } from '@/components/charts/legacy/MiniTrendChart';
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
@@ -113,6 +114,19 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       payments.some(p => p.general_cost_id === gc.id)
     ).length;
     const unusedConcepts = totalConcepts - usedConcepts;
+    const usagePercent = totalConcepts > 0 ? Math.round((usedConcepts / totalConcepts) * 100) : 0;
+
+    // Total pagado en todos los conceptos
+    const totalPaid = calculateMonetaryKPI({
+      items: payments.map(p => ({
+        amount: p.amount,
+        currency_id: p.currency_id,
+        currency: p.currency,
+        exchange_rate: p.exchange_rate
+      })),
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol || '$'
+    });
 
     return {
       totalConcepts: calculateCountKPI({
@@ -126,9 +140,11 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       unusedConcepts: calculateCountKPI({
         count: unusedConcepts,
         label: 'Sin pagos'
-      })
+      }),
+      usagePercent,
+      totalPaid
     };
-  }, [generalCosts, payments]);
+  }, [generalCosts, payments, defaultCurrency]);
 
   // Filter and sort
   const filteredGeneralCosts = useMemo(() => {
@@ -145,6 +161,8 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
 
   // Build enriched data for table
   const enrichedGeneralCosts = useMemo(() => {
+    const now = new Date();
+    
     return filteredGeneralCosts.map(gc => {
       const associatedPayments = payments.filter(p => p.general_cost_id === gc.id);
       const lastPayment = associatedPayments.length > 0 
@@ -165,12 +183,39 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
         symbol: defaultCurrency?.symbol || '$'
       });
 
+      // Calculate monthly trend data (last 6 months)
+      const trendData: { value: number }[] = [];
+      for (let i = 5; i >= 0; i--) {
+        const monthDate = subMonths(now, i);
+        const monthStart = startOfMonth(monthDate);
+        const monthEnd = endOfMonth(monthDate);
+        
+        const monthPayments = associatedPayments.filter(p => {
+          const paymentDate = parseLocalDate(p.payment_date);
+          return paymentDate && paymentDate >= monthStart && paymentDate <= monthEnd;
+        });
+        
+        // Sum payments converted to base currency
+        const monthTotal = monthPayments.reduce((sum, p) => {
+          const converted = convertToBaseCurrency(
+            p.currency?.code || defaultCurrency?.code || 'ARS',
+            defaultCurrency?.code || 'ARS',
+            p.amount,
+            p.exchange_rate || 1
+          );
+          return sum + converted;
+        }, 0);
+        
+        trendData.push({ value: monthTotal });
+      }
+
       return {
         ...gc,
         paymentCount: associatedPayments.length,
         lastPaymentDate: lastPayment?.payment_date,
         totalPaidKPI,
-        associatedPayments
+        associatedPayments,
+        trendData
       };
     });
   }, [filteredGeneralCosts, payments, defaultCurrency]);
@@ -235,6 +280,18 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
           </div>
         );
       }
+    },
+    {
+      key: 'trend',
+      label: 'Tendencia (6 meses)',
+      render: (item: typeof enrichedGeneralCosts[0]) => (
+        <div className="w-24">
+          <MiniTrendChart 
+            data={item.trendData} 
+            color="hsl(var(--primary))"
+          />
+        </div>
+      )
     },
     {
       key: 'description',
@@ -316,40 +373,56 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
   return (
     <div className="space-y-6">
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="stat-card-total-concepts">
           <StatCardTitle showArrow={false}>
+            <Layers className="h-4 w-4" />
             Total Conceptos
           </StatCardTitle>
           <StatCardValue>
             {kpis.totalConcepts.value}
           </StatCardValue>
           <StatCardMeta>
-            {typeof kpis.totalConcepts.meta === 'string' ? kpis.totalConcepts.meta : 'Conceptos activos'}
+            Conceptos activos
           </StatCardMeta>
         </StatCard>
 
         <StatCard data-testid="stat-card-used-concepts">
           <StatCardTitle showArrow={false}>
+            <CheckCircle className="h-4 w-4" />
             Utilizados
           </StatCardTitle>
           <StatCardValue>
             {kpis.usedConcepts.value}
           </StatCardValue>
           <StatCardMeta>
-            {typeof kpis.usedConcepts.meta === 'string' ? kpis.usedConcepts.meta : 'Con pagos'}
+            {kpis.usagePercent}% del total
           </StatCardMeta>
         </StatCard>
 
         <StatCard data-testid="stat-card-unused-concepts">
           <StatCardTitle showArrow={false}>
+            <XCircle className="h-4 w-4" />
             Sin Uso
           </StatCardTitle>
           <StatCardValue>
             {kpis.unusedConcepts.value}
           </StatCardValue>
           <StatCardMeta>
-            {typeof kpis.unusedConcepts.meta === 'string' ? kpis.unusedConcepts.meta : 'Sin pagos'}
+            Conceptos sin pagos
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard data-testid="stat-card-total-paid">
+          <StatCardTitle showArrow={false}>
+            <DollarSign className="h-4 w-4" />
+            Total Pagado
+          </StatCardTitle>
+          <StatCardValue>
+            {defaultCurrency?.symbol} {kpis.totalPaid.formatted}
+          </StatCardValue>
+          <StatCardMeta>
+            {payments.length} pagos registrados
           </StatCardMeta>
         </StatCard>
       </div>
