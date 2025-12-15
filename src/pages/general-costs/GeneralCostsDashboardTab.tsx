@@ -493,10 +493,14 @@ export default function GeneralCostsDashboardTab({
   }, [confirmedPayments, defaultCurrency, filteredByCategory, previousPeriodPayments, selectedPeriod, currentPeriodPaymentsForComparison, periodMeta]);
 
   const monthlyChartData = useMemo(() => {
-    return filteredMonthlySummary.map(m => ({
-      month: m.payment_month,
-      value: Number(m.total_amount) || 0
-    })).sort((a, b) => a.month.localeCompare(b.month));
+    return filteredMonthlySummary.map(m => {
+      // Normalize month format to YYYY-MM (e.g., "2025-03")
+      const normalizedMonth = m.payment_month.substring(0, 7);
+      return {
+        month: normalizedMonth,
+        value: Number(m.total_amount) || 0
+      };
+    }).sort((a, b) => a.month.localeCompare(b.month));
   }, [filteredMonthlySummary]);
 
   const currentMonthComparison = useMemo(() => {
