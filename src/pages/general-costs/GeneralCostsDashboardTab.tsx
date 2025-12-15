@@ -581,7 +581,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
 
   return (
     <div className="space-y-6" data-testid="general-costs-dashboard">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="kpi-total-gasto">
           <StatCardTitle>
             <DollarSign className="h-4 w-4" />
@@ -622,7 +622,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
             Concentración del Gasto
           </StatCardTitle>
           <StatCardValue>{kpis.topCategoryPercentage}%</StatCardValue>
-          <StatCardMeta>{kpis.topCategoryName}</StatCardMeta>
+          <StatCardMeta className="mt-1">{kpis.topCategoryName}</StatCardMeta>
         </StatCard>
       </div>
 
