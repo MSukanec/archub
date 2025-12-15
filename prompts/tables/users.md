@@ -1,4 +1,4 @@
-# Detalle de las tablas de Supabase relacionadas a USUARIOS:
+![image](image.png)# Detalle de las tablas de Supabase relacionadas a USUARIOS:
 
 --------------- TABLA USER_DATA:
 
