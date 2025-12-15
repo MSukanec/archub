@@ -191,6 +191,22 @@ export default function GeneralCostsDashboardTab({
         break;
     }
   }, [onNavigateToConceptos, onNavigateToPayments, onNavigateToTab, onScrollToPanel, onFilterCategory]);
+
+  const handleMonthDrillDown = useCallback((month: string) => {
+    if (onNavigateToTab) {
+      onNavigateToTab('pagos', { filterMonth: month });
+    } else {
+      onNavigateToPayments?.();
+    }
+  }, [onNavigateToTab, onNavigateToPayments]);
+
+  const handleCategoryDrillDown = useCallback((categoryName: string) => {
+    if (onNavigateToTab) {
+      onNavigateToTab('pagos', { filterGeneralCost: categoryName });
+    } else {
+      onNavigateToPayments?.();
+    }
+  }, [onNavigateToTab, onNavigateToPayments]);
   const { data: allPayments = [], isLoading: isLoadingPayments } = useGeneralCostsPayments(organizationId);
   const { data: monthlySummary = [], isLoading: isLoadingMonthlySummary } = useGeneralCostsMonthlySummary(organizationId ?? null);
   const { data: byCategory = [], isLoading: isLoadingByCategory } = useGeneralCostsByCategory(organizationId ?? null);
@@ -713,24 +729,30 @@ export default function GeneralCostsDashboardTab({
         <DashboardCard 
           title="Evolución Mensual"
           icon={<BarChart3 />}
+          description="Hacé click en un punto para ver los pagos de ese mes"
           data-testid="chart-monthly-trend"
         >
           <MonthlyTrendChart 
             data={monthlyChartData}
             height={280}
             emptyText="No hay datos de gastos registrados"
+            clickable
+            onBarClick={(month) => handleMonthDrillDown(month)}
           />
         </DashboardCard>
 
         <DashboardCard 
           title="Distribución por Categoría"
           icon={<PieChart />}
+          description="Hacé click en una categoría para ver sus pagos"
           data-testid="chart-category-breakdown"
         >
           <CategoryBreakdownChart 
             data={categoryChartData}
             height={280}
             emptyText="No hay categorías con gastos registrados"
+            clickable
+            onSliceClick={(name) => handleCategoryDrillDown(name)}
           />
         </DashboardCard>
       </div>

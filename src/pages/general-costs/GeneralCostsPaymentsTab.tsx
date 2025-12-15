@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, Calendar, TrendingUp, Filter, Search, Bell, Upload } from 'lucide-react';
+import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, Calendar, TrendingUp, Filter, Search, Bell, Upload, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -32,7 +32,17 @@ import { exportToExcel, createExportColumns } from '@/lib/export-utils';
 import { pdf } from '@react-pdf/renderer';
 import { GeneralCostPaymentsPDF, type GeneralCostPaymentsPDFData, type GeneralCostPaymentItem } from '@/features/pdf';
 
-export default function GeneralCostsPaymentsTab() {
+interface GeneralCostsPaymentsTabProps {
+  initialFilterMonth?: string;
+  initialFilterGeneralCost?: string;
+  onClearDrillDown?: () => void;
+}
+
+export default function GeneralCostsPaymentsTab({
+  initialFilterMonth,
+  initialFilterGeneralCost,
+  onClearDrillDown
+}: GeneralCostsPaymentsTabProps = {}) {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
@@ -43,8 +53,9 @@ export default function GeneralCostsPaymentsTab() {
   // Filter states
   const [filterWallet, setFilterWallet] = useState<string>('all');
   const [filterCurrency, setFilterCurrency] = useState<string>('all');
-  const [filterGeneralCost, setFilterGeneralCost] = useState<string>('all');
+  const [filterGeneralCost, setFilterGeneralCost] = useState<string>(initialFilterGeneralCost || 'all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterMonth, setFilterMonth] = useState<string>(initialFilterMonth || 'all');
 
   // Selection state
   const [selectedPayments, setSelectedPayments] = useState<GeneralCostPayment[]>([]);
@@ -74,22 +85,50 @@ export default function GeneralCostsPaymentsTab() {
   } = useActionBarMobile();
   const isMobile = useMobile();
 
+  // Sync filter states with props when they change (drill-down from dashboard)
+  useEffect(() => {
+    // Reset all drill-down filters first, then apply new ones
+    setFilterMonth(initialFilterMonth || 'all');
+    setFilterGeneralCost(initialFilterGeneralCost || 'all');
+  }, [initialFilterMonth, initialFilterGeneralCost]);
+
+  // Check if we have active drill-down filters from dashboard
+  const hasDrillDownFilter = !!(initialFilterMonth || initialFilterGeneralCost);
+  const drillDownLabel = initialFilterMonth 
+    ? (() => {
+        const [year, m] = initialFilterMonth.split('-');
+        const date = new Date(parseInt(year), parseInt(m) - 1);
+        return `Mes: ${date.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })}`;
+      })()
+    : initialFilterGeneralCost 
+      ? `Categoría: ${initialFilterGeneralCost}`
+      : null;
+
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
     const wallets = new Set<string>();
     const currencies = new Set<string>();
     const generalCosts = new Set<string>();
+    const months = new Set<string>();
 
     allPayments.forEach(payment => {
       if (payment.wallet?.wallets?.name) wallets.add(payment.wallet.wallets.name);
       if (payment.currency?.code) currencies.add(payment.currency.code);
       if (payment.general_cost?.name) generalCosts.add(payment.general_cost.name);
+      if (payment.payment_date) {
+        const date = parseLocalDate(payment.payment_date);
+        if (date) {
+          const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          months.add(monthKey);
+        }
+      }
     });
 
     return {
       wallets: Array.from(wallets).sort(),
       currencies: Array.from(currencies).sort(),
       generalCosts: Array.from(generalCosts).sort(),
+      months: Array.from(months).sort().reverse(),
     };
   }, [allPayments]);
 
@@ -100,9 +139,16 @@ export default function GeneralCostsPaymentsTab() {
       if (filterCurrency !== 'all' && payment.currency?.code !== filterCurrency) return false;
       if (filterGeneralCost !== 'all' && payment.general_cost?.name !== filterGeneralCost) return false;
       if (filterStatus !== 'all' && payment.status !== filterStatus) return false;
+      if (filterMonth !== 'all' && payment.payment_date) {
+        const date = parseLocalDate(payment.payment_date);
+        if (date) {
+          const paymentMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          if (paymentMonth !== filterMonth) return false;
+        }
+      }
       return true;
     });
-  }, [allPayments, filterWallet, filterCurrency, filterGeneralCost, filterStatus]);
+  }, [allPayments, filterWallet, filterCurrency, filterGeneralCost, filterStatus, filterMonth]);
 
   // Sort by payment_date DESC, then by created_at DESC
   const sortedPayments = useMemo(() => {
@@ -739,6 +785,8 @@ export default function GeneralCostsPaymentsTab() {
     setFilterWallet('all');
     setFilterCurrency('all');
     setFilterGeneralCost('all');
+    setFilterMonth('all');
+    onClearDrillDown?.();
     setFilterStatus('all');
   };
 
@@ -893,7 +941,8 @@ export default function GeneralCostsPaymentsTab() {
     filterWallet !== 'all' || 
     filterCurrency !== 'all' || 
     filterGeneralCost !== 'all' ||
-    filterStatus !== 'all';
+    filterStatus !== 'all' ||
+    filterMonth !== 'all';
 
   if (!organizationId) {
     return (
@@ -937,6 +986,32 @@ export default function GeneralCostsPaymentsTab() {
 
   return (
     <div className="space-y-6">
+      {/* Drill-down filter banner */}
+      {hasDrillDownFilter && drillDownLabel && (
+        <div className="flex items-center justify-between bg-accent/10 border border-accent/20 rounded-lg px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-accent" />
+            <span className="text-sm font-medium">
+              Filtrando desde dashboard: <span className="text-accent">{drillDownLabel}</span>
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setFilterMonth('all');
+              setFilterGeneralCost('all');
+              onClearDrillDown?.();
+            }}
+            className="text-xs"
+            data-testid="button-clear-drilldown"
+          >
+            <X className="h-3 w-3 mr-1" />
+            Limpiar filtro
+          </Button>
+        </div>
+      )}
+
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {/* Total Pagos - Mobile: 1 col, Desktop: 2 cols */}
@@ -1079,6 +1154,29 @@ export default function GeneralCostsPaymentsTab() {
                       {filterOptions.currencies.map(currency => (
                         <SelectItem key={currency} value={currency}>{currency}</SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Filter by Month */}
+              {filterOptions.months.length > 0 && (
+                <div>
+                  <Label className="text-xs font-medium mb-1 block">Mes</Label>
+                  <Select value={filterMonth} onValueChange={setFilterMonth}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {filterOptions.months.map(month => {
+                        const [year, m] = month.split('-');
+                        const date = new Date(parseInt(year), parseInt(m) - 1);
+                        const label = date.toLocaleDateString('es-AR', { month: 'short', year: 'numeric' });
+                        return (
+                          <SelectItem key={month} value={month}>{label}</SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>

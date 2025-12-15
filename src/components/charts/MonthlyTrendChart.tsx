@@ -14,6 +14,8 @@ interface MonthlyTrendChartProps {
   valueFormatter?: (value: number) => string
   loadingText?: string
   emptyText?: string
+  onBarClick?: (month: string, value: number) => void
+  clickable?: boolean
 }
 
 export function MonthlyTrendChart({
@@ -26,7 +28,9 @@ export function MonthlyTrendChart({
     compactDisplay: 'short'
   }).format(value),
   loadingText = 'Cargando datos...',
-  emptyText = 'No hay datos disponibles'
+  emptyText = 'No hay datos disponibles',
+  onBarClick,
+  clickable = false
 }: MonthlyTrendChartProps) {
   
   if (isLoading) {
@@ -125,6 +129,24 @@ export function MonthlyTrendChart({
             strokeWidth={2}
             fillOpacity={1}
             fill="url(#colorValue)"
+            style={clickable ? { cursor: 'pointer' } : undefined}
+            onClick={(data: any) => {
+              if (clickable && onBarClick && data?.payload) {
+                onBarClick(data.payload.month, data.payload.value)
+              }
+            }}
+            activeDot={clickable ? { 
+              r: 6, 
+              stroke: color, 
+              strokeWidth: 2,
+              fill: 'var(--background)',
+              cursor: 'pointer',
+              onClick: (e: any, payload: any) => {
+                if (onBarClick && payload?.payload) {
+                  onBarClick(payload.payload.month, payload.payload.value)
+                }
+              }
+            } : undefined}
           />
         </AreaChart>
       </ResponsiveContainer>

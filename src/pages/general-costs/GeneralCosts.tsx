@@ -27,6 +27,11 @@ const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
   { value: 'all', label: 'Histórico' },
 ]
 
+export interface DrillDownFilters {
+  filterMonth?: string;
+  filterGeneralCost?: string;
+}
+
 export default function GeneralCosts() {
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
@@ -34,6 +39,7 @@ export default function GeneralCosts() {
   const organizationId = userData?.organization?.id
   const [activeTab, setActiveTab] = useState("dashboard")
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all')
+  const [drillDownFilters, setDrillDownFilters] = useState<DrillDownFilters>({})
   
   // Get general costs to check if we should disable the Pagos tab
   const { data: generalCosts = [] } = useGeneralCosts(organizationId ?? null)
@@ -175,9 +181,12 @@ export default function GeneralCosts() {
         <GeneralCostsDashboardTab 
           onNavigateToConceptos={() => setActiveTab('conceptos')} 
           onNavigateToPayments={() => setActiveTab('pagos')}
-          onNavigateToTab={(tab) => {
+          onNavigateToTab={(tab, filters) => {
             if (tab === 'concepts') setActiveTab('conceptos');
-            else if (tab === 'payments') setActiveTab('pagos');
+            else if (tab === 'payments' || tab === 'pagos') {
+              setDrillDownFilters(filters || {});
+              setActiveTab('pagos');
+            }
           }}
           onScrollToPanel={(panelId) => {
             const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart' ? 'monthly-trend' : panelId}"]`);
@@ -187,7 +196,13 @@ export default function GeneralCosts() {
         />
       )}
       {activeTab === "conceptos" && <GeneralCostsConceptsTab onNewGeneralCost={handleNewGeneralCost} />}
-      {activeTab === "pagos" && <GeneralCostsPaymentsTab />}
+      {activeTab === "pagos" && (
+        <GeneralCostsPaymentsTab 
+          initialFilterMonth={drillDownFilters.filterMonth}
+          initialFilterGeneralCost={drillDownFilters.filterGeneralCost}
+          onClearDrillDown={() => setDrillDownFilters({})}
+        />
+      )}
       {activeTab === "ajustes" && <GeneralCostsSettingsTab />}
     </Layout>
   )

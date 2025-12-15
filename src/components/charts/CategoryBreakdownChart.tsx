@@ -16,6 +16,8 @@ interface CategoryBreakdownChartProps {
   showLegend?: boolean
   innerRadius?: number
   outerRadius?: number
+  onSliceClick?: (name: string, value: number) => void
+  clickable?: boolean
 }
 
 const COLORS = [
@@ -41,7 +43,9 @@ export function CategoryBreakdownChart({
   emptyText = 'No hay datos disponibles',
   showLegend = true,
   innerRadius = 60,
-  outerRadius = 90
+  outerRadius = 90,
+  onSliceClick,
+  clickable = false
 }: CategoryBreakdownChartProps) {
   
   if (isLoading) {
@@ -81,9 +85,19 @@ export function CategoryBreakdownChart({
             fill="#8884d8"
             dataKey="value"
             paddingAngle={2}
+            onClick={(data: any) => {
+              if (clickable && onSliceClick && data?.name) {
+                onSliceClick(data.name, data.value)
+              }
+            }}
+            style={clickable ? { cursor: 'pointer' } : undefined}
           >
             {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
+              <Cell 
+                key={`cell-${index}`} 
+                fill={entry.color}
+                style={clickable ? { cursor: 'pointer' } : undefined}
+              />
             ))}
           </Pie>
           <Tooltip 
