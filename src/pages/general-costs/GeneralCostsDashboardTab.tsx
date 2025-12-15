@@ -25,13 +25,40 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { formatDateShort } from '@/lib/date-utils';
+import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
+import { type PeriodFilter } from './GeneralCosts';
 
 interface GeneralCostsDashboardTabProps {
   onNavigateToConceptos?: () => void;
+  selectedPeriod?: PeriodFilter;
 }
 
-export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: GeneralCostsDashboardTabProps) {
+function getDateFromForPeriod(period: PeriodFilter): Date | null {
+  if (period === 'all') return null;
+  
+  const now = new Date();
+  const result = new Date(now);
+  
+  switch (period) {
+    case '30d':
+      result.setDate(result.getDate() - 30);
+      break;
+    case '3m':
+      result.setMonth(result.getMonth() - 3);
+      break;
+    case '6m':
+      result.setMonth(result.getMonth() - 6);
+      break;
+    case '1y':
+      result.setFullYear(result.getFullYear() - 1);
+      break;
+  }
+  
+  result.setHours(0, 0, 0, 0);
+  return result;
+}
+
+export default function GeneralCostsDashboardTab({ onNavigateToConceptos, selectedPeriod = 'all' }: GeneralCostsDashboardTabProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   
@@ -42,9 +69,32 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
 
   const isLoading = isLoadingPayments || isLoadingMonthlySummary || isLoadingByCategory;
 
+  const dateFrom = useMemo(() => getDateFromForPeriod(selectedPeriod), [selectedPeriod]);
+
   const confirmedPayments = useMemo(() => {
-    return allPayments.filter(p => p.status === 'confirmed');
-  }, [allPayments]);
+    const confirmed = allPayments.filter(p => p.status === 'confirmed');
+    
+    if (!dateFrom) return confirmed;
+    
+    return confirmed.filter(p => {
+      const paymentDate = parseLocalDate(p.payment_date);
+      return paymentDate && paymentDate >= dateFrom;
+    });
+  }, [allPayments, dateFrom]);
+
+  const filteredMonthlySummary = useMemo(() => {
+    if (!dateFrom) return monthlySummary;
+    
+    const fromMonth = `${dateFrom.getFullYear()}-${String(dateFrom.getMonth() + 1).padStart(2, '0')}`;
+    return monthlySummary.filter(m => m.payment_month >= fromMonth);
+  }, [monthlySummary, dateFrom]);
+
+  const filteredByCategory = useMemo(() => {
+    if (!dateFrom) return byCategory;
+    
+    const fromMonth = `${dateFrom.getFullYear()}-${String(dateFrom.getMonth() + 1).padStart(2, '0')}`;
+    return byCategory.filter(item => item.payment_month >= fromMonth);
+  }, [byCategory, dateFrom]);
 
   const kpis = useMemo(() => {
     const totalGasto = calculateMonetaryKPI({
@@ -88,7 +138,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
     let maxAmount = 0;
     const categoryTotals = new Map<string, number>();
     
-    byCategory.forEach(item => {
+    filteredByCategory.forEach(item => {
       const existing = categoryTotals.get(item.category_name) || 0;
       categoryTotals.set(item.category_name, existing + Number(item.total_amount));
     });
@@ -111,19 +161,19 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
       totalPayments,
       topCategory: topCategoryKPI
     };
-  }, [confirmedPayments, defaultCurrency, byCategory]);
+  }, [confirmedPayments, defaultCurrency, filteredByCategory]);
 
   const monthlyChartData = useMemo(() => {
-    return monthlySummary.map(m => ({
+    return filteredMonthlySummary.map(m => ({
       month: m.payment_month,
       value: Number(m.total_amount) || 0
     })).sort((a, b) => a.month.localeCompare(b.month));
-  }, [monthlySummary]);
+  }, [filteredMonthlySummary]);
 
   const allCategoryData = useMemo(() => {
     const categoryTotals = new Map<string, number>();
     
-    byCategory.forEach(item => {
+    filteredByCategory.forEach(item => {
       const existing = categoryTotals.get(item.category_name) || 0;
       categoryTotals.set(item.category_name, existing + Number(item.total_amount));
     });
@@ -131,7 +181,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
     return Array.from(categoryTotals.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
-  }, [byCategory]);
+  }, [filteredByCategory]);
 
   const categoryChartData = useMemo(() => {
     return allCategoryData.slice(0, 8);
@@ -204,8 +254,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
   }, [kpis, allCategoryData, confirmedPayments, monthlyChartData]);
 
   const recentActivityItems = useMemo((): ActivityItem[] => {
-    return allPayments
-      .filter(p => p.status === 'confirmed')
+    return confirmedPayments
       .sort((a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())
       .slice(0, 5)
       .map((payment) => ({
@@ -246,7 +295,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos }: Gene
           </Badge>
         )
       }));
-  }, [allPayments, defaultCurrency]);
+  }, [confirmedPayments, defaultCurrency]);
 
   if (isLoading) {
     return (
