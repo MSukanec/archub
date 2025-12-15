@@ -17,6 +17,7 @@ import {
   DashboardCard,
   InsightCard,
   ActivityCard,
+  CategoryHighlightCard,
   type InsightItem,
   type ActivityItem,
   type TrendDirection
@@ -358,6 +359,17 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
     const allCategoriesTotal = Array.from(categoryTotals.values()).reduce((sum, v) => sum + v, 0);
     const topCategoryPercentage = allCategoriesTotal > 0 ? Math.round((maxAmount / allCategoriesTotal) * 100) : 0;
 
+    // Generate description based on top 3 categories
+    const topCategories = Array.from(categoryTotals.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 3)
+      .map(cat => cat.name.toLowerCase());
+    
+    const categoryDescription = topCategories.length > 0 
+      ? `Concentrado principalmente en ${topCategories.join(', ')}.`
+      : 'Sin datos disponibles.';
+
     const topCategoryKPI = calculateTextKPI({
       text: topCategory || 'Sin categoría',
       icon: 'tag'
@@ -374,7 +386,9 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       totalPaymentsTrend,
       paymentsPerMonth,
       topCategory: topCategoryKPI,
-      topCategoryPercentage
+      topCategoryPercentage,
+      topCategoryName: topCategory,
+      categoryDescription
     };
   }, [confirmedPayments, defaultCurrency, filteredByCategory, previousPeriodPayments, selectedPeriod, currentPeriodPaymentsForComparison]);
 
@@ -586,18 +600,15 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
           />
         </StatCard>
 
-        <StatCard data-testid="kpi-top-category">
-          <StatCardTitle>
-            <Tag className="h-4 w-4" />
-            Categoría Principal
-          </StatCardTitle>
-          <StatCardValue className="text-lg">{kpis.topCategory.formatted}</StatCardValue>
-          <StatCardMeta>
-            {kpis.topCategoryPercentage > 0 
-              ? `${kpis.topCategoryPercentage}% del gasto total` 
-              : 'Mayor gasto acumulado'}
-          </StatCardMeta>
-        </StatCard>
+        <CategoryHighlightCard
+          data-testid="kpi-top-category"
+          title="Categoría Principal"
+          titleIcon={<Tag className="h-4 w-4" />}
+          mainValue={kpis.topCategoryName || 'Sin datos'}
+          highlightValue={`${kpis.topCategoryPercentage}%`}
+          highlightLabel="del gasto total"
+          description={kpis.categoryDescription}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
