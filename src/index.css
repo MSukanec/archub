@@ -14,11 +14,13 @@
 @tailwind utilities;
 
 html {
-  scrollbar-gutter: stable;
+  scrollbar-gutter: stable !important;
+  overflow-y: scroll !important;
 }
 
 body {
-  scrollbar-gutter: stable;
+  scrollbar-gutter: stable !important;
+  overflow-y: scroll !important;
 }
 
 /* Apply scrollbar-gutter to all overflow containers */
@@ -26,7 +28,7 @@ body {
 [class*="overflow-y"],
 .overflow-auto,
 .overflow-y-auto {
-  scrollbar-gutter: stable;
+  scrollbar-gutter: stable !important;
 }
 
 /* ========================================
