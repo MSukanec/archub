@@ -1,10 +1,18 @@
-import { type Insight, type InsightContext } from './types';
+import { type Insight, type InsightContext, type InsightRule } from './types';
 import { allInsightRules } from './insightRules';
 
-export function generateInsights(context: InsightContext, maxInsights: number = 3): Insight[] {
+/**
+ * Ejecuta un conjunto de reglas custom contra el contexto.
+ * Útil para dashboards que necesitan reglas específicas.
+ */
+export function runInsightRules(
+  context: InsightContext, 
+  rules: InsightRule[], 
+  maxInsights: number = 3
+): Insight[] {
   const insights: Insight[] = [];
   
-  for (const rule of allInsightRules) {
+  for (const rule of rules) {
     const insight = rule(context);
     if (insight !== null) {
       insights.push(insight);
@@ -14,6 +22,14 @@ export function generateInsights(context: InsightContext, maxInsights: number = 
   insights.sort((a, b) => a.priority - b.priority);
   
   return insights.slice(0, maxInsights);
+}
+
+/**
+ * Genera insights usando las reglas por defecto.
+ * Wrapper conveniente sobre runInsightRules.
+ */
+export function generateInsights(context: InsightContext, maxInsights: number = 3): Insight[] {
+  return runInsightRules(context, allInsightRules, maxInsights);
 }
 
 export function buildInsightContext(params: {
