@@ -115,12 +115,12 @@ export default function GeneralCosts() {
           <span>{selectedLabel}</span>
           <ChevronDown className="h-4 w-4" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-[180px] rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-2 text-[var(--card-fg)] shadow-lg">
+        <DropdownMenuContent align="end" className="min-w-[180px]">
           {PERIOD_OPTIONS.map((option) => (
             <DropdownMenuItem 
               key={option.value}
               onClick={() => setSelectedPeriod(option.value)}
-              className={`rounded-md px-3 py-2 text-sm cursor-pointer transition-colors ${selectedPeriod === option.value ? "bg-accent/10 font-medium" : "hover:bg-accent/10"}`}
+              className={selectedPeriod === option.value ? "font-medium text-black dark:text-white" : ""}
               data-testid={`option-period-${option.value}`}
             >
               {option.label}
