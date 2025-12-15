@@ -958,10 +958,10 @@ export default function GeneralCostsPaymentsTab() {
             Pagos a la Fecha
           </StatCardTitle>
           <StatCardValue>
-            {/* Mostrar total con símbolo de la MONEDA BASE de la organización (ej: USD 1.000) */}
+            {/* Mostrar total con símbolo de la MONEDA BASE de la organización (ej: $ 1.000) */}
             {formatMoneyAmount(
               metricsData?.total_confirmed_kpi?.value ?? 0, 
-              defaultCurrency?.code || defaultCurrency?.symbol || '$'
+              defaultCurrency?.symbol || '$'
             )}
           </StatCardValue>
           <StatCardMeta>

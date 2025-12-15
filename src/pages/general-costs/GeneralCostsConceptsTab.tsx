@@ -225,7 +225,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
         return (
           <div className="flex flex-col gap-0.5">
             <div className="text-sm font-bold">
-              {formatMoneyAmount(item.totalPaidKPI.value, defaultCurrency?.code || defaultCurrency?.symbol || '$')}
+              {formatMoneyAmount(item.totalPaidKPI.value, defaultCurrency?.symbol || '$')}
             </div>
             {breakdownText && (
               <div className="text-xs text-muted-foreground">
