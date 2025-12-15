@@ -13,6 +13,7 @@ import {
   StatCardTitle, 
   StatCardValue, 
   StatCardMeta,
+  StatCardMetaContainer,
   StatCardSubValue,
   StatCardTrend,
   StatCardHistoricalComparison,
@@ -682,15 +683,17 @@ export default function GeneralCostsDashboardTab({
             {kpiLabels.totalTitle}
           </StatCardTitle>
           <StatCardValue>{defaultCurrency?.symbol} {kpis.totalGasto.formatted}</StatCardValue>
-          {kpis.totalGastoTrendValue && (
-            <StatCardTrend direction={kpis.totalGastoTrend} value={kpis.totalGastoTrendValue} />
-          )}
-          {!periodMeta.isShortPeriod && (
-            <StatCardHistoricalComparison 
-              comparison={currentMonthComparison} 
-              label="vs promedio mensual"
-            />
-          )}
+          <StatCardMetaContainer>
+            {kpis.totalGastoTrendValue && (
+              <StatCardTrend direction={kpis.totalGastoTrend} value={kpis.totalGastoTrendValue} />
+            )}
+            {!periodMeta.isShortPeriod && (
+              <StatCardHistoricalComparison 
+                comparison={currentMonthComparison} 
+                label="vs promedio mensual"
+              />
+            )}
+          </StatCardMetaContainer>
         </StatCard>
 
         <StatCard data-testid="kpi-average-monthly">
@@ -699,12 +702,12 @@ export default function GeneralCostsDashboardTab({
             {kpiLabels.averageTitle}
           </StatCardTitle>
           <StatCardValue>{defaultCurrency?.symbol} {kpis.periodAverage?.formatted ?? kpis.averageMonthly.formatted}</StatCardValue>
-          {!periodMeta.isShortPeriod && kpis.averageMonthlyTrendValue ? (
-            <StatCardTrend direction={kpis.averageMonthlyTrend} value={kpis.averageMonthlyTrendValue} />
-          ) : (
-            <div className="h-4" />
-          )}
-          <StatCardMeta>{kpiLabels.averageHelper}</StatCardMeta>
+          <StatCardMetaContainer>
+            {!periodMeta.isShortPeriod && kpis.averageMonthlyTrendValue && (
+              <StatCardTrend direction={kpis.averageMonthlyTrend} value={kpis.averageMonthlyTrendValue} />
+            )}
+            <StatCardMeta>{kpiLabels.averageHelper}</StatCardMeta>
+          </StatCardMetaContainer>
         </StatCard>
 
         <StatCard data-testid="kpi-total-payments">
@@ -713,10 +716,12 @@ export default function GeneralCostsDashboardTab({
             Total Pagos
           </StatCardTitle>
           <StatCardValue>{kpis.totalPayments.formatted}</StatCardValue>
-          <StatCardTrend 
-            direction={kpis.totalPaymentsTrend}
-            value={`≈ ${kpis.paymentsPerMonth} pagos por mes`}
-          />
+          <StatCardMetaContainer>
+            <StatCardTrend 
+              direction={kpis.totalPaymentsTrend}
+              value={`≈ ${kpis.paymentsPerMonth} pagos por mes`}
+            />
+          </StatCardMetaContainer>
         </StatCard>
 
         <StatCard data-testid="kpi-concentration">
@@ -725,7 +730,9 @@ export default function GeneralCostsDashboardTab({
             Concentración del Gasto
           </StatCardTitle>
           <StatCardValue>{kpis.topCategoryPercentage}%</StatCardValue>
-          <StatCardMeta className="mt-1">{kpis.topCategoryName}</StatCardMeta>
+          <StatCardMetaContainer>
+            <StatCardMeta>{kpis.topCategoryName}</StatCardMeta>
+          </StatCardMetaContainer>
         </StatCard>
       </div>
 

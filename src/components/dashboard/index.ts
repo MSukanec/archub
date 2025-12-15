@@ -1,4 +1,4 @@
-export { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardSubValue, StatCardTrend, StatCardContent, StatCardHistoricalComparison } from './KPICard';
+export { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardMetaContainer, StatCardSubValue, StatCardTrend, StatCardContent, StatCardHistoricalComparison } from './KPICard';
 export type { StatCardProps, TrendDirection } from './KPICard';
 
 export { DashboardCard } from './DashboardCard';

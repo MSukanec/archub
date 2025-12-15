@@ -96,7 +96,7 @@ interface StatCardMetaProps extends React.HTMLAttributes<HTMLParagraphElement> {
 }
 
 const StatCardMeta = ({ children, className, ...props }: StatCardMetaProps) => (
-  <p className={cn("text-[11px] text-muted-foreground mt-2", className)} {...props}>
+  <p className={cn("text-xs text-muted-foreground", className)} {...props}>
     {children}
   </p>
 )
@@ -126,7 +126,7 @@ const StatCardTrend = ({ direction, value, className, ...props }: StatCardTrendP
       : 'text-muted-foreground'
   
   return (
-    <div className={cn("flex items-center gap-1 text-xs mt-1", colorClass, className)} {...props}>
+    <div className={cn("flex items-center gap-1 text-xs", colorClass, className)} {...props}>
       {direction === 'up' && <span>↑</span>}
       {direction === 'down' && <span>↓</span>}
       {direction === 'neutral' && <span>→</span>}
@@ -134,6 +134,16 @@ const StatCardTrend = ({ direction, value, className, ...props }: StatCardTrendP
     </div>
   )
 }
+
+interface StatCardMetaContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: ReactNode
+}
+
+const StatCardMetaContainer = ({ children, className, ...props }: StatCardMetaContainerProps) => (
+  <div className={cn("mt-2 min-h-[40px] flex flex-col justify-start gap-0.5", className)} {...props}>
+    {children}
+  </div>
+)
 
 interface StatCardContentProps extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode
@@ -166,12 +176,12 @@ const StatCardHistoricalComparison = ({ comparison, label = 'vs promedio', class
   const sign = deltaPercent > 0 ? '+' : ''
   
   return (
-    <div className={cn("flex items-center gap-1 text-xs mt-0.5", colorClass, className)} {...props}>
+    <div className={cn("flex items-center gap-1 text-xs", colorClass, className)} {...props}>
       <Icon className="w-3 h-3" />
       <span>{sign}{deltaPercent}% {label}</span>
     </div>
   )
 }
 
-export { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardSubValue, StatCardTrend, StatCardContent, StatCardHistoricalComparison }
+export { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardMetaContainer, StatCardSubValue, StatCardTrend, StatCardContent, StatCardHistoricalComparison }
 export type { TrendDirection }
