@@ -621,13 +621,14 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
             <TrendingUp className="h-4 w-4" />
             Concentración del Gasto
           </StatCardTitle>
-          <StatCardValue>
-            {kpis.topCategoryPercentage}%
-            <StatCardSubValue>en una sola categoría</StatCardSubValue>
-          </StatCardValue>
+          <StatCardValue>{kpis.topCategoryPercentage}%</StatCardValue>
           {kpis.concentrationTrendValue && (
             <StatCardTrend direction={kpis.concentrationTrend} value={kpis.concentrationTrendValue} />
           )}
+          <StatCardMeta>
+            {kpis.topCategoryName}
+            <div className="text-[10px] text-muted-foreground/60 mt-0.5">Mayor exposición financiera</div>
+          </StatCardMeta>
         </StatCard>
       </div>
 
