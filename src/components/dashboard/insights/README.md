@@ -18,9 +18,11 @@ src/components/dashboard/insights/
 ├── types.ts          # Tipos e interfaces
 ├── insightRules.ts   # Reglas de negocio
 ├── InsightEngine.ts  # Motor de ejecución
-├── InsightCard.tsx   # Componente visual
+├── InsightItem.tsx   # Adaptador de Insight → InsightItem
 ├── index.ts          # Exportaciones
 └── README.md         # Esta documentación
+
+src/components/dashboard/InsightCard.tsx  # Card contenedora (componente existente)
 ```
 
 ## Cómo funciona
@@ -28,7 +30,8 @@ src/components/dashboard/insights/
 1. **Contexto**: Se construye un `InsightContext` con datos agregados
 2. **Reglas**: Cada regla analiza el contexto y retorna `Insight | null`
 3. **Motor**: Ejecuta todas las reglas, filtra nulls, ordena por prioridad
-4. **Renderizado**: `InsightCard` muestra cada insight con su estilo
+4. **Adaptador**: `toInsightItems()` convierte `Insight[]` a `InsightItem[]`
+5. **Renderizado**: `InsightCard` (componente existente) muestra los items
 
 ## Reglas Actuales
 
@@ -122,8 +125,9 @@ El `InsightContext` requiere:
 import { 
   generateInsights, 
   buildInsightContext, 
-  InsightCard 
+  toInsightItems 
 } from '@/components/dashboard/insights';
+import { InsightCard } from '@/components/dashboard';
 
 function ProjectDashboard() {
   const autoInsights = useMemo(() => {
@@ -141,11 +145,12 @@ function ProjectDashboard() {
   }, [/* deps */]);
 
   return (
-    <div>
-      {autoInsights.map((insight) => (
-        <InsightCard key={insight.id} insight={insight} />
-      ))}
-    </div>
+    <InsightCard
+      title="Insights"
+      titleIcon={<Lightbulb />}
+      items={toInsightItems(autoInsights)}
+      data-testid="insights-section"
+    />
   );
 }
 ```
@@ -174,11 +179,13 @@ const insights = runInsightRules(context, [
 
 ## Estilos de los tipos
 
-| Tipo | Color Light | Color Dark | Uso |
-|------|-------------|------------|-----|
-| `info` | Azul | Azul oscuro | Información neutral o positiva |
-| `warning` | Ámbar | Ámbar oscuro | Requiere atención |
-| `alert` | Rojo | Rojo oscuro | Problema crítico |
+Los tipos de `Insight` se mapean a variantes de `InsightItem`:
+
+| Tipo Insight | Variante InsightItem | Color |
+|--------------|---------------------|-------|
+| `info` | `info` | Azul |
+| `warning` | `warning` | Amarillo |
+| `alert` | `danger` | Rojo |
 
 ## Buenas prácticas
 

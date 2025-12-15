@@ -17,10 +17,11 @@ import {
   DashboardCard,
   ActivityCard,
   CategoryHighlightCard,
+  InsightCard,
   type ActivityItem,
   type TrendDirection
 } from '@/components/dashboard';
-import { generateInsights, buildInsightContext, InsightCard as AutoInsightCard } from '@/components/dashboard/insights';
+import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
@@ -601,17 +602,12 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {autoInsights.length > 0 && (
-          <div className="space-y-3" data-testid="insights-section">
-            <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Lightbulb className="h-4 w-4" />
-              Insights
-            </h3>
-            <div className="space-y-2">
-              {autoInsights.map((insight) => (
-                <AutoInsightCard key={insight.id} insight={insight} />
-              ))}
-            </div>
-          </div>
+          <InsightCard
+            title="Insights"
+            titleIcon={<Lightbulb />}
+            items={toInsightItems(autoInsights)}
+            data-testid="insights-section"
+          />
         )}
 
         <ActivityCard
