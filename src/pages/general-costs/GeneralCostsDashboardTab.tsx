@@ -70,6 +70,16 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
   const isLoading = isLoadingPayments || isLoadingMonthlySummary || isLoadingByCategory;
 
   const dateFrom = useMemo(() => getDateFromForPeriod(selectedPeriod), [selectedPeriod]);
+  
+  // Debug logging
+  useMemo(() => {
+    console.log('[GeneralCostsDashboard] Period changed:', {
+      selectedPeriod,
+      dateFrom,
+      allPaymentsCount: allPayments.length,
+      confirmedCount: allPayments.filter(p => p.status === 'confirmed').length
+    });
+  }, [selectedPeriod, dateFrom, allPayments]);
 
   const confirmedPayments = useMemo(() => {
     const confirmed = allPayments.filter(p => p.status === 'confirmed');
