@@ -407,7 +407,7 @@ export function PartnerWithdrawalFormFields({
                     <SelectTrigger data-testid="select-partner-withdrawal-wallet">
                       <SelectValue placeholder="Seleccionar billetera" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-[var(--card-bg)] text-[var(--card-fg)] border-[var(--card-border)]">
                       {wallets?.map((orgWallet) => (
                         <SelectItem 
                           key={orgWallet.id} 
@@ -464,7 +464,7 @@ export function PartnerWithdrawalFormFields({
                     <SelectTrigger data-testid="select-partner-withdrawal-currency">
                       <SelectValue placeholder="Seleccionar moneda" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-[var(--card-bg)] text-[var(--card-fg)] border-[var(--card-border)]">
                       {currencies?.map((orgCurrency) => (
                         <SelectItem 
                           key={orgCurrency.currency?.id} 
