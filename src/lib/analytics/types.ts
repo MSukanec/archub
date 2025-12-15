@@ -22,3 +22,17 @@ export const DEFAULT_COMPARISON_OPTIONS: Required<HistoricalComparisonOptions> =
   minDataPoints: 3,
   stableThresholdPercent: 5,
 };
+
+export interface PeriodMeta {
+  monthsCount: number;
+  daysCount: number;
+  isShortPeriod: boolean;
+  periodType: 'days' | 'months' | 'years';
+}
+
+export interface KPILabels {
+  totalTitle: string;
+  totalHelper: string;
+  averageTitle: string;
+  averageHelper: string;
+}

@@ -126,3 +126,68 @@ El componente:
 3. **Separación de responsabilidades**: El cálculo está en analytics, la visualización en componentes
 4. **Null-safe**: Retorna `null` cuando no hay datos suficientes
 5. **Orden cronológico**: Asegurarse de pasar los valores históricos en orden cronológico (más antiguo primero)
+
+---
+
+## Metadatos de Período (`getPeriodMeta`)
+
+Sistema para determinar la duración real del período y ajustar la semántica de los KPIs.
+
+### Uso
+
+```typescript
+import { getPeriodMeta, getKPILabels } from '@/lib/analytics';
+
+const periodMeta = getPeriodMeta(startDate, endDate);
+const labels = getKPILabels(periodMeta);
+```
+
+### Resultado
+
+```typescript
+interface PeriodMeta {
+  monthsCount: number;      // Cantidad de meses en el período
+  daysCount: number;        // Cantidad de días en el período
+  isShortPeriod: boolean;   // true si < 2 meses
+  periodType: 'days' | 'months' | 'years';
+}
+
+interface KPILabels {
+  totalTitle: string;       // "Gasto Total" o "Gasto del período"
+  totalHelper: string;
+  averageTitle: string;     // "Promedio Mensual" o "Promedio diario"
+  averageHelper: string;
+}
+```
+
+### Semántica Dinámica de KPIs
+
+Los labels cambian según la duración del período:
+
+| Período | Total KPI | Promedio KPI |
+|---------|-----------|--------------|
+| < 2 meses | "Gasto del período" | "Promedio diario" |
+| >= 2 meses | "Gasto Total" | "Promedio Mensual" |
+
+**¿Por qué?** 
+- En períodos cortos (30 días), mostrar "Promedio Mensual" sería confuso porque hay pocos o un solo mes
+- El promedio diario es más útil para períodos cortos
+- Esto NO es un bug, es una decisión semántica intencional
+
+### Patrón a Replicar
+
+Este patrón debe aplicarse en otros módulos:
+- **Materiales**: Costo total vs Costo promedio por período
+- **Finanzas**: Cobros totales vs Cobros promedio
+- **Personal**: Pagos totales vs Pagos promedio por período
+
+### Ejemplo de Integración
+
+```tsx
+const periodMeta = useMemo(() => getPeriodMeta(dateFrom, new Date()), [dateFrom]);
+const kpiLabels = useMemo(() => getKPILabels(periodMeta), [periodMeta]);
+
+// En el render:
+<StatCardTitle>{kpiLabels.totalTitle}</StatCardTitle>
+<StatCardMeta>{kpiLabels.averageHelper}</StatCardMeta>
+```

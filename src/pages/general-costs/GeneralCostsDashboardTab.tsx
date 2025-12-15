@@ -22,7 +22,7 @@ import {
   type ActivityItem,
   type TrendDirection
 } from '@/components/dashboard';
-import { calculateHistoricalComparison } from '@/lib/analytics';
+import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
@@ -153,6 +153,13 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
   const isLoading = isLoadingPayments || isLoadingMonthlySummary || isLoadingByCategory;
 
   const dateFrom = useMemo(() => getDateFromForPeriod(selectedPeriod), [selectedPeriod]);
+
+  const periodMeta = useMemo(() => {
+    const now = new Date();
+    return getPeriodMeta(dateFrom, now);
+  }, [dateFrom]);
+
+  const kpiLabels = useMemo(() => getKPILabels(periodMeta), [periodMeta]);
 
   const confirmedPayments = useMemo(() => {
     const confirmed = allPayments.filter(p => p.status === 'confirmed');
@@ -392,6 +399,21 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       icon: 'tag'
     });
 
+    const periodDivisor = periodMeta.isShortPeriod ? periodMeta.daysCount : monthCount;
+    const periodAverageItems = confirmedPayments.map(p => ({
+      amount: p.amount / periodDivisor,
+      currency_id: p.currency_id,
+      currency: p.currency,
+      exchange_rate: p.exchange_rate
+    }));
+
+    const periodAverage = calculateMonetaryKPI({
+      items: periodAverageItems,
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol,
+      quoteCurrency: 'USD'
+    });
+
     return {
       totalGasto,
       totalGastoTrend,
@@ -399,6 +421,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       averageMonthly,
       averageMonthlyTrend,
       averageMonthlyTrendValue,
+      periodAverage,
       totalPayments,
       totalPaymentsTrend,
       paymentsPerMonth,
@@ -410,7 +433,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       previousPeriodGasto: previousTotalGasto.value,
       monthCount
     };
-  }, [confirmedPayments, defaultCurrency, filteredByCategory, previousPeriodPayments, selectedPeriod, currentPeriodPaymentsForComparison]);
+  }, [confirmedPayments, defaultCurrency, filteredByCategory, previousPeriodPayments, selectedPeriod, currentPeriodPaymentsForComparison, periodMeta]);
 
   const monthlyChartData = useMemo(() => {
     return filteredMonthlySummary.map(m => ({
@@ -586,31 +609,30 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
         <StatCard data-testid="kpi-total-gasto">
           <StatCardTitle>
             <DollarSign className="h-4 w-4" />
-            Gasto Total
+            {kpiLabels.totalTitle}
           </StatCardTitle>
           <StatCardValue>{defaultCurrency?.symbol} {kpis.totalGasto.formatted}</StatCardValue>
           {kpis.totalGastoTrendValue && (
             <StatCardTrend direction={kpis.totalGastoTrend} value={kpis.totalGastoTrendValue} />
           )}
-          <StatCardHistoricalComparison 
-            comparison={currentMonthComparison} 
-            label="vs promedio mensual"
-          />
+          {!periodMeta.isShortPeriod && (
+            <StatCardHistoricalComparison 
+              comparison={currentMonthComparison} 
+              label="vs promedio mensual"
+            />
+          )}
         </StatCard>
 
         <StatCard data-testid="kpi-average-monthly">
           <StatCardTitle>
             <TrendingUp className="h-4 w-4" />
-            Promedio Mensual
+            {kpiLabels.averageTitle}
           </StatCardTitle>
-          <StatCardValue>{defaultCurrency?.symbol} {kpis.averageMonthly.formatted}</StatCardValue>
-          {kpis.averageMonthlyTrendValue && (
+          <StatCardValue>{defaultCurrency?.symbol} {kpis.periodAverage?.formatted ?? kpis.averageMonthly.formatted}</StatCardValue>
+          {!periodMeta.isShortPeriod && kpis.averageMonthlyTrendValue && (
             <StatCardTrend direction={kpis.averageMonthlyTrend} value={kpis.averageMonthlyTrendValue} />
           )}
-          <StatCardHistoricalComparison 
-            comparison={currentMonthComparison} 
-            label="este mes vs promedio"
-          />
+          <StatCardMeta>{kpiLabels.averageHelper}</StatCardMeta>
         </StatCard>
 
         <StatCard data-testid="kpi-total-payments">
