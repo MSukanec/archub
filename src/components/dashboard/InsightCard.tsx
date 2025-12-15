@@ -1,8 +1,10 @@
 import { ReactNode } from 'react';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { DashboardCardHeader } from './internal/DashboardCardHeader';
 import { cn } from '@/lib/utils';
-import { Info, AlertTriangle, CheckCircle2, XCircle, LucideIcon } from 'lucide-react';
+import { Info, AlertTriangle, CheckCircle2, XCircle, LucideIcon, ChevronRight } from 'lucide-react';
+import { type InsightAction } from './insights/types';
 
 type InsightVariant = 'info' | 'warning' | 'success' | 'danger';
 
@@ -11,6 +13,7 @@ export interface InsightItem {
   title: string;
   description?: string;
   variant?: InsightVariant;
+  actions?: InsightAction[];
 }
 
 export interface InsightCardProps {
@@ -19,6 +22,7 @@ export interface InsightCardProps {
   items: InsightItem[];
   emptyText?: string;
   className?: string;
+  onAction?: (action: InsightAction) => void;
   'data-testid'?: string;
 }
 
@@ -51,6 +55,7 @@ export function InsightCard({
   items,
   emptyText,
   className,
+  onAction,
   'data-testid': testId,
 }: InsightCardProps) {
   return (
@@ -88,6 +93,23 @@ export function InsightCard({
                   <span className="text-sm text-muted-foreground">{item.title}</span>
                   {item.description && (
                     <p className="text-xs text-muted-foreground/70 mt-0.5">{item.description}</p>
+                  )}
+                  {item.actions && item.actions.length > 0 && onAction && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {item.actions.map((action) => (
+                        <Button
+                          key={action.id}
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => onAction(action)}
+                          data-testid={`${testId}-action-${action.id}`}
+                        >
+                          {action.label}
+                          <ChevronRight className="h-3 w-3 ml-1" />
+                        </Button>
+                      ))}
+                    </div>
                   )}
                 </div>
               </li>

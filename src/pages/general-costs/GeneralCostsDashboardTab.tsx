@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { TrendingUp, Calendar, DollarSign, CreditCard, Lightbulb, Clock, CheckCircle2, Plus, BarChart3, PieChart } from 'lucide-react';
+import { type InsightAction } from '@/components/dashboard/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakdown } from '@/lib/kpis';
 import { format, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -36,6 +37,10 @@ import { type PeriodFilter } from './GeneralCosts';
 
 interface GeneralCostsDashboardTabProps {
   onNavigateToConceptos?: () => void;
+  onNavigateToPayments?: () => void;
+  onNavigateToTab?: (tab: string, filters?: Record<string, unknown>) => void;
+  onScrollToPanel?: (panelId: string) => void;
+  onFilterCategory?: (category: string) => void;
   selectedPeriod?: PeriodFilter;
 }
 
@@ -141,11 +146,51 @@ export function calculateAvailablePeriods(allPayments: any[]): Record<PeriodFilt
   return result;
 }
 
-export default function GeneralCostsDashboardTab({ onNavigateToConceptos, selectedPeriod = 'all' }: GeneralCostsDashboardTabProps) {
+export default function GeneralCostsDashboardTab({ 
+  onNavigateToConceptos, 
+  onNavigateToPayments,
+  onNavigateToTab,
+  onScrollToPanel,
+  onFilterCategory,
+  selectedPeriod = 'all' 
+}: GeneralCostsDashboardTabProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
+
+  const handleInsightAction = useCallback((action: InsightAction) => {
+    switch (action.type) {
+      case 'navigate':
+        if (action.payload.tab === 'concepts') {
+          if (onNavigateToTab) {
+            onNavigateToTab('concepts', {
+              filterCategory: action.payload.filterCategory,
+              filterConcept: action.payload.filterConcept
+            });
+          } else {
+            onNavigateToConceptos?.();
+          }
+        } else if (action.payload.tab === 'payments') {
+          if (onNavigateToTab) {
+            onNavigateToTab('payments', action.payload);
+          } else {
+            onNavigateToPayments?.();
+          }
+        }
+        break;
+      case 'filter':
+        if (action.payload.category && typeof action.payload.category === 'string') {
+          onFilterCategory?.(action.payload.category);
+        }
+        break;
+      case 'open':
+        if (action.payload.panel && typeof action.payload.panel === 'string') {
+          onScrollToPanel?.(action.payload.panel);
+        }
+        break;
+    }
+  }, [onNavigateToConceptos, onNavigateToPayments, onNavigateToTab, onScrollToPanel, onFilterCategory]);
   const { data: allPayments = [], isLoading: isLoadingPayments } = useGeneralCostsPayments(organizationId);
   const { data: monthlySummary = [], isLoading: isLoadingMonthlySummary } = useGeneralCostsMonthlySummary(organizationId ?? null);
   const { data: byCategory = [], isLoading: isLoadingByCategory } = useGeneralCostsByCategory(organizationId ?? null);
@@ -695,6 +740,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
           titleIcon={<Lightbulb />}
           items={toInsightItems(autoInsights)}
           emptyText="Sin insights en este período. Continuá registrando pagos para obtener análisis."
+          onAction={handleInsightAction}
           data-testid="insights-section"
         />
 

@@ -1,5 +1,14 @@
 export type InsightType = 'info' | 'warning' | 'alert';
 
+export type InsightActionType = 'navigate' | 'filter' | 'open';
+
+export interface InsightAction {
+  id: string;
+  label: string;
+  type: InsightActionType;
+  payload: Record<string, unknown>;
+}
+
 export interface Insight {
   id: string;
   type: InsightType;
@@ -9,6 +18,7 @@ export interface Insight {
   priority: number;
   context?: string;      // POR QUÉ pasó (explicación del origen)
   actionHint?: string;   // QUÉ HACER (sugerencia concreta)
+  actions?: InsightAction[];
 }
 
 export interface CategoryData {

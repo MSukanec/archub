@@ -40,7 +40,8 @@ export function toInsightItems(insights: Insight[]): ContainerInsightItem[] {
       title: insight.title,
       description: fullDescription,
       variant: mapTypeToVariant(insight.type),
-      icon: getIconElement(insight.icon, 'h-3 w-3')
+      icon: getIconElement(insight.icon, 'h-3 w-3'),
+      actions: insight.actions
     };
   });
 }

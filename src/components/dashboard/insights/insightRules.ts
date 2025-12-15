@@ -1,4 +1,4 @@
-import { type Insight, type InsightContext, type InsightRule } from './types';
+import { type Insight, type InsightContext, type InsightRule, type InsightAction } from './types';
 
 /**
  * Insight 1 – Crecimiento explicado (narrativo)
@@ -47,7 +47,15 @@ export const growthExplainedInsight: InsightRule = (context: InsightContext): In
       icon: 'TrendingUp',
       priority: 1,
       context: `"${maxImpactCategory}" creció un ${roundedGrowthRate}% respecto al período anterior.`,
-      actionHint: `Revisá los conceptos de "${maxImpactCategory}" en este período.`
+      actionHint: `Revisá los conceptos de "${maxImpactCategory}" en este período.`,
+      actions: [
+        {
+          id: 'view-category-concepts',
+          label: 'Ver conceptos',
+          type: 'navigate',
+          payload: { tab: 'concepts', filterCategory: maxImpactCategory }
+        }
+      ]
     };
   } else {
     return {
@@ -58,7 +66,15 @@ export const growthExplainedInsight: InsightRule = (context: InsightContext): In
       icon: 'TrendingDown',
       priority: 3,
       context: `"${maxImpactCategory}" se redujo un ${roundedGrowthRate}% respecto al período anterior.`,
-      actionHint: `Revisá los conceptos de "${maxImpactCategory}" en este período.`
+      actionHint: `Revisá los conceptos de "${maxImpactCategory}" en este período.`,
+      actions: [
+        {
+          id: 'view-category-concepts',
+          label: 'Ver conceptos',
+          type: 'navigate',
+          payload: { tab: 'concepts', filterCategory: maxImpactCategory }
+        }
+      ]
     };
   }
 };
@@ -98,7 +114,15 @@ export const concentrationNarrativeInsight: InsightRule = (context: InsightConte
       icon: 'AlertTriangle',
       priority: 1,
       context: `"${sortedCategories[0].name}" lidera con el ${roundedPercentage}%.`,
-      actionHint: `Revisá "${sortedCategories[0].name}" en el gráfico de categorías.`
+      actionHint: `Revisá "${sortedCategories[0].name}" en el gráfico de categorías.`,
+      actions: [
+        {
+          id: 'filter-category',
+          label: 'Ver en gráfico',
+          type: 'filter',
+          payload: { category: sortedCategories[0].name }
+        }
+      ]
     };
   }
   
@@ -113,7 +137,15 @@ export const concentrationNarrativeInsight: InsightRule = (context: InsightConte
     icon: 'PieChart',
     priority: 2,
     context: `"${topCategoryName}" lidera con el ${topCategoryPercentage}%.`,
-    actionHint: `Revisá "${topCategoryName}" en el gráfico de categorías.`
+    actionHint: `Revisá "${topCategoryName}" en el gráfico de categorías.`,
+    actions: [
+      {
+        id: 'filter-category',
+        label: 'Ver en gráfico',
+        type: 'filter',
+        payload: { category: topCategoryName }
+      }
+    ]
   };
 };
 
@@ -142,7 +174,15 @@ export const operationalLoadInsight: InsightRule = (context: InsightContext): In
         icon: 'Repeat',
         priority: 4,
         context: `Esto representa ${context.paymentsCount} pagos en total.`,
-        actionHint: 'Considerá consolidar pagos recurrentes.'
+        actionHint: 'Considerá consolidar pagos recurrentes.',
+        actions: [
+          {
+            id: 'view-payments',
+            label: 'Ver pagos',
+            type: 'navigate',
+            payload: { tab: 'payments' }
+          }
+        ]
       };
     }
     return null;
@@ -161,7 +201,15 @@ export const operationalLoadInsight: InsightRule = (context: InsightContext): In
       icon: 'Repeat',
       priority: 4,
       context: `Esto representa ${context.paymentsCount} pagos en total.`,
-      actionHint: 'Considerá consolidar pagos recurrentes.'
+      actionHint: 'Considerá consolidar pagos recurrentes.',
+      actions: [
+        {
+          id: 'view-payments',
+          label: 'Ver pagos',
+          type: 'navigate',
+          payload: { tab: 'payments' }
+        }
+      ]
     };
   }
   
@@ -185,7 +233,15 @@ export const repeatedPatternInsight: InsightRule = (context: InsightContext): In
         icon: 'Tag',
         priority: 5,
         context: 'Este patrón se observa en el período actual.',
-        actionHint: 'Revisá si este nivel de gasto es esperado.'
+        actionHint: 'Revisá si este nivel de gasto es esperado.',
+        actions: [
+          {
+            id: 'open-monthly-chart',
+            label: 'Ver evolución',
+            type: 'open',
+            payload: { panel: 'monthlyChart' }
+          }
+        ]
       };
     }
     return null;
@@ -228,7 +284,15 @@ export const repeatedPatternInsight: InsightRule = (context: InsightContext): In
       icon: 'Activity',
       priority: 5,
       context: `Este patrón comenzó hace ${maxConsecutive} períodos.`,
-      actionHint: 'Revisá si este nivel de gasto es esperado.'
+      actionHint: 'Revisá si este nivel de gasto es esperado.',
+      actions: [
+        {
+          id: 'open-monthly-chart',
+          label: 'Ver evolución',
+          type: 'open',
+          payload: { panel: 'monthlyChart' }
+        }
+      ]
     };
   }
   
@@ -241,7 +305,15 @@ export const repeatedPatternInsight: InsightRule = (context: InsightContext): In
       icon: 'Tag',
       priority: 5,
       context: `Este patrón comenzó hace ${context.monthCount} períodos.`,
-      actionHint: 'Revisá si este nivel de gasto es esperado.'
+      actionHint: 'Revisá si este nivel de gasto es esperado.',
+      actions: [
+        {
+          id: 'open-monthly-chart',
+          label: 'Ver evolución',
+          type: 'open',
+          payload: { panel: 'monthlyChart' }
+        }
+      ]
     };
   }
   
@@ -278,7 +350,15 @@ export const consolidationOpportunityInsight: InsightRule = (context: InsightCon
       icon: 'Layers',
       priority: 6,
       context: `Este concepto representa el ${conceptPercentage}% del total de pagos.`,
-      actionHint: 'Revisá si podés agrupar estos pagos.'
+      actionHint: 'Revisá si podés agrupar estos pagos.',
+      actions: [
+        {
+          id: 'view-concept',
+          label: 'Ver concepto',
+          type: 'navigate',
+          payload: { tab: 'concepts', filterConcept: topCandidate.conceptName }
+        }
+      ]
     };
   }
   
@@ -308,7 +388,15 @@ export const consolidationOpportunityInsight: InsightRule = (context: InsightCon
     icon: 'Layers',
     priority: 6,
     context: `Este concepto representa el ${conceptPercentage}% del total de pagos.`,
-    actionHint: 'Revisá si podés agrupar estos pagos.'
+    actionHint: 'Revisá si podés agrupar estos pagos.',
+    actions: [
+      {
+        id: 'view-concept',
+        label: 'Ver concepto',
+        type: 'navigate',
+        payload: { tab: 'concepts', filterConcept: topCandidate.conceptName }
+      }
+    ]
   };
 };
 
