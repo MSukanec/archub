@@ -24,7 +24,7 @@ import {
   type PartnerContribution,
   type PartnerWithdrawal,
 } from '@/features/partners';
-import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge';
+import { getPartnerTransactionStatusBadgeConfig } from '@/features/partners/utils/statusBadge';
 
 type TransactionType = 'contribution' | 'withdrawal';
 
@@ -315,9 +315,16 @@ export function PartnerTransactionsTab() {
       label: 'Estado',
       width: '1fr',
       render: (item: UnifiedTransaction) => {
-        const config = getClientPaymentStatusBadgeConfig(item.status);
+        const config = getPartnerTransactionStatusBadgeConfig(item.status);
         return (
-          <Badge variant={config.variant} className={config.className}>
+          <Badge 
+            variant="default"
+            style={{
+              color: `var(${config.colorVar})`,
+              backgroundColor: `color-mix(in srgb, var(${config.colorVar}) 10%, transparent)`,
+              borderColor: `color-mix(in srgb, var(${config.colorVar}) 30%, transparent)`,
+            }}
+          >
             {config.label}
           </Badge>
         );
@@ -460,9 +467,21 @@ export function PartnerTransactionsTab() {
                 )}
                 <span className="font-medium">{item.type === 'contribution' ? 'Aporte' : 'Retiro'}</span>
               </div>
-              <Badge variant={getClientPaymentStatusBadgeConfig(item.status).variant} className={getClientPaymentStatusBadgeConfig(item.status).className}>
-                {getClientPaymentStatusBadgeConfig(item.status).label}
-              </Badge>
+              {(() => {
+                const config = getPartnerTransactionStatusBadgeConfig(item.status);
+                return (
+                  <Badge 
+                    variant="default"
+                    style={{
+                      color: `var(${config.colorVar})`,
+                      backgroundColor: `color-mix(in srgb, var(${config.colorVar}) 10%, transparent)`,
+                      borderColor: `color-mix(in srgb, var(${config.colorVar}) 30%, transparent)`,
+                    }}
+                  >
+                    {config.label}
+                  </Badge>
+                );
+              })()}
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{item.partner_name}</span>
