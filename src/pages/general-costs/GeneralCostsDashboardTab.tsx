@@ -25,6 +25,7 @@ import {
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
+import { PetalCategoryChart } from '@/components/charts/PetalCategoryChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -644,11 +645,10 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
           icon={<PieChart />}
           data-testid="chart-category-breakdown"
         >
-          <CategoryBreakdownChart 
+          <PetalCategoryChart 
             data={categoryChartData}
             height={280}
             emptyText="No hay categorías con gastos registrados"
-            variant="compact"
           />
         </DashboardCard>
       </div>
