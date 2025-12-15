@@ -191,3 +191,46 @@ const kpiLabels = useMemo(() => getKPILabels(periodMeta), [periodMeta]);
 <StatCardTitle>{kpiLabels.totalTitle}</StatCardTitle>
 <StatCardMeta>{kpiLabels.averageHelper}</StatCardMeta>
 ```
+
+---
+
+## Insights y Períodos Cortos
+
+El sistema de insights (`src/components/dashboard/insights/`) está integrado con `periodMeta` para ajustar automáticamente las reglas según la duración del período.
+
+### Integración con InsightContext
+
+```typescript
+import { buildInsightContext, generateInsights } from '@/components/dashboard/insights';
+
+const context = buildInsightContext({
+  // ... otros parámetros
+  isShortPeriod: periodMeta.isShortPeriod,
+  daysCount: periodMeta.daysCount
+});
+
+const insights = generateInsights(context, 3);
+```
+
+### Ajustes por Regla
+
+| Insight | Período Normal | Período Corto (< 60 días) |
+|---------|----------------|---------------------------|
+| **Carga Operativa** | ≥15 pagos/mes | ≥3.5 pagos/semana (mantiene paridad) |
+| **Patrón Sostenido** | Requiere ≥3 meses datos | Categoría dominante >50% + ≥3 pagos |
+| **Consolidación** | ≥3 pagos/mes y ≥6 total | ≥3 pagos en el período |
+
+### Principios
+
+1. **Umbrales proporcionales**: Los umbrales mantienen equivalencia matemática (15/mes ≈ 3.5/semana)
+2. **Actividad mínima**: Insights requieren suficiente actividad para ser significativos (ej: ≥3 pagos)
+3. **Mensajes genéricos**: Los textos usan "en el período" en lugar de días específicos
+4. **Reglas que no aplican**: Algunas reglas (ej: patrón de 3 meses) simplemente no se muestran en períodos cortos
+5. **Mismo componente visual**: Se reutiliza `InsightCard` sin cambios
+
+### Notas Técnicas
+
+- `isShortPeriod` default: `false` - La lógica de período corto NO se ejecuta a menos que se pase explícitamente
+- `daysCount` default: `0` - Los insights que requieren `daysCount` (ej: carga operativa) no se activan sin valor explícito
+- **Requerido**: Los callers deben pasar `periodMeta.isShortPeriod` y `periodMeta.daysCount` explícitamente para habilitar insights de período corto
+- `operationalLoadInsight` requiere mínimo 7 días para generar un insight válido

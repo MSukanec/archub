@@ -107,8 +107,32 @@ export const concentrationNarrativeInsight: InsightRule = (context: InsightConte
 /**
  * Insight 3 – Carga operativa elevada
  * Enfocado en la operación, no en dinero
+ * Ajustado para períodos cortos: usa pagos por semana en lugar de pagos por mes
+ * Umbral: 15 pagos/mes = ~3.5 pagos/semana, redondeamos a 3.5 para mantener paridad
  */
 export const operationalLoadInsight: InsightRule = (context: InsightContext): Insight | null => {
+  if (context.isShortPeriod) {
+    if (context.daysCount < 7) return null;
+    
+    const weeksCount = context.daysCount / 7;
+    const paymentsPerWeek = context.paymentsCount / weeksCount;
+    
+    if (paymentsPerWeek >= 3.5) {
+      const displayRate = paymentsPerWeek >= 5 
+        ? Math.round(paymentsPerWeek) 
+        : paymentsPerWeek.toFixed(1).replace('.0', '');
+      return {
+        id: 'operational-load-high-short',
+        type: 'info',
+        title: 'Carga operativa elevada',
+        description: `Procesás en promedio ${displayRate} pagos por semana. Considerá consolidar pagos recurrentes.`,
+        icon: 'Repeat',
+        priority: 4
+      };
+    }
+    return null;
+  }
+  
   if (context.monthCount === 0) return null;
   
   const paymentsPerMonth = context.paymentsCount / context.monthCount;
@@ -130,8 +154,24 @@ export const operationalLoadInsight: InsightRule = (context: InsightContext): In
 /**
  * Insight 4 – Patrón repetido en el tiempo
  * Detecta si un patrón (categoría dominante) se repite varios meses seguidos
+ * Para períodos cortos: muestra categoría dominante si supera el 50% y hay suficiente actividad
+ * Requiere al menos 3 pagos para que el insight sea significativo
  */
 export const repeatedPatternInsight: InsightRule = (context: InsightContext): Insight | null => {
+  if (context.isShortPeriod) {
+    if (context.topCategoryPercentage > 50 && context.paymentsCount >= 3) {
+      return {
+        id: 'dominant-category-short',
+        type: 'info',
+        title: 'Categoría dominante',
+        description: `"${context.topCategoryName}" concentra el ${context.topCategoryPercentage}% del gasto en este período.`,
+        icon: 'Tag',
+        priority: 5
+      };
+    }
+    return null;
+  }
+  
   if (context.monthlyData.length < 3) return null;
   
   const values = context.monthlyData.map(m => m.value);
@@ -188,9 +228,33 @@ export const repeatedPatternInsight: InsightRule = (context: InsightContext): In
 /**
  * Insight 5 – Oportunidad de consolidación
  * Detecta conceptos con muchos pagos pequeños y frecuentes
+ * Para períodos cortos: ajusta umbrales (>=3 pagos en el período)
  */
 export const consolidationOpportunityInsight: InsightRule = (context: InsightContext): Insight | null => {
-  if (!context.paymentsByConcept || context.paymentsByConcept.length === 0 || context.monthCount === 0) return null;
+  if (!context.paymentsByConcept || context.paymentsByConcept.length === 0) return null;
+  
+  if (context.isShortPeriod) {
+    const consolidationCandidates = context.paymentsByConcept.filter(concept => 
+      concept.paymentsCount >= 3
+    );
+    
+    if (consolidationCandidates.length === 0) return null;
+    
+    const topCandidate = consolidationCandidates.reduce((max, c) => 
+      c.paymentsCount > max.paymentsCount ? c : max
+    );
+    
+    return {
+      id: 'consolidation-opportunity-short',
+      type: 'info',
+      title: 'Oportunidad de consolidación',
+      description: `"${topCandidate.conceptName}" tiene ${topCandidate.paymentsCount} pagos en el período. Podrías consolidarlos.`,
+      icon: 'Layers',
+      priority: 6
+    };
+  }
+  
+  if (context.monthCount === 0) return null;
   
   const avgPaymentsPerMonthThreshold = 3;
   

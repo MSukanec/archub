@@ -517,10 +517,12 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       monthlyData: monthlyChartData,
       paymentsCount: confirmedPayments.length,
       monthCount: kpis.monthCount,
-      paymentsByConcept
+      paymentsByConcept,
+      isShortPeriod: periodMeta.isShortPeriod,
+      daysCount: periodMeta.daysCount
     });
     return generateInsights(context, 3);
-  }, [kpis, allCategoryData, previousCategoryData, monthlyChartData, confirmedPayments, paymentsByConcept]);
+  }, [kpis, allCategoryData, previousCategoryData, monthlyChartData, confirmedPayments, paymentsByConcept, periodMeta]);
 
   const recentActivityItems = useMemo((): ActivityItem[] => {
     return confirmedPayments

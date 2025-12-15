@@ -1,0 +1,89 @@
+Necesito que refactorices y consolides el sistema de INSIGHTS del dashboard de
+"Gastos Generales" siguiendo estas reglas de producto.
+
+OBJETIVO
+Pasar de insights genéricos a un set canónico, explicativo y ejecutivo,
+alineado a dashboards financieros de nivel enterprise.
+
+IMPORTANTE
+- NO crear nuevos componentes visuales
+- NO modificar el layout existente
+- Reutilizar el sistema actual de InsightEngine / InsightCard
+- Todo debe quedar escalable para otros dashboards futuros
+
+--------------------------------------------------
+1. DEFINIR EL SET CANÓNICO DE INSIGHTS (Gastos Generales)
+--------------------------------------------------
+
+El dashboard de Gastos Generales debe tener EXACTAMENTE estos 5 tipos de insights:
+
+1. ORIGEN DEL CAMBIO
+   - Explica qué categoría origina la mayor parte del aumento/disminución
+   - Ejemplo:
+     "El 42% del aumento proviene de Infraestructura"
+
+2. CONCENTRACIÓN DEL GASTO
+   - Detecta si pocas categorías concentran gran parte del gasto
+   - Ejemplo:
+     "3 categorías explican el 78% del gasto total"
+
+3. CARGA OPERATIVA
+   - Evalúa la frecuencia de pagos
+   - Ejemplo:
+     "Procesás en promedio 16 pagos por mes. Considerá consolidar pagos recurrentes"
+
+4. PATRÓN SOSTENIDO
+   - Detecta si una tendencia se repite varios períodos consecutivos
+   - Ejemplo:
+     "Este nivel de gasto se repite desde hace 11 períodos consecutivos"
+
+5. OPORTUNIDAD DE OPTIMIZACIÓN
+   - Detecta conceptos muy repetidos o montos similares
+   - Ejemplo:
+     "El concepto 'Internet' se repite 12 veces en el período"
+
+--------------------------------------------------
+2. REGLAS DE NEGOCIO PARA LOS INSIGHTS
+--------------------------------------------------
+
+- Cada insight:
+  - Recibe datos agregados
+  - Retorna null si no aplica
+  - Retorna un Insight completo si aplica
+
+- Máximo 3 insights activos por período
+- Priorizar insights por impacto (no por tipo)
+- NO mostrar la sección Insights si no hay ninguno válido
+
+--------------------------------------------------
+3. RELACIÓN KPI ↔ GRÁFICO ↔ INSIGHT
+--------------------------------------------------
+
+Asegurar que cada insight esté anclado conceptualmente a:
+- Un KPI visible
+- Un gráfico o tabla del dashboard
+
+Ejemplo:
+- Origen del cambio → Gasto Total + Donut
+- Carga operativa → Total Pagos + Actividad Reciente
+
+--------------------------------------------------
+4. TEXTO DE LOS INSIGHTS
+--------------------------------------------------
+
+- Los textos deben ser:
+  - Claros
+  - Ejecutivos
+  - Orientados a acción
+- NO usar textos genéricos
+- NO hardcodear strings fuera de las reglas
+
+--------------------------------------------------
+5. DOCUMENTACIÓN
+--------------------------------------------------
+
+Actualizar el README del sistema de Insights explicando:
+- Qué es un insight
+- Por qué existen solo estos 5
+- Cómo se reutilizan en otros dashboards
+- Cómo agregar uno nuevo sin romper el sistema

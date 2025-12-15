@@ -31,6 +31,8 @@ export interface InsightContext {
   topCategoryPercentage: number;
   topCategoryName: string;
   paymentsByConcept: PaymentsByConceptData[];
+  isShortPeriod: boolean;
+  daysCount: number;
 }
 
 export type InsightRule = (context: InsightContext) => Insight | null;
