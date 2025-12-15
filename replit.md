@@ -6,52 +6,6 @@ Seencel is a comprehensive construction management platform designed to optimize
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (2025-12-15, Session 22)
-
-### ✅ Payment Import Status Validation Fix - COMPLETADO
-**Problem:** When users import payments without mapping the STATUS field, the database check constraint would fail because invalid or missing status values were being sent.
-
-**Solution:**
-- Added `validStatuses` array validation in all 4 payment import handlers
-- If `row.status` is undefined, null, empty, or any invalid value → defaults to 'confirmed'
-- Only valid statuses ('confirmed', 'pending', 'overdue', 'cancelled') pass through
-
-**Files Modified:**
-1. `src/pages/general-costs/GeneralCostsPaymentsTab.tsx` - Added `validStatuses` check before insert
-2. `src/pages/clients/ClientPaymentsTab.tsx` - Added `validStatuses` check before insert
-3. `src/pages/professional/personnel/PersonnelPaymentsTab.tsx` - Added `validStatuses` check before insert
-4. `src/pages/professional/materials/MaterialPaymentsTab.tsx` - Added `validStatuses` check before insert
-
-### ✅ Smart Period Filter + Dropdown Fixes - COMPLETADO
-**Problem 1:** Period selector allowed users to select empty periods
-**Solution:** 
-- Implemented `calculateAvailablePeriods()` function that checks which periods (30d, 3m, 6m, 1y, all) have confirmed payments
-- Disabled dropdown options for periods with no data, showing "(sin datos)" label
-- Always keeps "Histórico" (all) enabled as fallback
-- Auto-reverts to "all" if user somehow selects an empty period
-
-**Problem 2:** ALL Select/Dropdown components were broken (wrong CSS variables)
-**Solution:**
-- Fixed `src/components/ui/select.tsx`:
-  - Changed `bg-[var(--popover-bg)]` → `bg-[var(--card-bg)]` (correct variable)
-  - Changed `text-[var(--popover-fg)]` → `text-[var(--card-fg)]` (correct variable)
-  - Fixed SelectItem hover: `hover:bg-[var(--accent-bg)]` + `hover:text-black dark:hover:text-white`
-  - Fixed SelectTrigger text color: `text-[var(--card-fg)]`
-- Dropdown styling in `src/components/ui/dropdown-menu.tsx` already correct
-
-**Files Modified:**
-1. `src/pages/general-costs/GeneralCostsDashboardTab.tsx`:
-   - Added `calculateAvailablePeriods()` export - scans all confirmed payments
-   
-2. `src/pages/general-costs/GeneralCosts.tsx`:
-   - Imported `calculateAvailablePeriods` and `useGeneralCostsPayments`
-   - Added `availablePeriods` calculation and `validSelectedPeriod` logic
-   - Updated dropdown to disable unavailable periods with "(sin datos)" label
-   
-3. `src/components/ui/select.tsx`:
-   - Fixed ALL CSS variable references to use correct theme variables
-   - Fixed hover states for consistency across all selects
-
 ## System Architecture
 
 ### UI/UX Decisions
@@ -60,10 +14,10 @@ Preferred communication style: Simple, everyday language.
 - **Dynamic Color System**: Project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors and organic radial gradients.
 - **Modal Architecture**: Enterprise SaaS-level modal system with stacking, dirty form blocking, size variants, portal rendering, and a registry pattern.
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub with a two-level sidebar system.
-- **Layout Architecture**: Experience-based layouts (`src/layouts/`) including Dashboard Layout (authenticated app) and Marketing Layout (public-facing pages).
-- **Content Theming System**: Unified CSS theming layer with dynamic background switching via `useContentBackground` hook.
+- **Layout Architecture**: Experience-based layouts including Dashboard Layout (authenticated app) and Marketing Layout (public-facing pages).
+- **Content Theming System**: Unified CSS theming layer with dynamic background switching.
 - **Smart Filtering**: Period filters disable options without data, preventing empty state confusion.
-- **Dropdown/Select Components**: All use consistent CSS variables from theme system (`--card-bg`, `--card-fg`, `--accent-bg`, etc.)
+- **Dropdown/Select Components**: All use consistent CSS variables from theme system.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
@@ -77,28 +31,30 @@ Preferred communication style: Simple, everyday language.
 - **Module Architecture**: Feature-Sliced Design for core modules (PROJECTS, SUBCONTRACTS, PERSONNEL, CLIENTS, FINANCES, LEARNING, MEDIA, SITELOG, etc.).
 - **Multi-tenancy**: Services consistently filter data by `organization_id`.
 - **Soft Delete**: Implemented for key entities.
-- **Core Feature Management**: Comprehensive CRUD operations for Projects, Subcontracts, Personnel, Materials, Financial, Contacts, Sitelog, Project Types, and Project Modalities.
+- **Core Feature Management**: Comprehensive CRUD for Projects, Subcontracts, Personnel, Materials, Financial, Contacts, Sitelog, Project Types, and Project Modalities.
 - **Learning Module**: Supports course management, video integration, progress tracking, notes, enrollment, pricing, and payment integration.
 - **AI Assistant**: Clean frontend/backend separation, orchestrating context-aware GPT-4o powered responses.
-- **Payment Architecture**: Unified `payments` table supporting multiple gateways and centralized checkout, including PayPal and Mercado Pago subscription flows, and bank transfer receipt uploads. Features proration for upgrades (MercadoPago only currently) and unified coupon system.
-- **Founders Program**: Annual subscribers (PRO/TEAMS) receive permanent founder status and lifetime access to a bonus course, with enrollment suspension/reactivation logic based on subscription status and membership.
+- **Payment Architecture**: Unified `payments` table supporting multiple gateways and centralized checkout, including PayPal and Mercado Pago subscription flows. Features proration for upgrades and a unified coupon system.
+- **Founders Program**: Annual subscribers receive permanent founder status and lifetime access to a bonus course, with enrollment suspension/reactivation logic.
 - **Access Control**: `PlanRestricted` component system for organization membership and subscription plans.
 - **Cost System**: Three-tier cost system (Seencel Cost, Organization Cost, Independent Cost).
 - **Media Uploads**: Unified component for image and multi-file uploads using a scalable `MEDIA_FILES` + `MEDIA_LINKS` architecture, with client-side image compression and a 3-bucket storage architecture.
-- **Date Utilities**: All date handling MUST use `src/lib/date-utils.ts` to avoid timezone issues.
+- **Date Utilities**: All date handling uses `src/lib/date-utils.ts` to avoid timezone issues.
 - **Project Activity Tracking**: `last_active_at` timestamp updated automatically via backend API.
 - **Modal Naming Standard**: Modals follow `<Entity>Form.tsx` naming convention, stored in `forms/` folders, and support CREATE/EDIT/VIEW modes.
-- **Drawer Architecture**: Enterprise SaaS-level drawer system mirroring the modal architecture with DrawerLayout, DrawerHeader, DrawerBody, DrawerFooter, and DrawerSection components. Follows the same agnostic pattern where content components are separate from container components.
+- **Drawer Architecture**: Enterprise SaaS-level drawer system mirroring the modal architecture.
 - **Delete/Replace Pattern**: Universal delete confirmation modal with optional replace functionality.
 - **Universal Import System**: 5-step wizard with reusable hooks for parsing, auto-mapping, validation, and AI-powered suggestions.
-- **Subscription Expiry Notification System**: Scheduled daily job for multi-recipient email notifications before and on subscription expiry.
-- **Soft-Lock System**: Plan limit enforcement via `is_over_limit` flags on `projects` and `organization_members` using `applyPlanLimits()`.
-- **Automated Downgrade Execution**: Hourly cron job processes expired subscriptions and scheduled downgrades, applying soft-lock limits and suspending bonus course enrollments.
+- **Subscription Expiry Notification System**: Scheduled daily job for multi-recipient email notifications.
+- **Soft-Lock System**: Plan limit enforcement via `is_over_limit` flags on `projects` and `organization_members`.
+- **Automated Downgrade Execution**: Hourly cron job processes expired subscriptions and scheduled downgrades.
 - **Downgrade Impact Calculation**: `DowngradeModal` fetches usage stats and calculates resources to be locked.
 - **Lab Neural Network Renderer System**: Extensible node rendering architecture for neural network graphs.
-- **Organization Activity Tracking System**: Comprehensive audit logging for organization actions, viewable by organization members and admins.
+- **Organization Activity Tracking System**: Comprehensive audit logging for organization actions.
 - **Founders Portal**: Private area for founder organizations with a directory, events, voting, and forum features, protected by access control.
-- **Smart Period Filtering**: Dashboard filters intelligently disable periods without data, automatically reverting to "Histórico" if an empty period is selected.
+- **Multicurrency System**: Centralized handling via `/lib/money.ts` with `amount_in_base = amount * exchange_rate` and explicit conversion functions.
+- **KPI System (Headless)**: Centralized calculation logic in `/lib/kpis.ts` for monetary, count, percentage, and text KPIs, with automatic refetching on currency changes.
+- **Subscription & Billing System**: Comprehensive management of plans, subscriptions, payments, billing cycles, proration, seat-based billing, coupons, soft-locks, and cron jobs for expiry and downgrades.
 
 ## External Dependencies
 - **Supabase**: Authentication.
@@ -124,51 +80,3 @@ Preferred communication style: Simple, everyday language.
 - **browser-image-compression**: Client-side image compression.
 - **@dnd-kit**: Modern drag-and-drop toolkit.
 - **node-cron**: Scheduled tasks.
-
-## Documentation
-
-### Multicurrency System
-Centralized multicurrency handling is documented in:
-- **`prompts/documentation/MULTICURRENCY_SYSTEM.md`**: Complete reference covering:
-  - Central rule: `amount_in_base = amount * exchange_rate` (never store precalculated columns)
-  - Core module: `/lib/money.ts` with `convert`, `convertToBaseCurrency`, `format`, `formatKPI`, `sumByCurrency`, `explainBreakdown`
-  - Usage patterns for hooks, services, and components
-  - KPI display pattern (converted total + breakdown by currency)
-- **`prompts/documentation/FINANCE_CURRENCY_AUDIT.md`**: Audit report and refactoring decisions
-
-### KPI System (Headless)
-Centralized headless KPI calculation logic (no UI/JSX) is implemented in:
-- **`/lib/kpis.ts`**: Pure logic for KPI calculation, providing:
-  - `calculateMonetaryKPI()` - Total convertido a moneda base + breakdown por moneda
-  - `calculateCountKPI()` - Conteos simples
-  - `calculatePercentageKPI()` - Ratios y porcentajes
-  - `calculateTextKPI()` - Valores de texto
-  - `calculateAggregateMonetaryKPI()` - Suma de múltiples KPIs
-  - Helpers: `formatBreakdown()`, `hasMultipleCurrencies()`, `getDominantCurrency()`
-  - All monetary KPIs use `convertToBaseCurrency()` with explicit signatures (fromCurrencyId, toCurrencyId)
-  - Standard return type: `{ value, formatted, meta?, breakdown? }`
-  - No UI components - works with any KPI display component (StatCard, etc.)
-- **Auto-update on currency change**: KPIs use `useOrganizationDefaultCurrency()` hook which automatically refetches when default currency changes
-- **Currency symbol display**: KPI values show currency symbol (e.g., "$ 150.000", "USD 75.000") using `format()` function from `/lib/money.ts`
-- **Recently refactored pages** (2025-12-12):
-  - `src/pages/general-costs/GeneralCostsPaymentsTab.tsx` - "Total Pagos" (count) and "Pagos a la Fecha" (monetary) KPIs
-  - `src/pages/partners/tabs/PartnerTransactionsTab.tsx` - "Total Aportes", "Total Retiros", "Saldo Neto" (all monetary) KPIs
-  - `src/pages/clients/ClientDashboardTab.tsx` - "Total Clientes" (count), "Total Pagos" (count), "Compromiso Total" (monetary), "Balance Pendiente" (monetary) KPIs
-  - `src/pages/clients/ClientPaymentsTab.tsx` - "Total Confirmado" (monetary), "Total Pagos" (count), "Último Pago" (text) KPIs
-  - `src/pages/clients/ClientObligationsTab.tsx` - "Compromiso Total" (monetary), "Pagado" (monetary), "Saldo" (monetary), "Items de Pago" (count) KPIs
-
-### Subscription & Billing System
-Complete technical documentation for the payment, subscription, and billing architecture is maintained in:
-- **`prompts/documentation/SUBSCRIPTIONS_BILLING_SYSTEM.md`**: Consolidated reference covering:
-  - Data model (plans, subscriptions, payments, billing cycles)
-  - Plan hierarchy and limits (read from `plans.features` JSON)
-  - PayPal and MercadoPago gateway integrations
-  - Proration calculations for upgrades
-  - Seat-based billing for TEAMS plan
-  - Coupon system (including 100% coupons)
-  - Invitation and member management with limit checks
-  - Soft-lock system (`is_over_limit` flags)
-  - Founders Program (bonus course enrollments)
-  - Automated cron jobs (downgrade execution, expiry notifications)
-  - API endpoints reference
-  - Critical rules (auth_id resolution, price validation)
