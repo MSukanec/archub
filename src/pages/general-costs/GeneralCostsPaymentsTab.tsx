@@ -28,6 +28,9 @@ import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
 import { format as formatMoneyAmount } from '@/lib/money';
 import type { TargetField, ImportConfig } from '@/features/imports/types';
+import { exportToExcel, createExportColumns } from '@/lib/export-utils';
+import { pdf } from '@react-pdf/renderer';
+import { GeneralCostPaymentsPDF, type GeneralCostPaymentsPDFData, type GeneralCostPaymentItem } from '@/features/pdf';
 
 export default function GeneralCostsPaymentsTab() {
   const { data: userData } = useCurrentUser();
@@ -562,6 +565,100 @@ export default function GeneralCostsPaymentsTab() {
     });
   };
 
+  const handleExportExcel = () => {
+    const exportColumns = [
+      { key: 'payment_date', label: 'Fecha de Pago', render: (p: GeneralCostPayment) => formatDate(p.payment_date) },
+      { key: 'general_cost', label: 'Gasto General', render: (p: GeneralCostPayment) => p.general_cost?.name || '-' },
+      { key: 'category', label: 'Categoría', render: (p: GeneralCostPayment) => p.general_cost?.category?.name || '-' },
+      { key: 'notes', label: 'Notas', render: (p: GeneralCostPayment) => p.notes || '-' },
+      { key: 'wallet', label: 'Billetera', render: (p: GeneralCostPayment) => p.wallet?.wallets?.name || '-' },
+      { key: 'amount', label: 'Monto', render: (p: GeneralCostPayment) => p.amount },
+      { key: 'currency', label: 'Moneda', render: (p: GeneralCostPayment) => p.currency?.code || '-' },
+      { key: 'exchange_rate', label: 'Cotización', render: (p: GeneralCostPayment) => p.exchange_rate || '-' },
+      { key: 'status', label: 'Estado', render: (p: GeneralCostPayment) => {
+        const statusLabels: Record<string, string> = {
+          confirmed: 'Confirmado',
+          pending: 'Pendiente',
+          overdue: 'Vencido',
+          cancelled: 'Cancelado',
+        };
+        return statusLabels[p.status] || p.status;
+      }},
+      { key: 'reference', label: 'Referencia', render: (p: GeneralCostPayment) => p.reference || '-' },
+    ];
+
+    const filename = `gastos_generales_pagos_${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
+    
+    exportToExcel({
+      filename,
+      sheetName: 'Pagos',
+      columns: exportColumns,
+      data: sortedPayments,
+    });
+
+    toast({
+      title: 'Exportación exitosa',
+      description: `Se exportaron ${sortedPayments.length} pagos a Excel.`,
+    });
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      const confirmedPayments = sortedPayments.filter(p => p.status === 'confirmed');
+      const totalConfirmed = confirmedPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+      const defaultSymbol = defaultCurrency?.symbol || '$';
+
+      const pdfData: GeneralCostPaymentsPDFData = {
+        organization_name: userData?.organization?.name || 'Mi Organización',
+        organization_logo: userData?.organization?.logo_url || null,
+        organization_address: userData?.organization?.address || null,
+        organization_email: userData?.organization?.email || null,
+        organization_phone: userData?.organization?.phone || null,
+        payments: sortedPayments.map((p): GeneralCostPaymentItem => ({
+          id: p.id,
+          payment_date: p.payment_date,
+          amount: p.amount,
+          exchange_rate: p.exchange_rate,
+          status: p.status,
+          reference: p.reference,
+          notes: p.notes,
+          currency_symbol: p.currency?.symbol,
+          currency_code: p.currency?.code,
+          wallet_name: p.wallet?.wallets?.name,
+          general_cost_name: p.general_cost?.name,
+          category_name: p.general_cost?.category?.name,
+          creator_name: p.creator?.users?.full_name,
+        })),
+        total_count: sortedPayments.length,
+        total_confirmed: confirmedPayments.length,
+        total_confirmed_formatted: `${defaultSymbol} ${totalConfirmed.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        generated_at: new Date().toISOString(),
+      };
+
+      const blob = await pdf(<GeneralCostPaymentsPDF data={pdfData} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `gastos_generales_pagos_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Exportación exitosa',
+        description: `Se exportaron ${sortedPayments.length} pagos a PDF.`,
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo generar el PDF. Por favor, intenta de nuevo.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const formatDate = (dateString: string) => {
     try {
       const date = parseLocalDate(dateString);
@@ -921,6 +1018,9 @@ export default function GeneralCostsPaymentsTab() {
           onClearFilters: handleClearFilters,
           showImport: true,
           onImport: handleImport,
+          showExport: true,
+          onExport: handleExportExcel,
+          onExportPDF: handleExportPDF,
           bulkActions: {
             onDelete: handleBulkDelete,
           },

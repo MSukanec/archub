@@ -4,6 +4,8 @@ export { PdfDocument } from './components/PdfDocument';
 export { PdfViewer } from './components/PdfViewer';
 export { PaymentReceiptPDF } from './components/PaymentReceiptPDF';
 export type { PaymentReceiptData } from './components/PaymentReceiptPDF';
+export { GeneralCostPaymentsPDF } from './components/GeneralCostPaymentsPDF';
+export type { GeneralCostPaymentsPDFData, GeneralCostPaymentItem } from './components/GeneralCostPaymentsPDF';
 
 // PDF Blocks
 export { PdfHeader } from './components/blocks/PdfHeader';
