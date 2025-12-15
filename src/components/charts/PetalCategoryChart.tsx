@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 interface CategoryData {
   name: string
@@ -10,19 +10,20 @@ interface PetalCategoryChartProps {
   data: CategoryData[]
   isLoading?: boolean
   height?: number
+  valueFormatter?: (value: number) => string
   loadingText?: string
   emptyText?: string
 }
 
 const COLORS = [
-  'hsl(0, 0%, 85%)',
-  'hsl(0, 0%, 70%)',
-  'hsl(0, 0%, 55%)',
-  'hsl(0, 0%, 45%)',
-  'hsl(0, 0%, 60%)',
-  'hsl(0, 0%, 75%)',
-  'hsl(0, 0%, 50%)',
-  'hsl(0, 0%, 65%)',
+  'hsl(76, 100%, 40%)',
+  'hsl(173, 58%, 39%)',
+  'hsl(197, 37%, 24%)',
+  'hsl(43, 74%, 49%)',
+  'hsl(27, 87%, 67%)',
+  'hsl(12, 76%, 61%)',
+  'hsl(340, 75%, 55%)',
+  'hsl(262, 52%, 47%)',
 ]
 
 function createPetalPath(
@@ -31,13 +32,9 @@ function createPetalPath(
   innerRadius: number,
   outerRadius: number,
   startAngle: number,
-  endAngle: number,
-  cornerRadius: number = 12
+  endAngle: number
 ): string {
   const angleRad = (angle: number) => (angle * Math.PI) / 180
-  
-  const midAngle = (startAngle + endAngle) / 2
-  const angleSpread = Math.abs(endAngle - startAngle)
   
   const innerStart = {
     x: cx + innerRadius * Math.cos(angleRad(startAngle)),
@@ -56,6 +53,7 @@ function createPetalPath(
     y: cy + outerRadius * Math.sin(angleRad(endAngle))
   }
   
+  const angleSpread = Math.abs(endAngle - startAngle)
   const largeArcFlag = angleSpread > 180 ? 1 : 0
   
   return `
@@ -72,9 +70,14 @@ export function PetalCategoryChart({
   data,
   isLoading = false,
   height = 280,
+  valueFormatter = (value: number) => new Intl.NumberFormat('es-AR', {
+    notation: 'compact',
+    compactDisplay: 'short'
+  }).format(value),
   loadingText = 'Cargando datos...',
   emptyText = 'No hay datos disponibles'
 }: PetalCategoryChartProps) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   
   if (isLoading) {
     return (
@@ -94,14 +97,18 @@ export function PetalCategoryChart({
 
   const chartData = useMemo(() => {
     const total = data.reduce((sum, item) => sum + item.value, 0)
-    const count = data.length
-    const anglePerItem = 360 / count
-    const gap = 3
+    const gap = 2
+    
+    let currentAngle = -90
     
     return data.map((item, index) => {
-      const startAngle = -90 + index * anglePerItem + gap / 2
-      const endAngle = -90 + (index + 1) * anglePerItem - gap / 2
+      const percentage = total > 0 ? (item.value / total) * 100 : 0
+      const angleSpread = (percentage / 100) * 360 - gap
+      const startAngle = currentAngle
+      const endAngle = currentAngle + angleSpread
       const midAngle = (startAngle + endAngle) / 2
+      
+      currentAngle = endAngle + gap
       
       return {
         ...item,
@@ -109,7 +116,7 @@ export function PetalCategoryChart({
         startAngle,
         endAngle,
         midAngle,
-        percentage: total > 0 ? ((item.value / total) * 100).toFixed(0) : '0'
+        percentage: percentage.toFixed(1)
       }
     })
   }, [data])
@@ -134,8 +141,8 @@ export function PetalCategoryChart({
           const labelX = cx + labelRadius * Math.cos(midAngleRad)
           const labelY = cy + labelRadius * Math.sin(midAngleRad)
           
-          const truncatedName = item.name.length > 10 
-            ? item.name.substring(0, 9) + '…' 
+          const truncatedName = item.name.length > 12 
+            ? item.name.substring(0, 11) + '…' 
             : item.name
 
           return (
@@ -150,29 +157,67 @@ export function PetalCategoryChart({
                   item.endAngle
                 )}
                 fill={item.color}
-                className="transition-opacity hover:opacity-80 cursor-pointer"
+                opacity={hoveredIndex === null || hoveredIndex === index ? 1 : 0.4}
+                className="transition-opacity duration-200 cursor-pointer"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
               />
               <text
                 x={labelX}
-                y={labelY - 6}
+                y={labelY}
                 textAnchor="middle"
-                dominantBaseline="middle"
+                dominantBaseline="central"
                 className="text-[11px] font-semibold fill-foreground pointer-events-none"
-              >
-                {item.value}
-              </text>
-              <text
-                x={labelX}
-                y={labelY + 8}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                className="text-[9px] fill-muted-foreground pointer-events-none"
+                style={{ fontWeight: 600 }}
               >
                 {truncatedName}
               </text>
+              
+              {hoveredIndex === index && (
+                <g>
+                  <rect
+                    x={cx - 60}
+                    y={cy - 50}
+                    width="120"
+                    height="60"
+                    rx="6"
+                    fill="var(--popover)"
+                    stroke="var(--border)"
+                    className="shadow-lg"
+                  />
+                  <text
+                    x={cx}
+                    y={cy - 35}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="text-[11px] font-semibold fill-popover-foreground"
+                  >
+                    {item.name}
+                  </text>
+                  <text
+                    x={cx}
+                    y={cy - 20}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="text-[10px] fill-popover-foreground opacity-80"
+                  >
+                    {valueFormatter(item.value)}
+                  </text>
+                  <text
+                    x={cx}
+                    y={cy - 5}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="text-[10px] fill-popover-foreground opacity-80"
+                  >
+                    {item.percentage}%
+                  </text>
+                </g>
+              )}
             </g>
           )
         })}
+        
         <circle
           cx={cx}
           cy={cy}
