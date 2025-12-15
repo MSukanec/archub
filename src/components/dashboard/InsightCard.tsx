@@ -8,6 +8,37 @@ import { type InsightAction } from './insights/types';
 
 type InsightVariant = 'info' | 'warning' | 'success' | 'danger';
 
+/**
+ * Highlights important values in text (percentages, money amounts, numbers with units)
+ * Wraps them in <strong> tags for visual emphasis
+ */
+function highlightValues(text: string): ReactNode {
+  // Pattern matches: percentages (15%), money ($1.234, $1,234.56), numbers with context (~15, 3 meses)
+  const pattern = /(\$[\d.,]+|~?\d+(?:[.,]\d+)?%|~\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s*(?:meses?|días?|pagos?|veces?))/gi;
+  
+  const parts = text.split(pattern);
+  const matches = text.match(pattern) || [];
+  
+  if (matches.length === 0) return text;
+  
+  const result: ReactNode[] = [];
+  let matchIndex = 0;
+  
+  parts.forEach((part, i) => {
+    if (part) result.push(part);
+    if (matchIndex < matches.length && i < parts.length - 1) {
+      result.push(
+        <strong key={matchIndex} className="font-semibold text-foreground">
+          {matches[matchIndex]}
+        </strong>
+      );
+      matchIndex++;
+    }
+  });
+  
+  return result;
+}
+
 export interface InsightItem {
   icon?: ReactNode;
   title: string;
@@ -90,9 +121,11 @@ export function InsightCard({
                   {item.icon || <IconComponent className="h-4 w-4" />}
                 </div>
                 <div className="flex-1">
-                  <span className="text-sm text-muted-foreground">{item.title}</span>
+                  <span className="text-sm font-semibold text-foreground">{item.title}</span>
                   {item.description && (
-                    <p className="text-xs text-muted-foreground/70 mt-0.5">{item.description}</p>
+                    <p className="text-xs text-muted-foreground/80 mt-0.5">
+                      {highlightValues(item.description)}
+                    </p>
                   )}
                   {item.actions && item.actions.length > 0 && onAction && (
                     <div className="flex flex-wrap gap-2 mt-2">
