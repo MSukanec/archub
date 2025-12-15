@@ -16,6 +16,7 @@ interface CategoryBreakdownChartProps {
   showLegend?: boolean
   innerRadius?: number
   outerRadius?: number
+  variant?: 'default' | 'compact'
 }
 
 const COLORS = [
@@ -41,8 +42,13 @@ export function CategoryBreakdownChart({
   emptyText = 'No hay datos disponibles',
   showLegend = true,
   innerRadius = 60,
-  outerRadius = 90
+  outerRadius = 90,
+  variant = 'default'
 }: CategoryBreakdownChartProps) {
+  const isCompact = variant === 'compact'
+  const effectiveShowLegend = isCompact ? false : showLegend
+  const effectiveInnerRadius = isCompact ? 50 : innerRadius
+  const effectiveOuterRadius = isCompact ? 80 : outerRadius
   
   if (isLoading) {
     return (
@@ -67,20 +73,47 @@ export function CategoryBreakdownChart({
     percentage: total > 0 ? ((item.value / total) * 100).toFixed(1) : '0'
   }))
 
+  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
+    const RADIAN = Math.PI / 180
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+    const x = cx + radius * Math.cos(-midAngle * RADIAN)
+    const y = cy + radius * Math.sin(-midAngle * RADIAN)
+    
+    if (percent < 0.05) return null
+    
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor="middle"
+        dominantBaseline="central"
+        className="text-[10px] font-medium"
+        style={{ 
+          textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+          pointerEvents: 'none'
+        }}
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    )
+  }
+
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart margin={{ top: 5, right: 5, bottom: showLegend ? 30 : 5, left: 5 }}>
+        <PieChart margin={{ top: 5, right: 5, bottom: effectiveShowLegend ? 30 : 5, left: 5 }}>
           <Pie
             data={chartData}
             cx="50%"
-            cy={showLegend ? "45%" : "50%"}
+            cy={effectiveShowLegend ? "45%" : "50%"}
             labelLine={false}
-            innerRadius={innerRadius}
-            outerRadius={outerRadius}
+            innerRadius={effectiveInnerRadius}
+            outerRadius={effectiveOuterRadius}
             fill="#8884d8"
             dataKey="value"
             paddingAngle={2}
+            label={isCompact ? renderCustomLabel : false}
           >
             {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
@@ -102,7 +135,7 @@ export function CategoryBreakdownChart({
               return null
             }}
           />
-          {showLegend && (
+          {effectiveShowLegend && (
             <Legend 
               verticalAlign="bottom"
               height={25}

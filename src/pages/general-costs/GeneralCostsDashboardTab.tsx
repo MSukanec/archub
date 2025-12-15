@@ -648,6 +648,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
             data={categoryChartData}
             height={280}
             emptyText="No hay categorías con gastos registrados"
+            variant="compact"
           />
         </DashboardCard>
       </div>
