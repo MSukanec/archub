@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TrendingUp, Calendar, Tag, DollarSign, CreditCard, Lightbulb, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, Plus, BarChart3, PieChart } from 'lucide-react';
+import { TrendingUp, Calendar, DollarSign, CreditCard, Lightbulb, Clock, CheckCircle2, Plus, BarChart3, PieChart } from 'lucide-react';
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakdown } from '@/lib/kpis';
 import { format, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -15,13 +15,12 @@ import {
   StatCardSubValue,
   StatCardTrend,
   DashboardCard,
-  InsightCard,
   ActivityCard,
   CategoryHighlightCard,
-  type InsightItem,
   type ActivityItem,
   type TrendDirection
 } from '@/components/dashboard';
+import { generateInsights, buildInsightContext, InsightCard as AutoInsightCard } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
@@ -404,7 +403,9 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       topCategoryPercentage,
       topCategoryName: topCategory,
       concentrationTrend,
-      concentrationTrendValue
+      concentrationTrendValue,
+      previousPeriodGasto: previousTotalGasto.value,
+      monthCount
     };
   }, [confirmedPayments, defaultCurrency, filteredByCategory, previousPeriodPayments, selectedPeriod, currentPeriodPaymentsForComparison]);
 
@@ -432,71 +433,17 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
     return allCategoryData.slice(0, 8);
   }, [allCategoryData]);
 
-  const insights = useMemo((): InsightItem[] => {
-    const messages: InsightItem[] = [];
-    
-    if (allCategoryData.length > 0 && kpis.totalGasto.value > 0) {
-      const topCategoryValue = allCategoryData[0]?.value || 0;
-      const topCategoryName = allCategoryData[0]?.name || '';
-      const allCategoriesTotal = allCategoryData.reduce((sum, c) => sum + c.value, 0);
-      const percentage = allCategoriesTotal > 0 
-        ? Math.round((topCategoryValue / allCategoriesTotal) * 100) 
-        : 0;
-      
-      if (percentage >= 50) {
-        messages.push({
-          title: `"${topCategoryName}" representa el ${percentage}% del gasto total`,
-          variant: 'info'
-        });
-      }
-    }
-    
-    const now = new Date();
-    const thisMonthPayments = confirmedPayments.filter(p => {
-      const paymentDate = new Date(p.payment_date);
-      return paymentDate.getMonth() === now.getMonth() && paymentDate.getFullYear() === now.getFullYear();
+  const autoInsights = useMemo(() => {
+    const context = buildInsightContext({
+      totalGasto: kpis.totalGasto.value,
+      previousPeriodGasto: kpis.previousPeriodGasto,
+      categoryData: allCategoryData,
+      monthlyData: monthlyChartData,
+      paymentsCount: confirmedPayments.length,
+      monthCount: kpis.monthCount
     });
-    
-    if (thisMonthPayments.length > 0) {
-      messages.push({
-        title: `${thisMonthPayments.length} pago${thisMonthPayments.length > 1 ? 's' : ''} registrado${thisMonthPayments.length > 1 ? 's' : ''} este mes`,
-        variant: 'info'
-      });
-    }
-    
-    if (monthlyChartData.length >= 2) {
-      const lastMonth = monthlyChartData[monthlyChartData.length - 1]?.value || 0;
-      const previousMonth = monthlyChartData[monthlyChartData.length - 2]?.value || 0;
-      
-      if (previousMonth > 0) {
-        const change = ((lastMonth - previousMonth) / previousMonth) * 100;
-        if (Math.abs(change) > 15) {
-          if (change > 0) {
-            messages.push({
-              title: `El último mes aumentó ${Math.round(change)}% respecto al anterior`,
-              icon: <ArrowUpRight className="h-3 w-3 text-red-600 dark:text-red-400" />,
-              variant: 'danger'
-            });
-          } else {
-            messages.push({
-              title: `El último mes disminuyó ${Math.round(Math.abs(change))}% respecto al anterior`,
-              icon: <ArrowDownRight className="h-3 w-3 text-green-600 dark:text-green-400" />,
-              variant: 'success'
-            });
-          }
-        }
-      }
-    }
-    
-    if (confirmedPayments.length > 0) {
-      messages.push({
-        title: `${confirmedPayments.length} pago${confirmedPayments.length > 1 ? 's' : ''} confirmado${confirmedPayments.length > 1 ? 's' : ''} en total`,
-        variant: 'info'
-      });
-    }
-    
-    return messages.slice(0, 4);
-  }, [kpis, allCategoryData, confirmedPayments, monthlyChartData]);
+    return generateInsights(context, 3);
+  }, [kpis, allCategoryData, monthlyChartData, confirmedPayments]);
 
   const recentActivityItems = useMemo((): ActivityItem[] => {
     return confirmedPayments
@@ -653,13 +600,18 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {insights.length > 0 && (
-          <InsightCard
-            title="Insights"
-            titleIcon={<Lightbulb />}
-            items={insights}
-            data-testid="insights-section"
-          />
+        {autoInsights.length > 0 && (
+          <div className="space-y-3" data-testid="insights-section">
+            <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Lightbulb className="h-4 w-4" />
+              Insights
+            </h3>
+            <div className="space-y-2">
+              {autoInsights.map((insight) => (
+                <AutoInsightCard key={insight.id} insight={insight} />
+              ))}
+            </div>
+          </div>
         )}
 
         <ActivityCard
