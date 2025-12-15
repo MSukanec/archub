@@ -16,27 +16,23 @@ function highlightValues(text: string): ReactNode {
   // Pattern matches: percentages (15%), money ($1.234, $1,234.56), numbers with context (~15, 3 meses)
   const pattern = /(\$[\d.,]+|~?\d+(?:[.,]\d+)?%|~\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s*(?:meses?|días?|pagos?|veces?))/gi;
   
+  // When using split with capturing group, matches are included in the result array
   const parts = text.split(pattern);
-  const matches = text.match(pattern) || [];
   
-  if (matches.length === 0) return text;
+  if (parts.length === 1) return text;
   
-  const result: ReactNode[] = [];
-  let matchIndex = 0;
-  
-  parts.forEach((part, i) => {
-    if (part) result.push(part);
-    if (matchIndex < matches.length && i < parts.length - 1) {
-      result.push(
-        <strong key={matchIndex} className="font-semibold text-foreground">
-          {matches[matchIndex]}
+  return parts.map((part, i) => {
+    if (!part) return null;
+    // Odd indices are the captured matches
+    if (i % 2 === 1) {
+      return (
+        <strong key={i} className="font-semibold text-foreground">
+          {part}
         </strong>
       );
-      matchIndex++;
     }
+    return part;
   });
-  
-  return result;
 }
 
 export interface InsightItem {
