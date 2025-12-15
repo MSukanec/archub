@@ -1,7 +1,7 @@
 # Auditoría Completa del Sistema PDF - Seencel
 
-**Fecha de Auditoría:** 6 de Diciembre 2025  
-**Estado General:** INCOMPLETO - Requiere desarrollo de sistema unificado
+**Fecha de Auditoría:** 15 de Diciembre 2025  
+**Estado General:** PARCIALMENTE IMPLEMENTADO - Sistema base funcional con PDFs para presupuestos, facturas, y gastos generales
 
 ---
 
@@ -28,9 +28,10 @@ El sistema de PDFs en Seencel está **parcialmente implementado** con una estruc
 | Sistema de plantillas | ❌ NO EXISTE | Hardcodeado para budgets |
 | Restricción por plan | ❌ NO EXISTE | Sin PlanRestricted |
 | Bitácora PDF | ❌ NO EXISTE | Solo vista web en portal |
-| Comprobante cliente | ❌ NO EXISTE | Sin PDF para client payments |
+| Comprobante cliente | ✅ EXISTE | PaymentReceiptPDF.tsx |
 | Recibo subcontrato | ❌ NO EXISTE | Sin PDF para pagos |
 | Factura curso | ✅ EXISTE | InvoicePDF.tsx (suscripciones) |
+| Gastos Generales PDF | ✅ EXISTE | GeneralCostPaymentsPDF.tsx (tabla de pagos) |
 
 ---
 
@@ -42,19 +43,23 @@ El sistema de PDFs en Seencel está **parcialmente implementado** con una estruc
 src/features/pdf/
 ├── components/
 │   ├── blocks/
-│   │   ├── PdfBudgetTable.tsx    # Tabla de items de presupuesto
-│   │   ├── PdfFooter.tsx         # Footer con texto y divisor
-│   │   └── PdfHeader.tsx         # Header con logo, info proyecto
-│   ├── InvoicePDF.tsx            # Factura de suscripción Seencel
-│   ├── PdfDocument.tsx           # Documento genérico con bloques
-│   └── PdfViewer.tsx             # Visor de PDF en canvas
+│   │   ├── PdfBudgetTable.tsx         # Tabla de items de presupuesto
+│   │   ├── PdfFooter.tsx              # Footer con texto y divisor
+│   │   └── PdfHeader.tsx              # Header con logo, info proyecto
+│   ├── InvoicePDF.tsx                 # Factura de suscripción Seencel
+│   ├── PaymentReceiptPDF.tsx          # Recibo de pago de cliente
+│   ├── GeneralCostPaymentsPDF.tsx     # Reporte de pagos de gastos generales (tabla)
+│   ├── PdfDocument.tsx                # Documento genérico con bloques
+│   └── PdfViewer.tsx                  # Visor de PDF en canvas
+├── hooks/
+│   └── use-pdf-templates.ts           # Hook para templates de PDF
 ├── modals/
-│   └── PDFExporterModal.tsx      # Modal de exportación (1132 líneas)
+│   └── PDFExporterModal.tsx           # Modal de exportación (1132 líneas)
 ├── services/
-│   └── pdfService.ts             # Registro de bloques disponibles
+│   └── pdfService.ts                  # Registro de bloques disponibles
 ├── types/
-│   └── types.ts                  # PdfBlock, PdfBlockProps
-└── index.ts                      # Exports públicos
+│   └── types.ts                       # PdfBlock, PdfBlockProps
+└── index.ts                           # Exports públicos
 ```
 
 ### 2.2 Uso en Otras Partes del Código
@@ -62,6 +67,7 @@ src/features/pdf/
 | Archivo | Uso | Completitud |
 |---------|-----|-------------|
 | `src/pages/billing/tabs/BillingListTab.tsx` | InvoicePDF para facturas suscripción | ✅ Completo |
+| `src/pages/general-costs/GeneralCostsPaymentsTab.tsx` | GeneralCostPaymentsPDF para exportar tabla de pagos | ✅ Completo |
 | `src/features/client-portal/components/PaymentsList.tsx` | Solo muestra datos, NO genera PDF | ❌ Falta PDF |
 | `src/features/client-portal/components/SiteLogsFeed.tsx` | Solo vista web, NO genera PDF | ❌ Falta PDF |
 | `src/features/clients/forms/ClientPaymentForm.tsx` | Referencia pero sin implementar | ❌ Falta PDF |
