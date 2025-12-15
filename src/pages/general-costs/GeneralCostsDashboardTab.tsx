@@ -631,8 +631,10 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
             {kpiLabels.averageTitle}
           </StatCardTitle>
           <StatCardValue>{defaultCurrency?.symbol} {kpis.periodAverage?.formatted ?? kpis.averageMonthly.formatted}</StatCardValue>
-          {!periodMeta.isShortPeriod && kpis.averageMonthlyTrendValue && (
+          {!periodMeta.isShortPeriod && kpis.averageMonthlyTrendValue ? (
             <StatCardTrend direction={kpis.averageMonthlyTrend} value={kpis.averageMonthlyTrendValue} />
+          ) : (
+            <div className="h-4" />
           )}
           <StatCardMeta>{kpiLabels.averageHelper}</StatCardMeta>
         </StatCard>
