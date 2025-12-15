@@ -58,6 +58,40 @@ function getDateFromForPeriod(period: PeriodFilter): Date | null {
   return result;
 }
 
+/**
+ * Calculate which periods have confirmed payments
+ * Returns an object with period as key and boolean indicating if data exists
+ */
+export function calculateAvailablePeriods(allPayments: any[]): Record<PeriodFilter, boolean> {
+  const confirmedPayments = allPayments.filter(p => p.status === 'confirmed');
+  
+  // 'all' is always available
+  const result: Record<PeriodFilter, boolean> = {
+    'all': true,
+    '30d': false,
+    '3m': false,
+    '6m': false,
+    '1y': false
+  };
+  
+  // Check each period
+  (['30d', '3m', '6m', '1y'] as const).forEach(period => {
+    const dateFrom = getDateFromForPeriod(period);
+    if (!dateFrom) return;
+    
+    const hasData = confirmedPayments.some(p => {
+      const paymentDate = parseLocalDate(p.payment_date);
+      if (!paymentDate) return false;
+      const paymentDateAtMidnight = new Date(paymentDate.getFullYear(), paymentDate.getMonth(), paymentDate.getDate(), 0, 0, 0);
+      return paymentDateAtMidnight >= dateFrom;
+    });
+    
+    result[period] = hasData;
+  });
+  
+  return result;
+}
+
 export default function GeneralCostsDashboardTab({ onNavigateToConceptos, selectedPeriod = 'all' }: GeneralCostsDashboardTabProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
@@ -70,16 +104,6 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
   const isLoading = isLoadingPayments || isLoadingMonthlySummary || isLoadingByCategory;
 
   const dateFrom = useMemo(() => getDateFromForPeriod(selectedPeriod), [selectedPeriod]);
-  
-  // Debug logging
-  useMemo(() => {
-    console.log('[GeneralCostsDashboard] Period changed:', {
-      selectedPeriod,
-      dateFrom,
-      allPaymentsCount: allPayments.length,
-      confirmedCount: allPayments.filter(p => p.status === 'confirmed').length
-    });
-  }, [selectedPeriod, dateFrom, allPayments]);
 
   const confirmedPayments = useMemo(() => {
     const confirmed = allPayments.filter(p => p.status === 'confirmed');

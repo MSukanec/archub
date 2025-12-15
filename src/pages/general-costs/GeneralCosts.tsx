@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { useNavigationStore } from '@/stores/navigationStore'
 import { CreditCard, Plus, Calendar, ChevronDown } from 'lucide-react'
-import GeneralCostsDashboardTab from './GeneralCostsDashboardTab'
+import GeneralCostsDashboardTab, { calculateAvailablePeriods } from './GeneralCostsDashboardTab'
 import GeneralCostsConceptsTab from './GeneralCostsConceptsTab'
 import GeneralCostsPaymentsTab from './GeneralCostsPaymentsTab'
 import GeneralCostsSettingsTab from './GeneralCostsSettingsTab'
 import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGeneralCosts } from '@/features/general-costs/hooks/use-general-costs'
+import { useGeneralCostsPayments } from '@/hooks/use-general-costs-payments'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +38,23 @@ export default function GeneralCosts() {
   // Get general costs to check if we should disable the Pagos tab
   const { data: generalCosts = [] } = useGeneralCosts(organizationId ?? null)
   const hasGeneralCosts = generalCosts.length > 0
+  
+  // Get payments to determine which periods have data
+  const { data: allPayments = [] } = useGeneralCostsPayments(organizationId)
+  const availablePeriods = useMemo(() => calculateAvailablePeriods(allPayments), [allPayments])
+  
+  // Force 'all' if current period has no data
+  const validSelectedPeriod = useMemo(() => {
+    if (availablePeriods[selectedPeriod]) return selectedPeriod
+    return 'all'
+  }, [selectedPeriod, availablePeriods])
+  
+  // Update selected period if current one becomes invalid
+  useEffect(() => {
+    if (validSelectedPeriod !== selectedPeriod) {
+      setSelectedPeriod(validSelectedPeriod)
+    }
+  }, [validSelectedPeriod, selectedPeriod])
 
   // Set sidebar context on mount
   useEffect(() => {
@@ -103,7 +121,7 @@ export default function GeneralCosts() {
   const getPeriodSelector = () => {
     if (activeTab !== "dashboard") return []
     
-    const selectedLabel = PERIOD_OPTIONS.find(opt => opt.value === selectedPeriod)?.label || 'Período'
+    const selectedLabel = PERIOD_OPTIONS.find(opt => opt.value === validSelectedPeriod)?.label || 'Período'
     
     return [
       <DropdownMenu key="period-selector">
@@ -116,16 +134,21 @@ export default function GeneralCosts() {
           <ChevronDown className="h-4 w-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-[180px]">
-          {PERIOD_OPTIONS.map((option) => (
-            <DropdownMenuItem 
-              key={option.value}
-              onClick={() => setSelectedPeriod(option.value)}
-              className={selectedPeriod === option.value ? "font-medium text-black dark:text-white" : ""}
-              data-testid={`option-period-${option.value}`}
-            >
-              {option.label}
-            </DropdownMenuItem>
-          ))}
+          {PERIOD_OPTIONS.map((option) => {
+            const isAvailable = availablePeriods[option.value];
+            return (
+              <DropdownMenuItem 
+                key={option.value}
+                onClick={() => isAvailable && setSelectedPeriod(option.value)}
+                disabled={!isAvailable}
+                className={validSelectedPeriod === option.value ? "font-medium text-black dark:text-white" : ""}
+                data-testid={`option-period-${option.value}`}
+              >
+                {option.label}
+                {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
+              </DropdownMenuItem>
+            );
+          })}
         </DropdownMenuContent>
       </DropdownMenu>
     ]
@@ -148,7 +171,7 @@ export default function GeneralCosts() {
 
   return (
     <Layout headerProps={headerProps} wide={false}>
-      {activeTab === "dashboard" && <GeneralCostsDashboardTab onNavigateToConceptos={() => setActiveTab('conceptos')} selectedPeriod={selectedPeriod} />}
+      {activeTab === "dashboard" && <GeneralCostsDashboardTab onNavigateToConceptos={() => setActiveTab('conceptos')} selectedPeriod={validSelectedPeriod} />}
       {activeTab === "conceptos" && <GeneralCostsConceptsTab onNewGeneralCost={handleNewGeneralCost} />}
       {activeTab === "pagos" && <GeneralCostsPaymentsTab />}
       {activeTab === "ajustes" && <GeneralCostsSettingsTab />}

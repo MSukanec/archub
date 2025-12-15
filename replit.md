@@ -6,6 +6,30 @@ Seencel is a comprehensive construction management platform designed to optimize
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (2025-12-15, Session 22)
+
+### ✅ Smart Period Filter for General Costs Dashboard
+**Problem:** Period selector allowed users to select empty periods, showing 0 data which was confusing
+**Solution:** 
+- Implemented `calculateAvailablePeriods()` function that checks which periods (30d, 3m, 6m, 1y, all) have confirmed payments
+- Disabled dropdown options for periods with no data, showing "(sin datos)" label
+- Always keeps "Histórico" (all) enabled as fallback
+- Auto-reverts to "all" if user somehow selects an empty period
+- Periods are now contextual - only available options with data can be selected
+
+**Files Modified:**
+1. `src/pages/general-costs/GeneralCostsDashboardTab.tsx`:
+   - Added `calculateAvailablePeriods()` export - scans all confirmed payments and determines which time periods have data
+   - Removed debug logging
+   
+2. `src/pages/general-costs/GeneralCosts.tsx`:
+   - Imported `calculateAvailablePeriods` and `useGeneralCostsPayments`
+   - Added `availablePeriods` calculation via `useMemo`
+   - Added `validSelectedPeriod` logic to force 'all' if current period has no data
+   - Updated dropdown to disable unavailable periods
+   - Added "(sin datos)" label for empty periods
+   - Updated component to use `validSelectedPeriod` instead of raw `selectedPeriod`
+
 ## System Architecture
 
 ### UI/UX Decisions
@@ -16,6 +40,7 @@ Preferred communication style: Simple, everyday language.
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub with a two-level sidebar system.
 - **Layout Architecture**: Experience-based layouts (`src/layouts/`) including Dashboard Layout (authenticated app) and Marketing Layout (public-facing pages).
 - **Content Theming System**: Unified CSS theming layer with dynamic background switching via `useContentBackground` hook.
+- **Smart Filtering**: Period filters disable options without data, preventing empty state confusion.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
@@ -50,6 +75,7 @@ Preferred communication style: Simple, everyday language.
 - **Lab Neural Network Renderer System**: Extensible node rendering architecture for neural network graphs.
 - **Organization Activity Tracking System**: Comprehensive audit logging for organization actions, viewable by organization members and admins.
 - **Founders Portal**: Private area for founder organizations with a directory, events, voting, and forum features, protected by access control.
+- **Smart Period Filtering**: Dashboard filters intelligently disable periods without data, automatically reverting to "Histórico" if an empty period is selected.
 
 ## External Dependencies
 - **Supabase**: Authentication.
