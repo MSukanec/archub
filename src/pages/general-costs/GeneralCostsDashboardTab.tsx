@@ -579,11 +579,10 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
             Total Pagos
           </StatCardTitle>
           <StatCardValue>{kpis.totalPayments.formatted}</StatCardValue>
-          <StatCardMeta className="flex items-center gap-1">
-            {kpis.totalPaymentsTrend === 'up' && <span className="text-red-600 dark:text-red-400">↑</span>}
-            {kpis.totalPaymentsTrend === 'down' && <span className="text-green-600 dark:text-green-400">↓</span>}
-            ≈ {kpis.paymentsPerMonth} pagos por mes
-          </StatCardMeta>
+          {kpis.totalPaymentsTrend !== 'neutral' && (
+            <StatCardTrend direction={kpis.totalPaymentsTrend} />
+          )}
+          <StatCardMeta>≈ {kpis.paymentsPerMonth} pagos por mes</StatCardMeta>
         </StatCard>
 
         <StatCard data-testid="kpi-top-category">
