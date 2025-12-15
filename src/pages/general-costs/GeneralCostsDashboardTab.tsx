@@ -526,7 +526,13 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
 
   const recentActivityItems = useMemo((): ActivityItem[] => {
     return confirmedPayments
-      .sort((a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())
+      .sort((a, b) => {
+        // Primero ordenar por fecha de pago (descendente)
+        const dateComparison = new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
+        if (dateComparison !== 0) return dateComparison;
+        // Si las fechas de pago son iguales, ordenar por fecha de creación (descendente)
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      })
       .slice(0, 5)
       .map((payment) => ({
         id: payment.id,
