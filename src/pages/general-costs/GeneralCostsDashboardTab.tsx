@@ -202,7 +202,7 @@ export default function GeneralCostsDashboardTab({
 
   const handleCategoryDrillDown = useCallback((categoryName: string) => {
     if (onNavigateToTab) {
-      onNavigateToTab('pagos', { filterGeneralCost: categoryName });
+      onNavigateToTab('pagos', { filterCategory: categoryName });
     } else {
       onNavigateToPayments?.();
     }

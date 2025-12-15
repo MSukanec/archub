@@ -30,6 +30,7 @@ const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
 export interface DrillDownFilters {
   filterMonth?: string;
   filterGeneralCost?: string;
+  filterCategory?: string;
 }
 
 export default function GeneralCosts() {
@@ -200,6 +201,7 @@ export default function GeneralCosts() {
         <GeneralCostsPaymentsTab 
           initialFilterMonth={drillDownFilters.filterMonth}
           initialFilterGeneralCost={drillDownFilters.filterGeneralCost}
+          initialFilterCategory={drillDownFilters.filterCategory}
           onClearDrillDown={() => setDrillDownFilters({})}
         />
       )}

@@ -35,12 +35,14 @@ import { GeneralCostPaymentsPDF, type GeneralCostPaymentsPDFData, type GeneralCo
 interface GeneralCostsPaymentsTabProps {
   initialFilterMonth?: string;
   initialFilterGeneralCost?: string;
+  initialFilterCategory?: string;
   onClearDrillDown?: () => void;
 }
 
 export default function GeneralCostsPaymentsTab({
   initialFilterMonth,
   initialFilterGeneralCost,
+  initialFilterCategory,
   onClearDrillDown
 }: GeneralCostsPaymentsTabProps = {}) {
   const { data: userData } = useCurrentUser();
@@ -56,6 +58,7 @@ export default function GeneralCostsPaymentsTab({
   const [filterGeneralCost, setFilterGeneralCost] = useState<string>(initialFilterGeneralCost || 'all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterMonth, setFilterMonth] = useState<string>(initialFilterMonth || 'all');
+  const [filterCategory, setFilterCategory] = useState<string>(initialFilterCategory || 'all');
 
   // Selection state
   const [selectedPayments, setSelectedPayments] = useState<GeneralCostPayment[]>([]);
@@ -90,31 +93,36 @@ export default function GeneralCostsPaymentsTab({
     // Reset all drill-down filters first, then apply new ones
     setFilterMonth(initialFilterMonth || 'all');
     setFilterGeneralCost(initialFilterGeneralCost || 'all');
-  }, [initialFilterMonth, initialFilterGeneralCost]);
+    setFilterCategory(initialFilterCategory || 'all');
+  }, [initialFilterMonth, initialFilterGeneralCost, initialFilterCategory]);
 
   // Check if we have active drill-down filters from dashboard
-  const hasDrillDownFilter = !!(initialFilterMonth || initialFilterGeneralCost);
+  const hasDrillDownFilter = !!(initialFilterMonth || initialFilterGeneralCost || initialFilterCategory);
   const drillDownLabel = initialFilterMonth 
     ? (() => {
         const [year, m] = initialFilterMonth.split('-');
         const date = new Date(parseInt(year), parseInt(m) - 1);
         return `Mes: ${date.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })}`;
       })()
-    : initialFilterGeneralCost 
-      ? `Categoría: ${initialFilterGeneralCost}`
-      : null;
+    : initialFilterCategory 
+      ? `Categoría: ${initialFilterCategory}`
+      : initialFilterGeneralCost 
+        ? `Gasto General: ${initialFilterGeneralCost}`
+        : null;
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
     const wallets = new Set<string>();
     const currencies = new Set<string>();
     const generalCosts = new Set<string>();
+    const categories = new Set<string>();
     const months = new Set<string>();
 
     allPayments.forEach(payment => {
       if (payment.wallet?.wallets?.name) wallets.add(payment.wallet.wallets.name);
       if (payment.currency?.code) currencies.add(payment.currency.code);
       if (payment.general_cost?.name) generalCosts.add(payment.general_cost.name);
+      if (payment.general_cost?.category?.name) categories.add(payment.general_cost.category.name);
       if (payment.payment_date) {
         const date = parseLocalDate(payment.payment_date);
         if (date) {
@@ -128,6 +136,7 @@ export default function GeneralCostsPaymentsTab({
       wallets: Array.from(wallets).sort(),
       currencies: Array.from(currencies).sort(),
       generalCosts: Array.from(generalCosts).sort(),
+      categories: Array.from(categories).sort(),
       months: Array.from(months).sort().reverse(),
     };
   }, [allPayments]);
@@ -138,6 +147,7 @@ export default function GeneralCostsPaymentsTab({
       if (filterWallet !== 'all' && payment.wallet?.wallets?.name !== filterWallet) return false;
       if (filterCurrency !== 'all' && payment.currency?.code !== filterCurrency) return false;
       if (filterGeneralCost !== 'all' && payment.general_cost?.name !== filterGeneralCost) return false;
+      if (filterCategory !== 'all' && payment.general_cost?.category?.name !== filterCategory) return false;
       if (filterStatus !== 'all' && payment.status !== filterStatus) return false;
       if (filterMonth !== 'all' && payment.payment_date) {
         const date = parseLocalDate(payment.payment_date);
@@ -148,7 +158,7 @@ export default function GeneralCostsPaymentsTab({
       }
       return true;
     });
-  }, [allPayments, filterWallet, filterCurrency, filterGeneralCost, filterStatus, filterMonth]);
+  }, [allPayments, filterWallet, filterCurrency, filterGeneralCost, filterCategory, filterStatus, filterMonth]);
 
   // Sort by payment_date DESC, then by created_at DESC
   const sortedPayments = useMemo(() => {
@@ -785,6 +795,7 @@ export default function GeneralCostsPaymentsTab({
     setFilterWallet('all');
     setFilterCurrency('all');
     setFilterGeneralCost('all');
+    setFilterCategory('all');
     setFilterMonth('all');
     onClearDrillDown?.();
     setFilterStatus('all');
@@ -941,6 +952,7 @@ export default function GeneralCostsPaymentsTab({
     filterWallet !== 'all' || 
     filterCurrency !== 'all' || 
     filterGeneralCost !== 'all' ||
+    filterCategory !== 'all' ||
     filterStatus !== 'all' ||
     filterMonth !== 'all';
 
@@ -1001,6 +1013,7 @@ export default function GeneralCostsPaymentsTab({
             onClick={() => {
               setFilterMonth('all');
               setFilterGeneralCost('all');
+              setFilterCategory('all');
               onClearDrillDown?.();
             }}
             className="text-xs"
