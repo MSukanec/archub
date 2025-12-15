@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Plus, Edit, Trash2, Search, Filter, Bell, Layers, CheckCircle, XCircle, DollarSign } from "lucide-react";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
-import { MiniTrendChart } from '@/components/charts/MiniTrendChart';
+import { MiniSparkline } from '@/components/charts/MiniSparkline';
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
@@ -289,12 +289,10 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       key: 'trend',
       label: 'Tendencia (6 meses)',
       render: (item: typeof enrichedGeneralCosts[0]) => (
-        <div style={{ width: '120px', height: '48px' }}>
-          <MiniTrendChart 
-            data={item.trendData} 
-            color="hsl(var(--accent))"
-          />
-        </div>
+        <MiniSparkline 
+          data={item.trendData.map(d => d.value)} 
+          color="#22c55e"
+        />
       )
     },
     {

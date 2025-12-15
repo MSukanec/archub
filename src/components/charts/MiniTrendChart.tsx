@@ -17,7 +17,7 @@ interface MiniTrendChartProps {
 export function MiniTrendChart({
   data,
   isLoading = false,
-  color = 'hsl(var(--accent))',
+  color = '#22c55e',
   height = 48,
   loadingText,
   emptyText = 'Sin datos',
@@ -52,21 +52,24 @@ export function MiniTrendChart({
   }
 
   return (
-    <LineChart 
-      data={data} 
-      width={120}
-      height={height}
-      margin={{ top: 2, right: 2, left: 2, bottom: 2 }}
-    >
-      <Line 
-        type="monotone" 
-        dataKey="value" 
-        stroke={color}
-        strokeWidth={strokeWidth}
-        dot={false}
-        activeDot={false}
-        connectNulls={false}
-      />
-    </LineChart>
+    <div style={{ width: '100%', height: '100%' }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart 
+          data={data} 
+          margin={{ top: 2, right: 2, left: 2, bottom: 2 }}
+        >
+          <Line 
+            type="monotone" 
+            dataKey="value" 
+            stroke={color}
+            strokeWidth={strokeWidth}
+            dot={false}
+            activeDot={false}
+            connectNulls={false}
+            isAnimationActive={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   )
 }
