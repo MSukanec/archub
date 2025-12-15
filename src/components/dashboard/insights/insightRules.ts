@@ -36,6 +36,8 @@ export const growthExplainedInsight: InsightRule = (context: InsightContext): In
   
   if (impactPercentage < 25) return null;
   
+  const roundedGrowthRate = Math.round(Math.abs(growthRate));
+  
   if (growthRate > 0) {
     return {
       id: 'growth-explained-increase',
@@ -43,7 +45,9 @@ export const growthExplainedInsight: InsightRule = (context: InsightContext): In
       title: 'Origen del aumento identificado',
       description: `El ${impactPercentage}% del aumento proviene de "${maxImpactCategory}" en este período.`,
       icon: 'TrendingUp',
-      priority: 1
+      priority: 1,
+      context: `"${maxImpactCategory}" creció un ${roundedGrowthRate}% respecto al período anterior.`,
+      actionHint: `Revisá los conceptos de "${maxImpactCategory}" en este período.`
     };
   } else {
     return {
@@ -52,7 +56,9 @@ export const growthExplainedInsight: InsightRule = (context: InsightContext): In
       title: 'Origen del ahorro identificado',
       description: `El ${impactPercentage}% de la reducción proviene de "${maxImpactCategory}".`,
       icon: 'TrendingDown',
-      priority: 3
+      priority: 3,
+      context: `"${maxImpactCategory}" se redujo un ${roundedGrowthRate}% respecto al período anterior.`,
+      actionHint: `Revisá los conceptos de "${maxImpactCategory}" en este período.`
     };
   }
 };
@@ -90,9 +96,14 @@ export const concentrationNarrativeInsight: InsightRule = (context: InsightConte
       title: 'Concentración crítica',
       description: `Una sola categoría ("${sortedCategories[0].name}") concentra el ${roundedPercentage}% del gasto total.`,
       icon: 'AlertTriangle',
-      priority: 1
+      priority: 1,
+      context: `"${sortedCategories[0].name}" lidera con el ${roundedPercentage}%.`,
+      actionHint: `Revisá "${sortedCategories[0].name}" en el gráfico de categorías.`
     };
   }
+  
+  const topCategoryName = sortedCategories[0]?.name || '';
+  const topCategoryPercentage = sortedCategories[0] ? Math.round((sortedCategories[0].value / totalValue) * 100) : 0;
   
   return {
     id: 'concentration-few',
@@ -100,7 +111,9 @@ export const concentrationNarrativeInsight: InsightRule = (context: InsightConte
     title: 'Alta concentración del gasto',
     description: `${categoriesNeeded} categorías concentran el ${roundedPercentage}% del gasto total.`,
     icon: 'PieChart',
-    priority: 2
+    priority: 2,
+    context: `"${topCategoryName}" lidera con el ${topCategoryPercentage}%.`,
+    actionHint: `Revisá "${topCategoryName}" en el gráfico de categorías.`
   };
 };
 
@@ -125,9 +138,11 @@ export const operationalLoadInsight: InsightRule = (context: InsightContext): In
         id: 'operational-load-high-short',
         type: 'info',
         title: 'Carga operativa elevada',
-        description: `Procesás en promedio ${displayRate} pagos por semana. Considerá consolidar pagos recurrentes.`,
+        description: `Procesás en promedio ${displayRate} pagos por semana.`,
         icon: 'Repeat',
-        priority: 4
+        priority: 4,
+        context: `Esto representa ${context.paymentsCount} pagos en total.`,
+        actionHint: 'Considerá consolidar pagos recurrentes.'
       };
     }
     return null;
@@ -142,9 +157,11 @@ export const operationalLoadInsight: InsightRule = (context: InsightContext): In
       id: 'operational-load-high',
       type: 'info',
       title: 'Carga operativa elevada',
-      description: `Procesás en promedio ${Math.round(paymentsPerMonth)} pagos por mes. Considerá consolidar pagos recurrentes.`,
+      description: `Procesás en promedio ${Math.round(paymentsPerMonth)} pagos por mes.`,
       icon: 'Repeat',
-      priority: 4
+      priority: 4,
+      context: `Esto representa ${context.paymentsCount} pagos en total.`,
+      actionHint: 'Considerá consolidar pagos recurrentes.'
     };
   }
   
@@ -166,7 +183,9 @@ export const repeatedPatternInsight: InsightRule = (context: InsightContext): In
         title: 'Categoría dominante',
         description: `"${context.topCategoryName}" concentra el ${context.topCategoryPercentage}% del gasto en este período.`,
         icon: 'Tag',
-        priority: 5
+        priority: 5,
+        context: 'Este patrón se observa en el período actual.',
+        actionHint: 'Revisá si este nivel de gasto es esperado.'
       };
     }
     return null;
@@ -207,7 +226,9 @@ export const repeatedPatternInsight: InsightRule = (context: InsightContext): In
       title: 'Patrón sostenido detectado',
       description: `Este patrón de gasto elevado se repite desde hace ${maxConsecutive} períodos consecutivos.`,
       icon: 'Activity',
-      priority: 5
+      priority: 5,
+      context: `Este patrón comenzó hace ${maxConsecutive} períodos.`,
+      actionHint: 'Revisá si este nivel de gasto es esperado.'
     };
   }
   
@@ -218,7 +239,9 @@ export const repeatedPatternInsight: InsightRule = (context: InsightContext): In
       title: 'Categoría dominante consistente',
       description: `"${context.topCategoryName}" mantiene el ${context.topCategoryPercentage}% del gasto de forma sostenida.`,
       icon: 'Tag',
-      priority: 5
+      priority: 5,
+      context: `Este patrón comenzó hace ${context.monthCount} períodos.`,
+      actionHint: 'Revisá si este nivel de gasto es esperado.'
     };
   }
   
@@ -244,13 +267,18 @@ export const consolidationOpportunityInsight: InsightRule = (context: InsightCon
       c.paymentsCount > max.paymentsCount ? c : max
     );
     
+    const totalPayments = context.paymentsByConcept.reduce((sum, c) => sum + c.paymentsCount, 0);
+    const conceptPercentage = totalPayments > 0 ? Math.round((topCandidate.paymentsCount / totalPayments) * 100) : 0;
+    
     return {
       id: 'consolidation-opportunity-short',
       type: 'info',
       title: 'Oportunidad de consolidación',
-      description: `"${topCandidate.conceptName}" tiene ${topCandidate.paymentsCount} pagos en el período. Podrías consolidarlos.`,
+      description: `"${topCandidate.conceptName}" tiene ${topCandidate.paymentsCount} pagos en el período.`,
       icon: 'Layers',
-      priority: 6
+      priority: 6,
+      context: `Este concepto representa el ${conceptPercentage}% del total de pagos.`,
+      actionHint: 'Revisá si podés agrupar estos pagos.'
     };
   }
   
@@ -269,13 +297,18 @@ export const consolidationOpportunityInsight: InsightRule = (context: InsightCon
     c.paymentsCount > max.paymentsCount ? c : max
   );
   
+  const totalPayments = context.paymentsByConcept.reduce((sum, c) => sum + c.paymentsCount, 0);
+  const conceptPercentage = totalPayments > 0 ? Math.round((topCandidate.paymentsCount / totalPayments) * 100) : 0;
+  
   return {
     id: 'consolidation-opportunity',
     type: 'info',
     title: 'Oportunidad de consolidación',
-    description: `"${topCandidate.conceptName}" tiene ${topCandidate.paymentsCount} pagos en el período. Podrías consolidarlos.`,
+    description: `"${topCandidate.conceptName}" tiene ${topCandidate.paymentsCount} pagos en el período.`,
     icon: 'Layers',
-    priority: 6
+    priority: 6,
+    context: `Este concepto representa el ${conceptPercentage}% del total de pagos.`,
+    actionHint: 'Revisá si podés agrupar estos pagos.'
   };
 };
 

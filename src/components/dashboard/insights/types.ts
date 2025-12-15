@@ -7,6 +7,8 @@ export interface Insight {
   description: string;
   icon: string;
   priority: number;
+  context?: string;      // POR QUÉ pasó (explicación del origen)
+  actionHint?: string;   // QUÉ HACER (sugerencia concreta)
 }
 
 export interface CategoryData {

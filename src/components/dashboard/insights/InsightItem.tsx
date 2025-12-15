@@ -25,10 +25,22 @@ function getIconElement(iconName: string, className?: string) {
 }
 
 export function toInsightItems(insights: Insight[]): ContainerInsightItem[] {
-  return insights.map(insight => ({
-    title: insight.title,
-    description: insight.description,
-    variant: mapTypeToVariant(insight.type),
-    icon: getIconElement(insight.icon, 'h-3 w-3')
-  }));
+  return insights.map(insight => {
+    let fullDescription = insight.description;
+    
+    if (insight.context) {
+      fullDescription += ` ${insight.context}`;
+    }
+    
+    if (insight.actionHint) {
+      fullDescription += ` → ${insight.actionHint}`;
+    }
+    
+    return {
+      title: insight.title,
+      description: fullDescription,
+      variant: mapTypeToVariant(insight.type),
+      icon: getIconElement(insight.icon, 'h-3 w-3')
+    };
+  });
 }
