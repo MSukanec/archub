@@ -26,6 +26,7 @@ import {
 } from '@/components/dashboard';
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
+import { useGeneralCostsDataHealth, mergeWithBusinessInsights } from '@/core/data-health';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
@@ -159,6 +160,7 @@ export default function GeneralCostsDashboardTab({
   const organizationId = userData?.organization?.id;
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
+  const defaultCurrencyId = userData?.organization?.preferences?.default_currency_id;
 
   const handleInsightAction = useCallback((action: InsightAction) => {
     switch (action.type) {
@@ -236,6 +238,13 @@ export default function GeneralCostsDashboardTab({
       return paymentDateAtMidnight >= dateFrom;
     });
   }, [allPayments, dateFrom]);
+
+  const dataHealth = useGeneralCostsDataHealth(allPayments, {
+    organizationId: organizationId ?? '',
+    defaultCurrencyId: defaultCurrencyId ?? undefined,
+    enabled: !!organizationId && allPayments.length > 0,
+    filterTags: ['general-costs'],
+  });
 
   const filteredMonthlySummary = useMemo(() => {
     if (!dateFrom) return monthlySummary;
@@ -772,7 +781,7 @@ export default function GeneralCostsDashboardTab({
         <InsightCard
           title="Insights"
           titleIcon={<Lightbulb />}
-          items={toInsightItems(autoInsights)}
+          items={mergeWithBusinessInsights(toInsightItems(autoInsights), dataHealth.insights, { dataHealthFirst: true })}
           emptyText="Sin insights en este período. Continuá registrando pagos para obtener análisis."
           onAction={handleInsightAction}
           data-testid="insights-section"

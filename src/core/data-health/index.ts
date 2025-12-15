@@ -18,4 +18,7 @@ export {
   allPaymentRules,
 } from './rules/payment-rules';
 
-export { dataHealthToInsights } from './adapters/insights-adapter';
+export { dataHealthToInsights, mergeWithBusinessInsights } from './adapters/insights-adapter';
+
+export { useGeneralCostsDataHealth, normalizeGeneralCostPayment } from './hooks/useDataHealth';
+export type { UseDataHealthOptions, UseDataHealthResult } from './hooks/useDataHealth';
