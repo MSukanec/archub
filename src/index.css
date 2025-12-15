@@ -14,23 +14,12 @@
 @tailwind utilities;
 
 html {
-  scrollbar-gutter: stable !important;
-  overflow-y: scroll !important;
   height: 100%;
 }
 
 body {
-  scrollbar-gutter: stable !important;
-  overflow-y: scroll !important;
   height: 100%;
-}
-
-/* Apply scrollbar-gutter to all overflow containers */
-[class*="overflow-auto"],
-[class*="overflow-y"],
-.overflow-auto,
-.overflow-y-auto {
-  scrollbar-gutter: stable !important;
+  min-height: 100%;
 }
 
 /* ========================================
