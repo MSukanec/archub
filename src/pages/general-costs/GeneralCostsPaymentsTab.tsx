@@ -517,8 +517,12 @@ export default function GeneralCostsPaymentsTab() {
           const totalToImport = validRowsToImport.length;
           let currentIndex = 0;
 
+          const validStatuses = ['confirmed', 'pending', 'overdue', 'cancelled'];
+
           for (const { row, resolvedCurrencyId, resolvedGeneralCostId, resolvedWalletId } of validRowsToImport) {
             try {
+              const resolvedStatus = validStatuses.includes(row.status) ? row.status : 'confirmed';
+
               await createPaymentMutation.mutateAsync({
                 organization_id: organizationId!,
                 payment_date: row.payment_date,
@@ -527,7 +531,7 @@ export default function GeneralCostsPaymentsTab() {
                 exchange_rate: row.exchange_rate ? parseFloat(String(row.exchange_rate).replace(/[^0-9.-]/g, '')) : undefined,
                 wallet_id: resolvedWalletId || undefined,
                 general_cost_id: resolvedGeneralCostId,
-                status: row.status || 'confirmed',
+                status: resolvedStatus,
                 reference: row.reference || undefined,
                 notes: row.notes || undefined,
                 created_by: currentMember?.id,

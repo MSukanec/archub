@@ -8,6 +8,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (2025-12-15, Session 22)
 
+### ✅ Payment Import Status Validation Fix - COMPLETADO
+**Problem:** When users import payments without mapping the STATUS field, the database check constraint would fail because invalid or missing status values were being sent.
+
+**Solution:**
+- Added `validStatuses` array validation in all 4 payment import handlers
+- If `row.status` is undefined, null, empty, or any invalid value → defaults to 'confirmed'
+- Only valid statuses ('confirmed', 'pending', 'overdue', 'cancelled') pass through
+
+**Files Modified:**
+1. `src/pages/general-costs/GeneralCostsPaymentsTab.tsx` - Added `validStatuses` check before insert
+2. `src/pages/clients/ClientPaymentsTab.tsx` - Added `validStatuses` check before insert
+3. `src/pages/professional/personnel/PersonnelPaymentsTab.tsx` - Added `validStatuses` check before insert
+4. `src/pages/professional/materials/MaterialPaymentsTab.tsx` - Added `validStatuses` check before insert
+
 ### ✅ Smart Period Filter + Dropdown Fixes - COMPLETADO
 **Problem 1:** Period selector allowed users to select empty periods
 **Solution:** 

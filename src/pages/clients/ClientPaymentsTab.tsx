@@ -809,6 +809,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
           }
 
           // Importar solo las filas válidas
+          const validStatuses = ['confirmed', 'pending', 'overdue', 'cancelled'];
           let successCount = 0;
           for (const row of validRowsToImport) {
             try {
@@ -829,13 +830,15 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
               }
               console.log('[Import] Final resolvedWalletId for this row:', resolvedWalletId);
 
+              const resolvedStatus = validStatuses.includes(row.status) ? row.status : 'confirmed';
+
               const paymentData = {
                 client_id: row._clientId,
                 amount: parseFloat(row.amount) || 0,
                 currency_id: row._currencyId,
                 exchange_rate: parseFloat(row.exchange_rate) || null,
                 payment_date: row.payment_date || new Date().toISOString().split('T')[0],
-                status: row.status || 'confirmed',
+                status: resolvedStatus,
                 wallet_id: resolvedWalletId,
                 reference: row.reference || null,
                 notes: row.notes || null,

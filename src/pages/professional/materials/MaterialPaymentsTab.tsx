@@ -547,6 +547,7 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
             throw new Error('No hay billeteras disponibles');
           }
 
+          const validStatuses = ['confirmed', 'pending', 'overdue', 'cancelled'];
           let successCount = 0;
           for (const row of validRowsToImport) {
             try {
@@ -561,13 +562,15 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
                 }
               }
 
+              const resolvedStatus = validStatuses.includes(row.status) ? row.status : 'confirmed';
+
               const paymentData = {
                 purchase_id: null,
                 amount: parseFloat(row.amount) || 0,
                 currency_id: row._currencyId,
                 exchange_rate: parseFloat(row.exchange_rate) || null,
                 payment_date: row.payment_date || new Date().toISOString().split('T')[0],
-                status: row.status || 'confirmed',
+                status: resolvedStatus,
                 wallet_id: resolvedWalletId,
                 reference: row.reference || null,
                 notes: row.notes || null,
