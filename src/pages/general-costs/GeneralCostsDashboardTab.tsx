@@ -12,11 +12,14 @@ import {
   StatCardTitle, 
   StatCardValue, 
   StatCardMeta,
+  StatCardSubValue,
+  StatCardTrend,
   DashboardCard,
   InsightCard,
   ActivityCard,
   type InsightItem,
-  type ActivityItem
+  type ActivityItem,
+  type TrendDirection
 } from '@/components/dashboard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
@@ -31,6 +34,47 @@ import { type PeriodFilter } from './GeneralCosts';
 interface GeneralCostsDashboardTabProps {
   onNavigateToConceptos?: () => void;
   selectedPeriod?: PeriodFilter;
+}
+
+function getPeriodLabel(period: PeriodFilter): string {
+  switch (period) {
+    case '30d': return 'Últimos 30 días';
+    case '3m': return 'Últimos 3 meses';
+    case '6m': return 'Últimos 6 meses';
+    case '1y': return 'Último año';
+    case 'all': return 'Histórico';
+  }
+}
+
+function getPreviousPeriodDateRange(period: PeriodFilter): { from: Date; to: Date } | null {
+  if (period === 'all') return null;
+  
+  const now = new Date();
+  const to = new Date(now);
+  const from = new Date(now);
+  
+  switch (period) {
+    case '30d':
+      to.setDate(to.getDate() - 30);
+      from.setDate(from.getDate() - 60);
+      break;
+    case '3m':
+      to.setMonth(to.getMonth() - 3);
+      from.setMonth(from.getMonth() - 6);
+      break;
+    case '6m':
+      to.setMonth(to.getMonth() - 6);
+      from.setMonth(from.getMonth() - 12);
+      break;
+    case '1y':
+      to.setFullYear(to.getFullYear() - 1);
+      from.setFullYear(from.getFullYear() - 2);
+      break;
+  }
+  
+  to.setHours(0, 0, 0, 0);
+  from.setHours(0, 0, 0, 0);
+  return { from, to };
 }
 
 function getDateFromForPeriod(period: PeriodFilter): Date | null {
@@ -133,6 +177,19 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
     return byCategory.filter(item => item.payment_month >= fromMonth);
   }, [byCategory, dateFrom]);
 
+  const previousPeriodPayments = useMemo(() => {
+    const previousRange = getPreviousPeriodDateRange(selectedPeriod);
+    if (!previousRange) return [];
+    
+    const allConfirmed = allPayments.filter(p => p.status === 'confirmed');
+    return allConfirmed.filter(p => {
+      const paymentDate = parseLocalDate(p.payment_date);
+      if (!paymentDate) return false;
+      const paymentDateAtMidnight = new Date(paymentDate.getFullYear(), paymentDate.getMonth(), paymentDate.getDate(), 0, 0, 0);
+      return paymentDateAtMidnight >= previousRange.from && paymentDateAtMidnight < previousRange.to;
+    });
+  }, [allPayments, selectedPeriod]);
+
   const kpis = useMemo(() => {
     const totalGasto = calculateMonetaryKPI({
       items: confirmedPayments.map(p => ({
@@ -146,12 +203,39 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       quoteCurrency: 'USD'
     });
 
+    const previousTotalGasto = calculateMonetaryKPI({
+      items: previousPeriodPayments.map(p => ({
+        amount: p.amount,
+        currency_id: p.currency_id,
+        currency: p.currency,
+        exchange_rate: p.exchange_rate
+      })),
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol,
+      quoteCurrency: 'USD'
+    });
+
+    let totalGastoTrend: TrendDirection = 'neutral';
+    let totalGastoTrendValue = '';
+    if (previousTotalGasto.value > 0 && selectedPeriod !== 'all') {
+      const change = ((totalGasto.value - previousTotalGasto.value) / previousTotalGasto.value) * 100;
+      totalGastoTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
+      totalGastoTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% vs período anterior`;
+    }
+
     const months = new Set(confirmedPayments.map(p => {
       const date = parseLocalDate(p.payment_date);
       if (!date) return '';
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }).filter(m => m !== ''));
     const monthCount = months.size || 1;
+
+    const previousMonths = new Set(previousPeriodPayments.map(p => {
+      const date = parseLocalDate(p.payment_date);
+      if (!date) return '';
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }).filter(m => m !== ''));
+    const previousMonthCount = previousMonths.size || 1;
 
     const averageMonthlyItems = confirmedPayments.map(p => ({
       amount: p.amount / monthCount,
@@ -167,10 +251,40 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       quoteCurrency: 'USD'
     });
 
+    const previousAverageMonthlyItems = previousPeriodPayments.map(p => ({
+      amount: p.amount / previousMonthCount,
+      currency_id: p.currency_id,
+      currency: p.currency,
+      exchange_rate: p.exchange_rate
+    }));
+
+    const previousAverageMonthly = calculateMonetaryKPI({
+      items: previousAverageMonthlyItems,
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol,
+      quoteCurrency: 'USD'
+    });
+
+    let averageMonthlyTrend: TrendDirection = 'neutral';
+    let averageMonthlyTrendValue = '';
+    if (previousAverageMonthly.value > 0 && selectedPeriod !== 'all') {
+      const change = ((averageMonthly.value - previousAverageMonthly.value) / previousAverageMonthly.value) * 100;
+      averageMonthlyTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
+      averageMonthlyTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% vs promedio anterior`;
+    }
+
     const totalPayments = calculateCountKPI({
       count: confirmedPayments.length,
       label: 'pagos'
     });
+
+    const paymentsPerMonth = monthCount > 0 ? Math.round(confirmedPayments.length / monthCount) : 0;
+    const previousPaymentsPerMonth = previousMonthCount > 0 ? Math.round(previousPeriodPayments.length / previousMonthCount) : 0;
+
+    let totalPaymentsTrend: TrendDirection = 'neutral';
+    if (previousPaymentsPerMonth > 0 && selectedPeriod !== 'all') {
+      totalPaymentsTrend = paymentsPerMonth > previousPaymentsPerMonth ? 'up' : paymentsPerMonth < previousPaymentsPerMonth ? 'down' : 'neutral';
+    }
 
     let topCategory = 'Sin datos';
     let maxAmount = 0;
@@ -188,6 +302,9 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       }
     });
 
+    const allCategoriesTotal = Array.from(categoryTotals.values()).reduce((sum, v) => sum + v, 0);
+    const topCategoryPercentage = allCategoriesTotal > 0 ? Math.round((maxAmount / allCategoriesTotal) * 100) : 0;
+
     const topCategoryKPI = calculateTextKPI({
       text: topCategory || 'Sin categoría',
       icon: 'tag'
@@ -195,11 +312,18 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
 
     return {
       totalGasto,
+      totalGastoTrend,
+      totalGastoTrendValue,
       averageMonthly,
+      averageMonthlyTrend,
+      averageMonthlyTrendValue,
       totalPayments,
-      topCategory: topCategoryKPI
+      totalPaymentsTrend,
+      paymentsPerMonth,
+      topCategory: topCategoryKPI,
+      topCategoryPercentage
     };
-  }, [confirmedPayments, defaultCurrency, filteredByCategory]);
+  }, [confirmedPayments, defaultCurrency, filteredByCategory, previousPeriodPayments, selectedPeriod]);
 
   const monthlyChartData = useMemo(() => {
     return filteredMonthlySummary.map(m => ({
