@@ -690,14 +690,13 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {autoInsights.length > 0 && (
-          <InsightCard
-            title="Insights"
-            titleIcon={<Lightbulb />}
-            items={toInsightItems(autoInsights)}
-            data-testid="insights-section"
-          />
-        )}
+        <InsightCard
+          title="Insights"
+          titleIcon={<Lightbulb />}
+          items={toInsightItems(autoInsights)}
+          emptyText="Sin insights en este período. Continuá registrando pagos para obtener análisis."
+          data-testid="insights-section"
+        />
 
         <ActivityCard
           title="Actividad Reciente"

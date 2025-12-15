@@ -17,6 +17,7 @@ export interface InsightCardProps {
   title?: string;
   titleIcon?: ReactNode;
   items: InsightItem[];
+  emptyText?: string;
   className?: string;
   'data-testid'?: string;
 }
@@ -48,11 +49,10 @@ export function InsightCard({
   title,
   titleIcon,
   items,
+  emptyText,
   className,
   'data-testid': testId,
 }: InsightCardProps) {
-  if (items.length === 0) return null;
-
   return (
     <Card className={cn('p-4', className)} data-testid={testId}>
       {title && (
@@ -61,32 +61,40 @@ export function InsightCard({
           title={title}
         />
       )}
-      <ul className="space-y-3">
-        {items.map((item, index) => {
-          const variant = item.variant || 'info';
-          const styles = variantStyles[variant];
-          const IconComponent = styles.icon;
+      {items.length === 0 ? (
+        <div className="flex items-center justify-center py-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            {emptyText || 'No hay insights disponibles en este momento'}
+          </p>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {items.map((item, index) => {
+            const variant = item.variant || 'info';
+            const styles = variantStyles[variant];
+            const IconComponent = styles.icon;
 
-          return (
-            <li
-              key={index}
-              className="flex items-start gap-3 p-3 rounded-lg border"
-              style={{ borderColor: styles.borderVar }}
-              data-testid={`${testId}-item-${index}`}
-            >
-              <div className="mt-0.5" style={{ color: styles.borderVar }}>
-                {item.icon || <IconComponent className="h-4 w-4" />}
-              </div>
-              <div className="flex-1">
-                <span className="text-sm text-muted-foreground">{item.title}</span>
-                {item.description && (
-                  <p className="text-xs text-muted-foreground/70 mt-0.5">{item.description}</p>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+            return (
+              <li
+                key={index}
+                className="flex items-start gap-3 p-3 rounded-lg border"
+                style={{ borderColor: styles.borderVar }}
+                data-testid={`${testId}-item-${index}`}
+              >
+                <div className="mt-0.5" style={{ color: styles.borderVar }}>
+                  {item.icon || <IconComponent className="h-4 w-4" />}
+                </div>
+                <div className="flex-1">
+                  <span className="text-sm text-muted-foreground">{item.title}</span>
+                  {item.description && (
+                    <p className="text-xs text-muted-foreground/70 mt-0.5">{item.description}</p>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </Card>
   );
 }
