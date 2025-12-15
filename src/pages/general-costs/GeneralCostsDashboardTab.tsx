@@ -14,6 +14,7 @@ import {
   StatCardMeta,
   StatCardSubValue,
   StatCardTrend,
+  StatCardHistoricalComparison,
   DashboardCard,
   ActivityCard,
   CategoryHighlightCard,
@@ -21,6 +22,7 @@ import {
   type ActivityItem,
   type TrendDirection
 } from '@/components/dashboard';
+import { calculateHistoricalComparison } from '@/lib/analytics';
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
@@ -417,6 +419,20 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
     })).sort((a, b) => a.month.localeCompare(b.month));
   }, [filteredMonthlySummary]);
 
+  const currentMonthComparison = useMemo(() => {
+    if (monthlyChartData.length < 2) return null;
+    
+    const chronologicalData = [...monthlyChartData].sort((a, b) => a.month.localeCompare(b.month));
+    const currentMonthValue = chronologicalData[chronologicalData.length - 1]?.value ?? 0;
+    const historicalValues = chronologicalData.slice(0, -1).map(m => m.value);
+    
+    return calculateHistoricalComparison(currentMonthValue, historicalValues, {
+      windowSize: 6,
+      minDataPoints: 2,
+      stableThresholdPercent: 5
+    });
+  }, [monthlyChartData]);
+
   const allCategoryData = useMemo(() => {
     const categoryTotals = new Map<string, number>();
     
@@ -576,6 +592,10 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
           {kpis.totalGastoTrendValue && (
             <StatCardTrend direction={kpis.totalGastoTrend} value={kpis.totalGastoTrendValue} />
           )}
+          <StatCardHistoricalComparison 
+            comparison={currentMonthComparison} 
+            label="vs promedio mensual"
+          />
         </StatCard>
 
         <StatCard data-testid="kpi-average-monthly">
@@ -587,6 +607,10 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
           {kpis.averageMonthlyTrendValue && (
             <StatCardTrend direction={kpis.averageMonthlyTrend} value={kpis.averageMonthlyTrendValue} />
           )}
+          <StatCardHistoricalComparison 
+            comparison={currentMonthComparison} 
+            label="este mes vs promedio"
+          />
         </StatCard>
 
         <StatCard data-testid="kpi-total-payments">

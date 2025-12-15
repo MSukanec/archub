@@ -2,8 +2,9 @@ import { forwardRef, ReactNode } from 'react'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { cva, type VariantProps } from 'class-variance-authority'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { useLocation } from 'wouter'
+import type { HistoricalComparisonResult } from '@/lib/analytics'
 
 const statCardVariants = cva(
   "p-4",
@@ -144,5 +145,33 @@ const StatCardContent = ({ children, className, ...props }: StatCardContentProps
   </div>
 )
 
-export { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardSubValue, StatCardTrend, StatCardContent }
+interface StatCardHistoricalComparisonProps extends React.HTMLAttributes<HTMLDivElement> {
+  comparison: HistoricalComparisonResult | null
+  label?: string
+}
+
+const StatCardHistoricalComparison = ({ comparison, label = 'vs promedio', className, ...props }: StatCardHistoricalComparisonProps) => {
+  if (!comparison) return null
+
+  const { direction, deltaPercent } = comparison
+  
+  const Icon = direction === 'up' ? TrendingUp : direction === 'down' ? TrendingDown : Minus
+  
+  const colorClass = direction === 'up' 
+    ? 'text-amber-600 dark:text-amber-400' 
+    : direction === 'down' 
+      ? 'text-blue-600 dark:text-blue-400' 
+      : 'text-muted-foreground'
+
+  const sign = deltaPercent > 0 ? '+' : ''
+  
+  return (
+    <div className={cn("flex items-center gap-1 text-xs mt-0.5", colorClass, className)} {...props}>
+      <Icon className="w-3 h-3" />
+      <span>{sign}{deltaPercent}% {label}</span>
+    </div>
+  )
+}
+
+export { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardSubValue, StatCardTrend, StatCardContent, StatCardHistoricalComparison }
 export type { TrendDirection }
