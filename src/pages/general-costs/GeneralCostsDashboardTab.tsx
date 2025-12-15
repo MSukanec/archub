@@ -588,7 +588,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
             <DollarSign className="h-4 w-4" />
             Gasto Total
           </StatCardTitle>
-          <StatCardValue>{kpis.totalGasto.formatted}</StatCardValue>
+          <StatCardValue>{defaultCurrency?.symbol} {kpis.totalGasto.formatted}</StatCardValue>
           {kpis.totalGastoTrendValue && (
             <StatCardTrend direction={kpis.totalGastoTrend} value={kpis.totalGastoTrendValue} />
           )}
@@ -599,7 +599,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
             <TrendingUp className="h-4 w-4" />
             Promedio Mensual
           </StatCardTitle>
-          <StatCardValue>{kpis.averageMonthly.formatted}</StatCardValue>
+          <StatCardValue>{defaultCurrency?.symbol} {kpis.averageMonthly.formatted}</StatCardValue>
           {kpis.averageMonthlyTrendValue && (
             <StatCardTrend direction={kpis.averageMonthlyTrend} value={kpis.averageMonthlyTrendValue} />
           )}
