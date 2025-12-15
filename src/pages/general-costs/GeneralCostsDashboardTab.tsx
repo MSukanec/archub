@@ -525,7 +525,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
   }, [kpis, allCategoryData, previousCategoryData, monthlyChartData, confirmedPayments, paymentsByConcept, periodMeta]);
 
   const recentActivityItems = useMemo((): ActivityItem[] => {
-    return confirmedPayments
+    return [...confirmedPayments]
       .sort((a, b) => {
         // Primero ordenar por fecha de pago (descendente)
         const dateComparison = new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
