@@ -74,7 +74,7 @@ export function InsightCard({
           return (
             <li
               key={index}
-              className={cn('flex items-start gap-3 p-3 rounded-lg', styles.bg, styles.border)}
+              className={cn('flex items-start gap-3 p-3 rounded-lg', styles.border)}
               data-testid={`${testId}-item-${index}`}
             >
               <div className="mt-0.5">
