@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Plus, Edit, Trash2, HandHeart, Calendar, TrendingUp } from 'lucide-react';
+import { Users, Plus, Edit, Trash2, HandHeart, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
@@ -46,6 +46,7 @@ export function PartnersListTab() {
     oneMonthAgo.setMonth(now.getMonth() - 1);
 
     const confirmedContributions = contributions.filter(c => c.status === 'confirmed');
+    const confirmedWithdrawals = withdrawals.filter(w => w.status === 'confirmed');
     
     const recentContributions = contributions.filter(contribution => {
       const contributionDate = parseLocalDate(contribution.contribution_date);
@@ -55,9 +56,10 @@ export function PartnersListTab() {
     return {
       totalPartners: partners.length,
       totalContributions: confirmedContributions.length,
+      totalWithdrawals: confirmedWithdrawals.length,
       recentContributions: recentContributions.length,
     };
-  }, [partners, contributions]);
+  }, [partners, contributions, withdrawals]);
 
   const deletePartnerMutation = useMutation({
     mutationFn: async (partnerId: string) => {
@@ -209,25 +211,25 @@ export function PartnersListTab() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard data-testid="stat-card-total-partners" className="col-span-2">
+        <StatCard data-testid="stat-card-total-partners">
           <StatCardTitle showArrow={false}>
-            <Users className="w-4 h-4 inline mr-1" />
-            Total Socios
+            <Users className="h-4 w-4" />
+            Socios
           </StatCardTitle>
           <StatCardValue>
             {metrics.totalPartners}
           </StatCardValue>
           <StatCardMeta>
-            Socios en la organización
+            Socios activos
           </StatCardMeta>
         </StatCard>
 
         <StatCard data-testid="stat-card-total-contributions">
           <StatCardTitle showArrow={false}>
-            <TrendingUp className="w-4 h-4 inline mr-1" />
+            <TrendingUp className="h-4 w-4" />
             Aportes
           </StatCardTitle>
-          <StatCardValue>
+          <StatCardValue className="text-green-600">
             {metrics.totalContributions}
           </StatCardValue>
           <StatCardMeta>
@@ -235,9 +237,22 @@ export function PartnersListTab() {
           </StatCardMeta>
         </StatCard>
 
+        <StatCard data-testid="stat-card-total-withdrawals">
+          <StatCardTitle showArrow={false}>
+            <TrendingDown className="h-4 w-4" />
+            Retiros
+          </StatCardTitle>
+          <StatCardValue className="text-red-600">
+            {metrics.totalWithdrawals}
+          </StatCardValue>
+          <StatCardMeta>
+            Retiros confirmados
+          </StatCardMeta>
+        </StatCard>
+
         <StatCard data-testid="stat-card-recent-contributions">
           <StatCardTitle showArrow={false}>
-            <Calendar className="w-4 h-4 inline mr-1" />
+            <Calendar className="h-4 w-4" />
             Recientes
           </StatCardTitle>
           <StatCardValue>

@@ -95,10 +95,10 @@ export function PartnerBalancesTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="stat-card-total-aportes">
           <StatCardTitle showArrow={false}>
-            <TrendingUp className="w-4 h-4 inline mr-1 text-green-600" />
+            <TrendingUp className="h-4 w-4" />
             Total Aportes
           </StatCardTitle>
           <StatCardValue className="text-green-600">
@@ -114,7 +114,7 @@ export function PartnerBalancesTab() {
 
         <StatCard data-testid="stat-card-total-retiros">
           <StatCardTitle showArrow={false}>
-            <TrendingDown className="w-4 h-4 inline mr-1 text-red-600" />
+            <TrendingDown className="h-4 w-4" />
             Total Retiros
           </StatCardTitle>
           <StatCardValue className="text-red-600">
@@ -130,7 +130,7 @@ export function PartnerBalancesTab() {
 
         <StatCard data-testid="stat-card-saldo-neto">
           <StatCardTitle showArrow={false}>
-            <Wallet className="w-4 h-4 inline mr-1" />
+            <Wallet className="h-4 w-4" />
             Saldo Neto
           </StatCardTitle>
           <StatCardValue className={isPositiveBalance ? "text-green-600" : "text-red-600"}>
@@ -141,6 +141,19 @@ export function PartnerBalancesTab() {
               ? formatBreakdown(balanceByCurrency.map(c => ({ currencySymbol: c.currencySymbol, amount: c.balance })))
               : 'Aportes - Retiros'
             }
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard data-testid="stat-card-partners-count">
+          <StatCardTitle showArrow={false}>
+            <HandHeart className="h-4 w-4" />
+            Socios
+          </StatCardTitle>
+          <StatCardValue>
+            {balanceByPartner.length}
+          </StatCardValue>
+          <StatCardMeta>
+            Socios con movimientos
           </StatCardMeta>
         </StatCard>
       </div>

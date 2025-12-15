@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowDownCircle, ArrowUpCircle, Edit, Trash2, Plus } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Edit, Trash2, Plus, TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Button } from '@/components/ui/button';
@@ -372,10 +372,12 @@ export function PartnerTransactionsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Total Aportes - REFACTORIZADO */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="card-total-contributions">
-          <StatCardTitle showArrow={false}>Total Aportes</StatCardTitle>
+          <StatCardTitle showArrow={false}>
+            <TrendingUp className="h-4 w-4" />
+            Total Aportes
+          </StatCardTitle>
           <StatCardValue className="text-green-600">
             {metrics.contributions_kpi.breakdown && metrics.contributions_kpi.breakdown.length > 0
               ? formatMoneyAmount(metrics.contributions_kpi.value, metrics.contributions_kpi.breakdown[0].currencySymbol)
@@ -389,9 +391,11 @@ export function PartnerTransactionsTab() {
           </StatCardMeta>
         </StatCard>
 
-        {/* Total Retiros - REFACTORIZADO */}
         <StatCard data-testid="card-total-withdrawals">
-          <StatCardTitle showArrow={false}>Total Retiros</StatCardTitle>
+          <StatCardTitle showArrow={false}>
+            <TrendingDown className="h-4 w-4" />
+            Total Retiros
+          </StatCardTitle>
           <StatCardValue className="text-red-600">
             {metrics.withdrawals_kpi.breakdown && metrics.withdrawals_kpi.breakdown.length > 0
               ? formatMoneyAmount(metrics.withdrawals_kpi.value, metrics.withdrawals_kpi.breakdown[0].currencySymbol)
@@ -405,9 +409,11 @@ export function PartnerTransactionsTab() {
           </StatCardMeta>
         </StatCard>
 
-        {/* Saldo Neto - REFACTORIZADO */}
         <StatCard data-testid="card-net-balance">
-          <StatCardTitle showArrow={false}>Saldo Neto</StatCardTitle>
+          <StatCardTitle showArrow={false}>
+            <Wallet className="h-4 w-4" />
+            Saldo Neto
+          </StatCardTitle>
           <StatCardValue className={metrics.net_balance_kpi.value >= 0 ? 'text-green-600' : 'text-red-600'}>
             {metrics.net_balance_kpi.breakdown && metrics.net_balance_kpi.breakdown.length > 0
               ? formatMoneyAmount(metrics.net_balance_kpi.value, metrics.net_balance_kpi.breakdown[0].currencySymbol)
@@ -418,6 +424,19 @@ export function PartnerTransactionsTab() {
             {metrics.net_balance_kpi.breakdown && metrics.net_balance_kpi.breakdown.length > 0
               ? kpiFormatBreakdown(metrics.net_balance_kpi)
               : 'Sin saldo'}
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard data-testid="card-transactions-count">
+          <StatCardTitle showArrow={false}>
+            <Receipt className="h-4 w-4" />
+            Transacciones
+          </StatCardTitle>
+          <StatCardValue>
+            {transactions.length}
+          </StatCardValue>
+          <StatCardMeta>
+            Movimientos registrados
           </StatCardMeta>
         </StatCard>
       </div>

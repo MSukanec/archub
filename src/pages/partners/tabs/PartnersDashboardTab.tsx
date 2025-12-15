@@ -1,0 +1,720 @@
+import { useMemo, useCallback } from 'react';
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  Wallet, 
+  Users, 
+  Lightbulb, 
+  Clock, 
+  BarChart3, 
+  PieChart,
+  ArrowDownCircle,
+  ArrowUpCircle
+} from 'lucide-react';
+import { type InsightAction } from '@/components/dashboard/insights/types';
+import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis';
+import { format as formatMoneyAmount, formatKPI } from '@/lib/money';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { 
+  StatCard, 
+  StatCardTitle, 
+  StatCardValue, 
+  StatCardMeta,
+  StatCardTrend,
+  StatCardHistoricalComparison,
+  DashboardCard,
+  ActivityCard,
+  InsightCard,
+  type ActivityItem,
+  type TrendDirection
+} from '@/components/dashboard';
+import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
+import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
+import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
+import { MiniSparkline } from '@/components/charts/MiniSparkline';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
+import { 
+  usePartners, 
+  usePartnerContributions, 
+  usePartnerWithdrawals 
+} from '@/features/partners';
+
+export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all';
+
+interface PartnersDashboardTabProps {
+  onNavigateToList?: () => void;
+  onNavigateToBalances?: () => void;
+  onNavigateToTransactions?: () => void;
+  onNavigateToTab?: (tab: string, filters?: Record<string, unknown>) => void;
+  onScrollToPanel?: (panelId: string) => void;
+  selectedPeriod?: PeriodFilter;
+}
+
+function getPeriodLabel(period: PeriodFilter): string {
+  switch (period) {
+    case '30d': return 'Últimos 30 días';
+    case '3m': return 'Últimos 3 meses';
+    case '6m': return 'Últimos 6 meses';
+    case '1y': return 'Último año';
+    case 'all': return 'Histórico';
+  }
+}
+
+function getDateFromForPeriod(period: PeriodFilter): Date | null {
+  if (period === 'all') return null;
+  
+  const now = new Date();
+  const result = new Date(now);
+  
+  switch (period) {
+    case '30d':
+      result.setDate(result.getDate() - 30);
+      break;
+    case '3m':
+      result.setMonth(result.getMonth() - 3);
+      break;
+    case '6m':
+      result.setMonth(result.getMonth() - 6);
+      break;
+    case '1y':
+      result.setFullYear(result.getFullYear() - 1);
+      break;
+  }
+  
+  result.setHours(0, 0, 0, 0);
+  return result;
+}
+
+function getPreviousPeriodDateRange(period: PeriodFilter): { from: Date; to: Date } | null {
+  const now = new Date();
+  const to = new Date(now);
+  const from = new Date(now);
+  
+  switch (period) {
+    case '30d':
+      to.setDate(to.getDate() - 30);
+      from.setDate(from.getDate() - 60);
+      break;
+    case '3m':
+      to.setMonth(to.getMonth() - 3);
+      from.setMonth(from.getMonth() - 6);
+      break;
+    case '6m':
+      to.setMonth(to.getMonth() - 6);
+      from.setMonth(from.getMonth() - 12);
+      break;
+    case '1y':
+      to.setFullYear(to.getFullYear() - 1);
+      from.setFullYear(from.getFullYear() - 2);
+      break;
+    case 'all':
+      return null;
+  }
+  
+  to.setHours(0, 0, 0, 0);
+  from.setHours(0, 0, 0, 0);
+  return { from, to };
+}
+
+export function calculateAvailablePeriods(
+  contributions: Array<{ contribution_date: string; status: string }>,
+  withdrawals: Array<{ withdrawal_date: string; status: string }>
+): Record<PeriodFilter, boolean> {
+  const result: Record<PeriodFilter, boolean> = {
+    'all': true,
+    '30d': false,
+    '3m': false,
+    '6m': false,
+    '1y': false
+  };
+  
+  const confirmedContributions = contributions.filter(c => c.status === 'confirmed');
+  const confirmedWithdrawals = withdrawals.filter(w => w.status === 'confirmed');
+  
+  (['30d', '3m', '6m', '1y'] as const).forEach(period => {
+    const dateFrom = getDateFromForPeriod(period);
+    if (!dateFrom) return;
+    
+    const hasContributionData = confirmedContributions.some(c => {
+      const date = parseLocalDate(c.contribution_date);
+      if (!date) return false;
+      return date >= dateFrom;
+    });
+    
+    const hasWithdrawalData = confirmedWithdrawals.some(w => {
+      const date = parseLocalDate(w.withdrawal_date);
+      if (!date) return false;
+      return date >= dateFrom;
+    });
+    
+    result[period] = hasContributionData || hasWithdrawalData;
+  });
+  
+  return result;
+}
+
+export default function PartnersDashboardTab({ 
+  onNavigateToList, 
+  onNavigateToBalances,
+  onNavigateToTransactions,
+  onNavigateToTab,
+  onScrollToPanel,
+  selectedPeriod = 'all' 
+}: PartnersDashboardTabProps) {
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
+  
+  const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
+  const { data: partners = [], isLoading: loadingPartners } = usePartners(organizationId);
+  const { data: allContributions = [], isLoading: loadingContributions } = usePartnerContributions(organizationId);
+  const { data: allWithdrawals = [], isLoading: loadingWithdrawals } = usePartnerWithdrawals(organizationId);
+
+  const isLoading = loadingPartners || loadingContributions || loadingWithdrawals;
+
+  const handleInsightAction = useCallback((action: InsightAction) => {
+    switch (action.type) {
+      case 'navigate':
+        if (action.payload.tab === 'list') {
+          if (onNavigateToTab) {
+            onNavigateToTab('list', action.payload);
+          } else {
+            onNavigateToList?.();
+          }
+        } else if (action.payload.tab === 'balances') {
+          if (onNavigateToTab) {
+            onNavigateToTab('balances', action.payload);
+          } else {
+            onNavigateToBalances?.();
+          }
+        } else if (action.payload.tab === 'transactions') {
+          if (onNavigateToTab) {
+            onNavigateToTab('transactions', action.payload);
+          } else {
+            onNavigateToTransactions?.();
+          }
+        }
+        break;
+      case 'open':
+        if (action.payload.panel && typeof action.payload.panel === 'string') {
+          onScrollToPanel?.(action.payload.panel);
+        }
+        break;
+    }
+  }, [onNavigateToList, onNavigateToBalances, onNavigateToTransactions, onNavigateToTab, onScrollToPanel]);
+
+  const handleMonthDrillDown = useCallback((month: string) => {
+    if (onNavigateToTab) {
+      onNavigateToTab('transactions', { filterMonth: month });
+    } else {
+      onNavigateToTransactions?.();
+    }
+  }, [onNavigateToTab, onNavigateToTransactions]);
+
+  const handlePartnerDrillDown = useCallback((partnerName: string) => {
+    if (onNavigateToTab) {
+      onNavigateToTab('balances', { filterPartner: partnerName });
+    } else {
+      onNavigateToBalances?.();
+    }
+  }, [onNavigateToTab, onNavigateToBalances]);
+
+  const dateFrom = useMemo(() => getDateFromForPeriod(selectedPeriod), [selectedPeriod]);
+
+  const periodMeta = useMemo(() => {
+    const now = new Date();
+    return getPeriodMeta(dateFrom, now);
+  }, [dateFrom]);
+
+  const kpiLabels = useMemo(() => getKPILabels(periodMeta), [periodMeta]);
+
+  const confirmedContributions = useMemo(() => {
+    const confirmed = allContributions.filter(c => c.status === 'confirmed');
+    
+    if (!dateFrom) return confirmed;
+    
+    return confirmed.filter(c => {
+      const contributionDate = parseLocalDate(c.contribution_date);
+      if (!contributionDate) return false;
+      return contributionDate >= dateFrom;
+    });
+  }, [allContributions, dateFrom]);
+
+  const confirmedWithdrawals = useMemo(() => {
+    const confirmed = allWithdrawals.filter(w => w.status === 'confirmed');
+    
+    if (!dateFrom) return confirmed;
+    
+    return confirmed.filter(w => {
+      const withdrawalDate = parseLocalDate(w.withdrawal_date);
+      if (!withdrawalDate) return false;
+      return withdrawalDate >= dateFrom;
+    });
+  }, [allWithdrawals, dateFrom]);
+
+  const previousPeriodData = useMemo(() => {
+    const previousRange = getPreviousPeriodDateRange(selectedPeriod);
+    if (!previousRange) return { contributions: [], withdrawals: [] };
+    
+    const prevContributions = allContributions.filter(c => {
+      if (c.status !== 'confirmed') return false;
+      const date = parseLocalDate(c.contribution_date);
+      if (!date) return false;
+      return date >= previousRange.from && date < previousRange.to;
+    });
+    
+    const prevWithdrawals = allWithdrawals.filter(w => {
+      if (w.status !== 'confirmed') return false;
+      const date = parseLocalDate(w.withdrawal_date);
+      if (!date) return false;
+      return date >= previousRange.from && date < previousRange.to;
+    });
+    
+    return { contributions: prevContributions, withdrawals: prevWithdrawals };
+  }, [allContributions, allWithdrawals, selectedPeriod]);
+
+  const kpis = useMemo(() => {
+    const contributionsKPI = calculateMonetaryKPI({
+      items: confirmedContributions.map(c => ({
+        amount: c.amount,
+        currency_id: c.currency_id,
+        currency: c.currency,
+        exchange_rate: c.exchange_rate
+      })),
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol
+    });
+
+    const withdrawalsKPI = calculateMonetaryKPI({
+      items: confirmedWithdrawals.map(w => ({
+        amount: w.amount,
+        currency_id: w.currency_id,
+        currency: w.currency,
+        exchange_rate: w.exchange_rate
+      })),
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol
+    });
+
+    const netCapital = contributionsKPI.value - withdrawalsKPI.value;
+    const netCapitalKPI = {
+      ...contributionsKPI,
+      value: netCapital,
+      formatted: formatKPI(netCapital)
+    };
+
+    const prevContributionsKPI = calculateMonetaryKPI({
+      items: previousPeriodData.contributions.map(c => ({
+        amount: c.amount,
+        currency_id: c.currency_id,
+        currency: c.currency,
+        exchange_rate: c.exchange_rate
+      })),
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol
+    });
+
+    const prevWithdrawalsKPI = calculateMonetaryKPI({
+      items: previousPeriodData.withdrawals.map(w => ({
+        amount: w.amount,
+        currency_id: w.currency_id,
+        currency: w.currency,
+        exchange_rate: w.exchange_rate
+      })),
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol
+    });
+
+    const prevNetCapital = prevContributionsKPI.value - prevWithdrawalsKPI.value;
+
+    let capitalTrend: TrendDirection = 'neutral';
+    let capitalTrendValue = '';
+    if (prevNetCapital !== 0) {
+      const change = ((netCapital - prevNetCapital) / Math.abs(prevNetCapital)) * 100;
+      capitalTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
+      capitalTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% vs período anterior`;
+    }
+
+    let contributionsTrend: TrendDirection = 'neutral';
+    let contributionsTrendValue = '';
+    if (prevContributionsKPI.value > 0) {
+      const change = ((contributionsKPI.value - prevContributionsKPI.value) / prevContributionsKPI.value) * 100;
+      contributionsTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
+      contributionsTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% vs período anterior`;
+    }
+
+    let withdrawalsTrend: TrendDirection = 'neutral';
+    let withdrawalsTrendValue = '';
+    if (prevWithdrawalsKPI.value > 0) {
+      const change = ((withdrawalsKPI.value - prevWithdrawalsKPI.value) / prevWithdrawalsKPI.value) * 100;
+      withdrawalsTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
+      withdrawalsTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% vs período anterior`;
+    }
+
+    const partnersCount = calculateCountKPI({
+      count: partners.length,
+      label: 'socios'
+    });
+
+    return {
+      netCapital: netCapitalKPI,
+      capitalTrend,
+      capitalTrendValue,
+      contributions: contributionsKPI,
+      contributionsTrend,
+      contributionsTrendValue,
+      withdrawals: withdrawalsKPI,
+      withdrawalsTrend,
+      withdrawalsTrendValue,
+      partnersCount,
+      previousNetCapital: prevNetCapital
+    };
+  }, [confirmedContributions, confirmedWithdrawals, defaultCurrency, partners, previousPeriodData]);
+
+  const monthlyChartData = useMemo(() => {
+    const monthlyTotals = new Map<string, { contributions: number; withdrawals: number }>();
+    
+    confirmedContributions.forEach(c => {
+      const date = parseLocalDate(c.contribution_date);
+      if (!date) return;
+      const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const existing = monthlyTotals.get(month) || { contributions: 0, withdrawals: 0 };
+      existing.contributions += c.amount * (c.exchange_rate || 1);
+      monthlyTotals.set(month, existing);
+    });
+    
+    confirmedWithdrawals.forEach(w => {
+      const date = parseLocalDate(w.withdrawal_date);
+      if (!date) return;
+      const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const existing = monthlyTotals.get(month) || { contributions: 0, withdrawals: 0 };
+      existing.withdrawals += w.amount * (w.exchange_rate || 1);
+      monthlyTotals.set(month, existing);
+    });
+    
+    return Array.from(monthlyTotals.entries())
+      .map(([month, data]) => ({
+        month,
+        value: data.contributions - data.withdrawals
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+  }, [confirmedContributions, confirmedWithdrawals]);
+
+  const sparklineData = useMemo(() => {
+    return monthlyChartData.map(m => m.value);
+  }, [monthlyChartData]);
+
+  const currentMonthComparison = useMemo(() => {
+    if (monthlyChartData.length < 2) return null;
+    
+    const chronologicalData = [...monthlyChartData].sort((a, b) => a.month.localeCompare(b.month));
+    const currentMonthValue = chronologicalData[chronologicalData.length - 1]?.value ?? 0;
+    const historicalValues = chronologicalData.slice(0, -1).map(m => m.value);
+    
+    return calculateHistoricalComparison(currentMonthValue, historicalValues, {
+      windowSize: 6,
+      minDataPoints: 2,
+      stableThresholdPercent: 5
+    });
+  }, [monthlyChartData]);
+
+  const partnerDistributionData = useMemo(() => {
+    const partnerTotals = new Map<string, { name: string; value: number }>();
+    
+    confirmedContributions.forEach(c => {
+      if (!c.partner) return;
+      const partnerId = c.partner_id || 'unknown';
+      const partnerName = c.partner.contacts?.full_name || 
+        `${c.partner.contacts?.first_name || ''} ${c.partner.contacts?.last_name || ''}`.trim() ||
+        c.partner.contacts?.company_name || 'Sin nombre';
+      
+      const existing = partnerTotals.get(partnerId) || { name: partnerName, value: 0 };
+      existing.value += c.amount * (c.exchange_rate || 1);
+      partnerTotals.set(partnerId, existing);
+    });
+    
+    confirmedWithdrawals.forEach(w => {
+      if (!w.partner) return;
+      const partnerId = w.partner_id || 'unknown';
+      const partnerName = w.partner.contacts?.full_name || 
+        `${w.partner.contacts?.first_name || ''} ${w.partner.contacts?.last_name || ''}`.trim() ||
+        w.partner.contacts?.company_name || 'Sin nombre';
+      
+      const existing = partnerTotals.get(partnerId) || { name: partnerName, value: 0 };
+      existing.value -= w.amount * (w.exchange_rate || 1);
+      partnerTotals.set(partnerId, existing);
+    });
+    
+    return Array.from(partnerTotals.values())
+      .filter(p => p.value > 0)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8);
+  }, [confirmedContributions, confirmedWithdrawals]);
+
+  const autoInsights = useMemo(() => {
+    const totalContributions = kpis.contributions.value;
+    const totalWithdrawals = kpis.withdrawals.value;
+    const netCapital = kpis.netCapital.value;
+    
+    const context = buildInsightContext({
+      totalGasto: netCapital,
+      previousPeriodGasto: kpis.previousNetCapital,
+      categoryData: partnerDistributionData,
+      previousCategoryData: [],
+      monthlyData: monthlyChartData,
+      paymentsCount: confirmedContributions.length + confirmedWithdrawals.length,
+      monthCount: monthlyChartData.length || 1,
+      paymentsByConcept: [],
+      isShortPeriod: periodMeta.isShortPeriod,
+      daysCount: periodMeta.daysCount,
+      currentMonth: new Date().getMonth() + 1
+    });
+    
+    return generateInsights(context, 3);
+  }, [kpis, partnerDistributionData, monthlyChartData, confirmedContributions, confirmedWithdrawals, periodMeta]);
+
+  const recentActivityItems = useMemo((): ActivityItem[] => {
+    const allTransactions = [
+      ...confirmedContributions.map(c => ({
+        id: c.id,
+        type: 'contribution' as const,
+        date: c.contribution_date,
+        amount: c.amount,
+        currencySymbol: c.currency?.symbol || '$',
+        partnerName: c.partner?.contacts?.full_name || 
+          `${c.partner?.contacts?.first_name || ''} ${c.partner?.contacts?.last_name || ''}`.trim() ||
+          'Sin socio',
+        createdAt: c.created_at
+      })),
+      ...confirmedWithdrawals.map(w => ({
+        id: w.id,
+        type: 'withdrawal' as const,
+        date: w.withdrawal_date,
+        amount: w.amount,
+        currencySymbol: w.currency?.symbol || '$',
+        partnerName: w.partner?.contacts?.full_name || 
+          `${w.partner?.contacts?.first_name || ''} ${w.partner?.contacts?.last_name || ''}`.trim() ||
+          'Sin socio',
+        createdAt: w.created_at
+      }))
+    ];
+    
+    return allTransactions
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5)
+      .map(t => ({
+        id: t.id,
+        title: t.partnerName,
+        subtitle: formatDateShort(parseLocalDate(t.date) || new Date()),
+        badge: t.type === 'contribution' ? (
+          <ArrowDownCircle className="h-4 w-4 text-green-600" />
+        ) : (
+          <ArrowUpCircle className="h-4 w-4 text-red-600" />
+        ),
+        rightContent: (
+          <span className={cn(
+            "text-sm font-medium",
+            t.type === 'contribution' ? 'text-green-600' : 'text-red-600'
+          )}>
+            {t.type === 'contribution' ? '+' : '-'}{t.currencySymbol} {t.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+          </span>
+        )
+      }));
+  }, [confirmedContributions, confirmedWithdrawals]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-80" />
+          <Skeleton className="h-80" />
+        </div>
+      </div>
+    );
+  }
+
+  const hasData = confirmedContributions.length > 0 || confirmedWithdrawals.length > 0;
+
+  if (!hasData && partners.length === 0) {
+    return (
+      <EmptyState
+        icon={<Users />}
+        title="No hay datos de socios"
+        description="Agrega socios y registra aportes o retiros para ver el dashboard aquí."
+      />
+    );
+  }
+
+  const currencySymbol = defaultCurrency?.symbol || '$';
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard 
+          data-testid="kpi-net-capital"
+          onClick={onNavigateToBalances}
+        >
+          <StatCardTitle>
+            <Wallet className="h-4 w-4" />
+            Capital Neto
+          </StatCardTitle>
+          <StatCardValue className={kpis.netCapital.value >= 0 ? 'text-green-600' : 'text-red-600'}>
+            {kpis.netCapital.value >= 0 ? '' : '-'}{currencySymbol} {formatKPI(Math.abs(kpis.netCapital.value))}
+          </StatCardValue>
+          {kpis.capitalTrendValue && (
+            <StatCardTrend 
+              direction={kpis.capitalTrend} 
+              value={kpis.capitalTrendValue} 
+            />
+          )}
+          <StatCardMeta>
+            {kpis.contributions.breakdown && kpis.contributions.breakdown.length > 1
+              ? formatBreakdown(kpis.netCapital)
+              : 'Aportes - Retiros'
+            }
+          </StatCardMeta>
+          {sparklineData.length >= 3 && (
+            <div className="mt-2">
+              <MiniSparkline data={sparklineData} height={24} />
+            </div>
+          )}
+        </StatCard>
+
+        <StatCard 
+          data-testid="kpi-total-contributions"
+          onClick={onNavigateToTransactions}
+        >
+          <StatCardTitle>
+            <TrendingUp className="h-4 w-4" />
+            Total Aportes
+          </StatCardTitle>
+          <StatCardValue className="text-green-600">
+            {currencySymbol} {formatKPI(kpis.contributions.value)}
+          </StatCardValue>
+          {kpis.contributionsTrendValue && (
+            <StatCardTrend 
+              direction={kpis.contributionsTrend} 
+              value={kpis.contributionsTrendValue} 
+            />
+          )}
+          <StatCardMeta>
+            {confirmedContributions.length} aporte{confirmedContributions.length !== 1 ? 's' : ''} confirmado{confirmedContributions.length !== 1 ? 's' : ''}
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard 
+          data-testid="kpi-total-withdrawals"
+          onClick={onNavigateToTransactions}
+        >
+          <StatCardTitle>
+            <TrendingDown className="h-4 w-4" />
+            Total Retiros
+          </StatCardTitle>
+          <StatCardValue className="text-red-600">
+            {currencySymbol} {formatKPI(kpis.withdrawals.value)}
+          </StatCardValue>
+          {kpis.withdrawalsTrendValue && (
+            <StatCardTrend 
+              direction={kpis.withdrawalsTrend} 
+              value={kpis.withdrawalsTrendValue} 
+            />
+          )}
+          <StatCardMeta>
+            {confirmedWithdrawals.length} retiro{confirmedWithdrawals.length !== 1 ? 's' : ''} confirmado{confirmedWithdrawals.length !== 1 ? 's' : ''}
+          </StatCardMeta>
+        </StatCard>
+
+        <StatCard 
+          data-testid="kpi-partners-count"
+          onClick={onNavigateToList}
+        >
+          <StatCardTitle>
+            <Users className="h-4 w-4" />
+            Socios
+          </StatCardTitle>
+          <StatCardValue>
+            {kpis.partnersCount.value}
+          </StatCardValue>
+          <StatCardMeta>
+            Socios activos en la organización
+          </StatCardMeta>
+        </StatCard>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DashboardCard 
+          title="Evolución del Capital"
+          icon={<BarChart3 className="h-4 w-4" />}
+          data-testid="chart-monthly-trend"
+        >
+          {monthlyChartData.length >= 2 ? (
+            <MonthlyTrendChart 
+              data={monthlyChartData} 
+              height={280}
+              onBarClick={handleMonthDrillDown}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-[280px] text-muted-foreground text-sm">
+              Se necesitan al menos 2 meses de datos para mostrar la tendencia
+            </div>
+          )}
+          {currentMonthComparison && (
+            <div className="mt-2 px-2">
+              <StatCardHistoricalComparison 
+                comparison={currentMonthComparison} 
+                label="vs promedio mensual" 
+              />
+            </div>
+          )}
+        </DashboardCard>
+
+        <DashboardCard 
+          title="Distribución por Socio"
+          icon={<PieChart className="h-4 w-4" />}
+          data-testid="chart-partner-distribution"
+        >
+          {partnerDistributionData.length > 0 ? (
+            <CategoryBreakdownChart 
+              data={partnerDistributionData} 
+              height={280}
+              onSliceClick={handlePartnerDrillDown}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-[280px] text-muted-foreground text-sm">
+              No hay datos de distribución para mostrar
+            </div>
+          )}
+        </DashboardCard>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <InsightCard
+          title="Insights"
+          titleIcon={<Lightbulb className="h-4 w-4" />}
+          items={toInsightItems(autoInsights)}
+          onAction={handleInsightAction}
+          data-testid="insights-section"
+          emptyText="No hay insights disponibles en este momento"
+        />
+
+        <ActivityCard
+          title="Actividad Reciente"
+          titleIcon={<Clock className="h-4 w-4" />}
+          items={recentActivityItems}
+          data-testid="activity-section"
+          emptyText="No hay actividad reciente"
+        />
+      </div>
+    </div>
+  );
+}
