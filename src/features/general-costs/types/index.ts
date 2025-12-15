@@ -64,6 +64,11 @@ export interface GeneralCostPayment {
     id: string;
     name: string;
     description: string | null;
+    category_id?: string | null;
+    category?: {
+      id: string;
+      name: string;
+    } | null;
   } | null;
   creator?: {
     id: string;

@@ -531,7 +531,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       .map((payment) => ({
         id: payment.id,
         title: payment.general_cost?.name || 'Sin concepto',
-        subtitle: `${formatDateShort(payment.payment_date)} · ${payment.general_cost?.name || 'Sin categoría'}`,
+        subtitle: `${formatDateShort(payment.payment_date)} · ${payment.general_cost?.category?.name || 'Sin categoría'}`,
         rightContent: (
           <div className="text-right">
             <span className="text-sm font-medium whitespace-nowrap block">
