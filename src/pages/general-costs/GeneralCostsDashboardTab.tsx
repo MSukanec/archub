@@ -299,29 +299,24 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       quoteCurrency: 'USD'
     });
 
-    const currentAverageMonthlyItemsForTrend = currentPeriodPaymentsForComparison.map(p => ({
-      amount: p.amount / currentMonthCountForTrend,
+    // Calcular promedio histórico general (todos los pagos confirmados)
+    const allConfirmedPayments = allPayments.filter(p => p.status === 'confirmed');
+    const allHistoricalMonths = new Set(allConfirmedPayments.map(p => {
+      const date = parseLocalDate(p.payment_date);
+      if (!date) return '';
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }).filter(m => m !== ''));
+    const allHistoricalMonthCount = allHistoricalMonths.size || 1;
+
+    const historicalAverageMonthlyItems = allConfirmedPayments.map(p => ({
+      amount: p.amount / allHistoricalMonthCount,
       currency_id: p.currency_id,
       currency: p.currency,
       exchange_rate: p.exchange_rate
     }));
 
-    const currentAverageMonthlyForTrend = calculateMonetaryKPI({
-      items: currentAverageMonthlyItemsForTrend,
-      baseCurrencyId: defaultCurrency?.code,
-      symbol: defaultCurrency?.symbol,
-      quoteCurrency: 'USD'
-    });
-
-    const previousAverageMonthlyItems = previousPeriodPayments.map(p => ({
-      amount: p.amount / previousMonthCount,
-      currency_id: p.currency_id,
-      currency: p.currency,
-      exchange_rate: p.exchange_rate
-    }));
-
-    const previousAverageMonthly = calculateMonetaryKPI({
-      items: previousAverageMonthlyItems,
+    const historicalAverageMonthly = calculateMonetaryKPI({
+      items: historicalAverageMonthlyItems,
       baseCurrencyId: defaultCurrency?.code,
       symbol: defaultCurrency?.symbol,
       quoteCurrency: 'USD'
@@ -329,10 +324,11 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
 
     let averageMonthlyTrend: TrendDirection = 'neutral';
     let averageMonthlyTrendValue = '';
-    if (previousAverageMonthly.value > 0) {
-      const change = ((currentAverageMonthlyForTrend.value - previousAverageMonthly.value) / previousAverageMonthly.value) * 100;
+    // Comparar promedio del período actual contra promedio histórico general
+    if (historicalAverageMonthly.value > 0 && averageMonthly.value !== historicalAverageMonthly.value) {
+      const change = ((averageMonthly.value - historicalAverageMonthly.value) / historicalAverageMonthly.value) * 100;
       averageMonthlyTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
-      averageMonthlyTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% vs promedio anterior`;
+      averageMonthlyTrendValue = `${change > 0 ? '+' : ''}${change.toFixed(1)}% vs promedio histórico`;
     }
 
     const totalPayments = calculateCountKPI({
