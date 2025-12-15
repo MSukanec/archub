@@ -288,7 +288,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
         <div className="w-24">
           <MiniTrendChart 
             data={item.trendData} 
-            color="hsl(var(--primary))"
+            color="hsl(var(--accent))"
           />
         </div>
       )

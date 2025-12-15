@@ -17,7 +17,7 @@ interface MiniTrendChartProps {
 export function MiniTrendChart({
   data,
   isLoading = false,
-  color = 'hsl(var(--primary))',
+  color = 'hsl(var(--accent))',
   height = 48,
   loadingText,
   emptyText = 'Sin datos',
