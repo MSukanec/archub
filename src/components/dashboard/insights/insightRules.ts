@@ -409,13 +409,13 @@ export const sustainedTrendInsight: InsightRule = (context: InsightContext): Ins
   if (context.isShortPeriod || context.monthlyData.length < 3) return null;
 
   const values = context.monthlyData.map(m => m.value);
-  const trend = detectTrendDirection(values, { minDataPoints: 3, stableThresholdPercent: 8 });
+  const trend = detectTrendDirection(values, { minDataPoints: 3, stableThresholdPercent: 4 });
 
   if (!trend || trend.direction === 'stable') return null;
   if (trend.confidence === 'low') return null;
 
   const changePercent = Math.abs(trend.monthlyChangePercent);
-  if (changePercent < 10) return null;
+  if (changePercent < 5) return null;
 
   const isIncreasing = trend.direction === 'increasing';
   const confidenceText = trend.confidence === 'high' ? 'consistente' : 'moderada';
@@ -464,10 +464,9 @@ export const yearEndProjectionInsight: InsightRule = (context: InsightContext): 
 
   if (!projection) return null;
   if (projection.direction === 'stable') return null;
-  if (projection.confidence === 'low') return null;
 
   const changePercent = Math.abs(projection.changePercent);
-  if (changePercent < 10) return null;
+  if (changePercent < 5) return null;
 
   const isUp = projection.direction === 'up';
   const projectionText = formatProjectionInsight(projection, 'yearEnd');
@@ -516,7 +515,7 @@ export const spendAccelerationInsight: InsightRule = (context: InsightContext): 
 
   const accelerationDelta = secondHalfTrend.monthlyChangePercent - firstHalfTrend.monthlyChangePercent;
 
-  if (Math.abs(accelerationDelta) < 10) return null;
+  if (Math.abs(accelerationDelta) < 5) return null;
 
   const isAccelerating = accelerationDelta > 0;
 
