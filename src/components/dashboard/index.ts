@@ -1,5 +1,5 @@
-export { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from './KPICard';
-export type { StatCardProps } from './KPICard';
+export { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardSubValue, StatCardTrend, StatCardContent } from './KPICard';
+export type { StatCardProps, TrendDirection } from './KPICard';
 
 export { DashboardCard } from './DashboardCard';
 export type { DashboardCardProps } from './DashboardCard';

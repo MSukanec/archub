@@ -100,6 +100,40 @@ const StatCardMeta = ({ children, className, ...props }: StatCardMetaProps) => (
   </p>
 )
 
+interface StatCardSubValueProps extends React.HTMLAttributes<HTMLSpanElement> {
+  children: ReactNode
+}
+
+const StatCardSubValue = ({ children, className, ...props }: StatCardSubValueProps) => (
+  <span className={cn("text-xs text-muted-foreground ml-2", className)} {...props}>
+    {children}
+  </span>
+)
+
+type TrendDirection = 'up' | 'down' | 'neutral'
+
+interface StatCardTrendProps extends React.HTMLAttributes<HTMLDivElement> {
+  direction: TrendDirection
+  value?: string
+}
+
+const StatCardTrend = ({ direction, value, className, ...props }: StatCardTrendProps) => {
+  const colorClass = direction === 'up' 
+    ? 'text-red-600 dark:text-red-400' 
+    : direction === 'down' 
+      ? 'text-green-600 dark:text-green-400' 
+      : 'text-muted-foreground'
+  
+  return (
+    <div className={cn("flex items-center gap-1 text-xs mt-1", colorClass, className)} {...props}>
+      {direction === 'up' && <span>↑</span>}
+      {direction === 'down' && <span>↓</span>}
+      {direction === 'neutral' && <span>→</span>}
+      {value && <span>{value}</span>}
+    </div>
+  )
+}
+
 interface StatCardContentProps extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode
 }
@@ -110,4 +144,5 @@ const StatCardContent = ({ children, className, ...props }: StatCardContentProps
   </div>
 )
 
-export { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent }
+export { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardSubValue, StatCardTrend, StatCardContent }
+export type { TrendDirection }
