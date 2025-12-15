@@ -499,11 +499,12 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
         ),
         badge: (
           <Badge 
-            variant="outline" 
-            className={cn(
-              "text-xs",
-              "border-green-500 text-green-600 dark:text-green-400"
-            )}
+            variant="default"
+            style={{
+              color: `var(--badge-status-success)`,
+              backgroundColor: `color-mix(in srgb, var(--badge-status-success) 10%, transparent)`,
+              borderColor: `color-mix(in srgb, var(--badge-status-success) 30%, transparent)`,
+            }}
           >
             <CheckCircle2 className="h-3 w-3 mr-1" />
             Confirmado
