@@ -4,7 +4,7 @@ interface SparklineProps {
   height?: number
 }
 
-export function MiniSparkline({ data, color = '#22c55e', height = 48 }: SparklineProps) {
+export function MiniSparkline({ data, color = 'var(--accent)', height = 48 }: SparklineProps) {
   if (!data || data.length === 0 || !data.some(v => v !== 0)) {
     return <div style={{ height }} className="flex items-center justify-center text-xs text-muted-foreground">Sin datos</div>
   }

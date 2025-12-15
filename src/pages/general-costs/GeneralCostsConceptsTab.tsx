@@ -291,7 +291,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       render: (item: typeof enrichedGeneralCosts[0]) => (
         <MiniSparkline 
           data={item.trendData.map(d => d.value)} 
-          color="#22c55e"
+          color="var(--accent)"
         />
       )
     },
