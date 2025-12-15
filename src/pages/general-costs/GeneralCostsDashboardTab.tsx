@@ -359,16 +359,31 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
     const allCategoriesTotal = Array.from(categoryTotals.values()).reduce((sum, v) => sum + v, 0);
     const topCategoryPercentage = allCategoriesTotal > 0 ? Math.round((maxAmount / allCategoriesTotal) * 100) : 0;
 
-    // Generate description based on top 3 categories
-    const topCategories = Array.from(categoryTotals.entries())
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 3)
-      .map(cat => cat.name.toLowerCase());
+    // Calculate concentration trend from previous period payments
+    const previousCategoryTotals = new Map<string, number>();
+    previousPeriodPayments.forEach(item => {
+      const categoryName = item.general_cost?.name || 'Sin categoría';
+      const existing = previousCategoryTotals.get(categoryName) || 0;
+      previousCategoryTotals.set(categoryName, existing + item.amount);
+    });
     
-    const categoryDescription = topCategories.length > 0 
-      ? `Concentrado principalmente en ${topCategories.join(', ')}.`
-      : 'Sin datos disponibles.';
+    let previousMaxAmount = 0;
+    previousCategoryTotals.forEach((amount) => {
+      if (amount > previousMaxAmount) {
+        previousMaxAmount = amount;
+      }
+    });
+    
+    const previousAllCategoriesTotal = Array.from(previousCategoryTotals.values()).reduce((sum, v) => sum + v, 0);
+    const previousConcentration = previousAllCategoriesTotal > 0 ? Math.round((previousMaxAmount / previousAllCategoriesTotal) * 100) : 0;
+
+    let concentrationTrend: TrendDirection = 'neutral';
+    let concentrationTrendValue = '';
+    if (previousConcentration > 0) {
+      const change = topCategoryPercentage - previousConcentration;
+      concentrationTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
+      concentrationTrendValue = `${change > 0 ? '+' : ''}${change}% vs período anterior`;
+    }
 
     const topCategoryKPI = calculateTextKPI({
       text: topCategory || 'Sin categoría',
@@ -388,7 +403,8 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       topCategory: topCategoryKPI,
       topCategoryPercentage,
       topCategoryName: topCategory,
-      categoryDescription
+      concentrationTrend,
+      concentrationTrendValue
     };
   }, [confirmedPayments, defaultCurrency, filteredByCategory, previousPeriodPayments, selectedPeriod, currentPeriodPaymentsForComparison]);
 
@@ -600,15 +616,19 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
           />
         </StatCard>
 
-        <CategoryHighlightCard
-          data-testid="kpi-top-category"
-          title="Categoría Principal"
-          titleIcon={<Tag className="h-4 w-4" />}
-          mainValue={kpis.topCategoryName || 'Sin datos'}
-          highlightValue={`${kpis.topCategoryPercentage}%`}
-          highlightLabel="del gasto total"
-          description={kpis.categoryDescription}
-        />
+        <StatCard data-testid="kpi-concentration">
+          <StatCardTitle>
+            <TrendingUp className="h-4 w-4" />
+            Concentración del Gasto
+          </StatCardTitle>
+          <StatCardValue>
+            {kpis.topCategoryPercentage}%
+            <StatCardSubValue>en una sola categoría</StatCardSubValue>
+          </StatCardValue>
+          {kpis.concentrationTrendValue && (
+            <StatCardTrend direction={kpis.concentrationTrend} value={kpis.concentrationTrendValue} />
+          )}
+        </StatCard>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
