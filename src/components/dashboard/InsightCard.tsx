@@ -74,8 +74,8 @@ export function InsightCard({
               style={{ borderColor: styles.borderVar }}
               data-testid={`${testId}-item-${index}`}
             >
-              <div className="mt-0.5">
-                {item.icon || <IconComponent className={cn('h-4 w-4', styles.iconClass)} />}
+              <div className="mt-0.5" style={{ color: styles.borderVar }}>
+                {item.icon || <IconComponent className="h-4 w-4" />}
               </div>
               <div className="flex-1">
                 <span className="text-sm text-muted-foreground">{item.title}</span>

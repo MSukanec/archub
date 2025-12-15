@@ -140,7 +140,7 @@ body {
   --success-text: hsl(0, 0%, 100%);
   --warning: hsl(45, 90%, 50%);
   --warning-text: hsl(240, 10%, 4%);
-  --info-neutral: hsl(197, 37%, 24%);
+  --info-neutral: hsl(197, 50%, 40%);
   --info-neutral-text: hsl(0, 0%, 100%);
 
   /* Badge Status Colors */

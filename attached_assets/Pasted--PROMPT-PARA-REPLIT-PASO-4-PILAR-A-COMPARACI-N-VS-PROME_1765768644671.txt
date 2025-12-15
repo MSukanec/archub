@@ -1,0 +1,184 @@
+🧠 PROMPT PARA REPLIT
+PASO 4 · PILAR A — COMPARACIÓN VS PROMEDIO HISTÓRICO (ESCALABLE)
+📌 CONTEXTO
+
+La aplicación ya cuenta con:
+
+KPIs funcionales
+
+Selector global de período
+
+Sistema de Insights modular
+
+Dashboards por dominio (ej: Gastos Generales)
+
+NO quiero modificar layouts existentes.
+NO quiero crear nuevos KPIs ni nuevos gráficos.
+
+El objetivo de este paso es agregar contexto temporal avanzado, comparando valores actuales contra el promedio histórico de la organización.
+
+🎯 OBJETIVO FUNCIONAL
+
+Permitir que KPIs e Insights puedan mostrar referencias como:
+
+“↑ 18% vs promedio histórico”
+
+“↓ 6% vs comportamiento normal”
+
+Esta comparación debe ser:
+
+secundaria
+
+sutil
+
+contextual
+
+reutilizable en cualquier dashboard futuro
+
+🧱 ARQUITECTURA REQUERIDA (IMPORTANTE)
+1️⃣ Crear una capa de lógica reutilizable (NO UI)
+
+Crear una nueva carpeta:
+
+src/lib/analytics/
+
+
+Dentro de ella crear:
+
+historicalComparison.ts
+
+types.ts
+
+README.md
+
+2️⃣ Definir un helper genérico de comparación histórica
+
+En historicalComparison.ts implementar una función genérica:
+
+Responsabilidad
+
+Recibe:
+
+valor actual (number)
+
+serie histórica (array de numbers)
+
+opciones (ventana, umbral mínimo, etc.)
+
+Retorna:
+
+null si no hay suficientes datos
+
+o un objeto con:
+
+delta porcentual
+
+dirección (up | down | stable)
+
+tipo de comparación (“above_average”, “below_average”)
+
+⚠️ NO hardcodear ventanas ni umbrales
+⚠️ Todo debe venir por parámetros
+
+3️⃣ Tipado claro y reutilizable
+
+Definir un tipo estándar, por ejemplo:
+
+HistoricalComparisonResult
+
+Este tipo será usado:
+
+por KPIs
+
+por Insights
+
+por cualquier dashboard futuro
+
+4️⃣ Integración en KPIs existentes (sin romperlos)
+
+Modificar los KPIs actuales para que opcionalmente puedan recibir:
+
+historicalComparison?: HistoricalComparisonResult
+
+Reglas:
+
+Si existe → mostrar una línea secundaria (tipografía pequeña, color muted)
+
+Si no existe → no mostrar nada
+
+El KPI NO calcula nada, solo muestra
+
+5️⃣ Uso en el Dashboard de Gastos Generales
+
+En la página de Gastos Generales:
+
+Calcular el promedio histórico para:
+
+gasto total
+
+promedio mensual
+
+Usar el helper genérico
+
+Pasar el resultado a los KPIs correspondientes
+
+⚠️ NO duplicar lógica
+⚠️ NO calcular dentro del componente KPI
+
+6️⃣ Uso futuro (clave para escalabilidad)
+
+Este sistema debe quedar preparado para:
+
+Materiales
+
+Finanzas
+
+Obras
+
+Proyectos
+
+Por eso:
+
+NO usar nombres específicos de “gastos”
+
+NO asumir unidades monetarias
+
+NO asumir períodos fijos
+
+7️⃣ Documentación obligatoria
+
+En src/lib/analytics/README.md documentar:
+
+Qué es una comparación histórica
+
+Cuándo usarla
+
+Qué datos necesita
+
+Ejemplo de uso en un dashboard
+
+Ejemplo de uso en otro dominio
+
+Esto es CRÍTICO para que el sistema escale.
+
+✅ RESULTADO ESPERADO
+
+Los KPIs muestran contexto adicional sin ruido visual
+
+El usuario entiende si un valor es alto o bajo para SU organización
+
+El sistema es reutilizable en toda la app
+
+No se agrega deuda técnica
+
+No se rompe ningún layout existente
+
+🛑 RESTRICCIONES FINALES
+
+NO agregar nuevos KPIs
+
+NO agregar nuevos gráficos
+
+NO hardcodear textos
+
+NO calcular lógica dentro de componentes UI
