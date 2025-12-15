@@ -512,14 +512,14 @@ export default function PartnersDashboardTab({
         title: t.partnerName,
         subtitle: formatDateShort(parseLocalDate(t.date) || new Date()),
         badge: t.type === 'contribution' ? (
-          <ArrowDownCircle className="h-4 w-4 text-green-600" />
+          <ArrowDownCircle className="h-4 w-4 text-[var(--chart-positive)]" />
         ) : (
-          <ArrowUpCircle className="h-4 w-4 text-red-600" />
+          <ArrowUpCircle className="h-4 w-4 text-[var(--chart-negative)]" />
         ),
         rightContent: (
           <span className={cn(
             "text-sm font-medium",
-            t.type === 'contribution' ? 'text-green-600' : 'text-red-600'
+            t.type === 'contribution' ? 'text-[var(--chart-positive)]' : 'text-[var(--chart-negative)]'
           )}>
             {t.type === 'contribution' ? '+' : '-'}{t.currencySymbol} {t.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </span>
@@ -568,7 +568,7 @@ export default function PartnersDashboardTab({
             <Wallet className="h-4 w-4" />
             Capital Neto
           </StatCardTitle>
-          <StatCardValue className={kpis.netCapital.value >= 0 ? 'text-green-600' : 'text-red-600'}>
+          <StatCardValue className={kpis.netCapital.value >= 0 ? 'text-[var(--chart-positive)]' : 'text-[var(--chart-negative)]'}>
             {kpis.netCapital.value >= 0 ? '' : '-'}{currencySymbol} {formatKPI(Math.abs(kpis.netCapital.value))}
           </StatCardValue>
           {kpis.capitalTrendValue && (
@@ -598,7 +598,7 @@ export default function PartnersDashboardTab({
             <TrendingUp className="h-4 w-4" />
             Total Aportes
           </StatCardTitle>
-          <StatCardValue className="text-green-600">
+          <StatCardValue className="text-[var(--chart-positive)]">
             {currencySymbol} {formatKPI(kpis.contributions.value)}
           </StatCardValue>
           {kpis.contributionsTrendValue && (
@@ -620,7 +620,7 @@ export default function PartnersDashboardTab({
             <TrendingDown className="h-4 w-4" />
             Total Retiros
           </StatCardTitle>
-          <StatCardValue className="text-red-600">
+          <StatCardValue className="text-[var(--chart-negative)]">
             {currencySymbol} {formatKPI(kpis.withdrawals.value)}
           </StatCardValue>
           {kpis.withdrawalsTrendValue && (

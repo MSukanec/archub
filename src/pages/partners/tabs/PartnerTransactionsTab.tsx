@@ -267,12 +267,12 @@ export function PartnerTransactionsTab() {
         <div className="flex items-center gap-2">
           {item.type === 'contribution' ? (
             <>
-              <ArrowDownCircle className="h-4 w-4 text-green-600" />
+              <ArrowDownCircle className="h-4 w-4 text-[var(--chart-positive)]" />
               <span className="text-sm">Aporte</span>
             </>
           ) : (
             <>
-              <ArrowUpCircle className="h-4 w-4 text-red-600" />
+              <ArrowUpCircle className="h-4 w-4 text-[var(--chart-negative)]" />
               <span className="text-sm">Retiro</span>
             </>
           )}
@@ -299,7 +299,7 @@ export function PartnerTransactionsTab() {
       sortType: 'number' as const,
       render: (item: UnifiedTransaction) => (
         <div className="flex flex-col items-end">
-          <span className={`text-sm font-medium ${item.type === 'contribution' ? 'text-green-600' : 'text-red-600'}`}>
+          <span className={`text-sm font-medium ${item.type === 'contribution' ? 'text-[var(--chart-positive)]' : 'text-[var(--chart-negative)]'}`}>
             {item.type === 'contribution' ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
           {item.exchange_rate && item.exchange_rate !== 1 && (
@@ -385,7 +385,7 @@ export function PartnerTransactionsTab() {
             <TrendingUp className="h-4 w-4" />
             Total Aportes
           </StatCardTitle>
-          <StatCardValue className="text-green-600">
+          <StatCardValue className="text-[var(--chart-positive)]">
             {metrics.contributions_kpi.breakdown && metrics.contributions_kpi.breakdown.length > 0
               ? formatMoneyAmount(metrics.contributions_kpi.value, metrics.contributions_kpi.breakdown[0].currencySymbol)
               : formatKPI(metrics.contributions_kpi.value)
@@ -403,7 +403,7 @@ export function PartnerTransactionsTab() {
             <TrendingDown className="h-4 w-4" />
             Total Retiros
           </StatCardTitle>
-          <StatCardValue className="text-red-600">
+          <StatCardValue className="text-[var(--chart-negative)]">
             {metrics.withdrawals_kpi.breakdown && metrics.withdrawals_kpi.breakdown.length > 0
               ? formatMoneyAmount(metrics.withdrawals_kpi.value, metrics.withdrawals_kpi.breakdown[0].currencySymbol)
               : formatKPI(metrics.withdrawals_kpi.value)
@@ -421,7 +421,7 @@ export function PartnerTransactionsTab() {
             <Wallet className="h-4 w-4" />
             Saldo Neto
           </StatCardTitle>
-          <StatCardValue className={metrics.net_balance_kpi.value >= 0 ? 'text-green-600' : 'text-red-600'}>
+          <StatCardValue className={metrics.net_balance_kpi.value >= 0 ? 'text-[var(--chart-positive)]' : 'text-[var(--chart-negative)]'}>
             {metrics.net_balance_kpi.breakdown && metrics.net_balance_kpi.breakdown.length > 0
               ? formatMoneyAmount(metrics.net_balance_kpi.value, metrics.net_balance_kpi.breakdown[0].currencySymbol)
               : formatKPI(metrics.net_balance_kpi.value)
@@ -461,9 +461,9 @@ export function PartnerTransactionsTab() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {item.type === 'contribution' ? (
-                  <ArrowDownCircle className="h-5 w-5 text-green-600" />
+                  <ArrowDownCircle className="h-5 w-5 text-[var(--chart-positive)]" />
                 ) : (
-                  <ArrowUpCircle className="h-5 w-5 text-red-600" />
+                  <ArrowUpCircle className="h-5 w-5 text-[var(--chart-negative)]" />
                 )}
                 <span className="font-medium">{item.type === 'contribution' ? 'Aporte' : 'Retiro'}</span>
               </div>
@@ -489,7 +489,7 @@ export function PartnerTransactionsTab() {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <span className={`text-lg font-bold ${item.type === 'contribution' ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`text-lg font-bold ${item.type === 'contribution' ? 'text-[var(--chart-positive)]' : 'text-[var(--chart-negative)]'}`}>
                   {item.type === 'contribution' ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
                 {item.exchange_rate && item.exchange_rate !== 1 && (

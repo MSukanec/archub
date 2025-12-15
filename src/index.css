@@ -134,13 +134,13 @@ body {
   --accent-foreground-hsl: 0 0% 100%;
   --accent-foreground: hsl(0, 0%, 100%);
 
-  --destructive: hsl(0, 84%, 60%);
+  --destructive: hsl(0, 75%, 60%);
   --destructive-text: hsl(0, 0%, 100%);
   --success: hsl(80, 90%, 40%);
   --success-text: hsl(0, 0%, 100%);
   --warning: hsl(45, 90%, 50%);
   --warning-text: hsl(240, 10%, 4%);
-  --info-neutral: hsl(197, 50%, 40%);
+  --info-neutral: hsl(200, 30%, 40%);
   --info-neutral-text: hsl(0, 0%, 100%);
 
   /* Badge Status Colors */
@@ -156,8 +156,8 @@ body {
   --chart-4: hsl(43, 74%, 66%);
   --chart-5: hsl(0, 87%, 67%);
   --chart-grid-text: hsl(0, 0%, 40%);
-  --chart-positive: hsl(76, 100%, 40%);
-  --chart-negative: hsl(0, 50%, 50%);
+  --chart-positive: hsl(80, 90%, 40%);
+  --chart-negative: hsl(0, 75%, 60%);
   --chart-neutral: hsl(200, 30%, 40%);
   --chart-ring-bg: hsl(0, 0%, 85%, 0.4);
 

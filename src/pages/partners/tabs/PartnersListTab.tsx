@@ -229,7 +229,7 @@ export function PartnersListTab() {
             <TrendingUp className="h-4 w-4" />
             Aportes
           </StatCardTitle>
-          <StatCardValue className="text-green-600">
+          <StatCardValue className="text-[var(--chart-positive)]">
             {metrics.totalContributions}
           </StatCardValue>
           <StatCardMeta>
@@ -242,7 +242,7 @@ export function PartnersListTab() {
             <TrendingDown className="h-4 w-4" />
             Retiros
           </StatCardTitle>
-          <StatCardValue className="text-red-600">
+          <StatCardValue className="text-[var(--chart-negative)]">
             {metrics.totalWithdrawals}
           </StatCardValue>
           <StatCardMeta>
