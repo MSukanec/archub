@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card';
-import { MiniTrendChart } from '@/components/charts/legacy/MiniTrendChart';
+import { MiniTrendChart } from '@/components/charts/MiniTrendChart';
 
 import { useGeneralCostsMetrics } from '../hooks/use-general-costs-metrics';
 import type { GeneralCost } from '../types';

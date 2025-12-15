@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Plus, Edit, Trash2, Search, Filter, Bell, Layers, CheckCircle, XCircle, DollarSign } from "lucide-react";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
-import { MiniTrendChart } from '@/components/charts/legacy/MiniTrendChart';
+import { MiniTrendChart } from '@/components/charts/MiniTrendChart';
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
