@@ -52,8 +52,7 @@ export function MiniTrendChart({
   }
 
   return (
-    <div className="w-full" style={{ height, minWidth: '80px' }}>
-      <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height="100%">
         <LineChart 
           data={data} 
           margin={{ top: 2, right: 2, left: 2, bottom: 2 }}
@@ -69,6 +68,5 @@ export function MiniTrendChart({
           />
         </LineChart>
       </ResponsiveContainer>
-    </div>
   )
 }

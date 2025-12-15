@@ -285,7 +285,7 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       key: 'trend',
       label: 'Tendencia (6 meses)',
       render: (item: typeof enrichedGeneralCosts[0]) => (
-        <div className="w-24">
+        <div style={{ width: '120px', height: '48px' }}>
           <MiniTrendChart 
             data={item.trendData} 
             color="hsl(var(--accent))"
