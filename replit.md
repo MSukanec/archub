@@ -8,27 +8,35 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (2025-12-15, Session 22)
 
-### ✅ Smart Period Filter for General Costs Dashboard
-**Problem:** Period selector allowed users to select empty periods, showing 0 data which was confusing
+### ✅ Smart Period Filter + Dropdown Fixes - COMPLETADO
+**Problem 1:** Period selector allowed users to select empty periods
 **Solution:** 
 - Implemented `calculateAvailablePeriods()` function that checks which periods (30d, 3m, 6m, 1y, all) have confirmed payments
 - Disabled dropdown options for periods with no data, showing "(sin datos)" label
 - Always keeps "Histórico" (all) enabled as fallback
 - Auto-reverts to "all" if user somehow selects an empty period
-- Periods are now contextual - only available options with data can be selected
+
+**Problem 2:** ALL Select/Dropdown components were broken (wrong CSS variables)
+**Solution:**
+- Fixed `src/components/ui/select.tsx`:
+  - Changed `bg-[var(--popover-bg)]` → `bg-[var(--card-bg)]` (correct variable)
+  - Changed `text-[var(--popover-fg)]` → `text-[var(--card-fg)]` (correct variable)
+  - Fixed SelectItem hover: `hover:bg-[var(--accent-bg)]` + `hover:text-black dark:hover:text-white`
+  - Fixed SelectTrigger text color: `text-[var(--card-fg)]`
+- Dropdown styling in `src/components/ui/dropdown-menu.tsx` already correct
 
 **Files Modified:**
 1. `src/pages/general-costs/GeneralCostsDashboardTab.tsx`:
-   - Added `calculateAvailablePeriods()` export - scans all confirmed payments and determines which time periods have data
-   - Removed debug logging
+   - Added `calculateAvailablePeriods()` export - scans all confirmed payments
    
 2. `src/pages/general-costs/GeneralCosts.tsx`:
    - Imported `calculateAvailablePeriods` and `useGeneralCostsPayments`
-   - Added `availablePeriods` calculation via `useMemo`
-   - Added `validSelectedPeriod` logic to force 'all' if current period has no data
-   - Updated dropdown to disable unavailable periods
-   - Added "(sin datos)" label for empty periods
-   - Updated component to use `validSelectedPeriod` instead of raw `selectedPeriod`
+   - Added `availablePeriods` calculation and `validSelectedPeriod` logic
+   - Updated dropdown to disable unavailable periods with "(sin datos)" label
+   
+3. `src/components/ui/select.tsx`:
+   - Fixed ALL CSS variable references to use correct theme variables
+   - Fixed hover states for consistency across all selects
 
 ## System Architecture
 
@@ -41,6 +49,7 @@ Preferred communication style: Simple, everyday language.
 - **Layout Architecture**: Experience-based layouts (`src/layouts/`) including Dashboard Layout (authenticated app) and Marketing Layout (public-facing pages).
 - **Content Theming System**: Unified CSS theming layer with dynamic background switching via `useContentBackground` hook.
 - **Smart Filtering**: Period filters disable options without data, preventing empty state confusion.
+- **Dropdown/Select Components**: All use consistent CSS variables from theme system (`--card-bg`, `--card-fg`, `--accent-bg`, etc.)
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
