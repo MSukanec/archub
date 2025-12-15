@@ -115,7 +115,7 @@ export default function GeneralCosts() {
           <span>{selectedLabel}</span>
           <ChevronDown className="h-4 w-4" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-[180px]">
+        <DropdownMenuContent align="end" className="min-w-[180px] bg-white dark:bg-zinc-900 border border-border shadow-lg">
           {PERIOD_OPTIONS.map((option) => (
             <DropdownMenuItem 
               key={option.value}
