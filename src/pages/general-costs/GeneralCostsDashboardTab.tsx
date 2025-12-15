@@ -47,8 +47,6 @@ function getPeriodLabel(period: PeriodFilter): string {
 }
 
 function getPreviousPeriodDateRange(period: PeriodFilter): { from: Date; to: Date } | null {
-  if (period === 'all') return null;
-  
   const now = new Date();
   const to = new Date(now);
   const from = new Date(now);
@@ -67,6 +65,10 @@ function getPreviousPeriodDateRange(period: PeriodFilter): { from: Date; to: Dat
       from.setMonth(from.getMonth() - 12);
       break;
     case '1y':
+      to.setFullYear(to.getFullYear() - 1);
+      from.setFullYear(from.getFullYear() - 2);
+      break;
+    case 'all':
       to.setFullYear(to.getFullYear() - 1);
       from.setFullYear(from.getFullYear() - 2);
       break;
@@ -177,6 +179,22 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
     return byCategory.filter(item => item.payment_month >= fromMonth);
   }, [byCategory, dateFrom]);
 
+  const currentPeriodPaymentsForComparison = useMemo(() => {
+    if (selectedPeriod !== 'all') return confirmedPayments;
+    
+    const now = new Date();
+    const oneYearAgo = new Date(now);
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    oneYearAgo.setHours(0, 0, 0, 0);
+    
+    return allPayments.filter(p => p.status === 'confirmed').filter(p => {
+      const paymentDate = parseLocalDate(p.payment_date);
+      if (!paymentDate) return false;
+      const paymentDateAtMidnight = new Date(paymentDate.getFullYear(), paymentDate.getMonth(), paymentDate.getDate(), 0, 0, 0);
+      return paymentDateAtMidnight >= oneYearAgo;
+    });
+  }, [allPayments, selectedPeriod, confirmedPayments]);
+
   const previousPeriodPayments = useMemo(() => {
     const previousRange = getPreviousPeriodDateRange(selectedPeriod);
     if (!previousRange) return [];
@@ -203,6 +221,18 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       quoteCurrency: 'USD'
     });
 
+    const currentPeriodTotalForTrend = calculateMonetaryKPI({
+      items: currentPeriodPaymentsForComparison.map(p => ({
+        amount: p.amount,
+        currency_id: p.currency_id,
+        currency: p.currency,
+        exchange_rate: p.exchange_rate
+      })),
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol,
+      quoteCurrency: 'USD'
+    });
+
     const previousTotalGasto = calculateMonetaryKPI({
       items: previousPeriodPayments.map(p => ({
         amount: p.amount,
@@ -217,10 +247,11 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
 
     let totalGastoTrend: TrendDirection = 'neutral';
     let totalGastoTrendValue = '';
-    if (previousTotalGasto.value > 0 && selectedPeriod !== 'all') {
-      const change = ((totalGasto.value - previousTotalGasto.value) / previousTotalGasto.value) * 100;
+    if (previousTotalGasto.value > 0) {
+      const change = ((currentPeriodTotalForTrend.value - previousTotalGasto.value) / previousTotalGasto.value) * 100;
       totalGastoTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
-      totalGastoTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% vs período anterior`;
+      const periodLabel = selectedPeriod === 'all' ? 'vs año anterior' : 'vs período anterior';
+      totalGastoTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% ${periodLabel}`;
     }
 
     const months = new Set(confirmedPayments.map(p => {
@@ -229,6 +260,13 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     }).filter(m => m !== ''));
     const monthCount = months.size || 1;
+
+    const currentMonthsForTrend = new Set(currentPeriodPaymentsForComparison.map(p => {
+      const date = parseLocalDate(p.payment_date);
+      if (!date) return '';
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }).filter(m => m !== ''));
+    const currentMonthCountForTrend = currentMonthsForTrend.size || 1;
 
     const previousMonths = new Set(previousPeriodPayments.map(p => {
       const date = parseLocalDate(p.payment_date);
@@ -251,6 +289,20 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       quoteCurrency: 'USD'
     });
 
+    const currentAverageMonthlyItemsForTrend = currentPeriodPaymentsForComparison.map(p => ({
+      amount: p.amount / currentMonthCountForTrend,
+      currency_id: p.currency_id,
+      currency: p.currency,
+      exchange_rate: p.exchange_rate
+    }));
+
+    const currentAverageMonthlyForTrend = calculateMonetaryKPI({
+      items: currentAverageMonthlyItemsForTrend,
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol,
+      quoteCurrency: 'USD'
+    });
+
     const previousAverageMonthlyItems = previousPeriodPayments.map(p => ({
       amount: p.amount / previousMonthCount,
       currency_id: p.currency_id,
@@ -267,8 +319,8 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
 
     let averageMonthlyTrend: TrendDirection = 'neutral';
     let averageMonthlyTrendValue = '';
-    if (previousAverageMonthly.value > 0 && selectedPeriod !== 'all') {
-      const change = ((averageMonthly.value - previousAverageMonthly.value) / previousAverageMonthly.value) * 100;
+    if (previousAverageMonthly.value > 0) {
+      const change = ((currentAverageMonthlyForTrend.value - previousAverageMonthly.value) / previousAverageMonthly.value) * 100;
       averageMonthlyTrend = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
       averageMonthlyTrendValue = `${change > 0 ? '+' : ''}${Math.round(change)}% vs promedio anterior`;
     }
@@ -279,11 +331,12 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
     });
 
     const paymentsPerMonth = monthCount > 0 ? Math.round(confirmedPayments.length / monthCount) : 0;
+    const currentPaymentsPerMonthForTrend = currentMonthCountForTrend > 0 ? Math.round(currentPeriodPaymentsForComparison.length / currentMonthCountForTrend) : 0;
     const previousPaymentsPerMonth = previousMonthCount > 0 ? Math.round(previousPeriodPayments.length / previousMonthCount) : 0;
 
     let totalPaymentsTrend: TrendDirection = 'neutral';
-    if (previousPaymentsPerMonth > 0 && selectedPeriod !== 'all') {
-      totalPaymentsTrend = paymentsPerMonth > previousPaymentsPerMonth ? 'up' : paymentsPerMonth < previousPaymentsPerMonth ? 'down' : 'neutral';
+    if (previousPaymentsPerMonth > 0) {
+      totalPaymentsTrend = currentPaymentsPerMonthForTrend > previousPaymentsPerMonth ? 'up' : currentPaymentsPerMonthForTrend < previousPaymentsPerMonth ? 'down' : 'neutral';
     }
 
     let topCategory = 'Sin datos';
@@ -323,7 +376,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
       topCategory: topCategoryKPI,
       topCategoryPercentage
     };
-  }, [confirmedPayments, defaultCurrency, filteredByCategory, previousPeriodPayments, selectedPeriod]);
+  }, [confirmedPayments, defaultCurrency, filteredByCategory, previousPeriodPayments, selectedPeriod, currentPeriodPaymentsForComparison]);
 
   const monthlyChartData = useMemo(() => {
     return filteredMonthlySummary.map(m => ({
@@ -531,7 +584,7 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
             Total Pagos
           </StatCardTitle>
           <StatCardValue>{kpis.totalPayments.formatted}</StatCardValue>
-          {selectedPeriod !== 'all' && kpis.totalPaymentsTrend !== 'neutral' && (
+          {kpis.totalPaymentsTrend !== 'neutral' && (
             <StatCardTrend direction={kpis.totalPaymentsTrend} />
           )}
           <StatCardMeta>≈ {kpis.paymentsPerMonth} pagos por mes</StatCardMeta>
