@@ -503,7 +503,13 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
             <DollarSign className="h-4 w-4" />
             Gasto Total
           </StatCardTitle>
-          <StatCardValue>{kpis.totalGasto.formatted}</StatCardValue>
+          <StatCardValue>
+            {kpis.totalGasto.formatted}
+            <StatCardSubValue>{getPeriodLabel(selectedPeriod)}</StatCardSubValue>
+          </StatCardValue>
+          {kpis.totalGastoTrendValue && (
+            <StatCardTrend direction={kpis.totalGastoTrend} value={kpis.totalGastoTrendValue} />
+          )}
           <StatCardMeta>{formatBreakdown(kpis.totalGasto)}</StatCardMeta>
         </StatCard>
 
@@ -513,6 +519,9 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
             Promedio Mensual
           </StatCardTitle>
           <StatCardValue>{kpis.averageMonthly.formatted}</StatCardValue>
+          {kpis.averageMonthlyTrendValue && (
+            <StatCardTrend direction={kpis.averageMonthlyTrend} value={kpis.averageMonthlyTrendValue} />
+          )}
           <StatCardMeta>{formatBreakdown(kpis.averageMonthly)}</StatCardMeta>
         </StatCard>
 
@@ -522,7 +531,10 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
             Total Pagos
           </StatCardTitle>
           <StatCardValue>{kpis.totalPayments.formatted}</StatCardValue>
-          <StatCardMeta>pagos registrados</StatCardMeta>
+          {selectedPeriod !== 'all' && kpis.totalPaymentsTrend !== 'neutral' && (
+            <StatCardTrend direction={kpis.totalPaymentsTrend} />
+          )}
+          <StatCardMeta>≈ {kpis.paymentsPerMonth} pagos por mes</StatCardMeta>
         </StatCard>
 
         <StatCard data-testid="kpi-top-category">
@@ -531,7 +543,11 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
             Categoría Principal
           </StatCardTitle>
           <StatCardValue className="text-lg">{kpis.topCategory.formatted}</StatCardValue>
-          <StatCardMeta>mayor gasto</StatCardMeta>
+          <StatCardMeta>
+            {kpis.topCategoryPercentage > 0 
+              ? `${kpis.topCategoryPercentage}% del gasto total` 
+              : 'Mayor gasto acumulado'}
+          </StatCardMeta>
         </StatCard>
       </div>
 
