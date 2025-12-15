@@ -37,7 +37,7 @@ export function normalizeGeneralCostPayment(payment: {
   } | null;
   payment_date?: string | null;
   status?: string | null;
-  wallet?: { wallet_id?: string | null; wallets?: { name?: string | null } } | null;
+  wallet?: { wallet_id?: string | null; wallets?: { name?: string | null } | null } | null;
   description?: string | null;
 }): NormalizedPayment {
   return {
@@ -81,7 +81,7 @@ export function useGeneralCostsDataHealth(
     } | null;
     payment_date?: string | null;
     status?: string | null;
-    wallet?: { wallet_id?: string | null; wallets?: { name?: string | null } } | null;
+    wallet?: { wallet_id?: string | null; wallets?: { name?: string | null } | null } | null;
     description?: string | null;
   }>,
   options: UseDataHealthOptions
