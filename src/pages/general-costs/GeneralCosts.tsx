@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { useNavigationStore } from '@/stores/navigationStore'
-import { CreditCard, Plus, Calendar } from 'lucide-react'
+import { CreditCard, Plus, Calendar, ChevronDown } from 'lucide-react'
 import GeneralCostsDashboardTab from './GeneralCostsDashboardTab'
 import GeneralCostsConceptsTab from './GeneralCostsConceptsTab'
 import GeneralCostsPaymentsTab from './GeneralCostsPaymentsTab'
@@ -10,12 +10,11 @@ import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGeneralCosts } from '@/features/general-costs/hooks/use-general-costs'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all'
 
@@ -104,31 +103,31 @@ export default function GeneralCosts() {
   const getPeriodSelector = () => {
     if (activeTab !== "dashboard") return []
     
+    const selectedLabel = PERIOD_OPTIONS.find(opt => opt.value === selectedPeriod)?.label || 'Período'
+    
     return [
-      <Select
-        key="period-selector"
-        value={selectedPeriod}
-        onValueChange={(value) => setSelectedPeriod(value as PeriodFilter)}
-      >
-        <SelectTrigger 
-          className="h-8 w-[160px] text-xs"
+      <DropdownMenu key="period-selector">
+        <DropdownMenuTrigger
+          className="bg-accent text-white hover:bg-accent/90 rounded-lg px-3 py-1.5 gap-2 text-sm font-medium shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 inline-flex items-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
           data-testid="select-period"
         >
-          <Calendar className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-          <SelectValue placeholder="Período" />
-        </SelectTrigger>
-        <SelectContent>
+          <Calendar className="h-4 w-4" />
+          <span>{selectedLabel}</span>
+          <ChevronDown className="h-4 w-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[180px]">
           {PERIOD_OPTIONS.map((option) => (
-            <SelectItem 
-              key={option.value} 
-              value={option.value}
+            <DropdownMenuItem 
+              key={option.value}
+              onClick={() => setSelectedPeriod(option.value)}
+              className={selectedPeriod === option.value ? "bg-accent/10 font-medium" : ""}
               data-testid={`option-period-${option.value}`}
             >
               {option.label}
-            </SelectItem>
+            </DropdownMenuItem>
           ))}
-        </SelectContent>
-      </Select>
+        </DropdownMenuContent>
+      </DropdownMenu>
     ]
   }
 
