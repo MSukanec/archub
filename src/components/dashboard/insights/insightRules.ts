@@ -1,79 +1,137 @@
 import { type Insight, type InsightContext, type InsightRule } from './types';
 
-export const growthInsight: InsightRule = (context: InsightContext): Insight | null => {
-  if (context.previousPeriodGasto === 0) return null;
+/**
+ * Insight 1 – Crecimiento explicado (narrativo)
+ * Explica QUÉ categoría explica la mayor parte del aumento/reducción del gasto
+ */
+export const growthExplainedInsight: InsightRule = (context: InsightContext): Insight | null => {
+  if (context.previousPeriodGasto === 0 || context.totalGasto === 0) return null;
   
   const growthRate = ((context.totalGasto - context.previousPeriodGasto) / context.previousPeriodGasto) * 100;
+  const absoluteChange = context.totalGasto - context.previousPeriodGasto;
   
-  if (growthRate > 20) {
+  if (Math.abs(growthRate) < 15) return null;
+  
+  const previousCategoryMap = new Map(context.previousCategoryData.map(c => [c.name, c.value]));
+  
+  let maxImpactCategory = '';
+  let maxImpactAmount = 0;
+  
+  for (const category of context.categoryData) {
+    const previousValue = previousCategoryMap.get(category.name) || 0;
+    const categoryChange = category.value - previousValue;
+    
+    if (growthRate > 0 && categoryChange > maxImpactAmount) {
+      maxImpactAmount = categoryChange;
+      maxImpactCategory = category.name;
+    } else if (growthRate < 0 && categoryChange < maxImpactAmount) {
+      maxImpactAmount = categoryChange;
+      maxImpactCategory = category.name;
+    }
+  }
+  
+  if (!maxImpactCategory || maxImpactAmount === 0) return null;
+  
+  const impactPercentage = Math.round(Math.abs(maxImpactAmount / absoluteChange) * 100);
+  
+  if (impactPercentage < 25) return null;
+  
+  if (growthRate > 0) {
     return {
-      id: 'growth-warning',
+      id: 'growth-explained-increase',
       type: 'warning',
-      title: 'Crecimiento significativo del gasto',
-      description: `El gasto aumentó un ${Math.round(growthRate)}% respecto al período anterior. Revisá las categorías con mayor incremento.`,
+      title: 'Origen del aumento identificado',
+      description: `El ${impactPercentage}% del aumento proviene de "${maxImpactCategory}" en este período.`,
       icon: 'TrendingUp',
       priority: 1
     };
-  }
-  
-  if (growthRate < -20) {
+  } else {
     return {
-      id: 'growth-savings',
+      id: 'growth-explained-decrease',
       type: 'info',
-      title: 'Reducción notable del gasto',
-      description: `Lograste reducir el gasto un ${Math.abs(Math.round(growthRate))}% respecto al período anterior. ¡Buen trabajo!`,
+      title: 'Origen del ahorro identificado',
+      description: `El ${impactPercentage}% de la reducción proviene de "${maxImpactCategory}".`,
       icon: 'TrendingDown',
       priority: 3
     };
   }
-  
-  return null;
 };
 
-export const concentrationInsight: InsightRule = (context: InsightContext): Insight | null => {
-  if (context.topCategoryPercentage <= 50 || !context.topCategoryName) return null;
+/**
+ * Insight 2 – Alta concentración del gasto
+ * Indica cuántas categorías concentran la mayor parte del gasto
+ */
+export const concentrationNarrativeInsight: InsightRule = (context: InsightContext): Insight | null => {
+  if (context.categoryData.length < 2) return null;
+  
+  const totalValue = context.categoryData.reduce((sum, c) => sum + c.value, 0);
+  if (totalValue === 0) return null;
+  
+  const sortedCategories = [...context.categoryData].sort((a, b) => b.value - a.value);
+  
+  let accumulatedPercentage = 0;
+  let categoriesNeeded = 0;
+  
+  for (const category of sortedCategories) {
+    accumulatedPercentage += (category.value / totalValue) * 100;
+    categoriesNeeded++;
+    
+    if (accumulatedPercentage >= 80) break;
+  }
+  
+  if (categoriesNeeded > 3 || accumulatedPercentage < 70) return null;
+  
+  const roundedPercentage = Math.round(accumulatedPercentage);
+  
+  if (categoriesNeeded === 1) {
+    return {
+      id: 'concentration-single',
+      type: 'alert',
+      title: 'Concentración crítica',
+      description: `Una sola categoría ("${sortedCategories[0].name}") concentra el ${roundedPercentage}% del gasto total.`,
+      icon: 'AlertTriangle',
+      priority: 1
+    };
+  }
   
   return {
-    id: 'concentration-warning',
+    id: 'concentration-few',
     type: 'warning',
-    title: 'Alta concentración de gastos',
-    description: `"${context.topCategoryName}" representa el ${context.topCategoryPercentage}% del gasto total. Considerá diversificar o renegociar.`,
+    title: 'Alta concentración del gasto',
+    description: `${categoriesNeeded} categorías concentran el ${roundedPercentage}% del gasto total.`,
     icon: 'PieChart',
     priority: 2
   };
 };
 
-export const frequencyInsight: InsightRule = (context: InsightContext): Insight | null => {
+/**
+ * Insight 3 – Carga operativa elevada
+ * Enfocado en la operación, no en dinero
+ */
+export const operationalLoadInsight: InsightRule = (context: InsightContext): Insight | null => {
   if (context.monthCount === 0) return null;
   
   const paymentsPerMonth = context.paymentsCount / context.monthCount;
   
   if (paymentsPerMonth >= 15) {
     return {
-      id: 'frequency-high',
+      id: 'operational-load-high',
       type: 'info',
-      title: 'Alto volumen de pagos',
-      description: `Procesás aproximadamente ${Math.round(paymentsPerMonth)} pagos por mes. Considerá automatizar o consolidar pagos recurrentes.`,
+      title: 'Carga operativa elevada',
+      description: `Procesás en promedio ${Math.round(paymentsPerMonth)} pagos por mes. Considerá consolidar pagos recurrentes.`,
       icon: 'Repeat',
       priority: 4
-    };
-  }
-  
-  if (paymentsPerMonth <= 2 && context.paymentsCount > 0) {
-    return {
-      id: 'frequency-low',
-      type: 'info',
-      title: 'Bajo volumen de pagos',
-      description: `Solo tenés ${Math.round(paymentsPerMonth)} pago${paymentsPerMonth === 1 ? '' : 's'} promedio por mes. Asegurate de estar registrando todos los gastos.`,
-      icon: 'AlertCircle',
-      priority: 5
     };
   }
   
   return null;
 };
 
-export const volatilityInsight: InsightRule = (context: InsightContext): Insight | null => {
+/**
+ * Insight 4 – Patrón repetido en el tiempo
+ * Detecta si un patrón (categoría dominante) se repite varios meses seguidos
+ */
+export const repeatedPatternInsight: InsightRule = (context: InsightContext): Insight | null => {
   if (context.monthlyData.length < 3) return null;
   
   const values = context.monthlyData.map(m => m.value);
@@ -81,43 +139,44 @@ export const volatilityInsight: InsightRule = (context: InsightContext): Insight
   
   if (mean === 0) return null;
   
-  const squaredDiffs = values.map(v => Math.pow(v - mean, 2));
-  const avgSquaredDiff = squaredDiffs.reduce((a, b) => a + b, 0) / squaredDiffs.length;
-  const stdDev = Math.sqrt(avgSquaredDiff);
+  let consecutiveAboveMean = 0;
+  let maxConsecutive = 0;
+  let currentTrend: 'above' | 'below' | null = null;
   
-  const coefficientOfVariation = (stdDev / mean) * 100;
+  for (const value of values) {
+    const isAbove = value > mean * 1.1;
+    
+    if (isAbove) {
+      if (currentTrend === 'above') {
+        consecutiveAboveMean++;
+      } else {
+        consecutiveAboveMean = 1;
+        currentTrend = 'above';
+      }
+      maxConsecutive = Math.max(maxConsecutive, consecutiveAboveMean);
+    } else {
+      currentTrend = null;
+      consecutiveAboveMean = 0;
+    }
+  }
   
-  if (coefficientOfVariation > 50) {
+  if (maxConsecutive >= 3) {
     return {
-      id: 'volatility-high',
-      type: 'warning',
-      title: 'Alta variabilidad mensual',
-      description: `Los gastos varían significativamente entre meses (CV: ${Math.round(coefficientOfVariation)}%). Esto puede dificultar la planificación presupuestaria.`,
+      id: 'repeated-pattern',
+      type: 'info',
+      title: 'Patrón sostenido detectado',
+      description: `Este patrón de gasto elevado se repite desde hace ${maxConsecutive} períodos consecutivos.`,
       icon: 'Activity',
-      priority: 3
+      priority: 5
     };
   }
   
-  return null;
-};
-
-export const recurrenceInsight: InsightRule = (context: InsightContext): Insight | null => {
-  if (context.categoryData.length === 0 || context.monthCount < 2) return null;
-  
-  const sortedCategories = [...context.categoryData].sort((a, b) => b.value - a.value);
-  const topCategory = sortedCategories[0];
-  
-  if (!topCategory) return null;
-  
-  const totalValue = context.categoryData.reduce((sum, c) => sum + c.value, 0);
-  const categoryShare = totalValue > 0 ? (topCategory.value / totalValue) * 100 : 0;
-  
-  if (categoryShare >= 25 && categoryShare < 50) {
+  if (context.topCategoryPercentage > 40 && context.monthCount >= 3) {
     return {
-      id: 'recurrence-top',
+      id: 'dominant-category-pattern',
       type: 'info',
-      title: 'Categoría predominante identificada',
-      description: `"${topCategory.name}" es tu gasto más frecuente con ${Math.round(categoryShare)}% del total. Monitoreá su evolución.`,
+      title: 'Categoría dominante consistente',
+      description: `"${context.topCategoryName}" mantiene el ${context.topCategoryPercentage}% del gasto de forma sostenida.`,
       icon: 'Tag',
       priority: 5
     };
@@ -126,10 +185,40 @@ export const recurrenceInsight: InsightRule = (context: InsightContext): Insight
   return null;
 };
 
+/**
+ * Insight 5 – Oportunidad de consolidación
+ * Detecta conceptos con muchos pagos pequeños y frecuentes
+ */
+export const consolidationOpportunityInsight: InsightRule = (context: InsightContext): Insight | null => {
+  if (!context.paymentsByConcept || context.paymentsByConcept.length === 0 || context.monthCount === 0) return null;
+  
+  const avgPaymentsPerMonthThreshold = 3;
+  
+  const consolidationCandidates = context.paymentsByConcept.filter(concept => {
+    const avgPaymentsPerMonth = concept.paymentsCount / context.monthCount;
+    return avgPaymentsPerMonth >= avgPaymentsPerMonthThreshold && concept.paymentsCount >= 6;
+  });
+  
+  if (consolidationCandidates.length === 0) return null;
+  
+  const topCandidate = consolidationCandidates.reduce((max, c) => 
+    c.paymentsCount > max.paymentsCount ? c : max
+  );
+  
+  return {
+    id: 'consolidation-opportunity',
+    type: 'info',
+    title: 'Oportunidad de consolidación',
+    description: `"${topCandidate.conceptName}" tiene ${topCandidate.paymentsCount} pagos en el período. Podrías consolidarlos.`,
+    icon: 'Layers',
+    priority: 6
+  };
+};
+
 export const allInsightRules: InsightRule[] = [
-  growthInsight,
-  concentrationInsight,
-  frequencyInsight,
-  volatilityInsight,
-  recurrenceInsight
+  growthExplainedInsight,
+  concentrationNarrativeInsight,
+  operationalLoadInsight,
+  repeatedPatternInsight,
+  consolidationOpportunityInsight
 ];

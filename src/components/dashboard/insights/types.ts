@@ -9,15 +9,28 @@ export interface Insight {
   priority: number;
 }
 
+export interface CategoryData {
+  name: string;
+  value: number;
+}
+
+export interface PaymentsByConceptData {
+  conceptName: string;
+  paymentsCount: number;
+  totalAmount: number;
+}
+
 export interface InsightContext {
   totalGasto: number;
   previousPeriodGasto: number;
-  categoryData: Array<{ name: string; value: number }>;
+  categoryData: CategoryData[];
+  previousCategoryData: CategoryData[];
   monthlyData: Array<{ month: string; value: number }>;
   paymentsCount: number;
   monthCount: number;
   topCategoryPercentage: number;
   topCategoryName: string;
+  paymentsByConcept: PaymentsByConceptData[];
 }
 
 export type InsightRule = (context: InsightContext) => Insight | null;

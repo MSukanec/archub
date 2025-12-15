@@ -434,17 +434,54 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
     return allCategoryData.slice(0, 8);
   }, [allCategoryData]);
 
+  const previousCategoryData = useMemo(() => {
+    const categoryTotals = new Map<string, number>();
+    
+    previousPeriodPayments.forEach(payment => {
+      const categoryName = payment.general_cost?.name || 'Sin categoría';
+      const existing = categoryTotals.get(categoryName) || 0;
+      categoryTotals.set(categoryName, existing + payment.amount);
+    });
+
+    return Array.from(categoryTotals.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [previousPeriodPayments]);
+
+  const paymentsByConcept = useMemo(() => {
+    const conceptTotals = new Map<string, { count: number; amount: number }>();
+    
+    confirmedPayments.forEach(payment => {
+      const conceptName = payment.general_cost?.name || 'Sin concepto';
+      const existing = conceptTotals.get(conceptName) || { count: 0, amount: 0 };
+      conceptTotals.set(conceptName, {
+        count: existing.count + 1,
+        amount: existing.amount + payment.amount
+      });
+    });
+
+    return Array.from(conceptTotals.entries())
+      .map(([conceptName, data]) => ({
+        conceptName,
+        paymentsCount: data.count,
+        totalAmount: data.amount
+      }))
+      .sort((a, b) => b.paymentsCount - a.paymentsCount);
+  }, [confirmedPayments]);
+
   const autoInsights = useMemo(() => {
     const context = buildInsightContext({
       totalGasto: kpis.totalGasto.value,
       previousPeriodGasto: kpis.previousPeriodGasto,
       categoryData: allCategoryData,
+      previousCategoryData,
       monthlyData: monthlyChartData,
       paymentsCount: confirmedPayments.length,
-      monthCount: kpis.monthCount
+      monthCount: kpis.monthCount,
+      paymentsByConcept
     });
     return generateInsights(context, 3);
-  }, [kpis, allCategoryData, monthlyChartData, confirmedPayments]);
+  }, [kpis, allCategoryData, previousCategoryData, monthlyChartData, confirmedPayments, paymentsByConcept]);
 
   const recentActivityItems = useMemo((): ActivityItem[] => {
     return confirmedPayments

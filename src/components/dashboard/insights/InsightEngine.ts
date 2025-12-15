@@ -1,4 +1,4 @@
-import { type Insight, type InsightContext, type InsightRule } from './types';
+import { type Insight, type InsightContext, type InsightRule, type CategoryData, type PaymentsByConceptData } from './types';
 import { allInsightRules } from './insightRules';
 
 /**
@@ -35,12 +35,23 @@ export function generateInsights(context: InsightContext, maxInsights: number = 
 export function buildInsightContext(params: {
   totalGasto: number;
   previousPeriodGasto: number;
-  categoryData: Array<{ name: string; value: number }>;
+  categoryData: CategoryData[];
+  previousCategoryData?: CategoryData[];
   monthlyData: Array<{ month: string; value: number }>;
   paymentsCount: number;
   monthCount: number;
+  paymentsByConcept?: PaymentsByConceptData[];
 }): InsightContext {
-  const { totalGasto, previousPeriodGasto, categoryData, monthlyData, paymentsCount, monthCount } = params;
+  const { 
+    totalGasto, 
+    previousPeriodGasto, 
+    categoryData, 
+    previousCategoryData = [],
+    monthlyData, 
+    paymentsCount, 
+    monthCount,
+    paymentsByConcept = []
+  } = params;
   
   let topCategoryName = '';
   let topCategoryPercentage = 0;
@@ -60,10 +71,12 @@ export function buildInsightContext(params: {
     totalGasto,
     previousPeriodGasto,
     categoryData,
+    previousCategoryData,
     monthlyData,
     paymentsCount,
     monthCount,
     topCategoryPercentage,
-    topCategoryName
+    topCategoryName,
+    paymentsByConcept
   };
 }
