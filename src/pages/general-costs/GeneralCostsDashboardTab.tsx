@@ -78,7 +78,10 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
     
     return confirmed.filter(p => {
       const paymentDate = parseLocalDate(p.payment_date);
-      return paymentDate && paymentDate >= dateFrom;
+      if (!paymentDate) return false;
+      // Compare dates at 00:00:00 to avoid time issues
+      const paymentDateAtMidnight = new Date(paymentDate.getFullYear(), paymentDate.getMonth(), paymentDate.getDate(), 0, 0, 0);
+      return paymentDateAtMidnight >= dateFrom;
     });
   }, [allPayments, dateFrom]);
 
@@ -110,9 +113,10 @@ export default function GeneralCostsDashboardTab({ onNavigateToConceptos, select
     });
 
     const months = new Set(confirmedPayments.map(p => {
-      const date = new Date(p.payment_date);
+      const date = parseLocalDate(p.payment_date);
+      if (!date) return '';
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    }));
+    }).filter(m => m !== ''));
     const monthCount = months.size || 1;
 
     const averageMonthlyItems = confirmedPayments.map(p => ({
