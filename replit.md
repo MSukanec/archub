@@ -18,6 +18,7 @@ Preferred communication style: Simple, everyday language.
 - **Content Theming System**: Unified CSS theming layer with dynamic background switching.
 - **Smart Filtering**: Period filters disable options without data, preventing empty state confusion.
 - **Dropdown/Select Components**: All use consistent CSS variables from theme system.
+- **Financial Indicator Colors**: ALL positive/negative/neutral indicators MUST use Tailwind chart color utilities (`text-chart-positive`, `text-chart-negative`, `text-chart-neutral`, `bg-chart-positive/10`, etc.) which map to CSS variables `--chart-positive`, `--chart-negative`, `--chart-neutral`. NEVER use hardcoded colors like `text-green-600` or `text-red-600` for financial indicators.
 
 ### Technical Implementations
 - **Frontend**: React 18, TypeScript, Vite, shadcn/ui, Tailwind CSS, Zustand, Wouter, TanStack Query.
