@@ -39,17 +39,21 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui-custom/security/EmptyState";
 import { Tabs } from "@/components/ui-custom/Tabs";
+import { ProjectBadge } from "@/features/projects/components/ProjectBadge";
 
 type SortDirection = "asc" | "desc" | null;
 
-// ProjectBadge component integrado en Table
+// Re-export ProjectBadge from its new location for backwards compatibility
+export { ProjectBadge };
+
 interface ProjectBadgeProps {
   projectId: string | null;
   projectsMap: Record<string, { id: string; name: string; color: string | null }>;
 }
 
-function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
-  // Si no hay project_id, mostrar badge "General"
+// DEPRECATED: This component has been moved to @/features/projects/components/ProjectBadge
+// This local definition is kept for backwards compatibility but will be removed in a future version
+function ProjectBadgeLocal({ projectId, projectsMap }: ProjectBadgeProps) {
   if (!projectId) {
     return (
       <Badge 
@@ -67,7 +71,6 @@ function ProjectBadge({ projectId, projectsMap }: ProjectBadgeProps) {
     );
   }
 
-  // Buscar el proyecto en el mapa
   const project = projectsMap[projectId];
   
   if (!project) {
@@ -245,8 +248,6 @@ interface TableProps<T = any> {
   inactiveSeparatorLabel?: string;
   showInactiveSeparator?: boolean;
 }
-
-export { ProjectBadge };
 
 export function Table<T = any>({
   columns,
