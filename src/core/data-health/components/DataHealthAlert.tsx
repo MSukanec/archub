@@ -23,26 +23,21 @@ export function DataHealthAlert({
 
   return (
     <div 
-      className="flex items-center justify-between w-full px-4 py-3 rounded-lg cursor-pointer transition-all border"
-      style={{
-        backgroundColor: 'hsl(var(--warning) / 0.10)',
-        borderColor: 'hsl(var(--warning) / 0.30)',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = 'hsl(var(--warning) / 0.15)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = 'hsl(var(--warning) / 0.10)';
-      }}
+      className={`
+        flex items-center justify-between w-full px-4 py-3 rounded-lg cursor-pointer transition-all
+        border-[hsl(var(--warning))]/30 bg-[hsl(var(--warning))]/10
+        hover:bg-[hsl(var(--warning))]/15
+        ${isFiltering ? 'ring-2 ring-[hsl(var(--warning))]/50' : ''}
+      `}
       onClick={onToggleFilter}
       data-testid="data-health-alert"
     >
       <div className="flex items-center gap-3">
-        <div className="p-1.5 rounded-md" style={{ backgroundColor: 'hsl(var(--warning) / 0.15)' }}>
-          <AlertTriangle className="h-4 w-4" style={{ color: 'hsl(var(--warning))' }} />
+        <div className="p-1.5 rounded-md bg-[hsl(var(--warning))]/15">
+          <AlertTriangle className="h-4 w-4 text-[hsl(var(--warning))]" />
         </div>
         <div className="text-sm">
-          <span className="font-medium" style={{ color: 'hsl(var(--warning))' }}>
+          <span className="font-medium text-[hsl(var(--warning))]">
             {entityText} con problemas
           </span>
           <span className="text-muted-foreground ml-2">
