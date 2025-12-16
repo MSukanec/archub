@@ -16,7 +16,11 @@ export async function getPartnerContributions(
         created_at,
         contacts(id, full_name, first_name, last_name, email, phone, company_name)
       ),
-      currency:currencies(id, name, symbol, code)
+      currency:currencies(id, name, symbol, code),
+      organization_wallet:organization_wallets(
+        id,
+        wallets:wallet_id(id, name)
+      )
     `)
     .eq('organization_id', organizationId)
     .or('is_deleted.is.null,is_deleted.eq.false')

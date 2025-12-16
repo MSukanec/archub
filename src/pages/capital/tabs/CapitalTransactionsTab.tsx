@@ -33,6 +33,7 @@ interface UnifiedTransaction {
   type: TransactionType;
   partner_id: string | null;
   partner_name: string;
+  wallet_name: string | null;
   date: string;
   amount: number;
   currency_symbol: string;
@@ -76,6 +77,7 @@ export function CapitalTransactionsTab() {
       type: 'contribution' as TransactionType,
       partner_id: c.partner_id,
       partner_name: formatPartnerName(c.partner),
+      wallet_name: (c as any).organization_wallet?.wallets?.name || null,
       date: c.contribution_date,
       amount: c.amount,
       currency_symbol: c.currency?.symbol || '$',
@@ -92,6 +94,7 @@ export function CapitalTransactionsTab() {
       type: 'withdrawal' as TransactionType,
       partner_id: w.partner_id,
       partner_name: formatPartnerName(w.partner),
+      wallet_name: (w as any).organization_wallet?.wallets?.name || null,
       date: w.withdrawal_date,
       amount: w.amount,
       currency_symbol: w.currency?.symbol || '$',
@@ -289,6 +292,16 @@ export function CapitalTransactionsTab() {
           linkedUser={item.linkedUser}
           size="sm"
         />
+      ),
+    },
+    {
+      key: 'wallet_name',
+      label: 'Billetera',
+      width: '1fr',
+      render: (item: UnifiedTransaction) => (
+        <span className="text-sm text-muted-foreground">
+          {item.wallet_name || '-'}
+        </span>
       ),
     },
     {
