@@ -107,6 +107,7 @@ export default function SubscriptionCheckout() {
 
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isPaymentInitiated, setIsPaymentInitiated] = useState(false);
 
   useEffect(() => {
     const previousLevel = sidebarLevel;
@@ -488,7 +489,14 @@ export default function SubscriptionCheckout() {
   };
 
   const handleMercadoPagoPayment = async () => {
+    // Double-click protection: prevent if already initiated
+    if (isPaymentInitiated) {
+      console.warn('[MP] Payment already initiated, ignoring duplicate click');
+      return;
+    }
+    
     try {
+      setIsPaymentInitiated(true);
       setLoading(true);
 
       const {
@@ -667,12 +675,21 @@ export default function SubscriptionCheckout() {
         description: error.message || "No se pudo iniciar el pago",
         variant: "destructive",
       });
+      // Reset payment initiated on error so user can retry
+      setIsPaymentInitiated(false);
     } finally {
       setLoading(false);
     }
   };
 
   const handlePayPalPayment = async () => {
+    // Double-click protection: prevent if already initiated
+    if (isPaymentInitiated) {
+      console.warn('[PayPal] Payment already initiated, ignoring duplicate click');
+      return;
+    }
+    
+    setIsPaymentInitiated(true);
     try {
       setLoading(true);
 
@@ -810,11 +827,18 @@ export default function SubscriptionCheckout() {
         description: error.message || "No se pudo iniciar el pago",
         variant: "destructive",
       });
+      // Reset payment initiated on error so user can retry
+      setIsPaymentInitiated(false);
       setLoading(false);
     }
   };
 
   const handleContinue = async () => {
+    // Early exit if payment already initiated
+    if (isPaymentInitiated || loading) {
+      console.warn('[Checkout] Payment already in progress, ignoring click');
+      return;
+    }
     const trimmedFirstName = firstName.trim();
     const trimmedEmail = email.trim();
 
@@ -1743,6 +1767,7 @@ export default function SubscriptionCheckout() {
                       disabled={
                         selectedMethod === null || 
                         loading || 
+                        isPaymentInitiated ||
                         priceLoading || 
                         !acceptTerms || 
                         !acceptCommunications
@@ -1750,7 +1775,7 @@ export default function SubscriptionCheckout() {
                       className="w-full h-12 text-base font-medium mt-6"
                       data-testid="button-continue-payment"
                     >
-                      {loading ? (
+                      {loading || isPaymentInitiated ? (
                         <>
                           <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                           Procesando...
