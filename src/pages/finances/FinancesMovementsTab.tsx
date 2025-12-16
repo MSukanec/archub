@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
 import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users, TrendingUp, TrendingDown } from 'lucide-react';
+import chroma from 'chroma-js';
 import type { UnifiedMovementWithRelations } from '@/features/finances/services/getUnifiedMovements';
 
 const MOVEMENT_TYPE_CONFIG: Record<string, { 
@@ -165,12 +166,16 @@ export function FinancesMovementsTab() {
       width: '12%',
       render: (movement) => {
         if (!movement.project) return <span className="text-muted-foreground">-</span>;
+        const projectColor = movement.project.color;
+        const rgb = chroma(projectColor).rgb();
+        
         return (
           <Badge 
-            variant="default"
-            className="font-medium whitespace-nowrap"
+            className="font-medium whitespace-nowrap border"
             style={{ 
-              backgroundColor: movement.project.color,
+              color: projectColor,
+              backgroundColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.1)`,
+              borderColor: `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.3)`,
             }}
           >
             {movement.project.name}
