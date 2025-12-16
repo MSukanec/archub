@@ -68,6 +68,9 @@ export default {
           DEFAULT: "hsl(var(--accent-hsl) / <alpha-value>)",
           foreground: "hsl(var(--accent-foreground-hsl) / <alpha-value>)",
         },
+        warning: {
+          DEFAULT: "hsl(var(--warning-hsl) / <alpha-value>)",
+        },
         destructive: {
           DEFAULT: "var(--destructive)",
           foreground: "var(--destructive-foreground)",

@@ -138,6 +138,7 @@ body {
   --destructive-text: hsl(0, 0%, 100%);
   --success: hsl(80, 90%, 40%);
   --success-text: hsl(0, 0%, 100%);
+  --warning-hsl: 45 90% 50%;
   --warning: hsl(45, 90%, 50%);
   --warning-text: hsl(240, 10%, 4%);
   --info-neutral: hsl(200, 30%, 40%);
@@ -322,6 +323,7 @@ body {
   --destructive-text: hsl(0, 0%, 100%);
   --success: hsl(76, 100%, 40%);
   --success-text: hsl(0, 0%, 100%);
+  --warning-hsl: 45 90% 55%;
   --warning: hsl(45, 90%, 55%);
   --warning-text: hsl(240, 10%, 4%);
   --info-neutral: hsl(197, 37%, 40%);
