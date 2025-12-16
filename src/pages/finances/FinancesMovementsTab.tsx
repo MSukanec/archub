@@ -167,10 +167,10 @@ export function FinancesMovementsTab() {
         if (!movement.project) return <span className="text-muted-foreground">-</span>;
         return (
           <Badge 
+            variant="default"
             className="font-medium whitespace-nowrap"
             style={{ 
               backgroundColor: movement.project.color,
-              color: 'white'
             }}
           >
             {movement.project.name}
