@@ -1,7 +1,17 @@
+/**
+ * CapitalTransactionsTab.tsx
+ * 
+ * MIGRADO AL NUEVO SISTEMA DE TABLA MODULAR
+ * Fecha de migración: 2024-12-16
+ * 
+ * Esta pantalla usa el nuevo sistema de tabla ubicado en:
+ * src/components/shared/table/
+ */
 import { useMemo } from 'react';
 import { ArrowDownCircle, ArrowUpCircle, Edit, Trash2, Plus, TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/table';
+import type { Column } from '@/components/shared/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useGlobalModalStore } from '@/components/modal';
@@ -264,7 +274,7 @@ export function CapitalTransactionsTab({
     });
   };
 
-  const columns = [
+  const columns: Column<UnifiedTransaction>[] = [
     {
       key: 'date',
       label: 'Fecha',

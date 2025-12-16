@@ -295,6 +295,8 @@ t('table.search'); // "Buscar..." o "Search..."
 | Pantalla | Archivo | Fecha | Estado |
 |----------|---------|-------|--------|
 | Finanzas → Movimientos | `src/pages/finances/FinancesMovementsTab.tsx` | 2024-12-16 | ✅ PILOTO |
+| Capital → Participantes | `src/pages/capital/tabs/CapitalParticipantsListTab.tsx` | 2024-12-16 | ✅ Migrado |
+| Capital → Transacciones | `src/pages/capital/tabs/CapitalTransactionsTab.tsx` | 2024-12-16 | ✅ Migrado |
 
 ### Importaciones Legacy (Resto de consumidores)
 

@@ -1,9 +1,19 @@
+/**
+ * CapitalParticipantsListTab.tsx
+ * 
+ * MIGRADO AL NUEVO SISTEMA DE TABLA MODULAR
+ * Fecha de migración: 2024-12-16
+ * 
+ * Esta pantalla usa el nuevo sistema de tabla ubicado en:
+ * src/components/shared/table/
+ */
 import { useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Users, Plus, Edit, Trash2, HandHeart, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/table';
+import type { Column } from '@/components/shared/table';
 import { Button } from '@/components/ui/button';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
@@ -151,7 +161,7 @@ export function CapitalParticipantsListTab() {
     );
   }
 
-  const columns = [
+  const columns: Column<EnrichedPartner>[] = [
     {
       key: 'partnerName',
       label: 'Socio',
