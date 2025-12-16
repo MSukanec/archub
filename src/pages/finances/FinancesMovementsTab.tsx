@@ -6,12 +6,23 @@ import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
 import { useDeleteClientPayment } from '@/features/clients/hooks/use-client-payments';
 import { useDeleteMaterialPayment } from '@/features/materials/hooks/use-material-payments';
 import { useDeletePersonnelPayment } from '@/features/personnel/hooks/use-personnel-payments';
+import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { 
+  StatCard, 
+  StatCardTitle, 
+  StatCardValue, 
+  StatCardMeta,
+  StatCardTrend,
+  type TrendDirection
+} from '@/components/dashboard';
+import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown, hasMultipleCurrencies } from '@/lib/kpis';
+import { format as formatMoney, formatKPI } from '@/lib/money';
 import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
-import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users, TrendingUp, TrendingDown } from 'lucide-react';
+import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Scale, Hash } from 'lucide-react';
 import chroma from 'chroma-js';
 import type { UnifiedMovementWithRelations } from '@/features/finances/services/getUnifiedMovements';
 
@@ -57,6 +68,9 @@ export function FinancesMovementsTab() {
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
   
+  // Obtener moneda por defecto de la organización
+  const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId);
+  
   // No filtrar por proyecto - mostrar todos los movimientos de la organización
   const { data: rawMovements = [], isLoading } = useUnifiedMovements(
     currentOrganizationId || undefined,
@@ -68,10 +82,58 @@ export function FinancesMovementsTab() {
     return [...rawMovements].sort((a, b) => {
       const dateComparison = new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
       if (dateComparison !== 0) return dateComparison;
-      // Si las fechas son iguales, ordenar por fecha de creación (más recientes primero)
       return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
   }, [rawMovements]);
+
+  // Calcular KPIs
+  const kpis = useMemo(() => {
+    // Separar ingresos (amount_sign > 0) y egresos (amount_sign < 0)
+    const ingresos = movements.filter(m => m.amount_sign > 0);
+    const egresos = movements.filter(m => m.amount_sign < 0);
+
+    // KPI 1: Total Ingresos
+    const ingresosKPI = calculateMonetaryKPI({
+      items: ingresos.map(m => ({
+        amount: m.amount,
+        currency_id: m.currency_id,
+        currency: m.currency,
+        exchange_rate: m.exchange_rate
+      })),
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol,
+      quoteCurrency: 'USD'
+    });
+
+    // KPI 2: Total Egresos
+    const egresosKPI = calculateMonetaryKPI({
+      items: egresos.map(m => ({
+        amount: m.amount,
+        currency_id: m.currency_id,
+        currency: m.currency,
+        exchange_rate: m.exchange_rate
+      })),
+      baseCurrencyId: defaultCurrency?.code,
+      symbol: defaultCurrency?.symbol,
+      quoteCurrency: 'USD'
+    });
+
+    // KPI 3: Balance (Ingresos - Egresos)
+    const balanceValue = ingresosKPI.value - egresosKPI.value;
+
+    // KPI 4: Total movimientos (conteo)
+    const totalMovimientosKPI = calculateCountKPI({
+      count: movements.length,
+      label: 'movimientos'
+    });
+
+    return {
+      ingresos: ingresosKPI,
+      egresos: egresosKPI,
+      balance: balanceValue,
+      totalMovimientos: totalMovimientosKPI,
+    };
+  }, [movements, defaultCurrency]);
 
   const deleteClientPaymentMutation = useDeleteClientPayment();
   const deleteMaterialPaymentMutation = useDeleteMaterialPayment();
