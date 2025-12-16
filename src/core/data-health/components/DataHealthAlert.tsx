@@ -25,7 +25,7 @@ export function DataHealthAlert({
     <div 
       className={`
         flex items-center justify-between w-full px-4 py-3 rounded-lg cursor-pointer transition-all
-        border-warning/30 bg-warning/10 text-warning
+        border-warning bg-warning/10 text-warning
         hover:bg-warning/15
         ${isFiltering ? 'ring-2 ring-warning/50' : ''}
       `}
@@ -33,9 +33,7 @@ export function DataHealthAlert({
       data-testid="data-health-alert"
     >
       <div className="flex items-center gap-3">
-        <div className="p-1.5 rounded-md bg-warning/15">
-          <AlertTriangle className="h-4 w-4" />
-        </div>
+        <AlertTriangle className="h-4 w-4" />
         <div className="text-sm">
           <span className="font-medium">
             {entityText} con problemas
