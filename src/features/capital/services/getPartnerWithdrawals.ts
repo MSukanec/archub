@@ -1,17 +1,17 @@
 import { supabase } from '@/lib/supabase';
-import type { PartnerContribution } from '../types';
+import type { PartnerWithdrawal } from '../types';
 
-export async function getPartnerContributions(
+export async function getPartnerWithdrawals(
   organizationId: string,
   projectId?: string
-): Promise<PartnerContribution[]> {
+): Promise<PartnerWithdrawal[]> {
   if (!organizationId) return [];
 
   let query = supabase
-    .from('partner_contributions')
+    .from('partner_withdrawals')
     .select(`
       *,
-      partner:partners(
+      partner:capital_participants(
         id,
         created_at,
         contacts(id, full_name, first_name, last_name, email, phone, company_name)
@@ -20,7 +20,7 @@ export async function getPartnerContributions(
     `)
     .eq('organization_id', organizationId)
     .or('is_deleted.is.null,is_deleted.eq.false')
-    .order('contribution_date', { ascending: false });
+    .order('withdrawal_date', { ascending: false });
 
   if (projectId) {
     query = query.eq('project_id', projectId);
@@ -29,20 +29,20 @@ export async function getPartnerContributions(
   const { data, error } = await query;
 
   if (error) throw error;
-  return (data as PartnerContribution[]) || [];
+  return (data as PartnerWithdrawal[]) || [];
 }
 
-export async function getPartnerContributionById(
+export async function getPartnerWithdrawalById(
   id: string,
   organizationId: string
-): Promise<PartnerContribution | null> {
+): Promise<PartnerWithdrawal | null> {
   if (!id || !organizationId) return null;
 
   const { data, error } = await supabase
-    .from('partner_contributions')
+    .from('partner_withdrawals')
     .select(`
       *,
-      partner:partners(
+      partner:capital_participants(
         id,
         created_at,
         contacts(id, full_name, first_name, last_name, email, phone, company_name)
@@ -70,5 +70,5 @@ export async function getPartnerContributionById(
     .single();
 
   if (error) throw error;
-  return data as PartnerContribution;
+  return data as PartnerWithdrawal;
 }

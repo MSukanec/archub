@@ -237,11 +237,10 @@ export function LeftSidebar() {
         { id: 'settings', label: 'Ajustes', icon: Settings, href: '/organization/settings' },
         { type: 'section-header', id: 'section-finanzas', label: 'Finanzas' },
         { id: 'finances-unified', label: 'Finanzas', icon: DollarSign, href: '/finances', restricted: 'lab_user' },
-        { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners' },
+        { id: 'capital', label: 'Capital', icon: HandHeart, href: '/organization/capital' },
         { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
         { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'lab_user' },
         { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'lab_user' },
-        { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'lab_user' },
       ];
     } else if (sidebarLevel === 'project' && selectedProjectId) {
       return [

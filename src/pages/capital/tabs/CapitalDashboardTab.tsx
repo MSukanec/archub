@@ -43,11 +43,11 @@ import {
   usePartners, 
   usePartnerContributions, 
   usePartnerWithdrawals 
-} from '@/features/partners';
+} from '@/features/capital';
 
 export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all';
 
-interface PartnersDashboardTabProps {
+interface CapitalDashboardTabProps {
   onNavigateToList?: () => void;
   onNavigateToBalances?: () => void;
   onNavigateToTransactions?: () => void;
@@ -159,14 +159,14 @@ export function calculateAvailablePeriods(
   return result;
 }
 
-export default function PartnersDashboardTab({ 
+export default function CapitalDashboardTab({ 
   onNavigateToList, 
   onNavigateToBalances,
   onNavigateToTransactions,
   onNavigateToTab,
   onScrollToPanel,
   selectedPeriod = 'all' 
-}: PartnersDashboardTabProps) {
+}: CapitalDashboardTabProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   
@@ -549,8 +549,8 @@ export default function PartnersDashboardTab({
     return (
       <EmptyState
         icon={<Users />}
-        title="No hay datos de socios"
-        description="Agrega socios y registra aportes o retiros para ver el dashboard aquí."
+        title="No hay datos de participantes"
+        description="Agrega participantes y registra aportes o retiros para ver las métricas aquí."
       />
     );
   }
@@ -646,7 +646,7 @@ export default function PartnersDashboardTab({
             {kpis.partnersCount.value}
           </StatCardValue>
           <StatCardMeta>
-            Socios activos en la organización
+            Participantes activos
           </StatCardMeta>
         </StatCard>
       </div>

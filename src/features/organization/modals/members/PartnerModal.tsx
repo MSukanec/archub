@@ -86,7 +86,7 @@ export function PartnerModal({ editingPartner, onClose }: PartnerModalProps) {
       if (!organizationId) throw new Error('No organization selected');
 
       const { data, error } = await supabase
-        .from('partners')
+        .from('capital_participants')
         .insert({
           organization_id: organizationId,
           contact_id: partnerData.contactId,
@@ -120,7 +120,7 @@ export function PartnerModal({ editingPartner, onClose }: PartnerModalProps) {
       if (!editingPartner?.id) throw new Error('Partner ID not found');
 
       const { data, error } = await supabase
-        .from('partners')
+        .from('capital_participants')
         .update({
           contact_id: partnerData.contactId,
           updated_at: new Date().toISOString(),

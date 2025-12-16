@@ -152,7 +152,7 @@ export async function getUnifiedMovements(
       ? supabase.from('organization_members').select('id, user:users(id, full_name)').in('id', personnelIds)
       : { data: [], error: null },
     partnerIds.length > 0
-      ? supabase.from('partners').select('id, contact:contacts(id, full_name, company_name)').in('id', partnerIds)
+      ? supabase.from('capital_participants').select('id, contact:contacts(id, full_name, company_name)').in('id', partnerIds)
       : { data: [], error: null },
     orFilterParts.length > 0
       ? supabase.from('media_links')

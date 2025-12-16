@@ -1,17 +1,17 @@
 import { supabase } from '@/lib/supabase';
-import type { PartnerWithdrawal } from '../types';
+import type { PartnerContribution } from '../types';
 
-export async function getPartnerWithdrawals(
+export async function getPartnerContributions(
   organizationId: string,
   projectId?: string
-): Promise<PartnerWithdrawal[]> {
+): Promise<PartnerContribution[]> {
   if (!organizationId) return [];
 
   let query = supabase
-    .from('partner_withdrawals')
+    .from('partner_contributions')
     .select(`
       *,
-      partner:partners(
+      partner:capital_participants(
         id,
         created_at,
         contacts(id, full_name, first_name, last_name, email, phone, company_name)
@@ -20,7 +20,7 @@ export async function getPartnerWithdrawals(
     `)
     .eq('organization_id', organizationId)
     .or('is_deleted.is.null,is_deleted.eq.false')
-    .order('withdrawal_date', { ascending: false });
+    .order('contribution_date', { ascending: false });
 
   if (projectId) {
     query = query.eq('project_id', projectId);
@@ -29,20 +29,20 @@ export async function getPartnerWithdrawals(
   const { data, error } = await query;
 
   if (error) throw error;
-  return (data as PartnerWithdrawal[]) || [];
+  return (data as PartnerContribution[]) || [];
 }
 
-export async function getPartnerWithdrawalById(
+export async function getPartnerContributionById(
   id: string,
   organizationId: string
-): Promise<PartnerWithdrawal | null> {
+): Promise<PartnerContribution | null> {
   if (!id || !organizationId) return null;
 
   const { data, error } = await supabase
-    .from('partner_withdrawals')
+    .from('partner_contributions')
     .select(`
       *,
-      partner:partners(
+      partner:capital_participants(
         id,
         created_at,
         contacts(id, full_name, first_name, last_name, email, phone, company_name)
@@ -70,5 +70,5 @@ export async function getPartnerWithdrawalById(
     .single();
 
   if (error) throw error;
-  return data as PartnerWithdrawal;
+  return data as PartnerContribution;
 }

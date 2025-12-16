@@ -122,7 +122,7 @@ import MovementsPage from "@/pages/movements/Movements";
 import PricingPlan from "@/pages/settings/PricingPlan";
 import Billing from "@/pages/billing/Billing";
 import Members from "@/pages/members/Members";
-import Partners from "@/pages/partners/Partners";
+import Capital from "@/pages/capital/Capital";
 import OrganizationActivity from "@/pages/settings/OrganizationActivity";
 
 // User Page
@@ -255,7 +255,7 @@ function Router() {
         <Route path="/organization/billing" component={Billing} />
         <Route path="/organization/settings" component={OrganizationSettings} />
         <Route path="/organization/members" component={Members} />
-        <Route path="/organization/partners" component={Partners} />
+        <Route path="/organization/capital" component={Capital} />
         <Route path="/settings/organization-activity" component={OrganizationActivity} />
         <Route path="/settings/pricing-plan" component={PricingPlan} />
         

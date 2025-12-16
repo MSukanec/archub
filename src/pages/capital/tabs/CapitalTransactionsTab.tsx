@@ -23,8 +23,8 @@ import {
   useDeletePartnerWithdrawal,
   type PartnerContribution,
   type PartnerWithdrawal,
-} from '@/features/partners';
-import { getPartnerTransactionStatusBadgeConfig } from '@/features/partners/utils/statusBadge';
+} from '@/features/capital';
+import { getPartnerTransactionStatusBadgeConfig } from '@/features/capital/utils/statusBadge';
 
 type TransactionType = 'contribution' | 'withdrawal';
 
@@ -53,7 +53,7 @@ function formatPartnerName(partner?: { contacts: { full_name: string | null; fir
   return constructedName || company_name || email || 'Sin nombre';
 }
 
-export function PartnerTransactionsTab() {
+export function CapitalTransactionsTab() {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
@@ -360,7 +360,7 @@ export function PartnerTransactionsTab() {
       <EmptyState
         icon={<ArrowDownCircle />}
         title="No hay transacciones"
-        description="Aún no se han registrado aportes ni retiros de socios."
+        description="Aún no se han registrado aportes ni retiros de capital."
         action={
           <div className="flex items-center gap-2">
             <Button onClick={handleAddContribution} data-testid="button-empty-add-contribution">

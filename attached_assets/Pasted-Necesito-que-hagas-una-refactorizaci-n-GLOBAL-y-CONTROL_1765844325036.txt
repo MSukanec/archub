@@ -1,0 +1,146 @@
+Necesito que hagas una refactorización GLOBAL y CONTROLADA del módulo que hasta ahora
+estaba mal llamado "Socios / Partners".
+
+IMPORTANTE:
+- NO agregar features nuevas
+- NO crear nuevas tabs
+- NO cambiar layouts
+- NO inventar lógica nueva
+- SOLO renombrar, sincronizar y arreglar referencias
+- Todo debe seguir funcionando exactamente igual, pero con el nuevo naming correcto
+
+CONTEXTO (LEER CON ATENCIÓN):
+
+Acabamos de terminar completamente el backend en Supabase para este módulo.
+Voy a compartirte un archivo con TODAS las tablas y vistas finales.
+Ese backend ya está 100% cerrado y no debe ser modificado.
+
+El problema ahora es que:
+- El frontend todavía usa naming viejo (socios / partners)
+- Carpetas, hooks, modales y páginas no reflejan el nuevo modelo
+- Hay referencias inconsistentes entre front y back
+
+Tu trabajo es:
+👉 Alinear TODO el frontend al nuevo modelo de datos.
+
+---------------------------------------
+NUEVO CONCEPTO DE PRODUCTO
+---------------------------------------
+
+Este módulo ya NO se llama "Socios".
+
+El nombre correcto del módulo es:
+
+CAPITAL
+
+Conceptualmente representa:
+- Participantes de capital (capital_participants)
+- Aportes de capital (partner_contributions)
+- Retiros de capital (partner_withdrawals)
+- Balances de capital (partner_capital_balance + views)
+
+NO es:
+- Operativo
+- Gastos
+- Clientes
+
+Es un módulo PATRIMONIAL / FINANCIERO.
+
+---------------------------------------
+PASO 1 — RENOMBRAR FEATURE COMPLETA
+---------------------------------------
+
+1. Renombrar la carpeta de feature completa:
+
+ANTES:
+src/features/partners/
+o
+src/features/socios/
+
+DESPUÉS:
+src/features/capital/
+
+2. Dentro de esa carpeta:
+- Renombrar archivos
+- Renombrar componentes
+- Renombrar hooks
+- Renombrar stores (si existen)
+- Renombrar rutas
+- Renombrar imports
+
+Ejemplos:
+- usePartners → useCapitalParticipants
+- PartnerList → CapitalParticipantsList
+- PartnerModal → CapitalParticipantModal
+(no inventes nombres, usá naming claro y consistente)
+
+---------------------------------------
+PASO 2 — SINCRONIZAR CON SUPABASE
+---------------------------------------
+
+Usar EXCLUSIVAMENTE las siguientes entidades del backend
+(según el archivo que te voy a pasar):
+
+- capital_participants
+- partner_contributions
+- partner_withdrawals
+- partner_capital_balance
+- partner_balance_summary (VIEW)
+
+Acciones:
+- Revisar TODOS los queries
+- Revisar TODOS los selects
+- Revisar TODOS los inserts/updates
+- Revisar TODOS los tipos/interfaces
+
+No debe quedar:
+❌ ningún query apuntando a "partners"
+❌ ningún tipo llamado Partner que represente otra cosa
+❌ ningún campo inexistente
+
+---------------------------------------
+PASO 3 — MODALES, PÁGINAS Y HOOKS
+---------------------------------------
+
+Sin cambiar UX ni layout:
+
+- Ajustar modales existentes para que reflejen:
+  - CapitalParticipant (no socio)
+  - Contribution / Withdrawal como movimientos patrimoniales
+
+- Ajustar textos internos (labels, titles, helpers):
+  - Evitar la palabra "Socio"
+  - Usar "Participante", "Capital", "Aporte", "Retiro"
+
+- Ajustar hooks para que:
+  - Sean coherentes con el nuevo naming
+  - No mezclen lógica de pagos o gastos
+
+---------------------------------------
+PASO 4 — COHERENCIA GLOBAL
+---------------------------------------
+
+Revisar:
+- Imports cruzados
+- Rutas
+- Breadcrumbs (si existen)
+- Títulos de página
+- Stores globales (si los hay)
+
+Objetivo:
+👉 Que TODO el proyecto hable el mismo idioma: CAPITAL.
+
+---------------------------------------
+REGLAS FINALES
+---------------------------------------
+
+- No refactorizar más de lo pedido
+- No tocar lógica de negocio
+- No agregar nuevas vistas
+- No adelantar trabajo de tabs o dashboards
+- Documentar brevemente los cambios realizados
+
+Cuando termines:
+- El módulo debe compilar
+- No debe haber errores de runtime
+- El naming debe ser consistente en todo el front

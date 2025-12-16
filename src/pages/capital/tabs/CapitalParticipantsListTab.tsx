@@ -10,15 +10,15 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGlobalModalStore } from '@/components/modal';
 import { parseLocalDate } from '@/lib/date-utils';
 import { useMobile } from '@/hooks/use-mobile';
-import { usePartners, usePartnerContributions, usePartnerWithdrawals } from '@/features/partners';
+import { usePartners, usePartnerContributions, usePartnerWithdrawals } from '@/features/capital';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
-import type { Partner } from '@/features/partners/types';
+import type { Partner } from '@/features/capital/types';
 
 type EnrichedPartner = Partner & { partnerName: string };
 
-export function PartnersListTab() {
+export function CapitalParticipantsListTab() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
@@ -64,7 +64,7 @@ export function PartnersListTab() {
   const deletePartnerMutation = useMutation({
     mutationFn: async (partnerId: string) => {
       const { error } = await supabase
-        .from('partners')
+        .from('capital_participants')
         .update({ is_deleted: true })
         .eq('id', partnerId);
 
@@ -196,12 +196,12 @@ export function PartnersListTab() {
     return (
       <EmptyState
         icon={<HandHeart />}
-        title="No hay socios en esta organización"
+        title="No hay participantes en esta organización"
         description="Agrega socios para gestionar las participaciones de tu organización."
         action={
           <Button onClick={handleAddPartner} data-testid="button-add-partner-empty">
             <Plus className="h-4 w-4 mr-2" />
-            Agregar Socio
+            Agregar Participante
           </Button>
         }
       />
@@ -273,7 +273,7 @@ export function PartnersListTab() {
         onRowClick={handleEdit}
         rowActions={(partner: EnrichedPartner) => [
           {
-            label: 'Editar Socio',
+            label: 'Editar Participante',
             icon: Edit,
             onClick: () => handleEdit(partner),
           },

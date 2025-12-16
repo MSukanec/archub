@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
-import { PARTNER_QUERY_KEYS } from '../constants';
+import { CAPITAL_QUERY_KEYS } from '../constants';
 
 const partnerSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
@@ -38,7 +38,7 @@ interface Contact {
   linked_user: LinkedUser | LinkedUser[] | null;
 }
 
-export interface PartnerFormFieldsProps {
+export interface CapitalParticipantFormFieldsProps {
   organizationId?: string;
   partnerId?: string;
   mode: 'create' | 'edit';
@@ -48,7 +48,7 @@ export interface PartnerFormFieldsProps {
   formRef?: React.RefObject<HTMLFormElement>;
 }
 
-export function PartnerFormFields({
+export function CapitalParticipantFormFields({
   organizationId,
   partnerId,
   mode,
@@ -56,7 +56,7 @@ export function PartnerFormFields({
   onCancel,
   hideActions = false,
   formRef,
-}: PartnerFormFieldsProps) {
+}: CapitalParticipantFormFieldsProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const queryClient = useQueryClient();
@@ -100,7 +100,7 @@ export function PartnerFormFields({
       if (!partnerId) return null;
       
       const { data, error } = await supabase
-        .from('partners')
+        .from('capital_participants')
         .select('id, contact_id, notes, status')
         .eq('id', partnerId)
         .single();
@@ -117,7 +117,7 @@ export function PartnerFormFields({
       if (!orgId) return [];
       
       const { data, error } = await supabase
-        .from('partners')
+        .from('capital_participants')
         .select('contact_id')
         .eq('organization_id', orgId)
         .eq('is_deleted', false);
@@ -155,7 +155,7 @@ export function PartnerFormFields({
       if (!orgId) throw new Error('No hay organización seleccionada');
 
       const { data: result, error } = await supabase
-        .from('partners')
+        .from('capital_participants')
         .insert({
           organization_id: orgId,
           contact_id: data.contactId,
@@ -169,7 +169,7 @@ export function PartnerFormFields({
       return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.partners(orgId || '') });
+      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.participants(orgId || '') });
       queryClient.invalidateQueries({ queryKey: ['partners'] });
       toast({
         title: 'Socio agregado',
@@ -191,7 +191,7 @@ export function PartnerFormFields({
       if (!partnerId) throw new Error('ID de socio no encontrado');
 
       const { data: result, error } = await supabase
-        .from('partners')
+        .from('capital_participants')
         .update({
           contact_id: data.contactId,
           notes: data.notes || null,
@@ -205,7 +205,7 @@ export function PartnerFormFields({
       return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: PARTNER_QUERY_KEYS.partners(orgId || '') });
+      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.participants(orgId || '') });
       queryClient.invalidateQueries({ queryKey: ['partners'] });
       toast({
         title: 'Socio actualizado',
@@ -371,3 +371,4 @@ export function PartnerFormFields({
     </Form>
   );
 }
+export const PartnerFormFields = CapitalParticipantFormFields;

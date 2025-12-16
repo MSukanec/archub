@@ -7,10 +7,10 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { usePartnerMovements } from '@/features/finances/hooks/use-partner-movements';
 import { usePartnerMetrics } from '@/features/finances/hooks/use-partner-metrics';
-import { usePartners } from '@/features/partners';
+import { usePartners } from '@/features/capital';
 import PartnerBalanceAccordion from '@/features/finances/components/PartnerBalanceAccordion';
 
-export function PartnerBalancesTab() {
+export function CapitalBalancesTab() {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
 
@@ -85,7 +85,7 @@ export function PartnerBalancesTab() {
     return (
       <EmptyState
         icon={<HandHeart />}
-        title="No hay movimientos de socios"
+        title="No hay movimientos de capital"
         description="Registra aportes o retiros de socios para ver el balance por cada uno aquí."
       />
     );
@@ -153,7 +153,7 @@ export function PartnerBalancesTab() {
             {balanceByPartner.length}
           </StatCardValue>
           <StatCardMeta>
-            Socios con movimientos
+            Participantes con movimientos
           </StatCardMeta>
         </StatCard>
       </div>

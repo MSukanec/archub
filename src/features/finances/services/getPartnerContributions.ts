@@ -91,7 +91,7 @@ export async function getPartnerContributions(
     .from('partner_contributions')
     .select(`
       *,
-      partner:partners(
+      partner:capital_participants(
         id,
         contacts(
           id,

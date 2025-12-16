@@ -1,22 +1,22 @@
 import { useRef } from 'react';
 import { HandHeart } from 'lucide-react';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
-import { PartnerFormFields } from '../forms/PartnerFormFields';
+import { CapitalParticipantFormFields } from '../forms/CapitalParticipantFormFields';
 
-export interface PartnerModalProps {
+export interface CapitalParticipantModalProps {
   modalData?: {
     organizationId?: string;
-    partnerId?: string;
+    participantId?: string;
     mode?: 'create' | 'edit';
   };
   onClose: () => void;
 }
 
-export function PartnerModal({ modalData, onClose }: PartnerModalProps) {
+export function CapitalParticipantModal({ modalData, onClose }: CapitalParticipantModalProps) {
   const formRef = useRef<HTMLFormElement>(null);
   
-  const { organizationId, partnerId, mode = 'create' } = modalData || {};
-  const isEditing = mode === 'edit' && !!partnerId;
+  const { organizationId, participantId, mode = 'create' } = modalData || {};
+  const isEditing = mode === 'edit' && !!participantId;
 
   const handleSubmit = () => {
     if (formRef.current) {
@@ -26,10 +26,10 @@ export function PartnerModal({ modalData, onClose }: PartnerModalProps) {
 
   const headerContent = (
     <ModalHeader 
-      title={isEditing ? 'Editar Socio' : 'Ingresar Socio'}
+      title={isEditing ? 'Editar Participante' : 'Agregar Participante'}
       description={isEditing 
-        ? 'Actualiza la información del socio de tu organización.' 
-        : 'Selecciona un contacto existente para agregarlo como socio de tu organización.'
+        ? 'Actualiza la información del participante de capital.' 
+        : 'Selecciona un contacto existente para agregarlo como participante de capital.'
       }
       icon={HandHeart}
     />
@@ -39,7 +39,7 @@ export function PartnerModal({ modalData, onClose }: PartnerModalProps) {
     <ModalFooter
       leftLabel="Cancelar"
       onLeftClick={onClose}
-      submitText={isEditing ? 'Actualizar' : 'Agregar Socio'}
+      submitText={isEditing ? 'Actualizar' : 'Agregar Participante'}
       onSubmit={handleSubmit}
     />
   );
@@ -52,9 +52,9 @@ export function PartnerModal({ modalData, onClose }: PartnerModalProps) {
       footerContent={footerContent}
     >
       <ModalBody>
-        <PartnerFormFields
+        <CapitalParticipantFormFields
           organizationId={organizationId}
-          partnerId={partnerId}
+          partnerId={participantId}
           mode={isEditing ? 'edit' : 'create'}
           onSuccess={onClose}
           onCancel={onClose}
@@ -65,3 +65,6 @@ export function PartnerModal({ modalData, onClose }: PartnerModalProps) {
     </ModalLayout>
   );
 }
+
+// Backward compatibility alias
+export const PartnerModal = CapitalParticipantModal;

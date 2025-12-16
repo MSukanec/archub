@@ -1,7 +1,7 @@
 import { registerModal, ModalConfig } from './registry';
 
 import { MemberFormModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, OrganizationFormModal, ProfileOrganizationFormModal } from '@/features/organization';
-import { PartnerModal, PartnerContributionModal, PartnerWithdrawalModal } from '@/features/partners';
+import { CapitalParticipantModal, PartnerContributionModal, PartnerWithdrawalModal } from '@/features/capital';
 import { ProjectForm } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
 import ContactForm from '@/features/contacts/forms/ContactForm';
@@ -60,20 +60,54 @@ export function initializeModalRegistry(): void {
       defaultEmail: data?.defaultEmail,
     }),
   });
-  registerModal('partner', PartnerModal as any, {
+  // Capital module modals
+  registerModal('capital-participant', CapitalParticipantModal as any, {
     ...organizationConfig,
     mapDataToProps: (data) => {
       if (!data?.organizationId) {
-        console.warn('[registerModal:partner] organizationId is missing');
+        console.warn('[registerModal:capital-participant] organizationId is missing');
       }
       return {
         modalData: {
           organizationId: data?.organizationId,
-          partnerId: data?.partnerId,
-          mode: data?.partnerId ? 'edit' : 'create',
+          participantId: data?.participantId || data?.partnerId,
+          mode: (data?.participantId || data?.partnerId) ? 'edit' : 'create',
         },
       };
     },
+  });
+  registerModal('capital-contribution', PartnerContributionModal as any, {
+    ...financeConfig,
+    mapDataToProps: (data) => ({
+      modalData: {
+        projectId: data?.projectId,
+        organizationId: data?.organizationId,
+        contributionId: data?.contributionId,
+      },
+      mode: data?.contributionId ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
+  registerModal('capital-withdrawal', PartnerWithdrawalModal as any, {
+    ...financeConfig,
+    mapDataToProps: (data) => ({
+      modalData: {
+        projectId: data?.projectId,
+        organizationId: data?.organizationId,
+        withdrawalId: data?.withdrawalId,
+      },
+      mode: data?.withdrawalId ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
+  // Legacy aliases for backward compatibility
+  registerModal('partner', CapitalParticipantModal as any, {
+    ...organizationConfig,
+    mapDataToProps: (data) => ({
+      modalData: {
+        organizationId: data?.organizationId,
+        participantId: data?.partnerId,
+        mode: data?.partnerId ? 'edit' : 'create',
+      },
+    }),
   });
   registerModal('partner-contribution', PartnerContributionModal as any, {
     ...financeConfig,

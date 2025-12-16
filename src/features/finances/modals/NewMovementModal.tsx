@@ -7,7 +7,7 @@ import { useProjectContext } from '@/stores/projectContext'
 import { ClientPaymentFormFields } from '@/features/clients/forms/ClientPaymentFormFields'
 import { MaterialPaymentFormFields } from '@/features/materials/forms/MaterialPaymentFormFields'
 import { PersonnelPaymentFormFields } from '@/features/personnel/forms/PersonnelPaymentFormFields'
-import { PartnerContributionFormFields, PartnerWithdrawalFormFields } from '@/features/partners'
+import { PartnerContributionFormFields, PartnerWithdrawalFormFields } from '@/features/capital'
 import { GeneralCostPaymentFormFields } from '@/features/general-costs/forms/GeneralCostPaymentFormFields'
 
 type MovementType = 'client_payment' | 'material_payment' | 'personnel_payment' | 'partner_contribution' | 'partner_withdrawal' | 'general_cost_payment'

@@ -1,4 +1,4 @@
-export * from './services/getPartners';
+export * from './services/getCapitalParticipants';
 export * from './services/getPartnerContributions';
 export * from './services/getPartnerWithdrawals';
 export * from './services/createPartnerContribution';
@@ -10,11 +10,11 @@ export * from './services/deletePartnerWithdrawal';
 
 export * from './hooks';
 
-export { PartnerFormFields } from './forms/PartnerFormFields';
+export { CapitalParticipantFormFields } from './forms/CapitalParticipantFormFields';
 export { PartnerContributionFormFields } from './forms/PartnerContributionFormFields';
 export { PartnerWithdrawalFormFields } from './forms/PartnerWithdrawalFormFields';
 
-export { PartnerModal } from './modals/PartnerModal';
+export { CapitalParticipantModal } from './modals/CapitalParticipantModal';
 export { PartnerContributionModal } from './modals/PartnerContributionModal';
 export { PartnerWithdrawalModal } from './modals/PartnerWithdrawalModal';
 

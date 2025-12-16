@@ -1,11 +1,11 @@
-export interface PartnerLinkedUser {
+export interface CapitalParticipantLinkedUser {
   id: string
   full_name: string | null
   email: string
   avatar_url: string | null
 }
 
-export interface PartnerContact {
+export interface CapitalParticipantContact {
   id: string
   first_name: string | null
   last_name: string | null
@@ -16,10 +16,10 @@ export interface PartnerContact {
   linked_user_id: string | null
   image_bucket: string | null
   image_path: string | null
-  linked_user: PartnerLinkedUser | PartnerLinkedUser[] | null
+  linked_user: CapitalParticipantLinkedUser | CapitalParticipantLinkedUser[] | null
 }
 
-export interface Partner {
+export interface CapitalParticipant {
   id: string
   created_at: string
   updated_at: string | null
@@ -30,10 +30,10 @@ export interface Partner {
   created_by: string | null
   is_deleted: boolean
   deleted_at: string | null
-  contacts: PartnerContact | null
+  contacts: CapitalParticipantContact | null
 }
 
-export interface PartnerCreateInput {
+export interface CapitalParticipantCreateInput {
   contact_id: string
   organization_id: string
   notes?: string | null
@@ -41,7 +41,7 @@ export interface PartnerCreateInput {
   created_by?: string | null
 }
 
-export interface PartnerUpdateInput {
+export interface CapitalParticipantUpdateInput {
   contact_id?: string
   notes?: string | null
   status?: 'active' | 'inactive' | 'deleted'
@@ -66,7 +66,7 @@ export interface MediaLink {
   is_cover: boolean | null
 }
 
-export interface PartnerContribution {
+export interface CapitalContribution {
   id: string
   project_id: string | null
   organization_id: string
@@ -83,12 +83,12 @@ export interface PartnerContribution {
   created_at: string
   is_deleted?: boolean
   deleted_at?: string | null
-  partner?: Partner
+  partner?: CapitalParticipant
   currency?: { id: string; name: string; symbol: string; code: string }
   media_links?: MediaLink[]
 }
 
-export interface PartnerWithdrawal {
+export interface CapitalWithdrawal {
   id: string
   project_id: string | null
   organization_id: string
@@ -105,12 +105,12 @@ export interface PartnerWithdrawal {
   created_at: string
   is_deleted?: boolean
   deleted_at?: string | null
-  partner?: Partner
+  partner?: CapitalParticipant
   currency?: { id: string; name: string; symbol: string; code: string }
   media_links?: MediaLink[]
 }
 
-export interface PartnerContributionCreateInput {
+export interface CapitalContributionCreateInput {
   organization_id: string
   project_id?: string | null
   partner_id: string
@@ -125,7 +125,7 @@ export interface PartnerContributionCreateInput {
   created_by: string
 }
 
-export interface PartnerWithdrawalCreateInput {
+export interface CapitalWithdrawalCreateInput {
   organization_id: string
   project_id?: string | null
   partner_id: string
@@ -139,3 +139,14 @@ export interface PartnerWithdrawalCreateInput {
   notes?: string | null
   created_by: string
 }
+
+// Backward compatibility aliases (to be removed later)
+export type Partner = CapitalParticipant
+export type PartnerContact = CapitalParticipantContact
+export type PartnerLinkedUser = CapitalParticipantLinkedUser
+export type PartnerCreateInput = CapitalParticipantCreateInput
+export type PartnerUpdateInput = CapitalParticipantUpdateInput
+export type PartnerContribution = CapitalContribution
+export type PartnerWithdrawal = CapitalWithdrawal
+export type PartnerContributionCreateInput = CapitalContributionCreateInput
+export type PartnerWithdrawalCreateInput = CapitalWithdrawalCreateInput

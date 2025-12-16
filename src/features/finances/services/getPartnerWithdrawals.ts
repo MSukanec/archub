@@ -91,7 +91,7 @@ export async function getPartnerWithdrawals(
     .from('partner_withdrawals')
     .select(`
       *,
-      partner:partners(
+      partner:capital_participants(
         id,
         contacts(
           id,

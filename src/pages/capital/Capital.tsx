@@ -1,14 +1,14 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import PartnersDashboardTab, { calculateAvailablePeriods, type PeriodFilter } from '@/pages/partners/tabs/PartnersDashboardTab';
-import { PartnersListTab } from '@/pages/partners/tabs/PartnersListTab';
-import { PartnerBalancesTab } from '@/pages/partners/tabs/PartnerBalancesTab';
-import { PartnerTransactionsTab } from '@/pages/partners/tabs/PartnerTransactionsTab';
+import CapitalDashboardTab, { calculateAvailablePeriods, type PeriodFilter } from '@/pages/capital/tabs/CapitalDashboardTab';
+import { CapitalParticipantsListTab } from '@/pages/capital/tabs/CapitalParticipantsListTab';
+import { CapitalBalancesTab } from '@/pages/capital/tabs/CapitalBalancesTab';
+import { CapitalTransactionsTab } from '@/pages/capital/tabs/CapitalTransactionsTab';
 import { HandHeart, Plus, TrendingUp, TrendingDown, ChevronDown, Check } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
-import { usePartnerContributions, usePartnerWithdrawals } from '@/features/partners';
+import { usePartnerContributions, usePartnerWithdrawals } from '@/features/capital';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -26,7 +26,7 @@ const periodOptions: { value: PeriodFilter; label: string }[] = [
   { value: 'all', label: 'Histórico' },
 ];
 
-export default function Partners() {
+export default function Capital() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
@@ -46,16 +46,16 @@ export default function Partners() {
     return calculateAvailablePeriods(contributions, withdrawals);
   }, [contributions, withdrawals]);
 
-  const handleAddPartner = () => {
-    openModal('partner', { organizationId });
+  const handleAddParticipant = () => {
+    openModal('capital-participant', { organizationId });
   };
 
   const handleAddContribution = () => {
-    openModal('partner-contribution', { organizationId });
+    openModal('capital-contribution', { organizationId });
   };
 
   const handleAddWithdrawal = () => {
-    openModal('partner-withdrawal', { organizationId });
+    openModal('capital-withdrawal', { organizationId });
   };
 
   const handleNavigateToTab = useCallback((tab: string, filters?: Record<string, unknown>) => {
@@ -64,7 +64,7 @@ export default function Partners() {
 
   const tabs = [
     { id: 'dashboard', label: 'Visión General', isActive: activeTab === 'dashboard' },
-    { id: 'list', label: 'Socios', isActive: activeTab === 'list' },
+    { id: 'list', label: 'Participantes', isActive: activeTab === 'list' },
     { id: 'balances', label: 'Balances', isActive: activeTab === 'balances' },
     { id: 'transactions', label: 'Transacciones', isActive: activeTab === 'transactions' }
   ];
@@ -73,7 +73,7 @@ export default function Partners() {
     switch (activeTab) {
       case 'dashboard':
         return (
-          <PartnersDashboardTab 
+          <CapitalDashboardTab 
             selectedPeriod={selectedPeriod}
             onNavigateToList={() => setActiveTab('list')}
             onNavigateToBalances={() => setActiveTab('balances')}
@@ -82,14 +82,14 @@ export default function Partners() {
           />
         );
       case 'list':
-        return <PartnersListTab />;
+        return <CapitalParticipantsListTab />;
       case 'balances':
-        return <PartnerBalancesTab />;
+        return <CapitalBalancesTab />;
       case 'transactions':
-        return <PartnerTransactionsTab />;
+        return <CapitalTransactionsTab />;
       default:
         return (
-          <PartnersDashboardTab 
+          <CapitalDashboardTab 
             selectedPeriod={selectedPeriod}
             onNavigateToList={() => setActiveTab('list')}
             onNavigateToBalances={() => setActiveTab('balances')}
@@ -135,8 +135,8 @@ export default function Partners() {
 
   const headerProps = {
     icon: HandHeart,
-    title: "Socios",
-    description: "Gestiona los socios de tu organización y sus participaciones",
+    title: "Capital",
+    description: "Gestiona los participantes de capital y sus aportes",
     organizationId: organizationId ?? undefined,
     showMembers: true,
     tabs,
@@ -146,9 +146,9 @@ export default function Partners() {
     }),
     ...(activeTab === 'list' && {
       actionButton: {
-        label: "Agregar Socio",
+        label: "Agregar Participante",
         icon: Plus,
-        onClick: handleAddPartner
+        onClick: handleAddParticipant
       }
     }),
     ...(activeTab === 'transactions' && {
@@ -162,11 +162,11 @@ export default function Partners() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={handleAddContribution} data-testid="menu-item-add-contribution">
-              <TrendingUp className="w-4 h-4 mr-2 text-green-600" />
+              <TrendingUp className="w-4 h-4 mr-2 text-[var(--chart-positive)]" />
               Nuevo Aporte
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleAddWithdrawal} data-testid="menu-item-add-withdrawal">
-              <TrendingDown className="w-4 h-4 mr-2 text-red-600" />
+              <TrendingDown className="w-4 h-4 mr-2 text-[var(--chart-negative)]" />
               Nuevo Retiro
             </DropdownMenuItem>
           </DropdownMenuContent>
