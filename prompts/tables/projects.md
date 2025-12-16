@@ -129,7 +129,6 @@ create table public.project_data (
   start_date date null,
   estimated_end date null,
   project_type_id uuid null,
-  project_image_url text null,
   lat numeric(9, 6) null,
   lng numeric(9, 6) null,
   zip_code text null,
@@ -145,12 +144,15 @@ create table public.project_data (
   contact_phone text null,
   email text null,
   project_modality_id uuid null,
-  organization_id uuid null,
+  organization_id uuid not null,
   accessibility_notes text null,
   address_full text null,
   location_type text null,
   place_id text null,
   timezone text null,
+  image_bucket text null,
+  image_path text null,
+  is_public boolean not null default false,
   constraint project_data_pkey primary key (project_id),
   constraint project_data_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
   constraint project_data_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
@@ -169,6 +171,14 @@ create index IF not exists project_data_zip_idx on public.project_data using btr
 create index IF not exists project_data_org_idx on public.project_data using btree (organization_id) TABLESPACE pg_default;
 
 create index IF not exists project_data_org_project_idx on public.project_data using btree (organization_id, project_id) TABLESPACE pg_default;
+
+create index IF not exists idx_project_data_image_bucket on public.project_data using btree (image_bucket) TABLESPACE pg_default
+where
+  (image_bucket is not null);
+
+create index IF not exists idx_project_data_image_metadata on public.project_data using btree (organization_id, image_bucket, image_path) TABLESPACE pg_default
+where
+  (image_bucket is not null);
 
 create trigger project_data_set_updated_at BEFORE
 update on project_data for EACH row

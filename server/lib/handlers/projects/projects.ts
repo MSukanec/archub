@@ -122,11 +122,17 @@ export async function createProject(
 
     if (dataError) {
       console.error('Error creating project_data:', dataError);
+      console.error('project_data insert payload:', {
+        project_id: newProject.id,
+        organization_id: params.organization_id,
+        project_type_id: params.project_type_id || null,
+        project_modality_id: params.project_modality_id || null,
+      });
       
       // Rollback: delete the project we just created
       await supabase.from('projects').delete().eq('id', newProject.id);
       
-      return { success: false, error: 'Failed to create project data' };
+      return { success: false, error: `Failed to create project data: ${dataError.message}` };
     }
 
     return { success: true, data: newProject };

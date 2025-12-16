@@ -1,0 +1,62 @@
+create table public.project_data (
+  project_id uuid not null,
+  surface_total numeric(12, 2) null,
+  surface_covered numeric(12, 2) null,
+  surface_semi numeric(12, 2) null,
+  start_date date null,
+  estimated_end date null,
+  project_type_id uuid null,
+  lat numeric(9, 6) null,
+  lng numeric(9, 6) null,
+  zip_code text null,
+  description text null,
+  internal_notes text null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  country text null,
+  state text null,
+  address text null,
+  city text null,
+  client_name text null,
+  contact_phone text null,
+  email text null,
+  project_modality_id uuid null,
+  organization_id uuid not null,
+  accessibility_notes text null,
+  address_full text null,
+  location_type text null,
+  place_id text null,
+  timezone text null,
+  image_bucket text null,
+  image_path text null,
+  is_public boolean not null default false,
+  constraint project_data_pkey primary key (project_id),
+  constraint project_data_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint project_data_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
+  constraint project_data_project_modality_id_fkey foreign KEY (project_modality_id) references project_modalities (id) on delete set null,
+  constraint project_data_project_type_id_fkey foreign KEY (project_type_id) references project_types (id) on delete set null
+) TABLESPACE pg_default;
+
+create index IF not exists project_data_type_idx on public.project_data using btree (project_type_id) TABLESPACE pg_default;
+
+create index IF not exists project_data_modality_idx on public.project_data using btree (project_modality_id) TABLESPACE pg_default;
+
+create index IF not exists project_data_city_idx on public.project_data using btree (city) TABLESPACE pg_default;
+
+create index IF not exists project_data_zip_idx on public.project_data using btree (zip_code) TABLESPACE pg_default;
+
+create index IF not exists project_data_org_idx on public.project_data using btree (organization_id) TABLESPACE pg_default;
+
+create index IF not exists project_data_org_project_idx on public.project_data using btree (organization_id, project_id) TABLESPACE pg_default;
+
+create index IF not exists idx_project_data_image_bucket on public.project_data using btree (image_bucket) TABLESPACE pg_default
+where
+  (image_bucket is not null);
+
+create index IF not exists idx_project_data_image_metadata on public.project_data using btree (organization_id, image_bucket, image_path) TABLESPACE pg_default
+where
+  (image_bucket is not null);
+
+create trigger project_data_set_updated_at BEFORE
+update on project_data for EACH row
+execute FUNCTION set_timestamp ();
