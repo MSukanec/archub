@@ -150,6 +150,8 @@ export const PROJECT_NAVIGATION: NavigationEntry[] = [
   { id: 'logs', label: 'Bitácora de Obra', icon: BookOpen, href: '/construction/logs', testId: 'nav-project-logs' },
   { type: 'section-header', id: 'section-comercializacion', label: 'Comercialización y Venta' },
   { id: 'clients', label: 'Clientes', icon: LuHandshake, href: '/clients', testId: 'nav-project-clients' },
+  { type: 'section-header', id: 'section-finanzas-proyecto', label: 'Finanzas' },
+  { id: 'finances', label: 'Finanzas', icon: DollarSign, href: '/project/finances', restricted: 'lab_user', testId: 'nav-project-finances' },
 ];
 
 export const ADMIN_NAVIGATION: NavigationItem[] = [

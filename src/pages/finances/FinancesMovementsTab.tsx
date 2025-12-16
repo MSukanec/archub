@@ -66,7 +66,15 @@ const MOVEMENT_TYPE_CONFIG: Record<string, {
   },
 };
 
-export function FinancesMovementsTab() {
+interface FinancesMovementsTabProps {
+  isProjectContext?: boolean;
+  projectId?: string | null;
+}
+
+export function FinancesMovementsTab({ 
+  isProjectContext = false, 
+  projectId 
+}: FinancesMovementsTabProps) {
   const { currentOrganizationId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
@@ -77,10 +85,15 @@ export function FinancesMovementsTab() {
   // Obtener moneda por defecto de la organización
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined);
   
-  // No filtrar por proyecto - mostrar todos los movimientos de la organización
+  // Determinar el projectId efectivo para la query:
+  // - En contexto de proyecto: usar el projectId pasado (filtrar por proyecto específico)
+  // - En contexto de organización: pasar null para obtener todos los movimientos
+  const effectiveProjectId = isProjectContext ? projectId : null;
+  
+  // Filtrar por proyecto si estamos en contexto de proyecto
   const { data: rawMovements = [], isLoading } = useUnifiedMovements(
     currentOrganizationId || undefined,
-    undefined
+    effectiveProjectId
   );
 
   // Sort by payment_date DESC, then by created_at DESC
