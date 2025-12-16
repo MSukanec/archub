@@ -167,21 +167,22 @@ export function FinancesMovementsTab() {
       width: '18%',
       render: (movement) => {
         const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
-        const entityInitials = movement.entity_name 
-          ? movement.entity_name.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
-          : 'M';
+        const creatorInitials = movement.creator?.full_name 
+          ? movement.creator.full_name.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+          : 'U';
         
         return (
           <div className="flex items-center gap-2 min-w-0">
             <Avatar className="h-8 w-8 flex-shrink-0">
-              <AvatarFallback className="text-xs font-bold bg-accent text-accent-foreground">{entityInitials}</AvatarFallback>
+              <AvatarImage src={movement.creator?.avatar_url || ''} />
+              <AvatarFallback className="text-xs font-bold">{creatorInitials}</AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
               <div className="font-medium text-sm truncate">
                 {config?.label || movement.movement_type}
               </div>
               <div className="text-muted-foreground text-xs truncate">
-                {movement.entity_name || '-'}
+                {movement.creator?.full_name || movement.entity_name || '-'}
               </div>
             </div>
           </div>

@@ -48,6 +48,11 @@ export interface UnifiedMovementWithRelations extends UnifiedMovement {
     id: string;
     name: string;
   } | null;
+  creator: {
+    id: string;
+    full_name: string;
+    avatar_url: string | null;
+  } | null;
   signed_amount: number;
   entity_name: string | null;
   has_attachments: boolean;
@@ -99,6 +104,7 @@ export async function getUnifiedMovements(
   const projectIds = Array.from(new Set(movements.map(m => m.project_id).filter(Boolean))) as string[];
   const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean))) as string[];
   const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean))) as string[];
+  const creatorIds = Array.from(new Set(movements.map(m => m.created_by).filter(Boolean))) as string[];
   
   const clientPaymentIds = movements
     .filter(m => m.movement_type === 'client_payment' && m.client_id)
@@ -135,7 +141,7 @@ export async function getUnifiedMovements(
     orFilterParts.push(`partner_withdrawal_id.in.(${Array.from(partnerWithdrawalIdSet).join(',')})`);
   }
 
-  const [projectsResult, currenciesResult, walletsResult, clientsResult, personnelResult, partnersResult, attachmentsResult] = await Promise.all([
+  const [projectsResult, currenciesResult, walletsResult, creatorsResult, clientsResult, personnelResult, partnersResult, attachmentsResult] = await Promise.all([
     projectIds.length > 0 
       ? supabase.from('projects').select('id, name, code, color').in('id', projectIds)
       : { data: [], error: null },
@@ -144,6 +150,9 @@ export async function getUnifiedMovements(
       : { data: [], error: null },
     walletIds.length > 0
       ? supabase.from('organization_wallets').select('id, wallets:wallet_id(id, name)').in('id', walletIds)
+      : { data: [], error: null },
+    creatorIds.length > 0
+      ? supabase.from('users').select('id, full_name, avatar_url').in('id', creatorIds)
       : { data: [], error: null },
     clientPaymentIds.length > 0
       ? supabase.from('project_clients').select('id, contact:contacts(id, full_name, company_name)').in('id', clientPaymentIds)
@@ -166,6 +175,10 @@ export async function getUnifiedMovements(
   const walletsMap = new Map((walletsResult.data || []).map((w: any) => [
     w.id, 
     w.wallets ? { id: w.id, name: w.wallets.name } : null
+  ]));
+  const creatorsMap = new Map((creatorsResult.data || []).map((u: any) => [
+    u.id,
+    { id: u.id, full_name: u.full_name, avatar_url: u.avatar_url }
   ]));
   const clientsMap = new Map((clientsResult.data || []).map((c: any) => [
     c.id,
@@ -210,6 +223,7 @@ export async function getUnifiedMovements(
     project: movement.project_id ? projectsMap.get(movement.project_id) || null : null,
     currency: movement.currency_id ? currenciesMap.get(movement.currency_id) || null : null,
     wallet: movement.wallet_id ? walletsMap.get(movement.wallet_id) || null : null,
+    creator: movement.created_by ? creatorsMap.get(movement.created_by) || null : null,
     signed_amount: movement.amount * movement.amount_sign,
     entity_name: getEntityName(movement),
     has_attachments: attachmentsSet.has(movement.id),
