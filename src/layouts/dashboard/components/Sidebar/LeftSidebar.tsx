@@ -586,7 +586,6 @@ export function LeftSidebar() {
                       .map((button) => {
                         const buttonElement = (
                           <SidebarIconButton
-                            key={button.id}
                             icon={button.icon}
                             isActive={sidebarLevel === button.id}
                             onClick={button.onClick}
@@ -595,9 +594,9 @@ export function LeftSidebar() {
                         );
                         
                         if (button.wrapper) {
-                          return button.wrapper(buttonElement);
+                          return <div key={button.id}>{button.wrapper(buttonElement)}</div>;
                         }
-                        return buttonElement;
+                        return <div key={button.id}>{buttonElement}</div>;
                       });
                   })()}
               </div>
@@ -861,9 +860,8 @@ export function LeftSidebar() {
                     const isActive = location === item.href;
                     const isExternalLink = item.href?.startsWith('http') || false;
                     
-                    const button = (
+                    const buttonElement = (
                       <ButtonSidebar
-                        key={item.id}
                         icon={<item.icon className="w-[18px] h-[18px]" />}
                         label={item.label}
                         isActive={isActive}
@@ -884,17 +882,17 @@ export function LeftSidebar() {
                     if (item.restricted === "coming_soon") {
                       return (
                         <ComingSoonRestricted key={item.id}>
-                          {button}
+                          {buttonElement}
                         </ComingSoonRestricted>
                       );
                     } else if (item.restricted === "lab_user") {
                       return (
                         <RoleRestricted key={item.id} requiredRole="lab_user" hideCompletely>
-                          {button}
+                          {buttonElement}
                         </RoleRestricted>
                       );
                     } else {
-                      return button;
+                      return <div key={item.id}>{buttonElement}</div>;
                     }
                   })}
               </div>
