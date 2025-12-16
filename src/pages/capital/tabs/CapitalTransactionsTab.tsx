@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { ArrowDownCircle, ArrowUpCircle, Edit, Trash2, Plus, TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
+import { useMemo, useState, useEffect } from 'react';
+import { ArrowDownCircle, ArrowUpCircle, Edit, Trash2, Plus, TrendingUp, TrendingDown, Wallet, Receipt, AlertTriangle } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,8 @@ import {
   type PartnerWithdrawal,
 } from '@/features/capital';
 import { getPartnerTransactionStatusBadgeConfig } from '@/features/capital/utils/statusBadge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useCapitalDataHealth, type NormalizedCapitalTransaction } from '@/core/data-health';
 
 type TransactionType = 'contribution' | 'withdrawal';
 
@@ -70,6 +72,8 @@ export function CapitalTransactionsTab() {
   const deleteWithdrawalMutation = useDeletePartnerWithdrawal();
 
   const isLoading = loadingContributions || loadingWithdrawals || loadingPartners;
+
+  const [showOnlyProblems, setShowOnlyProblems] = useState(false);
 
   const transactions = useMemo<UnifiedTransaction[]>(() => {
     const contributionItems: UnifiedTransaction[] = contributions.map((c) => ({
@@ -127,6 +131,41 @@ export function CapitalTransactionsTab() {
       };
     });
   }, [transactions, partners]);
+
+  // Preparar transacciones para Data Health
+  const normalizedForHealth = useMemo<NormalizedCapitalTransaction[]>(() => {
+    return transactions.map(t => ({
+      id: t.id,
+      type: t.type,
+      partnerName: t.partner_name,
+      walletId: (t.original as any).wallet_id || null,
+      walletName: t.wallet_name,
+      date: t.date,
+      amount: t.amount,
+      currencyId: t.currency_id,
+      exchangeRate: t.exchange_rate,
+    }));
+  }, [transactions]);
+
+  // Data Health: detectar problemas en las transacciones
+  const dataHealth = useCapitalDataHealth(normalizedForHealth, {
+    organizationId: organizationId || '',
+    defaultCurrencyId: defaultCurrency?.id,
+    enabled: !!organizationId && transactions.length > 0,
+  });
+
+  // Auto-reset del filtro cuando ya no hay problemas
+  useEffect(() => {
+    if (showOnlyProblems && !dataHealth.hasIssues) {
+      setShowOnlyProblems(false);
+    }
+  }, [showOnlyProblems, dataHealth.hasIssues]);
+
+  // Filtrar transacciones: mostrar todas o solo las que tienen problemas
+  const filteredTransactions = useMemo(() => {
+    if (!showOnlyProblems) return transactionsWithLinkedUser;
+    return transactionsWithLinkedUser.filter(t => dataHealth.affectedIds.has(t.id));
+  }, [transactionsWithLinkedUser, showOnlyProblems, dataHealth.affectedIds]);
 
   // KPI system - REFACTORIZADO
   const metrics = useMemo(() => {
@@ -392,6 +431,30 @@ export function CapitalTransactionsTab() {
 
   return (
     <div className="space-y-6">
+      {/* Alerta de Data Health */}
+      {dataHealth.hasIssues && (
+        <Alert 
+          variant="default" 
+          className={`cursor-pointer transition-all border-chart-negative/30 bg-chart-negative/5 hover:bg-chart-negative/10 ${showOnlyProblems ? 'ring-2 ring-chart-negative/50' : ''}`}
+          onClick={() => setShowOnlyProblems(!showOnlyProblems)}
+          data-testid="capital-data-health-alert"
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-chart-negative" />
+              <AlertDescription className="text-sm">
+                <span className="font-medium text-chart-negative">
+                  {dataHealth.affectedIds.size} transacción{dataHealth.affectedIds.size !== 1 ? 'es' : ''} con problemas
+                </span>
+                <span className="text-muted-foreground ml-2">
+                  {showOnlyProblems ? '(mostrando solo problemáticas)' : '- Click para filtrar'}
+                </span>
+              </AlertDescription>
+            </div>
+          </div>
+        </Alert>
+      )}
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="card-total-contributions">
           <StatCardTitle showArrow={false}>
@@ -463,7 +526,7 @@ export function CapitalTransactionsTab() {
 
       <Table
         columns={columns}
-        data={transactionsWithLinkedUser}
+        data={filteredTransactions}
         rowActions={rowActions}
         defaultSort={{ key: 'date', direction: 'desc' }}
         topBar={{

@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 import { DataHealthEngine } from '../engine/DataHealthEngine';
 import { allPaymentRules } from '../rules/payment-rules';
+import { allCapitalRules } from '../rules/capital-rules';
 import { dataHealthToInsights } from '../adapters/insights-adapter';
 import type { DataHealthContext, DataHealthResult, NormalizedPayment } from '../types';
 import type { InsightItem } from '@/components/dashboard/InsightCard';
 
 const paymentEngine = new DataHealthEngine(allPaymentRules);
+const capitalEngine = new DataHealthEngine(allCapitalRules);
 
 export interface UseDataHealthOptions {
   organizationId: string;
@@ -224,6 +226,97 @@ export function useFinancesDataHealth(
       if (issue.recommendedAction.targetIds) {
         for (const id of issue.recommendedAction.targetIds) {
           ids.add(id);
+        }
+      }
+    }
+    return ids;
+  }, [result]);
+
+  return {
+    result,
+    insights,
+    hasIssues: result ? result.issues.length > 0 : false,
+    criticalCount: result?.stats.bySeverity.critical ?? 0,
+    warningCount: result?.stats.bySeverity.warning ?? 0,
+    infoCount: result?.stats.bySeverity.info ?? 0,
+    affectedIds,
+  };
+}
+
+export interface NormalizedCapitalTransaction {
+  id: string;
+  type: 'contribution' | 'withdrawal';
+  partnerName: string;
+  walletId: string | null;
+  walletName: string | null;
+  date: string;
+  amount: number;
+  currencyId: string;
+  exchangeRate: number | null;
+}
+
+export function normalizeCapitalTransaction(tx: NormalizedCapitalTransaction): NormalizedPayment {
+  const typeLabel = tx.type === 'contribution' ? 'Aporte' : 'Retiro';
+  
+  return {
+    id: tx.id,
+    label: `${typeLabel}: ${tx.partnerName} - ${tx.date || 'Sin fecha'}`,
+    amount: tx.amount,
+    amountInBase: null,
+    currencyId: tx.currencyId,
+    currencyCode: undefined,
+    exchangeRate: tx.exchangeRate,
+    categoryId: null,
+    categoryName: null,
+    conceptId: null,
+    conceptName: null,
+    paymentDate: tx.date,
+    status: null,
+    walletId: tx.walletId,
+    walletName: tx.walletName,
+    description: null,
+  };
+}
+
+export interface UseCapitalDataHealthResult extends UseDataHealthResult {
+  affectedIds: Set<string>;
+}
+
+export function useCapitalDataHealth(
+  transactions: NormalizedCapitalTransaction[],
+  options: UseDataHealthOptions
+): UseCapitalDataHealthResult {
+  const { organizationId, defaultCurrencyId, enabled = true } = options;
+
+  const result = useMemo(() => {
+    if (!enabled || transactions.length === 0) {
+      return null;
+    }
+
+    const normalizedTransactions = transactions.map(normalizeCapitalTransaction);
+    
+    const ctx: DataHealthContext = {
+      organizationId,
+      defaultCurrencyId,
+      locale: 'es-AR',
+      dateToleranceDays: 0,
+    };
+
+    return capitalEngine.check(normalizedTransactions, ctx, ['capital']);
+  }, [transactions, organizationId, defaultCurrencyId, enabled]);
+
+  const insights = useMemo(() => {
+    if (!result) return [];
+    return dataHealthToInsights(result);
+  }, [result]);
+
+  const affectedIds = useMemo(() => {
+    if (!result) return new Set<string>();
+    const ids = new Set<string>();
+    for (const issue of result.issues) {
+      if (issue.recommendedAction.targetIds) {
+        for (const id of issue.recommendedAction.targetIds) {
+          ids.add(String(id));
         }
       }
     }

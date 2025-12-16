@@ -25,5 +25,20 @@ export {
   normalizeGeneralCostPayment,
   useFinancesDataHealth,
   normalizeUnifiedMovement,
+  useCapitalDataHealth,
+  normalizeCapitalTransaction,
 } from './hooks/useDataHealth';
-export type { UseDataHealthOptions, UseDataHealthResult, UseFinancesDataHealthResult } from './hooks/useDataHealth';
+export type { 
+  UseDataHealthOptions, 
+  UseDataHealthResult, 
+  UseFinancesDataHealthResult,
+  UseCapitalDataHealthResult,
+  NormalizedCapitalTransaction,
+} from './hooks/useDataHealth';
+
+export {
+  capitalMissingExchangeRateRule,
+  capitalMissingWalletRule,
+  capitalWithFutureDateRule,
+  allCapitalRules,
+} from './rules/capital-rules';
