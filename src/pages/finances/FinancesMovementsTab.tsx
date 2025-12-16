@@ -1,3 +1,15 @@
+/**
+ * FinancesMovementsTab.tsx
+ * 
+ * MIGRADO AL NUEVO SISTEMA DE TABLA MODULAR
+ * Fecha de migración: 2024-12-16
+ * 
+ * Esta pantalla usa el nuevo sistema de tabla ubicado en:
+ * src/components/shared/table/
+ * 
+ * NO usa el sistema legacy de:
+ * src/components/ui-custom/tables-and-trees/Table.tsx
+ */
 import { useMemo, useState, useEffect } from 'react';
 import { useUnifiedMovements } from '@/features/finances/hooks/use-unified-movements';
 import { useProjectContext } from '@/stores/projectContext';
@@ -8,7 +20,8 @@ import { useDeleteMaterialPayment } from '@/features/materials/hooks/use-materia
 import { useDeletePersonnelPayment } from '@/features/personnel/hooks/use-personnel-payments';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { useFinancesDataHealth, DataHealthAlert } from '@/core/data-health';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/table';
+import type { Column } from '@/components/shared/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -247,15 +260,7 @@ export function FinancesMovementsTab({
     });
   };
 
-  const columns: Array<{
-    key: string;
-    label: string;
-    render?: (item: UnifiedMovementWithRelations) => React.ReactNode;
-    sortable?: boolean;
-    sortType?: 'string' | 'number' | 'date';
-    width?: string;
-    align?: 'left' | 'center' | 'right';
-  }> = [
+  const columns: Column<UnifiedMovementWithRelations>[] = [
     {
       key: 'payment_date',
       label: 'Fecha',

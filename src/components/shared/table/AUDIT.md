@@ -285,24 +285,30 @@ t('table.search'); // "Buscar..." o "Search..."
 
 | Componente | Estado | Notas |
 |------------|--------|-------|
-| Table legacy (`tables-and-trees/`) | ✅ Activo | Todos los consumidores lo usan |
-| Table modular (`shared/table/`) | ✅ Listo | Creado pero NO migrado |
+| Table legacy (`tables-and-trees/`) | ✅ Activo | Mayoría de consumidores lo usan |
+| Table modular (`shared/table/`) | ✅ En uso | Primera migración piloto completada |
 | ProjectBadge | ❌ Eliminado | Funcionalidad en Table legacy |
 | Sistema i18n | ✅ Listo | Falta agregar Provider al App shell |
 
-### Importaciones Actuales (Todos los consumidores)
+### Pantallas Migradas al Nuevo Sistema
+
+| Pantalla | Archivo | Fecha | Estado |
+|----------|---------|-------|--------|
+| Finanzas → Movimientos | `src/pages/finances/FinancesMovementsTab.tsx` | 2024-12-16 | ✅ PILOTO |
+
+### Importaciones Legacy (Resto de consumidores)
 
 ```typescript
-// Esto sigue funcionando - NO HAY CAMBIOS
+// Sigue funcionando para pantallas NO migradas
 import { Table } from "@/components/ui-custom/tables-and-trees/Table";
 ```
 
-### Importaciones Nuevas (Para FUTURA migración)
+### Importaciones Nuevas (Pantallas migradas)
 
 ```typescript
-// Cuando se migre, será:
+// Usado por FinancesMovementsTab y futuras migraciones
 import { Table } from "@/components/shared/table";
-import { useTableSort, useTableFilter } from "@/components/shared/table/hooks";
+import type { Column } from "@/components/shared/table";
 ```
 
 ---
