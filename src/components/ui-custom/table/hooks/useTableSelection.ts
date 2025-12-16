@@ -1,13 +1,14 @@
-import { useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 
 interface UseTableSelectionOptions<T> {
-  selectedItems: T[];
+  externalSelectedItems?: T[];
   onSelectionChange?: (items: T[]) => void;
   getItemId: (item: T) => string | number;
   pageData: T[];
 }
 
 interface UseTableSelectionReturn<T> {
+  selectedItems: T[];
   isItemSelected: (item: T) => boolean;
   handleSelectItem: (item: T, checked: boolean) => void;
   handleSelectAll: (checked: boolean) => void;
@@ -19,11 +20,37 @@ interface UseTableSelectionReturn<T> {
 }
 
 export function useTableSelection<T>({
-  selectedItems,
+  externalSelectedItems,
   onSelectionChange,
   getItemId,
   pageData,
 }: UseTableSelectionOptions<T>): UseTableSelectionReturn<T> {
+  const [internalSelectedItems, setInternalSelectedItems] = useState<T[]>(
+    () => externalSelectedItems ?? []
+  );
+
+  const isControlled = onSelectionChange !== undefined;
+  const selectedItems = isControlled
+    ? (externalSelectedItems ?? [])
+    : internalSelectedItems;
+
+  useEffect(() => {
+    if (!isControlled && externalSelectedItems) {
+      setInternalSelectedItems(externalSelectedItems);
+    }
+  }, [isControlled, externalSelectedItems]);
+
+  const updateSelection = useCallback(
+    (newItems: T[]) => {
+      if (isControlled) {
+        onSelectionChange?.(newItems);
+      } else {
+        setInternalSelectedItems(newItems);
+      }
+    },
+    [isControlled, onSelectionChange]
+  );
+
   const isItemSelected = useCallback(
     (item: T): boolean => {
       return selectedItems.some(
@@ -35,25 +62,21 @@ export function useTableSelection<T>({
 
   const handleSelectItem = useCallback(
     (item: T, checked: boolean) => {
-      if (!onSelectionChange) return;
-
       if (checked) {
-        onSelectionChange([...selectedItems, item]);
+        updateSelection([...selectedItems, item]);
       } else {
-        onSelectionChange(
+        updateSelection(
           selectedItems.filter(
             (selectedItem) => getItemId(selectedItem) !== getItemId(item)
           )
         );
       }
     },
-    [selectedItems, onSelectionChange, getItemId]
+    [selectedItems, updateSelection, getItemId]
   );
 
   const handleSelectAll = useCallback(
     (checked: boolean) => {
-      if (!onSelectionChange) return;
-
       if (checked) {
         const newSelectedItems = [...selectedItems];
         pageData.forEach((item) => {
@@ -61,27 +84,27 @@ export function useTableSelection<T>({
             newSelectedItems.push(item);
           }
         });
-        onSelectionChange(newSelectedItems);
+        updateSelection(newSelectedItems);
       } else {
         const currentPageIds = new Set(pageData.map((item) => getItemId(item)));
         const filteredSelection = selectedItems.filter(
           (item) => !currentPageIds.has(getItemId(item))
         );
-        onSelectionChange(filteredSelection);
+        updateSelection(filteredSelection);
       }
     },
-    [selectedItems, onSelectionChange, pageData, getItemId, isItemSelected]
+    [selectedItems, updateSelection, pageData, getItemId, isItemSelected]
   );
 
   const clearSelection = useCallback(() => {
-    onSelectionChange?.([]);
-  }, [onSelectionChange]);
+    updateSelection([]);
+  }, [updateSelection]);
 
   const selectAll = useCallback(
     (allData: T[]) => {
-      onSelectionChange?.(allData);
+      updateSelection(allData);
     },
-    [onSelectionChange]
+    [updateSelection]
   );
 
   const isAllPageSelected = useMemo(() => {
@@ -96,6 +119,7 @@ export function useTableSelection<T>({
   const selectedCount = selectedItems.length;
 
   return {
+    selectedItems,
     isItemSelected,
     handleSelectItem,
     handleSelectAll,

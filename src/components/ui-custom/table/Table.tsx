@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { useProjectReadOnlyContext } from "@/contexts/ProjectReadOnlyContext";
 import { TableDesktop } from "./TableDesktop";
 import { TableMobile } from "./TableMobile";
 import { TableLoadingSkeleton } from "./TableLoadingSkeleton";
@@ -24,7 +25,7 @@ export function Table<T = any>({
   isLoading = false,
   className,
   selectable = false,
-  selectedItems = [],
+  selectedItems: externalSelectedItems = [],
   onSelectionChange,
   getItemId = (item: T) => (item as any).id,
   getRowClassName,
@@ -46,8 +47,10 @@ export function Table<T = any>({
   getIsInactive,
   inactiveSeparatorLabel = "Completados",
   showInactiveSeparator = true,
-  hideActions = false,
+  hideActions: hideActionsProp,
 }: TableProps<T>) {
+  const { shouldHideActions } = useProjectReadOnlyContext();
+  const hideActions = hideActionsProp ?? shouldHideActions;
   const [searchInputValue, setSearchInputValue] = useState("");
 
   const { sortKey, sortDirection, handleSort, getSortedData } = useTableSort({
@@ -110,13 +113,14 @@ export function Table<T = any>({
   }, [flattenedData, getPaginatedData]);
 
   const {
+    selectedItems,
     isItemSelected,
     handleSelectItem,
     handleSelectAll,
     clearSelection,
     selectedCount,
   } = useTableSelection({
-    selectedItems,
+    externalSelectedItems,
     onSelectionChange,
     getItemId,
     pageData: paginatedData,
