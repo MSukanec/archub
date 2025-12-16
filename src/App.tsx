@@ -202,6 +202,7 @@ function Router() {
         
         {/* Finances Routes */}
         <Route path="/finances" component={FinancesPage} />
+        <Route path="/project/finances" component={FinancesPage} />
         
         <Route path="/organization" component={OrganizationDashboard} />
 

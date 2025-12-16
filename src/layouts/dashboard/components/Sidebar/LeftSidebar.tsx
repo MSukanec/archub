@@ -247,6 +247,7 @@ export function LeftSidebar() {
         { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard' },
         { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project' },
         { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media' },
+        { id: 'finances', label: 'Finanzas', icon: DollarSign, href: '/project/finances', restricted: 'lab_user' },
         { type: 'section-header', id: 'section-construccion', label: 'Construcción' },
         { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel' },
         { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials' },

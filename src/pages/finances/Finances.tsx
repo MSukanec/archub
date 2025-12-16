@@ -1,19 +1,27 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { DollarSign, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FinancesMovementsTab } from "./FinancesMovementsTab";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from "@/components/modal/state/globalModalStore";
+import { useProjectContext } from "@/stores/projectContext";
 
 export default function Finances() {
   const [activeTab, setActiveTab] = useState("movements");
+  const [location] = useLocation();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
+  const { selectedProjectId } = useProjectContext();
+
+  const isProjectContext = location.startsWith('/project/');
 
   const handleAddMovement = () => {
     openModal('unified-payment', {
       organizationId: userData?.organization?.id,
+      projectId: isProjectContext ? selectedProjectId : undefined,
+      isProjectContext,
     });
   };
 

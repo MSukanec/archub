@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { DollarSign, Users, Package, CreditCard, TrendingUp, TrendingDown, Briefcase } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useProjectContext } from '@/stores/projectContext'
+import { useProjectsLite } from '@/features/projects'
 import { ClientPaymentFormFields } from '@/features/clients/forms/ClientPaymentFormFields'
 import { MaterialPaymentFormFields } from '@/features/materials/forms/MaterialPaymentFormFields'
 import { PersonnelPaymentFormFields } from '@/features/personnel/forms/PersonnelPaymentFormFields'
@@ -11,6 +12,12 @@ import { PartnerContributionFormFields, PartnerWithdrawalFormFields } from '@/fe
 import { GeneralCostPaymentFormFields } from '@/features/general-costs/forms/GeneralCostPaymentFormFields'
 
 type MovementType = 'client_payment' | 'material_payment' | 'personnel_payment' | 'partner_contribution' | 'partner_withdrawal' | 'general_cost_payment'
+
+const MOVEMENT_TYPES_REQUIRING_PROJECT: MovementType[] = [
+  'client_payment',
+  'material_payment',
+  'personnel_payment',
+]
 
 interface MovementTypeConfig {
   id: MovementType
@@ -76,17 +83,29 @@ interface NewMovementModalProps {
   modalData?: {
     projectId?: string
     organizationId?: string
+    isProjectContext?: boolean
   }
   onClose: () => void
 }
 
 export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) {
   const [selectedType, setSelectedType] = useState<MovementType | null>(null)
+  const [selectedProjectIdForMovement, setSelectedProjectIdForMovement] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
+  const { data: projects = [] } = useProjectsLite()
 
-  const projectId = modalData?.projectId || selectedProjectId || undefined
+  const isProjectContext = modalData?.isProjectContext ?? false
+  const contextProjectId = modalData?.projectId || (isProjectContext ? selectedProjectId : null) || undefined
   const organizationId = modalData?.organizationId || currentOrganizationId || undefined
+
+  const requiresProjectSelector = useMemo(() => {
+    if (!selectedType) return false
+    if (isProjectContext || contextProjectId) return false
+    return MOVEMENT_TYPES_REQUIRING_PROJECT.includes(selectedType)
+  }, [selectedType, isProjectContext, contextProjectId])
+
+  const effectiveProjectId = contextProjectId || selectedProjectIdForMovement || undefined
 
   const selectedConfig = selectedType 
     ? MOVEMENT_TYPES.find(t => t.id === selectedType) 
@@ -102,7 +121,7 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
     if (!selectedType) return null
 
     const commonProps = {
-      projectId,
+      projectId: effectiveProjectId,
       organizationId,
       mode: 'create' as const,
       onSuccess: onClose,
@@ -179,6 +198,31 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
             </SelectContent>
           </Select>
         </div>
+
+        {requiresProjectSelector && (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Proyecto</Label>
+            <Select
+              value={selectedProjectIdForMovement || ''}
+              onValueChange={(value) => setSelectedProjectIdForMovement(value)}
+            >
+              <SelectTrigger data-testid="select-project">
+                <SelectValue placeholder="Selecciona un proyecto" />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map((project) => (
+                  <SelectItem 
+                    key={project.id} 
+                    value={project.id}
+                    data-testid={`option-project-${project.id}`}
+                  >
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {selectedType && (
           <div className="pt-4 border-t">
