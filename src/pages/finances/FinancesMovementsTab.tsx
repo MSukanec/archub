@@ -15,39 +15,38 @@ import type { UnifiedMovementWithRelations } from '@/features/finances/services/
 
 const MOVEMENT_TYPE_CONFIG: Record<string, { 
   label: string; 
-  color: string;
   modalType: string;
   icon: typeof User;
 }> = {
   client_payment: { 
     label: 'Pago Cliente', 
-    color: 'bg-green-600',
     modalType: 'client-payment',
     icon: User,
   },
   material_payment: { 
     label: 'Pago Material', 
-    color: 'bg-orange-600',
     modalType: 'material-payment',
     icon: Package,
   },
   personnel_payment: { 
     label: 'Pago Personal', 
-    color: 'bg-blue-600',
     modalType: 'personnel-payment',
     icon: Users,
   },
   partner_contribution: { 
     label: 'Aporte Socio', 
-    color: 'bg-emerald-600',
     modalType: 'partner-contribution',
     icon: TrendingUp,
   },
   partner_withdrawal: { 
     label: 'Retiro Socio', 
-    color: 'bg-rose-600',
     modalType: 'partner-withdrawal',
     icon: TrendingDown,
+  },
+  general_cost_payment: { 
+    label: 'Gastos Generales', 
+    modalType: 'general-cost-payment',
+    icon: DollarSign,
   },
 };
 
@@ -185,15 +184,13 @@ export function FinancesMovementsTab() {
       sortable: true,
       width: '10%',
       render: (movement) => {
-        const config = MOVEMENT_TYPE_CONFIG[movement.movement_type] || {
-          label: movement.movement_type,
-          color: 'bg-gray-600',
-          icon: DollarSign,
-        };
-        return (
-          <Badge className={`text-xs ${config.color} text-white border-0`}>
+        const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
+        return config ? (
+          <Badge variant="default">
             {config.label}
           </Badge>
+        ) : (
+          <span className="text-sm text-muted-foreground">{movement.movement_type}</span>
         );
       },
     },
@@ -238,15 +235,6 @@ export function FinancesMovementsTab() {
             {movement.description || '-'}
           </span>
         </div>
-      ),
-    },
-    {
-      key: 'currency',
-      label: 'Moneda',
-      sortable: true,
-      width: '8%',
-      render: (movement) => (
-        <span className="text-sm">{movement.currency?.code || '-'}</span>
       ),
     },
     {
