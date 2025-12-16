@@ -8,7 +8,7 @@ import { useDeleteMaterialPayment } from '@/features/materials/hooks/use-materia
 import { useDeletePersonnelPayment } from '@/features/personnel/hooks/use-personnel-payments';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
-import { IdentityBadge } from '@/components/shared/IdentityBadge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
 import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users, TrendingUp, TrendingDown } from 'lucide-react';
@@ -167,14 +167,26 @@ export function FinancesMovementsTab() {
       width: '20%',
       render: (movement) => {
         const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
+        const creatorName = movement.creator_full_name || '';
+        const creatorInitials = creatorName
+          ? creatorName.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase()
+          : '?';
         
         return (
-          <IdentityBadge
-            name={config?.label || movement.movement_type}
-            avatarUrl={movement.creator_avatar_url}
-            subLabel={movement.entity_name || '-'}
-            size="sm"
-          />
+          <div className="flex items-center gap-2 min-w-0">
+            <Avatar className="h-8 w-8 flex-shrink-0 ring-2 ring-offset-0" style={{ '--tw-ring-color': 'var(--accent)' } as React.CSSProperties}>
+              {movement.creator_avatar_url && <AvatarImage src={movement.creator_avatar_url} alt={creatorName} />}
+              <AvatarFallback className="text-xs font-semibold">{creatorInitials}</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 flex-1">
+              <div className="font-medium text-sm truncate">
+                {config?.label || movement.movement_type}
+              </div>
+              <div className="text-muted-foreground text-xs truncate">
+                {movement.entity_name || '-'}
+              </div>
+            </div>
+          </div>
         );
       },
     },
