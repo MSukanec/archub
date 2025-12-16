@@ -132,12 +132,9 @@ export const ORGANIZATION_NAVIGATION: NavigationEntry[] = [
   { id: 'billing', label: 'Facturación', icon: CreditCard, href: '/organization/billing', testId: 'nav-org-billing' },
   { type: 'section-header', id: 'section-finanzas', label: 'Finanzas' },
   { id: 'finances-unified', label: 'Finanzas', icon: DollarSign, href: '/finances', restricted: 'lab_user', testId: 'nav-org-finances-unified' },
+  { id: 'capital', label: 'Capital', icon: HandHeart, href: '/organization/capital', testId: 'nav-org-capital' },
   { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs', testId: 'nav-org-expenses' },
-  { type: 'spacer', id: 'spacer-lab' },
-  { id: 'partners', label: 'Socios', icon: HandHeart, href: '/organization/partners', testId: 'nav-org-partners' },
   { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'lab_user', testId: 'nav-org-analysis' },
-  { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'lab_user', testId: 'nav-org-finances' },
-  { id: 'capital', label: 'Capital', icon: TrendingUp, href: '/finances/capital', restricted: 'lab_user', testId: 'nav-org-capital' },
 ];
 
 export const PROJECT_NAVIGATION: NavigationEntry[] = [

@@ -134,7 +134,6 @@ export function Layout({ children, wide = false, hideHeader = false, headerProps
       '/professional',        // Professional routes
       '/construction',        // Construction module
       '/analysis',            // Analysis
-      '/movements',           // Movements
       '/admin',               // Admin panel
       '/providers',           // Providers (English)
       '/proveedor'            // Providers (Spanish)

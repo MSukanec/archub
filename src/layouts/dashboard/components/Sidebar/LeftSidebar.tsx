@@ -240,7 +240,6 @@ export function LeftSidebar() {
         { id: 'capital', label: 'Capital', icon: HandHeart, href: '/organization/capital' },
         { id: 'expenses', label: 'Gastos Generales', icon: CreditCard, href: '/general-costs' },
         { id: 'analysis', label: 'Análisis de Costos', icon: BarChart3, href: '/analysis', restricted: 'lab_user' },
-        { id: 'finances', label: 'Movimientos', icon: DollarSign, href: '/movements', restricted: 'lab_user' },
       ];
     } else if (sidebarLevel === 'project' && selectedProjectId) {
       return [
