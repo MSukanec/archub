@@ -8,6 +8,7 @@ import { useDeleteMaterialPayment } from '@/features/materials/hooks/use-materia
 import { useDeletePersonnelPayment } from '@/features/personnel/hooks/use-personnel-payments';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
 import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users, TrendingUp, TrendingDown } from 'lucide-react';
@@ -153,10 +154,38 @@ export function FinancesMovementsTab() {
       label: 'Fecha',
       sortable: true,
       sortType: 'date',
-      width: '10%',
+      width: '12%',
       render: (movement) => {
         const date = parseLocalDate(movement.payment_date);
         return date ? format(date, 'dd/MM/yyyy') : '-';
+      },
+    },
+    {
+      key: 'movement_type',
+      label: 'Tipo',
+      sortable: true,
+      width: '18%',
+      render: (movement) => {
+        const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
+        const entityInitials = movement.entity_name 
+          ? movement.entity_name.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+          : 'M';
+        
+        return (
+          <div className="flex items-center gap-2 min-w-0">
+            <Avatar className="h-8 w-8 flex-shrink-0">
+              <AvatarFallback className="text-xs font-bold bg-accent text-accent-foreground">{entityInitials}</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 flex-1">
+              <div className="font-medium text-sm truncate">
+                {config?.label || movement.movement_type}
+              </div>
+              <div className="text-muted-foreground text-xs truncate">
+                {movement.entity_name || '-'}
+              </div>
+            </div>
+          </div>
+        );
       },
     },
     {
@@ -165,7 +194,7 @@ export function FinancesMovementsTab() {
       sortable: true,
       width: '12%',
       render: (movement) => {
-        if (!movement.project) return <span className="text-muted-foreground">-</span>;
+        if (!movement.project) return <span className="text-muted-foreground text-sm">-</span>;
         const projectColor = movement.project.color;
         const rgb = chroma(projectColor).rgb();
         
@@ -184,57 +213,17 @@ export function FinancesMovementsTab() {
       },
     },
     {
-      key: 'movement_type',
-      label: 'Tipo',
-      sortable: true,
-      width: '10%',
-      render: (movement) => {
-        const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
-        return config ? (
-          <Badge variant="default">
-            {config.label}
-          </Badge>
-        ) : (
-          <span className="text-sm text-muted-foreground">{movement.movement_type}</span>
-        );
-      },
-    },
-    {
-      key: 'entity_name',
-      label: 'Entidad',
-      sortable: true,
-      width: '15%',
-      render: (movement) => {
-        const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
-        const IconComponent = config?.icon || DollarSign;
-        const entityName = movement.entity_name;
-        
-        if (!entityName) {
-          return <span className="text-muted-foreground">-</span>;
-        }
-        
-        return (
-          <div className="flex items-center gap-2 min-w-0">
-            <IconComponent className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <span className="truncate font-medium" title={entityName}>
-              {entityName}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
       key: 'description',
       label: 'Detalle',
       sortable: true,
-      width: '12%',
+      width: '18%',
       render: (movement) => (
         <div className="flex items-center gap-1.5 min-w-0">
           {movement.has_attachments && (
             <Paperclip className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           )}
           <span 
-            className="font-medium block truncate" 
+            className="text-sm block truncate" 
             title={movement.description || '-'}
           >
             {movement.description || '-'}
@@ -246,7 +235,7 @@ export function FinancesMovementsTab() {
       key: 'wallet',
       label: 'Billetera',
       sortable: true,
-      width: '10%',
+      width: '12%',
       render: (movement) => (
         <span className="text-sm truncate" title={movement.wallet?.name}>{movement.wallet?.name || '-'}</span>
       ),
@@ -256,13 +245,13 @@ export function FinancesMovementsTab() {
       label: 'Monto',
       sortable: true,
       sortType: 'number',
-      width: '13%',
+      width: '16%',
       align: 'right',
       render: (movement) => {
         const isPositive = movement.signed_amount >= 0;
         return (
           <div className="flex flex-col items-end">
-            <span className={`font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+            <span className={`text-sm font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
               {isPositive ? '+' : '-'}{formatCurrency(movement.amount, movement.currency?.symbol)}
             </span>
             {movement.exchange_rate && (
