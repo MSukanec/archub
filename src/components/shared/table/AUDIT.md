@@ -6,7 +6,7 @@
 |----------|-------|
 | Archivo Original | `src/components/ui-custom/tables-and-trees/Table.tsx` |
 | Líneas de código original | 1761 |
-| Nueva ubicación | `src/components/ui-custom/table/` |
+| Nueva ubicación | `src/components/shared/table/` |
 | Antigüedad estimada | +6 meses |
 | Fecha de auditoría | 2024-12-16 |
 | Estado | ✅ FASE 1 COMPLETADA - Nueva arquitectura lista |
@@ -18,8 +18,8 @@
 Se ha creado una nueva arquitectura modular para el componente Table que:
 
 1. **Mantiene compatibilidad total**: El archivo original `tables-and-trees/Table.tsx` sigue funcionando sin cambios
-2. **Ofrece nueva arquitectura**: Componentes modulares en `table/` para uso futuro
-3. **Extrae lógica de dominio**: `ProjectBadge` movido a `features/projects/components/`
+2. **Ofrece nueva arquitectura**: Componentes modulares en `shared/table/` para uso futuro
+3. **ProjectBadge**: Se mantiene como función utilitaria dentro de Table.tsx (usa Badge común de shadcn)
 4. **Centraliza utilidades**: Hooks, tipos, constantes y utilidades en archivos separados
 
 ---
@@ -30,8 +30,8 @@ Se ha creado una nueva arquitectura modular para el componente Table que:
 
 | Problema | Estado | Solución |
 |----------|--------|----------|
-| `ProjectBadge` embebido | ✅ Resuelto | Extraído a `src/features/projects/components/ProjectBadge.tsx` |
-| `useProjectReadOnlyContext` | ✅ Resuelto | Nuevo wrapper usa contexto con fallback seguro |
+| `ProjectBadge` embebido | ✅ Resuelto | Mantiene en Table.tsx usando Badge común de shadcn |
+| `useProjectReadOnlyContext` | ✅ Resuelto | Usa contexto con valor por defecto seguro |
 | Texto hardcodeado en español | ✅ Resuelto | Centralizado en `constants.ts` |
 
 ### 1.2 Código Duplicado
@@ -54,7 +54,7 @@ El hook `useTableSelection` ahora soporta ambos modos:
 ## 2. ESTRUCTURA NUEVA
 
 ```
-src/components/ui-custom/table/
+src/components/shared/table/
 ├── Table.tsx              ← Wrapper con API pública compatible
 ├── TableDesktop.tsx       ← Vista desktop
 ├── TableMobile.tsx        ← Vista mobile  
