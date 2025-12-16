@@ -66,6 +66,46 @@ export async function createUpgradePreference(req: Request): Promise<CreateUpgra
       };
     }
 
+    // PROTECTION: Check for recent pending upgrade preferences (prevent duplicate clicks)
+    const adminClient = getAdminClient();
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    
+    const { data: recentPreferences } = await adminClient
+      .from("mp_subscription_preferences")
+      .select("id, created_at, plan_slug")
+      .eq("organization_id", organization_id)
+      .eq("product_type", "subscription_upgrade")
+      .gte("created_at", fiveMinutesAgo)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (recentPreferences && recentPreferences.length > 0) {
+      const recentPref = recentPreferences[0];
+      console.warn('[MP create-upgrade-preference] ⚠️ Duplicate prevention: Recent preference exists:', {
+        preferenceId: recentPref.id,
+        createdAt: recentPref.created_at,
+        planSlug: recentPref.plan_slug,
+      });
+      
+      // Check if there's already a completed payment for this preference
+      const { data: existingPayment } = await adminClient
+        .from("payments")
+        .select("id, status")
+        .eq("organization_id", organization_id)
+        .eq("product_type", "subscription_upgrade")
+        .gte("created_at", fiveMinutesAgo)
+        .eq("status", "completed")
+        .limit(1);
+
+      if (existingPayment && existingPayment.length > 0) {
+        return {
+          success: false,
+          error: "Ya existe un pago de upgrade reciente. Por favor espera unos minutos o contacta soporte si el problema persiste.",
+          status: 429
+        };
+      }
+    }
+
     const { data: plan, error: planError } = await supabase
       .from("plans")
       .select("id, name, slug, is_active, monthly_amount, annual_amount")
@@ -78,7 +118,7 @@ export async function createUpgradePreference(req: Request): Promise<CreateUpgra
       return { success: false, error: "Plan no encontrado o inactivo", status: 404 };
     }
 
-    const adminClient = getAdminClient();
+    // adminClient already declared above for duplicate check
     const prorationResult = await calculateProration(adminClient, {
       organizationId: organization_id,
       targetPlanSlug: plan_slug,
@@ -140,6 +180,7 @@ export async function createUpgradePreference(req: Request): Promise<CreateUpgra
     prorationAmountARS = Math.round(prorationAmountARS);
     if (prorationAmountARS < 1) prorationAmountARS = 1;
 
+    // Note: adminClient already declared above for duplicate check
     const userData = await getUserData(supabase, user_id);
     const payerEmail = clientPayerEmail?.trim() || userData.email;
     
@@ -156,6 +197,7 @@ export async function createUpgradePreference(req: Request): Promise<CreateUpgra
     const shortId = `mpu_${nanoid(12)}`;
     const urlContext = buildURLContext(req);
 
+    // Note: adminClient already declared above for duplicate check
     const { error: insertError } = await adminClient
       .from("mp_subscription_preferences")
       .insert({
