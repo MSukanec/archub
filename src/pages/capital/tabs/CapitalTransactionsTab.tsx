@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { ArrowDownCircle, ArrowUpCircle, Edit, Trash2, Plus, TrendingUp, TrendingDown, Wallet, Receipt, AlertTriangle } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Edit, Trash2, Plus, TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Button } from '@/components/ui/button';
@@ -25,8 +25,7 @@ import {
   type PartnerWithdrawal,
 } from '@/features/capital';
 import { getPartnerTransactionStatusBadgeConfig } from '@/features/capital/utils/statusBadge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useCapitalDataHealth, type NormalizedCapitalTransaction } from '@/core/data-health';
+import { useCapitalDataHealth, DataHealthAlert, type NormalizedCapitalTransaction } from '@/core/data-health';
 
 type TransactionType = 'contribution' | 'withdrawal';
 
@@ -431,29 +430,12 @@ export function CapitalTransactionsTab() {
 
   return (
     <div className="space-y-6">
-      {/* Alerta de Data Health */}
-      {dataHealth.hasIssues && (
-        <Alert 
-          variant="default" 
-          className={`cursor-pointer transition-all border-chart-negative/30 bg-chart-negative/5 hover:bg-chart-negative/10 ${showOnlyProblems ? 'ring-2 ring-chart-negative/50' : ''}`}
-          onClick={() => setShowOnlyProblems(!showOnlyProblems)}
-          data-testid="capital-data-health-alert"
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 text-chart-negative" />
-              <AlertDescription className="text-sm">
-                <span className="font-medium text-chart-negative">
-                  {dataHealth.affectedIds.size} transacción{dataHealth.affectedIds.size !== 1 ? 'es' : ''} con problemas
-                </span>
-                <span className="text-muted-foreground ml-2">
-                  {showOnlyProblems ? '(mostrando solo problemáticas)' : '- Click para filtrar'}
-                </span>
-              </AlertDescription>
-            </div>
-          </div>
-        </Alert>
-      )}
+      <DataHealthAlert
+        affectedCount={dataHealth.affectedIds.size}
+        entityLabel="transacción"
+        isFiltering={showOnlyProblems}
+        onToggleFilter={() => setShowOnlyProblems(!showOnlyProblems)}
+      />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="card-total-contributions">

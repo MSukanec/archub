@@ -42,3 +42,5 @@ export {
   capitalWithFutureDateRule,
   allCapitalRules,
 } from './rules/capital-rules';
+
+export { DataHealthAlert } from './components/DataHealthAlert';
