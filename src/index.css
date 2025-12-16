@@ -178,14 +178,6 @@ body {
   --checkbox-checked-bg: hsl(76, 100%, 40%);
   --checkbox-checked-border: hsl(76, 100%, 40%);
 
-  /* Movement border colors */
-  --movement-income-border: hsl(142, 76%, 36%);
-  --movement-expense-border: hsl(0, 72%, 51%);
-  --movement-conversion-border: hsl(217, 91%, 60%);
-  --movement-transfer-border: hsl(262, 83%, 58%);
-  --movement-aportes-propios-border: hsl(210, 10%, 60%);
-  --movement-retiros-propios-border: hsl(210, 10%, 60%);
-
   /* Text */
   --text-default: hsl(240, 10%, 4%);
   --text-muted: hsl(240, 5%, 45%);
@@ -352,14 +344,6 @@ body {
   --checkbox-border: hsl(0, 0%, 30%);
   --checkbox-checked-bg: hsl(76, 100%, 40%);
   --checkbox-checked-border: hsl(76, 100%, 40%);
-
-  /* Movement border colors */
-  --movement-income-border: hsl(142, 76%, 36%);
-  --movement-expense-border: hsl(0, 72%, 51%);
-  --movement-conversion-border: hsl(217, 91%, 60%);
-  --movement-transfer-border: hsl(262, 83%, 58%);
-  --movement-aportes-propios-border: hsl(210, 10%, 60%);
-  --movement-retiros-propios-border: hsl(210, 10%, 60%);
 
   /* Tables */
   --table-header-bg: hsl(0, 0%, 16%);
@@ -564,32 +548,32 @@ body {
    ======================================== */
 .movement-row-income {
   background-color: rgba(34, 197, 94, 0.08) !important;
-  border-left: 4px solid var(--movement-income-border) !important;
+  border-left: 4px solid var(--chart-positive) !important;
 }
 
 .movement-row-expense {
   background-color: rgba(239, 68, 68, 0.08) !important;
-  border-left: 4px solid var(--movement-expense-border) !important;
+  border-left: 4px solid var(--chart-negative) !important;
 }
 
 .movement-row-conversion {
   background-color: rgba(59, 130, 246, 0.08) !important;
-  border-left: 4px solid rgb(59, 130, 246) !important;
+  border-left: 4px solid var(--chart-3) !important;
 }
 
 .movement-row-transfer {
   background-color: rgba(168, 85, 247, 0.08) !important;
-  border-left: 4px solid rgb(168, 85, 247) !important;
+  border-left: 4px solid var(--accent) !important;
 }
 
 .movement-row-aportes-propios {
   background-color: rgba(107, 114, 128, 0.08) !important;
-  border-left: 4px solid var(--movement-aportes-propios-border) !important;
+  border-left: 4px solid var(--chart-neutral) !important;
 }
 
 .movement-row-retiros-propios {
   background-color: rgba(107, 114, 128, 0.08) !important;
-  border-left: 4px solid var(--movement-retiros-propios-border) !important;
+  border-left: 4px solid var(--chart-neutral) !important;
 }
 
 /* ========================================
