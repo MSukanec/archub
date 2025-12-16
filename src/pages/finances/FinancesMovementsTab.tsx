@@ -15,6 +15,7 @@ import {
   StatCardTitle, 
   StatCardValue, 
   StatCardMeta,
+  StatCardSubValue,
   StatCardTrend,
   type TrendDirection
 } from '@/components/dashboard';
@@ -89,12 +90,16 @@ export function FinancesMovementsTab() {
   // Calcular KPIs
   const kpis = useMemo(() => {
     // Separar ingresos (amount_sign > 0) y egresos (amount_sign < 0)
-    const ingresos = movements.filter(m => m.amount_sign > 0);
-    const egresos = movements.filter(m => m.amount_sign < 0);
+    const ingresosMovements = movements.filter(m => m.amount_sign > 0);
+    const egresosMovements = movements.filter(m => m.amount_sign < 0);
+
+    // Precomputar conteos
+    const ingresosCount = ingresosMovements.length;
+    const egresosCount = egresosMovements.length;
 
     // KPI 1: Total Ingresos
     const ingresosKPI = calculateMonetaryKPI({
-      items: ingresos.map(m => ({
+      items: ingresosMovements.map(m => ({
         amount: m.amount,
         currency_id: m.currency_id,
         currency: m.currency,
@@ -107,7 +112,7 @@ export function FinancesMovementsTab() {
 
     // KPI 2: Total Egresos
     const egresosKPI = calculateMonetaryKPI({
-      items: egresos.map(m => ({
+      items: egresosMovements.map(m => ({
         amount: m.amount,
         currency_id: m.currency_id,
         currency: m.currency,
@@ -132,6 +137,8 @@ export function FinancesMovementsTab() {
       egresos: egresosKPI,
       balance: balanceValue,
       totalMovimientos: totalMovimientosKPI,
+      ingresosCount,
+      egresosCount,
     };
   }, [movements, defaultCurrency]);
 
@@ -329,8 +336,90 @@ export function FinancesMovementsTab() {
     },
   ];
 
+  // Determinar si la moneda está lista
+  const isCurrencyReady = !!defaultCurrency;
+  const currencySymbol = defaultCurrency?.symbol || '$';
+
+  // Determinar dirección del balance para trend
+  const balanceDirection: TrendDirection = kpis.balance > 0 ? 'up' : kpis.balance < 0 ? 'down' : 'neutral';
+  const balanceTrendLabel = kpis.balance > 0 ? 'Positivo' : kpis.balance < 0 ? 'Negativo' : 'Sin variación';
+
+  // Helpers para mostrar KPIs monetarias (solo si breakdown tiene entradas válidas)
+  const showIngresosBreakdown = isCurrencyReady && hasMultipleCurrencies(kpis.ingresos) && kpis.ingresos.breakdown && kpis.ingresos.breakdown.length > 0;
+  const showEgresosBreakdown = isCurrencyReady && hasMultipleCurrencies(kpis.egresos) && kpis.egresos.breakdown && kpis.egresos.breakdown.length > 0;
+
   return (
     <div className="space-y-6" data-testid="finances-movements-tab">
+      {/* KPIs Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* KPI 1: Ingresos */}
+        <StatCard data-testid="kpi-ingresos">
+          <StatCardTitle>
+            <ArrowUpRight className="h-4 w-4 text-green-600" />
+            Ingresos
+          </StatCardTitle>
+          <StatCardValue className="text-green-600">
+            {isCurrencyReady ? formatMoney(kpis.ingresos.value, currencySymbol) : '-'}
+          </StatCardValue>
+          {showIngresosBreakdown && (
+            <StatCardSubValue>{formatBreakdown(kpis.ingresos)}</StatCardSubValue>
+          )}
+          <StatCardMeta>
+            {kpis.ingresosCount} movimientos
+          </StatCardMeta>
+        </StatCard>
+
+        {/* KPI 2: Egresos */}
+        <StatCard data-testid="kpi-egresos">
+          <StatCardTitle>
+            <ArrowDownRight className="h-4 w-4 text-red-600" />
+            Egresos
+          </StatCardTitle>
+          <StatCardValue className="text-red-600">
+            {isCurrencyReady ? formatMoney(kpis.egresos.value, currencySymbol) : '-'}
+          </StatCardValue>
+          {showEgresosBreakdown && (
+            <StatCardSubValue>{formatBreakdown(kpis.egresos)}</StatCardSubValue>
+          )}
+          <StatCardMeta>
+            {kpis.egresosCount} movimientos
+          </StatCardMeta>
+        </StatCard>
+
+        {/* KPI 3: Balance */}
+        <StatCard data-testid="kpi-balance">
+          <StatCardTitle>
+            <Scale className="h-4 w-4" />
+            Balance
+          </StatCardTitle>
+          <StatCardValue className={kpis.balance >= 0 ? 'text-green-600' : 'text-red-600'}>
+            {isCurrencyReady 
+              ? `${kpis.balance >= 0 ? '+' : ''}${formatMoney(kpis.balance, currencySymbol)}`
+              : '-'
+            }
+          </StatCardValue>
+          <StatCardTrend 
+            direction={balanceDirection} 
+            value={balanceTrendLabel} 
+          />
+        </StatCard>
+
+        {/* KPI 4: Total Movimientos */}
+        <StatCard data-testid="kpi-total-movimientos">
+          <StatCardTitle>
+            <Hash className="h-4 w-4" />
+            Total Movimientos
+          </StatCardTitle>
+          <StatCardValue>
+            {kpis.totalMovimientos.formatted}
+          </StatCardValue>
+          <StatCardMeta>
+            {kpis.ingresosCount} ingresos · {kpis.egresosCount} egresos
+          </StatCardMeta>
+        </StatCard>
+      </div>
+
+      {/* Tabla de movimientos */}
       <Table
         columns={columns}
         data={movements}
