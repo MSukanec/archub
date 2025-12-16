@@ -154,6 +154,19 @@ export function CapitalTransactionsTab() {
     enabled: !!organizationId && transactions.length > 0,
   });
 
+  // Debug: log data health results
+  console.log('[CapitalDataHealth] defaultCurrency:', defaultCurrency?.id, defaultCurrency?.code);
+  console.log('[CapitalDataHealth] transactions with exchange_rate details:', transactions.map(t => ({
+    id: t.id,
+    date: t.date,
+    amount: t.amount,
+    currency_id: t.currency_id,
+    exchange_rate: t.exchange_rate,
+    exchange_rate_type: typeof t.exchange_rate,
+    original_exchange_rate: t.original.exchange_rate,
+  })));
+  console.log('[CapitalDataHealth] hasIssues:', dataHealth.hasIssues, 'affectedIds:', Array.from(dataHealth.affectedIds));
+
   // Auto-reset del filtro cuando ya no hay problemas
   useEffect(() => {
     if (showOnlyProblems && !dataHealth.hasIssues) {
