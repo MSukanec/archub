@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { useCapitalDataHealth, DataHealthAlert } from '@/core/data-health';
 
 const periodOptions: { value: PeriodFilter; label: string }[] = [
   { value: '30d', label: 'Últimos 30 días' },
@@ -32,6 +33,7 @@ export default function Capital() {
   const { openModal } = useGlobalModalStore();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
+  const [showOnlyProblems, setShowOnlyProblems] = useState(false);
 
   useEffect(() => {
     setSidebarLevel('organization');
@@ -41,6 +43,7 @@ export default function Capital() {
 
   const { data: contributions = [] } = usePartnerContributions(organizationId);
   const { data: withdrawals = [] } = usePartnerWithdrawals(organizationId);
+  const dataHealth = useCapitalDataHealth(contributions as any, false);
 
   const availablePeriods = useMemo(() => {
     return calculateAvailablePeriods(contributions, withdrawals);
@@ -177,7 +180,15 @@ export default function Capital() {
 
   return (
     <Layout headerProps={headerProps} wide={false}>
-      {renderTabContent()}
+      <div className="space-y-6">
+        <DataHealthAlert
+          affectedCount={dataHealth.affectedIds.size}
+          entityLabel="transacción"
+          isFiltering={false}
+          onToggleFilter={() => {}}
+        />
+        {renderTabContent()}
+      </div>
     </Layout>
   );
 }
