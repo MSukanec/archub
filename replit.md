@@ -28,7 +28,8 @@ Preferred communication style: Simple, everyday language.
 - **Performance Optimizations**: Code-splitting, lazy loading, database views, smart caching, optimized backend endpoints.
 
 ### System Design Choices
-- **Module Architecture**: Feature-Sliced Design for core modules (PROJECTS, SUBCONTRACTS, PERSONNEL, CLIENTS, FINANCES, LEARNING, MEDIA, SITELOG, etc.).
+- **Module Architecture**: Feature-Sliced Design for core modules (PROJECTS, SUBCONTRACTS, PERSONNEL, CLIENTS, FINANCES, CAPITAL, LEARNING, MEDIA, SITELOG, etc.).
+- **Capital Module**: Manages capital participants (formerly "partners/socios"). Database tables: `capital_participants` (main), `partner_contributions`, `partner_withdrawals`. Located at `/organization/capital` with feature code in `src/features/capital` and pages in `src/pages/capital`.
 - **Multi-tenancy**: Services consistently filter data by `organization_id`.
 - **Soft Delete**: Implemented for key entities.
 - **Core Feature Management**: Comprehensive CRUD for Projects, Subcontracts, Personnel, Materials, Financial, Contacts, Sitelog, Project Types, and Project Modalities.
