@@ -52,13 +52,14 @@ const MOVEMENT_TYPE_CONFIG: Record<string, {
 };
 
 export function FinancesMovementsTab() {
-  const { currentOrganizationId, selectedProjectId } = useProjectContext();
+  const { currentOrganizationId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
   
+  // No filtrar por proyecto - mostrar todos los movimientos de la organización
   const { data: rawMovements = [], isLoading } = useUnifiedMovements(
     currentOrganizationId || undefined,
-    selectedProjectId
+    undefined
   );
 
   // Sort by payment_date DESC, then by created_at DESC

@@ -4,19 +4,16 @@ import { DollarSign, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FinancesMovementsTab } from "./FinancesMovementsTab";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useProjectContext } from "@/stores/projectContext";
 import { useGlobalModalStore } from "@/components/modal/state/globalModalStore";
 
 export default function Finances() {
   const [activeTab, setActiveTab] = useState("movements");
   const { data: userData } = useCurrentUser();
-  const { currentOrganizationId, selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
 
   const handleAddMovement = () => {
     openModal('unified-payment', {
-      projectId: selectedProjectId,
-      organizationId: currentOrganizationId,
+      organizationId: userData?.organization?.id,
     });
   };
 
@@ -35,7 +32,7 @@ export default function Finances() {
         onTabChange: setActiveTab,
         organizationId: userData?.organization?.id,
         showMembers: true,
-        showProjectSelector: true,
+        showProjectSelector: false,
         actions: [
           activeTab === "movements" && (
             <Button
