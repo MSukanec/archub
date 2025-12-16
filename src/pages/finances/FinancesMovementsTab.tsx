@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useUnifiedMovements } from '@/features/finances/hooks/use-unified-movements';
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
@@ -7,9 +7,12 @@ import { useDeleteClientPayment } from '@/features/clients/hooks/use-client-paym
 import { useDeleteMaterialPayment } from '@/features/materials/hooks/use-material-payments';
 import { useDeletePersonnelPayment } from '@/features/personnel/hooks/use-personnel-payments';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { useFinancesDataHealth } from '@/core/data-health';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { 
   StatCard, 
   StatCardTitle, 
@@ -23,7 +26,7 @@ import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown, hasMultipleCu
 import { format as formatMoney, formatKPI } from '@/lib/money';
 import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
-import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Scale, Hash } from 'lucide-react';
+import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Scale, Hash, AlertTriangle, X } from 'lucide-react';
 import chroma from 'chroma-js';
 import type { UnifiedMovementWithRelations } from '@/features/finances/services/getUnifiedMovements';
 
@@ -69,6 +72,9 @@ export function FinancesMovementsTab() {
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
   
+  // Estado de filtro para mostrar solo movimientos con problemas
+  const [showOnlyProblems, setShowOnlyProblems] = useState(false);
+  
   // Obtener moneda por defecto de la organización
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined);
   
@@ -79,13 +85,33 @@ export function FinancesMovementsTab() {
   );
 
   // Sort by payment_date DESC, then by created_at DESC
-  const movements = useMemo(() => {
+  const sortedMovements = useMemo(() => {
     return [...rawMovements].sort((a, b) => {
       const dateComparison = new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
       if (dateComparison !== 0) return dateComparison;
       return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
   }, [rawMovements]);
+
+  // Data Health: detectar problemas en los movimientos
+  const dataHealth = useFinancesDataHealth(sortedMovements, {
+    organizationId: currentOrganizationId || '',
+    defaultCurrencyId: defaultCurrency?.id,
+    enabled: !!currentOrganizationId && sortedMovements.length > 0,
+  });
+
+  // Auto-reset del filtro cuando ya no hay problemas
+  useEffect(() => {
+    if (showOnlyProblems && !dataHealth.hasIssues) {
+      setShowOnlyProblems(false);
+    }
+  }, [showOnlyProblems, dataHealth.hasIssues]);
+
+  // Filtrar movimientos: mostrar todos o solo los que tienen problemas
+  const movements = useMemo(() => {
+    if (!showOnlyProblems) return sortedMovements;
+    return sortedMovements.filter(m => dataHealth.affectedIds.has(m.id));
+  }, [sortedMovements, showOnlyProblems, dataHealth.affectedIds]);
 
   // Calcular KPIs
   const kpis = useMemo(() => {
@@ -350,6 +376,44 @@ export function FinancesMovementsTab() {
 
   return (
     <div className="space-y-6" data-testid="finances-movements-tab">
+      {/* Alerta de Data Health */}
+      {dataHealth.hasIssues && (
+        <Alert 
+          variant="default" 
+          className={`cursor-pointer transition-all border-chart-negative/30 bg-chart-negative/5 hover:bg-chart-negative/10 ${showOnlyProblems ? 'ring-2 ring-chart-negative/50' : ''}`}
+          onClick={() => setShowOnlyProblems(!showOnlyProblems)}
+          data-testid="data-health-alert"
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-chart-negative" />
+              <AlertDescription className="text-sm">
+                <span className="font-medium text-chart-negative">
+                  {dataHealth.affectedIds.size} movimiento{dataHealth.affectedIds.size !== 1 ? 's' : ''} con problemas
+                </span>
+                <span className="text-muted-foreground ml-2">
+                  {showOnlyProblems ? '(mostrando solo problemáticos)' : '- Click para filtrar'}
+                </span>
+              </AlertDescription>
+            </div>
+            {showOnlyProblems && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 px-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowOnlyProblems(false);
+                }}
+                data-testid="clear-problems-filter"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </Alert>
+      )}
+
       {/* KPIs Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Ingresos */}

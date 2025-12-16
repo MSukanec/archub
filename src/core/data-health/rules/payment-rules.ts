@@ -5,7 +5,7 @@ export const paymentsWithoutCategoryRule: DataHealthRule<NormalizedPayment> = {
   name: 'Pagos sin categoría',
   description: 'Detecta pagos que no tienen una categoría asignada, lo cual dificulta el análisis por categorías',
   category: 'classification',
-  appliesTo: ['payments', 'general-costs', 'finances'],
+  appliesTo: ['payments', 'general-costs'],
   check: (payments, ctx) => {
     const affected = payments.filter(p => !p.categoryId && !p.categoryName);
     
