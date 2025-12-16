@@ -20,5 +20,10 @@ export {
 
 export { dataHealthToInsights, mergeWithBusinessInsights } from './adapters/insights-adapter';
 
-export { useGeneralCostsDataHealth, normalizeGeneralCostPayment } from './hooks/useDataHealth';
-export type { UseDataHealthOptions, UseDataHealthResult } from './hooks/useDataHealth';
+export { 
+  useGeneralCostsDataHealth, 
+  normalizeGeneralCostPayment,
+  useFinancesDataHealth,
+  normalizeUnifiedMovement,
+} from './hooks/useDataHealth';
+export type { UseDataHealthOptions, UseDataHealthResult, UseFinancesDataHealthResult } from './hooks/useDataHealth';
