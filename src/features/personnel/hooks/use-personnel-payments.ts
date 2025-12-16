@@ -50,6 +50,12 @@ export function useCreatePersonnelPayment() {
       queryClient.invalidateQueries({
         queryKey: PERSONNEL_PAYMENT_QUERY_KEYS.payments(variables.projectId),
       });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements-stats'],
+      });
     },
   });
 }
@@ -76,6 +82,12 @@ export function useUpdatePersonnelPayment() {
       queryClient.invalidateQueries({
         queryKey: PERSONNEL_PAYMENT_QUERY_KEYS.payment(variables.paymentId),
       });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements-stats'],
+      });
     },
   });
 }
@@ -96,6 +108,12 @@ export function useDeletePersonnelPayment() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: PERSONNEL_PAYMENT_QUERY_KEYS.payments(variables.projectId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements-stats'],
       });
     },
   });

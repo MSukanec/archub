@@ -56,6 +56,12 @@ export function useCreateClientPayment() {
       queryClient.invalidateQueries({
         queryKey: CLIENT_QUERY_KEYS.dashboard(data.project_id),
       });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements-stats'],
+      });
     },
   });
 }
@@ -86,6 +92,12 @@ export function useUpdateClientPayment() {
       queryClient.invalidateQueries({
         queryKey: CLIENT_QUERY_KEYS.dashboard(data.project_id),
       });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements-stats'],
+      });
     },
   });
 }
@@ -112,6 +124,12 @@ export function useDeleteClientPayment() {
       });
       queryClient.invalidateQueries({
         queryKey: CLIENT_QUERY_KEYS.dashboard(variables.projectId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements-stats'],
       });
     },
   });

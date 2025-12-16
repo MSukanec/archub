@@ -50,6 +50,12 @@ export function useCreateMaterialPayment() {
       queryClient.invalidateQueries({
         queryKey: MATERIAL_PAYMENT_QUERY_KEYS.payments(variables.projectId),
       });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements-stats'],
+      });
     },
   });
 }
@@ -76,6 +82,12 @@ export function useUpdateMaterialPayment() {
       queryClient.invalidateQueries({
         queryKey: MATERIAL_PAYMENT_QUERY_KEYS.payment(variables.paymentId),
       });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements-stats'],
+      });
     },
   });
 }
@@ -96,6 +108,12 @@ export function useDeleteMaterialPayment() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: MATERIAL_PAYMENT_QUERY_KEYS.payments(variables.projectId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['unified-movements-stats'],
       });
     },
   });

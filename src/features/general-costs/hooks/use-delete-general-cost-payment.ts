@@ -19,6 +19,8 @@ export function useDeleteGeneralCostPayment() {
       queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.monthlySummary() });
       queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.byCategory() });
+      queryClient.invalidateQueries({ queryKey: ['unified-movements'] });
+      queryClient.invalidateQueries({ queryKey: ['unified-movements-stats'] });
       
       toast({
         title: 'Pago eliminado',
