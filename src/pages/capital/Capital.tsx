@@ -157,7 +157,7 @@ export default function Capital() {
           <DropdownMenuTrigger asChild>
             <Button className="h-8 px-3 text-xs" data-testid="button-add-transaction">
               <Plus className="w-4 h-4 mr-1" />
-              Nuevo Movimiento
+              Nueva Transacción
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
