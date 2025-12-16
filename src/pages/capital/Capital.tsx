@@ -9,6 +9,7 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
 import { usePartnerContributions, usePartnerWithdrawals } from '@/features/capital';
+import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { useCapitalDataHealth, DataHealthAlert } from '@/core/data-health';
+import { useCapitalDataHealth, DataHealthAlert, type NormalizedCapitalTransaction } from '@/core/data-health';
 
 const periodOptions: { value: PeriodFilter; label: string }[] = [
   { value: '30d', label: 'Últimos 30 días' },
@@ -43,11 +44,60 @@ export default function Capital() {
 
   const { data: contributions = [] } = usePartnerContributions(organizationId);
   const { data: withdrawals = [] } = usePartnerWithdrawals(organizationId);
-  const dataHealth = useCapitalDataHealth(contributions as any, false);
+  const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
 
   const availablePeriods = useMemo(() => {
     return calculateAvailablePeriods(contributions, withdrawals);
   }, [contributions, withdrawals]);
+
+  const normalizedTransactions = useMemo<NormalizedCapitalTransaction[]>(() => {
+    const contributionItems = contributions.map((c: any) => ({
+      id: c.id,
+      type: 'contribution' as const,
+      partnerName: c.partner?.contacts?.full_name || 'Sin socio',
+      walletId: c.wallet_id || null,
+      walletName: c.organization_wallet?.wallets?.name || null,
+      date: c.contribution_date,
+      amount: c.amount,
+      currencyId: c.currency_id,
+      exchangeRate: c.exchange_rate || null,
+    }));
+
+    const withdrawalItems = withdrawals.map((w: any) => ({
+      id: w.id,
+      type: 'withdrawal' as const,
+      partnerName: w.partner?.contacts?.full_name || 'Sin socio',
+      walletId: w.wallet_id || null,
+      walletName: w.organization_wallet?.wallets?.name || null,
+      date: w.withdrawal_date,
+      amount: w.amount,
+      currencyId: w.currency_id,
+      exchangeRate: w.exchange_rate || null,
+    }));
+
+    return [...contributionItems, ...withdrawalItems];
+  }, [contributions, withdrawals]);
+
+  const dataHealth = useCapitalDataHealth(normalizedTransactions, {
+    organizationId: organizationId || '',
+    defaultCurrencyId: defaultCurrency?.id,
+    enabled: !!organizationId && normalizedTransactions.length > 0,
+  });
+
+  useEffect(() => {
+    if (showOnlyProblems && !dataHealth.hasIssues) {
+      setShowOnlyProblems(false);
+    }
+  }, [showOnlyProblems, dataHealth.hasIssues]);
+
+  const handleDataHealthClick = useCallback(() => {
+    if (activeTab !== 'transactions') {
+      setActiveTab('transactions');
+      setShowOnlyProblems(true);
+    } else {
+      setShowOnlyProblems(prev => !prev);
+    }
+  }, [activeTab]);
 
   const handleAddParticipant = () => {
     openModal('capital-participant', { organizationId });
@@ -89,7 +139,12 @@ export default function Capital() {
       case 'balances':
         return <CapitalBalancesTab />;
       case 'transactions':
-        return <CapitalTransactionsTab />;
+        return (
+          <CapitalTransactionsTab 
+            showOnlyProblems={showOnlyProblems}
+            affectedIds={dataHealth.affectedIds}
+          />
+        );
       default:
         return (
           <CapitalDashboardTab 
@@ -184,8 +239,9 @@ export default function Capital() {
         <DataHealthAlert
           affectedCount={dataHealth.affectedIds.size}
           entityLabel="transacción"
-          isFiltering={false}
-          onToggleFilter={() => {}}
+          isFiltering={showOnlyProblems}
+          onToggleFilter={handleDataHealthClick}
+          showClearButton
         />
         {renderTabContent()}
       </div>

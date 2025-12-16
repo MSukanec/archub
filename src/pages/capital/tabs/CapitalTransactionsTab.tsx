@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { ArrowDownCircle, ArrowUpCircle, Edit, Trash2, Plus, TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
@@ -25,7 +25,11 @@ import {
   type PartnerWithdrawal,
 } from '@/features/capital';
 import { getPartnerTransactionStatusBadgeConfig } from '@/features/capital/utils/statusBadge';
-import { useCapitalDataHealth, DataHealthAlert, type NormalizedCapitalTransaction } from '@/core/data-health';
+
+interface CapitalTransactionsTabProps {
+  showOnlyProblems?: boolean;
+  affectedIds?: Set<string>;
+}
 
 type TransactionType = 'contribution' | 'withdrawal';
 
@@ -55,7 +59,10 @@ function formatPartnerName(partner?: { contacts: { full_name: string | null; fir
   return constructedName || company_name || email || 'Sin nombre';
 }
 
-export function CapitalTransactionsTab() {
+export function CapitalTransactionsTab({ 
+  showOnlyProblems = false, 
+  affectedIds = new Set() 
+}: CapitalTransactionsTabProps) {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
@@ -71,8 +78,6 @@ export function CapitalTransactionsTab() {
   const deleteWithdrawalMutation = useDeletePartnerWithdrawal();
 
   const isLoading = loadingContributions || loadingWithdrawals || loadingPartners;
-
-  const [showOnlyProblems, setShowOnlyProblems] = useState(false);
 
   const transactions = useMemo<UnifiedTransaction[]>(() => {
     const contributionItems: UnifiedTransaction[] = contributions.map((c) => ({
@@ -131,40 +136,11 @@ export function CapitalTransactionsTab() {
     });
   }, [transactions, partners]);
 
-  // Preparar transacciones para Data Health
-  const normalizedForHealth = useMemo<NormalizedCapitalTransaction[]>(() => {
-    return transactions.map(t => ({
-      id: t.id,
-      type: t.type,
-      partnerName: t.partner_name,
-      walletId: (t.original as any).wallet_id || null,
-      walletName: t.wallet_name,
-      date: t.date,
-      amount: t.amount,
-      currencyId: t.currency_id,
-      exchangeRate: t.exchange_rate,
-    }));
-  }, [transactions]);
-
-  // Data Health: detectar problemas en las transacciones
-  const dataHealth = useCapitalDataHealth(normalizedForHealth, {
-    organizationId: organizationId || '',
-    defaultCurrencyId: defaultCurrency?.id,
-    enabled: !!organizationId && transactions.length > 0,
-  });
-
-  // Auto-reset del filtro cuando ya no hay problemas
-  useEffect(() => {
-    if (showOnlyProblems && !dataHealth.hasIssues) {
-      setShowOnlyProblems(false);
-    }
-  }, [showOnlyProblems, dataHealth.hasIssues]);
-
   // Filtrar transacciones: mostrar todas o solo las que tienen problemas
   const filteredTransactions = useMemo(() => {
     if (!showOnlyProblems) return transactionsWithLinkedUser;
-    return transactionsWithLinkedUser.filter(t => dataHealth.affectedIds.has(t.id));
-  }, [transactionsWithLinkedUser, showOnlyProblems, dataHealth.affectedIds]);
+    return transactionsWithLinkedUser.filter(t => affectedIds.has(t.id));
+  }, [transactionsWithLinkedUser, showOnlyProblems, affectedIds]);
 
   // KPI system - REFACTORIZADO
   const metrics = useMemo(() => {
@@ -430,13 +406,6 @@ export function CapitalTransactionsTab() {
 
   return (
     <div className="space-y-6">
-      <DataHealthAlert
-        affectedCount={dataHealth.affectedIds.size}
-        entityLabel="transacción"
-        isFiltering={showOnlyProblems}
-        onToggleFilter={() => setShowOnlyProblems(!showOnlyProblems)}
-      />
-
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="card-total-contributions">
           <StatCardTitle showArrow={false}>
