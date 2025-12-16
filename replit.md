@@ -58,6 +58,8 @@ Preferred communication style: Simple, everyday language.
 - **Multicurrency System**: Centralized handling via `/lib/money.ts` with `amount_in_base = amount * exchange_rate` and explicit conversion functions.
 - **KPI System (Headless)**: Centralized calculation logic in `/lib/kpis.ts` for monetary, count, percentage, and text KPIs, with automatic refetching on currency changes.
 - **Subscription & Billing System**: Comprehensive management of plans, subscriptions, payments, billing cycles, proration, seat-based billing, coupons, soft-locks, and cron jobs for expiry and downgrades.
+- **Internationalization (i18n) System**: Lightweight locale system in `src/lib/i18n/` with `I18nProvider`, `useI18n` hook, and typed translations (es/en). Table component labels use `getTableLabels(locale)` for dynamic language switching. Default locale is Spanish with browser detection fallback.
+- **Table Component Architecture**: Modular table system in `src/components/shared/table/` with separate components (TableDesktop, TableMobile, TableRow, TableGroup) and hooks (useTableSort, useTableFilter, useTablePagination, useTableSelection). Original monolithic Table.tsx in `tables-and-trees/` maintained for backward compatibility.
 
 ## External Dependencies
 - **Supabase**: Authentication.
