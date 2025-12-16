@@ -154,7 +154,7 @@ export function FinancesMovementsTab() {
       label: 'Fecha',
       sortable: true,
       sortType: 'date',
-      width: '12%',
+      width: '10%',
       render: (movement) => {
         const date = parseLocalDate(movement.payment_date);
         return date ? format(date, 'dd/MM/yyyy') : '-';
@@ -164,7 +164,7 @@ export function FinancesMovementsTab() {
       key: 'movement_type',
       label: 'Tipo',
       sortable: true,
-      width: '18%',
+      width: '20%',
       render: (movement) => {
         const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
         
@@ -182,7 +182,7 @@ export function FinancesMovementsTab() {
       key: 'project',
       label: 'Proyecto',
       sortable: true,
-      width: '12%',
+      width: '14%',
       render: (movement) => {
         if (!movement.project) return <span className="text-muted-foreground text-sm">-</span>;
         const projectColor = movement.project.color;
@@ -206,7 +206,7 @@ export function FinancesMovementsTab() {
       key: 'description',
       label: 'Detalle',
       sortable: true,
-      width: '18%',
+      width: '22%',
       render: (movement) => (
         <div className="flex items-center gap-1.5 min-w-0">
           {movement.has_attachments && (
@@ -225,7 +225,7 @@ export function FinancesMovementsTab() {
       key: 'wallet',
       label: 'Billetera',
       sortable: true,
-      width: '12%',
+      width: '14%',
       render: (movement) => (
         <span className="text-sm truncate" title={movement.wallet?.name}>{movement.wallet?.name || '-'}</span>
       ),

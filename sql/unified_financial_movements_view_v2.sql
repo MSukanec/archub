@@ -79,8 +79,8 @@ SELECT
   -- Creator info
   u.full_name AS creator_full_name,
   u.avatar_url AS creator_avatar_url,
-  -- Entity name (from description/notes since materials don't have a direct entity)
-  COALESCE(mp.notes, mp.reference, 'Material'::text) AS entity_name
+  -- Entity name (materials don't have a direct entity)
+  NULL::text AS entity_name
 FROM material_payments mp
 LEFT JOIN organization_members om ON om.id = mp.created_by
 LEFT JOIN users u ON u.id = om.user_id
