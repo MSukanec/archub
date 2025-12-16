@@ -34,15 +34,17 @@ export const paymentsWithoutCategoryRule: DataHealthRule<NormalizedPayment> = {
 
 export const paymentsMissingExchangeRateRule: DataHealthRule<NormalizedPayment> = {
   id: 'payments-missing-exchange-rate',
-  name: 'Pagos sin cotización',
-  description: 'Detecta pagos en moneda extranjera que no tienen cotización, impidiendo calcular totales en moneda base',
+  name: 'Pagos sin cotización válida',
+  description: 'Detecta pagos en moneda extranjera que no tienen cotización válida (null, 0, o 1), impidiendo calcular totales en moneda base',
   category: 'currency',
   appliesTo: ['payments', 'general-costs', 'finances'],
   check: (payments, ctx) => {
+    const minValidRate = 1.0;
+    
     const affected = payments.filter(p => {
-      const isForegingCurrency = p.currencyId && ctx.defaultCurrencyId && p.currencyId !== ctx.defaultCurrencyId;
-      const hasNoRate = !p.exchangeRate || p.exchangeRate === 0;
-      return isForegingCurrency && hasNoRate;
+      const isForeignCurrency = p.currencyId && ctx.defaultCurrencyId && p.currencyId !== ctx.defaultCurrencyId;
+      const hasInvalidRate = !p.exchangeRate || p.exchangeRate <= minValidRate;
+      return isForeignCurrency && hasInvalidRate;
     });
     
     if (affected.length === 0) return null;
@@ -50,8 +52,8 @@ export const paymentsMissingExchangeRateRule: DataHealthRule<NormalizedPayment> 
     return {
       id: `${ctx.organizationId}-payments-missing-exchange-rate`,
       ruleId: 'payments-missing-exchange-rate',
-      title: 'Pagos sin cotización',
-      description: `${affected.length} pago${affected.length > 1 ? 's' : ''} en moneda extranjera no tiene${affected.length > 1 ? 'n' : ''} cotización. Los totales en moneda base pueden ser incorrectos.`,
+      title: 'Pagos sin cotización válida',
+      description: `${affected.length} pago${affected.length > 1 ? 's' : ''} en moneda extranjera con cotización inválida (debe ser mayor a 1). Los totales en moneda base son incorrectos.`,
       severity: 'critical',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 
@@ -59,8 +61,8 @@ export const paymentsMissingExchangeRateRule: DataHealthRule<NormalizedPayment> 
         label: p.label || `Pago #${p.id}` 
       })),
       recommendedAction: {
-        label: 'Agregar cotización',
-        description: 'Editar los pagos para agregar la cotización correspondiente',
+        label: 'Corregir cotización',
+        description: 'Editar los pagos para agregar la cotización correcta (ej: 1 USD = 1400 ARS)',
         actionType: 'bulk_edit',
         targetIds: affected.map(p => p.id),
       },

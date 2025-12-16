@@ -2,15 +2,17 @@ import type { DataHealthRule, NormalizedPayment, DataIssue } from '../types';
 
 export const capitalMissingExchangeRateRule: DataHealthRule<NormalizedPayment> = {
   id: 'capital-missing-exchange-rate',
-  name: 'Transacciones sin cotización',
-  description: 'Detecta transacciones de capital en moneda extranjera que no tienen cotización',
+  name: 'Transacciones sin cotización válida',
+  description: 'Detecta transacciones de capital en moneda extranjera que no tienen cotización válida (null, 0, o 1)',
   category: 'currency',
   appliesTo: ['capital'],
   check: (transactions, ctx) => {
+    const minValidRate = 1.0;
+    
     const affected = transactions.filter(t => {
       const isForeignCurrency = t.currencyId && ctx.defaultCurrencyId && t.currencyId !== ctx.defaultCurrencyId;
-      const hasNoRate = !t.exchangeRate || t.exchangeRate === 0;
-      return isForeignCurrency && hasNoRate;
+      const hasInvalidRate = !t.exchangeRate || t.exchangeRate <= minValidRate;
+      return isForeignCurrency && hasInvalidRate;
     });
     
     if (affected.length === 0) return null;
@@ -18,8 +20,8 @@ export const capitalMissingExchangeRateRule: DataHealthRule<NormalizedPayment> =
     return {
       id: `${ctx.organizationId}-capital-missing-exchange-rate`,
       ruleId: 'capital-missing-exchange-rate',
-      title: 'Transacciones sin cotización',
-      description: `${affected.length} transacción${affected.length > 1 ? 'es' : ''} en moneda extranjera sin cotización. Los totales en moneda base pueden ser incorrectos.`,
+      title: 'Transacciones sin cotización válida',
+      description: `${affected.length} transacción${affected.length > 1 ? 'es' : ''} en moneda extranjera con cotización inválida (debe ser mayor a 1). Los totales en moneda base son incorrectos.`,
       severity: 'critical',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(t => ({ 
@@ -27,8 +29,8 @@ export const capitalMissingExchangeRateRule: DataHealthRule<NormalizedPayment> =
         label: t.label || `Transacción #${t.id}` 
       })),
       recommendedAction: {
-        label: 'Agregar cotización',
-        description: 'Editar las transacciones para agregar la cotización correspondiente',
+        label: 'Corregir cotización',
+        description: 'Editar las transacciones para agregar la cotización correcta (ej: 1 USD = 1400 ARS)',
         actionType: 'bulk_edit',
         targetIds: affected.map(t => t.id),
       },
