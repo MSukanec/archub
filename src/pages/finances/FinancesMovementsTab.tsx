@@ -172,7 +172,7 @@ export function FinancesMovementsTab() {
           <IdentityBadge
             name={config?.label || movement.movement_type}
             avatarUrl={movement.creator_avatar_url}
-            subLabel={movement.creator_full_name || '-'}
+            subLabel={movement.entity_name || '-'}
             size="sm"
           />
         );
