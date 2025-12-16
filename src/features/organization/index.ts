@@ -9,7 +9,6 @@ export { BoardFormModal } from './modals/BoardFormModal';
 export { CardFormModal } from './modals/CardFormModal';
 export { ListFormModal } from './modals/ListFormModal';
 export { OrganizationMovementConceptFormModal } from './modals/OrganizationMovementConceptFormModal';
-export { ContactAttachmentsSubform } from './modals/contact-forms/ContactAttachmentsSubform';
 export { ProfileOrganizationFormModal } from './modals/ProfileOrganizationFormModal';
 
 export { OrganizationFormModal } from './modals/admin/OrganizationFormModal';
