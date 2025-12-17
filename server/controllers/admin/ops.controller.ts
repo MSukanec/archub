@@ -2,6 +2,10 @@ import type { Request, Response } from "express";
 import { supabaseAdmin } from "../../lib/supabase/admin.js";
 import { verifyAdminUser, HttpError } from "../../lib/auth/helpers.js";
 import crypto from "crypto";
+import { 
+  executeOpsRepairAction as executeRepairActionService,
+  getAvailableRepairActions 
+} from "../../lib/services/ops-repair.service.js";
 
 function generateFingerprint(type: string, ...parts: string[]): string {
   const data = [type, ...parts.filter(Boolean)].join("|");
@@ -862,26 +866,6 @@ export async function getRepairActions(req: Request, res: Response) {
   }
 }
 
-async function logRepairAction(
-  alertId: string,
-  actionId: string,
-  userId: string,
-  result: "success" | "error",
-  details: Record<string, any>
-) {
-  try {
-    await supabaseAdmin.from("ops_repair_logs").insert({
-      alert_id: alertId,
-      action_id: actionId,
-      executed_by: userId,
-      result,
-      details,
-    });
-  } catch (err) {
-    console.error("[OpsCenter] Error logging repair action:", err);
-  }
-}
-
 export async function executeRepairAction(req: Request, res: Response) {
   try {
     const user = await verifyAdminUser(req.headers.authorization);
@@ -892,211 +876,11 @@ export async function executeRepairAction(req: Request, res: Response) {
       return res.status(400).json({ error: "actionId is required" });
     }
 
-    const { data: alert, error: alertError } = await supabaseAdmin
-      .from("ops_alerts")
-      .select("*")
-      .eq("id", alertId)
-      .single();
+    const result = await executeRepairActionService(alertId, actionId, user.id);
 
-    if (alertError || !alert) {
-      return res.status(404).json({ error: "Alert not found" });
+    if (!result.success) {
+      return res.status(400).json(result);
     }
-
-    const availableActions = REPAIR_ACTIONS[alert.alert_type] || [];
-    const action = availableActions.find((a) => a.id === actionId);
-
-    if (!action) {
-      return res.status(400).json({ error: `Action ${actionId} not available for this alert type` });
-    }
-
-    if (action.requiredEvidence) {
-      for (const field of action.requiredEvidence) {
-        if (!alert.evidence?.[field]) {
-          return res.status(400).json({
-            error: `Missing required evidence: ${field}`,
-            requiredEvidence: action.requiredEvidence,
-          });
-        }
-      }
-    }
-
-    let result: { success: boolean; message: string; data?: any } = {
-      success: false,
-      message: "Unknown action",
-    };
-
-    switch (actionId) {
-      case "acknowledge_alert": {
-        const { error } = await supabaseAdmin
-          .from("ops_alerts")
-          .update({
-            status: "ack",
-            ack_by: user.id,
-            ack_at: new Date().toISOString(),
-          })
-          .eq("id", alertId);
-
-        if (error) {
-          result = { success: false, message: `Error acknowledging: ${error.message}` };
-        } else {
-          result = { success: true, message: "Alerta reconocida exitosamente" };
-        }
-        break;
-      }
-
-      case "mark_resolved": {
-        const { error } = await supabaseAdmin
-          .from("ops_alerts")
-          .update({
-            status: "resolved",
-            resolved_by: user.id,
-            resolved_at: new Date().toISOString(),
-          })
-          .eq("id", alertId);
-
-        if (error) {
-          result = { success: false, message: `Error resolving: ${error.message}` };
-        } else {
-          result = { success: true, message: "Alerta marcada como resuelta" };
-        }
-        break;
-      }
-
-      case "test_signup_flow": {
-        result = {
-          success: true,
-          message: "Dry-run completado. El flujo de registro parece funcional.",
-          data: { tested_at: new Date().toISOString(), status: "ok" },
-        };
-        break;
-      }
-
-      case "apply_plan_to_org": {
-        const orgId = alert.evidence?.organization_id || alert.organization_id;
-        const planId = alert.evidence?.purchased_plan_id;
-
-        if (!orgId || !planId) {
-          result = { success: false, message: "Faltan datos: organization_id o purchased_plan_id" };
-          break;
-        }
-
-        const { error } = await supabaseAdmin
-          .from("organizations")
-          .update({ plan_id: planId })
-          .eq("id", orgId);
-
-        if (error) {
-          result = { success: false, message: `Error aplicando plan: ${error.message}` };
-        } else {
-          await supabaseAdmin
-            .from("ops_alerts")
-            .update({
-              status: "resolved",
-              resolved_by: user.id,
-              resolved_at: new Date().toISOString(),
-            })
-            .eq("id", alertId);
-
-          result = {
-            success: true,
-            message: `Plan ${planId} aplicado exitosamente a la organización`,
-            data: { organization_id: orgId, plan_id: planId },
-          };
-        }
-        break;
-      }
-
-      case "create_missing_subscription": {
-        const orgId = alert.evidence?.organization_id || alert.organization_id;
-        const paymentId = alert.evidence?.payment_id || alert.payment_id;
-
-        if (!orgId || !paymentId) {
-          result = { success: false, message: "Faltan datos: organization_id o payment_id" };
-          break;
-        }
-
-        const { data: payment } = await supabaseAdmin
-          .from("payments")
-          .select("*")
-          .eq("id", paymentId)
-          .single();
-
-        if (!payment) {
-          result = { success: false, message: "Pago no encontrado" };
-          break;
-        }
-
-        const now = new Date();
-        const periodEnd = new Date(now);
-        periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-
-        const { error: subError } = await supabaseAdmin.from("subscriptions").insert({
-          organization_id: orgId,
-          plan_id: payment.product_id,
-          status: "active",
-          billing_period: "annual",
-          current_period_start: now.toISOString(),
-          current_period_end: periodEnd.toISOString(),
-          payment_provider: payment.provider,
-          provider_subscription_id: payment.provider_payment_id,
-        });
-
-        if (subError) {
-          result = { success: false, message: `Error creando suscripción: ${subError.message}` };
-        } else {
-          await supabaseAdmin
-            .from("ops_alerts")
-            .update({
-              status: "resolved",
-              resolved_by: user.id,
-              resolved_at: new Date().toISOString(),
-            })
-            .eq("id", alertId);
-
-          result = {
-            success: true,
-            message: "Suscripción creada exitosamente",
-            data: { organization_id: orgId, payment_id: paymentId },
-          };
-        }
-        break;
-      }
-
-      case "retry_webhook_processing": {
-        const eventId = alert.evidence?.event_id || alert.event_id;
-
-        if (!eventId) {
-          result = { success: false, message: "Falta event_id" };
-          break;
-        }
-
-        const { error } = await supabaseAdmin
-          .from("payment_events")
-          .update({ status: "PENDING_RETRY" })
-          .eq("id", eventId);
-
-        if (error) {
-          result = { success: false, message: `Error: ${error.message}` };
-        } else {
-          result = {
-            success: true,
-            message: "Evento marcado para reprocesamiento",
-            data: { event_id: eventId },
-          };
-        }
-        break;
-      }
-
-      default:
-        result = { success: false, message: `Acción ${actionId} no implementada` };
-    }
-
-    await logRepairAction(alertId, actionId, user.id, result.success ? "success" : "error", {
-      action_label: action.label,
-      alert_type: alert.alert_type,
-      result_message: result.message,
-      result_data: result.data,
-    });
 
     return res.json(result);
   } catch (error: any) {
