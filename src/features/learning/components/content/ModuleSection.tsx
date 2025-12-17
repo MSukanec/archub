@@ -70,8 +70,8 @@ export function ModuleSection({
 
   const getEffortLabel = (seconds: number) => {
     const hours = seconds / 3600;
-    if (hours < 1) return 'Módulo corto';
-    if (hours <= 3) return 'Módulo medio';
+    if (hours < 3) return 'Módulo corto';
+    if (hours <= 5) return 'Módulo medio';
     return 'Módulo largo';
   };
 
