@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useCallback, useRef, useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { Play, CheckCircle, FileText, Bookmark, Clock } from 'lucide-react'
+import { Play, CheckCircle, FileText, Bookmark, Clock, Plus } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
@@ -36,6 +36,7 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
   const setVimeoPlayer = useCoursePlayerStore(s => s.setVimeoPlayer);
   const { toast } = useToast();
   const [targetSeekTime, setTargetSeekTime] = useState<number | undefined>(initialSeekTime);
+  const [currentVideoTime, setCurrentVideoTime] = useState(0);
   
   // Track if video is currently playing to prevent auto-rewind
   const isPlayingRef = useRef(false);
@@ -140,12 +141,60 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
   const handleVideoProgress = useCallback((sec: number, pct: number) => {
     if (!activeLessonId) return;
     
+    // Update current time for marker button
+    setCurrentVideoTime(sec);
+    
     const now = Date.now();
     if (now - lastSaveTime.current >= SAVE_THROTTLE_MS) {
       lastSaveTime.current = now;
       saveProgressMutation.mutate({ lessonId: activeLessonId, sec, pct });
     }
   }, [activeLessonId, saveProgressMutation]);
+
+  // Create marker mutation
+  const createMarkerMutation = useMutation({
+    mutationFn: async (time_sec: number) => {
+      if (!activeLessonId) throw new Error('No active lesson');
+      return apiRequest('POST', `/api/lessons/${activeLessonId}/markers`, {
+        body: '',
+        time_sec
+      });
+    },
+    onSuccess: () => {
+      if (activeLessonId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/lessons/${activeLessonId}/markers`] });
+      }
+      toast({
+        title: 'Marcador agregado',
+        description: `Marcador creado en ${formatTimeForMarker(currentVideoTime)}`
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'No se pudo agregar el marcador',
+        variant: 'destructive'
+      });
+    }
+  });
+
+  const formatTimeForMarker = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleAddMarkerFromVideo = async () => {
+    if (!vimeoPlayer) return;
+    
+    try {
+      const time = await vimeoPlayer.getCurrentTime();
+      const roundedTime = Math.floor(time);
+      createMarkerMutation.mutate(roundedTime);
+    } catch (error) {
+      console.error('Error getting video time:', error);
+    }
+  };
 
   // Mark lesson as complete mutation (toggle) using the same update progress mutation
   const markCompleteMutation = useMemo(() => ({
@@ -388,16 +437,30 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
               )}
             </div>
 
-            {/* Video Player */}
-            <VimeoPlayer 
-              vimeoId={currentLesson.vimeo_video_id}
-              initialPosition={initialPosition}
-              onProgress={handleVideoProgress}
-              onPlayerReady={setVimeoPlayer}
-              onSeekApplied={() => {
-                clearPendingSeek();
-              }}
-            />
+            {/* Video Player with Marker Overlay */}
+            <div className="relative">
+              <VimeoPlayer 
+                vimeoId={currentLesson.vimeo_video_id}
+                initialPosition={initialPosition}
+                onProgress={handleVideoProgress}
+                onPlayerReady={setVimeoPlayer}
+                onSeekApplied={() => {
+                  clearPendingSeek();
+                }}
+              />
+              {/* Marker button overlay */}
+              <Button
+                onClick={handleAddMarkerFromVideo}
+                size="sm"
+                variant="secondary"
+                className="absolute bottom-4 right-4 gap-2 bg-background/90 backdrop-blur-sm shadow-lg hover:bg-background"
+                disabled={!vimeoPlayer || createMarkerMutation.isPending}
+                data-testid="button-add-marker-overlay"
+              >
+                <Bookmark className="h-4 w-4" />
+                <span>Marcar {formatTimeForMarker(currentVideoTime)}</span>
+              </Button>
+            </div>
 
             {/* Notes and Markers Section */}
             {activeLessonId && (
@@ -414,23 +477,16 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
                 </div>
 
                 <div className="bg-card border rounded-lg p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Bookmark className="h-5 w-5 text-[var(--accent)]" />
+                    <h3 className="text-base font-semibold">Mis Marcadores</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Marca momentos importantes del video para volver a ellos fácilmente.
+                  </p>
                   <LessonMarkers 
                     lessonId={activeLessonId} 
                     vimeoPlayer={vimeoPlayer}
-                    renderHeader={(addButton) => (
-                      <>
-                        <div className="flex items-center justify-between gap-2 mb-3">
-                          <div className="flex items-center gap-2">
-                            <Bookmark className="h-5 w-5 text-[var(--accent)]" />
-                            <h3 className="text-base font-semibold">Mis Marcadores</h3>
-                          </div>
-                          {addButton}
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          Marca momentos importantes del video para volver a ellos fácilmente.
-                        </p>
-                      </>
-                    )}
                   />
                 </div>
               </div>
