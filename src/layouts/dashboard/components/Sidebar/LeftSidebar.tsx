@@ -7,6 +7,7 @@ import { useProject } from "@/features/projects";
 import { useUserMode } from "@/hooks/use-user-mode";
 import { useUserOrganizationPreferences } from "@/features/organization";
 import { isButtonExcluded } from "@/config/modes";
+import { ADMIN_NAVIGATION, COMMUNITY_NAVIGATION, LEARNING_NAVIGATION } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 import { useProjectContext } from '@/stores/projectContext';
 import { useSidebarStore } from "@/stores/sidebarStore";
@@ -258,33 +259,11 @@ export function LeftSidebar() {
         { id: 'clients', label: 'Clientes', icon: Users, href: '/clients' },
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
-      return [
-        { id: 'ops', label: 'Ops Center', icon: Activity, href: '/admin/ops' },
-        { id: 'dashboard', label: 'Analytics', icon: BarChart3, href: '/admin/dashboard' },
-        { id: 'administration', label: 'Administración', icon: Settings, href: '/admin/administration' },
-        { id: 'support', label: 'Soporte', icon: Headphones, href: '/admin/support' },
-        { id: 'subscriptions', label: 'Suscripciones', icon: CreditCard, href: '/admin/subscriptions' },
-        { id: 'payments', label: 'Pagos', icon: Wallet, href: '/admin/payments' },
-        { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses' },
-        { id: 'email-templates', label: 'Plantillas de Email', icon: Mail, href: '/admin/email-templates' },
-        { id: 'layout', label: 'Layout', icon: Layers, href: '/admin/layout' },
-        { id: 'general', label: 'General', icon: Settings, href: '/admin/general' },
-        { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks' },
-        { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs' },
-        { id: 'products', label: 'Productos', icon: Package, href: '/providers/products' },
-        { id: 'lab-clients', label: 'Lab - Clientes', icon: FlaskConical, href: '/lab/financial-lattice' },
-        { id: 'lab-contacts', label: 'Lab - Contactos', icon: FlaskConical, href: '/lab/contacts' },
-      ];
+      return ADMIN_NAVIGATION;
     } else if (sidebarLevel === 'community') {
-      return [
-        { id: 'dashboard', label: 'Visión General', icon: Home, href: '/community/dashboard' },
-        { id: 'map', label: 'Mapa', icon: MapPin, href: '/community/map' },
-      ];
+      return COMMUNITY_NAVIGATION;
     } else if (sidebarLevel === 'learning') {
-      return [
-        { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/learning/dashboard' },
-        { id: 'courses', label: 'Cursos', icon: GraduationCap, href: '/learning/courses' },
-      ];
+      return LEARNING_NAVIGATION;
     }
     
     return [];
