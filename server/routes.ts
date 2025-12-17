@@ -112,6 +112,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register forum routes (categories, threads, posts, reactions)
   registerForumRoutes(app, deps);
 
+  // Flow blocking status endpoint (public - for preventive blocking)
+  app.get("/api/ops/flow-status", async (req, res) => {
+    try {
+      const flowKey = req.query.flow as string;
+      
+      const FLOW_BLOCK_RULES: Record<string, { alertTypes: string[]; severities: string[] }> = {
+        user_signup: {
+          alertTypes: ['system.integrity.failed', 'system.signup.blocked'],
+          severities: ['critical'],
+        },
+        billing_checkout: {
+          alertTypes: ['payment.approved_but_not_applied', 'payment.approved_not_applied'],
+          severities: ['critical', 'high'],
+        },
+      };
+
+      const { data: alerts, error } = await getAdminClient()
+        .from('ops_alerts')
+        .select('id, alert_type, severity, status, title')
+        .in('status', ['open', 'ack'])
+        .in('severity', ['critical', 'high']);
+
+      if (error) {
+        return res.json({ blocked: false, alerts: [] });
+      }
+
+      if (!flowKey) {
+        return res.json({ 
+          blocked: false, 
+          alerts: alerts || [],
+          flows: Object.keys(FLOW_BLOCK_RULES),
+        });
+      }
+
+      const rules = FLOW_BLOCK_RULES[flowKey];
+      if (!rules) {
+        return res.json({ blocked: false, alerts: [] });
+      }
+
+      const blockingAlerts = (alerts || []).filter((alert) => {
+        const matchesType = rules.alertTypes.some(
+          (type) => alert.alert_type === type || alert.alert_type.includes(type.replace('system.', ''))
+        );
+        const matchesSeverity = rules.severities.includes(alert.severity);
+        
+        if (flowKey === 'user_signup' && alert.alert_type === 'system.integrity.failed' && alert.severity === 'critical') {
+          return true;
+        }
+        
+        return matchesType && matchesSeverity;
+      });
+
+      return res.json({
+        flow: flowKey,
+        blocked: blockingAlerts.length > 0,
+        alerts: blockingAlerts,
+      });
+    } catch (e: any) {
+      return res.json({ blocked: false, error: e.message });
+    }
+  });
+
   // Diagnostic endpoints for payments
   app.get("/api/diag/last-payment-events", async (req, res) => {
     try {

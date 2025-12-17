@@ -3,12 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Mail, Lock } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/use-toast";
+import { useFlowBlocking } from "@/hooks/use-flow-blocking";
+import { FlowBlockedBanner } from "@/components/shared/FlowBlockedBanner";
 
 export default function Register() {
   const { signInWithGoogle, loading } = useAuthStore();
   const { toast } = useToast();
+  const { isBlocked, message } = useFlowBlocking('user_signup');
 
   const handleGoogleSignUp = async () => {
+    if (isBlocked) {
+      toast({
+        variant: "destructive",
+        title: message.title,
+        description: message.description
+      });
+      return;
+    }
+
     try {
       await signInWithGoogle();
     } catch (error: any) {
@@ -90,6 +102,8 @@ export default function Register() {
                 </div>
 
                 <div className="space-y-4">
+                  <FlowBlockedBanner flowKey="user_signup" className="mb-4" />
+
                   {/* Google Sign Up */}
                   <Button
                     variant="outline"

@@ -37,6 +37,8 @@ import {
 import { cn } from "@/lib/utils";
 import { getApiBase } from "@/utils/apiBase";
 import { toE164, fromE164 } from "@/utils/phone";
+import { useFlowBlocking } from "@/hooks/use-flow-blocking";
+import { FlowBlockedBanner } from "@/components/shared/FlowBlockedBanner";
 import mercadoPagoLogo from "/MercadoPago_logo.png";
 import paypalLogo from "/Paypal_2014_logo.png";
 
@@ -108,6 +110,8 @@ export default function SubscriptionCheckout() {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [loading, setLoading] = useState(false);
   const [isPaymentInitiated, setIsPaymentInitiated] = useState(false);
+
+  const { isBlocked: isCheckoutBlocked, message: checkoutBlockedMessage } = useFlowBlocking('billing_checkout');
 
   useEffect(() => {
     const previousLevel = sidebarLevel;
@@ -834,6 +838,16 @@ export default function SubscriptionCheckout() {
   };
 
   const handleContinue = async () => {
+    // Check if flow is blocked
+    if (isCheckoutBlocked) {
+      toast({
+        title: checkoutBlockedMessage.title,
+        description: checkoutBlockedMessage.description,
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Early exit if payment already initiated
     if (isPaymentInitiated || loading) {
       console.warn('[Checkout] Payment already in progress, ignoring click');
@@ -1115,6 +1129,8 @@ export default function SubscriptionCheckout() {
             Completá tu suscripción de forma segura - Facturación {billingPeriod === 'annual' ? 'Anual' : 'Mensual'}
           </p>
         </div>
+
+        <FlowBlockedBanner flowKey="billing_checkout" className="mb-6" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-7 order-1 lg:order-1">
