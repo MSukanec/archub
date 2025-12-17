@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useCallback } from 'react';
 import { useRoute, useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -66,10 +66,15 @@ export function CoursePlayerDrawerHost() {
     return map;
   }, [progressData]);
 
-  const handleLessonSelect = (lessonId: string) => {
+  const handleLessonSelect = useCallback((lessonId: string) => {
     setCurrentLesson(lessonId);
     goToLesson(lessonId, null);
-  };
+  }, [setCurrentLesson, goToLesson]);
+
+  const handleMarkerLessonSelect = useCallback((lessonId: string, timeSec: number | null) => {
+    setCurrentLesson(lessonId);
+    goToLesson(lessonId, timeSec);
+  }, [setCurrentLesson, goToLesson]);
 
   if (!isOnCoursePlayerTab || modules.length === 0) {
     return null;
@@ -88,10 +93,7 @@ export function CoursePlayerDrawerHost() {
             courseId={course.id} 
             activeLessonId={activeLessonId}
             vimeoPlayer={vimeoPlayer} 
-            onLessonSelect={(lessonId, timeSec) => {
-              setCurrentLesson(lessonId);
-              goToLesson(lessonId, timeSec);
-            }}
+            onLessonSelect={handleMarkerLessonSelect}
           />
         ) : undefined
       }
