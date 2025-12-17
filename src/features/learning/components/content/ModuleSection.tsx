@@ -20,6 +20,7 @@ interface ModuleSectionProps {
   moduleIndex: number;
   lessons: Lesson[];
   courseId: string;
+  imageUrl?: string;
   isExpanded?: boolean;
   isActive?: boolean;
   nextRecommendedLessonId?: string | null;
@@ -33,6 +34,7 @@ export function ModuleSection({
   moduleIndex,
   lessons,
   courseId,
+  imageUrl,
   isExpanded: controlledExpanded,
   isActive = false,
   nextRecommendedLessonId,
@@ -83,17 +85,26 @@ export function ModuleSection({
       {/* Module Header */}
       <button
         onClick={handleToggle}
-        className="w-full flex items-center gap-4 p-4 text-left hover:bg-muted/30 transition-colors rounded-t-xl"
+        className="w-full flex items-center gap-4 p-4 text-left transition-colors rounded-t-xl relative overflow-hidden"
+        style={imageUrl ? {
+          backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%), url(${imageUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        } : {
+          backgroundColor: 'hsl(var(--muted))'
+        }}
         data-testid={`module-header-${moduleId}`}
       >
         {/* Module Number */}
         <div className={cn(
           "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm",
-          isModuleComplete 
-            ? "bg-chart-positive/10 text-chart-positive" 
-            : isActive 
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-muted-foreground"
+          imageUrl ? "bg-white/20 text-white border border-white/40" : (
+            isModuleComplete 
+              ? "bg-chart-positive/10 text-chart-positive" 
+              : isActive 
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+          )
         )}>
           {isModuleComplete ? (
             <CheckCircle2 className="h-5 w-5" />
@@ -105,23 +116,23 @@ export function ModuleSection({
         </div>
 
         {/* Module Info */}
-        <div className="flex-1 min-w-0">
+        <div className={cn("flex-1 min-w-0", imageUrl && "text-white")}>
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-base truncate">{moduleTitle}</h3>
+            <h3 className={cn("font-semibold text-base truncate", imageUrl && "text-white")}>{moduleTitle}</h3>
             {isActive && !isModuleComplete && (
-              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+              <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", imageUrl ? "bg-white/20 text-white" : "bg-primary/10 text-primary")}>
                 En curso
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+          <div className={cn("flex items-center gap-3 mt-1 text-sm", imageUrl ? "text-white/80" : "text-muted-foreground")}>
             <span>{totalCount} {totalCount === 1 ? 'lección' : 'lecciones'}</span>
             <span>·</span>
             <span>{formatTotalDuration(totalDuration)}</span>
             {completedCount > 0 && (
               <>
                 <span>·</span>
-                <span className="text-chart-positive font-medium">
+                <span className={cn("font-medium", imageUrl ? "text-white" : "text-chart-positive")}>
                   {completedCount}/{totalCount} completadas
                 </span>
               </>
@@ -130,12 +141,12 @@ export function ModuleSection({
 
           {/* Progress Bar */}
           {totalCount > 0 && (
-            <div className="mt-2 h-1 bg-muted rounded-full overflow-hidden">
+            <div className={cn("mt-2 h-1 rounded-full overflow-hidden", imageUrl ? "bg-white/20" : "bg-muted")}>
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="h-full bg-chart-positive rounded-full"
+                className={cn("h-full rounded-full", imageUrl ? "bg-white" : "bg-chart-positive")}
               />
             </div>
           )}
@@ -147,7 +158,7 @@ export function ModuleSection({
           transition={{ duration: 0.2 }}
           className="flex-shrink-0"
         >
-          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+          <ChevronDown className={cn("h-5 w-5", imageUrl ? "text-white" : "text-muted-foreground")} />
         </motion.div>
       </button>
 

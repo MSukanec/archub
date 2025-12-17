@@ -36,6 +36,7 @@ interface ModuleData {
   id: string;
   title: string;
   sort_index: number;
+  imageUrl?: string;
   lessons: LessonData[];
 }
 
@@ -98,6 +99,7 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
         id: module.id,
         title: module.title,
         sort_index: module.sort_index || 0,
+        imageUrl: (module as any).module_image_url,
         lessons: moduleLessons
       };
     }).sort((a, b) => a.sort_index - b.sort_index);
@@ -210,6 +212,7 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
             moduleIndex={index}
             lessons={module.lessons}
             courseId={courseId}
+            imageUrl={module.imageUrl}
             isExpanded={expandedModuleId === module.id}
             isActive={module.id === activeModuleId}
             nextRecommendedLessonId={nextRecommendedLessonId}
