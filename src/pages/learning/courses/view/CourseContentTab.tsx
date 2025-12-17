@@ -61,29 +61,40 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     enabled: !!courseId
   });
 
+  // Get module IDs from course structure
+  const moduleIds = useMemo(() => {
+    return courseStructure.map((m: any) => m.id);
+  }, [courseStructure]);
+
+  // Fetch module images using module IDs (same approach as landing page)
   const { data: moduleImagesResponse } = useQuery<Record<string, string>>({
-    queryKey: [`courses/${courseId}/module-images`],
+    queryKey: [`courses/${courseId}/module-images`, moduleIds],
     queryFn: async () => {
-      if (!courseId) return {};
+      console.log('[ModuleImages] Looking for images with moduleIds:', moduleIds);
+      if (!moduleIds.length) return {};
       try {
         const { data, error } = await supabase
           .from('media_links')
           .select(`
             course_module_id,
-            media_files (
+            media_files!inner (
               file_url,
               is_deleted
             )
           `)
-          .eq('course_id', courseId)
-          .eq('category', 'module_image');
+          .in('course_module_id', moduleIds)
+          .eq('category', 'module_image')
+          .eq('media_files.is_deleted', false);
 
+        console.log('[ModuleImages] Raw Supabase response:', { data, error });
         if (error) throw error;
 
         const imageMap: Record<string, string> = {};
         (data || []).forEach((link: any) => {
-          if (link.media_files?.length > 0) {
-            const mediaFile = link.media_files.find((m: any) => !m.is_deleted);
+          if (link.course_module_id && link.media_files) {
+            const mediaFile = Array.isArray(link.media_files) 
+              ? link.media_files[0] 
+              : link.media_files;
             if (mediaFile?.file_url) {
               imageMap[link.course_module_id] = mediaFile.file_url;
             }
@@ -96,7 +107,7 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
         return {};
       }
     },
-    enabled: !!courseId
+    enabled: moduleIds.length > 0
   });
 
   const modules = useMemo<ModuleData[]>(() => {
