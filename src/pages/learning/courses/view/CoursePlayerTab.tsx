@@ -396,9 +396,14 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
           <>
             {/* Lesson Info Card - ABOVE the video */}
             <div className="bg-card border rounded-lg p-4">
-              <div className="flex items-center justify-between gap-4 mb-2">
+              <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <h2 className="text-lg font-semibold truncate">{currentLesson.title}</h2>
+                  {currentModule && (
+                    <Badge variant="secondary" className="text-xs font-normal whitespace-nowrap">
+                      {currentModule.title}
+                    </Badge>
+                  )}
                   {currentLesson.duration_sec && (
                     <div className="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap">
                       <Clock className="h-4 w-4 flex-shrink-0" />
@@ -407,7 +412,7 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
                   )}
                 </div>
                 
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   {courseId && (
                     <FavoriteButton 
                       lessonId={currentLesson.id}
@@ -424,17 +429,13 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
                     onClick={handleMarkComplete}
                     disabled={markCompleteMutation.isPending}
                     data-testid="button-mark-complete-inline"
-                    title={currentProgress?.is_completed ? 'Desmarcar como Completa' : 'Marcar como Completa'}
-                    className={currentProgress?.is_completed ? "text-chart-positive hover:text-chart-positive" : ""}
+                    className={currentProgress?.is_completed ? "text-chart-positive hover:text-chart-positive gap-2" : "gap-2"}
                   >
                     <CheckCircle className="w-4 h-4" />
+                    <span>{currentProgress?.is_completed ? 'Completada' : 'Marcar completa'}</span>
                   </Button>
                 </div>
               </div>
-
-              {currentModule && (
-                <p className="text-sm text-muted-foreground">{currentModule.title}</p>
-              )}
             </div>
 
             {/* Video Player with Marker Overlay */}
