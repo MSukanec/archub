@@ -94,7 +94,7 @@ export function PlayerDrawer({
                 <div 
                   key={module.id}
                   className={cn(
-                    "mx-2 my-1 rounded-lg border transition-colors",
+                    "mx-3 my-1 rounded-lg border transition-colors",
                     isModuleExpanded 
                       ? "border-border bg-muted/30" 
                       : "border-transparent hover:border-border/50"
@@ -140,8 +140,8 @@ export function PlayerDrawer({
                             className={cn(
                               "w-full rounded-md cursor-pointer transition-colors flex items-center group pl-5 pr-2 py-1.5 my-px",
                               isActive 
-                                ? "bg-accent text-accent-foreground" 
-                                : "hover:bg-accent/50 text-muted-foreground"
+                                ? "" 
+                                : "hover:bg-accent/50"
                             )}
                             data-testid={`lesson-${lesson.id}`}
                           >
@@ -151,7 +151,7 @@ export function PlayerDrawer({
                               />
                             ) : isActive ? (
                               <Play 
-                                className="w-3.5 h-3.5 flex-shrink-0 text-primary"
+                                className="w-3.5 h-3.5 flex-shrink-0 text-[var(--accent)]"
                               />
                             ) : (
                               <Circle 
@@ -161,13 +161,16 @@ export function PlayerDrawer({
                             <span 
                               className={cn(
                                 "ml-2 text-xs truncate flex-1 text-left",
-                                isActive ? "text-accent-foreground font-medium" : "group-hover:text-foreground"
+                                isActive ? "text-[var(--accent)] font-medium" : "text-muted-foreground group-hover:text-foreground"
                               )}
                             >
                               {lesson.title}
                             </span>
                             {duration && (
-                              <span className="text-[10px] text-muted-foreground/60 ml-2 flex-shrink-0">
+                              <span className={cn(
+                                "text-[10px] ml-2 flex-shrink-0",
+                                isActive ? "text-[var(--accent)]" : "text-muted-foreground/60"
+                              )}>
                                 {duration}
                               </span>
                             )}
