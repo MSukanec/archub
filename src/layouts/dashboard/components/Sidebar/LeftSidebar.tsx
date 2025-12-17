@@ -19,6 +19,7 @@ import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useUnreadSupportMessages } from '@/hooks/use-unread-support-messages';
 import { useUnreadUserSupportMessages } from '@/hooks/use-unread-user-support-messages';
+import { useOpsAlertsCount } from '@/hooks/use-ops-alerts-count';
 import ButtonSidebar from "./ButtonSidebar";
 import { SidebarIconButton } from "./SidebarIconButton";
 import { PlanBadge } from "@/components/shared/PlanBadge";
@@ -128,6 +129,12 @@ export function LeftSidebar() {
   const { data: unreadCount = 0 } = useUnreadSupportMessages();
   const { data: unreadSupportCountUser = 0 } = useUnreadUserSupportMessages(userId);
   const unreadSupportCount = isAdmin ? unreadCount : unreadSupportCountUser;
+  
+  // Contador de alertas críticas del Ops Center (solo admins)
+  const { data: opsAlertsCount = 0 } = useOpsAlertsCount(isAdmin);
+  
+  // Badge total para Administración: mensajes de soporte + alertas ops críticas
+  const adminBadgeCount = unreadCount + opsAlertsCount;
   
   // Estado para popovers y modals
   const [notificationPopoverOpen, setNotificationPopoverOpen] = useState(false);
@@ -570,7 +577,7 @@ export function LeftSidebar() {
                     setSidebarLevel('admin');
                     navigate('/admin/dashboard');
                   }}
-                  badge={unreadCount}
+                  badge={adminBadgeCount}
                   testId="sidebar-button-administration"
                 />
               )}
