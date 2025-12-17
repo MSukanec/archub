@@ -64,7 +64,8 @@ export function PlayerDrawer({
   ];
 
   return (
-    <div className="w-[300px] h-full flex flex-col bg-card border-l border-border overflow-hidden">
+    <div className="h-full p-1 rounded-lg bg-[var(--content-bg)]">
+      <div className="w-[298px] h-full flex flex-col bg-card rounded-lg border border-border overflow-hidden">
       <div className="pt-4 pb-2 px-4 border-b border-border">
         <h3 className="text-sm font-semibold text-foreground mb-3">
           Contenido del Curso
@@ -198,6 +199,7 @@ export function PlayerDrawer({
           </div>
         </ScrollArea>
       )}
+      </div>
     </div>
   );
 }
