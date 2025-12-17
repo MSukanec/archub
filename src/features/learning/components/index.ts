@@ -42,3 +42,6 @@ export { default as AdminCourseStudentRow } from './admin/AdminCourseStudentRow'
 
 // ========== CONTENT EXPLORER COMPONENTS ==========
 export { ContentHeader, ModuleSection, LessonItem } from './content';
+
+// ========== PLAYER COMPONENTS ==========
+export { PlayerDrawer } from './player';

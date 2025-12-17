@@ -76,8 +76,8 @@ export function RightSidebar() {
       
       const { data, error } = await supabase
         .from('courses')
-        .eq('is_deleted', false)
         .select('*')
+        .eq('is_deleted', false)
         .eq('slug', courseSlug)
         .single();
         
@@ -172,11 +172,14 @@ export function RightSidebar() {
   // En modo learner, el panel siempre está expandido. En otros modos, solo cuando activePanel !== null
   const isExpanded = showCourseContent ? true : (activePanel !== null);
 
-  // 🔒 Por ahora, SOLO mostrar el sidebar en la tab Reproductor (en cualquier modo)
-  // Esto oculta el botón de IA en todos los demás lugares
-  const shouldShowSidebar = isOnCoursePlayerTab;
+  // 🔒 OCULTAR el sidebar en la tab Reproductor (ahora usa PlayerDrawer independiente)
+  // En otras páginas mostrar normalmente si hay contenido
+  if (isOnCoursePlayerTab) {
+    return null;
+  }
 
-  if (!shouldShowSidebar) {
+  // En modo learner fuera del reproductor, no mostrar sidebar
+  if (userMode === 'learner') {
     return null;
   }
 

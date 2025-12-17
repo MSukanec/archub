@@ -8,7 +8,7 @@ import { useCourseSidebarStore } from '@/stores/sidebarStore'
 import { VimeoPlayer } from '@/components/ui-custom/media'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
-import { LessonSummaryNote, LessonMarkers, FavoriteButton, useCourseStructure, useCourseProgress, useUpdateLessonProgress, useCoursePlayerStore } from '@/features/learning'
+import { LessonSummaryNote, LessonMarkers, FavoriteButton, useCourseStructure, useCourseProgress, useUpdateLessonProgress, useCoursePlayerStore, PlayerDrawer } from '@/features/learning'
 import Player from '@vimeo/player'
 
 interface CoursePlayerTabProps {
@@ -27,7 +27,7 @@ interface CoursePlayerTabProps {
 }
 
 export default function CoursePlayerTab({ courseId, onNavigationStateChange, initialLessonId, initialSeekTime }: CoursePlayerTabProps) {
-  const { setVisible, setData, setCurrentLesson, currentLessonId: sidebarLessonId } = useCourseSidebarStore();
+  const { setData, setCurrentLesson, currentLessonId: sidebarLessonId } = useCourseSidebarStore();
   const storeLessonId = useCoursePlayerStore(s => s.currentLessonId);
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
   const pendingSeek = useCoursePlayerStore(s => s.pendingSeek);
@@ -175,25 +175,16 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
     isPending: updateProgressMutation.isPending
   }), [updateProgressMutation, toast]);
 
-  // Crear strings estables de IDs para evitar re-renders innecesarios
-  const moduleIdsString = useMemo(() => modules.map(m => m.id).join(','), [modules]);
-  const lessonIdsString = useMemo(() => lessons.map(l => l.id).join(','), [lessons]);
-
-  // Activar el sidebar cuando hay datos
+  // Sincronizar datos con el sidebar store (para otros tabs que lo leen)
   useEffect(() => {
     if (modules.length > 0 || lessons.length > 0) {
-      setVisible(true);
       setData(modules, lessons);
     }
-
-    // Desactivar el sidebar cuando el componente se desmonta
+    
     return () => {
-      setVisible(false);
-      setData([], []);
       setCurrentLesson(undefined);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moduleIdsString, lessonIdsString]);
+  }, [modules, lessons, setData, setCurrentLesson]);
 
   // Seleccionar automáticamente la lección (inicial, última vista, o primera) cuando se cargan las lecciones
   // IMPORTANTE: Usa goToLesson del store para NO sobrescribir navegación desde marcadores
@@ -344,70 +335,75 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
     ? targetSeekTime 
     : (isPlayingRef.current ? 0 : (currentProgress?.last_position_sec || 0));
 
-  return (
-    <div className="space-y-6">
-      {/* Video Player - 100% width */}
-      {currentLesson?.vimeo_video_id ? (
-        <>
-          <VimeoPlayer 
-            vimeoId={currentLesson.vimeo_video_id}
-            initialPosition={initialPosition}
-            onProgress={handleVideoProgress}
-            onPlayerReady={setVimeoPlayer}
-            onSeekApplied={() => {
-              clearPendingSeek();
-            }}
-          />
+  const handleLessonSelect = (lessonId: string) => {
+    setCurrentLesson(lessonId);
+    goToLesson(lessonId, null);
+  };
 
-          {/* Compact Lesson Info Card - 2 rows */}
-          <div className="bg-card border rounded-lg p-4">
-            {/* Row 1: Lesson name | Duration | Action buttons (right) */}
-            <div className="flex items-center justify-between gap-4 mb-2">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <h2 className="text-lg font-semibold truncate">{currentLesson.title}</h2>
-                {currentLesson.duration_sec && (
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap">
-                    <Clock className="h-4 w-4 flex-shrink-0" />
-                    <span>{formatDuration(currentLesson.duration_sec)}</span>
-                  </div>
-                )}
-              </div>
-              
-              {/* Action buttons inline on the right */}
-              <div className="flex items-center gap-1 flex-shrink-0">
-                {courseId && (
-                  <FavoriteButton 
-                    lessonId={currentLesson.id}
-                    courseId={courseId}
-                    isFavorite={currentProgress?.is_favorite || false}
-                    variant="icon"
-                    size="sm"
-                  />
-                )}
+  return (
+    <div className="flex h-full">
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        {/* Video Player - 100% width */}
+        {currentLesson?.vimeo_video_id ? (
+          <>
+            <VimeoPlayer 
+              vimeoId={currentLesson.vimeo_video_id}
+              initialPosition={initialPosition}
+              onProgress={handleVideoProgress}
+              onPlayerReady={setVimeoPlayer}
+              onSeekApplied={() => {
+                clearPendingSeek();
+              }}
+            />
+
+            {/* Compact Lesson Info Card - 2 rows */}
+            <div className="bg-card border rounded-lg p-4">
+              {/* Row 1: Lesson name | Duration | Action buttons (right) */}
+              <div className="flex items-center justify-between gap-4 mb-2">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <h2 className="text-lg font-semibold truncate">{currentLesson.title}</h2>
+                  {currentLesson.duration_sec && (
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap">
+                      <Clock className="h-4 w-4 flex-shrink-0" />
+                      <span>{formatDuration(currentLesson.duration_sec)}</span>
+                    </div>
+                  )}
+                </div>
                 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleMarkComplete}
-                  disabled={markCompleteMutation.isPending}
-                  data-testid="button-mark-complete-inline"
-                  title={currentProgress?.is_completed ? 'Desmarcar como Completa' : 'Marcar como Completa'}
-                  className={currentProgress?.is_completed ? "text-green-600 hover:text-green-700" : ""}
-                >
-                  <CheckCircle className="w-4 h-4" />
-                </Button>
+                {/* Action buttons inline on the right */}
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {courseId && (
+                    <FavoriteButton 
+                      lessonId={currentLesson.id}
+                      courseId={courseId}
+                      isFavorite={currentProgress?.is_favorite || false}
+                      variant="icon"
+                      size="sm"
+                    />
+                  )}
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleMarkComplete}
+                    disabled={markCompleteMutation.isPending}
+                    data-testid="button-mark-complete-inline"
+                    title={currentProgress?.is_completed ? 'Desmarcar como Completa' : 'Marcar como Completa'}
+                    className={currentProgress?.is_completed ? "text-green-600 hover:text-green-700" : ""}
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
+
+              {/* Row 2: Module name */}
+              {currentModule && (
+                <p className="text-sm text-muted-foreground">{currentModule.title}</p>
+              )}
             </div>
 
-            {/* Row 2: Module name */}
-            {currentModule && (
-              <p className="text-sm text-muted-foreground">{currentModule.title}</p>
-            )}
-          </div>
-
-          {/* Notes and Markers - Side by side grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Mis Apuntes */}
+            {/* Notes Section */}
             {activeLessonId && (
               <div className="bg-card border rounded-lg p-6">
                 <div className="flex items-center gap-2 mb-4">
@@ -420,25 +416,34 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
                 <LessonSummaryNote lessonId={activeLessonId} />
               </div>
             )}
+          </>
+        ) : (
+          <div className="bg-muted/20 rounded-lg border-2 border-dashed border-muted-foreground/20 aspect-video flex items-center justify-center">
+            <div className="text-center">
+              <Play className="h-16 w-16 mx-auto mb-4 text-muted-foreground/40" />
+              <p className="text-lg font-medium text-muted-foreground">
+                {activeLessonId ? 'Esta lección no tiene video disponible' : 'Selecciona una lección para comenzar'}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
 
-            {/* Marcadores */}
-            {activeLessonId && (
-              <div className="bg-card border rounded-lg p-6">
-                <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
-              </div>
-            )}
-          </div>
-        </>
-      ) : (
-        <div className="bg-muted/20 rounded-lg border-2 border-dashed border-muted-foreground/20 aspect-video flex items-center justify-center">
-          <div className="text-center">
-            <Play className="h-16 w-16 mx-auto mb-4 text-muted-foreground/40" />
-            <p className="text-lg font-medium text-muted-foreground">
-              {activeLessonId ? 'Esta lección no tiene video disponible' : 'Selecciona una lección para comenzar'}
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Player Drawer - Right sidebar */}
+      <div className="hidden lg:block flex-shrink-0">
+        <PlayerDrawer
+          modules={modules}
+          lessons={lessons}
+          activeLessonId={activeLessonId}
+          progressMap={progressMap}
+          onLessonSelect={handleLessonSelect}
+          markersContent={
+            activeLessonId ? (
+              <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
+            ) : undefined
+          }
+        />
+      </div>
     </div>
   )
 }
