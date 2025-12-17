@@ -16,6 +16,7 @@ import {
 } from '@/features/learning';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface CourseContentTabProps {
   courseId?: string;
@@ -60,6 +61,44 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     enabled: !!courseId
   });
 
+  const { data: moduleImagesResponse } = useQuery<Record<string, string>>({
+    queryKey: [`courses/${courseId}/module-images`],
+    queryFn: async () => {
+      if (!courseId) return {};
+      try {
+        const { data, error } = await supabase
+          .from('media_links')
+          .select(`
+            entity_id,
+            media_files (
+              file_url,
+              is_deleted
+            )
+          `)
+          .eq('course_id', courseId)
+          .eq('category', 'module_image');
+
+        if (error) throw error;
+
+        const imageMap: Record<string, string> = {};
+        (data || []).forEach((link: any) => {
+          if (link.media_files?.length > 0) {
+            const mediaFile = link.media_files.find((m: any) => !m.is_deleted);
+            if (mediaFile?.file_url) {
+              imageMap[link.entity_id] = mediaFile.file_url;
+            }
+          }
+        });
+        console.log('[ModuleImages] Found images:', imageMap);
+        return imageMap;
+      } catch (error) {
+        console.error('Error fetching module images:', error);
+        return {};
+      }
+    },
+    enabled: !!courseId
+  });
+
   const modules = useMemo<ModuleData[]>(() => {
     if (!courseStructure.length) return [];
 
@@ -99,11 +138,11 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
         id: module.id,
         title: module.title,
         sort_index: module.sort_index || 0,
-        imageUrl: (module as any).module_image_url,
+        imageUrl: moduleImagesResponse?.[module.id],
         lessons: moduleLessons
       };
     }).sort((a, b) => a.sort_index - b.sort_index);
-  }, [courseStructure, courseProgress, notesResponse, markersResponse]);
+  }, [courseStructure, courseProgress, notesResponse, markersResponse, moduleImagesResponse]);
 
   const { nextRecommendedLessonId, activeModuleId } = useMemo(() => {
     for (const module of modules) {
