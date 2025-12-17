@@ -79,8 +79,8 @@ export function PlayerDrawer({
       </div>
 
       {activeTab === 'lecciones' && (
-        <ScrollArea className="flex-1 w-full">
-          <div className="flex flex-col py-2 w-full">
+        <ScrollArea className="flex-1 overflow-hidden">
+          <div className="flex flex-col py-2 px-2">
             {modules.map((module) => {
               const moduleLessons = lessons
                 .filter(l => l.module_id === module.id)
@@ -94,7 +94,7 @@ export function PlayerDrawer({
                 <div 
                   key={module.id}
                   className={cn(
-                    "mx-2 my-1 rounded-lg border transition-colors",
+                    "my-1 rounded-lg border transition-colors",
                     isModuleExpanded 
                       ? "border-border bg-muted/30" 
                       : "border-transparent hover:border-border/50"
@@ -187,8 +187,8 @@ export function PlayerDrawer({
       )}
 
       {activeTab === 'marcadores' && (
-        <ScrollArea className="flex-1 w-full">
-          <div className="p-4 w-full">
+        <ScrollArea className="flex-1 overflow-hidden">
+          <div className="p-3">
             {markersContent || (
               <div className="text-center py-8 text-muted-foreground">
                 <Bookmark className="h-8 w-8 mx-auto mb-2 opacity-50" />
