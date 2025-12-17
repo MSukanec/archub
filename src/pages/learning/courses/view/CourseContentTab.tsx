@@ -12,10 +12,9 @@ import {
   ModuleSection,
   useCourseStructure, 
   useCourseProgress, 
-  useCoursePlayerStore,
-  useUpdateLessonProgress
+  useCoursePlayerStore
 } from '@/features/learning';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
@@ -224,27 +223,47 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
 
   // Mark all lessons as complete
   const { toast } = useToast();
-  const updateProgress = useUpdateLessonProgress(courseId);
+  const queryClient = useQueryClient();
   const [markingModuleId, setMarkingModuleId] = useState<string | null>(null);
 
   const handleMarkAllComplete = async (moduleId: string, lessonIds: string[]) => {
     setMarkingModuleId(moduleId);
     try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.access_token) throw new Error('No active session');
+
+      // Make all requests in parallel
       await Promise.all(
-        lessonIds.map(lessonId => 
-          updateProgress.mutateAsync({
-            lessonId,
-            is_completed: true,
-            progress_pct: 100
+        lessonIds.map(lessonId =>
+          fetch(`/api/lessons/${lessonId}/progress`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.session.access_token}`,
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              is_completed: true,
+              progress_pct: 100
+            })
           })
         )
       );
+
+      // Invalidate cache once after all requests
+      queryClient.invalidateQueries({ queryKey: [`/api/courses/${courseId}/progress`] });
+      
       toast({
         title: "¡Módulo completado!",
         description: `Se marcaron ${lessonIds.length} lecciones como completadas`,
       });
     } catch (error) {
       console.error('Error marking lessons complete:', error);
+      toast({
+        title: "Error",
+        description: "No se pudieron marcar todas las lecciones como completadas",
+        variant: "destructive",
+      });
     } finally {
       setMarkingModuleId(null);
     }
