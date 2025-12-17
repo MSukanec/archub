@@ -60,6 +60,7 @@ Preferred communication style: Simple, everyday language.
 - **Subscription & Billing System**: Comprehensive management of plans, subscriptions, payments, billing cycles, proration, seat-based billing, coupons, soft-locks, and cron jobs for expiry and downgrades.
 - **Internationalization (i18n) System**: Lightweight locale system in `src/lib/i18n/` with `I18nProvider`, `useI18n` hook, and typed translations (es/en). Table component labels use `getTableLabels(locale)` for dynamic language switching. Default locale is Spanish with browser detection fallback.
 - **Table Component Architecture**: Modular table system in `src/components/shared/table/` with separate components (TableDesktop, TableMobile, TableRow, TableGroup) and hooks (useTableSort, useTableFilter, useTablePagination, useTableSelection). Original monolithic Table.tsx in `tables-and-trees/` maintained for backward compatibility.
+- **Operations Center (Admin Ops)**: Enterprise-grade monitoring and incident management at `/admin/ops`. Features automated health checks (payment/plan mismatches, stuck webhooks, failed jobs, system integrity), persistent alerts with deduplication, preventive flow blocking (`useFlowBlocking` hook + `FlowBlockedBanner`), guided repair actions (acknowledge, resolve, apply_plan_to_org, create_missing_subscription, retry_webhook_processing), and runbooks. Tables: `ops_alerts`, `ops_check_runs`, `ops_runbooks`. Pending: `ops_repair_logs` table for repair action audit logging.
 
 ## External Dependencies
 - **Supabase**: Authentication.

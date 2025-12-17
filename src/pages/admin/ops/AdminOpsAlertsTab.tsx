@@ -6,16 +6,37 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   CheckCircle2,
   Clock,
   Eye,
   Check,
   X,
   RotateCcw,
-  RefreshCw
+  RefreshCw,
+  Wrench,
+  Loader2,
+  AlertTriangle
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+interface RepairAction {
+  id: string;
+  label: string;
+  description: string;
+  dangerous: boolean;
+  requiredEvidence?: string[];
+}
 
 interface OpsAlert {
   id: string;
@@ -87,130 +108,238 @@ function getStatusBadge(status: string) {
   }
 }
 
-function AlertCard({ alert, onAction }: { alert: OpsAlert; onAction: (id: string, action: string) => void }) {
+function AlertCard({ 
+  alert, 
+  onAction,
+  onExecuteRepair
+}: { 
+  alert: OpsAlert; 
+  onAction: (id: string, action: string) => void;
+  onExecuteRepair: (alertId: string, actionId: string) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
+  const [showRepairActions, setShowRepairActions] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<RepairAction | null>(null);
+  const { toast } = useToast();
+
+  const { data: repairActionsData, isLoading: loadingActions } = useQuery<{ actions: RepairAction[] }>({
+    queryKey: ['/api/admin/ops/repair-actions', alert.alert_type],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/ops/repair-actions/${encodeURIComponent(alert.alert_type)}`, {
+        credentials: 'include'
+      });
+      if (!res.ok) throw new Error('Failed to fetch repair actions');
+      return res.json();
+    },
+    enabled: showRepairActions,
+  });
+
+  const repairActions = repairActionsData?.actions || [];
+
+  const handleConfirmRepair = () => {
+    if (confirmAction) {
+      onExecuteRepair(alert.id, confirmAction.id);
+      setConfirmAction(null);
+      setShowRepairActions(false);
+    }
+  };
 
   return (
-    <Card className={`border-l-4 ${
-      alert.severity === 'critical' ? 'border-l-red-600' :
-      alert.severity === 'high' ? 'border-l-red-500' :
-      alert.severity === 'medium' ? 'border-l-yellow-500' : 'border-l-gray-400'
-    }`} data-testid={`alert-card-${alert.id}`}>
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              {getSeverityBadge(alert.severity)}
-              {getStatusBadge(alert.status)}
-              <span className="text-xs text-muted-foreground">
-                {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true, locale: es })}
-              </span>
+    <>
+      <Card className={`border-l-4 ${
+        alert.severity === 'critical' ? 'border-l-red-600' :
+        alert.severity === 'high' ? 'border-l-red-500' :
+        alert.severity === 'medium' ? 'border-l-yellow-500' : 'border-l-gray-400'
+      }`} data-testid={`alert-card-${alert.id}`}>
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                {getSeverityBadge(alert.severity)}
+                {getStatusBadge(alert.status)}
+                <span className="text-xs text-muted-foreground">
+                  {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true, locale: es })}
+                </span>
+              </div>
+              <h4 className="font-medium text-sm mb-1">{alert.title}</h4>
+              {alert.description && (
+                <p className="text-xs text-muted-foreground line-clamp-2">{alert.description}</p>
+              )}
+              {alert.organizations && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Org: {alert.organizations.name}
+                </p>
+              )}
             </div>
-            <h4 className="font-medium text-sm mb-1">{alert.title}</h4>
-            {alert.description && (
-              <p className="text-xs text-muted-foreground line-clamp-2">{alert.description}</p>
-            )}
-            {alert.organizations && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Org: {alert.organizations.name}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={() => setExpanded(!expanded)}
-              data-testid={`button-expand-${alert.id}`}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-            {alert.status === 'open' && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-blue-600"
-                onClick={() => onAction(alert.id, 'ack')}
-                data-testid={`button-ack-${alert.id}`}
-              >
-                <Check className="h-4 w-4" />
-              </Button>
-            )}
-            {(alert.status === 'open' || alert.status === 'ack') && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-green-600"
-                onClick={() => onAction(alert.id, 'resolve')}
-                data-testid={`button-resolve-${alert.id}`}
-              >
-                <CheckCircle2 className="h-4 w-4" />
-              </Button>
-            )}
-            {(alert.status === 'open' || alert.status === 'ack') && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-gray-500"
-                onClick={() => onAction(alert.id, 'dismiss')}
-                data-testid={`button-dismiss-${alert.id}`}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-            {(alert.status === 'resolved' || alert.status === 'dismissed') && (
+            <div className="flex items-center gap-1">
+              {(alert.status === 'open' || alert.status === 'ack') && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-amber-600"
+                  onClick={() => setShowRepairActions(!showRepairActions)}
+                  data-testid={`button-repair-${alert.id}`}
+                  title="Acciones de reparación"
+                >
+                  <Wrench className="h-4 w-4" />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
-                onClick={() => onAction(alert.id, 'reopen')}
-                data-testid={`button-reopen-${alert.id}`}
+                onClick={() => setExpanded(!expanded)}
+                data-testid={`button-expand-${alert.id}`}
               >
-                <RotateCcw className="h-4 w-4" />
+                <Eye className="h-4 w-4" />
               </Button>
-            )}
-          </div>
-        </div>
-
-        {expanded && (
-          <div className="mt-4 pt-4 border-t">
-            <div className="text-xs space-y-2">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-muted-foreground">Tipo:</span>{' '}
-                  <code className="bg-muted px-1 rounded">{alert.alert_type}</code>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Provider:</span>{' '}
-                  {alert.provider || '-'}
-                </div>
-                {alert.provider_payment_id && (
-                  <div>
-                    <span className="text-muted-foreground">Payment ID:</span>{' '}
-                    <code className="bg-muted px-1 rounded text-xs">{alert.provider_payment_id}</code>
-                  </div>
-                )}
-                {alert.fingerprint && (
-                  <div>
-                    <span className="text-muted-foreground">Fingerprint:</span>{' '}
-                    <code className="bg-muted px-1 rounded text-xs">{alert.fingerprint.slice(0, 12)}...</code>
-                  </div>
-                )}
-              </div>
-              {Object.keys(alert.evidence).length > 0 && (
-                <div className="mt-2">
-                  <span className="text-muted-foreground">Evidence:</span>
-                  <pre className="bg-muted p-2 rounded mt-1 overflow-auto max-h-40 text-xs">
-                    {JSON.stringify(alert.evidence, null, 2)}
-                  </pre>
-                </div>
+              {alert.status === 'open' && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-blue-600"
+                  onClick={() => onAction(alert.id, 'ack')}
+                  data-testid={`button-ack-${alert.id}`}
+                >
+                  <Check className="h-4 w-4" />
+                </Button>
+              )}
+              {(alert.status === 'open' || alert.status === 'ack') && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-green-600"
+                  onClick={() => onAction(alert.id, 'resolve')}
+                  data-testid={`button-resolve-${alert.id}`}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                </Button>
+              )}
+              {(alert.status === 'open' || alert.status === 'ack') && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-gray-500"
+                  onClick={() => onAction(alert.id, 'dismiss')}
+                  data-testid={`button-dismiss-${alert.id}`}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+              {(alert.status === 'resolved' || alert.status === 'dismissed') && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => onAction(alert.id, 'reopen')}
+                  data-testid={`button-reopen-${alert.id}`}
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
               )}
             </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          {showRepairActions && (
+            <div className="mt-4 pt-4 border-t border-amber-200 bg-amber-50 dark:bg-amber-950/20 -mx-4 px-4 pb-4 rounded-b-lg">
+              <div className="flex items-center gap-2 mb-3">
+                <Wrench className="h-4 w-4 text-amber-600" />
+                <span className="text-sm font-medium text-amber-800 dark:text-amber-200">Acciones de Reparación</span>
+              </div>
+              {loadingActions ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Cargando acciones...
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {repairActions.map((action) => (
+                    <div 
+                      key={action.id}
+                      className="flex items-center justify-between gap-4 p-3 bg-white dark:bg-background rounded-lg border"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{action.label}</p>
+                        <p className="text-xs text-muted-foreground">{action.description}</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant={action.dangerous ? "destructive" : "outline"}
+                        onClick={() => setConfirmAction(action)}
+                        data-testid={`button-action-${action.id}`}
+                      >
+                        Ejecutar
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {expanded && (
+            <div className="mt-4 pt-4 border-t">
+              <div className="text-xs space-y-2">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-muted-foreground">Tipo:</span>{' '}
+                    <code className="bg-muted px-1 rounded">{alert.alert_type}</code>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Provider:</span>{' '}
+                    {alert.provider || '-'}
+                  </div>
+                  {alert.provider_payment_id && (
+                    <div>
+                      <span className="text-muted-foreground">Payment ID:</span>{' '}
+                      <code className="bg-muted px-1 rounded text-xs">{alert.provider_payment_id}</code>
+                    </div>
+                  )}
+                  {alert.fingerprint && (
+                    <div>
+                      <span className="text-muted-foreground">Fingerprint:</span>{' '}
+                      <code className="bg-muted px-1 rounded text-xs">{alert.fingerprint.slice(0, 12)}...</code>
+                    </div>
+                  )}
+                </div>
+                {Object.keys(alert.evidence).length > 0 && (
+                  <div className="mt-2">
+                    <span className="text-muted-foreground">Evidence:</span>
+                    <pre className="bg-muted p-2 rounded mt-1 overflow-auto max-h-40 text-xs">
+                      {JSON.stringify(alert.evidence, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={!!confirmAction} onOpenChange={() => setConfirmAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              {confirmAction?.dangerous && <AlertTriangle className="h-5 w-5 text-amber-500" />}
+              Confirmar acción
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p className="font-medium">{confirmAction?.label}</p>
+              <p>{confirmAction?.description}</p>
+              <p className="text-xs bg-muted p-2 rounded">
+                Esta acción se registrará en el log de auditoría.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmRepair}>
+              Confirmar y Ejecutar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
@@ -251,8 +380,38 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
     },
   });
 
+  const executeRepairMutation = useMutation({
+    mutationFn: async ({ alertId, actionId }: { alertId: string; actionId: string }) => {
+      const res = await apiRequest('POST', `/api/admin/ops/alerts/${alertId}/repair`, { actionId });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({ 
+          title: 'Acción ejecutada', 
+          description: data.message,
+        });
+      } else {
+        toast({ 
+          title: 'Error', 
+          description: data.message, 
+          variant: 'destructive' 
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/alerts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/stats'] });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    },
+  });
+
   const handleAction = (id: string, action: string) => {
     updateAlertMutation.mutate({ id, action });
+  };
+
+  const handleExecuteRepair = (alertId: string, actionId: string) => {
+    executeRepairMutation.mutate({ alertId, actionId });
   };
 
   return (
@@ -341,7 +500,12 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
       ) : (
         <div className="space-y-2">
           {alerts.map((alert) => (
-            <AlertCard key={alert.id} alert={alert} onAction={handleAction} />
+            <AlertCard 
+              key={alert.id} 
+              alert={alert} 
+              onAction={handleAction}
+              onExecuteRepair={handleExecuteRepair}
+            />
           ))}
         </div>
       )}

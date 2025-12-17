@@ -115,4 +115,9 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
   app.get("/api/admin/ops/check-runs", opsController.getOpsCheckRuns);
   app.get("/api/admin/ops/runbooks", opsController.getOpsRunbooks);
   app.post("/api/admin/ops/runbooks", opsController.upsertOpsRunbook);
+
+  // Repair Actions
+  app.get("/api/admin/ops/repair-actions/:alertType", opsController.getRepairActions);
+  app.post("/api/admin/ops/alerts/:id/repair", opsController.executeRepairAction);
+  app.get("/api/admin/ops/repair-logs", opsController.getRepairLogs);
 }
