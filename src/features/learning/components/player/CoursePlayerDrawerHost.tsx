@@ -13,16 +13,20 @@ export function CoursePlayerDrawerHost() {
   const activeTab = useCoursePlayerStore(s => s.activeTab);
   const setActiveTab = useCoursePlayerStore(s => s.setActiveTab);
   
-  // Sync activeTab from URL query params on location change (for deep links)
+  // Sync activeTab from URL query params on mount/location change (for deep links)
   useEffect(() => {
     if (match && params?.courseSlug) {
       const searchParams = new URLSearchParams(window.location.search);
       const urlTab = searchParams.get('tab');
-      if (urlTab === 'Reproductor' && activeTab !== 'Reproductor') {
-        setActiveTab('Reproductor');
+      if (urlTab === 'Reproductor') {
+        // Use getState() to avoid dependency on activeTab
+        const currentTab = useCoursePlayerStore.getState().activeTab;
+        if (currentTab !== 'Reproductor') {
+          setActiveTab('Reproductor');
+        }
       }
     }
-  }, [location, match, params?.courseSlug, activeTab, setActiveTab]);
+  }, [location, match, params?.courseSlug, setActiveTab]);
   
   const isOnCoursePlayerTab = match && !!params?.courseSlug && activeTab === 'Reproductor';
   const courseSlug = isOnCoursePlayerTab ? params?.courseSlug : null;
