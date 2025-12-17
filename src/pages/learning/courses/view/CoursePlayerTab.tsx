@@ -170,52 +170,63 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
   }), [updateProgressMutation, toast]);
 
   // Sincronizar datos con el sidebar store (para otros tabs que lo leen)
+  // Use JSON.stringify comparison to prevent unnecessary updates
+  const modulesJson = JSON.stringify(modules.map(m => m.id));
+  const lessonsJson = JSON.stringify(lessons.map(l => l.id));
+  
   useEffect(() => {
     if (modules.length > 0 || lessons.length > 0) {
       setData(modules, lessons);
     }
-    
+  }, [modulesJson, lessonsJson]);
+  
+  // Cleanup on unmount only
+  useEffect(() => {
     return () => {
       setCurrentLesson(undefined);
       setVimeoPlayer(null);
     };
-  }, [modules, lessons, setData, setCurrentLesson, setVimeoPlayer]);
+  }, []);
 
   // Seleccionar automáticamente la lección (inicial, última vista, o primera) cuando se cargan las lecciones
-  // IMPORTANTE: Usa goToLesson del store para NO sobrescribir navegación desde marcadores
+  // IMPORTANTE: Solo se ejecuta una vez cuando las lecciones se cargan y no hay lección activa
+  const hasAutoSelectedRef = useRef(false);
+  
   useEffect(() => {
-    if (orderedLessons.length > 0 && !activeLessonId) {
-      let targetLesson = null;
+    // Solo ejecutar una vez cuando hay lecciones y no hay activeLessonId
+    if (hasAutoSelectedRef.current || orderedLessons.length === 0 || activeLessonId) {
+      return;
+    }
+    
+    hasAutoSelectedRef.current = true;
+    
+    let targetLesson = null;
+    
+    // 1. Si hay initialLessonId (deep link o marcador), usar esa
+    if (initialLessonId) {
+      targetLesson = orderedLessons.find(l => l.id === initialLessonId);
+    }
+    
+    // 2. Si no, buscar la última lección vista (la más reciente en progressData)
+    if (!targetLesson && progressData && progressData.length > 0) {
+      const sortedProgress = [...progressData]
+        .filter(p => orderedLessons.some(l => l.id === p.lesson_id))
+        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
       
-      // 1. Si hay initialLessonId (deep link o marcador), usar esa
-      if (initialLessonId) {
-        targetLesson = orderedLessons.find(l => l.id === initialLessonId);
-      }
-      
-      // 2. Si no, buscar la última lección vista (la más reciente en progressData)
-      if (!targetLesson && progressData && progressData.length > 0) {
-        // Ordenar por updated_at descendente y tomar la primera
-        const sortedProgress = [...progressData]
-          .filter(p => orderedLessons.some(l => l.id === p.lesson_id))
-          .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
-        
-        if (sortedProgress.length > 0) {
-          const lastViewedLessonId = sortedProgress[0].lesson_id;
-          targetLesson = orderedLessons.find(l => l.id === lastViewedLessonId);
-        }
-      }
-      
-      // 3. Si no hay última lección vista, usar la primera del primer módulo
-      if (!targetLesson) {
-        targetLesson = orderedLessons[0];
-      }
-      
-      if (targetLesson) {
-        goToLesson(targetLesson.id, null);
+      if (sortedProgress.length > 0) {
+        targetLesson = orderedLessons.find(l => l.id === sortedProgress[0].lesson_id);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderedLessons, activeLessonId, initialLessonId, progressData, goToLesson]);
+    
+    // 3. Si no hay última lección vista, usar la primera del primer módulo
+    if (!targetLesson) {
+      targetLesson = orderedLessons[0];
+    }
+    
+    if (targetLesson) {
+      goToLesson(targetLesson.id, null);
+    }
+  }, [orderedLessons.length, activeLessonId, initialLessonId]);
 
 
   // Navigation handlers with useCallback - use goToLesson from store
