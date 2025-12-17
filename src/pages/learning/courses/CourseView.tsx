@@ -154,11 +154,38 @@ export default function CourseView() {
     onMarkComplete: () => void;
     isMarkingComplete: boolean;
     isCompleted: boolean;
+    currentLesson?: { title: string; duration_sec?: number | null };
+    currentModule?: { title: string };
   } | null>(null);
+
+  // Format duration for display
+  const formatDuration = (seconds: number | null | undefined) => {
+    if (!seconds) return '';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Build dynamic title based on active tab
+  const getHeaderTitle = () => {
+    if (activeTab === 'Reproductor' && navigationState?.currentLesson) {
+      const parts = [course?.title || 'Curso'];
+      if (navigationState.currentModule) {
+        parts.push(navigationState.currentModule.title);
+      }
+      let lessonPart = navigationState.currentLesson.title;
+      if (navigationState.currentLesson.duration_sec) {
+        lessonPart += ` (${formatDuration(navigationState.currentLesson.duration_sec)})`;
+      }
+      parts.push(lessonPart);
+      return parts.join(' | ');
+    }
+    return course?.title || "Curso";
+  };
 
   const headerProps = {
     icon: BookOpen,
-    title: course?.title || "Curso",
+    title: getHeaderTitle(),
     showBackButton: true,
     onBackClick: () => {
       navigate('/learning/courses');

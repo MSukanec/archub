@@ -21,6 +21,8 @@ interface CoursePlayerTabProps {
     onMarkComplete: () => void;
     isMarkingComplete: boolean;
     isCompleted: boolean;
+    currentLesson?: { title: string; duration_sec?: number | null };
+    currentModule?: { title: string };
   } | null) => void;
   initialLessonId?: string;
   initialSeekTime?: number;
@@ -327,6 +329,8 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
       if (activeLessonId && orderedLessons.length > 0) {
         const currentProgress = progressMap.get(activeLessonId);
         const isCompleted = currentProgress?.is_completed || false;
+        const lesson = lessons.find(l => l.id === activeLessonId);
+        const module = lesson ? modules.find(m => m.id === lesson.module_id) : null;
         
         onNavigationStateChange({
           hasPrev: navigationInfo.hasPrev,
@@ -335,14 +339,16 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
           onNext: handleNext,
           onMarkComplete: handleMarkComplete,
           isMarkingComplete: markCompleteMutation.isPending,
-          isCompleted
+          isCompleted,
+          currentLesson: lesson ? { title: lesson.title, duration_sec: lesson.duration_sec } : undefined,
+          currentModule: module ? { title: module.title } : undefined
         });
       } else {
         onNavigationStateChange(null);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeLessonId, navigationInfo.hasPrev, navigationInfo.hasNext, orderedLessons.length, markCompleteMutation.isPending]);
+  }, [activeLessonId, navigationInfo.hasPrev, navigationInfo.hasNext, orderedLessons.length, markCompleteMutation.isPending, lessons, modules]);
 
   // Group lessons by module
   const getLessonsForModule = (moduleId: string) => {
