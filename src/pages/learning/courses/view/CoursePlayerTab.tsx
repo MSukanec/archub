@@ -44,16 +44,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
   // SINGLE SOURCE OF TRUTH: coursePlayerStore.currentLessonId has priority
   const activeLessonId = storeLessonId || sidebarLessonId || null;
   
-  // Sync coursePlayerStore.currentLessonId with sidebar store (UNIDIRECTIONAL: store → sidebar)
-  // Use ref to avoid re-triggering on sidebarLessonId changes
-  const lastSyncedLessonIdRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (storeLessonId && storeLessonId !== lastSyncedLessonIdRef.current) {
-      lastSyncedLessonIdRef.current = storeLessonId;
-      setCurrentLesson(storeLessonId);
-    }
-  }, [storeLessonId, setCurrentLesson]);
-  
   // Detectar cambio de lección y resetear flag de reproducción
   useEffect(() => {
     if (activeLessonId !== currentLessonIdRef.current) {

@@ -34,7 +34,7 @@ export function CoursePlayerDrawerHost() {
   const storeLessonId = useCoursePlayerStore(s => s.currentLessonId);
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
   const vimeoPlayer = useCoursePlayerStore(s => s.vimeoPlayer);
-  const { currentLessonId: sidebarLessonId, setCurrentLesson, modules, lessons } = useCourseSidebarStore();
+  const { currentLessonId: sidebarLessonId, modules, lessons } = useCourseSidebarStore();
   
   const activeLessonId = storeLessonId || sidebarLessonId || null;
 
@@ -67,14 +67,12 @@ export function CoursePlayerDrawerHost() {
   }, [progressData]);
 
   const handleLessonSelect = useCallback((lessonId: string) => {
-    setCurrentLesson(lessonId);
     goToLesson(lessonId, null);
-  }, [setCurrentLesson, goToLesson]);
+  }, [goToLesson]);
 
   const handleMarkerLessonSelect = useCallback((lessonId: string, timeSec: number | null) => {
-    setCurrentLesson(lessonId);
     goToLesson(lessonId, timeSec);
-  }, [setCurrentLesson, goToLesson]);
+  }, [goToLesson]);
 
   if (!isOnCoursePlayerTab || modules.length === 0) {
     return null;
