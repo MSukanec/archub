@@ -240,28 +240,35 @@ export async function getOrganizationAudit(req: Request, res: Response) {
     };
     
     if (owner) {
-      const { data: founderCourse } = await supabaseAdmin
-        .from("courses")
-        .select("id, title")
-        .eq("is_founder_bonus", true)
-        .limit(1)
+      const { data: appSetting } = await supabaseAdmin
+        .from("app_settings")
+        .select("value")
+        .eq("key", "founder_bonus_course_id")
         .maybeSingle();
       
-      if (founderCourse) {
-        const { data: enrollment } = await supabaseAdmin
-          .from("user_course_purchases")
-          .select("id, access_type, expires_at")
-          .eq("user_id", owner.id)
-          .eq("course_id", founderCourse.id)
-          .maybeSingle();
+      if (appSetting?.value) {
+        const { data: founderCourse } = await supabaseAdmin
+          .from("courses")
+          .select("id, title")
+          .eq("id", appSetting.value)
+          .single();
         
-        founderCourseEnrollment = {
-          enrolled: !!enrollment,
-          course_id: founderCourse.id,
-          course_name: founderCourse.title,
-          access_type: enrollment?.access_type || null,
-          expires_at: enrollment?.expires_at || null,
-        };
+        if (founderCourse) {
+          const { data: enrollment } = await supabaseAdmin
+            .from("user_course_purchases")
+            .select("id, access_type, expires_at")
+            .eq("user_id", owner.id)
+            .eq("course_id", founderCourse.id)
+            .maybeSingle();
+          
+          founderCourseEnrollment = {
+            enrolled: !!enrollment,
+            course_id: founderCourse.id,
+            course_name: founderCourse.title,
+            access_type: enrollment?.access_type || null,
+            expires_at: enrollment?.expires_at || null,
+          };
+        }
       }
     }
     
@@ -460,12 +467,23 @@ export async function enrollOwnerInFounderCourse(req: Request, res: Response) {
     
     const ownerId = org.owner_id;
     
+    const { data: appSetting } = await supabaseAdmin
+      .from("app_settings")
+      .select("value")
+      .eq("key", "founder_bonus_course_id")
+      .maybeSingle();
+    
+    if (!appSetting?.value) {
+      return res.status(404).json({ error: "Founder course not configured in app_settings" });
+    }
+    
+    const founderCourseId = appSetting.value;
+    
     const { data: founderCourse } = await supabaseAdmin
       .from("courses")
       .select("id, title")
-      .eq("is_founder_bonus", true)
-      .limit(1)
-      .maybeSingle();
+      .eq("id", founderCourseId)
+      .single();
     
     if (!founderCourse) {
       return res.status(404).json({ error: "Founder course not found" });
