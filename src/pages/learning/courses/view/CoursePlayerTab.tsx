@@ -438,7 +438,7 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
             </div>
 
             {/* Video Player with Marker Overlay */}
-            <div className="relative">
+            <div className="relative group">
               <VimeoPlayer 
                 vimeoId={currentLesson.vimeo_video_id}
                 initialPosition={initialPosition}
@@ -448,12 +448,12 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
                   clearPendingSeek();
                 }}
               />
-              {/* Marker button overlay */}
+              {/* Marker button overlay - appears on hover */}
               <Button
                 onClick={handleAddMarkerFromVideo}
                 size="sm"
                 variant="secondary"
-                className="absolute bottom-4 right-4 gap-2 bg-background/90 backdrop-blur-sm shadow-lg hover:bg-background"
+                className="absolute top-4 left-4 gap-2 bg-black/70 text-white backdrop-blur-sm shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/80"
                 disabled={!vimeoPlayer || createMarkerMutation.isPending}
                 data-testid="button-add-marker-overlay"
               >
