@@ -33,8 +33,10 @@ export function PlanCard({
   const isFree = plan.name.toLowerCase() === 'free';
   const isTeams = plan.name.toLowerCase() === 'teams';
   
-  // Only Teams plan is blocked - Pro and Free are available
-  const status = isTeams ? (plan.status || 'coming_soon') : 'available';
+  // TEST MODE: Both Pro and Teams are blocked for testing
+  // Change back to: isTeams ? ... when ready for production
+  const isPro = plan.name.toLowerCase() === 'pro';
+  const status = (isTeams || isPro) ? (plan.status || 'coming_soon') : 'available';
   const isStatusBlocking = status !== 'available' && !isAdmin;
 
   const getMonthlyEquivalent = () => {
