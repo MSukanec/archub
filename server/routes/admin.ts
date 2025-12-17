@@ -10,6 +10,7 @@ import * as enrollmentsController from '../controllers/admin/enrollments.control
 import * as resetTestDataController from '../controllers/admin/reset-test-data.controller.js';
 import * as subscriptionsController from '../controllers/admin/subscriptions.controller.js';
 import * as plansController from '../controllers/admin/plans.controller.js';
+import * as auditController from '../controllers/admin/audit.controller.js';
 import { runScheduledDowngradesJob } from '../cron/jobs/execute-scheduled-downgrades.js';
 import { runSubscriptionExpiryNotifier } from '../cron/jobs/subscription-expiry-notifier.js';
 
@@ -97,4 +98,11 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
       res.status(500).json({ ok: false, error: error.message });
     }
   });
+
+  // ==================== AUDIT ====================
+  app.get("/api/admin/audit/organizations", auditController.getOrganizationsList);
+  app.get("/api/admin/audit/organizations/:id", auditController.getOrganizationAudit);
+  app.post("/api/admin/audit/organizations/:id/repair-founder", auditController.repairFounderStatus);
+  app.post("/api/admin/audit/organizations/:id/enroll-founder-course", auditController.enrollOwnerInFounderCourse);
+  app.post("/api/admin/audit/organizations/:id/sync-plan", auditController.syncOrganizationPlan);
 }

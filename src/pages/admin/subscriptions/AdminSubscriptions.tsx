@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CreditCard, Plus, RotateCcw, Play, Bell } from 'lucide-react';
+import { CreditCard, Plus, RotateCcw, Play, Bell, Search } from 'lucide-react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useGlobalModalStore } from '@/components/modal';
@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import AdminSubscriptionsTab from './AdminSubscriptionsTab';
 import AdminPlansTab from './AdminPlansTab';
+import AdminAuditTab from './AdminAuditTab';
 
 const AdminSubscriptions = () => {
   const [activeTab, setActiveTab] = useState('subscriptions');
@@ -24,7 +25,10 @@ const AdminSubscriptions = () => {
 
   const executeDowngradesCronMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest('POST', '/api/admin/cron/execute-scheduled-downgrades');
+      const response = await apiRequest('POST', '/api/admin/cron/execute-scheduled-downgrades');
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Error al ejecutar cron');
+      return data;
     },
     onSuccess: (data: any) => {
       toast({
@@ -43,7 +47,10 @@ const AdminSubscriptions = () => {
 
   const executeNotifierCronMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest('POST', '/api/admin/cron/execute-expiry-notifier');
+      const response = await apiRequest('POST', '/api/admin/cron/execute-expiry-notifier');
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Error al ejecutar notificador');
+      return data;
     },
     onSuccess: (data: any) => {
       toast({
@@ -123,6 +130,11 @@ const AdminSubscriptions = () => {
         label: 'Planes',
         isActive: activeTab === 'plans'
       },
+      {
+        id: 'audit',
+        label: 'Auditoría',
+        isActive: activeTab === 'audit'
+      },
     ],
     onTabChange: (tabId: string) => setActiveTab(tabId),
     actions: getActions(),
@@ -132,6 +144,7 @@ const AdminSubscriptions = () => {
     <Layout wide headerProps={headerProps}>
       {activeTab === 'subscriptions' && <AdminSubscriptionsTab />}
       {activeTab === 'plans' && <AdminPlansTab />}
+      {activeTab === 'audit' && <AdminAuditTab />}
     </Layout>
   );
 };
