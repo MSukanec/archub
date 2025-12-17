@@ -114,7 +114,7 @@ export function PlayerDrawer({
                       isModuleExpanded && "rotate-90"
                     )} />
                     <span className={cn(
-                      "ml-2 text-sm font-medium truncate flex-1 text-left",
+                      "ml-2 text-sm font-medium flex-1 text-left break-words line-clamp-2",
                       hasActiveLesson
                         ? "text-primary"
                         : "text-muted-foreground group-hover:text-foreground"
@@ -161,7 +161,7 @@ export function PlayerDrawer({
                             )}
                             <span 
                               className={cn(
-                                "ml-2 text-xs truncate flex-1 text-left",
+                                "ml-2 text-xs flex-1 text-left break-words line-clamp-2",
                                 isActive ? "text-[var(--accent)] font-medium" : "text-muted-foreground group-hover:text-foreground"
                               )}
                             >
