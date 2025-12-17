@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useCallback, useRef, useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { Play, BookOpen, CheckCircle, ChevronLeft, ChevronRight, FileText, Bookmark, Clock } from 'lucide-react'
+import { Play, CheckCircle, FileText, Bookmark, Clock } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
@@ -343,22 +343,10 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
 
   return (
     <div className="space-y-6">
-      {/* Video Player - 100% width */}
         {currentLesson?.vimeo_video_id ? (
           <>
-            <VimeoPlayer 
-              vimeoId={currentLesson.vimeo_video_id}
-              initialPosition={initialPosition}
-              onProgress={handleVideoProgress}
-              onPlayerReady={setVimeoPlayer}
-              onSeekApplied={() => {
-                clearPendingSeek();
-              }}
-            />
-
-            {/* Compact Lesson Info Card - 2 rows */}
+            {/* Lesson Info Card - ABOVE the video */}
             <div className="bg-card border rounded-lg p-4">
-              {/* Row 1: Lesson name | Duration | Action buttons (right) */}
               <div className="flex items-center justify-between gap-4 mb-2">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <h2 className="text-lg font-semibold truncate">{currentLesson.title}</h2>
@@ -370,7 +358,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
                   )}
                 </div>
                 
-                {/* Action buttons inline on the right */}
                 <div className="flex items-center gap-1 flex-shrink-0">
                   {courseId && (
                     <FavoriteButton 
@@ -389,26 +376,36 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
                     disabled={markCompleteMutation.isPending}
                     data-testid="button-mark-complete-inline"
                     title={currentProgress?.is_completed ? 'Desmarcar como Completa' : 'Marcar como Completa'}
-                    className={currentProgress?.is_completed ? "text-green-600 hover:text-green-700" : ""}
+                    className={currentProgress?.is_completed ? "text-chart-positive hover:text-chart-positive" : ""}
                   >
                     <CheckCircle className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
 
-              {/* Row 2: Module name */}
               {currentModule && (
                 <p className="text-sm text-muted-foreground">{currentModule.title}</p>
               )}
             </div>
 
+            {/* Video Player */}
+            <VimeoPlayer 
+              vimeoId={currentLesson.vimeo_video_id}
+              initialPosition={initialPosition}
+              onProgress={handleVideoProgress}
+              onPlayerReady={setVimeoPlayer}
+              onSeekApplied={() => {
+                clearPendingSeek();
+              }}
+            />
+
             {/* Notes and Markers Section */}
             {activeLessonId && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-card border rounded-lg p-6">
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="flex items-center gap-2 mb-3">
                     <FileText className="h-5 w-5 text-[var(--accent)]" />
-                    <h3 className="font-semibold">Mis Apuntes</h3>
+                    <h3 className="text-base font-semibold">Mis Apuntes</h3>
                   </div>
                   <p className="text-sm text-muted-foreground mb-4">
                     Resumen general de la lección - se guarda automáticamente mientras escribes.
@@ -417,14 +414,24 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
                 </div>
 
                 <div className="bg-card border rounded-lg p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Bookmark className="h-5 w-5 text-[var(--accent)]" />
-                    <h3 className="font-semibold">Mis Marcadores</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Marca momentos importantes del video para volver a ellos fácilmente.
-                  </p>
-                  <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
+                  <LessonMarkers 
+                    lessonId={activeLessonId} 
+                    vimeoPlayer={vimeoPlayer}
+                    renderHeader={(addButton) => (
+                      <>
+                        <div className="flex items-center justify-between gap-2 mb-3">
+                          <div className="flex items-center gap-2">
+                            <Bookmark className="h-5 w-5 text-[var(--accent)]" />
+                            <h3 className="text-base font-semibold">Mis Marcadores</h3>
+                          </div>
+                          {addButton}
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Marca momentos importantes del video para volver a ellos fácilmente.
+                        </p>
+                      </>
+                    )}
+                  />
                 </div>
               </div>
             )}

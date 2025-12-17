@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bookmark, Plus, Trash2, Clock, Loader2, ArrowRight } from 'lucide-react';
+import { Bookmark, Plus, Trash2, Clock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -10,13 +10,14 @@ import type { CourseLessonNote } from '@shared/schema';
 interface LessonMarkersProps {
   lessonId: string;
   vimeoPlayer?: any | null;
+  renderHeader?: (addButton: React.ReactNode) => React.ReactNode;
 }
 
 interface MarkerWithSaveStatus extends CourseLessonNote {
   isSaving?: boolean;
 }
 
-export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
+export function LessonMarkers({ lessonId, vimeoPlayer, renderHeader }: LessonMarkersProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const { toast } = useToast();
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
@@ -187,26 +188,25 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
     );
   }
 
+  // Expose the add marker function and current time for parent components
+  const addMarkerButton = (
+    <Button
+      onClick={handleAddMarker}
+      size="sm"
+      variant="default"
+      className="gap-2"
+      disabled={!vimeoPlayer || createMarkerMutation.isPending}
+      data-testid="button-add-marker"
+    >
+      <Plus className="h-4 w-4" />
+      <span>en {formatTime(currentTime)}</span>
+    </Button>
+  );
+
   return (
     <div className="space-y-4" data-testid="lesson-markers-container">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Bookmark className="h-5 w-5 text-[var(--accent)]" />
-          <h3 className="font-semibold">Marcadores</h3>
-        </div>
-        <Button
-          onClick={handleAddMarker}
-          size="sm"
-          variant="default"
-          className="gap-2"
-          disabled={!vimeoPlayer || createMarkerMutation.isPending}
-          data-testid="button-add-marker"
-        >
-          <Plus className="h-4 w-4" />
-          <span>en {formatTime(currentTime)}</span>
-        </Button>
-      </div>
-
+      {renderHeader && renderHeader(addMarkerButton)}
+      
       {markers.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           <Bookmark className="h-12 w-12 mx-auto mb-3 opacity-30" />
@@ -221,37 +221,31 @@ export function LessonMarkers({ lessonId, vimeoPlayer }: LessonMarkersProps) {
               className="p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors space-y-2"
               data-testid={`marker-${marker.id}`}
             >
-              {/* Primera fila: Tiempo y botones */}
+              {/* Primera fila: Tiempo y botón eliminar */}
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleSeekTo(marker.time_sec)}
+                  className="flex items-center gap-2 hover:text-[var(--accent)] transition-colors cursor-pointer"
+                  data-testid={`button-seek-${marker.id}`}
+                  title="Ir a este momento"
+                >
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-mono font-medium">
                     {formatTime(marker.time_sec)}
                   </span>
-                </div>
+                </button>
 
-                <div className="flex items-center gap-1">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => handleSeekTo(marker.time_sec)}
-                    data-testid={`button-seek-${marker.id}`}
-                    title="Ir a este momento"
-                  >
-                    <ArrowRight className="h-5 w-5" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => handleDeleteMarker(marker.id)}
-                    className="text-destructive hover:text-destructive"
-                    disabled={deleteMarkerMutation.isPending}
-                    data-testid={`button-delete-${marker.id}`}
-                    title="Eliminar marcador"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </Button>
-                </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => handleDeleteMarker(marker.id)}
+                  className="text-destructive hover:text-destructive h-8 w-8"
+                  disabled={deleteMarkerMutation.isPending}
+                  data-testid={`button-delete-${marker.id}`}
+                  title="Eliminar marcador"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
 
               {/* Segunda fila: Input de texto */}
