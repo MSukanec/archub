@@ -190,24 +190,33 @@ CREATE TABLE ops_check_runs (
      └─► Frontend usa useFlowBlocking() para mostrar FlowBlockedBanner/Overlay
      │
      ▼
-  4. GUIDED REPAIR (Reparación Guiada)
+  4. GUIDED REPAIR (Reparación Guiada) - ARQUITECTURA SQL-FIRST
      │
      ├─► Admin ve alerta en Ops Center UI
      ├─► Hace clic en "Acciones de reparación" (Wrench icon)
-     ├─► Ve lista de acciones disponibles para ese alert_type
+     ├─► Ve lista de acciones desde ops_repair_actions (Supabase)
      ├─► Selecciona acción → Confirmación (especialmente si is_dangerous)
-     ├─► executeOpsRepairAction(alertId, actionId, userId)
-     │   ├─► Valida alerta (existe, estado open/ack)
-     │   ├─► Valida acción (existe, activa, match alert_type)
-     │   ├─► Valida evidencia requerida
-     │   ├─► Ejecuta handler correspondiente
-     │   ├─► Registra en ops_repair_logs (siempre)
-     │   └─► Si exitoso, marca alerta como resolved
+     ├─► Backend llama: SELECT ops_execute_repair_action(alertId, actionId, userId)
+     │   │
+     │   │   ┌─────────────────────────────────────────────────────┐
+     │   │   │  SUPABASE DISPATCHER (ops_execute_repair_action)   │
+     │   │   │  ═══════════════════════════════════════════════   │
+     │   │   │  1. Valida alerta (existe, estado open/ack)        │
+     │   │   │  2. Valida acción (existe, activa, match type)     │
+     │   │   │  3. CASE action_id:                                │
+     │   │   │     - apply_plan_to_org → ops_apply_plan_to_org()  │
+     │   │   │     - retry_user_creation → ops_retry_user_...()   │
+     │   │   │     - acknowledge_alert → UPDATE status='ack'      │
+     │   │   │     - mark_resolved → UPDATE status='resolved'     │
+     │   │   │  4. INSERT INTO ops_repair_logs (auditoría)        │
+     │   │   │  5. UPDATE ops_alerts SET status='resolved'        │
+     │   │   │  6. RETURN { success, message, data, error }       │
+     │   │   └─────────────────────────────────────────────────────┘
      │
      ▼
   5. AUDITORÍA (ops_repair_logs)
      │
-     └─► Cada acción queda registrada con:
+     └─► Cada acción queda registrada automáticamente por SQL con:
          - alert_id, action_id, executed_by
          - result: 'success' | 'error'
          - details: { message, data, error, duration_ms, timestamps }
@@ -311,45 +320,64 @@ El botón de "Administración" (corona) en el sidebar muestra un badge con:
 
 ---
 
-## Servicio de Reparación
+## Servicio de Reparación (SQL-FIRST Architecture)
 
-### Ubicación
+### IMPORTANTE: Supabase es la Fuente de Verdad
+
+La lógica de reparación está **100% en Supabase** (funciones SQL).
+El backend TypeScript es solo un **wrapper** que llama al dispatcher SQL.
+
+### Ubicación Backend (Wrapper)
 `server/lib/services/ops-repair.service.ts`
 
-### Funciones Exportadas
+### Funciones SQL en Supabase
+
+```sql
+-- Dispatcher central (ÚNICO punto de ejecución)
+ops_execute_repair_action(p_alert_id UUID, p_action_id TEXT, p_executed_by UUID)
+  RETURNS JSONB -- { success, message, data, error }
+
+-- Funciones de reparación específicas
+ops_apply_plan_to_org(p_alert_id UUID, p_executed_by UUID)
+ops_retry_user_creation(p_alert_id UUID, p_executed_by UUID)
+-- (agregar más según necesidad)
+```
+
+### Funciones TypeScript Exportadas
 
 ```typescript
-// Ejecuta una acción de reparación
+// Ejecuta una acción llamando al dispatcher SQL
 executeOpsRepairAction(
   alertId: string, 
   actionId: string, 
   executedBy: string
 ): Promise<RepairActionResult>
+// Internamente: SELECT ops_execute_repair_action(...)
 
-// Obtiene acciones disponibles para un tipo de alerta
+// Obtiene acciones disponibles desde ops_repair_actions
 getAvailableRepairActions(
   alertType: string
 ): Promise<OpsRepairAction[]>
 ```
 
-### Registry de Handlers
+### Agregar Nueva Acción de Reparación
 
-```typescript
-const ACTION_HANDLERS: Record<string, ActionHandler> = {
-  "acknowledge_alert": handleAcknowledgeAlert,
-  "mark_resolved": handleMarkResolved,
-  "test_signup_flow": handleTestSignupFlow,
-  "apply_plan_to_org": handleApplyPlanToOrg,
-  "create_missing_subscription": handleCreateMissingSubscription,
-  "retry_webhook_processing": handleRetryWebhookProcessing,
-};
-```
+1. **En Supabase SQL:**
+   - Crear función `ops_<nombre_accion>(p_alert_id, p_executed_by)`
+   - Agregar CASE en el dispatcher `ops_execute_repair_action`
+   - Insertar registro en `ops_repair_actions` con metadata
 
-### Agregar Nueva Acción
+2. **NO hacer en TypeScript:**
+   - NO crear handlers en el servicio
+   - NO duplicar lógica de reparación
+   - El backend solo llama al dispatcher SQL
 
-1. Añadir handler en `ACTION_HANDLERS`
-2. Implementar función `async handleMyAction(ctx: RepairActionContext): Promise<RepairActionResult>`
-3. (Opcional) Insertar en tabla `ops_repair_actions` para definir metadata (label, description, required_evidence)
+### Por qué SQL-First?
+
+- **Atomicidad**: Transacciones SQL garantizan consistencia
+- **Seguridad**: La lógica crítica no está expuesta en el código
+- **Auditoría**: El dispatcher registra todo automáticamente
+- **Simplicidad**: Backend es thin layer, fácil de mantener
 
 ---
 
@@ -359,9 +387,15 @@ const ACTION_HANDLERS: Record<string, ActionHandler> = {
 - [x] Health checks: payment mismatch, stuck webhooks, failed jobs, system integrity
 - [x] Generación de alertas con deduplicación via fingerprint
 - [x] API completa: stats, alerts, run-checks, repair-actions, execute-repair, repair-logs
-- [x] Servicio de reparación con registry extensible
-- [x] Logging de todas las acciones en ops_repair_logs
+- [x] Servicio wrapper que llama al dispatcher SQL de Supabase
+- [x] Logging automático via SQL en ops_repair_logs
 - [x] Flow blocking API
+
+### Supabase (Funciones SQL)
+- [x] `ops_execute_repair_action` - Dispatcher central
+- [x] `ops_apply_plan_to_org` - Aplica plan a organización
+- [x] `ops_repair_actions` - Tabla de definiciones de acciones
+- [x] `ops_repair_logs` - Tabla de auditoría
 
 ### Frontend
 - [x] Página Ops Center con 3 tabs (Alertas, Historial, Runbooks)
@@ -384,8 +418,8 @@ const ACTION_HANDLERS: Record<string, ActionHandler> = {
 ## Lo Que Falta Implementar 🔴
 
 ### Prioridad Alta
-- [ ] **Migración SQL de `ops_repair_logs`** - La tabla puede no existir en Supabase, logging falla silenciosamente
 - [ ] **Tests E2E** - Para repair actions y flow blocking API
+- [ ] **Más funciones SQL de reparación** - Agregar más handlers según tipos de alerta
 
 ### Prioridad Media
 - [ ] **Dashboard de métricas** - Gráficos de volumen de alertas, tiempos de resolución
