@@ -283,7 +283,6 @@ export function LeftSidebar() {
       return [
         { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/learning/dashboard' },
         { id: 'courses', label: 'Cursos', icon: GraduationCap, href: '/learning/courses' },
-        { id: 'community', label: 'Comunidad Discord', icon: MessageCircle, href: 'https://discord.com/channels/868615664070443008' },
       ];
     }
     
