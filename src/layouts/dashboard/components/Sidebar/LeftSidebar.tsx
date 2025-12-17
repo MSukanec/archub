@@ -545,38 +545,7 @@ export function LeftSidebar() {
                       },
                     ];
 
-                    // Botones especiales para modo LEARNER (sin sub-sidebar)
-                    const learnerDirectButtons = [
-                      {
-                        id: 'learner-dashboard' as const,
-                        icon: <Home className="h-5 w-5" />, // Icono de casita
-                        testId: 'button-sidebar-learning-dashboard',
-                        onClick: () => navigate('/learning/dashboard'),
-                        isActive: location === '/learning/dashboard',
-                      },
-                      {
-                        id: 'learner-courses' as const,
-                        icon: <GraduationCap className="h-5 w-5" />, // Icono de gorrito
-                        testId: 'button-sidebar-learning-courses',
-                        onClick: () => navigate('/learning/courses'),
-                        isActive: location === '/learning/courses',
-                      },
-                    ];
-
-                    // Si es modo learner, mostrar SOLO los 3 botones directos (sin submenu)
-                    if (userMode === 'learner') {
-                      return learnerDirectButtons.map((button) => (
-                        <SidebarIconButton
-                          key={button.id}
-                          icon={button.icon}
-                          isActive={button.isActive}
-                          onClick={button.onClick}
-                          testId={button.testId}
-                        />
-                      ));
-                    }
-
-                    // Para otros modos, usar el sistema normal
+                    // Renderizar los botones de contexto usando el sistema normal
                     return contextButtons
                       .filter((button) => {
                         if (isButtonExcluded(userMode, button.id)) return false;

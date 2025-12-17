@@ -16,19 +16,19 @@ export interface ModeConfig {
 }
 
 export const modeConfigs: Record<UserMode, ModeConfig> = {
-  // Modo PROFESIONAL - Acceso completo a organización y proyectos
+  // Modo PROFESIONAL - Acceso completo a organización, proyectos y capacitaciones
   professional: {
     leftSidebar: {
-      allowedContexts: ['general', 'community', 'organization', 'project', 'admin', 'user'],
-      excludedButtons: ['learning'], // Sin botón de Capacitaciones
+      allowedContexts: ['general', 'community', 'organization', 'project', 'learning', 'admin', 'user'],
+      excludedButtons: [], // Acceso a todos los botones incluyendo Capacitaciones
     }
   },
 
-  // Modo CAPACITACIONES - Solo acceso a learning
+  // Modo CAPACITACIONES - Ya no se usa, redirige a professional
   learner: {
     leftSidebar: {
-      allowedContexts: ['learning', 'user'], // Sin contexto general
-      excludedButtons: ['general', 'organization', 'project', 'community'], // Solo botones directos de learning
+      allowedContexts: ['general', 'community', 'organization', 'project', 'learning', 'admin', 'user'],
+      excludedButtons: [],
     }
   },
 
