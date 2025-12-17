@@ -65,7 +65,7 @@ export function PlayerDrawer({
 
   return (
     <div className="h-full p-1 rounded-lg bg-[var(--content-bg)]">
-      <div className="w-[298px] h-full flex flex-col bg-card rounded-lg border border-border overflow-hidden">
+      <div className="w-[298px] h-full flex flex-col bg-card rounded-lg border border-border overflow-hidden min-w-0">
       <div className="pt-4 pb-2 px-4 border-b border-border">
         <h3 className="text-sm font-semibold text-foreground mb-3">
           Contenido del Curso
@@ -80,8 +80,8 @@ export function PlayerDrawer({
       </div>
 
       {activeTab === 'lecciones' && (
-        <ScrollArea className="flex-1 w-full">
-          <div className="flex flex-col py-2 px-2 w-full max-w-full overflow-hidden">
+        <ScrollArea className="flex-1 w-full min-w-0 overflow-hidden">
+          <div className="flex flex-col py-2 px-2 w-full min-w-0">
             {modules.map((module) => {
               const moduleLessons = lessons
                 .filter(l => l.module_id === module.id)
