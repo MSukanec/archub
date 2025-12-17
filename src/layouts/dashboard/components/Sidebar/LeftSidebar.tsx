@@ -507,6 +507,11 @@ export function LeftSidebar() {
                         shouldRender: () => hasProjects && !!selectedProjectId,
                       },
                       {
+                        id: 'spacer-1' as const,
+                        isSpacer: true,
+                        shouldRender: () => true,
+                      },
+                      {
                         id: 'founders' as const,
                         icon: <Award className="h-5 w-5" />,
                         testId: 'button-sidebar-founders',
@@ -551,7 +556,12 @@ export function LeftSidebar() {
                         if (!button.shouldRender()) return false;
                         return true;
                       })
-                      .map((button) => {
+                      .map((button: any) => {
+                        // Si es un spacer, renderizar un div vacío del tamaño de un botón
+                        if (button.isSpacer) {
+                          return <div key={button.id} className="h-[32px]" />;
+                        }
+
                         const buttonElement = (
                           <SidebarIconButton
                             icon={button.icon}
