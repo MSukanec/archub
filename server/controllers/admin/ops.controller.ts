@@ -42,6 +42,10 @@ async function checkPaymentPlanMismatch(): Promise<{ results: any[]; stats: Chec
       .limit(100);
 
     if (error) {
+      if (error.message.includes("does not exist") || error.code === "42703" || error.code === "42P01") {
+        console.warn("[OpsCenter] checkPaymentPlanMismatch: Table or column not found, skipping check");
+        return { results, stats };
+      }
       stats.errors.push(`Error fetching payments: ${error.message}`);
       return { results, stats };
     }
@@ -122,13 +126,17 @@ async function checkStuckPaymentEvents(): Promise<{ results: any[]; stats: Check
 
     const { data: events, error } = await supabaseAdmin
       .from("payment_events")
-      .select("id, provider, provider_event_type, provider_payment_id, status, custom_id, organization_id, created_at")
+      .select("id, provider, provider_event_type, provider_payment_id, status, custom_id, payment_id, created_at")
       .eq("status", "RECEIVED")
       .lt("created_at", tenMinutesAgo)
       .order("created_at", { ascending: false })
       .limit(100);
 
     if (error) {
+      if (error.message.includes("does not exist") || error.code === "42703") {
+        console.warn("[OpsCenter] checkStuckPaymentEvents: Table or column not found, skipping check");
+        return { results, stats };
+      }
       stats.errors.push(`Error fetching payment events: ${error.message}`);
       return { results, stats };
     }
@@ -157,7 +165,6 @@ async function checkStuckPaymentEvents(): Promise<{ results: any[]; stats: Check
           alert_type: "webhook.stuck_received",
           title: `Webhook atascado en RECEIVED`,
           description: `Evento ${event.provider_event_type} de ${event.provider} sin procesar hace más de 10 min`,
-          organization_id: event.organization_id,
           provider: event.provider,
           provider_payment_id: event.provider_payment_id,
           event_id: event.id,
@@ -167,6 +174,7 @@ async function checkStuckPaymentEvents(): Promise<{ results: any[]; stats: Check
             provider: event.provider,
             event_type: event.provider_event_type,
             custom_id: event.custom_id,
+            payment_id: event.payment_id,
             received_at: event.created_at,
           },
         });
@@ -198,13 +206,17 @@ async function checkFailedSystemJobs(): Promise<{ results: any[]; stats: CheckRe
 
     const { data: jobs, error } = await supabaseAdmin
       .from("system_job_logs")
-      .select("id, job_type, status, error_message, metadata, created_at")
+      .select("id, job_type, status, error_message, created_at")
       .in("status", ["error", "failed"])
       .gte("created_at", twentyFourHoursAgo)
       .order("created_at", { ascending: false })
       .limit(100);
 
     if (error) {
+      if (error.message.includes("does not exist") || error.code === "42703" || error.code === "42P01") {
+        console.warn("[OpsCenter] checkFailedSystemJobs: Table or column not found, skipping check");
+        return { results, stats };
+      }
       stats.errors.push(`Error fetching system job logs: ${error.message}`);
       return { results, stats };
     }
@@ -239,7 +251,6 @@ async function checkFailedSystemJobs(): Promise<{ results: any[]; stats: CheckRe
             job_type: job.job_type,
             status: job.status,
             error_message: job.error_message,
-            metadata: job.metadata,
             failed_at: job.created_at,
           },
         });
@@ -269,13 +280,17 @@ async function checkSystemIntegrity(): Promise<{ results: any[]; stats: CheckRes
   try {
     const { data: systemErrors, error } = await supabaseAdmin
       .from("system_errors")
-      .select("id, entity, operation, error_message, severity, context, occurred_at, resolved")
+      .select("id, entity, operation, error_message, severity, context, occurred_at, resolved_at")
       .eq("severity", "critical")
-      .eq("resolved", false)
+      .is("resolved_at", null)
       .order("occurred_at", { ascending: false })
       .limit(200);
 
     if (error) {
+      if (error.message.includes("does not exist") || error.code === "42703" || error.code === "42P01") {
+        console.warn("[OpsCenter] checkSystemIntegrity: Table or column not found, skipping check");
+        return { results, stats };
+      }
       stats.errors.push(`Error fetching system_errors: ${error.message}`);
       return { results, stats };
     }
@@ -290,7 +305,7 @@ async function checkSystemIntegrity(): Promise<{ results: any[]; stats: CheckRes
       severity: string | null;
       context: Record<string, any> | null;
       occurred_at: string | null;
-      resolved: boolean;
+      resolved_at: string | null;
     }
 
     const grouped: Record<string, SystemError[]> = {};
