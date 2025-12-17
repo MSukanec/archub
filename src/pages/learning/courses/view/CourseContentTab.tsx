@@ -70,7 +70,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
   const { data: moduleImagesResponse } = useQuery<Record<string, string>>({
     queryKey: [`courses/${courseId}/module-images`, moduleIds],
     queryFn: async () => {
-      console.log('[ModuleImages] Looking for images with moduleIds:', moduleIds);
       if (!moduleIds.length) return {};
       try {
         const { data, error } = await supabase
@@ -86,7 +85,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
           .eq('category', 'module_image')
           .eq('media_files.is_deleted', false);
 
-        console.log('[ModuleImages] Raw Supabase response:', { data, error });
         if (error) throw error;
 
         const imageMap: Record<string, string> = {};
@@ -100,7 +98,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
             }
           }
         });
-        console.log('[ModuleImages] Found images:', imageMap);
         return imageMap;
       } catch (error) {
         console.error('Error fetching module images:', error);
@@ -199,10 +196,15 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
       (acc, m) => acc + m.lessons.filter(l => l.is_completed).length, 
       0
     );
+    const totalDurationSec = modules.reduce(
+      (acc, m) => acc + m.lessons.reduce((lacc, l) => lacc + (l.duration_sec || 0), 0),
+      0
+    );
     return {
       totalModules: modules.length,
       totalLessons,
-      completedLessons
+      completedLessons,
+      totalDurationMin: Math.floor(totalDurationSec / 60)
     };
   }, [modules]);
 
@@ -246,30 +248,46 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
   }
 
   return (
-    <div ref={containerRef} className="max-w-4xl mx-auto px-4 py-6 md:px-6">
+    <div ref={containerRef} className="max-w-6xl mx-auto px-4 py-6 md:px-6">
+      {/* Mobile: Inline header */}
       <ContentHeader
         totalModules={stats.totalModules}
         totalLessons={stats.totalLessons}
         completedLessons={stats.completedLessons}
+        totalDurationMin={stats.totalDurationMin}
+        variant="inline"
       />
 
-      <div className="space-y-4">
-        {modules.map((module, index) => (
-          <ModuleSection
-            key={module.id}
-            moduleId={module.id}
-            moduleTitle={module.title}
-            moduleIndex={index}
-            lessons={module.lessons}
-            courseId={courseId}
-            imageUrl={module.imageUrl}
-            isExpanded={expandedModuleId === module.id}
-            isActive={module.id === activeModuleId}
-            nextRecommendedLessonId={nextRecommendedLessonId}
-            onGoToLesson={handleGoToLesson}
-            onToggle={() => handleToggleModule(module.id)}
-          />
-        ))}
+      {/* Desktop: Two columns - Sidebar left, Modules right */}
+      <div className="lg:grid lg:grid-cols-[280px_1fr] lg:gap-8">
+        {/* Left sidebar - visible only on desktop */}
+        <ContentHeader
+          totalModules={stats.totalModules}
+          totalLessons={stats.totalLessons}
+          completedLessons={stats.completedLessons}
+          totalDurationMin={stats.totalDurationMin}
+          variant="sidebar"
+        />
+
+        {/* Modules list */}
+        <div className="space-y-4">
+          {modules.map((module, index) => (
+            <ModuleSection
+              key={module.id}
+              moduleId={module.id}
+              moduleTitle={module.title}
+              moduleIndex={index}
+              lessons={module.lessons}
+              courseId={courseId}
+              imageUrl={module.imageUrl}
+              isExpanded={expandedModuleId === module.id}
+              isActive={module.id === activeModuleId}
+              nextRecommendedLessonId={nextRecommendedLessonId}
+              onGoToLesson={handleGoToLesson}
+              onToggle={() => handleToggleModule(module.id)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

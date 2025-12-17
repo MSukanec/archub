@@ -77,8 +77,7 @@ export function ModuleSection({
     <div 
       className={cn(
         "rounded-xl border bg-card transition-all duration-200",
-        isActive && "ring-2 ring-accent/20 border-accent/30",
-        !isActive && "hover:border-muted-foreground/20"
+        "hover:border-muted-foreground/20"
       )}
       data-testid={`module-section-${moduleId}`}
     >
