@@ -2,7 +2,7 @@ import { useMemo, useEffect } from 'react';
 import { useRoute, useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { useCoursePlayerStore, useCourseProgress, LessonMarkers } from '@/features/learning';
+import { useCoursePlayerStore, useCourseProgress, CourseMarkers } from '@/features/learning';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
 import { PlayerDrawer } from './PlayerDrawer';
 
@@ -83,8 +83,16 @@ export function CoursePlayerDrawerHost() {
       progressMap={progressMap}
       onLessonSelect={handleLessonSelect}
       markersContent={
-        activeLessonId ? (
-          <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
+        course?.id ? (
+          <CourseMarkers 
+            courseId={course.id} 
+            activeLessonId={activeLessonId}
+            vimeoPlayer={vimeoPlayer} 
+            onLessonSelect={(lessonId, timeSec) => {
+              setCurrentLesson(lessonId);
+              goToLesson(lessonId, timeSec);
+            }}
+          />
         ) : undefined
       }
     />

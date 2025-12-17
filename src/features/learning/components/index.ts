@@ -30,6 +30,7 @@ export { UnifiedCourseGrid } from './UnifiedCourseGrid';
 export { default as CourseHeroImageUpload } from './dashboard/CourseHeroImageUpload';
 export { FavoriteButton } from './dashboard/FavoriteButton';
 export { LessonMarkers } from './dashboard/LessonMarkers';
+export { CourseMarkers } from './dashboard/CourseMarkers';
 export { LessonNotes } from './dashboard/LessonNotes';
 export { LessonSummaryNote } from './dashboard/LessonSummaryNote';
 export { default as PayButton } from './dashboard/PayButton';
