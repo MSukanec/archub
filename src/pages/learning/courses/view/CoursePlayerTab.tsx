@@ -8,7 +8,7 @@ import { useCourseSidebarStore } from '@/stores/sidebarStore'
 import { VimeoPlayer } from '@/components/ui-custom/media'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
-import { LessonSummaryNote, LessonMarkers, FavoriteButton, useCourseStructure, useCourseProgress, useUpdateLessonProgress, useCoursePlayerStore, PlayerDrawer } from '@/features/learning'
+import { LessonSummaryNote, LessonMarkers, FavoriteButton, useCourseStructure, useCourseProgress, useUpdateLessonProgress, useCoursePlayerStore } from '@/features/learning'
 import Player from '@vimeo/player'
 
 interface CoursePlayerTabProps {
@@ -32,8 +32,9 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
   const pendingSeek = useCoursePlayerStore(s => s.pendingSeek);
   const clearPendingSeek = useCoursePlayerStore(s => s.clearPendingSeek);
+  const vimeoPlayer = useCoursePlayerStore(s => s.vimeoPlayer);
+  const setVimeoPlayer = useCoursePlayerStore(s => s.setVimeoPlayer);
   const { toast } = useToast();
-  const [vimeoPlayer, setVimeoPlayer] = useState<Player | null>(null);
   const [targetSeekTime, setTargetSeekTime] = useState<number | undefined>(initialSeekTime);
   
   // Track if video is currently playing to prevent auto-rewind
@@ -183,8 +184,9 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
     
     return () => {
       setCurrentLesson(undefined);
+      setVimeoPlayer(null);
     };
-  }, [modules, lessons, setData, setCurrentLesson]);
+  }, [modules, lessons, setData, setCurrentLesson, setVimeoPlayer]);
 
   // Seleccionar automáticamente la lección (inicial, última vista, o primera) cuando se cargan las lecciones
   // IMPORTANTE: Usa goToLesson del store para NO sobrescribir navegación desde marcadores
@@ -335,16 +337,9 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
     ? targetSeekTime 
     : (isPlayingRef.current ? 0 : (currentProgress?.last_position_sec || 0));
 
-  const handleLessonSelect = (lessonId: string) => {
-    setCurrentLesson(lessonId);
-    goToLesson(lessonId, null);
-  };
-
   return (
-    <div className="flex h-full">
-      {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {/* Video Player - 100% width */}
+    <div className="space-y-6">
+      {/* Video Player - 100% width */}
         {currentLesson?.vimeo_video_id ? (
           <>
             <VimeoPlayer 
@@ -427,23 +422,6 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
             </div>
           </div>
         )}
-      </div>
-
-      {/* Player Drawer - Right sidebar */}
-      <div className="hidden lg:block flex-shrink-0">
-        <PlayerDrawer
-          modules={modules}
-          lessons={lessons}
-          activeLessonId={activeLessonId}
-          progressMap={progressMap}
-          onLessonSelect={handleLessonSelect}
-          markersContent={
-            activeLessonId ? (
-              <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
-            ) : undefined
-          }
-        />
-      </div>
     </div>
   )
 }

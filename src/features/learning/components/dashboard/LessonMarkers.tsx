@@ -9,7 +9,7 @@ import type { CourseLessonNote } from '@shared/schema';
 
 interface LessonMarkersProps {
   lessonId: string;
-  vimeoPlayer: any | null;
+  vimeoPlayer?: any | null;
 }
 
 interface MarkerWithSaveStatus extends CourseLessonNote {

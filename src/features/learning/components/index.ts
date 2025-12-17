@@ -44,4 +44,4 @@ export { default as AdminCourseStudentRow } from './admin/AdminCourseStudentRow'
 export { ContentHeader, ModuleSection, LessonItem } from './content';
 
 // ========== PLAYER COMPONENTS ==========
-export { PlayerDrawer } from './player';
+export { PlayerDrawer, CoursePlayerDrawerHost } from './player';

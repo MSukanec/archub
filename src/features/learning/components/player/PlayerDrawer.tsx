@@ -67,17 +67,17 @@ export function PlayerDrawer({
   };
 
   return (
-    <div className="w-[300px] h-full flex flex-col bg-[var(--main-sidebar-bg)] border-l border-[var(--main-sidebar-border)]">
+    <div className="w-[300px] h-full flex flex-col bg-sidebar border-l border-sidebar-border rounded-lg">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
-        <div className="pt-4 pb-2 px-4 border-b border-[var(--main-sidebar-border)]">
-          <h3 className="text-sm font-semibold text-white mb-3">
+        <div className="pt-4 pb-2 px-4 border-b border-sidebar-border">
+          <h3 className="text-sm font-semibold text-sidebar-foreground mb-3">
             Contenido del Curso
           </h3>
           
-          <TabsList className="w-full grid grid-cols-2 bg-[var(--main-sidebar-button-hover-bg)]">
+          <TabsList className="w-full grid grid-cols-2 bg-muted">
             <TabsTrigger 
               value="lecciones" 
-              className="text-xs data-[state=active]:bg-[var(--accent)] data-[state=active]:text-white"
+              className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               data-testid="tab-lecciones"
             >
               <BookOpen className="h-3.5 w-3.5 mr-1.5" />
@@ -85,7 +85,7 @@ export function PlayerDrawer({
             </TabsTrigger>
             <TabsTrigger 
               value="marcadores" 
-              className="text-xs data-[state=active]:bg-[var(--accent)] data-[state=active]:text-white"
+              className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               data-testid="tab-marcadores"
             >
               <Bookmark className="h-3.5 w-3.5 mr-1.5" />
@@ -110,37 +110,37 @@ export function PlayerDrawer({
                   <div key={module.id}>
                     <button
                       onClick={() => toggleModule(module.id)}
-                      className="w-full h-10 px-4 rounded-md cursor-pointer transition-colors hover:bg-[var(--main-sidebar-button-hover-bg)] flex items-center group"
+                      className="w-full h-10 px-4 rounded-md cursor-pointer transition-colors hover:bg-sidebar-accent flex items-center group"
                       data-testid={`module-${module.id}`}
                     >
                       <BookOpen className={cn(
                         "w-[18px] h-[18px] flex-shrink-0",
                         hasActiveLesson 
-                          ? "text-[var(--accent)]" 
-                          : "text-[var(--main-sidebar-fg)] group-hover:text-white"
+                          ? "text-primary" 
+                          : "text-sidebar-foreground/70 group-hover:text-sidebar-foreground"
                       )} />
                       <span className={cn(
                         "ml-3 text-sm font-medium truncate flex-1 text-left",
                         hasActiveLesson
-                          ? "text-[var(--accent)]"
-                          : "text-[var(--main-sidebar-fg)] group-hover:text-white"
+                          ? "text-primary"
+                          : "text-sidebar-foreground/70 group-hover:text-sidebar-foreground"
                       )}>
                         {module.title}
                       </span>
-                      <span className="text-xs text-[var(--main-sidebar-fg)]/60 mr-2">
+                      <span className="text-xs text-sidebar-foreground/50 mr-2">
                         {completedCount}/{totalCount}
                       </span>
                       <ChevronRight className={cn(
                         "w-4 h-4 transition-transform flex-shrink-0",
                         hasActiveLesson
-                          ? "text-[var(--accent)]"
-                          : "text-[var(--main-sidebar-fg)] group-hover:text-white",
+                          ? "text-primary"
+                          : "text-sidebar-foreground/70 group-hover:text-sidebar-foreground",
                         isModuleExpanded && "rotate-90"
                       )} />
                     </button>
 
                     {isModuleExpanded && (
-                      <div className="ml-4 border-l border-[var(--main-sidebar-border)] pl-2 my-1">
+                      <div className="ml-4 border-l border-sidebar-border pl-2 my-1">
                         {moduleLessons.map((lesson) => {
                           const isActive = activeLessonId === lesson.id;
                           const progress = progressMap.get(lesson.id);
@@ -154,42 +154,41 @@ export function PlayerDrawer({
                               className={cn(
                                 "w-full rounded-md cursor-pointer transition-colors flex items-center group px-3 py-2 my-[2px]",
                                 isActive 
-                                  ? "bg-[var(--main-sidebar-button-active-bg)] text-white" 
-                                  : "hover:bg-[var(--main-sidebar-button-hover-bg)] text-[var(--main-sidebar-fg)]"
+                                  ? "bg-sidebar-accent text-sidebar-accent-foreground" 
+                                  : "hover:bg-sidebar-accent/50 text-sidebar-foreground/70"
                               )}
                               data-testid={`lesson-${lesson.id}`}
                             >
                               <Play 
                                 className={cn(
                                   "w-[14px] h-[14px] flex-shrink-0",
-                                  isActive ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)] group-hover:text-white"
+                                  isActive ? "text-primary" : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground"
                                 )}
                               />
                               <div className="ml-2 flex-1 min-w-0 text-left">
                                 <span 
                                   className={cn(
                                     "text-xs truncate block",
-                                    isActive ? "text-white font-medium" : "text-[var(--main-sidebar-fg)] group-hover:text-white"
+                                    isActive ? "text-sidebar-accent-foreground font-medium" : "text-sidebar-foreground/70 group-hover:text-sidebar-foreground"
                                   )}
                                 >
                                   {lesson.title}
                                 </span>
                                 {duration && (
-                                  <span className="text-[10px] text-[var(--main-sidebar-fg)]/50">
+                                  <span className="text-[10px] text-sidebar-foreground/50">
                                     {duration}
                                   </span>
                                 )}
                               </div>
                               {isCompleted ? (
                                 <CheckCircle2 
-                                  className="w-[14px] h-[14px] flex-shrink-0 ml-2"
-                                  style={{ color: 'var(--accent)' }}
+                                  className="w-[14px] h-[14px] flex-shrink-0 ml-2 text-primary"
                                 />
                               ) : (
                                 <Circle 
                                   className={cn(
                                     "w-[14px] h-[14px] flex-shrink-0 ml-2",
-                                    isActive ? "text-white/50" : "text-[var(--main-sidebar-fg)]/30"
+                                    isActive ? "text-sidebar-accent-foreground/50" : "text-sidebar-foreground/30"
                                   )}
                                 />
                               )}
@@ -209,7 +208,7 @@ export function PlayerDrawer({
           <ScrollArea className="h-full">
             <div className="p-4">
               {markersContent || (
-                <div className="text-center py-8 text-[var(--main-sidebar-fg)]/60">
+                <div className="text-center py-8 text-sidebar-foreground/50">
                   <Bookmark className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">No hay marcadores en esta lección</p>
                 </div>

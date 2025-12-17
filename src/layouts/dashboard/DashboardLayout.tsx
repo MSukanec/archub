@@ -21,7 +21,7 @@ import { useMobile } from "@/hooks/use-mobile";
 import { useProjectAccentColor } from "@/features/projects";
 import { useContentBackground } from "@/hooks/use-content-background";
 import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
-import { FloatingCourseLessons } from "@/features/learning";
+import { FloatingCourseLessons, CoursePlayerDrawerHost } from "@/features/learning";
 import { InvitationModal } from "@/features/users/modals/InvitationModal";
 import { OrganizationRemovedModal } from "@/features/organization/modals/OrganizationRemovedModal";
 import { usePendingInvitations } from "@/hooks/use-pending-invitations";
@@ -317,6 +317,7 @@ function LayoutContent({
           {/* Right Sidebar - Fixed width, always visible */}
           <div className="flex-shrink-0 p-1">
             <RightSidebar />
+            <CoursePlayerDrawerHost />
           </div>
         </div>
       )}
