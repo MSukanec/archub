@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Activity, Play, RefreshCw } from 'lucide-react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient } from '@/lib/queryClient';
-import { supabase } from '@/lib/supabase';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import AdminOpsAlertsTab from './AdminOpsAlertsTab';
 import AdminOpsHistoryTab from './AdminOpsHistoryTab';
@@ -34,27 +33,17 @@ export default function AdminOps() {
 
   const runChecksMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc('ops_run_all_checks');
-      if (error) throw error;
-      return data;
+      const res = await apiRequest('POST', '/api/admin/ops/run-checks');
+      return res.json();
     },
-    onSuccess: (data: any) => {
-      const alertsCreated = data?.alerts_created ?? 0;
-      toast({ 
-        title: 'Checks ejecutados', 
-        description: `Alertas creadas: ${alertsCreated}` 
-      });
+    onSuccess: (data) => {
+      toast({ title: 'Checks ejecutados', description: `Alertas creadas: ${data.stats?.total_created || 0}` });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/alerts'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/stats'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/check-runs'] });
     },
     onError: (error: any) => {
-      console.error('[OpsCenter] Error running checks:', error);
-      toast({ 
-        title: 'Error al ejecutar checks', 
-        description: error.message || 'Error desconocido', 
-        variant: 'destructive' 
-      });
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     },
   });
 
