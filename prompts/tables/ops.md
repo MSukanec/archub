@@ -155,3 +155,263 @@ create table public.system_job_logs (
   constraint system_job_logs_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
+
+
+
+
+
+
+## Funcion log_system_error:
+
+begin
+  insert into public.system_errors (
+    source,
+    entity,
+    operation,
+    error_message,
+    context,
+    severity
+  )
+  values (
+    p_source,
+    p_entity,
+    p_operation,
+    p_error,
+    p_context,
+    p_severity
+  );
+end;
+
+## Funcion ops_apply_plan_to_org:
+
+
+DECLARE
+  v_org_id UUID;
+  v_plan_id UUID;
+  v_payment_id UUID;
+BEGIN
+  -- 1. Validar alerta
+  SELECT
+    (metadata->>'organization_id')::uuid,
+    (metadata->>'plan_id')::uuid,
+    (metadata->>'payment_id')::uuid
+  INTO
+    v_org_id,
+    v_plan_id,
+    v_payment_id
+  FROM ops_alerts
+  WHERE id = p_alert_id
+    AND status = 'open';
+
+  IF v_org_id IS NULL OR v_plan_id IS NULL THEN
+    RAISE EXCEPTION 'Alert % does not contain required metadata', p_alert_id;
+  END IF;
+
+  -- 2. Aplicar plan a la organización
+  UPDATE organizations
+  SET
+    plan_id = v_plan_id,
+    updated_at = NOW()
+  WHERE id = v_org_id;
+
+  -- 3. Registrar reparación
+  INSERT INTO ops_repair_logs (
+    alert_id,
+    action_id,
+    executed_by,
+    result,
+    details
+  )
+  VALUES (
+    p_alert_id,
+    'apply_plan_to_org',
+    p_executed_by,
+    'success',
+    jsonb_build_object(
+      'organization_id', v_org_id,
+      'plan_id', v_plan_id,
+      'payment_id', v_payment_id
+    )
+  );
+
+  -- 4. Marcar alerta como resuelta
+  UPDATE ops_alerts
+  SET
+    status = 'resolved',
+    resolved_at = NOW()
+  WHERE id = p_alert_id;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    INSERT INTO ops_repair_logs (
+      alert_id,
+      action_id,
+      executed_by,
+      result,
+      details
+    )
+    VALUES (
+      p_alert_id,
+      'apply_plan_to_org',
+      p_executed_by,
+      'error',
+      jsonb_build_object('error', SQLERRM)
+    );
+
+    RAISE;
+END;
+
+## Funcion ops_detect_payment_not_applied:
+
+
+BEGIN
+  INSERT INTO ops_alerts (
+    alert_type,
+    severity,
+    title,
+    description,
+    entity_type,
+    entity_id,
+    organization_id,
+    metadata,
+    status,
+    created_at
+  )
+  SELECT
+    'payment.approved_but_not_applied',
+    'critical',
+    'Pago aprobado sin aplicación de plan',
+    'Se detectó un pago aprobado que no generó suscripción o no aplicó el plan a la organización.',
+    'payment',
+    p.id,
+    p.organization_id,
+    jsonb_build_object(
+      'payment_id', p.id,
+      'provider', p.provider,
+      'amount', p.amount,
+      'currency', p.currency,
+      'plan_id', p.plan_id,
+      'user_id', p.user_id
+    ),
+    'open',
+    now()
+  FROM payments p
+  LEFT JOIN organization_subscriptions s
+    ON s.organization_id = p.organization_id
+    AND s.status = 'active'
+    AND s.plan_id = p.plan_id
+  WHERE
+    p.status = 'approved'
+    AND p.product_type = 'subscription'
+    AND (
+      s.id IS NULL
+      OR p.entitlement_applied IS DISTINCT FROM true
+    )
+    AND NOT EXISTS (
+      SELECT 1
+      FROM ops_alerts a
+      WHERE a.alert_type = 'payment.approved_but_not_applied'
+        AND a.entity_id = p.id
+        AND a.status = 'open'
+    );
+END;
+
+## Funcion ops_execute_repair_action:
+
+BEGIN
+  -- Validar que la acción exista y esté activa
+  IF NOT EXISTS (
+    SELECT 1
+    FROM ops_repair_actions
+    WHERE id = p_action_id
+      AND is_active = true
+  ) THEN
+    RAISE EXCEPTION 'Repair action % does not exist or is inactive', p_action_id;
+  END IF;
+
+  -- Dispatcher
+  CASE p_action_id
+
+    WHEN 'apply_plan_to_org' THEN
+      PERFORM ops_apply_plan_to_org(p_alert_id, p_executed_by);
+
+    WHEN 'retry_user_creation' THEN
+      PERFORM ops_retry_user_creation(p_alert_id, p_executed_by);
+
+    WHEN 'force_resolve_alert' THEN
+      UPDATE ops_alerts
+      SET status = 'resolved', resolved_at = NOW()
+      WHERE id = p_alert_id;
+
+    ELSE
+      RAISE EXCEPTION 'Repair action % not implemented yet', p_action_id;
+
+  END CASE;
+
+END;
+
+## Funcion ops_retry_user_creation:
+
+
+DECLARE
+  v_auth_user_id UUID;
+BEGIN
+  SELECT (metadata->>'auth_user_id')::uuid
+  INTO v_auth_user_id
+  FROM ops_alerts
+  WHERE id = p_alert_id;
+
+  IF v_auth_user_id IS NULL THEN
+    RAISE EXCEPTION 'auth_user_id missing in alert metadata';
+  END IF;
+
+  -- Reintenta provisión del usuario
+  PERFORM handle_new_user(
+    (SELECT * FROM auth.users WHERE id = v_auth_user_id)
+  );
+
+  INSERT INTO ops_repair_logs (
+    alert_id, action_id, executed_by, result
+  )
+  VALUES (
+    p_alert_id, 'retry_user_creation', p_executed_by, 'success'
+  );
+
+  UPDATE ops_alerts
+  SET status = 'resolved', resolved_at = NOW()
+  WHERE id = p_alert_id;
+
+END;
+
+## Funcion ops_run_all_checks:
+
+
+BEGIN
+  -- ==========================================
+  -- 🔍 DETECTORES DE OPERACIONES
+  -- ==========================================
+
+  -- Pagos aprobados sin plan aplicado
+  PERFORM public.ops_detect_payment_not_applied();
+
+  -- (futuro)
+  -- PERFORM public.ops_detect_user_creation_failed();
+  -- PERFORM public.ops_detect_webhook_stuck();
+  -- PERFORM public.ops_detect_subscription_inconsistent();
+
+  -- ==========================================
+  -- ✅ FIN
+  -- ==========================================
+END;
+
+
+
+
+
+
+
+
+
+
+
+
