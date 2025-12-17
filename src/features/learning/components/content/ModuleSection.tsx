@@ -19,7 +19,6 @@ interface ModuleSectionProps {
   moduleTitle: string;
   moduleIndex: number;
   lessons: Lesson[];
-  courseId: string;
   imageUrl?: string;
   isExpanded?: boolean;
   isActive?: boolean;
@@ -33,7 +32,6 @@ export function ModuleSection({
   moduleTitle,
   moduleIndex,
   lessons,
-  courseId,
   imageUrl,
   isExpanded: controlledExpanded,
   isActive = false,
@@ -63,6 +61,13 @@ export function ModuleSection({
     const hours = Math.floor(mins / 60);
     const remainingMins = mins % 60;
     return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours}h`;
+  };
+
+  const getEffortLabel = (seconds: number) => {
+    const hours = seconds / 3600;
+    if (hours < 1) return 'Módulo corto';
+    if (hours <= 3) return 'Módulo medio';
+    return 'Módulo largo';
   };
 
   const handleToggle = () => {
@@ -128,11 +133,15 @@ export function ModuleSection({
             <span>{totalCount} {totalCount === 1 ? 'lección' : 'lecciones'}</span>
             <span>·</span>
             <span>{formatTotalDuration(totalDuration)}</span>
+            <span>·</span>
+            <span className={cn("italic", imageUrl ? "text-white/70" : "text-muted-foreground/80")}>
+              {getEffortLabel(totalDuration)}
+            </span>
             {completedCount > 0 && (
               <>
                 <span>·</span>
                 <span className={cn("font-medium", imageUrl ? "text-white" : "text-chart-positive")}>
-                  {completedCount}/{totalCount} completadas
+                  {completedCount}/{totalCount}
                 </span>
               </>
             )}
@@ -177,7 +186,6 @@ export function ModuleSection({
                   <LessonItem
                     key={lesson.id}
                     lesson={lesson}
-                    courseId={courseId}
                     isNextRecommended={lesson.id === nextRecommendedLessonId}
                     onGoToLesson={onGoToLesson}
                   />

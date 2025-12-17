@@ -1,7 +1,6 @@
-import { Play, CheckCircle2, Circle, Clock, FileText, Bookmark, ChevronRight } from 'lucide-react';
+import { Play, CheckCircle2, Circle, Clock, FileText, Bookmark, ChevronRight, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { FavoriteButton } from '@/features/learning';
 import { motion } from 'framer-motion';
 
 interface LessonItemProps {
@@ -14,7 +13,6 @@ interface LessonItemProps {
     is_completed: boolean;
     is_favorite: boolean;
   };
-  courseId: string;
   isActive?: boolean;
   isNextRecommended?: boolean;
   onGoToLesson: (lessonId: string) => void;
@@ -22,7 +20,6 @@ interface LessonItemProps {
 
 export function LessonItem({ 
   lesson, 
-  courseId, 
   isActive = false,
   isNextRecommended = false,
   onGoToLesson 
@@ -103,18 +100,16 @@ export function LessonItem({
               <span>{lesson.markers_count}</span>
             </div>
           )}
+          {lesson.is_favorite && (
+            <div className="flex items-center gap-1">
+              <Heart className="h-3 w-3 fill-red-500 text-red-500" />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Actions - Always visible on mobile, hover on desktop */}
+      {/* Action - Go to lesson */}
       <div className="flex items-center gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-        <FavoriteButton
-          lessonId={lesson.id}
-          courseId={courseId}
-          isFavorite={lesson.is_favorite}
-          variant="icon"
-          size="sm"
-        />
         <Button
           variant="ghost"
           size="icon"

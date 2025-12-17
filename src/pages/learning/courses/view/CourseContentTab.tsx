@@ -278,7 +278,6 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
               moduleTitle={module.title}
               moduleIndex={index}
               lessons={module.lessons}
-              courseId={courseId}
               imageUrl={module.imageUrl}
               isExpanded={expandedModuleId === module.id}
               isActive={module.id === activeModuleId}
