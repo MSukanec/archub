@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/lib/queryClient';
+import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -122,19 +123,27 @@ function AlertCard({
   const [confirmAction, setConfirmAction] = useState<RepairAction | null>(null);
   const { toast } = useToast();
 
-  const { data: repairActionsData, isLoading: loadingActions } = useQuery<{ actions: RepairAction[] }>({
-    queryKey: ['/api/admin/ops/repair-actions', alert.alert_type],
+  const { data: repairActionsData, isLoading: loadingActions } = useQuery<RepairAction[]>({
+    queryKey: ['ops_repair_actions', alert.alert_type],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/ops/repair-actions/${encodeURIComponent(alert.alert_type)}`, {
-        credentials: 'include'
-      });
-      if (!res.ok) throw new Error('Failed to fetch repair actions');
-      return res.json();
+      const { data, error } = await supabase
+        .from('ops_repair_actions')
+        .select('id, label, description, is_dangerous, requires_confirmation')
+        .eq('alert_type', alert.alert_type)
+        .eq('is_active', true);
+      
+      if (error) throw error;
+      return (data || []).map(a => ({
+        id: a.id,
+        label: a.label,
+        description: a.description || '',
+        dangerous: a.is_dangerous || false,
+      }));
     },
     enabled: showRepairActions,
   });
 
-  const repairActions = repairActionsData?.actions || [];
+  const repairActions = repairActionsData || [];
 
   const handleConfirmRepair = () => {
     if (confirmAction) {
@@ -352,27 +361,62 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
   const [statusFilter, setStatusFilter] = useState<string>('open');
 
   const { data: alerts = [], isLoading, refetch } = useQuery<OpsAlert[]>({
-    queryKey: ['/api/admin/ops/alerts', statusFilter],
+    queryKey: ['ops_alerts', statusFilter],
     queryFn: async () => {
-      const params = new URLSearchParams();
+      let query = supabase
+        .from('ops_alerts')
+        .select(`
+          *,
+          organizations:organization_id(id, name),
+          users:user_id(id, email, full_name),
+          payments:payment_id(id, amount, currency, status)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(100);
+      
       if (statusFilter && statusFilter !== 'all') {
-        params.set('status', statusFilter);
+        query = query.eq('status', statusFilter);
       }
-      const res = await fetch(`/api/admin/ops/alerts?${params.toString()}`, {
-        credentials: 'include'
-      });
-      if (!res.ok) throw new Error('Failed to fetch alerts');
-      return res.json();
+      
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
     },
   });
 
   const updateAlertMutation = useMutation({
     mutationFn: async ({ id, action }: { id: string; action: string }) => {
-      const res = await apiRequest('PATCH', `/api/admin/ops/alerts/${id}`, { action });
-      return res.json();
+      const updates: Record<string, any> = { updated_at: new Date().toISOString() };
+      
+      switch (action) {
+        case 'ack':
+          updates.status = 'ack';
+          updates.ack_at = new Date().toISOString();
+          break;
+        case 'resolve':
+          updates.status = 'resolved';
+          updates.resolved_at = new Date().toISOString();
+          break;
+        case 'dismiss':
+          updates.status = 'dismissed';
+          break;
+        case 'reopen':
+          updates.status = 'open';
+          updates.ack_at = null;
+          updates.resolved_at = null;
+          break;
+      }
+      
+      const { error } = await supabase
+        .from('ops_alerts')
+        .update(updates)
+        .eq('id', id);
+      
+      if (error) throw error;
+      return { success: true };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/alerts'] });
+      queryClient.invalidateQueries({ queryKey: ['ops_alerts'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/stats'] });
     },
     onError: (error: any) => {
@@ -382,26 +426,24 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
 
   const executeRepairMutation = useMutation({
     mutationFn: async ({ alertId, actionId }: { alertId: string; actionId: string }) => {
-      const res = await apiRequest('POST', `/api/admin/ops/alerts/${alertId}/repair`, { actionId });
-      return res.json();
+      const { data, error } = await supabase.rpc('ops_execute_repair_action', {
+        p_alert_id: alertId,
+        p_action_id: actionId,
+        p_executed_by: null
+      });
+      if (error) throw error;
+      return { success: true, message: 'Acción ejecutada correctamente' };
     },
     onSuccess: (data) => {
-      if (data.success) {
-        toast({ 
-          title: 'Acción ejecutada', 
-          description: data.message,
-        });
-      } else {
-        toast({ 
-          title: 'Error', 
-          description: data.message, 
-          variant: 'destructive' 
-        });
-      }
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/alerts'] });
+      toast({ 
+        title: 'Acción ejecutada', 
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ['ops_alerts'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/ops/stats'] });
     },
     onError: (error: any) => {
+      console.error('[OpsCenter] Error executing repair:', error);
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     },
   });
