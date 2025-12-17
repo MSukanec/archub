@@ -4,7 +4,7 @@
  * Course Structure Explorer - Premium learning experience
  * Replaces the previous table-based view with a modern, visual module explorer
  */
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
 import { 
@@ -43,6 +43,8 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
   const [, navigate] = useLocation();
   const { setCurrentLesson } = useCourseSidebarStore();
   const goToLesson = useCoursePlayerStore(s => s.goToLesson);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hasScrolledRef = useRef(false);
 
   const { data: courseStructure = [], isLoading: structureLoading } = useCourseStructure(courseId);
   const { data: courseProgress = [] } = useCourseProgress(courseId);
@@ -115,6 +117,30 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     return { nextRecommendedLessonId: null, activeModuleId: null };
   }, [modules]);
 
+  const [expandedModuleId, setExpandedModuleId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (activeModuleId && expandedModuleId === null) {
+      setExpandedModuleId(activeModuleId);
+    }
+  }, [activeModuleId, expandedModuleId]);
+
+  useEffect(() => {
+    if (expandedModuleId && !hasScrolledRef.current && containerRef.current) {
+      const moduleElement = document.querySelector(`[data-testid="module-section-${expandedModuleId}"]`);
+      if (moduleElement) {
+        setTimeout(() => {
+          moduleElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          hasScrolledRef.current = true;
+        }, 300);
+      }
+    }
+  }, [expandedModuleId]);
+
+  const handleToggleModule = (moduleId: string) => {
+    setExpandedModuleId(prev => prev === moduleId ? null : moduleId);
+  };
+
   const stats = useMemo(() => {
     const totalLessons = modules.reduce((acc, m) => acc + m.lessons.length, 0);
     const completedLessons = modules.reduce(
@@ -168,7 +194,7 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 md:px-6">
+    <div ref={containerRef} className="max-w-4xl mx-auto px-4 py-6 md:px-6">
       <ContentHeader
         totalModules={stats.totalModules}
         totalLessons={stats.totalLessons}
@@ -184,9 +210,11 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
             moduleIndex={index}
             lessons={module.lessons}
             courseId={courseId}
+            isExpanded={expandedModuleId === module.id}
             isActive={module.id === activeModuleId}
             nextRecommendedLessonId={nextRecommendedLessonId}
             onGoToLesson={handleGoToLesson}
+            onToggle={() => handleToggleModule(module.id)}
           />
         ))}
       </div>

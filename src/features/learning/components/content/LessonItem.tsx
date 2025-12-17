@@ -44,8 +44,8 @@ export function LessonItem({
       className={cn(
         "group relative flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200",
         "hover:bg-muted/50 cursor-pointer",
-        isActive && "bg-primary/5 border border-primary/20",
-        isNextRecommended && !isActive && "bg-accent/50 border border-accent"
+        isActive && "bg-primary/5",
+        isNextRecommended && !isActive && "bg-chart-positive/10"
       )}
       onClick={() => onGoToLesson(lesson.id)}
       data-testid={`lesson-item-${lesson.id}`}
