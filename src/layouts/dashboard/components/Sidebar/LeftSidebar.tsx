@@ -259,6 +259,7 @@ export function LeftSidebar() {
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return [
+        { id: 'ops', label: 'Ops Center', icon: Activity, href: '/admin/ops' },
         { id: 'dashboard', label: 'Analytics', icon: BarChart3, href: '/admin/dashboard' },
         { id: 'administration', label: 'Administración', icon: Settings, href: '/admin/administration' },
         { id: 'support', label: 'Soporte', icon: Headphones, href: '/admin/support' },
