@@ -143,8 +143,7 @@ export async function getOrganizationAudit(req: Request, res: Response) {
         created_at,
         created_by,
         owner_id,
-        plans!organizations_plan_id_fkey(id, name, slug),
-        users!organizations_owner_id_fkey(id, email, full_name)
+        plans!organizations_plan_id_fkey(id, name, slug)
       `)
       .eq("id", organizationId)
       .single();
@@ -154,11 +153,22 @@ export async function getOrganizationAudit(req: Request, res: Response) {
       return res.status(404).json({ error: "Organization not found" });
     }
     
-    const owner = org.users ? {
-      id: (org.users as any).id,
-      email: (org.users as any).email,
-      full_name: (org.users as any).full_name,
-    } : null;
+    let owner = null;
+    if (org.owner_id) {
+      const { data: ownerData } = await supabaseAdmin
+        .from("users")
+        .select("id, email, full_name")
+        .eq("id", org.owner_id)
+        .single();
+      
+      if (ownerData) {
+        owner = {
+          id: ownerData.id,
+          email: ownerData.email,
+          full_name: ownerData.full_name,
+        };
+      }
+    }
     
     const { data: subscription } = await supabaseAdmin
       .from("organization_subscriptions")
