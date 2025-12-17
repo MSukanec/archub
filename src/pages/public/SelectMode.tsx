@@ -7,13 +7,13 @@ import { queryClient } from "@/lib/queryClient";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Lock, GraduationCap, Briefcase, Package, HardHat, ArrowRight } from "lucide-react";
+import { Loader2, Lock, Briefcase, Package, HardHat, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 interface ModeOption {
-  type: 'professional' | 'learner' | 'provider' | 'worker';
+  type: 'professional' | 'provider' | 'worker';
   title: string;
   description: string;
   icon: typeof Briefcase;
@@ -24,15 +24,8 @@ const modeOptions: ModeOption[] = [
   {
     type: "professional",
     title: "Profesionales y Constructoras",
-    description: "Gestiona proyectos completos con equipos, presupuestos y documentación técnica profesional",
+    description: "Gestiona proyectos, equipos, presupuestos y documentación. Accede a cursos y capacitaciones para tu desarrollo profesional.",
     icon: Briefcase,
-    available: true,
-  },
-  {
-    type: "learner",
-    title: "Cursos y Capacitaciones",
-    description: "Accede a cursos especializados y recursos de formación para el desarrollo profesional",
-    icon: GraduationCap,
     available: true,
   },
   {
@@ -98,21 +91,15 @@ export default function SelectMode() {
 
       return { previousUserData };
     },
-    onSuccess: (data, userType) => {
+    onSuccess: () => {
       localStorage.setItem('onboarding_bypass', 'true');
       localStorage.setItem('onboarding_bypass_user_id', userData?.user?.id || '');
       
       setCompletingOnboarding(false);
       
-      if (userType === 'learner') {
-        setSidebarContext('learning');
-        setSidebarLevel('learning');
-        navigate('/learning/dashboard');
-      } else {
-        setSidebarContext('organization');
-        setSidebarLevel('organization');
-        navigate('/organization/dashboard');
-      }
+      setSidebarContext('organization');
+      setSidebarLevel('organization');
+      navigate('/organization/dashboard');
     },
     onError: (err, userType, context) => {
       setCompletingOnboarding(false);
@@ -164,8 +151,8 @@ export default function SelectMode() {
           </p>
         </div>
 
-        {/* Available Modes Grid - 2 columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        {/* All Modes Grid - 3 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {availableModes.map((mode) => {
             const isSelected = selectedMode === mode.type;
             const isLoading = updateUserTypeMutation.isPending && isSelected;
@@ -236,10 +223,6 @@ export default function SelectMode() {
               </Card>
             );
           })}
-        </div>
-
-        {/* Upcoming Modes Grid - 2 columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {upcomingModes.map((mode) => {
             const Icon = mode.icon;
             
