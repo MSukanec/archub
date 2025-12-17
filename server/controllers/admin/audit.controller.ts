@@ -255,18 +255,18 @@ export async function getOrganizationAudit(req: Request, res: Response) {
         
         if (founderCourse) {
           const { data: enrollment } = await supabaseAdmin
-            .from("user_course_purchases")
-            .select("id, access_type, expires_at")
+            .from("course_enrollments")
+            .select("id, access_type, status")
             .eq("user_id", owner.id)
             .eq("course_id", founderCourse.id)
             .maybeSingle();
           
           founderCourseEnrollment = {
-            enrolled: !!enrollment,
+            enrolled: !!enrollment && enrollment.status === 'active',
             course_id: founderCourse.id,
             course_name: founderCourse.title,
             access_type: enrollment?.access_type || null,
-            expires_at: enrollment?.expires_at || null,
+            expires_at: null,
           };
         }
       }
@@ -490,24 +490,35 @@ export async function enrollOwnerInFounderCourse(req: Request, res: Response) {
     }
     
     const { data: existingEnrollment } = await supabaseAdmin
-      .from("user_course_purchases")
-      .select("id")
+      .from("course_enrollments")
+      .select("id, status")
       .eq("user_id", ownerId)
       .eq("course_id", founderCourse.id)
       .maybeSingle();
     
     if (existingEnrollment) {
-      return res.json({ success: true, already_enrolled: true });
+      if (existingEnrollment.status === 'active') {
+        return res.json({ success: true, already_enrolled: true });
+      }
+      const { error: updateError } = await supabaseAdmin
+        .from("course_enrollments")
+        .update({ status: 'active', updated_at: new Date().toISOString() })
+        .eq("id", existingEnrollment.id);
+      
+      if (updateError) {
+        console.error('[Admin Audit] Error reactivating enrollment:', updateError);
+        return res.status(500).json({ error: updateError.message });
+      }
+      return res.json({ success: true, reactivated: true, course: founderCourse.title });
     }
     
     const { error: insertError } = await supabaseAdmin
-      .from("user_course_purchases")
+      .from("course_enrollments")
       .insert({
         user_id: ownerId,
         course_id: founderCourse.id,
+        status: 'active',
         access_type: 'founder_bonus',
-        payment_id: null,
-        expires_at: null,
       });
     
     if (insertError) {
