@@ -401,17 +401,30 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
               )}
             </div>
 
-            {/* Notes Section */}
+            {/* Notes and Markers Section */}
             {activeLessonId && (
-              <div className="bg-card border rounded-lg p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <FileText className="h-5 w-5 text-[var(--accent)]" />
-                  <h3 className="font-semibold">Mis Apuntes</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-card border rounded-lg p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <FileText className="h-5 w-5 text-[var(--accent)]" />
+                    <h3 className="font-semibold">Mis Apuntes</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Resumen general de la lección - se guarda automáticamente mientras escribes.
+                  </p>
+                  <LessonSummaryNote lessonId={activeLessonId} />
                 </div>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Resumen general de la lección - se guarda automáticamente mientras escribes.
-                </p>
-                <LessonSummaryNote lessonId={activeLessonId} />
+
+                <div className="bg-card border rounded-lg p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Bookmark className="h-5 w-5 text-[var(--accent)]" />
+                    <h3 className="font-semibold">Mis Marcadores</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Marca momentos importantes del video para volver a ellos fácilmente.
+                  </p>
+                  <LessonMarkers lessonId={activeLessonId} vimeoPlayer={vimeoPlayer} />
+                </div>
               </div>
             )}
           </>

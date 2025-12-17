@@ -2,7 +2,7 @@ import { useMemo, useEffect, useCallback } from 'react';
 import { useRoute, useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { useCoursePlayerStore, useCourseProgress, CourseMarkers } from '@/features/learning';
+import { useCoursePlayerStore, useCourseProgress, CourseMarkersSimple } from '@/features/learning';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
 import { PlayerDrawer } from './PlayerDrawer';
 
@@ -89,11 +89,10 @@ export function CoursePlayerDrawerHost() {
       onLessonSelect={handleLessonSelect}
       markersContent={
         course?.id ? (
-          <CourseMarkers 
+          <CourseMarkersSimple 
             courseId={course.id} 
             activeLessonId={activeLessonId}
-            vimeoPlayer={vimeoPlayer} 
-            onLessonSelect={handleMarkerLessonSelect}
+            onMarkerClick={handleMarkerLessonSelect}
           />
         ) : undefined
       }

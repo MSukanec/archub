@@ -31,6 +31,7 @@ export { default as CourseHeroImageUpload } from './dashboard/CourseHeroImageUpl
 export { FavoriteButton } from './dashboard/FavoriteButton';
 export { LessonMarkers } from './dashboard/LessonMarkers';
 export { CourseMarkers } from './dashboard/CourseMarkers';
+export { CourseMarkersSimple } from './dashboard/CourseMarkersSimple';
 export { LessonNotes } from './dashboard/LessonNotes';
 export { LessonSummaryNote } from './dashboard/LessonSummaryNote';
 export { default as PayButton } from './dashboard/PayButton';
