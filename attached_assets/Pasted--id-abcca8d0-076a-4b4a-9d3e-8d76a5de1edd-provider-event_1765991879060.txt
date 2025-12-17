@@ -1,0 +1,2813 @@
+[
+  {
+    "id": "abcca8d0-076a-4b4a-9d3e-8d76a5de1edd",
+    "provider_event_id": "137553336079",
+    "provider_event_type": "payment.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 137553336079,
+      "card": {
+        "id": "8888339209",
+        "bin": "371595",
+        "tags": [
+          "credit"
+        ],
+        "country": "ARG",
+        "cardholder": {
+          "name": "DIEGO PEDRO ORTEGA",
+          "identification": {
+            "type": "DNI",
+            "number": "23823223"
+          }
+        },
+        "date_created": "2025-12-16T17:31:58.000-04:00",
+        "expiration_year": 2027,
+        "expiration_month": 7,
+        "first_six_digits": "371595",
+        "last_four_digits": "1411",
+        "date_last_updated": "2025-12-16T17:31:58.000-04:00"
+      },
+      "tags": null,
+      "order": {},
+      "payer": {
+        "id": "59529013",
+        "type": null,
+        "email": "info.omgestudio@gmail.com",
+        "phone": {
+          "number": null,
+          "area_code": null,
+          "extension": null
+        },
+        "last_name": null,
+        "first_name": null,
+        "entity_type": null,
+        "operator_id": null,
+        "identification": {
+          "type": "CUIT",
+          "number": "20238232237"
+        }
+      },
+      "pos_id": null,
+      "status": "approved",
+      "refunds": [],
+      "brand_id": null,
+      "captured": true,
+      "metadata": {},
+      "store_id": null,
+      "issuer_id": "310",
+      "live_mode": true,
+      "sponsor_id": null,
+      "binary_mode": true,
+      "currency_id": "ARS",
+      "description": "Suscripción Pro - Anual",
+      "fee_details": [
+        {
+          "type": "mercadopago_fee",
+          "amount": 11335.68,
+          "fee_payer": "collector"
+        }
+      ],
+      "platform_id": null,
+      "collector_id": 130095653,
+      "date_created": "2025-12-16T17:31:58.000-04:00",
+      "installments": 1,
+      "release_info": null,
+      "taxes_amount": 0,
+      "accounts_info": null,
+      "build_version": "3.135.0-rc-1",
+      "coupon_amount": 0,
+      "date_approved": "2025-12-16T17:32:01.000-04:00",
+      "integrator_id": null,
+      "status_detail": "accredited",
+      "corporation_id": null,
+      "operation_type": "regular_payment",
+      "payment_method": {
+        "id": "amex",
+        "data": {
+          "routing_data": {
+            "merchant_account_id": "9900682790"
+          }
+        },
+        "type": "credit_card",
+        "issuer_id": "310"
+      },
+      "additional_info": {
+        "tracking_id": "platform:v1-blacklabel,so:ALL,type:N/A,security:none"
+      },
+      "charges_details": [
+        {
+          "id": "137553336079-001",
+          "name": "mercadopago_fee",
+          "rate": 4.1,
+          "type": "fee",
+          "amounts": {
+            "original": 11335.68,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "collector"
+          },
+          "metadata": {
+            "reason": "",
+            "source": "proc-svc-charges",
+            "source_detail": "processing_fee_charge"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 276480,
+          "date_created": "2025-12-16T17:31:58.000-04:00",
+          "last_updated": "2025-12-16T17:31:58.000-04:00",
+          "refund_charges": [],
+          "external_charge_id": "01KCMH7FY132JJ13W9T7YSPECQ"
+        }
+      ],
+      "financing_group": null,
+      "merchant_number": null,
+      "payment_type_id": "credit_card",
+      "processing_mode": "aggregator",
+      "shipping_amount": 0,
+      "counter_currency": null,
+      "deduction_schema": null,
+      "notification_url": null,
+      "date_last_updated": "2025-12-16T17:32:01.000-04:00",
+      "marketplace_owner": null,
+      "payment_method_id": "amex",
+      "authorization_code": "942110",
+      "date_of_expiration": null,
+      "external_reference": "mps_MqpY5iPJRlZN",
+      "money_release_date": "2026-01-03T17:32:01.000-04:00",
+      "transaction_amount": 276480,
+      "merchant_account_id": null,
+      "transaction_details": {
+        "overpaid_amount": 0,
+        "total_paid_amount": 276480,
+        "acquirer_reference": null,
+        "installment_amount": 276480,
+        "net_received_amount": 265144.32,
+        "external_resource_url": null,
+        "financial_institution": null,
+        "payable_deferral_period": null,
+        "payment_method_reference_id": null
+      },
+      "money_release_schema": null,
+      "money_release_status": "pending",
+      "point_of_interaction": {
+        "type": "SUBSCRIPTIONS",
+        "location": {
+          "source": "collector",
+          "state_id": "AR-B"
+        },
+        "references": [
+          {
+            "id": "2152ff24b8284dce8f3b84df67f8f9a4",
+            "type": "AUTOMATIC_PAYMENTS_ATTEMPT"
+          }
+        ],
+        "business_info": {
+          "unit": "online_payments",
+          "branch": "Merchant Services",
+          "sub_unit": "recurring"
+        },
+        "application_data": {
+          "name": null,
+          "version": null,
+          "operating_system": null
+        },
+        "transaction_data": {
+          "plan_id": null,
+          "processor": null,
+          "ticket_id": "017299133552066",
+          "invoice_id": null,
+          "billing_date": "2025-12-15",
+          "user_present": true,
+          "first_time_use": true,
+          "invoice_period": {
+            "type": "monthly",
+            "period": 12
+          },
+          "subscription_id": "3567506db5ae46929470735bee731711",
+          "payment_reference": null,
+          "subscription_sequence": {
+            "total": null,
+            "number": 1
+          }
+        }
+      },
+      "statement_descriptor": "MERPAGO * MATIASSUKANEC",
+      "call_for_authorize_id": null,
+      "charges_execution_info": {
+        "internal_execution": {
+          "date": "2025-12-16T17:31:58.800-04:00",
+          "execution_id": "01KCMH7FX4ZK8BKQ3ANJZHSSKQ"
+        }
+      },
+      "acquirer_reconciliation": [],
+      "differential_pricing_id": null,
+      "transaction_amount_refunded": 0
+    },
+    "created_at": "2025-12-16 21:32:02.915379+00",
+    "order_id": "",
+    "custom_id": "mps_MqpY5iPJRlZN",
+    "user_hint": "88fa1a41-0784-4fbd-9119-4c0c827bc912",
+    "course_hint": null,
+    "provider": "mercadopago",
+    "provider_payment_id": "137553336079",
+    "amount": "276480",
+    "currency": "ARS"
+  },
+  {
+    "id": "3ede4ece-1811-418e-890e-044a00e55207",
+    "provider_event_id": "36047794448",
+    "provider_event_type": "merchant_order.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 36047794448,
+      "items": [
+        {
+          "id": "teams",
+          "title": "Upgrade a Teams - Pago prorrateado",
+          "quantity": 1,
+          "unit_price": 29,
+          "category_id": "subscription_upgrade",
+          "currency_id": "ARS",
+          "description": "Pago único por la diferencia al hacer upgrade a Teams (Anual)",
+          "picture_url": null
+        }
+      ],
+      "payer": {
+        "id": 2153427240,
+        "email": ""
+      },
+      "status": "closed",
+      "is_test": false,
+      "payouts": [],
+      "site_id": "MLA",
+      "payments": [
+        {
+          "id": 136080306464,
+          "status": "approved",
+          "currency_id": "ARS",
+          "date_created": "2025-12-01T20:39:37.000-04:00",
+          "date_approved": "2025-12-01T20:39:38.000-04:00",
+          "last_modified": "2025-12-16T13:08:22.000-04:00",
+          "shipping_cost": 0,
+          "status_detail": "accredited",
+          "operation_type": "regular_payment",
+          "amount_refunded": 0,
+          "total_paid_amount": 29.17,
+          "transaction_amount": 29
+        }
+      ],
+      "cancelled": false,
+      "collector": {
+        "id": 130095653,
+        "email": "",
+        "nickname": "MATIASSUKANEC"
+      },
+      "shipments": [],
+      "sponsor_id": null,
+      "marketplace": "MP-MKT-1488196399552700",
+      "paid_amount": 29,
+      "date_created": "2025-12-01T20:39:37.583-04:00",
+      "last_updated": "2025-12-16T13:08:28.930-04:00",
+      "order_status": "paid",
+      "total_amount": 29,
+      "preference_id": "130095653-db378c3d-3645-4520-a7f6-d3053d32241b",
+      "shipping_cost": 0,
+      "application_id": null,
+      "additional_info": "",
+      "refunded_amount": 0,
+      "notification_url": "https://56b0c08a-c571-423d-82ae-1092bbb3423d-00-3h8x5lp11lea7.picard.replit.dev/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "external_reference": "mpu_72Bc-tY7cHHx"
+    },
+    "created_at": "2025-12-16 17:08:30.902555+00",
+    "order_id": "36047794448",
+    "custom_id": "mpu_72Bc-tY7cHHx",
+    "user_hint": "mpu_72Bc-tY7cHHx",
+    "course_hint": "subscription_upgrade",
+    "provider": "mercadopago",
+    "provider_payment_id": null,
+    "amount": "29",
+    "currency": null
+  },
+  {
+    "id": "781bc895-d004-4a37-8e6e-2db8aa5ff803",
+    "provider_event_id": "36047794448",
+    "provider_event_type": "topic_merchant_order_wh",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": "36047794448",
+      "data": {
+        "status": "closed",
+        "currency_id": "",
+        "marketplace": "MP-MKT-1488196399552700"
+      },
+      "type": "topic_merchant_order_wh",
+      "action": "update",
+      "status": "closed",
+      "user_id": 130095653,
+      "version": 2,
+      "live_mode": true,
+      "date_created": "2025-12-01T20:39:37.583-04:00",
+      "application_id": ""
+    },
+    "created_at": "2025-12-16 17:08:30.410877+00",
+    "order_id": null,
+    "custom_id": null,
+    "user_hint": null,
+    "course_hint": null,
+    "provider": "mercadopago",
+    "provider_payment_id": null,
+    "amount": null,
+    "currency": null
+  },
+  {
+    "id": "31417f72-b25b-459e-84d1-2b15191ea8da",
+    "provider_event_id": "136080306464",
+    "provider_event_type": "payment.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 136080306464,
+      "card": {},
+      "tags": null,
+      "order": {
+        "id": "36047794448",
+        "type": "mercadopago"
+      },
+      "payer": {
+        "id": "2153427240",
+        "type": null,
+        "email": "estudio@msya.com.ar",
+        "phone": {
+          "number": null,
+          "area_code": null,
+          "extension": null
+        },
+        "last_name": null,
+        "first_name": null,
+        "entity_type": null,
+        "operator_id": null,
+        "identification": {
+          "type": "CUIT",
+          "number": "30718719514"
+        }
+      },
+      "pos_id": null,
+      "status": "approved",
+      "refunds": [],
+      "brand_id": null,
+      "captured": true,
+      "metadata": {
+        "plan_id": "a1ea5839-e5c9-4a7c-a78b-0d18e9456957",
+        "user_id": "92eb60ea-4d37-41ab-8461-17139dc88c3f",
+        "plan_slug": "teams",
+        "product_type": "subscription_upgrade",
+        "billing_period": "annual",
+        "full_price_ars": 172.79999999999998,
+        "organization_id": "bb2747bc-6218-4101-8505-0f63bf390e29",
+        "proration_amount_ars": 29,
+        "proration_credit_ars": 144,
+        "previous_subscription_id": "677aeacb-bd3c-4511-95b2-7f2e06dfbb33"
+      },
+      "store_id": null,
+      "issuer_id": "2005",
+      "live_mode": true,
+      "sponsor_id": null,
+      "binary_mode": true,
+      "currency_id": "ARS",
+      "description": "Upgrade a Teams - Pago prorrateado",
+      "fee_details": [
+        {
+          "type": "mercadopago_fee",
+          "amount": 1.19,
+          "fee_payer": "collector"
+        }
+      ],
+      "platform_id": null,
+      "collector_id": 130095653,
+      "date_created": "2025-12-01T20:39:37.000-04:00",
+      "installments": 1,
+      "release_info": null,
+      "taxes_amount": 0,
+      "accounts_info": null,
+      "build_version": "3.130.1-hotfix-27",
+      "coupon_amount": 0,
+      "date_approved": "2025-12-01T20:39:38.000-04:00",
+      "integrator_id": null,
+      "status_detail": "accredited",
+      "corporation_id": null,
+      "operation_type": "regular_payment",
+      "payment_method": {
+        "id": "account_money",
+        "type": "account_money",
+        "issuer_id": "2005"
+      },
+      "additional_info": {
+        "items": [
+          {
+            "id": "teams",
+            "title": "Upgrade a Teams - Pago prorrateado",
+            "quantity": "1",
+            "unit_price": "29",
+            "category_id": "subscription_upgrade",
+            "description": "Pago único por la diferencia al hacer upgrade a Teams (Anual)"
+          }
+        ],
+        "ip_address": "181.45.46.142",
+        "tracking_id": "platform:v1-blacklabel,so:ALL,type:N/A,security:none"
+      },
+      "charges_details": [
+        {
+          "id": "136080306464-001",
+          "name": "mercadopago_fee",
+          "rate": 4.1,
+          "type": "fee",
+          "amounts": {
+            "original": 1.19,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "collector"
+          },
+          "metadata": {
+            "reason": "",
+            "source": "rule-engine",
+            "source_detail": "processing_fee_charge"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 29,
+          "date_created": "2025-12-01T20:39:37.000-04:00",
+          "last_updated": "2025-12-01T20:39:37.000-04:00",
+          "refund_charges": []
+        },
+        {
+          "id": "136080306464-002",
+          "name": "tax_withholding_payer-debitos_creditos",
+          "rate": 0.6,
+          "type": "tax",
+          "amounts": {
+            "original": 0.17,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "payer"
+          },
+          "metadata": {
+            "source": "taxes",
+            "tax_id": 108972576339,
+            "user_id": 2153427240,
+            "mov_type": "expense",
+            "mov_detail": "tax_withholding_payer",
+            "tax_status": "applied",
+            "source_detail": "",
+            "mov_financial_entity": "debitos_creditos"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 29,
+          "date_created": "2025-12-01T20:39:37.000-04:00",
+          "last_updated": "2025-12-01T20:39:37.000-04:00",
+          "refund_charges": []
+        }
+      ],
+      "financing_group": "",
+      "merchant_number": null,
+      "payment_type_id": "account_money",
+      "processing_mode": "aggregator",
+      "shipping_amount": 0,
+      "counter_currency": null,
+      "deduction_schema": null,
+      "notification_url": "https://56b0c08a-c571-423d-82ae-1092bbb3423d-00-3h8x5lp11lea7.picard.replit.dev/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "date_last_updated": "2025-12-16T13:08:22.000-04:00",
+      "marketplace_owner": 130095653,
+      "payment_method_id": "account_money",
+      "authorization_code": null,
+      "date_of_expiration": null,
+      "external_reference": "mpu_72Bc-tY7cHHx",
+      "money_release_date": "2025-12-16T13:03:23.000-04:00",
+      "transaction_amount": 29,
+      "merchant_account_id": null,
+      "transaction_details": {
+        "overpaid_amount": 0,
+        "total_paid_amount": 29.17,
+        "acquirer_reference": null,
+        "installment_amount": 0,
+        "net_received_amount": 27.81,
+        "external_resource_url": null,
+        "financial_institution": null,
+        "payable_deferral_period": null,
+        "payment_method_reference_id": null
+      },
+      "money_release_schema": null,
+      "money_release_status": "released",
+      "point_of_interaction": {
+        "type": "CHECKOUT",
+        "location": {
+          "source": "Payer",
+          "state_id": "AR-B"
+        },
+        "business_info": {
+          "unit": "online_payments",
+          "branch": "Merchant Services",
+          "sub_unit": "checkout_pro"
+        },
+        "application_data": {
+          "name": "checkout-off",
+          "version": "v2",
+          "operating_system": null
+        },
+        "transaction_data": {
+          "e2e_id": null
+        }
+      },
+      "statement_descriptor": null,
+      "call_for_authorize_id": null,
+      "charges_execution_info": {
+        "internal_execution": {
+          "date": "2025-12-01T20:39:37.819-04:00",
+          "execution_id": "01KBE80A14XXP2JXZWTS6T8DXG"
+        }
+      },
+      "acquirer_reconciliation": [],
+      "differential_pricing_id": null,
+      "transaction_amount_refunded": 0
+    },
+    "created_at": "2025-12-16 17:08:29.761285+00",
+    "order_id": "36047794448",
+    "custom_id": "mpu_72Bc-tY7cHHx",
+    "user_hint": "92eb60ea-4d37-41ab-8461-17139dc88c3f",
+    "course_hint": null,
+    "provider": "mercadopago",
+    "provider_payment_id": "136080306464",
+    "amount": "29",
+    "currency": "ARS"
+  },
+  {
+    "id": "75177653-96e8-4d53-8e5c-64ca3ea7603c",
+    "provider_event_id": "35932086351",
+    "provider_event_type": "merchant_order.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 35932086351,
+      "items": [
+        {
+          "id": "master-archicad",
+          "title": "Master ArchiCAD Online",
+          "quantity": 1,
+          "unit_price": 101,
+          "category_id": "services",
+          "currency_id": "ARS",
+          "description": "En este curso de ArchiCAD online aprenderás paso a paso a dominar el modelado BIM desde cero hasta un nivel profesional. A través de clases claras, ejercicios reales y flujos de trabajo actuales, vas a incorporar todo lo necesario para desarrollar proye",
+          "picture_url": null
+        }
+      ],
+      "payer": {
+        "id": 2153427240,
+        "email": ""
+      },
+      "status": "closed",
+      "is_test": false,
+      "payouts": [],
+      "site_id": "MLA",
+      "payments": [
+        {
+          "id": 135669205590,
+          "status": "approved",
+          "currency_id": "ARS",
+          "date_created": "2025-11-28T18:20:46.000-04:00",
+          "date_approved": "2025-11-28T18:20:46.000-04:00",
+          "last_modified": "2025-12-16T13:08:20.000-04:00",
+          "shipping_cost": 0,
+          "status_detail": "accredited",
+          "operation_type": "regular_payment",
+          "amount_refunded": 0,
+          "total_paid_amount": 101.61,
+          "transaction_amount": 101
+        }
+      ],
+      "cancelled": false,
+      "collector": {
+        "id": 130095653,
+        "email": "",
+        "nickname": "MATIASSUKANEC"
+      },
+      "shipments": [],
+      "sponsor_id": null,
+      "marketplace": "MP-MKT-1488196399552700",
+      "paid_amount": 101,
+      "date_created": "2025-11-28T18:20:46.213-04:00",
+      "last_updated": "2025-12-16T13:08:28.592-04:00",
+      "order_status": "paid",
+      "total_amount": 101,
+      "preference_id": "130095653-2b3cf305-2765-4581-99a3-48f70a3cdc51",
+      "shipping_cost": 0,
+      "application_id": null,
+      "additional_info": "",
+      "refunded_amount": 0,
+      "notification_url": "https://56b0c08a-c571-423d-82ae-1092bbb3423d-00-3h8x5lp11lea7.picard.replit.dev/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "external_reference": "mp_MNy8qahjk7CW"
+    },
+    "created_at": "2025-12-16 17:08:29.635933+00",
+    "order_id": "35932086351",
+    "custom_id": "mp_MNy8qahjk7CW",
+    "user_hint": "mp_MNy8qahjk7CW",
+    "course_hint": "services",
+    "provider": "mercadopago",
+    "provider_payment_id": null,
+    "amount": "101",
+    "currency": null
+  },
+  {
+    "id": "7db4163e-ab30-4bdc-b3ea-d780a4397e91",
+    "provider_event_id": "135669205590",
+    "provider_event_type": "payment.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 135669205590,
+      "card": {},
+      "tags": null,
+      "order": {
+        "id": "35932086351",
+        "type": "mercadopago"
+      },
+      "payer": {
+        "id": "2153427240",
+        "type": null,
+        "email": "estudio@msya.com.ar",
+        "phone": {
+          "number": null,
+          "area_code": null,
+          "extension": null
+        },
+        "last_name": null,
+        "first_name": null,
+        "entity_type": null,
+        "operator_id": null,
+        "identification": {
+          "type": "CUIT",
+          "number": "30718719514"
+        }
+      },
+      "pos_id": null,
+      "status": "approved",
+      "refunds": [],
+      "brand_id": null,
+      "captured": true,
+      "metadata": {
+        "months": 12,
+        "user_id": "92eb60ea-4d37-41ab-8461-17139dc88c3f",
+        "coupon_id": "bb035e5d-753c-4828-9c21-166f8757930b",
+        "coupon_code": "ESTUDIANTE25OFF",
+        "course_slug": "master-archicad",
+        "product_type": "course"
+      },
+      "store_id": null,
+      "issuer_id": "2005",
+      "live_mode": true,
+      "sponsor_id": null,
+      "binary_mode": true,
+      "currency_id": "ARS",
+      "description": "Master ArchiCAD Online",
+      "fee_details": [
+        {
+          "type": "mercadopago_fee",
+          "amount": 4.14,
+          "fee_payer": "collector"
+        }
+      ],
+      "platform_id": null,
+      "collector_id": 130095653,
+      "date_created": "2025-11-28T18:20:46.000-04:00",
+      "installments": 1,
+      "release_info": null,
+      "taxes_amount": 0,
+      "accounts_info": null,
+      "build_version": "3.130.1-hotfix-27",
+      "coupon_amount": 0,
+      "date_approved": "2025-11-28T18:20:46.000-04:00",
+      "integrator_id": null,
+      "status_detail": "accredited",
+      "corporation_id": null,
+      "operation_type": "regular_payment",
+      "payment_method": {
+        "id": "account_money",
+        "type": "account_money",
+        "issuer_id": "2005"
+      },
+      "additional_info": {
+        "items": [
+          {
+            "id": "master-archicad",
+            "title": "Master ArchiCAD Online",
+            "quantity": "1",
+            "unit_price": "101",
+            "category_id": "services",
+            "description": "En este curso de ArchiCAD online aprenderás paso a paso a dominar el modelado BIM desde cero hasta un nivel profesional. A través de clases claras, ejercicios reales y flujos de trabajo actuales, vas a incorporar todo lo necesario para desarrollar proye"
+          }
+        ],
+        "ip_address": "181.45.46.142",
+        "tracking_id": "platform:v1-blacklabel,so:ALL,type:N/A,security:none"
+      },
+      "charges_details": [
+        {
+          "id": "135669205590-001",
+          "name": "mercadopago_fee",
+          "rate": 4.1,
+          "type": "fee",
+          "amounts": {
+            "original": 4.14,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "collector"
+          },
+          "metadata": {
+            "reason": "",
+            "source": "rule-engine",
+            "source_detail": "processing_fee_charge"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 101,
+          "date_created": "2025-11-28T18:20:46.000-04:00",
+          "last_updated": "2025-11-28T18:20:46.000-04:00",
+          "refund_charges": []
+        },
+        {
+          "id": "135669205590-002",
+          "name": "tax_withholding_payer-debitos_creditos",
+          "rate": 0.6,
+          "type": "tax",
+          "amounts": {
+            "original": 0.61,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "payer"
+          },
+          "metadata": {
+            "source": "taxes",
+            "tax_id": 109059385076,
+            "user_id": 2153427240,
+            "mov_type": "expense",
+            "mov_detail": "tax_withholding_payer",
+            "tax_status": "applied",
+            "source_detail": "",
+            "mov_financial_entity": "debitos_creditos"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 101,
+          "date_created": "2025-11-28T18:20:46.000-04:00",
+          "last_updated": "2025-11-28T18:20:46.000-04:00",
+          "refund_charges": []
+        }
+      ],
+      "financing_group": "",
+      "merchant_number": null,
+      "payment_type_id": "account_money",
+      "processing_mode": "aggregator",
+      "shipping_amount": 0,
+      "counter_currency": null,
+      "deduction_schema": null,
+      "notification_url": "https://56b0c08a-c571-423d-82ae-1092bbb3423d-00-3h8x5lp11lea7.picard.replit.dev/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "date_last_updated": "2025-12-16T13:08:20.000-04:00",
+      "marketplace_owner": 130095653,
+      "payment_method_id": "account_money",
+      "authorization_code": null,
+      "date_of_expiration": null,
+      "external_reference": "mp_MNy8qahjk7CW",
+      "money_release_date": "2025-12-16T13:03:21.000-04:00",
+      "transaction_amount": 101,
+      "merchant_account_id": null,
+      "transaction_details": {
+        "overpaid_amount": 0,
+        "total_paid_amount": 101.61,
+        "acquirer_reference": null,
+        "installment_amount": 0,
+        "net_received_amount": 96.86,
+        "external_resource_url": null,
+        "financial_institution": null,
+        "payable_deferral_period": null,
+        "payment_method_reference_id": null
+      },
+      "money_release_schema": null,
+      "money_release_status": "released",
+      "point_of_interaction": {
+        "type": "CHECKOUT",
+        "location": {
+          "source": "Payer",
+          "state_id": "AR-B"
+        },
+        "business_info": {
+          "unit": "online_payments",
+          "branch": "Merchant Services",
+          "sub_unit": "checkout_pro"
+        },
+        "application_data": {
+          "name": "checkout-off",
+          "version": "v2",
+          "operating_system": null
+        },
+        "transaction_data": {
+          "e2e_id": null
+        }
+      },
+      "statement_descriptor": null,
+      "call_for_authorize_id": null,
+      "charges_execution_info": {
+        "internal_execution": {
+          "date": "2025-11-28T18:20:46.456-04:00",
+          "execution_id": "01KB68VWXRWNTZFXXQGYJG5DEX"
+        }
+      },
+      "acquirer_reconciliation": [],
+      "differential_pricing_id": null,
+      "transaction_amount_refunded": 0
+    },
+    "created_at": "2025-12-16 17:08:29.556632+00",
+    "order_id": "35932086351",
+    "custom_id": "mp_MNy8qahjk7CW",
+    "user_hint": "92eb60ea-4d37-41ab-8461-17139dc88c3f",
+    "course_hint": "master-archicad",
+    "provider": "mercadopago",
+    "provider_payment_id": "135669205590",
+    "amount": "101",
+    "currency": "ARS"
+  },
+  {
+    "id": "16870e9d-729e-4931-b02c-c604f25a194f",
+    "provider_event_id": "136080306464",
+    "provider_event_type": "payment.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 136080306464,
+      "card": {},
+      "tags": null,
+      "order": {
+        "id": "36047794448",
+        "type": "mercadopago"
+      },
+      "payer": {
+        "id": "2153427240",
+        "type": null,
+        "email": "estudio@msya.com.ar",
+        "phone": {
+          "number": null,
+          "area_code": null,
+          "extension": null
+        },
+        "last_name": null,
+        "first_name": null,
+        "entity_type": null,
+        "operator_id": null,
+        "identification": {
+          "type": "CUIT",
+          "number": "30718719514"
+        }
+      },
+      "pos_id": null,
+      "status": "approved",
+      "refunds": [],
+      "brand_id": null,
+      "captured": true,
+      "metadata": {
+        "plan_id": "a1ea5839-e5c9-4a7c-a78b-0d18e9456957",
+        "user_id": "92eb60ea-4d37-41ab-8461-17139dc88c3f",
+        "plan_slug": "teams",
+        "product_type": "subscription_upgrade",
+        "billing_period": "annual",
+        "full_price_ars": 172.79999999999998,
+        "organization_id": "bb2747bc-6218-4101-8505-0f63bf390e29",
+        "proration_amount_ars": 29,
+        "proration_credit_ars": 144,
+        "previous_subscription_id": "677aeacb-bd3c-4511-95b2-7f2e06dfbb33"
+      },
+      "store_id": null,
+      "issuer_id": "2005",
+      "live_mode": true,
+      "sponsor_id": null,
+      "binary_mode": true,
+      "currency_id": "ARS",
+      "description": "Upgrade a Teams - Pago prorrateado",
+      "fee_details": [
+        {
+          "type": "mercadopago_fee",
+          "amount": 1.19,
+          "fee_payer": "collector"
+        }
+      ],
+      "platform_id": null,
+      "collector_id": 130095653,
+      "date_created": "2025-12-01T20:39:37.000-04:00",
+      "installments": 1,
+      "release_info": null,
+      "taxes_amount": 0,
+      "accounts_info": null,
+      "build_version": "3.130.1-hotfix-27",
+      "coupon_amount": 0,
+      "date_approved": "2025-12-01T20:39:38.000-04:00",
+      "integrator_id": null,
+      "status_detail": "accredited",
+      "corporation_id": null,
+      "operation_type": "regular_payment",
+      "payment_method": {
+        "id": "account_money",
+        "type": "account_money",
+        "issuer_id": "2005"
+      },
+      "additional_info": {
+        "items": [
+          {
+            "id": "teams",
+            "title": "Upgrade a Teams - Pago prorrateado",
+            "quantity": "1",
+            "unit_price": "29",
+            "category_id": "subscription_upgrade",
+            "description": "Pago único por la diferencia al hacer upgrade a Teams (Anual)"
+          }
+        ],
+        "ip_address": "181.45.46.142",
+        "tracking_id": "platform:v1-blacklabel,so:ALL,type:N/A,security:none"
+      },
+      "charges_details": [
+        {
+          "id": "136080306464-001",
+          "name": "mercadopago_fee",
+          "rate": 4.1,
+          "type": "fee",
+          "amounts": {
+            "original": 1.19,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "collector"
+          },
+          "metadata": {
+            "reason": "",
+            "source": "rule-engine",
+            "source_detail": "processing_fee_charge"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 29,
+          "date_created": "2025-12-01T20:39:37.000-04:00",
+          "last_updated": "2025-12-01T20:39:37.000-04:00",
+          "refund_charges": []
+        },
+        {
+          "id": "136080306464-002",
+          "name": "tax_withholding_payer-debitos_creditos",
+          "rate": 0.6,
+          "type": "tax",
+          "amounts": {
+            "original": 0.17,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "payer"
+          },
+          "metadata": {
+            "source": "taxes",
+            "tax_id": 108972576339,
+            "user_id": 2153427240,
+            "mov_type": "expense",
+            "mov_detail": "tax_withholding_payer",
+            "tax_status": "applied",
+            "source_detail": "",
+            "mov_financial_entity": "debitos_creditos"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 29,
+          "date_created": "2025-12-01T20:39:37.000-04:00",
+          "last_updated": "2025-12-01T20:39:37.000-04:00",
+          "refund_charges": []
+        }
+      ],
+      "financing_group": "",
+      "merchant_number": null,
+      "payment_type_id": "account_money",
+      "processing_mode": "aggregator",
+      "shipping_amount": 0,
+      "counter_currency": null,
+      "deduction_schema": null,
+      "notification_url": "https://56b0c08a-c571-423d-82ae-1092bbb3423d-00-3h8x5lp11lea7.picard.replit.dev/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "date_last_updated": "2025-12-16T13:08:22.000-04:00",
+      "marketplace_owner": 130095653,
+      "payment_method_id": "account_money",
+      "authorization_code": null,
+      "date_of_expiration": null,
+      "external_reference": "mpu_72Bc-tY7cHHx",
+      "money_release_date": "2025-12-16T13:03:23.000-04:00",
+      "transaction_amount": 29,
+      "merchant_account_id": null,
+      "transaction_details": {
+        "overpaid_amount": 0,
+        "total_paid_amount": 29.17,
+        "acquirer_reference": null,
+        "installment_amount": 0,
+        "net_received_amount": 27.81,
+        "external_resource_url": null,
+        "financial_institution": null,
+        "payable_deferral_period": null,
+        "payment_method_reference_id": null
+      },
+      "money_release_schema": null,
+      "money_release_status": "released",
+      "point_of_interaction": {
+        "type": "CHECKOUT",
+        "location": {
+          "source": "Payer",
+          "state_id": "AR-B"
+        },
+        "business_info": {
+          "unit": "online_payments",
+          "branch": "Merchant Services",
+          "sub_unit": "checkout_pro"
+        },
+        "application_data": {
+          "name": "checkout-off",
+          "version": "v2",
+          "operating_system": null
+        },
+        "transaction_data": {
+          "e2e_id": null
+        }
+      },
+      "statement_descriptor": null,
+      "call_for_authorize_id": null,
+      "charges_execution_info": {
+        "internal_execution": {
+          "date": "2025-12-01T20:39:37.819-04:00",
+          "execution_id": "01KBE80A14XXP2JXZWTS6T8DXG"
+        }
+      },
+      "acquirer_reconciliation": [],
+      "differential_pricing_id": null,
+      "transaction_amount_refunded": 0
+    },
+    "created_at": "2025-12-16 17:08:29.540432+00",
+    "order_id": "36047794448",
+    "custom_id": "mpu_72Bc-tY7cHHx",
+    "user_hint": "92eb60ea-4d37-41ab-8461-17139dc88c3f",
+    "course_hint": null,
+    "provider": "mercadopago",
+    "provider_payment_id": "136080306464",
+    "amount": "29",
+    "currency": "ARS"
+  },
+  {
+    "id": "32c5e291-9cb2-41fb-af02-ee8fd08d44a7",
+    "provider_event_id": "35932086351",
+    "provider_event_type": "topic_merchant_order_wh",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": "35932086351",
+      "data": {
+        "status": "closed",
+        "currency_id": "",
+        "marketplace": "MP-MKT-1488196399552700"
+      },
+      "type": "topic_merchant_order_wh",
+      "action": "update",
+      "status": "closed",
+      "user_id": 130095653,
+      "version": 2,
+      "live_mode": true,
+      "date_created": "2025-11-28T18:20:46.213-04:00",
+      "application_id": ""
+    },
+    "created_at": "2025-12-16 17:08:29.204113+00",
+    "order_id": null,
+    "custom_id": null,
+    "user_hint": null,
+    "course_hint": null,
+    "provider": "mercadopago",
+    "provider_payment_id": null,
+    "amount": null,
+    "currency": null
+  },
+  {
+    "id": "d9c37c62-27d6-456e-85c2-3c995f81848e",
+    "provider_event_id": "135669205590",
+    "provider_event_type": "payment.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 135669205590,
+      "card": {},
+      "tags": null,
+      "order": {
+        "id": "35932086351",
+        "type": "mercadopago"
+      },
+      "payer": {
+        "id": "2153427240",
+        "type": null,
+        "email": "estudio@msya.com.ar",
+        "phone": {
+          "number": null,
+          "area_code": null,
+          "extension": null
+        },
+        "last_name": null,
+        "first_name": null,
+        "entity_type": null,
+        "operator_id": null,
+        "identification": {
+          "type": "CUIT",
+          "number": "30718719514"
+        }
+      },
+      "pos_id": null,
+      "status": "approved",
+      "refunds": [],
+      "brand_id": null,
+      "captured": true,
+      "metadata": {
+        "months": 12,
+        "user_id": "92eb60ea-4d37-41ab-8461-17139dc88c3f",
+        "coupon_id": "bb035e5d-753c-4828-9c21-166f8757930b",
+        "coupon_code": "ESTUDIANTE25OFF",
+        "course_slug": "master-archicad",
+        "product_type": "course"
+      },
+      "store_id": null,
+      "issuer_id": "2005",
+      "live_mode": true,
+      "sponsor_id": null,
+      "binary_mode": true,
+      "currency_id": "ARS",
+      "description": "Master ArchiCAD Online",
+      "fee_details": [
+        {
+          "type": "mercadopago_fee",
+          "amount": 4.14,
+          "fee_payer": "collector"
+        }
+      ],
+      "platform_id": null,
+      "collector_id": 130095653,
+      "date_created": "2025-11-28T18:20:46.000-04:00",
+      "installments": 1,
+      "release_info": null,
+      "taxes_amount": 0,
+      "accounts_info": null,
+      "build_version": "3.130.1-hotfix-27",
+      "coupon_amount": 0,
+      "date_approved": "2025-11-28T18:20:46.000-04:00",
+      "integrator_id": null,
+      "status_detail": "accredited",
+      "corporation_id": null,
+      "operation_type": "regular_payment",
+      "payment_method": {
+        "id": "account_money",
+        "type": "account_money",
+        "issuer_id": "2005"
+      },
+      "additional_info": {
+        "items": [
+          {
+            "id": "master-archicad",
+            "title": "Master ArchiCAD Online",
+            "quantity": "1",
+            "unit_price": "101",
+            "category_id": "services",
+            "description": "En este curso de ArchiCAD online aprenderás paso a paso a dominar el modelado BIM desde cero hasta un nivel profesional. A través de clases claras, ejercicios reales y flujos de trabajo actuales, vas a incorporar todo lo necesario para desarrollar proye"
+          }
+        ],
+        "ip_address": "181.45.46.142",
+        "tracking_id": "platform:v1-blacklabel,so:ALL,type:N/A,security:none"
+      },
+      "charges_details": [
+        {
+          "id": "135669205590-001",
+          "name": "mercadopago_fee",
+          "rate": 4.1,
+          "type": "fee",
+          "amounts": {
+            "original": 4.14,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "collector"
+          },
+          "metadata": {
+            "reason": "",
+            "source": "rule-engine",
+            "source_detail": "processing_fee_charge"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 101,
+          "date_created": "2025-11-28T18:20:46.000-04:00",
+          "last_updated": "2025-11-28T18:20:46.000-04:00",
+          "refund_charges": []
+        },
+        {
+          "id": "135669205590-002",
+          "name": "tax_withholding_payer-debitos_creditos",
+          "rate": 0.6,
+          "type": "tax",
+          "amounts": {
+            "original": 0.61,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "payer"
+          },
+          "metadata": {
+            "source": "taxes",
+            "tax_id": 109059385076,
+            "user_id": 2153427240,
+            "mov_type": "expense",
+            "mov_detail": "tax_withholding_payer",
+            "tax_status": "applied",
+            "source_detail": "",
+            "mov_financial_entity": "debitos_creditos"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 101,
+          "date_created": "2025-11-28T18:20:46.000-04:00",
+          "last_updated": "2025-11-28T18:20:46.000-04:00",
+          "refund_charges": []
+        }
+      ],
+      "financing_group": "",
+      "merchant_number": null,
+      "payment_type_id": "account_money",
+      "processing_mode": "aggregator",
+      "shipping_amount": 0,
+      "counter_currency": null,
+      "deduction_schema": null,
+      "notification_url": "https://56b0c08a-c571-423d-82ae-1092bbb3423d-00-3h8x5lp11lea7.picard.replit.dev/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "date_last_updated": "2025-12-16T13:08:20.000-04:00",
+      "marketplace_owner": 130095653,
+      "payment_method_id": "account_money",
+      "authorization_code": null,
+      "date_of_expiration": null,
+      "external_reference": "mp_MNy8qahjk7CW",
+      "money_release_date": "2025-12-16T13:03:21.000-04:00",
+      "transaction_amount": 101,
+      "merchant_account_id": null,
+      "transaction_details": {
+        "overpaid_amount": 0,
+        "total_paid_amount": 101.61,
+        "acquirer_reference": null,
+        "installment_amount": 0,
+        "net_received_amount": 96.86,
+        "external_resource_url": null,
+        "financial_institution": null,
+        "payable_deferral_period": null,
+        "payment_method_reference_id": null
+      },
+      "money_release_schema": null,
+      "money_release_status": "released",
+      "point_of_interaction": {
+        "type": "CHECKOUT",
+        "location": {
+          "source": "Payer",
+          "state_id": "AR-B"
+        },
+        "business_info": {
+          "unit": "online_payments",
+          "branch": "Merchant Services",
+          "sub_unit": "checkout_pro"
+        },
+        "application_data": {
+          "name": "checkout-off",
+          "version": "v2",
+          "operating_system": null
+        },
+        "transaction_data": {
+          "e2e_id": null
+        }
+      },
+      "statement_descriptor": null,
+      "call_for_authorize_id": null,
+      "charges_execution_info": {
+        "internal_execution": {
+          "date": "2025-11-28T18:20:46.456-04:00",
+          "execution_id": "01KB68VWXRWNTZFXXQGYJG5DEX"
+        }
+      },
+      "acquirer_reconciliation": [],
+      "differential_pricing_id": null,
+      "transaction_amount_refunded": 0
+    },
+    "created_at": "2025-12-16 17:08:28.724341+00",
+    "order_id": "35932086351",
+    "custom_id": "mp_MNy8qahjk7CW",
+    "user_hint": "92eb60ea-4d37-41ab-8461-17139dc88c3f",
+    "course_hint": "master-archicad",
+    "provider": "mercadopago",
+    "provider_payment_id": "135669205590",
+    "amount": "101",
+    "currency": "ARS"
+  },
+  {
+    "id": "7df4ed80-bc8b-42cb-a58e-7e9e37ab8c3d",
+    "provider_event_id": "36053632163",
+    "provider_event_type": "merchant_order.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 36053632163,
+      "items": [
+        {
+          "id": "seat-bb2747bc-6218-4101-8505-0f63bf390e29",
+          "title": "Nuevo miembro - CoDevelopers",
+          "quantity": 1,
+          "unit_price": 173,
+          "category_id": "services",
+          "currency_id": "ARS",
+          "description": "Agregar jorgebenitest@gmail.com como Administrador",
+          "picture_url": null
+        }
+      ],
+      "payer": {
+        "id": 2153427240,
+        "email": ""
+      },
+      "status": "closed",
+      "is_test": false,
+      "payouts": [],
+      "site_id": "MLA",
+      "payments": [
+        {
+          "id": 135616342617,
+          "status": "approved",
+          "currency_id": "ARS",
+          "date_created": "2025-12-02T22:48:08.000-04:00",
+          "date_approved": "2025-12-02T22:48:08.000-04:00",
+          "last_modified": "2025-12-16T13:08:26.000-04:00",
+          "shipping_cost": 0,
+          "status_detail": "accredited",
+          "operation_type": "regular_payment",
+          "amount_refunded": 0,
+          "total_paid_amount": 174.04,
+          "transaction_amount": 173
+        }
+      ],
+      "cancelled": false,
+      "collector": {
+        "id": 130095653,
+        "email": "",
+        "nickname": "MATIASSUKANEC"
+      },
+      "shipments": [],
+      "sponsor_id": null,
+      "marketplace": "MP-MKT-1488196399552700",
+      "paid_amount": 173,
+      "date_created": "2025-12-02T22:48:07.847-04:00",
+      "last_updated": "2025-12-16T13:08:27.401-04:00",
+      "order_status": "paid",
+      "total_amount": 173,
+      "preference_id": "130095653-6aa866c2-8e0a-4449-b0d5-806213fe5816",
+      "shipping_cost": 0,
+      "application_id": null,
+      "additional_info": "",
+      "refunded_amount": 0,
+      "notification_url": "https://seencel.com/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "external_reference": "mps_kizkvWLCkQiU"
+    },
+    "created_at": "2025-12-16 17:08:28.465425+00",
+    "order_id": "36053632163",
+    "custom_id": "mps_kizkvWLCkQiU",
+    "user_hint": "mps_kizkvWLCkQiU",
+    "course_hint": "services",
+    "provider": "mercadopago",
+    "provider_payment_id": null,
+    "amount": "173",
+    "currency": null
+  },
+  {
+    "id": "8ef8f664-254d-42e2-b529-76867cbf7c7e",
+    "provider_event_id": "36053632163",
+    "provider_event_type": "topic_merchant_order_wh",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": "36053632163",
+      "data": {
+        "status": "closed",
+        "currency_id": "",
+        "marketplace": "MP-MKT-1488196399552700"
+      },
+      "type": "topic_merchant_order_wh",
+      "action": "update",
+      "status": "closed",
+      "user_id": 130095653,
+      "version": 2,
+      "live_mode": true,
+      "date_created": "2025-12-02T22:48:07.847-04:00",
+      "application_id": ""
+    },
+    "created_at": "2025-12-16 17:08:28.324578+00",
+    "order_id": null,
+    "custom_id": null,
+    "user_hint": null,
+    "course_hint": null,
+    "provider": "mercadopago",
+    "provider_payment_id": null,
+    "amount": null,
+    "currency": null
+  },
+  {
+    "id": "81124f05-ccb6-4ea6-9fa5-25022448a3e8",
+    "provider_event_id": "36040062435",
+    "provider_event_type": "merchant_order.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 36040062435,
+      "items": [
+        {
+          "id": "seat-bb2747bc-6218-4101-8505-0f63bf390e29",
+          "title": "Nuevo miembro - CoDevelopers",
+          "quantity": 1,
+          "unit_price": 173,
+          "category_id": "services",
+          "currency_id": "ARS",
+          "description": "Agregar jorgebenitest@gmail.com como Editor",
+          "picture_url": null
+        }
+      ],
+      "payer": {
+        "id": 2153427240,
+        "email": ""
+      },
+      "status": "closed",
+      "is_test": false,
+      "payouts": [],
+      "site_id": "MLA",
+      "payments": [
+        {
+          "id": 135556288485,
+          "status": "approved",
+          "currency_id": "ARS",
+          "date_created": "2025-12-02T14:27:22.000-04:00",
+          "date_approved": "2025-12-02T14:27:22.000-04:00",
+          "last_modified": "2025-12-16T13:08:22.000-04:00",
+          "shipping_cost": 0,
+          "status_detail": "accredited",
+          "operation_type": "regular_payment",
+          "amount_refunded": 0,
+          "total_paid_amount": 174.04,
+          "transaction_amount": 173
+        }
+      ],
+      "cancelled": false,
+      "collector": {
+        "id": 130095653,
+        "email": "",
+        "nickname": "MATIASSUKANEC"
+      },
+      "shipments": [],
+      "sponsor_id": null,
+      "marketplace": "MP-MKT-1488196399552700",
+      "paid_amount": 173,
+      "date_created": "2025-12-02T14:27:21.831-04:00",
+      "last_updated": "2025-12-16T13:08:27.640-04:00",
+      "order_status": "paid",
+      "total_amount": 173,
+      "preference_id": "130095653-bcd63818-0e85-4e51-a22b-7321a77e1829",
+      "shipping_cost": 0,
+      "application_id": null,
+      "additional_info": "",
+      "refunded_amount": 0,
+      "notification_url": "https://seencel.com/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "external_reference": "mps_tzC0B-Q6Ptho"
+    },
+    "created_at": "2025-12-16 17:08:28.322619+00",
+    "order_id": "36040062435",
+    "custom_id": "mps_tzC0B-Q6Ptho",
+    "user_hint": "mps_tzC0B-Q6Ptho",
+    "course_hint": "services",
+    "provider": "mercadopago",
+    "provider_payment_id": null,
+    "amount": "173",
+    "currency": null
+  },
+  {
+    "id": "6187dc9a-6a01-4d63-a937-b8113a389503",
+    "provider_event_id": "36040062435",
+    "provider_event_type": "topic_merchant_order_wh",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": "36040062435",
+      "data": {
+        "status": "closed",
+        "currency_id": "",
+        "marketplace": "MP-MKT-1488196399552700"
+      },
+      "type": "topic_merchant_order_wh",
+      "action": "update",
+      "status": "closed",
+      "user_id": 130095653,
+      "version": 2,
+      "live_mode": true,
+      "date_created": "2025-12-02T14:27:21.831-04:00",
+      "application_id": ""
+    },
+    "created_at": "2025-12-16 17:08:28.163089+00",
+    "order_id": null,
+    "custom_id": null,
+    "user_hint": null,
+    "course_hint": null,
+    "provider": "mercadopago",
+    "provider_payment_id": null,
+    "amount": null,
+    "currency": null
+  },
+  {
+    "id": "fb1f5747-b08b-4001-8cf2-33d3746e3935",
+    "provider_event_id": "135616342617",
+    "provider_event_type": "payment.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 135616342617,
+      "card": {},
+      "tags": null,
+      "order": {
+        "id": "36053632163",
+        "type": "mercadopago"
+      },
+      "payer": {
+        "id": "2153427240",
+        "type": null,
+        "email": "estudio@msya.com.ar",
+        "phone": {
+          "number": null,
+          "area_code": null,
+          "extension": null
+        },
+        "last_name": null,
+        "first_name": null,
+        "entity_type": null,
+        "operator_id": null,
+        "identification": {
+          "type": "CUIT",
+          "number": "30718719514"
+        }
+      },
+      "pos_id": null,
+      "status": "approved",
+      "refunds": [],
+      "brand_id": null,
+      "captured": true,
+      "metadata": {
+        "auth_id": "92eb60ea-4d37-41ab-8461-17139dc88c3f",
+        "role_id": "81be9c24-1e85-4f48-a131-2c618e0d1888",
+        "user_id": "0776911d-ccd9-4ac2-95c2-c1d7e270585b",
+        "amount_ars": 173,
+        "product_type": "seat",
+        "invitee_email": "jorgebenitest@gmail.com",
+        "billing_period": "annual",
+        "organization_id": "bb2747bc-6218-4101-8505-0f63bf390e29",
+        "subscription_id": "593f6692-6663-445b-bbe7-b0cab23f362c"
+      },
+      "store_id": null,
+      "issuer_id": "2005",
+      "live_mode": true,
+      "sponsor_id": null,
+      "binary_mode": true,
+      "currency_id": "ARS",
+      "description": "Nuevo miembro - CoDevelopers",
+      "fee_details": [
+        {
+          "type": "mercadopago_fee",
+          "amount": 7.09,
+          "fee_payer": "collector"
+        }
+      ],
+      "platform_id": null,
+      "collector_id": 130095653,
+      "date_created": "2025-12-02T22:48:08.000-04:00",
+      "installments": 1,
+      "release_info": null,
+      "taxes_amount": 0,
+      "accounts_info": null,
+      "build_version": "3.133.0-rc-1",
+      "coupon_amount": 0,
+      "date_approved": "2025-12-02T22:48:08.000-04:00",
+      "integrator_id": null,
+      "status_detail": "accredited",
+      "corporation_id": null,
+      "operation_type": "regular_payment",
+      "payment_method": {
+        "id": "account_money",
+        "type": "account_money",
+        "issuer_id": "2005"
+      },
+      "additional_info": {
+        "items": [
+          {
+            "id": "seat-bb2747bc-6218-4101-8505-0f63bf390e29",
+            "title": "Nuevo miembro - CoDevelopers",
+            "quantity": "1",
+            "unit_price": "173",
+            "category_id": "services",
+            "description": "Agregar jorgebenitest@gmail.com como Administrador"
+          }
+        ],
+        "ip_address": "181.45.46.142",
+        "tracking_id": "platform:v1-blacklabel,so:ALL,type:N/A,security:none"
+      },
+      "charges_details": [
+        {
+          "id": "135616342617-001",
+          "name": "mercadopago_fee",
+          "rate": 4.1,
+          "type": "fee",
+          "amounts": {
+            "original": 7.09,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "collector"
+          },
+          "metadata": {
+            "reason": "",
+            "source": "rule-engine",
+            "source_detail": "processing_fee_charge"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 173,
+          "date_created": "2025-12-02T22:48:08.000-04:00",
+          "last_updated": "2025-12-02T22:48:08.000-04:00",
+          "refund_charges": []
+        },
+        {
+          "id": "135616342617-002",
+          "name": "tax_withholding_payer-debitos_creditos",
+          "rate": 0.6,
+          "type": "tax",
+          "amounts": {
+            "original": 1.04,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "payer"
+          },
+          "metadata": {
+            "source": "taxes",
+            "tax_id": 109263706242,
+            "user_id": 2153427240,
+            "mov_type": "expense",
+            "mov_detail": "tax_withholding_payer",
+            "tax_status": "applied",
+            "source_detail": "",
+            "mov_financial_entity": "debitos_creditos"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 173,
+          "date_created": "2025-12-02T22:48:08.000-04:00",
+          "last_updated": "2025-12-02T22:48:08.000-04:00",
+          "refund_charges": []
+        }
+      ],
+      "financing_group": "",
+      "merchant_number": null,
+      "payment_type_id": "account_money",
+      "processing_mode": "aggregator",
+      "shipping_amount": 0,
+      "counter_currency": null,
+      "deduction_schema": null,
+      "notification_url": "https://seencel.com/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "date_last_updated": "2025-12-16T13:08:26.000-04:00",
+      "marketplace_owner": 130095653,
+      "payment_method_id": "account_money",
+      "authorization_code": null,
+      "date_of_expiration": null,
+      "external_reference": "mps_kizkvWLCkQiU",
+      "money_release_date": "2025-12-16T13:03:21.000-04:00",
+      "transaction_amount": 173,
+      "merchant_account_id": null,
+      "transaction_details": {
+        "overpaid_amount": 0,
+        "total_paid_amount": 174.04,
+        "acquirer_reference": null,
+        "installment_amount": 0,
+        "net_received_amount": 165.91,
+        "external_resource_url": null,
+        "financial_institution": null,
+        "payable_deferral_period": null,
+        "payment_method_reference_id": null
+      },
+      "money_release_schema": null,
+      "money_release_status": "released",
+      "point_of_interaction": {
+        "type": "CHECKOUT",
+        "location": {
+          "source": "Payer",
+          "state_id": "AR-B"
+        },
+        "business_info": {
+          "unit": "online_payments",
+          "branch": "Merchant Services",
+          "sub_unit": "checkout_pro"
+        },
+        "application_data": {
+          "name": "checkout-off",
+          "version": "v2",
+          "operating_system": null
+        },
+        "transaction_data": {
+          "e2e_id": null
+        }
+      },
+      "statement_descriptor": null,
+      "call_for_authorize_id": null,
+      "charges_execution_info": {
+        "internal_execution": {
+          "date": "2025-12-02T22:48:08.085-04:00",
+          "execution_id": "01KBH1RAJSPK86V03M3W22SPP9"
+        }
+      },
+      "acquirer_reconciliation": [],
+      "differential_pricing_id": null,
+      "transaction_amount_refunded": 0
+    },
+    "created_at": "2025-12-16 17:08:28.13764+00",
+    "order_id": "36053632163",
+    "custom_id": "mps_kizkvWLCkQiU",
+    "user_hint": "0776911d-ccd9-4ac2-95c2-c1d7e270585b",
+    "course_hint": null,
+    "provider": "mercadopago",
+    "provider_payment_id": "135616342617",
+    "amount": "173",
+    "currency": "ARS"
+  },
+  {
+    "id": "7d36bced-9461-46fc-a5a8-972cef401d47",
+    "provider_event_id": "135616342617",
+    "provider_event_type": "payment.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 135616342617,
+      "card": {},
+      "tags": null,
+      "order": {
+        "id": "36053632163",
+        "type": "mercadopago"
+      },
+      "payer": {
+        "id": "2153427240",
+        "type": null,
+        "email": "estudio@msya.com.ar",
+        "phone": {
+          "number": null,
+          "area_code": null,
+          "extension": null
+        },
+        "last_name": null,
+        "first_name": null,
+        "entity_type": null,
+        "operator_id": null,
+        "identification": {
+          "type": "CUIT",
+          "number": "30718719514"
+        }
+      },
+      "pos_id": null,
+      "status": "approved",
+      "refunds": [],
+      "brand_id": null,
+      "captured": true,
+      "metadata": {
+        "auth_id": "92eb60ea-4d37-41ab-8461-17139dc88c3f",
+        "role_id": "81be9c24-1e85-4f48-a131-2c618e0d1888",
+        "user_id": "0776911d-ccd9-4ac2-95c2-c1d7e270585b",
+        "amount_ars": 173,
+        "product_type": "seat",
+        "invitee_email": "jorgebenitest@gmail.com",
+        "billing_period": "annual",
+        "organization_id": "bb2747bc-6218-4101-8505-0f63bf390e29",
+        "subscription_id": "593f6692-6663-445b-bbe7-b0cab23f362c"
+      },
+      "store_id": null,
+      "issuer_id": "2005",
+      "live_mode": true,
+      "sponsor_id": null,
+      "binary_mode": true,
+      "currency_id": "ARS",
+      "description": "Nuevo miembro - CoDevelopers",
+      "fee_details": [
+        {
+          "type": "mercadopago_fee",
+          "amount": 7.09,
+          "fee_payer": "collector"
+        }
+      ],
+      "platform_id": null,
+      "collector_id": 130095653,
+      "date_created": "2025-12-02T22:48:08.000-04:00",
+      "installments": 1,
+      "release_info": null,
+      "taxes_amount": 0,
+      "accounts_info": null,
+      "build_version": "3.133.0-rc-1",
+      "coupon_amount": 0,
+      "date_approved": "2025-12-02T22:48:08.000-04:00",
+      "integrator_id": null,
+      "status_detail": "accredited",
+      "corporation_id": null,
+      "operation_type": "regular_payment",
+      "payment_method": {
+        "id": "account_money",
+        "type": "account_money",
+        "issuer_id": "2005"
+      },
+      "additional_info": {
+        "items": [
+          {
+            "id": "seat-bb2747bc-6218-4101-8505-0f63bf390e29",
+            "title": "Nuevo miembro - CoDevelopers",
+            "quantity": "1",
+            "unit_price": "173",
+            "category_id": "services",
+            "description": "Agregar jorgebenitest@gmail.com como Administrador"
+          }
+        ],
+        "ip_address": "181.45.46.142",
+        "tracking_id": "platform:v1-blacklabel,so:ALL,type:N/A,security:none"
+      },
+      "charges_details": [
+        {
+          "id": "135616342617-001",
+          "name": "mercadopago_fee",
+          "rate": 4.1,
+          "type": "fee",
+          "amounts": {
+            "original": 7.09,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "collector"
+          },
+          "metadata": {
+            "reason": "",
+            "source": "rule-engine",
+            "source_detail": "processing_fee_charge"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 173,
+          "date_created": "2025-12-02T22:48:08.000-04:00",
+          "last_updated": "2025-12-02T22:48:08.000-04:00",
+          "refund_charges": []
+        },
+        {
+          "id": "135616342617-002",
+          "name": "tax_withholding_payer-debitos_creditos",
+          "rate": 0.6,
+          "type": "tax",
+          "amounts": {
+            "original": 1.04,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "payer"
+          },
+          "metadata": {
+            "source": "taxes",
+            "tax_id": 109263706242,
+            "user_id": 2153427240,
+            "mov_type": "expense",
+            "mov_detail": "tax_withholding_payer",
+            "tax_status": "applied",
+            "source_detail": "",
+            "mov_financial_entity": "debitos_creditos"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 173,
+          "date_created": "2025-12-02T22:48:08.000-04:00",
+          "last_updated": "2025-12-02T22:48:08.000-04:00",
+          "refund_charges": []
+        }
+      ],
+      "financing_group": "",
+      "merchant_number": null,
+      "payment_type_id": "account_money",
+      "processing_mode": "aggregator",
+      "shipping_amount": 0,
+      "counter_currency": null,
+      "deduction_schema": null,
+      "notification_url": "https://seencel.com/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "date_last_updated": "2025-12-16T13:08:26.000-04:00",
+      "marketplace_owner": 130095653,
+      "payment_method_id": "account_money",
+      "authorization_code": null,
+      "date_of_expiration": null,
+      "external_reference": "mps_kizkvWLCkQiU",
+      "money_release_date": "2025-12-16T13:03:21.000-04:00",
+      "transaction_amount": 173,
+      "merchant_account_id": null,
+      "transaction_details": {
+        "overpaid_amount": 0,
+        "total_paid_amount": 174.04,
+        "acquirer_reference": null,
+        "installment_amount": 0,
+        "net_received_amount": 165.91,
+        "external_resource_url": null,
+        "financial_institution": null,
+        "payable_deferral_period": null,
+        "payment_method_reference_id": null
+      },
+      "money_release_schema": null,
+      "money_release_status": "released",
+      "point_of_interaction": {
+        "type": "CHECKOUT",
+        "location": {
+          "source": "Payer",
+          "state_id": "AR-B"
+        },
+        "business_info": {
+          "unit": "online_payments",
+          "branch": "Merchant Services",
+          "sub_unit": "checkout_pro"
+        },
+        "application_data": {
+          "name": "checkout-off",
+          "version": "v2",
+          "operating_system": null
+        },
+        "transaction_data": {
+          "e2e_id": null
+        }
+      },
+      "statement_descriptor": null,
+      "call_for_authorize_id": null,
+      "charges_execution_info": {
+        "internal_execution": {
+          "date": "2025-12-02T22:48:08.085-04:00",
+          "execution_id": "01KBH1RAJSPK86V03M3W22SPP9"
+        }
+      },
+      "acquirer_reconciliation": [],
+      "differential_pricing_id": null,
+      "transaction_amount_refunded": 0
+    },
+    "created_at": "2025-12-16 17:08:27.828609+00",
+    "order_id": "36053632163",
+    "custom_id": "mps_kizkvWLCkQiU",
+    "user_hint": "0776911d-ccd9-4ac2-95c2-c1d7e270585b",
+    "course_hint": null,
+    "provider": "mercadopago",
+    "provider_payment_id": "135616342617",
+    "amount": "173",
+    "currency": "ARS"
+  },
+  {
+    "id": "3ac9bf63-f625-4249-9419-e362ebebe55a",
+    "provider_event_id": "135614003321",
+    "provider_event_type": "payment.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 135614003321,
+      "card": {},
+      "tags": null,
+      "order": {
+        "id": "36053172717",
+        "type": "mercadopago"
+      },
+      "payer": {
+        "id": "2153427240",
+        "type": null,
+        "email": "estudio@msya.com.ar",
+        "phone": {
+          "number": null,
+          "area_code": null,
+          "extension": null
+        },
+        "last_name": null,
+        "first_name": null,
+        "entity_type": null,
+        "operator_id": null,
+        "identification": {
+          "type": "CUIT",
+          "number": "30718719514"
+        }
+      },
+      "pos_id": null,
+      "status": "approved",
+      "refunds": [],
+      "brand_id": null,
+      "captured": true,
+      "metadata": {
+        "months": 12,
+        "user_id": "fe0da014-fe76-4008-83e4-c4c4e77dd684",
+        "coupon_id": "bb035e5d-753c-4828-9c21-166f8757930b",
+        "coupon_code": "ESTUDIANTE25OFF",
+        "course_slug": "master-archicad",
+        "product_type": "course"
+      },
+      "store_id": null,
+      "issuer_id": "2005",
+      "live_mode": true,
+      "sponsor_id": null,
+      "binary_mode": true,
+      "currency_id": "ARS",
+      "description": "Master ArchiCAD Online",
+      "fee_details": [
+        {
+          "type": "mercadopago_fee",
+          "amount": 4.14,
+          "fee_payer": "collector"
+        }
+      ],
+      "platform_id": null,
+      "collector_id": 130095653,
+      "date_created": "2025-12-02T22:15:53.000-04:00",
+      "installments": 1,
+      "release_info": null,
+      "taxes_amount": 0,
+      "accounts_info": null,
+      "build_version": "3.133.0-rc-1",
+      "coupon_amount": 0,
+      "date_approved": "2025-12-02T22:15:54.000-04:00",
+      "integrator_id": null,
+      "status_detail": "accredited",
+      "corporation_id": null,
+      "operation_type": "regular_payment",
+      "payment_method": {
+        "id": "account_money",
+        "type": "account_money",
+        "issuer_id": "2005"
+      },
+      "additional_info": {
+        "items": [
+          {
+            "id": "master-archicad",
+            "title": "Master ArchiCAD Online",
+            "quantity": "1",
+            "unit_price": "101",
+            "category_id": "services",
+            "description": "En este curso de ArchiCAD online aprenderás paso a paso a dominar el modelado BIM desde cero hasta un nivel profesional. A través de clases claras, ejercicios reales y flujos de trabajo actuales, vas a incorporar todo lo necesario para desarrollar proye"
+          }
+        ],
+        "ip_address": "181.45.46.142",
+        "tracking_id": "platform:v1-blacklabel,so:ALL,type:N/A,security:none"
+      },
+      "charges_details": [
+        {
+          "id": "135614003321-001",
+          "name": "mercadopago_fee",
+          "rate": 4.1,
+          "type": "fee",
+          "amounts": {
+            "original": 4.14,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "collector"
+          },
+          "metadata": {
+            "reason": "",
+            "source": "rule-engine",
+            "source_detail": "processing_fee_charge"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 101,
+          "date_created": "2025-12-02T22:15:53.000-04:00",
+          "last_updated": "2025-12-02T22:15:53.000-04:00",
+          "refund_charges": []
+        },
+        {
+          "id": "135614003321-002",
+          "name": "tax_withholding_payer-debitos_creditos",
+          "rate": 0.6,
+          "type": "tax",
+          "amounts": {
+            "original": 0.61,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "payer"
+          },
+          "metadata": {
+            "source": "taxes",
+            "tax_id": 109026737857,
+            "user_id": 2153427240,
+            "mov_type": "expense",
+            "mov_detail": "tax_withholding_payer",
+            "tax_status": "applied",
+            "source_detail": "",
+            "mov_financial_entity": "debitos_creditos"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 101,
+          "date_created": "2025-12-02T22:15:53.000-04:00",
+          "last_updated": "2025-12-02T22:15:53.000-04:00",
+          "refund_charges": []
+        }
+      ],
+      "financing_group": "",
+      "merchant_number": null,
+      "payment_type_id": "account_money",
+      "processing_mode": "aggregator",
+      "shipping_amount": 0,
+      "counter_currency": null,
+      "deduction_schema": null,
+      "notification_url": "https://seencel.com/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "date_last_updated": "2025-12-16T13:08:22.000-04:00",
+      "marketplace_owner": 130095653,
+      "payment_method_id": "account_money",
+      "authorization_code": null,
+      "date_of_expiration": null,
+      "external_reference": "mp_O1FEOwADnwhH",
+      "money_release_date": "2025-12-16T13:03:21.000-04:00",
+      "transaction_amount": 101,
+      "merchant_account_id": null,
+      "transaction_details": {
+        "overpaid_amount": 0,
+        "total_paid_amount": 101.61,
+        "acquirer_reference": null,
+        "installment_amount": 0,
+        "net_received_amount": 96.86,
+        "external_resource_url": null,
+        "financial_institution": null,
+        "payable_deferral_period": null,
+        "payment_method_reference_id": null
+      },
+      "money_release_schema": null,
+      "money_release_status": "released",
+      "point_of_interaction": {
+        "type": "CHECKOUT",
+        "location": {
+          "source": "Payer",
+          "state_id": "AR-B"
+        },
+        "business_info": {
+          "unit": "online_payments",
+          "branch": "Merchant Services",
+          "sub_unit": "checkout_pro"
+        },
+        "application_data": {
+          "name": "checkout-off",
+          "version": "v2",
+          "operating_system": null
+        },
+        "transaction_data": {
+          "e2e_id": null
+        }
+      },
+      "statement_descriptor": null,
+      "call_for_authorize_id": null,
+      "charges_execution_info": {
+        "internal_execution": {
+          "date": "2025-12-02T22:15:53.825-04:00",
+          "execution_id": "01KBGZX9N7XPQS6SR5FP06PY8M"
+        }
+      },
+      "acquirer_reconciliation": [],
+      "differential_pricing_id": null,
+      "transaction_amount_refunded": 0
+    },
+    "created_at": "2025-12-16 17:08:27.586985+00",
+    "order_id": "36053172717",
+    "custom_id": "mp_O1FEOwADnwhH",
+    "user_hint": "fe0da014-fe76-4008-83e4-c4c4e77dd684",
+    "course_hint": "master-archicad",
+    "provider": "mercadopago",
+    "provider_payment_id": "135614003321",
+    "amount": "101",
+    "currency": "ARS"
+  },
+  {
+    "id": "d6fe3151-4d69-42b2-87f4-1d6fcae6742d",
+    "provider_event_id": "135556288485",
+    "provider_event_type": "payment.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 135556288485,
+      "card": {},
+      "tags": null,
+      "order": {
+        "id": "36040062435",
+        "type": "mercadopago"
+      },
+      "payer": {
+        "id": "2153427240",
+        "type": null,
+        "email": "estudio@msya.com.ar",
+        "phone": {
+          "number": null,
+          "area_code": null,
+          "extension": null
+        },
+        "last_name": null,
+        "first_name": null,
+        "entity_type": null,
+        "operator_id": null,
+        "identification": {
+          "type": "CUIT",
+          "number": "30718719514"
+        }
+      },
+      "pos_id": null,
+      "status": "approved",
+      "refunds": [],
+      "brand_id": null,
+      "captured": true,
+      "metadata": {
+        "auth_id": "92eb60ea-4d37-41ab-8461-17139dc88c3f",
+        "role_id": "794f7c1a-a51c-46ff-8a64-30d79cdfdb2e",
+        "user_id": "0776911d-ccd9-4ac2-95c2-c1d7e270585b",
+        "amount_ars": 173,
+        "product_type": "seat",
+        "invitee_email": "jorgebenitest@gmail.com",
+        "billing_period": "annual",
+        "organization_id": "bb2747bc-6218-4101-8505-0f63bf390e29",
+        "subscription_id": "6026cb5f-cdb1-419d-ac5c-7d53f820c50a"
+      },
+      "store_id": null,
+      "issuer_id": "2005",
+      "live_mode": true,
+      "sponsor_id": null,
+      "binary_mode": true,
+      "currency_id": "ARS",
+      "description": "Nuevo miembro - CoDevelopers",
+      "fee_details": [
+        {
+          "type": "mercadopago_fee",
+          "amount": 7.09,
+          "fee_payer": "collector"
+        }
+      ],
+      "platform_id": null,
+      "collector_id": 130095653,
+      "date_created": "2025-12-02T14:27:22.000-04:00",
+      "installments": 1,
+      "release_info": null,
+      "taxes_amount": 0,
+      "accounts_info": null,
+      "build_version": "3.133.0-rc-1",
+      "coupon_amount": 0,
+      "date_approved": "2025-12-02T14:27:22.000-04:00",
+      "integrator_id": null,
+      "status_detail": "accredited",
+      "corporation_id": null,
+      "operation_type": "regular_payment",
+      "payment_method": {
+        "id": "account_money",
+        "type": "account_money",
+        "issuer_id": "2005"
+      },
+      "additional_info": {
+        "items": [
+          {
+            "id": "seat-bb2747bc-6218-4101-8505-0f63bf390e29",
+            "title": "Nuevo miembro - CoDevelopers",
+            "quantity": "1",
+            "unit_price": "173",
+            "category_id": "services",
+            "description": "Agregar jorgebenitest@gmail.com como Editor"
+          }
+        ],
+        "ip_address": "181.45.46.142",
+        "tracking_id": "platform:v1-blacklabel,so:ALL,type:N/A,security:none"
+      },
+      "charges_details": [
+        {
+          "id": "135556288485-001",
+          "name": "mercadopago_fee",
+          "rate": 4.1,
+          "type": "fee",
+          "amounts": {
+            "original": 7.09,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "collector"
+          },
+          "metadata": {
+            "reason": "",
+            "source": "rule-engine",
+            "source_detail": "processing_fee_charge"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 173,
+          "date_created": "2025-12-02T14:27:22.000-04:00",
+          "last_updated": "2025-12-02T14:27:22.000-04:00",
+          "refund_charges": []
+        },
+        {
+          "id": "135556288485-002",
+          "name": "tax_withholding_payer-debitos_creditos",
+          "rate": 0.6,
+          "type": "tax",
+          "amounts": {
+            "original": 1.04,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "payer"
+          },
+          "metadata": {
+            "source": "taxes",
+            "tax_id": 109002796733,
+            "user_id": 2153427240,
+            "mov_type": "expense",
+            "mov_detail": "tax_withholding_payer",
+            "tax_status": "applied",
+            "source_detail": "",
+            "mov_financial_entity": "debitos_creditos"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 173,
+          "date_created": "2025-12-02T14:27:22.000-04:00",
+          "last_updated": "2025-12-02T14:27:22.000-04:00",
+          "refund_charges": []
+        }
+      ],
+      "financing_group": "",
+      "merchant_number": null,
+      "payment_type_id": "account_money",
+      "processing_mode": "aggregator",
+      "shipping_amount": 0,
+      "counter_currency": null,
+      "deduction_schema": null,
+      "notification_url": "https://seencel.com/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "date_last_updated": "2025-12-16T13:08:22.000-04:00",
+      "marketplace_owner": 130095653,
+      "payment_method_id": "account_money",
+      "authorization_code": null,
+      "date_of_expiration": null,
+      "external_reference": "mps_tzC0B-Q6Ptho",
+      "money_release_date": "2025-12-16T13:03:23.000-04:00",
+      "transaction_amount": 173,
+      "merchant_account_id": null,
+      "transaction_details": {
+        "overpaid_amount": 0,
+        "total_paid_amount": 174.04,
+        "acquirer_reference": null,
+        "installment_amount": 0,
+        "net_received_amount": 165.91,
+        "external_resource_url": null,
+        "financial_institution": null,
+        "payable_deferral_period": null,
+        "payment_method_reference_id": null
+      },
+      "money_release_schema": null,
+      "money_release_status": "released",
+      "point_of_interaction": {
+        "type": "CHECKOUT",
+        "location": {
+          "source": "Payer",
+          "state_id": "AR-B"
+        },
+        "business_info": {
+          "unit": "online_payments",
+          "branch": "Merchant Services",
+          "sub_unit": "checkout_pro"
+        },
+        "application_data": {
+          "name": "checkout-off",
+          "version": "v2",
+          "operating_system": null
+        },
+        "transaction_data": {
+          "e2e_id": null
+        }
+      },
+      "statement_descriptor": null,
+      "call_for_authorize_id": null,
+      "charges_execution_info": {
+        "internal_execution": {
+          "date": "2025-12-02T14:27:22.099-04:00",
+          "execution_id": "01KBG53CSR51QJR14FNB9DJANX"
+        }
+      },
+      "acquirer_reconciliation": [],
+      "differential_pricing_id": null,
+      "transaction_amount_refunded": 0
+    },
+    "created_at": "2025-12-16 17:08:27.532827+00",
+    "order_id": "36040062435",
+    "custom_id": "mps_tzC0B-Q6Ptho",
+    "user_hint": "0776911d-ccd9-4ac2-95c2-c1d7e270585b",
+    "course_hint": null,
+    "provider": "mercadopago",
+    "provider_payment_id": "135556288485",
+    "amount": "173",
+    "currency": "ARS"
+  },
+  {
+    "id": "fca4d306-ad01-4ca1-ac02-079851d82bad",
+    "provider_event_id": "35929684807",
+    "provider_event_type": "merchant_order.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 35929684807,
+      "items": [
+        {
+          "id": "master-archicad",
+          "title": "Master ArchiCAD Online",
+          "quantity": 1,
+          "unit_price": 144,
+          "category_id": "services",
+          "currency_id": "ARS",
+          "description": "En este curso de ArchiCAD online aprenderás paso a paso a dominar el modelado BIM desde cero hasta un nivel profesional. A través de clases claras, ejercicios reales y flujos de trabajo actuales, vas a incorporar todo lo necesario para desarrollar proye",
+          "picture_url": null
+        }
+      ],
+      "payer": {
+        "id": 2153427240,
+        "email": ""
+      },
+      "status": "closed",
+      "is_test": false,
+      "payouts": [],
+      "site_id": "MLA",
+      "payments": [
+        {
+          "id": 135658427674,
+          "status": "approved",
+          "currency_id": "ARS",
+          "date_created": "2025-11-28T17:17:48.000-04:00",
+          "date_approved": "2025-11-28T17:17:48.000-04:00",
+          "last_modified": "2025-12-16T13:08:24.000-04:00",
+          "shipping_cost": 0,
+          "status_detail": "accredited",
+          "operation_type": "regular_payment",
+          "amount_refunded": 0,
+          "total_paid_amount": 144.86,
+          "transaction_amount": 144
+        }
+      ],
+      "cancelled": false,
+      "collector": {
+        "id": 130095653,
+        "email": "",
+        "nickname": "MATIASSUKANEC"
+      },
+      "shipments": [],
+      "sponsor_id": null,
+      "marketplace": "MP-MKT-1488196399552700",
+      "paid_amount": 144,
+      "date_created": "2025-11-28T17:17:48.006-04:00",
+      "last_updated": "2025-12-16T13:08:25.769-04:00",
+      "order_status": "paid",
+      "total_amount": 144,
+      "preference_id": "130095653-f2b7bab2-68b6-4c36-b3b5-e292c1b87cf5",
+      "shipping_cost": 0,
+      "application_id": null,
+      "additional_info": "",
+      "refunded_amount": 0,
+      "notification_url": "https://56b0c08a-c571-423d-82ae-1092bbb3423d-00-3h8x5lp11lea7.picard.replit.dev/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "external_reference": "eyJ1c2VyX2lkIjoiOTJlYjYwZWEtNGQzNy00MWFiLTg0NjEtMTcxMzlkYzg4YzNmIiwicHJvZHVjdF90eXBlIjoiY291cnNlIiwiY291cnNlX3NsdWciOiJtYXN0ZXItYXJjaGljYWQiLCJtb250aHMiOjEyfQ=="
+    },
+    "created_at": "2025-12-16 17:08:27.499724+00",
+    "order_id": "35929684807",
+    "custom_id": "eyJ1c2VyX2lkIjoiOTJlYjYwZWEtNGQzNy00MWFiLTg0NjEtMTcxMzlkYzg4YzNmIiwicHJvZHVjdF90eXBlIjoiY291cnNlIiwiY291cnNlX3NsdWciOiJtYXN0ZXItYXJjaGljYWQiLCJtb250aHMiOjEyfQ==",
+    "user_hint": "92eb60ea-4d37-41ab-8461-17139dc88c3f",
+    "course_hint": "services",
+    "provider": "mercadopago",
+    "provider_payment_id": null,
+    "amount": "144",
+    "currency": null
+  },
+  {
+    "id": "e5f83257-12b1-4c0a-b3b3-2f39307769f6",
+    "provider_event_id": "36053172717",
+    "provider_event_type": "merchant_order.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 36053172717,
+      "items": [
+        {
+          "id": "master-archicad",
+          "title": "Master ArchiCAD Online",
+          "quantity": 1,
+          "unit_price": 101,
+          "category_id": "services",
+          "currency_id": "ARS",
+          "description": "En este curso de ArchiCAD online aprenderás paso a paso a dominar el modelado BIM desde cero hasta un nivel profesional. A través de clases claras, ejercicios reales y flujos de trabajo actuales, vas a incorporar todo lo necesario para desarrollar proye",
+          "picture_url": null
+        }
+      ],
+      "payer": {
+        "id": 2153427240,
+        "email": ""
+      },
+      "status": "closed",
+      "is_test": false,
+      "payouts": [],
+      "site_id": "MLA",
+      "payments": [
+        {
+          "id": 135614003321,
+          "status": "approved",
+          "currency_id": "ARS",
+          "date_created": "2025-12-02T22:15:53.000-04:00",
+          "date_approved": "2025-12-02T22:15:54.000-04:00",
+          "last_modified": "2025-12-16T13:08:22.000-04:00",
+          "shipping_cost": 0,
+          "status_detail": "accredited",
+          "operation_type": "regular_payment",
+          "amount_refunded": 0,
+          "total_paid_amount": 101.61,
+          "transaction_amount": 101
+        }
+      ],
+      "cancelled": false,
+      "collector": {
+        "id": 130095653,
+        "email": "",
+        "nickname": "MATIASSUKANEC"
+      },
+      "shipments": [],
+      "sponsor_id": null,
+      "marketplace": "MP-MKT-1488196399552700",
+      "paid_amount": 101,
+      "date_created": "2025-12-02T22:15:53.595-04:00",
+      "last_updated": "2025-12-16T13:08:26.456-04:00",
+      "order_status": "paid",
+      "total_amount": 101,
+      "preference_id": "130095653-c5824905-c1f7-4fd7-a56a-ab5041bd3a7a",
+      "shipping_cost": 0,
+      "application_id": null,
+      "additional_info": "",
+      "refunded_amount": 0,
+      "notification_url": "https://seencel.com/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "external_reference": "mp_O1FEOwADnwhH"
+    },
+    "created_at": "2025-12-16 17:08:27.277205+00",
+    "order_id": "36053172717",
+    "custom_id": "mp_O1FEOwADnwhH",
+    "user_hint": "mp_O1FEOwADnwhH",
+    "course_hint": "services",
+    "provider": "mercadopago",
+    "provider_payment_id": null,
+    "amount": "101",
+    "currency": null
+  },
+  {
+    "id": "a3913c0a-e432-4d2c-a094-7f987ebb2c82",
+    "provider_event_id": "135556288485",
+    "provider_event_type": "payment.webhook",
+    "status": "PROCESSED",
+    "raw_headers": null,
+    "raw_payload": {
+      "id": 135556288485,
+      "card": {},
+      "tags": null,
+      "order": {
+        "id": "36040062435",
+        "type": "mercadopago"
+      },
+      "payer": {
+        "id": "2153427240",
+        "type": null,
+        "email": "estudio@msya.com.ar",
+        "phone": {
+          "number": null,
+          "area_code": null,
+          "extension": null
+        },
+        "last_name": null,
+        "first_name": null,
+        "entity_type": null,
+        "operator_id": null,
+        "identification": {
+          "type": "CUIT",
+          "number": "30718719514"
+        }
+      },
+      "pos_id": null,
+      "status": "approved",
+      "refunds": [],
+      "brand_id": null,
+      "captured": true,
+      "metadata": {
+        "auth_id": "92eb60ea-4d37-41ab-8461-17139dc88c3f",
+        "role_id": "794f7c1a-a51c-46ff-8a64-30d79cdfdb2e",
+        "user_id": "0776911d-ccd9-4ac2-95c2-c1d7e270585b",
+        "amount_ars": 173,
+        "product_type": "seat",
+        "invitee_email": "jorgebenitest@gmail.com",
+        "billing_period": "annual",
+        "organization_id": "bb2747bc-6218-4101-8505-0f63bf390e29",
+        "subscription_id": "6026cb5f-cdb1-419d-ac5c-7d53f820c50a"
+      },
+      "store_id": null,
+      "issuer_id": "2005",
+      "live_mode": true,
+      "sponsor_id": null,
+      "binary_mode": true,
+      "currency_id": "ARS",
+      "description": "Nuevo miembro - CoDevelopers",
+      "fee_details": [
+        {
+          "type": "mercadopago_fee",
+          "amount": 7.09,
+          "fee_payer": "collector"
+        }
+      ],
+      "platform_id": null,
+      "collector_id": 130095653,
+      "date_created": "2025-12-02T14:27:22.000-04:00",
+      "installments": 1,
+      "release_info": null,
+      "taxes_amount": 0,
+      "accounts_info": null,
+      "build_version": "3.133.0-rc-1",
+      "coupon_amount": 0,
+      "date_approved": "2025-12-02T14:27:22.000-04:00",
+      "integrator_id": null,
+      "status_detail": "accredited",
+      "corporation_id": null,
+      "operation_type": "regular_payment",
+      "payment_method": {
+        "id": "account_money",
+        "type": "account_money",
+        "issuer_id": "2005"
+      },
+      "additional_info": {
+        "items": [
+          {
+            "id": "seat-bb2747bc-6218-4101-8505-0f63bf390e29",
+            "title": "Nuevo miembro - CoDevelopers",
+            "quantity": "1",
+            "unit_price": "173",
+            "category_id": "services",
+            "description": "Agregar jorgebenitest@gmail.com como Editor"
+          }
+        ],
+        "ip_address": "181.45.46.142",
+        "tracking_id": "platform:v1-blacklabel,so:ALL,type:N/A,security:none"
+      },
+      "charges_details": [
+        {
+          "id": "135556288485-001",
+          "name": "mercadopago_fee",
+          "rate": 4.1,
+          "type": "fee",
+          "amounts": {
+            "original": 7.09,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "collector"
+          },
+          "metadata": {
+            "reason": "",
+            "source": "rule-engine",
+            "source_detail": "processing_fee_charge"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 173,
+          "date_created": "2025-12-02T14:27:22.000-04:00",
+          "last_updated": "2025-12-02T14:27:22.000-04:00",
+          "refund_charges": []
+        },
+        {
+          "id": "135556288485-002",
+          "name": "tax_withholding_payer-debitos_creditos",
+          "rate": 0.6,
+          "type": "tax",
+          "amounts": {
+            "original": 1.04,
+            "refunded": 0
+          },
+          "accounts": {
+            "to": "mp",
+            "from": "payer"
+          },
+          "metadata": {
+            "source": "taxes",
+            "tax_id": 109002796733,
+            "user_id": 2153427240,
+            "mov_type": "expense",
+            "mov_detail": "tax_withholding_payer",
+            "tax_status": "applied",
+            "source_detail": "",
+            "mov_financial_entity": "debitos_creditos"
+          },
+          "client_id": 0,
+          "reserve_id": null,
+          "base_amount": 173,
+          "date_created": "2025-12-02T14:27:22.000-04:00",
+          "last_updated": "2025-12-02T14:27:22.000-04:00",
+          "refund_charges": []
+        }
+      ],
+      "financing_group": "",
+      "merchant_number": null,
+      "payment_type_id": "account_money",
+      "processing_mode": "aggregator",
+      "shipping_amount": 0,
+      "counter_currency": null,
+      "deduction_schema": null,
+      "notification_url": "https://seencel.com/api/checkout/mp/webhook?secret=5bd39be881c81718c5f939eb7e6fe382377ab549198d3c04124673115beaa47c",
+      "date_last_updated": "2025-12-16T13:08:22.000-04:00",
+      "marketplace_owner": 130095653,
+      "payment_method_id": "account_money",
+      "authorization_code": null,
+      "date_of_expiration": null,
+      "external_reference": "mps_tzC0B-Q6Ptho",
+      "money_release_date": "2025-12-16T13:03:23.000-04:00",
+      "transaction_amount": 173,
+      "merchant_account_id": null,
+      "transaction_details": {
+        "overpaid_amount": 0,
+        "total_paid_amount": 174.04,
+        "acquirer_reference": null,
+        "installment_amount": 0,
+        "net_received_amount": 165.91,
+        "external_resource_url": null,
+        "financial_institution": null,
+        "payable_deferral_period": null,
+        "payment_method_reference_id": null
+      },
+      "money_release_schema": null,
+      "money_release_status": "released",
+      "point_of_interaction": {
+        "type": "CHECKOUT",
+        "location": {
+          "source": "Payer",
+          "state_id": "AR-B"
+        },
+        "business_info": {
+          "unit": "online_payments",
+          "branch": "Merchant Services",
+          "sub_unit": "checkout_pro"
+        },
+        "application_data": {
+          "name": "checkout-off",
+          "version": "v2",
+          "operating_system": null
+        },
+        "transaction_data": {
+          "e2e_id": null
+        }
+      },
+      "statement_descriptor": null,
+      "call_for_authorize_id": null,
+      "charges_execution_info": {
+        "internal_execution": {
+          "date": "2025-12-02T14:27:22.099-04:00",
+          "execution_id": "01KBG53CSR51QJR14FNB9DJANX"
+        }
+      },
+      "acquirer_reconciliation": [],
+      "differential_pricing_id": null,
+      "transaction_amount_refunded": 0
+    },
+    "created_at": "2025-12-16 17:08:27.252945+00",
+    "order_id": "36040062435",
+    "custom_id": "mps_tzC0B-Q6Ptho",
+    "user_hint": "0776911d-ccd9-4ac2-95c2-c1d7e270585b",
+    "course_hint": null,
+    "provider": "mercadopago",
+    "provider_payment_id": "135556288485",
+    "amount": "173",
+    "currency": "ARS"
+  }
+]

@@ -106,6 +106,27 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
         } else {
           console.warn("[MP webhook] ⚠️ No upgrade preference data found:", prefError);
         }
+      } else if (externalRef.startsWith("mpr_")) {
+        // RECURRING SUBSCRIPTION PAYMENT: Lookup recurring subscription preference data
+        console.log("[MP webhook] Looking up recurring subscription preference:", externalRef);
+        const { data: prefData, error: prefError } = await supabase
+          .from("mp_subscription_preferences")
+          .select("*")
+          .eq("id", externalRef)
+          .maybeSingle();
+        
+        if (prefData && !prefError) {
+          fromDb = {
+            user_id: prefData.user_id,
+            organization_id: prefData.organization_id,
+            plan_slug: prefData.plan_slug,
+            billing_period: prefData.billing_period,
+            product_type: 'subscription',
+          };
+          console.log("[MP webhook] Found recurring subscription preference data:", fromDb);
+        } else {
+          console.warn("[MP webhook] ⚠️ No recurring subscription preference data found:", prefError);
+        }
       } else if (externalRef.startsWith("mps_")) {
         // SEAT PAYMENT: Lookup seat preference data
         console.log("[MP webhook] Looking up seat preference:", externalRef);
@@ -863,9 +884,9 @@ export async function processWebhook(req: Request): Promise<ProcessWebhookResult
       const preapprovalStatus = preapproval.status; // 'pending', 'authorized', 'paused', 'cancelled'
       const externalRef = preapproval.external_reference || "";
       
-      // NEW: Lookup subscription data from mp_subscription_preferences if short ID format (mps_...)
+      // NEW: Lookup subscription data from mp_subscription_preferences if short ID format (mpr_... or legacy mps_...)
       let fromDb: any = null;
-      if (externalRef.startsWith("mps_")) {
+      if (externalRef.startsWith("mpr_") || externalRef.startsWith("mps_")) {
         console.log("[MP webhook preapproval] Looking up subscription preference:", externalRef);
         const { data: prefData, error: prefError } = await supabase
           .from("mp_subscription_preferences")

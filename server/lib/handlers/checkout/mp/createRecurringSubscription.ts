@@ -311,8 +311,8 @@ export async function createRecurringSubscription(req: Request): Promise<CreateR
     }
 
     // Generate short ID for external_reference (max 64 chars, alphanumeric)
-    // Same pattern as course payments in Payment_Course_MercadoPago.md
-    const shortId = `mps_${nanoid(12)}`;
+    // Using mpr_ prefix for recurring subscriptions (different from mps_ for seats)
+    const shortId = `mpr_${nanoid(12)}`;
 
     const urlContext = buildURLContext(req);
 

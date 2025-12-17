@@ -90,7 +90,7 @@ export async function handleSubscriptionReturn(req: Request): Promise<HandleSubs
   // If external_reference is empty or not in expected format, try to find preference by preapproval_id
   let prefData: any = null;
   
-  if (externalRef.startsWith("mps_")) {
+  if (externalRef.startsWith("mpr_") || externalRef.startsWith("mps_")) {
     const { data, error } = await supabase
       .from("mp_subscription_preferences")
       .select("*")
