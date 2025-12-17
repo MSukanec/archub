@@ -69,23 +69,26 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
         const { data, error } = await supabase
           .from('media_links')
           .select(`
-            entity_id,
-            media_files (
+            course_module_id,
+            media_files!inner (
               file_url,
               is_deleted
             )
           `)
           .eq('course_id', courseId)
-          .eq('category', 'module_image');
+          .eq('category', 'module_image')
+          .eq('media_files.is_deleted', false);
 
         if (error) throw error;
 
         const imageMap: Record<string, string> = {};
         (data || []).forEach((link: any) => {
           if (link.media_files?.length > 0) {
-            const mediaFile = link.media_files.find((m: any) => !m.is_deleted);
+            const mediaFile = Array.isArray(link.media_files) 
+              ? link.media_files[0] 
+              : link.media_files;
             if (mediaFile?.file_url) {
-              imageMap[link.entity_id] = mediaFile.file_url;
+              imageMap[link.course_module_id] = mediaFile.file_url;
             }
           }
         });
