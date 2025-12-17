@@ -80,8 +80,8 @@ export function PlayerDrawer({
       </div>
 
       {activeTab === 'lecciones' && (
-        <ScrollArea className="flex-1 overflow-hidden">
-          <div className="flex flex-col py-2 px-2">
+        <ScrollArea className="flex-1 w-full">
+          <div className="flex flex-col py-2 px-2 w-full max-w-full overflow-hidden">
             {modules.map((module) => {
               const moduleLessons = lessons
                 .filter(l => l.module_id === module.id)
