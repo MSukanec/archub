@@ -142,7 +142,9 @@ export async function getOrganizationAudit(req: Request, res: Response) {
         settings,
         created_at,
         created_by,
-        plans!organizations_plan_id_fkey(id, name, slug)
+        owner_id,
+        plans!organizations_plan_id_fkey(id, name, slug),
+        users!organizations_owner_id_fkey(id, email, full_name)
       `)
       .eq("id", organizationId)
       .single();
@@ -152,20 +154,10 @@ export async function getOrganizationAudit(req: Request, res: Response) {
       return res.status(404).json({ error: "Organization not found" });
     }
     
-    const { data: ownerMember } = await supabaseAdmin
-      .from("organization_members")
-      .select(`
-        user_id,
-        users!organization_members_user_id_fkey(id, email, full_name)
-      `)
-      .eq("organization_id", organizationId)
-      .eq("role", "owner")
-      .maybeSingle();
-    
-    const owner = ownerMember?.users ? {
-      id: (ownerMember.users as any).id,
-      email: (ownerMember.users as any).email,
-      full_name: (ownerMember.users as any).full_name,
+    const owner = org.users ? {
+      id: (org.users as any).id,
+      email: (org.users as any).email,
+      full_name: (org.users as any).full_name,
     } : null;
     
     const { data: subscription } = await supabaseAdmin
@@ -336,25 +328,18 @@ export async function repairFounderStatus(req: Request, res: Response) {
       return res.status(400).json({ error: "Organization ID required" });
     }
     
-    const { data: ownerMember } = await supabaseAdmin
-      .from("organization_members")
-      .select("user_id")
-      .eq("organization_id", organizationId)
-      .eq("role", "owner")
-      .maybeSingle();
-    
-    if (!ownerMember) {
-      return res.status(400).json({ error: "No se encontró owner para esta organización" });
-    }
-    
     const { data: org, error: orgError } = await supabaseAdmin
       .from("organizations")
-      .select("id, settings")
+      .select("id, settings, owner_id")
       .eq("id", organizationId)
       .single();
     
     if (orgError || !org) {
       return res.status(404).json({ error: "Organization not found" });
+    }
+    
+    if (!org.owner_id) {
+      return res.status(400).json({ error: "No se encontró owner para esta organización" });
     }
     
     const currentSettings = org.settings || {};
@@ -453,21 +438,17 @@ export async function enrollOwnerInFounderCourse(req: Request, res: Response) {
       return res.status(400).json({ error: "Organization ID required" });
     }
     
-    const { data: ownerMember } = await supabaseAdmin
-      .from("organization_members")
-      .select(`
-        user_id,
-        users!organization_members_user_id_fkey(id)
-      `)
-      .eq("organization_id", organizationId)
-      .eq("role", "owner")
-      .maybeSingle();
+    const { data: org } = await supabaseAdmin
+      .from("organizations")
+      .select("id, owner_id")
+      .eq("id", organizationId)
+      .single();
     
-    if (!ownerMember?.users) {
+    if (!org?.owner_id) {
       return res.status(404).json({ error: "Owner not found" });
     }
     
-    const ownerId = (ownerMember.users as any).id;
+    const ownerId = org.owner_id;
     
     const { data: founderCourse } = await supabaseAdmin
       .from("courses")

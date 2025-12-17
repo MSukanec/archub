@@ -20,7 +20,6 @@ import {
   Webhook,
   Crown,
   GraduationCap,
-  Wrench,
   RefreshCw,
   ChevronRight,
   Clock,
@@ -110,32 +109,60 @@ interface AuditReport {
   };
 }
 
-function HealthCheckItem({ 
+function HealthCheckRow({ 
   label, 
   passed, 
   warning = false,
-  detail 
+  detail,
+  action,
+  actionLabel,
+  actionLoading,
+  onAction
 }: { 
   label: string; 
   passed: boolean;
   warning?: boolean;
   detail?: string;
+  action?: boolean;
+  actionLabel?: string;
+  actionLoading?: boolean;
+  onAction?: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between py-2">
-      <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between py-2.5 border-b border-border/50 last:border-0">
+      <div className="flex items-center gap-2 min-w-0 flex-1">
         {passed ? (
-          <CheckCircle2 className="h-5 w-5 text-chart-positive" />
+          <CheckCircle2 className="h-4 w-4 text-chart-positive shrink-0" />
         ) : warning ? (
-          <AlertTriangle className="h-5 w-5 text-chart-neutral" />
+          <AlertTriangle className="h-4 w-4 text-chart-neutral shrink-0" />
         ) : (
-          <XCircle className="h-5 w-5 text-chart-negative" />
+          <XCircle className="h-4 w-4 text-chart-negative shrink-0" />
         )}
-        <span className="text-sm">{label}</span>
+        <span className="text-sm truncate">{label}</span>
       </div>
-      {detail && (
-        <span className="text-xs text-muted-foreground">{detail}</span>
-      )}
+      <div className="flex items-center gap-2 shrink-0">
+        {passed && detail && (
+          <span className="text-xs text-muted-foreground">{detail}</span>
+        )}
+        {!passed && action && onAction && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onAction}
+            disabled={actionLoading}
+            className="h-7 text-xs"
+          >
+            {actionLoading ? (
+              <RefreshCw className="h-3 w-3 animate-spin" />
+            ) : (
+              actionLabel || 'Reparar'
+            )}
+          </Button>
+        )}
+        {!passed && !action && detail && (
+          <span className="text-xs text-muted-foreground">{detail}</span>
+        )}
+      </div>
     </div>
   );
 }
@@ -149,7 +176,11 @@ function formatDate(dateStr: string | null | undefined) {
   }
 }
 
-export default function AdminAuditTab() {
+interface AdminAuditTabProps {
+  onRefreshAction?: (refetchFn: () => void) => void;
+}
+
+export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -254,8 +285,8 @@ export default function AdminAuditTab() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Search className="h-4 w-4" />
             Buscar Organización
           </CardTitle>
           <CardDescription>
@@ -318,7 +349,7 @@ export default function AdminAuditTab() {
       )}
       
       {selectedOrgId && auditError && !auditLoading && (
-        <Card className="border-destructive">
+        <Card>
           <CardContent className="pt-6">
             <p className="text-destructive">
               Error al cargar auditoría: {(auditError as Error).message}
@@ -340,134 +371,43 @@ export default function AdminAuditTab() {
             <div className="flex items-center gap-3">
               <Building2 className="h-6 w-6" />
               <div>
-                <h2 className="text-xl font-bold">{report.organization.name}</h2>
-                <p className="text-sm text-muted-foreground">
-                  ID: {report.organization.id}
+                <h2 className="text-xl font-semibold">{report.organization.name}</h2>
+                <p className="text-sm text-muted-foreground font-mono">
+                  {report.organization.id}
                 </p>
               </div>
             </div>
-            <Badge 
-              variant={health?.all_passed ? 'default' : 'destructive'}
-              className={health?.all_passed ? 'bg-chart-positive' : ''}
-            >
-              {health?.all_passed ? 'Todo OK' : 'Requiere Atención'}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => refetchAudit()}
+                data-testid="button-refresh-audit"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              <Badge 
+                variant={health?.all_passed ? 'default' : 'destructive'}
+                className={health?.all_passed ? 'bg-chart-positive' : ''}
+              >
+                {health?.all_passed ? 'OK' : 'Requiere Atención'}
+              </Badge>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Health Checks
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-1">
-                <HealthCheckItem 
-                  label="Plan coincide con suscripción" 
-                  passed={health?.plan_matches_subscription || false}
-                  detail={report.organization.plan_name || 'Sin plan'}
-                />
-                <HealthCheckItem 
-                  label="Suscripción activa" 
-                  passed={health?.has_active_subscription || false}
-                  detail={report.subscription?.status}
-                />
-                <HealthCheckItem 
-                  label="Ciclo de facturación" 
-                  passed={health?.has_billing_cycle || false}
-                  warning={!health?.has_active_subscription}
-                />
-                <HealthCheckItem 
-                  label="Pagos registrados" 
-                  passed={health?.has_payments || false}
-                  detail={`${report.payments.length} pagos`}
-                />
-                <HealthCheckItem 
-                  label="Webhooks procesados" 
-                  passed={health?.has_payment_events || false}
-                  detail={`${report.payment_events.length} eventos`}
-                />
-                <Separator className="my-2" />
-                <HealthCheckItem 
-                  label="Status Fundador" 
-                  passed={health?.is_founder || false}
-                  detail={health?.is_founder ? 'Activo' : 'No es fundador'}
-                />
-                <HealthCheckItem 
-                  label="Curso Fundador" 
-                  passed={health?.founder_has_course || false}
-                  warning={!health?.is_founder}
-                  detail={report.founder_course_enrollment.enrolled ? 'Inscrito' : 'No inscrito'}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Wrench className="h-4 w-4" />
-                  Acciones Rápidas
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => repairFounderMutation.mutate()}
-                  disabled={repairFounderMutation.isPending || health?.is_founder}
-                  data-testid="button-repair-founder"
-                >
-                  <Crown className="h-4 w-4 mr-2" />
-                  {repairFounderMutation.isPending ? 'Reparando...' : 'Reparar Status Fundador'}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => enrollFounderCourseMutation.mutate()}
-                  disabled={enrollFounderCourseMutation.isPending || report.founder_course_enrollment.enrolled}
-                  data-testid="button-enroll-founder-course"
-                >
-                  <GraduationCap className="h-4 w-4 mr-2" />
-                  {enrollFounderCourseMutation.isPending ? 'Inscribiendo...' : 'Inscribir Owner al Curso Fundador'}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => syncPlanMutation.mutate()}
-                  disabled={syncPlanMutation.isPending || health?.plan_matches_subscription}
-                  data-testid="button-sync-plan"
-                >
-                  <Link2 className="h-4 w-4 mr-2" />
-                  {syncPlanMutation.isPending ? 'Sincronizando...' : 'Sincronizar Plan con Suscripción'}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => refetchAudit()}
-                  data-testid="button-refresh-audit"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Refrescar Auditoría
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <User className="h-4 w-4" />
                   Owner
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {report.owner ? (
-                  <div className="space-y-1">
-                    <p className="font-medium">{report.owner.full_name}</p>
-                    <p className="text-sm text-muted-foreground">{report.owner.email}</p>
-                    <p className="text-xs text-muted-foreground font-mono">{report.owner.id}</p>
+                  <div className="space-y-0.5">
+                    <p className="font-medium text-sm">{report.owner.full_name}</p>
+                    <p className="text-xs text-muted-foreground">{report.owner.email}</p>
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">Sin owner</p>
@@ -476,37 +416,24 @@ export default function AdminAuditTab() {
             </Card>
 
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <CreditCard className="h-4 w-4" />
                   Suscripción
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {report.subscription ? (
-                  <div className="space-y-1">
+                  <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <Badge variant={report.subscription.status === 'active' ? 'default' : 'secondary'}>
+                      <Badge variant={report.subscription.status === 'active' ? 'default' : 'secondary'} className="text-xs">
                         {report.subscription.status}
                       </Badge>
                       <span className="text-sm">{report.subscription.plan_name}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {report.subscription.billing_period === 'annual' ? 'Anual' : 'Mensual'}
-                    </p>
                     <p className="text-xs text-muted-foreground">
-                      Desde: {formatDate(report.subscription.started_at)}
+                      {report.subscription.billing_period === 'annual' ? 'Anual' : 'Mensual'} • Desde {formatDate(report.subscription.started_at)}
                     </p>
-                    {report.subscription.expires_at && (
-                      <p className="text-xs text-muted-foreground">
-                        Expira: {formatDate(report.subscription.expires_at)}
-                      </p>
-                    )}
-                    {report.subscription.provider_subscription_id && (
-                      <p className="text-xs text-muted-foreground font-mono truncate">
-                        MP: {report.subscription.provider_subscription_id}
-                      </p>
-                    )}
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">Sin suscripción activa</p>
@@ -515,99 +442,136 @@ export default function AdminAuditTab() {
             </Card>
 
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  Ciclo de Facturación
+                  Ciclo Actual
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {report.billing_cycle ? (
-                  <div className="space-y-1">
-                    <Badge variant={report.billing_cycle.status === 'active' ? 'default' : 'secondary'}>
-                      {report.billing_cycle.status}
-                    </Badge>
+                  <div className="space-y-0.5">
+                    <Badge variant="outline" className="text-xs">{report.billing_cycle.status}</Badge>
                     <p className="text-xs text-muted-foreground">
-                      Inicio: {formatDate(report.billing_cycle.cycle_start)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Fin: {formatDate(report.billing_cycle.cycle_end)}
+                      {formatDate(report.billing_cycle.cycle_start)} - {formatDate(report.billing_cycle.cycle_end)}
                     </p>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Sin ciclo activo</p>
+                  <p className="text-sm text-muted-foreground">Sin ciclo de facturación</p>
                 )}
               </CardContent>
             </Card>
           </div>
 
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Receipt className="h-4 w-4" />
-                Historial de Pagos ({report.payments.length})
-              </CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Health Checks</CardTitle>
             </CardHeader>
-            <CardContent>
-              {report.payments.length > 0 ? (
-                <div className="space-y-2">
-                  {report.payments.map((payment) => (
-                    <div 
-                      key={payment.id} 
-                      className="flex items-center justify-between py-2 border-b last:border-0"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Badge variant={payment.status === 'completed' ? 'default' : 'secondary'}>
-                          {payment.status}
-                        </Badge>
-                        <div>
-                          <p className="text-sm font-medium">
-                            {payment.currency} {payment.amount?.toLocaleString()}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {payment.provider} • {formatDate(payment.created_at)}
-                          </p>
-                        </div>
-                      </div>
-                      {payment.provider_payment_id && (
-                        <code className="text-xs text-muted-foreground">
-                          {payment.provider_payment_id.substring(0, 20)}...
-                        </code>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Sin pagos registrados</p>
-              )}
+            <CardContent className="pt-0">
+              <HealthCheckRow 
+                label="Plan coincide con suscripción" 
+                passed={health?.plan_matches_subscription || false}
+                detail={report.organization.plan_name || 'Sin plan'}
+                action={!health?.plan_matches_subscription}
+                actionLabel="Sincronizar"
+                actionLoading={syncPlanMutation.isPending}
+                onAction={() => syncPlanMutation.mutate()}
+              />
+              <HealthCheckRow 
+                label="Suscripción activa" 
+                passed={health?.has_active_subscription || false}
+                detail={report.subscription?.status || 'Sin suscripción'}
+              />
+              <HealthCheckRow 
+                label="Ciclo de facturación" 
+                passed={health?.has_billing_cycle || false}
+                warning={!health?.has_active_subscription}
+                detail={report.billing_cycle ? 'Activo' : 'Sin ciclo'}
+              />
+              <HealthCheckRow 
+                label="Pagos registrados" 
+                passed={health?.has_payments || false}
+                detail={`${report.payments.length} pagos`}
+              />
+              <HealthCheckRow 
+                label="Webhooks procesados" 
+                passed={health?.has_payment_events || false}
+                detail={`${report.payment_events.length} eventos`}
+              />
+              <Separator className="my-2" />
+              <HealthCheckRow 
+                label="Status Fundador" 
+                passed={health?.is_founder || false}
+                detail={health?.is_founder ? 'Activo' : 'No es fundador'}
+                action={!health?.is_founder}
+                actionLabel="Activar"
+                actionLoading={repairFounderMutation.isPending}
+                onAction={() => repairFounderMutation.mutate()}
+              />
+              <HealthCheckRow 
+                label="Curso Fundador" 
+                passed={health?.founder_has_course || false}
+                warning={!health?.is_founder}
+                detail={report.founder_course_enrollment.enrolled ? 'Inscrito' : 'No inscrito'}
+                action={!health?.founder_has_course && health?.is_founder}
+                actionLabel="Inscribir"
+                actionLoading={enrollFounderCourseMutation.isPending}
+                onAction={() => enrollFounderCourseMutation.mutate()}
+              />
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Receipt className="h-4 w-4" />
+                  Pagos ({report.payments.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {report.payments.length > 0 ? (
+                  <div className="space-y-2 max-h-48 overflow-auto">
+                    {report.payments.map((payment) => (
+                      <div key={payment.id} className="flex items-center justify-between text-sm py-1 border-b border-border/50 last:border-0">
+                        <div className="flex items-center gap-2">
+                          <Badge variant={payment.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
+                            {payment.status}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">{payment.provider}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-medium">${payment.amount} {payment.currency}</span>
+                          <p className="text-xs text-muted-foreground">{formatDate(payment.created_at)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Sin pagos registrados</p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Webhook className="h-4 w-4" />
-                  Webhooks ({report.payment_events.length})
+                  Eventos de Webhook ({report.payment_events.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {report.payment_events.length > 0 ? (
-                  <div className="space-y-2 max-h-60 overflow-auto">
+                  <div className="space-y-2 max-h-48 overflow-auto">
                     {report.payment_events.map((event) => (
-                      <div 
-                        key={event.id} 
-                        className="flex items-center justify-between py-2 border-b last:border-0"
-                      >
-                        <div>
-                          <p className="text-sm font-mono">{event.provider_event_type}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(event.created_at)}
-                          </p>
+                      <div key={event.id} className="flex items-center justify-between text-sm py-1 border-b border-border/50 last:border-0">
+                        <div className="flex items-center gap-2">
+                          <Badge variant={event.status === 'processed' ? 'default' : 'secondary'} className="text-xs">
+                            {event.status}
+                          </Badge>
+                          <span className="text-xs font-mono truncate max-w-32">{event.provider_event_type}</span>
                         </div>
-                        <Badge variant={event.status === 'PROCESSED' ? 'default' : 'secondary'}>
-                          {event.status}
-                        </Badge>
+                        <span className="text-xs text-muted-foreground">{formatDate(event.created_at)}</span>
                       </div>
                     ))}
                   </div>
@@ -616,52 +580,71 @@ export default function AdminAuditTab() {
                 )}
               </CardContent>
             </Card>
+          </div>
 
+          {report.mp_preferences.length > 0 && (
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  MP Preferences ({report.mp_preferences.length})
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Link2 className="h-4 w-4" />
+                  MercadoPago Preferences ({report.mp_preferences.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {report.mp_preferences.length > 0 ? (
-                  <div className="space-y-2 max-h-60 overflow-auto">
-                    {report.mp_preferences.map((pref) => (
-                      <div 
-                        key={pref.id} 
-                        className="py-2 border-b last:border-0"
-                      >
-                        <div className="flex items-center gap-2">
-                          <code className="text-xs bg-muted px-1 rounded">{pref.id}</code>
-                          <Badge variant="outline">{pref.plan_slug}</Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {pref.billing_period} • {formatDate(pref.created_at)}
-                        </p>
-                        {pref.preapproval_id && (
-                          <p className="text-xs text-muted-foreground font-mono truncate">
-                            Preapproval: {pref.preapproval_id}
-                          </p>
-                        )}
+                <div className="space-y-2 max-h-48 overflow-auto">
+                  {report.mp_preferences.map((pref) => (
+                    <div key={pref.id} className="flex items-center justify-between text-sm py-1 border-b border-border/50 last:border-0">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">{pref.plan_slug}</Badge>
+                        <span className="text-xs">{pref.billing_period === 'annual' ? 'Anual' : 'Mensual'}</span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">Sin preferencias MP</p>
-                )}
+                      <div className="text-right">
+                        {pref.preapproval_id && (
+                          <p className="text-xs font-mono truncate max-w-32">{pref.preapproval_id}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground">{formatDate(pref.created_at)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
-          </div>
+          )}
 
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Raw Settings</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <GraduationCap className="h-4 w-4" />
+                Curso Fundador
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <pre className="text-xs bg-muted p-3 rounded-md overflow-auto max-h-40">
-                {JSON.stringify(report.organization.settings, null, 2)}
-              </pre>
+              {report.founder_course_enrollment.enrolled ? (
+                <div className="space-y-0.5">
+                  <p className="font-medium text-sm">{report.founder_course_enrollment.course_name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Acceso: {report.founder_course_enrollment.access_type}
+                    {report.founder_course_enrollment.expires_at && 
+                      ` • Expira: ${formatDate(report.founder_course_enrollment.expires_at)}`
+                    }
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">No inscrito al curso fundador</p>
+                  {health?.is_founder && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => enrollFounderCourseMutation.mutate()}
+                      disabled={enrollFounderCourseMutation.isPending}
+                      className="h-7 text-xs"
+                    >
+                      {enrollFounderCourseMutation.isPending ? 'Inscribiendo...' : 'Inscribir'}
+                    </Button>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </>
