@@ -262,6 +262,137 @@ async function checkFailedSystemJobs(): Promise<{ results: any[]; stats: CheckRe
   return { results, stats };
 }
 
+async function checkSystemIntegrity(): Promise<{ results: any[]; stats: CheckResult }> {
+  const stats: CheckResult = { alerts_created: 0, alerts_skipped: 0, items_scanned: 0, errors: [] };
+  const results: any[] = [];
+
+  try {
+    const { data: systemErrors, error } = await supabaseAdmin
+      .from("system_errors")
+      .select("id, entity, operation, error_message, severity, context, occurred_at, resolved")
+      .eq("severity", "critical")
+      .eq("resolved", false)
+      .order("occurred_at", { ascending: false })
+      .limit(200);
+
+    if (error) {
+      stats.errors.push(`Error fetching system_errors: ${error.message}`);
+      return { results, stats };
+    }
+
+    stats.items_scanned = systemErrors?.length || 0;
+
+    interface SystemError {
+      id: string;
+      entity: string | null;
+      operation: string | null;
+      error_message: string | null;
+      severity: string | null;
+      context: Record<string, any> | null;
+      occurred_at: string | null;
+      resolved: boolean;
+    }
+
+    const grouped: Record<string, SystemError[]> = {};
+    for (const err of (systemErrors || []) as SystemError[]) {
+      const key = `${err.entity || "unknown"}|${err.operation || "unknown"}`;
+      if (!grouped[key]) {
+        grouped[key] = [];
+      }
+      grouped[key].push(err);
+    }
+
+    for (const groupKey of Object.keys(grouped)) {
+      const errors = grouped[groupKey];
+      const [entity, operation] = groupKey.split("|");
+      const latestError = errors[0];
+      const errorCount = errors.length;
+
+      const fingerprint = generateFingerprint("system.integrity.failed", entity, operation);
+
+      const { data: existing } = await supabaseAdmin
+        .from("ops_alerts")
+        .select("id")
+        .eq("fingerprint", fingerprint)
+        .in("status", ["open", "ack"])
+        .maybeSingle();
+
+      if (existing) {
+        await supabaseAdmin
+          .from("ops_alerts")
+          .update({
+            evidence: {
+              entity,
+              operation,
+              error_count: errorCount,
+              error_ids: errors.map((e: SystemError) => e.id),
+              latest_error: {
+                id: latestError.id,
+                error_message: latestError.error_message,
+                occurred_at: latestError.occurred_at,
+                context: latestError.context,
+              },
+              all_errors: errors.slice(0, 10).map((e: SystemError) => ({
+                id: e.id,
+                error_message: e.error_message,
+                occurred_at: e.occurred_at,
+                context: e.context,
+              })),
+            },
+          })
+          .eq("id", existing.id);
+
+        stats.alerts_skipped++;
+        continue;
+      }
+
+      const { error: insertError } = await supabaseAdmin
+        .from("ops_alerts")
+        .insert({
+          severity: "critical",
+          alert_type: "system.integrity.failed",
+          title: `Operaciones críticas bloqueadas`,
+          description: `${errorCount} error(es) crítico(s) en ${entity} → ${operation}`,
+          fingerprint,
+          evidence: {
+            entity,
+            operation,
+            error_count: errorCount,
+            error_ids: errors.map((e: SystemError) => e.id),
+            latest_error: {
+              id: latestError.id,
+              error_message: latestError.error_message,
+              occurred_at: latestError.occurred_at,
+              context: latestError.context,
+            },
+            all_errors: errors.slice(0, 10).map((e: SystemError) => ({
+              id: e.id,
+              error_message: e.error_message,
+              occurred_at: e.occurred_at,
+              context: e.context,
+            })),
+          },
+        });
+
+      if (insertError) {
+        stats.errors.push(`Error creating alert for ${groupKey}: ${insertError.message}`);
+      } else {
+        stats.alerts_created++;
+        results.push({
+          type: "system.integrity.failed",
+          entity,
+          operation,
+          error_count: errorCount,
+        });
+      }
+    }
+  } catch (err: any) {
+    stats.errors.push(`Unexpected error in checkSystemIntegrity: ${err.message}`);
+  }
+
+  return { results, stats };
+}
+
 export async function runOpsChecks(req: Request, res: Response) {
   const startTime = Date.now();
 
@@ -270,15 +401,16 @@ export async function runOpsChecks(req: Request, res: Response) {
 
     console.log("[OpsCenter] Running ops checks...");
 
-    const [paymentCheck, eventCheck, jobCheck] = await Promise.all([
+    const [paymentCheck, eventCheck, jobCheck, integrityCheck] = await Promise.all([
       checkPaymentPlanMismatch(),
       checkStuckPaymentEvents(),
       checkFailedSystemJobs(),
+      checkSystemIntegrity(),
     ]);
 
-    const totalCreated = paymentCheck.stats.alerts_created + eventCheck.stats.alerts_created + jobCheck.stats.alerts_created;
-    const totalScanned = paymentCheck.stats.items_scanned + eventCheck.stats.items_scanned + jobCheck.stats.items_scanned;
-    const allErrors = [...paymentCheck.stats.errors, ...eventCheck.stats.errors, ...jobCheck.stats.errors];
+    const totalCreated = paymentCheck.stats.alerts_created + eventCheck.stats.alerts_created + jobCheck.stats.alerts_created + integrityCheck.stats.alerts_created;
+    const totalScanned = paymentCheck.stats.items_scanned + eventCheck.stats.items_scanned + jobCheck.stats.items_scanned + integrityCheck.stats.items_scanned;
+    const allErrors = [...paymentCheck.stats.errors, ...eventCheck.stats.errors, ...jobCheck.stats.errors, ...integrityCheck.stats.errors];
 
     const duration = Date.now() - startTime;
     const runStatus = allErrors.length > 0 ? "warning" : "success";
@@ -296,6 +428,7 @@ export async function runOpsChecks(req: Request, res: Response) {
             payment_mismatch: paymentCheck.stats,
             stuck_events: eventCheck.stats,
             failed_jobs: jobCheck.stats,
+            system_integrity: integrityCheck.stats,
           },
         },
         error_message: allErrors.length > 0 ? allErrors.join("; ") : null,
@@ -344,6 +477,7 @@ export async function runOpsChecks(req: Request, res: Response) {
           payment_mismatch: paymentCheck.stats,
           stuck_events: eventCheck.stats,
           failed_jobs: jobCheck.stats,
+          system_integrity: integrityCheck.stats,
         },
       },
       errors: allErrors,
