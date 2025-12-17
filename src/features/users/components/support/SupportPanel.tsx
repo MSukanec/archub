@@ -1,5 +1,5 @@
 /**
- * 💬 SupportPanel - Panel de chat de soporte integrado en RightSidebar
+ * 💬 SupportPanel - Panel de chat de soporte
  * 
  * Componente que muestra un chat para contactar con administradores:
  * - Contacto directo con el equipo de soporte

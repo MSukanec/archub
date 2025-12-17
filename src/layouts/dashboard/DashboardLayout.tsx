@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 // import { SecondarySidebar } from "./SecondarySidebar";
 import { LeftSidebar } from "./components/Sidebar/LeftSidebar";
-import { RightSidebar } from "./components/Sidebar/RightSidebar";
 // Header removed - now handled by sidebar
 // import { PrimarySidebar } from "./PrimarySidebar";
 // import { SidebarSubmenu } from "./SidebarSubmenu"; // Commented out - using accordion sidebar instead
@@ -244,7 +243,7 @@ function LayoutContent({
           </main>
         </HeaderMobile>
       ) : (
-        /* Desktop View - Sidebar + MainHeader + Content + RightSidebar */
+        /* Desktop View - Sidebar + MainHeader + Content */
         <div className="flex-1 flex min-h-0">
           {/* Sidebar - Full height with padding, sticky to stay visible on scroll */}
           <div className="flex-shrink-0 p-1 sticky top-0 h-screen overflow-hidden">
@@ -314,9 +313,8 @@ function LayoutContent({
             </div>
           </div>
 
-          {/* Right Sidebar - Fixed width, always visible */}
+          {/* Course Player Drawer Host */}
           <div className="flex-shrink-0 p-1">
-            <RightSidebar />
             <CoursePlayerDrawerHost />
           </div>
         </div>

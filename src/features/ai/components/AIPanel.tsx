@@ -1,5 +1,5 @@
 /**
- * 🤖 AIPanel - Panel de chat IA integrado en RightSidebar
+ * 🤖 AIPanel - Panel de chat IA
  * 
  * Componente presentacional que muestra un chat conversacional con IA:
  * - Vista inicial: Saludo personalizado + ideas pre-establecidas

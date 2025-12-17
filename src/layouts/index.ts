@@ -13,7 +13,6 @@ export { PageLayout } from "./dashboard/PageLayout";
 
 // Dashboard Components - Sidebar
 export { LeftSidebar } from "./dashboard/components/Sidebar/LeftSidebar";
-export { RightSidebar } from "./dashboard/components/Sidebar/RightSidebar";
 export { default as ButtonSidebar } from "./dashboard/components/Sidebar/ButtonSidebar";
 export { SidebarIconButton } from "./dashboard/components/Sidebar/SidebarIconButton";
 
