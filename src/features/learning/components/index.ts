@@ -39,3 +39,6 @@ export { DiscordWidget } from './dashboard/DiscordWidget';
 export { FloatingCourseLessons } from './FloatingCourseLessons';
 export { default as LessonRow } from './LessonRow';
 export { default as AdminCourseStudentRow } from './admin/AdminCourseStudentRow';
+
+// ========== CONTENT EXPLORER COMPONENTS ==========
+export { ContentHeader, ModuleSection, LessonItem } from './content';

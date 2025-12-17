@@ -1,152 +1,137 @@
-import { useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { useLocation } from 'wouter'
-import { supabase } from '@/lib/supabase'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { CheckCircle2, Circle, ArrowRight, Star } from 'lucide-react'
-import { useCourseSidebarStore } from '@/stores/sidebarStore'
-import { FavoriteButton, useCourseStructure, useCourseProgress, useCoursePlayerStore } from '@/features/learning'
-import LessonRow from '@/features/learning/components/LessonRow'
+/**
+ * CourseContentTab.tsx
+ * 
+ * Course Structure Explorer - Premium learning experience
+ * Replaces the previous table-based view with a modern, visual module explorer
+ */
+import { useMemo } from 'react';
+import { useLocation } from 'wouter';
+import { useCourseSidebarStore } from '@/stores/sidebarStore';
+import { 
+  ContentHeader, 
+  ModuleSection,
+  useCourseStructure, 
+  useCourseProgress, 
+  useCoursePlayerStore 
+} from '@/features/learning';
+import { useQuery } from '@tanstack/react-query';
+import { Loader2 } from 'lucide-react';
 
 interface CourseContentTabProps {
   courseId?: string;
   courseSlug?: string;
 }
 
-interface LessonRowData {
+interface LessonData {
   id: string;
   title: string;
   duration_sec: number | null;
-  module_id: string;
-  module_title: string;
-  module_sort_index: number;
   notes_count: number;
   markers_count: number;
   is_completed: boolean;
-  is_favorite: boolean; // 🌟 NUEVO: Estado de favorito
-  groupKey: string; // Para el groupBy
+  is_favorite: boolean;
+}
+
+interface ModuleData {
+  id: string;
+  title: string;
+  sort_index: number;
+  lessons: LessonData[];
 }
 
 export default function CourseContentTab({ courseId, courseSlug }: CourseContentTabProps) {
-  const [, navigate] = useLocation()
-  const { setCurrentLesson } = useCourseSidebarStore()
-  const goToLesson = useCoursePlayerStore(s => s.goToLesson)
+  const [, navigate] = useLocation();
+  const { setCurrentLesson } = useCourseSidebarStore();
+  const goToLesson = useCoursePlayerStore(s => s.goToLesson);
 
-  // Get course structure (modules with lessons) using the learning feature hook
-  const { data: courseStructure = [] } = useCourseStructure(courseId);
-  
-  // Extract modules and lessons from the structure
-  const modules = useMemo(() => {
-    return courseStructure.map(({ lessons, ...module }) => module);
-  }, [courseStructure]);
-  
-  const lessons = useMemo(() => {
-    return courseStructure.flatMap(module => 
-      (module.lessons || []).map(lesson => ({
-        ...lesson,
-        module_id: module.id
-      }))
-    );
-  }, [courseStructure]);
-
-  // Get progress for all lessons using the learning feature hook
+  const { data: courseStructure = [], isLoading: structureLoading } = useCourseStructure(courseId);
   const { data: courseProgress = [] } = useCourseProgress(courseId);
 
-  // Get notes for this course using optimized backend API
-  const { data: notesResponse } = useQuery<any[]>({
+  const { data: notesResponse } = useQuery<{ lesson_id: string }[]>({
     queryKey: [`/api/courses/${courseId}/notes`],
     enabled: !!courseId
   });
 
-  // Get markers for this course using optimized backend API  
-  const { data: markersResponse } = useQuery<any[]>({
+  const { data: markersResponse } = useQuery<{ lesson_id: string }[]>({
     queryKey: [`/api/courses/${courseId}/markers`],
     enabled: !!courseId
   });
 
-  // Process data into rows
-  const tableData = useMemo<LessonRowData[]>(() => {
-    if (!lessons.length || !modules.length) return [];
+  const modules = useMemo<ModuleData[]>(() => {
+    if (!courseStructure.length) return [];
 
-    // Count notes and markers per lesson from API responses
     const notesCountMap: Record<string, { notes: number; markers: number }> = {};
     
-    // Count summary notes (Apuntes)
-    (notesResponse || []).forEach((note: any) => {
+    (notesResponse || []).forEach((note) => {
       if (!notesCountMap[note.lesson_id]) {
         notesCountMap[note.lesson_id] = { notes: 0, markers: 0 };
       }
       notesCountMap[note.lesson_id].notes++;
     });
     
-    // Count markers
-    (markersResponse || []).forEach((marker: any) => {
+    (markersResponse || []).forEach((marker) => {
       if (!notesCountMap[marker.lesson_id]) {
         notesCountMap[marker.lesson_id] = { notes: 0, markers: 0 };
       }
       notesCountMap[marker.lesson_id].markers++;
     });
 
-    // Build module map
-    const moduleMap = modules.reduce((acc, module) => {
-      acc[module.id] = module;
-      return acc;
-    }, {} as Record<string, any>);
+    return courseStructure.map((module) => {
+      const moduleLessons = (module.lessons || []).map((lesson: any) => {
+        const progress = courseProgress.find((p: any) => p.lesson_id === lesson.id);
+        const counts = notesCountMap[lesson.id] || { notes: 0, markers: 0 };
 
-    // Map lessons to rows
-    const rows: LessonRowData[] = lessons.map((lesson) => {
-      const module = moduleMap[lesson.module_id];
-      const progress = courseProgress.find((p: any) => p.lesson_id === lesson.id);
-      const isCompleted = progress?.is_completed || false;
-      const isFavorite = progress?.is_favorite || false; // 🌟 NUEVO: Obtener estado de favorito
-      const counts = notesCountMap[lesson.id] || { notes: 0, markers: 0 };
+        return {
+          id: lesson.id,
+          title: lesson.title,
+          duration_sec: lesson.duration_sec,
+          notes_count: counts.notes,
+          markers_count: counts.markers,
+          is_completed: progress?.is_completed || false,
+          is_favorite: progress?.is_favorite || false
+        };
+      });
 
       return {
-        id: lesson.id,
-        title: lesson.title,
-        duration_sec: lesson.duration_sec,
-        module_id: lesson.module_id,
-        module_title: module?.title || 'Sin módulo',
-        module_sort_index: module?.sort_index || 0,
-        notes_count: counts.notes,
-        markers_count: counts.markers,
-        is_completed: isCompleted,
-        is_favorite: isFavorite, // 🌟 NUEVO: Incluir en el row
-        groupKey: module?.title || 'Sin módulo'
+        id: module.id,
+        title: module.title,
+        sort_index: module.sort_index || 0,
+        lessons: moduleLessons
       };
-    });
+    }).sort((a, b) => a.sort_index - b.sort_index);
+  }, [courseStructure, courseProgress, notesResponse, markersResponse]);
 
-    // Sort by module sort_index and then by lesson order
-    rows.sort((a, b) => {
-      if (a.module_sort_index !== b.module_sort_index) {
-        return a.module_sort_index - b.module_sort_index;
+  const { nextRecommendedLessonId, activeModuleId } = useMemo(() => {
+    for (const module of modules) {
+      for (const lesson of module.lessons) {
+        if (!lesson.is_completed) {
+          return { 
+            nextRecommendedLessonId: lesson.id, 
+            activeModuleId: module.id 
+          };
+        }
       }
-      // Within same module, maintain lesson order
-      const aLessonIndex = lessons.findIndex(l => l.id === a.id);
-      const bLessonIndex = lessons.findIndex(l => l.id === b.id);
-      return aLessonIndex - bLessonIndex;
-    });
+    }
+    return { nextRecommendedLessonId: null, activeModuleId: null };
+  }, [modules]);
 
-    return rows;
-  }, [lessons, modules, courseProgress, notesResponse, markersResponse]);
-
-  const formatDuration = (seconds: number | null) => {
-    if (!seconds) return '-';
-    const totalMins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${totalMins}:${secs.toString().padStart(2, '0')}`;
-  }
+  const stats = useMemo(() => {
+    const totalLessons = modules.reduce((acc, m) => acc + m.lessons.length, 0);
+    const completedLessons = modules.reduce(
+      (acc, m) => acc + m.lessons.filter(l => l.is_completed).length, 
+      0
+    );
+    return {
+      totalModules: modules.length,
+      totalLessons,
+      completedLessons
+    };
+  }, [modules]);
 
   const handleGoToLesson = (lessonId: string) => {
-    // Set the current lesson in the sidebar
     setCurrentLesson(lessonId);
-    
-    // Use the store to navigate (this will switch to "Reproductor" tab and set the lesson)
     goToLesson(lessonId, null);
     
-    // Update URL with deep link params (for browser navigation and refresh support)
     if (courseSlug) {
       const params = new URLSearchParams();
       params.set('tab', 'Reproductor');
@@ -155,134 +140,56 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     }
   };
 
-  const columns = [
-    {
-      key: 'title',
-      label: 'Nombre',
-      width: '28%',
-      render: (row: LessonRowData) => (
-        <span className="font-medium">{row.title}</span>
-      )
-    },
-    {
-      key: 'duration_sec',
-      label: 'Duración',
-      width: '12%',
-      render: (row: LessonRowData) => (
-        <span className="text-sm">{formatDuration(row.duration_sec)}</span>
-      )
-    },
-    {
-      key: 'notes_count',
-      label: 'Apuntes',
-      width: '10%',
-      render: (row: LessonRowData) => (
-        <span className="text-sm">{row.notes_count}</span>
-      )
-    },
-    {
-      key: 'markers_count',
-      label: 'Marcadores',
-      width: '12%',
-      render: (row: LessonRowData) => (
-        <span className="text-sm">{row.markers_count}</span>
-      )
-    },
-    {
-      key: 'is_completed',
-      label: 'Completada',
-      width: '14%',
-      render: (row: LessonRowData) => (
-        row.is_completed ? (
-          <Badge variant="secondary" className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
-            <CheckCircle2 className="h-3 w-3 mr-1" />
-            Completada
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="text-muted-foreground">
-            <Circle className="h-3 w-3 mr-1" />
-            Pendiente
-          </Badge>
-        )
-      )
-    },
-    {
-      key: 'go_to_lesson',
-      label: '',
-      width: '4%',
-      render: (row: LessonRowData) => (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => handleGoToLesson(row.id)}
-          data-testid={`button-go-to-lesson-${row.id}`}
-          className="h-8 w-8"
-        >
-          <ArrowRight className="h-4 w-4" />
-        </Button>
-      )
-    }
-  ];
-
   if (!courseId) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-muted-foreground">No hay curso seleccionado</p>
       </div>
-    )
+    );
+  }
+
+  if (structureLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (modules.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-center">
+        <p className="text-muted-foreground mb-2">Este curso aún no tiene contenido</p>
+        <p className="text-sm text-muted-foreground/70">
+          El contenido estará disponible pronto
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <Table
-        data={tableData}
-        columns={columns}
-        groupBy="groupKey"
-        rowActions={(row: LessonRowData) => [
-          {
-            icon: Star,
-            label: row.is_favorite ? 'Quitar de Favoritos' : 'Marcar como Favorito',
-            onClick: () => {
-              // Aquí se maneja el toggle de favoritos
-              // El FavoriteButton component ya maneja la lógica internamente
-            },
-            customRender: () => (
-              <FavoriteButton
-                lessonId={row.id}
-                courseId={courseId!}
-                isFavorite={row.is_favorite}
-                variant="button"
-              />
-            )
-          }
-        ]}
-        renderGroupHeader={(groupKey: string, groupRows: LessonRowData[]) => {
-          // Calculate total duration for this module
-          const totalDuration = groupRows.reduce((sum, row) => {
-            return sum + (row.duration_sec || 0);
-          }, 0);
-          
-          return (
-            <div className="col-span-full text-sm font-semibold py-2 flex items-center gap-3">
-              <span>{groupKey}</span>
-              <span className="text-muted-foreground font-normal">
-                ({groupRows.length} {groupRows.length === 1 ? 'lección' : 'lecciones'} · {formatDuration(totalDuration)})
-              </span>
-            </div>
-          );
-        }}
-        renderCard={(row: LessonRowData) => (
-          <LessonRow
-            lesson={row}
-            courseId={courseId!}
+    <div className="max-w-4xl mx-auto px-4 py-6 md:px-6">
+      <ContentHeader
+        totalModules={stats.totalModules}
+        totalLessons={stats.totalLessons}
+        completedLessons={stats.completedLessons}
+      />
+
+      <div className="space-y-4">
+        {modules.map((module, index) => (
+          <ModuleSection
+            key={module.id}
+            moduleId={module.id}
+            moduleTitle={module.title}
+            moduleIndex={index}
+            lessons={module.lessons}
+            courseId={courseId}
+            isActive={module.id === activeModuleId}
+            nextRecommendedLessonId={nextRecommendedLessonId}
             onGoToLesson={handleGoToLesson}
           />
-        )}
-        emptyStateConfig={{
-          title: 'No hay lecciones',
-          description: 'Este curso no tiene lecciones disponibles'
-        }}
-      />
+        ))}
+      </div>
     </div>
-  )
+  );
 }
