@@ -315,7 +315,7 @@ function LayoutContent({
           </div>
 
           {/* Right Sidebar - Fixed width, always visible */}
-          <div className="flex-shrink-0 p-1">
+          <div className="flex-shrink-0">
             <RightSidebar />
             <CoursePlayerDrawerHost />
           </div>
