@@ -57,8 +57,8 @@ export function LessonItem({
             <CheckCircle2 className="h-4 w-4 text-chart-positive" />
           </div>
         ) : isNextRecommended ? (
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-            <Play className="h-4 w-4 text-primary-foreground fill-current" />
+          <div className="w-8 h-8 rounded-full flex items-center justify-center border-2 border-accent/40 bg-accent/10">
+            <Play className="h-4 w-4 fill-accent stroke-accent stroke-[3]" />
           </div>
         ) : (
           <div className="w-8 h-8 rounded-full border-2 border-muted-foreground/30 flex items-center justify-center group-hover:border-primary/50 transition-colors">
