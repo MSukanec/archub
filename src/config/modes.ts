@@ -24,7 +24,7 @@ export const modeConfigs: Record<UserMode, ModeConfig> = {
     }
   },
 
-  // Modo CAPACITACIONES - Ya no se usa, redirige a professional
+  // Modo LEARNER - Deprecado, mantiene mismos permisos que professional para compatibilidad
   learner: {
     leftSidebar: {
       allowedContexts: ['general', 'community', 'organization', 'project', 'learning', 'admin', 'user'],

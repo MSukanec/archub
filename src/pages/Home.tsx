@@ -12,15 +12,9 @@ export default function Home() {
   useEffect(() => {
     if (isLoading || !userData) return;
 
-    const userMode = userData.preferences?.last_user_type;
-
-    if (userMode === 'learner') {
-      setSidebarLevel('learning');
-      navigate('/learning/dashboard', { replace: true });
-    } else {
-      setSidebarLevel('organization');
-      navigate('/organization/dashboard', { replace: true });
-    }
+    // Todos los usuarios van al dashboard de organización
+    setSidebarLevel('organization');
+    navigate('/organization/dashboard', { replace: true });
   }, [userData, isLoading, navigate, setSidebarLevel]);
 
   return <LoadingSpinner fullScreen size="lg" />;

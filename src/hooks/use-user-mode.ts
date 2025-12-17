@@ -6,8 +6,7 @@ import type { UserMode } from '@/config/modes';
  * El modo se almacena en user_preferences.last_user_type
  * 
  * Modos disponibles:
- * - 'professional': Acceso completo a organización y proyectos
- * - 'learner': Solo acceso a capacitaciones
+ * - 'professional': Acceso completo a organización, proyectos y capacitaciones
  * - 'provider': Para proveedores (futuro)
  * - 'worker': Para mano de obra (futuro)
  */
