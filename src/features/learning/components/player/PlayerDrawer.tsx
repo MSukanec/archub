@@ -64,7 +64,7 @@ export function PlayerDrawer({
   ];
 
   return (
-    <div className="w-[300px] h-full flex flex-col bg-card border-l border-border rounded-lg">
+    <div className="w-[300px] h-full flex flex-col bg-card border-l border-border overflow-hidden">
       <div className="pt-4 pb-2 px-4 border-b border-border">
         <h3 className="text-sm font-semibold text-foreground mb-3">
           Contenido del Curso
@@ -94,7 +94,7 @@ export function PlayerDrawer({
                 <div 
                   key={module.id}
                   className={cn(
-                    "mx-3 my-1 rounded-lg border transition-colors",
+                    "mx-2 my-1 rounded-lg border transition-colors",
                     isModuleExpanded 
                       ? "border-border bg-muted/30" 
                       : "border-transparent hover:border-border/50"
