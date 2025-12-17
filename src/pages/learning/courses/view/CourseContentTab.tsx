@@ -70,23 +70,20 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
           .from('media_links')
           .select(`
             course_module_id,
-            media_files!inner (
+            media_files (
               file_url,
               is_deleted
             )
           `)
           .eq('course_id', courseId)
-          .eq('category', 'module_image')
-          .eq('media_files.is_deleted', false);
+          .eq('category', 'module_image');
 
         if (error) throw error;
 
         const imageMap: Record<string, string> = {};
         (data || []).forEach((link: any) => {
           if (link.media_files?.length > 0) {
-            const mediaFile = Array.isArray(link.media_files) 
-              ? link.media_files[0] 
-              : link.media_files;
+            const mediaFile = link.media_files.find((m: any) => !m.is_deleted);
             if (mediaFile?.file_url) {
               imageMap[link.course_module_id] = mediaFile.file_url;
             }
