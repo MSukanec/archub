@@ -7,7 +7,7 @@ import { useCourseSidebarStore } from '@/stores/sidebarStore';
 import { PlayerDrawer } from './PlayerDrawer';
 
 export function CoursePlayerDrawerHost() {
-  const [match, params] = useRoute('/learning/courses/view/:courseSlug');
+  const [match, params] = useRoute('/learning/courses/:courseSlug');
   const [location] = useLocation();
   
   const activeTab = useCoursePlayerStore(s => s.activeTab);
