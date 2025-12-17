@@ -91,10 +91,18 @@ export function PlayerDrawer({
               const totalCount = moduleLessons.length;
               
               return (
-                <div key={module.id}>
+                <div 
+                  key={module.id}
+                  className={cn(
+                    "mx-2 my-1 rounded-lg border transition-colors",
+                    isModuleExpanded 
+                      ? "border-border bg-muted/30" 
+                      : "border-transparent hover:border-border/50"
+                  )}
+                >
                   <button
                     onClick={() => toggleModule(module.id)}
-                    className="w-full h-9 px-4 rounded-md cursor-pointer transition-colors hover:bg-muted flex items-center group"
+                    className="w-full h-10 px-3 cursor-pointer transition-colors flex items-center group"
                     data-testid={`module-${module.id}`}
                   >
                     <ChevronRight className={cn(
@@ -118,7 +126,7 @@ export function PlayerDrawer({
                   </button>
 
                   {isModuleExpanded && (
-                    <div className="px-2 py-1">
+                    <div className="px-3 pb-2">
                       {moduleLessons.map((lesson) => {
                         const isActive = activeLessonId === lesson.id;
                         const progress = progressMap.get(lesson.id);
@@ -130,10 +138,10 @@ export function PlayerDrawer({
                             key={lesson.id}
                             onClick={() => onLessonSelect(lesson.id)}
                             className={cn(
-                              "w-full rounded-md cursor-pointer transition-colors flex items-center group px-2 py-1.5 my-px",
+                              "w-full rounded-md cursor-pointer transition-colors flex items-center group pl-5 pr-2 py-1.5 my-px",
                               isActive 
                                 ? "bg-accent text-accent-foreground" 
-                                : "hover:bg-muted text-muted-foreground"
+                                : "hover:bg-accent/50 text-muted-foreground"
                             )}
                             data-testid={`lesson-${lesson.id}`}
                           >
@@ -147,7 +155,7 @@ export function PlayerDrawer({
                               />
                             ) : (
                               <Circle 
-                                className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground/50"
+                                className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground/40"
                               />
                             )}
                             <span 
