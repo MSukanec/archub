@@ -11,6 +11,7 @@ import * as resetTestDataController from '../controllers/admin/reset-test-data.c
 import * as subscriptionsController from '../controllers/admin/subscriptions.controller.js';
 import * as plansController from '../controllers/admin/plans.controller.js';
 import * as auditController from '../controllers/admin/audit.controller.js';
+import * as opsController from '../controllers/admin/ops.controller.js';
 import { runScheduledDowngradesJob } from '../cron/jobs/execute-scheduled-downgrades.js';
 import { runSubscriptionExpiryNotifier } from '../cron/jobs/subscription-expiry-notifier.js';
 
@@ -105,4 +106,13 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
   app.post("/api/admin/audit/organizations/:id/repair-founder", auditController.repairFounderStatus);
   app.post("/api/admin/audit/organizations/:id/enroll-founder-course", auditController.enrollOwnerInFounderCourse);
   app.post("/api/admin/audit/organizations/:id/sync-plan", auditController.syncOrganizationPlan);
+
+  // ==================== OPS CENTER ====================
+  app.get("/api/admin/ops/stats", opsController.getOpsStats);
+  app.get("/api/admin/ops/alerts", opsController.getOpsAlerts);
+  app.patch("/api/admin/ops/alerts/:id", opsController.updateOpsAlert);
+  app.post("/api/admin/ops/run-checks", opsController.runOpsChecks);
+  app.get("/api/admin/ops/check-runs", opsController.getOpsCheckRuns);
+  app.get("/api/admin/ops/runbooks", opsController.getOpsRunbooks);
+  app.post("/api/admin/ops/runbooks", opsController.upsertOpsRunbook);
 }

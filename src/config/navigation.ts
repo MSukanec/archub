@@ -155,6 +155,7 @@ export const PROJECT_NAVIGATION: NavigationEntry[] = [
 ];
 
 export const ADMIN_NAVIGATION: NavigationItem[] = [
+  { id: 'ops', label: 'Ops Center', icon: Activity, href: '/admin/ops', testId: 'nav-admin-ops' },
   { id: 'dashboard', label: 'Analytics', icon: BarChart3, href: '/admin/dashboard', testId: 'nav-admin-dashboard' },
   { id: 'administration', label: 'Administración', icon: Settings, href: '/admin/administration', testId: 'nav-admin-administration' },
   { id: 'support', label: 'Soporte', icon: Headphones, href: '/admin/support', testId: 'nav-admin-support' },
