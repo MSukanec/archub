@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ChevronDown, CheckCircle2, Circle, PlayCircle } from 'lucide-react';
+import { ChevronDown, CheckCircle2, Circle, PlayCircle, CheckCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 import { LessonItem } from './LessonItem';
 
 interface Lesson {
@@ -25,6 +26,8 @@ interface ModuleSectionProps {
   nextRecommendedLessonId?: string | null;
   onGoToLesson: (lessonId: string) => void;
   onToggle?: () => void;
+  onMarkAllComplete?: (lessonIds: string[]) => void;
+  isMarkingComplete?: boolean;
 }
 
 export function ModuleSection({
@@ -37,7 +40,9 @@ export function ModuleSection({
   isActive = false,
   nextRecommendedLessonId,
   onGoToLesson,
-  onToggle
+  onToggle,
+  onMarkAllComplete,
+  isMarkingComplete = false
 }: ModuleSectionProps) {
   const [internalExpanded, setInternalExpanded] = useState(isActive);
   const isExpanded = controlledExpanded !== undefined ? controlledExpanded : internalExpanded;
@@ -89,7 +94,7 @@ export function ModuleSection({
       {/* Module Header */}
       <button
         onClick={handleToggle}
-        className="w-full flex items-center gap-4 p-4 text-left transition-colors rounded-t-xl relative overflow-hidden"
+        className="group w-full flex items-center gap-4 p-4 text-left transition-colors rounded-t-xl relative overflow-hidden"
         style={imageUrl ? {
           backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%), url(${imageUrl})`,
           backgroundSize: 'cover',
@@ -159,6 +164,39 @@ export function ModuleSection({
             </div>
           )}
         </div>
+
+        {/* Mark All Complete Button - appears on hover */}
+        {!isModuleComplete && onMarkAllComplete && (
+          <div 
+            className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isMarkingComplete}
+              onClick={(e) => {
+                e.stopPropagation();
+                const incompleteLessonIds = lessons
+                  .filter(l => !l.is_completed)
+                  .map(l => l.id);
+                if (incompleteLessonIds.length > 0) {
+                  onMarkAllComplete(incompleteLessonIds);
+                }
+              }}
+              className={cn(
+                "h-8 px-3 text-xs font-medium",
+                imageUrl 
+                  ? "bg-white/20 hover:bg-white/30 text-white border border-white/30" 
+                  : "bg-chart-positive/10 hover:bg-chart-positive/20 text-chart-positive"
+              )}
+              data-testid={`button-mark-all-complete-${moduleId}`}
+            >
+              <CheckCheck className="h-4 w-4 mr-1.5" />
+              Completar todo
+            </Button>
+          </div>
+        )}
 
         {/* Expand Icon */}
         <motion.div

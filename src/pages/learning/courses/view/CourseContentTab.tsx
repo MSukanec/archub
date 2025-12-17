@@ -12,11 +12,13 @@ import {
   ModuleSection,
   useCourseStructure, 
   useCourseProgress, 
-  useCoursePlayerStore 
+  useCoursePlayerStore,
+  useUpdateLessonProgress
 } from '@/features/learning';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 
 interface CourseContentTabProps {
   courseId?: string;
@@ -220,6 +222,34 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
     }
   };
 
+  // Mark all lessons as complete
+  const { toast } = useToast();
+  const updateProgress = useUpdateLessonProgress(courseId);
+  const [markingModuleId, setMarkingModuleId] = useState<string | null>(null);
+
+  const handleMarkAllComplete = async (moduleId: string, lessonIds: string[]) => {
+    setMarkingModuleId(moduleId);
+    try {
+      await Promise.all(
+        lessonIds.map(lessonId => 
+          updateProgress.mutateAsync({
+            lessonId,
+            is_completed: true,
+            progress_pct: 100
+          })
+        )
+      );
+      toast({
+        title: "¡Módulo completado!",
+        description: `Se marcaron ${lessonIds.length} lecciones como completadas`,
+      });
+    } catch (error) {
+      console.error('Error marking lessons complete:', error);
+    } finally {
+      setMarkingModuleId(null);
+    }
+  };
+
   if (!courseId) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -284,6 +314,8 @@ export default function CourseContentTab({ courseId, courseSlug }: CourseContent
               nextRecommendedLessonId={nextRecommendedLessonId}
               onGoToLesson={handleGoToLesson}
               onToggle={() => handleToggleModule(module.id)}
+              onMarkAllComplete={(lessonIds) => handleMarkAllComplete(module.id, lessonIds)}
+              isMarkingComplete={markingModuleId === module.id}
             />
           ))}
         </div>
