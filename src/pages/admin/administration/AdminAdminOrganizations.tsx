@@ -42,7 +42,7 @@ interface Organization {
   last_seen_at: string | null;
 }
 
-// Componente para mostrar la última actividad con Badge
+// Componente para mostrar la última actividad
 function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
   const [tick, setTick] = useState(0);
 
@@ -51,18 +51,37 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
     return () => clearInterval(interval);
   }, []);
 
-  const { isOnline, tooltip } = useMemo(() => {
-    if (!lastSeen) return { isOnline: false, tooltip: 'Sin actividad registrada' };
+  const { label, isOnline, tooltip } = useMemo(() => {
+    if (!lastSeen) return { label: '—', isOnline: false, tooltip: 'Sin actividad registrada' };
     
     const lastSeenTime = new Date(lastSeen).getTime();
     const now = Date.now();
     const diffMs = now - lastSeenTime;
     
+    // Activo si está dentro de 90 segundos
     if (diffMs <= 90_000) {
-      return { isOnline: true, tooltip: format(new Date(lastSeen), 'dd/MM/yyyy HH:mm:ss', { locale: es }) };
+      return { label: 'Activo ahora', isOnline: true, tooltip: format(new Date(lastSeen), 'dd/MM/yyyy HH:mm:ss', { locale: es }) };
+    }
+    
+    // Tiempo relativo
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDays = Math.floor(diffHr / 24);
+    
+    let relativeLabel = '';
+    if (diffDays >= 1) {
+      relativeLabel = `hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+    } else if (diffHr >= 1) {
+      relativeLabel = `hace ${diffHr} h`;
+    } else if (diffMin >= 1) {
+      relativeLabel = `hace ${diffMin} min`;
+    } else {
+      relativeLabel = `hace ${diffSec} s`;
     }
     
     return { 
+      label: relativeLabel, 
       isOnline: false, 
       tooltip: format(new Date(lastSeen), 'dd/MM/yyyy HH:mm:ss', { locale: es })
     };
@@ -70,10 +89,12 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
 
   return (
     <div title={tooltip}>
-      {isOnline && (
+      {isOnline ? (
         <Badge variant="default">
-          Activo
+          {label}
         </Badge>
+      ) : (
+        <span className="text-sm text-muted-foreground">{label}</span>
       )}
     </div>
   );
