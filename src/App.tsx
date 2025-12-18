@@ -116,7 +116,8 @@ const MPSeatSubscriptionSuccess = lazy(() => import("@/pages/MPSeatSubscriptionS
 const SubscriptionCheckout = lazy(() => import("@/pages/checkout/SubscriptionCheckout"));
 
 // Finances Pages
-import FinancesPage from "@/pages/finances/Finances";
+import OrganizationFinances from "@/pages/organization-finances/OrganizationFinances";
+import ProjectFinances from "@/pages/project-finances/ProjectFinances";
 
 // Settings Pages (legacy - keeping for backwards compatibility)
 import PricingPlan from "@/pages/settings/PricingPlan";
@@ -202,8 +203,8 @@ function Router() {
         <Route path="/general-costs" component={GeneralCosts} />
         
         {/* Finances Routes */}
-        <Route path="/finances" component={FinancesPage} />
-        <Route path="/project/finances" component={FinancesPage} />
+        <Route path="/finances" component={OrganizationFinances} />
+        <Route path="/project/finances" component={ProjectFinances} />
         
         <Route path="/organization" component={OrganizationDashboard} />
 

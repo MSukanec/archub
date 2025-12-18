@@ -1,14 +1,8 @@
 /**
- * FinancesMovementsTab.tsx
+ * OrganizationFinancesMovementsTab.tsx
  * 
- * MIGRADO AL NUEVO SISTEMA DE TABLA MODULAR
- * Fecha de migración: 2024-12-16
- * 
- * Esta pantalla usa el nuevo sistema de tabla ubicado en:
- * src/components/shared/table/
- * 
- * NO usa el sistema legacy de:
- * src/components/ui-custom/tables-and-trees/Table.tsx
+ * Finanzas de ORGANIZACIÓN - muestra TODOS los movimientos de la organización
+ * incluyendo los de proyectos. Incluye columna "Proyecto" para identificar origen.
  */
 import { useMemo, useState, useEffect } from 'react';
 import { useUnifiedMovements } from '@/features/finances/hooks/use-unified-movements';
@@ -24,7 +18,6 @@ import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { 
   StatCard, 
   StatCardTitle, 
@@ -35,7 +28,7 @@ import {
   type TrendDirection
 } from '@/components/dashboard';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown, hasMultipleCurrencies } from '@/lib/kpis';
-import { format as formatMoney, formatKPI } from '@/lib/money';
+import { format as formatMoney } from '@/lib/money';
 import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
 import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Scale, Hash } from 'lucide-react';
@@ -79,37 +72,20 @@ const MOVEMENT_TYPE_CONFIG: Record<string, {
   },
 };
 
-interface FinancesMovementsTabProps {
-  isProjectContext?: boolean;
-  projectId?: string | null;
-}
-
-export function FinancesMovementsTab({ 
-  isProjectContext = false, 
-  projectId 
-}: FinancesMovementsTabProps) {
+export function OrganizationFinancesMovementsTab() {
   const { currentOrganizationId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
   
-  // Estado de filtro para mostrar solo movimientos con problemas
   const [showOnlyProblems, setShowOnlyProblems] = useState(false);
   
-  // Obtener moneda por defecto de la organización
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined);
   
-  // Determinar el projectId efectivo para la query:
-  // - En contexto de proyecto: usar el projectId pasado (filtrar por proyecto específico)
-  // - En contexto de organización: pasar null para obtener todos los movimientos
-  const effectiveProjectId = isProjectContext ? projectId : null;
-  
-  // Filtrar por proyecto si estamos en contexto de proyecto
   const { data: rawMovements = [], isLoading } = useUnifiedMovements(
     currentOrganizationId || undefined,
-    effectiveProjectId
+    null
   );
 
-  // Sort by payment_date DESC, then by created_at DESC
   const sortedMovements = useMemo(() => {
     return [...rawMovements].sort((a, b) => {
       const dateComparison = new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
@@ -118,37 +94,30 @@ export function FinancesMovementsTab({
     });
   }, [rawMovements]);
 
-  // Data Health: detectar problemas en los movimientos
   const dataHealth = useFinancesDataHealth(sortedMovements, {
     organizationId: currentOrganizationId || '',
     defaultCurrencyId: defaultCurrency?.id,
     enabled: !!currentOrganizationId && sortedMovements.length > 0,
   });
 
-  // Auto-reset del filtro cuando ya no hay problemas
   useEffect(() => {
     if (showOnlyProblems && !dataHealth.hasIssues) {
       setShowOnlyProblems(false);
     }
   }, [showOnlyProblems, dataHealth.hasIssues]);
 
-  // Filtrar movimientos: mostrar todos o solo los que tienen problemas
   const movements = useMemo(() => {
     if (!showOnlyProblems) return sortedMovements;
     return sortedMovements.filter(m => dataHealth.affectedIds.has(m.id));
   }, [sortedMovements, showOnlyProblems, dataHealth.affectedIds]);
 
-  // Calcular KPIs
   const kpis = useMemo(() => {
-    // Separar ingresos (amount_sign > 0) y egresos (amount_sign < 0)
     const ingresosMovements = movements.filter(m => m.amount_sign > 0);
     const egresosMovements = movements.filter(m => m.amount_sign < 0);
 
-    // Precomputar conteos
     const ingresosCount = ingresosMovements.length;
     const egresosCount = egresosMovements.length;
 
-    // KPI 1: Total Ingresos
     const ingresosKPI = calculateMonetaryKPI({
       items: ingresosMovements.map(m => ({
         amount: m.amount,
@@ -161,7 +130,6 @@ export function FinancesMovementsTab({
       quoteCurrency: 'USD'
     });
 
-    // KPI 2: Total Egresos
     const egresosKPI = calculateMonetaryKPI({
       items: egresosMovements.map(m => ({
         amount: m.amount,
@@ -174,10 +142,8 @@ export function FinancesMovementsTab({
       quoteCurrency: 'USD'
     });
 
-    // KPI 3: Balance (Ingresos - Egresos)
     const balanceValue = ingresosKPI.value - egresosKPI.value;
 
-    // KPI 4: Total movimientos (conteo)
     const totalMovimientosKPI = calculateCountKPI({
       count: movements.length,
       label: 'movimientos'
@@ -379,20 +345,17 @@ export function FinancesMovementsTab({
     },
   ];
 
-  // Determinar si la moneda está lista
   const isCurrencyReady = !!defaultCurrency;
   const currencySymbol = defaultCurrency?.symbol || '$';
 
-  // Determinar dirección del balance para trend
   const balanceDirection: TrendDirection = kpis.balance > 0 ? 'up' : kpis.balance < 0 ? 'down' : 'neutral';
   const balanceTrendLabel = kpis.balance > 0 ? 'Positivo' : kpis.balance < 0 ? 'Negativo' : 'Sin variación';
 
-  // Helpers para mostrar KPIs monetarias (solo si breakdown tiene entradas válidas)
   const showIngresosBreakdown = isCurrencyReady && hasMultipleCurrencies(kpis.ingresos) && kpis.ingresos.breakdown && kpis.ingresos.breakdown.length > 0;
   const showEgresosBreakdown = isCurrencyReady && hasMultipleCurrencies(kpis.egresos) && kpis.egresos.breakdown && kpis.egresos.breakdown.length > 0;
 
   return (
-    <div className="space-y-6" data-testid="finances-movements-tab">
+    <div className="space-y-6" data-testid="organization-finances-movements-tab">
       <DataHealthAlert
         affectedCount={dataHealth.affectedIds.size}
         entityLabel="movimiento"
@@ -401,9 +364,7 @@ export function FinancesMovementsTab({
         showClearButton
       />
 
-      {/* KPIs Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 1: Ingresos */}
         <StatCard data-testid="kpi-ingresos">
           <StatCardTitle>
             <ArrowUpRight className="h-4 w-4 text-chart-positive" />
@@ -420,7 +381,6 @@ export function FinancesMovementsTab({
           </StatCardMeta>
         </StatCard>
 
-        {/* KPI 2: Egresos */}
         <StatCard data-testid="kpi-egresos">
           <StatCardTitle>
             <ArrowDownRight className="h-4 w-4 text-chart-negative" />
@@ -437,7 +397,6 @@ export function FinancesMovementsTab({
           </StatCardMeta>
         </StatCard>
 
-        {/* KPI 3: Balance */}
         <StatCard data-testid="kpi-balance">
           <StatCardTitle>
             <Scale className="h-4 w-4" />
@@ -455,7 +414,6 @@ export function FinancesMovementsTab({
           />
         </StatCard>
 
-        {/* KPI 4: Total Movimientos */}
         <StatCard data-testid="kpi-total-movimientos">
           <StatCardTitle>
             <Hash className="h-4 w-4" />
@@ -470,7 +428,6 @@ export function FinancesMovementsTab({
         </StatCard>
       </div>
 
-      {/* Tabla de movimientos */}
       <Table
         columns={columns}
         data={movements}
@@ -478,7 +435,7 @@ export function FinancesMovementsTab({
         emptyStateConfig={{
           icon: <DollarSign className="h-12 w-12 text-muted-foreground" />,
           title: 'No hay movimientos',
-          description: 'No se encontraron movimientos financieros unificados.',
+          description: 'No se encontraron movimientos financieros en la organización.',
         }}
         defaultSort={{
           key: 'payment_date',
