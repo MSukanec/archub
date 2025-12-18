@@ -7,7 +7,7 @@ import { convertToBaseCurrency, formatKPI, formatSubValue } from '@/lib/money';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/table/Table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
@@ -733,14 +733,24 @@ export default function GeneralCostsPaymentsTab({
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  const getStatusBadgeConfig = (status: 'confirmed' | 'pending' | 'overdue' | 'cancelled') => {
-    const statusConfig: Record<string, { label: string; colorVar: string }> = {
-      confirmed: { label: 'Confirmado', colorVar: '--badge-status-success' },
-      pending: { label: 'Pendiente', colorVar: '--badge-status-warning' },
-      overdue: { label: 'Vencido', colorVar: '--badge-status-destructive' },
-      cancelled: { label: 'Cancelado', colorVar: '--badge-status-neutral' },
+  const getStatusBadgeColorClass = (status: 'confirmed' | 'pending' | 'overdue' | 'cancelled'): string => {
+    const statusColorMap: Record<string, string> = {
+      confirmed: 'bg-green-100/50 text-green-700 border-green-300 hover:bg-green-100',
+      pending: 'bg-amber-100/50 text-amber-700 border-amber-300 hover:bg-amber-100',
+      overdue: 'bg-red-100/50 text-red-700 border-red-300 hover:bg-red-100',
+      cancelled: 'bg-gray-100/50 text-gray-700 border-gray-300 hover:bg-gray-100',
     };
-    return statusConfig[status] || { label: status, colorVar: '--badge-status-neutral' };
+    return statusColorMap[status] || statusColorMap['cancelled'];
+  };
+
+  const getStatusLabel = (status: 'confirmed' | 'pending' | 'overdue' | 'cancelled') => {
+    const labels: Record<string, string> = {
+      confirmed: 'Confirmado',
+      pending: 'Pendiente',
+      overdue: 'Vencido',
+      cancelled: 'Cancelado',
+    };
+    return labels[status] || status;
   };
 
   const formatCurrencyAmount = (amount: number, currencySymbol?: string) => {
@@ -930,21 +940,14 @@ export default function GeneralCostsPaymentsTab({
       key: 'status',
       label: 'Estado',
       sortable: true,
-      render: (payment: GeneralCostPayment) => {
-        const statusConfig = getStatusBadgeConfig(payment.status);
-        return (
-          <Badge 
-            variant="default"
-            style={{
-              color: `var(${statusConfig.colorVar})`,
-              backgroundColor: `color-mix(in srgb, var(${statusConfig.colorVar}) 10%, transparent)`,
-              borderColor: `color-mix(in srgb, var(${statusConfig.colorVar}) 30%, transparent)`,
-            } as React.CSSProperties}
-          >
-            {statusConfig.label}
-          </Badge>
-        );
-      },
+      render: (payment: GeneralCostPayment) => (
+        <Badge 
+          variant="default"
+          className={getStatusBadgeColorClass(payment.status)}
+        >
+          {getStatusLabel(payment.status)}
+        </Badge>
+      ),
     },
   ];
 
