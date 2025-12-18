@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Activity as ActivityIcon, Eye } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/table';
+import type { Column } from '@/components/shared/table';
+import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { getOrganizationActivityLogs } from '@/features/organization/services/getOrganizationActivityLogs';
@@ -38,16 +39,6 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
     fetchActivities();
   }, [organizationId]);
 
-  // Helper function for initials
-  const getInitials = (name: string) => {
-    return name
-      ?.split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2) || 'U';
-  };
-
   // Handle activity click
   const handleActivityClick = (activity: any) => {
     console.log('Activity clicked:', activity);
@@ -71,11 +62,12 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
   };
 
   // Table columns configuration
-  const columns = [
+  const columns: Column<ActivityLog>[] = useMemo(() => [
     {
-      key: 'created_at',
+      key: 'created_at' as const,
       label: 'Fecha',
-      width: '15%',
+      sortable: true,
+      sortType: 'date' as const,
       render: (activity: ActivityLog) => (
         <div className="flex flex-col">
           <span className="text-sm font-medium">
@@ -88,51 +80,42 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
             }) : 'N/A'}
           </span>
         </div>
-      ),
-      sortable: true,
-      sortType: 'date' as const
+      )
     },
     {
-      key: 'user',
+      key: 'user' as const,
       label: 'Usuario',
-      width: '20%',
+      sortable: false,
       render: (activity: ActivityLog) => (
-        <div className="flex items-center gap-2">
-          <Avatar className="w-8 h-8">
-            <AvatarImage src={activity.user?.avatar_url} />
-            <AvatarFallback className="text-xs">
-              {getInitials(activity.user?.full_name || 'Usuario')}
-            </AvatarFallback>
-          </Avatar>
-          <span className="text-sm font-medium">
-            {activity.user?.full_name || 'Usuario'}
-          </span>
-        </div>
-      ),
-      sortable: true,
-      sortType: 'string' as const
+        <IdentityBadge
+          name={activity.user?.full_name || 'Usuario'}
+          avatarUrl={activity.user?.avatar_url}
+          size="sm"
+          layout="row"
+          showName={true}
+        />
+      )
     },
     {
-      key: 'action',
+      key: 'action' as const,
       label: 'Acción',
-      width: '20%',
+      sortable: false,
       render: (activity: ActivityLog) => {
         const displayInfo = getActivityDisplayInfo(activity);
         return (
-          <div className="flex items-center gap-2">
-            <span>{displayInfo.icon}</span>
-            <Badge variant="outline" className="text-xs">
-              {displayInfo.label}
-            </Badge>
-          </div>
+          <Badge 
+            variant="default" 
+            className={`text-xs ${displayInfo.color}`}
+          >
+            {displayInfo.label}
+          </Badge>
         );
-      },
-      sortable: true,
-      sortType: 'string' as const
+      }
     },
     {
-      key: 'description',
+      key: 'description' as const,
       label: 'Detalle',
+      sortable: false,
       render: (activity: ActivityLog) => {
         const displayInfo = getActivityDisplayInfo(activity);
         return (
@@ -140,10 +123,9 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
             {displayInfo.description}
           </span>
         );
-      },
-      sortable: false
+      }
     }
-  ];
+  ], []);
 
   return (
     <div className="space-y-6">
@@ -162,6 +144,7 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
         <Table
           data={activities}
           columns={columns}
+          onRowClick={handleActivityClick}
           rowActions={(activity) => [
             {
               icon: Eye,
@@ -169,6 +152,10 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
               onClick: () => handleActivityClick(activity)
             }
           ]}
+          emptyStateConfig={{
+            title: "No hay actividades registradas",
+            description: "Cuando se realicen acciones en la organización, aparecerán aquí."
+          }}
         />
       )}
     </div>

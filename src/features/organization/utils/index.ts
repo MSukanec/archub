@@ -16,6 +16,18 @@ import type { ActivityLog, ActivityDisplayInfo } from '../types';
 export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
   const { action, target_table, metadata } = log;
 
+  const getActionColorClass = (color: string): string => {
+    const colorMap: Record<string, string> = {
+      'blue': 'bg-blue-100/50 text-blue-700',
+      'yellow': 'bg-amber-100/50 text-amber-700',
+      'red': 'bg-red-100/50 text-red-700',
+      'green': 'bg-green-100/50 text-green-700',
+      'purple': 'bg-purple-100/50 text-purple-700',
+      'gray': 'bg-gray-100/50 text-gray-700'
+    };
+    return colorMap[color] || colorMap['gray'];
+  };
+
   const actionInfo: Record<string, { icon: string; label: string; color: string }> = {
     [ACTIVITY_ACTIONS.CREATE_MOVEMENT]: { icon: '💰', label: 'Movimiento Creado', color: 'blue' },
     [ACTIVITY_ACTIONS.UPDATE_MOVEMENT]: { icon: '✏️', label: 'Movimiento Editado', color: 'yellow' },
@@ -66,6 +78,7 @@ export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
   };
 
   const info = actionInfo[action] || { icon: '📊', label: 'Actividad', color: 'gray' };
+  const colorClass = getActionColorClass(info.color);
 
   let description = '';
   
@@ -130,6 +143,7 @@ export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
 
   return {
     ...info,
+    color: colorClass,
     description: description || `Actividad en ${target_table}`,
     title: info.label
   };
