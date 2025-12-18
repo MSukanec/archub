@@ -327,8 +327,19 @@ export default function ProjectList() {
     return statusConfig[status as keyof typeof statusConfig] || status || 'Sin estado'
   }
 
+  const getStatusVariant = (status: string): 'status_active' | 'status_completed' | 'status_paused' | 'status_cancelled' | 'status_planning' | 'neutral' => {
+    const variantMap: Record<string, 'status_active' | 'status_completed' | 'status_paused' | 'status_cancelled' | 'status_planning' | 'neutral'> = {
+      'active': 'status_active',
+      'completed': 'status_completed',
+      'paused': 'status_paused',
+      'cancelled': 'status_cancelled',
+      'planning': 'status_planning'
+    }
+    return variantMap[status] || 'neutral'
+  }
+
   const getStatusBadge = (status: string) => (
-    <Badge variant="default">
+    <Badge variant={getStatusVariant(status)}>
       {getStatusText(status)}
     </Badge>
   )

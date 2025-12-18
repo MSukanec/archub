@@ -1,0 +1,85 @@
+Quiero refactorizar el componente Badge para implementar un SISTEMA DE BADGES
+SEMÁNTICOS enterprise, con colores definidos por DESIGN TOKENS,
+como Stripe, Linear o Notion.
+
+OBJETIVO:
+- Mantener UN solo componente Badge
+- Usar variantes semánticas (success, error, warning, etc)
+- Los colores deben ser completamente configurables por el producto
+- El Badge NO debe hardcodear colores
+
+--------------------------------------------------
+1) DESIGN TOKENS (COLORES)
+--------------------------------------------------
+
+Definir colores semánticos globales usando variables CSS.
+
+Ejemplos de tokens (los valores exactos deben poder modificarse fácilmente):
+
+- --color-success-bg / --color-success-fg
+- --color-warning-bg / --color-warning-fg
+- --color-error-bg / --color-error-fg
+- --color-info-bg / --color-info-fg
+- --color-accent-bg / --color-accent-fg
+- --color-neutral-bg / --color-neutral-fg
+
+Estos tokens deben vivir en el archivo global de estilos
+(index.css / globals.css / theme.css según el proyecto).
+
+--------------------------------------------------
+2) VARIANTES SEMÁNTICAS DEL BADGE
+--------------------------------------------------
+
+Definir un tipo BadgeVariant con valores como:
+- 'success'
+- 'pending'
+- 'error'
+- 'warning'
+- 'info'
+- 'plan_pro'
+- 'plan_free'
+- 'status_active'
+- 'status_cancelled'
+
+--------------------------------------------------
+3) CONFIGURACIÓN DEL BADGE
+--------------------------------------------------
+
+Dentro del componente Badge (o archivo asociado):
+
+Crear un mapa central que asocie cada variant con:
+- label por defecto
+- icono (si aplica)
+- semanticColor (success, warning, error, etc)
+
+Ejemplo conceptual:
+- plan_pro → semanticColor: 'accent'
+- success → semanticColor: 'success'
+- error → semanticColor: 'error'
+
+El componente Badge debe:
+- Resolver los colores usando CSS variables
+- Renderizar icono si existe
+- Usar estilos suaves y consistentes
+- Permitir override opcional del label
+
+--------------------------------------------------
+4) ESTILOS
+--------------------------------------------------
+
+- NO hardcodear colores en el componente
+- NO usar nombres como green, yellow, purple
+- Consumir SOLO design tokens CSS
+- Mantener estilos encapsulados
+
+--------------------------------------------------
+5) RESULTADO ESPERADO
+--------------------------------------------------
+
+- Sistema de badges consistente en toda la app
+- Colores controlados desde un solo lugar
+- Cambios de paleta sin tocar componentes
+- Base sólida para escalar el design system
+
+Luego de esto, aplicaré estos badges
+en tablas y vistas existentes.
