@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Permission {
   id: string;
@@ -318,38 +319,38 @@ export function PermissionsTab() {
   const categories = data?.permissionsByCategory || {};
 
   return (
-    <div className="space-y-4" data-testid="permissions-tab">
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-sm text-muted-foreground">
-          Configura los permisos de cada rol. Los cambios afectan a todos los miembros con ese rol.
-        </p>
-        
-        {hasChanges && canManageRoles && (
-          <Button
-            onClick={handleSaveAll}
-            disabled={updatePermissionsMutation.isPending}
-            data-testid="button-save-permissions"
-          >
-            {updatePermissionsMutation.isPending ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4 mr-2" />
-            )}
-            Guardar cambios
-          </Button>
-        )}
-      </div>
+    <Card data-testid="permissions-tab">
+      <CardContent className="p-0">
+        <div className="space-y-4">
+          {hasChanges && canManageRoles && (
+            <div className="flex justify-end p-4 border-b">
+              <Button
+                onClick={handleSaveAll}
+                disabled={updatePermissionsMutation.isPending}
+                data-testid="button-save-permissions"
+              >
+                {updatePermissionsMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                Guardar cambios
+              </Button>
+            </div>
+          )}
 
-      {!canManageRoles && (
-        <Alert>
-          <Shield className="h-4 w-4" />
-          <AlertDescription>
-            No tienes permisos para modificar los roles. Los cambios están deshabilitados.
-          </AlertDescription>
-        </Alert>
-      )}
+          {!canManageRoles && (
+            <div className="px-4 pt-4">
+              <Alert>
+                <Shield className="h-4 w-4" />
+                <AlertDescription>
+                  No tienes permisos para modificar los roles. Los cambios están deshabilitados.
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
 
-      <div className="border rounded-lg overflow-hidden">
+          <div className="overflow-hidden">
         <ScrollArea className="w-full">
           <div className="min-w-[800px]">
             <table className="w-full">
@@ -496,7 +497,9 @@ export function PermissionsTab() {
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
-      </div>
-    </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
