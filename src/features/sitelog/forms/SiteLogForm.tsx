@@ -486,7 +486,6 @@ export default function SiteLogForm({ modalData, onClose, mode = "create" }: Sit
     onSuccess: (compressionStats, variables) => {
       queryClient.invalidateQueries({ queryKey: ['sitelog-files', variables.siteLogId] });
       queryClient.invalidateQueries({ queryKey: ['site-logs', selectedProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['gallery-files'] });
       setFilesToUpload([]);
       toast({ title: "Archivos subidos", description: "Los archivos se han subido correctamente" });
     },
@@ -573,7 +572,6 @@ export default function SiteLogForm({ modalData, onClose, mode = "create" }: Sit
       await deleteMediaFileV2(linkId);
       queryClient.invalidateQueries({ queryKey: ['sitelog-files'] });
       queryClient.invalidateQueries({ queryKey: ['site-logs'] });
-      queryClient.invalidateQueries({ queryKey: ['gallery-files'] });
       toast({ title: "Archivo eliminado", description: "El archivo se ha eliminado correctamente." });
     } catch (error: any) {
       toast({ title: "Error", description: "No se pudo eliminar el archivo.", variant: "destructive" });
