@@ -196,13 +196,13 @@ const AdminAdminUsers = () => {
     {
       key: 'last_activity',
       label: 'Activo',
-      width: '8%',
+      width: '20%',
       render: (user: User) => <LastActivityCell lastSeen={user.last_seen_at} />
     },
     {
       key: 'full_name',
       label: 'Usuario',
-      width: '26%',
+      width: '20%',
       render: (user: User) => (
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
@@ -221,7 +221,7 @@ const AdminAdminUsers = () => {
     {
       key: 'organizations_count',
       label: 'Orgs',
-      width: '10%',
+      width: '20%',
       render: (user: User) => (
         <span className="text-sm">{user.organizations_count}</span>
       )
@@ -229,7 +229,7 @@ const AdminAdminUsers = () => {
     {
       key: 'created_at',
       label: 'Registro',
-      width: '14%',
+      width: '20%',
       render: (user: User) => (
         <span className="text-sm text-muted-foreground">
           {format(new Date(user.created_at), 'dd/MM/yy', { locale: es })}
@@ -279,7 +279,7 @@ const AdminAdminUsers = () => {
           <div className="text-center py-8 text-muted-foreground">
             <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
             <p className="text-sm">No se encontraron usuarios</p>
-            <p className="text-xs">No hay usuarios que coincidan con los filtros aplicados.</p>
+            <p className="text-sm">No hay usuarios que coincidan con los filtros aplicados.</p>
           </div>
         }
       />

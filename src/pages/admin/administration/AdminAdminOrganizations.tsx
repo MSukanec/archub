@@ -42,7 +42,7 @@ interface Organization {
   last_seen_at: string | null;
 }
 
-// Componente para mostrar la última actividad (simplificado: solo punto)
+// Componente para mostrar la última actividad con Badge
 function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
   const [tick, setTick] = useState(0);
 
@@ -69,8 +69,12 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
   }, [lastSeen, tick]);
 
   return (
-    <div className="flex items-center" title={tooltip}>
-      <span className={`inline-block w-2 h-2 rounded-full ${isOnline ? 'bg-[var(--plan-free-bg)]' : 'bg-muted-foreground'}`} />
+    <div title={tooltip}>
+      {isOnline && (
+        <Badge variant="default">
+          Activo
+        </Badge>
+      )}
     </div>
   );
 }
@@ -247,31 +251,19 @@ const AdminAdminOrganizations = () => {
   const tableColumns = [
     {
       key: 'last_activity',
-      label: 'Última Actividad',
-      width: '14%',
-      render: (organization: Organization) => <LastActivityCell lastSeen={organization.last_seen_at} />
-    },
-    {
-      key: 'founder',
-      label: 'Fundador',
-      width: '5%',
-      render: (organization: Organization) => (
-        organization.settings?.is_founder ? (
-          <div title="Organización Fundadora">
-            <Award className="w-5 h-5 text-amber-500" />
-          </div>
-        ) : null
-      )
+      label: 'Activo',
+      width: '20%',
+      render: (org: Organization) => <LastActivityCell lastSeen={org.last_seen_at} />
     },
     {
       key: 'name',
       label: 'Organización',
-      width: '24%',
-      render: (organization: Organization) => (
+      width: '20%',
+      render: (org: Organization) => (
         <div>
-          <div className="font-bold text-sm">{organization.name}</div>
+          <div className="font-bold text-sm">{org.name}</div>
           <div className="text-sm text-muted-foreground">
-            {organization.creator?.full_name || 'Desconocido'}
+            {org.creator?.full_name || 'Desconocido'}
           </div>
         </div>
       ),
@@ -279,9 +271,9 @@ const AdminAdminOrganizations = () => {
     {
       key: 'plan',
       label: 'Plan',
-      width: '10%',
-      render: (organization: Organization) => {
-        const planName = organization.plan?.name || 'Sin plan';
+      width: '20%',
+      render: (org: Organization) => {
+        const planName = org.plan?.name || 'Sin plan';
         let bgColor = '';
         
         if (planName === 'Free') {
@@ -305,48 +297,30 @@ const AdminAdminOrganizations = () => {
     {
       key: 'members',
       label: 'Miembros',
-      width: '8%',
-      render: (organization: Organization) => (
-        <span className="text-sm">{organization.members_count}</span>
-      ),
-    },
-    {
-      key: 'projects',
-      label: 'Proyectos',
-      width: '8%',
-      render: (organization: Organization) => (
-        <span className="text-sm">{organization.projects_count}</span>
+      width: '20%',
+      render: (org: Organization) => (
+        <span className="text-sm">{org.members_count}</span>
       ),
     },
     {
       key: 'status',
       label: 'Estado',
-      width: '10%',
-      render: (organization: Organization) => (
+      width: '20%',
+      render: (org: Organization) => (
         <div className="flex items-center gap-2">
           <Badge 
             variant="default"
             className="bg-[var(--plan-free-bg)] text-white hover:bg-[var(--plan-free-bg)]/90"
           >
-            {organization.is_active ? 'Activa' : 'Inactiva'}
+            {org.is_active ? 'Activa' : 'Inactiva'}
           </Badge>
-          {organization.is_system && (
+          {org.is_system && (
             <Badge variant="outline" className="text-sm">
               <Crown className="w-3 h-3 mr-1" />
               Sistema
             </Badge>
           )}
         </div>
-      ),
-    },
-    {
-      key: 'created_at',
-      label: 'Fecha de creación',
-      width: '12%',
-      render: (organization: Organization) => (
-        <span className="text-sm">
-          {organization.created_at ? format(new Date(organization.created_at), 'dd/MM/yyyy', { locale: es }) : 'No disponible'}
-        </span>
       ),
     },
   ];
