@@ -71,19 +71,31 @@ create table public.media_links (
   is_public boolean null default false,
   material_payment_id uuid null,
   material_purchase_id uuid null,
+  testimonial_id uuid null,
+  hero_section_id uuid null,
+  personnel_payment_id uuid null,
+  forum_thread_id uuid null,
+  partner_contribution_id uuid null,
+  partner_withdrawal_id uuid null,
   constraint media_links_pkey primary key (id),
   constraint media_links_client_payment_fkey foreign KEY (client_payment_id) references client_payments (id) on delete CASCADE,
   constraint media_links_contact_fkey foreign KEY (contact_id) references contacts (id) on delete CASCADE,
   constraint media_links_course_fkey foreign KEY (course_id) references courses (id) on delete CASCADE,
   constraint media_links_course_lesson_fkey foreign KEY (course_lesson_id) references course_lessons (id) on delete set null,
   constraint media_links_course_module_fkey foreign KEY (course_module_id) references course_modules (id) on delete CASCADE,
+  constraint media_links_forum_thread_fkey foreign KEY (forum_thread_id) references forum_threads (id) on delete CASCADE,
   constraint media_links_general_cost_payment_id_fkey foreign KEY (general_cost_payment_id) references general_costs_payments (id) on delete CASCADE,
+  constraint media_links_hero_section_id_fkey foreign KEY (hero_section_id) references hero_sections (id) on delete set null,
   constraint media_links_material_payment_id_fkey foreign KEY (material_payment_id) references material_payments (id) on delete set null,
   constraint media_links_material_purchase_id_fkey foreign KEY (material_purchase_id) references material_purchases (id) on delete set null,
   constraint media_links_media_fkey foreign KEY (media_file_id) references media_files (id) on delete CASCADE,
   constraint media_links_org_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint media_links_partner_contribution_fkey foreign KEY (partner_contribution_id) references partner_contributions (id) on delete CASCADE,
+  constraint media_links_partner_withdrawal_fkey foreign KEY (partner_withdrawal_id) references partner_withdrawals (id) on delete CASCADE,
+  constraint media_links_personnel_payment_fkey foreign KEY (personnel_payment_id) references personnel_payments (id) on delete CASCADE,
   constraint media_links_project_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
   constraint media_links_sitelog_fkey foreign KEY (site_log_id) references site_logs (id) on delete CASCADE,
+  constraint media_links_testimonial_id_fkey foreign KEY (testimonial_id) references testimonials (id) on delete CASCADE,
   constraint media_links_category_check check (
     (
       (category is null)
@@ -105,13 +117,22 @@ create table public.media_links (
             'testimonial_avatar'::text,
             'project_photo'::text,
             'og_image'::text,
-            'client_gallery'::text
+            'client_gallery'::text,
+            'forum_attachment'::text
           ]
         )
       )
     )
   )
 ) TABLESPACE pg_default;
+
+create index IF not exists idx_media_links_partner_contribution on public.media_links using btree (partner_contribution_id) TABLESPACE pg_default
+where
+  (partner_contribution_id is not null);
+
+create index IF not exists idx_media_links_partner_withdrawal on public.media_links using btree (partner_withdrawal_id) TABLESPACE pg_default
+where
+  (partner_withdrawal_id is not null);
 
 create index IF not exists idx_media_links_project on public.media_links using btree (project_id) TABLESPACE pg_default
 where
@@ -136,6 +157,13 @@ where
 
 create index IF not exists idx_media_links_media_file on public.media_links using btree (media_file_id, organization_id) TABLESPACE pg_default;
 
+create index IF not exists idx_media_links_personnel_payment on public.media_links using btree (personnel_payment_id) TABLESPACE pg_default
+where
+  (
+    (personnel_payment_id is not null)
+    and (organization_id is not null)
+  );
+
 create index IF not exists idx_media_links_client_payment on public.media_links using btree (client_payment_id) TABLESPACE pg_default
 where
   (
@@ -158,3 +186,11 @@ where
 create index IF not exists idx_media_links_created_by on public.media_links using btree (created_by) TABLESPACE pg_default
 where
   (created_by is not null);
+
+create index IF not exists idx_media_links_forum_thread on public.media_links using btree (forum_thread_id) TABLESPACE pg_default
+where
+  (forum_thread_id is not null);
+
+create index IF not exists idx_media_links_testimonial on public.media_links using btree (testimonial_id) TABLESPACE pg_default
+where
+  (testimonial_id is not null);

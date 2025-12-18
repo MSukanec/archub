@@ -65,13 +65,25 @@ export function MediaGallery() {
   };
 
   const handleDelete = (file: GalleryFile) => {
+    // Ensure link_id exists - use id as fallback if link_id is missing
+    const linkId = file.link_id || file.id;
+    
+    if (!linkId) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo determinar el ID del archivo para eliminar',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     openModal('delete-confirmation', {
       mode: 'simple',
       title: 'Eliminar archivo',
       description: `¿Estás seguro de que deseas eliminar "${file.file_name}"? Esta acción no se puede deshacer.`,
       destructiveActionText: 'Eliminar archivo',
       onConfirm: () => {
-        deleteFileMutation.mutate(file.link_id!, {
+        deleteFileMutation.mutate(linkId, {
           onSuccess: () => {
             toast({
               title: 'Éxito',

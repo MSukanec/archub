@@ -79,6 +79,7 @@ export async function deleteMediaFile(
 
         if (softDeleteError) {
           console.error('[deleteMediaFile] Error soft deleting file:', softDeleteError);
+          return { success: false, error: 'Failed to soft delete media file: ' + softDeleteError.message };
         }
 
         const { error: storageError } = await supabase.storage
