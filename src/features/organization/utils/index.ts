@@ -18,12 +18,12 @@ export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
 
   const getActionColorClass = (color: string): string => {
     const colorMap: Record<string, string> = {
-      'blue': 'bg-blue-100/50 text-blue-700 border-blue-300',
-      'yellow': 'bg-amber-100/50 text-amber-700 border-amber-300',
-      'red': 'bg-red-100/50 text-red-700 border-red-300',
-      'green': 'bg-green-100/50 text-green-700 border-green-300',
-      'purple': 'bg-purple-100/50 text-purple-700 border-purple-300',
-      'gray': 'bg-gray-100/50 text-gray-700 border-gray-300'
+      'blue': 'bg-blue-100/50 text-blue-700 border-blue-300 hover:bg-blue-100',
+      'yellow': 'bg-amber-100/50 text-amber-700 border-amber-300 hover:bg-amber-100',
+      'red': 'bg-red-100/50 text-red-700 border-red-300 hover:bg-red-100',
+      'green': 'bg-green-100/50 text-green-700 border-green-300 hover:bg-green-100',
+      'purple': 'bg-purple-100/50 text-purple-700 border-purple-300 hover:bg-purple-100',
+      'gray': 'bg-gray-100/50 text-gray-700 border-gray-300 hover:bg-gray-100'
     };
     return colorMap[color] || colorMap['gray'];
   };
