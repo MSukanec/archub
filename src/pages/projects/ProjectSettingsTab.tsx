@@ -21,13 +21,15 @@ export default function ProjectSettingsTab() {
   const deleteModalityMutation = useDeleteProjectModality();
   const replaceModalityMutation = useReplaceProjectModality();
 
-  // Separar tipos del sistema y de la organización
-  const systemTypes = projectTypes.filter(type => type.organization_id === null);
-  const customTypes = projectTypes.filter(type => type.organization_id !== null);
+  // Ordenar tipos alfabéticamente (sin agrupar por sistema/personalizado)
+  const sortedTypes = [...projectTypes].sort((a, b) => 
+    a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+  );
 
-  // Separar modalidades del sistema y de la organización
-  const systemModalities = projectModalities.filter(modality => modality.organization_id === null);
-  const customModalities = projectModalities.filter(modality => modality.organization_id !== null);
+  // Ordenar modalidades alfabéticamente (sin agrupar por sistema/personalizado)
+  const sortedModalities = [...projectModalities].sort((a, b) => 
+    a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+  );
 
   const handleEditType = (type: ProjectType) => {
     if (!organizationId) {
@@ -202,71 +204,57 @@ export default function ProjectSettingsTab() {
 
         {/* Right Column - Contenido */}
         <div className="space-y-3">
-          {/* Tipos Personalizados */}
-          {customTypes.length > 0 && (
+          {/* Tipos ordenados alfabéticamente */}
+          {sortedTypes.length > 0 ? (
             <>
-              {customTypes.map((type) => (
-                <div 
-                  key={type.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
-                  data-testid={`card-project-type-${type.id}`}
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{type.name}</p>
+              {sortedTypes.map((type) => {
+                const isSystemType = type.organization_id === null;
+                return (
+                  <div 
+                    key={type.id}
+                    className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
+                    data-testid={`card-project-type-${type.id}`}
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{type.name}</p>
+                    </div>
+                    <div className="flex items-center gap-1 ml-4">
+                      {isSystemType ? (
+                        <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                          Sistema
+                        </span>
+                      ) : (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditType(type)}
+                            data-testid={`button-edit-type-${type.id}`}
+                            disabled={!organizationId}
+                          >
+                            <Edit2 className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteType(type)}
+                            data-testid={`button-delete-type-${type.id}`}
+                            disabled={!organizationId}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 ml-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditType(type)}
-                      data-testid={`button-edit-type-${type.id}`}
-                      disabled={!organizationId}
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteType(type)}
-                      data-testid={`button-delete-type-${type.id}`}
-                      disabled={!organizationId}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </>
-          )}
-
-          {/* Tipos del Sistema */}
-          {systemTypes.length > 0 && (
-            <>
-              {systemTypes.map((type) => (
-                <div 
-                  key={type.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
-                  data-testid={`card-project-type-${type.id}`}
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{type.name}</p>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                      Sistema
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
-
-          {/* Estado vacío para tipos personalizados */}
-          {customTypes.length === 0 && systemTypes.length === 0 && (
+          ) : (
             <div className="p-8 text-center rounded-lg border border-dashed border-border">
               <Tag className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground mb-4">
-                No hay tipos personalizados. Crea uno para adaptar la clasificación a tus necesidades.
+                No hay tipos de proyecto. Crea uno para adaptar la clasificación a tus necesidades.
               </p>
             </div>
           )}
@@ -301,71 +289,57 @@ export default function ProjectSettingsTab() {
 
         {/* Right Column - Contenido */}
         <div className="space-y-3">
-          {/* Modalidades Personalizadas */}
-          {customModalities.length > 0 && (
+          {/* Modalidades ordenadas alfabéticamente */}
+          {sortedModalities.length > 0 ? (
             <>
-              {customModalities.map((modality) => (
-                <div 
-                  key={modality.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
-                  data-testid={`card-project-modality-${modality.id}`}
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{modality.name}</p>
+              {sortedModalities.map((modality) => {
+                const isSystemModality = modality.organization_id === null;
+                return (
+                  <div 
+                    key={modality.id}
+                    className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
+                    data-testid={`card-project-modality-${modality.id}`}
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{modality.name}</p>
+                    </div>
+                    <div className="flex items-center gap-1 ml-4">
+                      {isSystemModality ? (
+                        <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                          Sistema
+                        </span>
+                      ) : (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditModality(modality)}
+                            data-testid={`button-edit-modality-${modality.id}`}
+                            disabled={!organizationId}
+                          >
+                            <Edit2 className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteModality(modality)}
+                            data-testid={`button-delete-modality-${modality.id}`}
+                            disabled={!organizationId}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 ml-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditModality(modality)}
-                      data-testid={`button-edit-modality-${modality.id}`}
-                      disabled={!organizationId}
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteModality(modality)}
-                      data-testid={`button-delete-modality-${modality.id}`}
-                      disabled={!organizationId}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </>
-          )}
-
-          {/* Modalidades del Sistema */}
-          {systemModalities.length > 0 && (
-            <>
-              {systemModalities.map((modality) => (
-                <div 
-                  key={modality.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
-                  data-testid={`card-project-modality-${modality.id}`}
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{modality.name}</p>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                      Sistema
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
-
-          {/* Estado vacío para modalidades personalizadas */}
-          {customModalities.length === 0 && systemModalities.length === 0 && (
+          ) : (
             <div className="p-8 text-center rounded-lg border border-dashed border-border">
               <Layers className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground mb-4">
-                No hay modalidades personalizadas. Crea una para categorizar tus proyectos de manera única.
+                No hay modalidades de proyecto. Crea una para categorizar tus proyectos de manera única.
               </p>
             </div>
           )}
