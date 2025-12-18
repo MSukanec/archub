@@ -87,17 +87,17 @@ export function ComboBoxMultiSelectField({
             <ChevronDown className="h-4 w-4 opacity-50" />
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-[var(--card-bg)] border border-[var(--card-border)]" align="start">
-          <Command className="bg-[var(--card-bg)]">
-            <CommandInput placeholder={searchPlaceholder} />
-            <CommandEmpty>{emptyText}</CommandEmpty>
-            <CommandGroup className="max-h-64 overflow-auto">
+        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 fixed z-[10000] border border-[var(--card-border)] bg-[var(--card-bg)] text-[var(--card-fg)] rounded-md shadow-lg" align="start">
+          <Command className="rounded-md">
+            <CommandInput className="border-b border-[var(--card-border)]" placeholder={searchPlaceholder} />
+            <CommandEmpty className="py-6 text-center text-sm text-[var(--card-fg)]">{emptyText}</CommandEmpty>
+            <CommandGroup className="p-1 max-h-56 overflow-auto text-[var(--card-fg)]">
               {options?.map((option) => (
                 <CommandItem
                   key={option.value}
                   value={option.label}
                   onSelect={() => handleSelect(option.value)}
-                  className="cursor-pointer hover:text-accent-foreground focus:text-accent-foreground"
+                  className="cursor-pointer rounded-sm py-1.5 px-2 transition-colors hover:bg-[var(--accent-bg)] focus:bg-[var(--accent-bg)] hover:text-black dark:hover:text-white"
                 >
                   <Check
                     className={cn(
