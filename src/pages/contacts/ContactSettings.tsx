@@ -17,8 +17,10 @@ export default function ContactSettings() {
   const deleteMutation = useDeleteContactType(organizationId || '');
   const replaceMutation = useReplaceContactType();
 
-  const systemTypes = contactTypes.filter((type: ContactType) => type.organization_id === null);
-  const customTypes = contactTypes.filter((type: ContactType) => type.organization_id !== null);
+  // Ordenar tipos alfabéticamente (sin agrupar por sistema/personalizado)
+  const sortedTypes = [...contactTypes].sort((a: ContactType, b: ContactType) => 
+    a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+  );
 
   const handleAddType = () => {
     openModal('contactType', { isEditing: false });
@@ -108,72 +110,59 @@ export default function ContactSettings() {
         </div>
 
         <div className="space-y-3">
-          {systemTypes.length > 0 && (
+          {/* Tipos ordenados alfabéticamente */}
+          {sortedTypes.length > 0 ? (
             <>
-              {systemTypes.map((type: ContactType) => (
-                <div 
-                  key={type.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
-                  data-testid={`card-contact-type-${type.id}`}
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{type.name}</p>
+              {sortedTypes.map((type: ContactType) => {
+                const isSystemType = type.organization_id === null;
+                return (
+                  <div 
+                    key={type.id}
+                    className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
+                    data-testid={`card-contact-type-${type.id}`}
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{type.name}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 ml-4">
+                      {isSystemType ? (
+                        <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                          Sistema
+                        </span>
+                      ) : (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditType(type)}
+                            data-testid={`button-edit-type-${type.id}`}
+                            disabled={!organizationId}
+                          >
+                            <Edit2 className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteType(type)}
+                            data-testid={`button-delete-type-${type.id}`}
+                            disabled={!organizationId}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                      Sistema
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </>
-          )}
-
-          {customTypes.length > 0 && (
-            <>
-              {customTypes.map((type: ContactType) => (
-                <div 
-                  key={type.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
-                  data-testid={`card-contact-type-${type.id}`}
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{type.name}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 ml-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditType(type)}
-                      data-testid={`button-edit-type-${type.id}`}
-                      disabled={!organizationId}
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteType(type)}
-                      data-testid={`button-delete-type-${type.id}`}
-                      disabled={!organizationId}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
-
-          {customTypes.length === 0 && systemTypes.length === 0 && (
+          ) : (
             <div className="p-8 text-center rounded-lg border border-dashed border-border">
               <Tag className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground mb-4">
-                No hay tipos personalizados. Crea uno para adaptar la clasificación de contactos a tus necesidades.
+                No hay tipos de contacto. Crea uno para adaptar la clasificación de contactos a tus necesidades.
               </p>
             </div>
           )}
