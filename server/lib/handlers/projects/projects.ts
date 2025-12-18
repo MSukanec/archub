@@ -1,6 +1,7 @@
 // api/lib/handlers/projects/projects.ts
 import type { ProjectsContext } from './shared.js';
 import { ensureAuth, ensureOrganizationAccess } from './shared.js';
+import { supabaseAdmin } from '../../supabase/admin.js';
 
 export interface CreateProjectParams {
   organization_id: string;
@@ -79,8 +80,11 @@ export async function createProject(
       return orgAccessResult;
     }
 
-    // Create new project
-    const { data: newProject, error: projectError } = await supabase
+    console.log('[createProject] Access validated, using admin client for INSERT');
+
+    // Use supabaseAdmin for INSERT to bypass RLS policies
+    // Access has already been validated by ensureOrganizationAccess
+    const { data: newProject, error: projectError } = await supabaseAdmin
       .from('projects')
       .insert({
         organization_id: params.organization_id,
@@ -110,8 +114,8 @@ export async function createProject(
       return { success: false, error: 'Failed to create project - no data returned' };
     }
 
-    // Create project_data (required for RLS)
-    const { error: dataError } = await supabase
+    // Create project_data (required for RLS) using admin client
+    const { error: dataError } = await supabaseAdmin
       .from('project_data')
       .insert({
         project_id: newProject.id,
@@ -129,8 +133,8 @@ export async function createProject(
         project_modality_id: params.project_modality_id || null,
       });
       
-      // Rollback: delete the project we just created
-      await supabase.from('projects').delete().eq('id', newProject.id);
+      // Rollback: delete the project we just created (using admin)
+      await supabaseAdmin.from('projects').delete().eq('id', newProject.id);
       
       return { success: false, error: `Failed to create project data: ${dataError.message}` };
     }
