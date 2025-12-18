@@ -87,8 +87,8 @@ export function ComboBoxMultiSelectField({
             <ChevronDown className="h-4 w-4 opacity-50" />
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-          <Command>
+        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-[var(--card-bg)] border border-[var(--card-border)]" align="start">
+          <Command className="bg-[var(--card-bg)]">
             <CommandInput placeholder={searchPlaceholder} />
             <CommandEmpty>{emptyText}</CommandEmpty>
             <CommandGroup className="max-h-64 overflow-auto">
