@@ -3,7 +3,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects, useProjectsCount, updateProjectLastActive } from '@/features/projects'
 import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-import { Folder, Edit, Trash2, Plus, CheckCircle2, Search, Filter, Bell } from 'lucide-react'
+import { Folder, Edit, Trash2, Plus, CheckCircle2, Search, Filter, Bell, Play, Check, Pause, X, Calendar } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
@@ -338,8 +338,20 @@ export default function ProjectList() {
     return variantMap[status] || 'neutral'
   }
 
+  const getStatusIcon = (status: string) => {
+    const iconMap: Record<string, React.ReactNode> = {
+      'active': <Play className="w-3.5 h-3.5" />,
+      'completed': <Check className="w-3.5 h-3.5" />,
+      'paused': <Pause className="w-3.5 h-3.5" />,
+      'cancelled': <X className="w-3.5 h-3.5" />,
+      'planning': <Calendar className="w-3.5 h-3.5" />,
+      'inactive': <X className="w-3.5 h-3.5" />
+    }
+    return iconMap[status] || null
+  }
+
   const getStatusBadge = (status: string) => (
-    <Badge variant={getStatusVariant(status)}>
+    <Badge variant={getStatusVariant(status)} icon={getStatusIcon(status)}>
       {getStatusText(status)}
     </Badge>
   )
