@@ -310,7 +310,7 @@ const AdminAdminOrganizations = () => {
         return (
           <Badge 
             variant="default"
-            className={`${bgColor} text-white hover:${bgColor}/90`}
+            className={bgColor}
           >
             {planName}
           </Badge>
@@ -330,20 +330,9 @@ const AdminAdminOrganizations = () => {
       label: 'Estado',
       width: '20%',
       render: (org: Organization) => (
-        <div className="flex items-center gap-2">
-          <Badge 
-            variant="default"
-            className={org.is_active ? 'bg-[var(--chart-positive)] text-white hover:bg-[var(--chart-positive)]/90' : 'bg-[var(--chart-neutral)] text-white hover:bg-[var(--chart-neutral)]/90'}
-          >
-            {org.is_active ? 'Activa' : 'Inactiva'}
-          </Badge>
-          {org.is_system && (
-            <Badge variant="outline" className="text-sm">
-              <Crown className="w-3 h-3 mr-1" />
-              Sistema
-            </Badge>
-          )}
-        </div>
+        <Badge variant="default">
+          {org.is_active ? 'Activa' : 'Inactiva'}
+        </Badge>
       ),
     },
   ];
