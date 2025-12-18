@@ -333,7 +333,7 @@ const AdminAdminOrganizations = () => {
         <div className="flex items-center gap-2">
           <Badge 
             variant="default"
-            className="bg-[var(--plan-free-bg)] text-white hover:bg-[var(--plan-free-bg)]/90"
+            className={org.is_active ? 'bg-[var(--chart-positive)] text-white hover:bg-[var(--chart-positive)]/90' : 'bg-[var(--chart-neutral)] text-white hover:bg-[var(--chart-neutral)]/90'}
           >
             {org.is_active ? 'Activa' : 'Inactiva'}
           </Badge>
