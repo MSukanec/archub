@@ -99,7 +99,7 @@ export default function Members() {
     showMembers: true,
     tabs,
     onTabChange: setActiveTab,
-    actions: [
+    actions: activeTab === 'list' ? [
       <PlanRestricted 
         key="invite-member" 
         feature="max_members" 
@@ -118,7 +118,7 @@ export default function Members() {
           Invitar Miembro
         </Button>
       </PlanRestricted>
-    ]
+    ] : []
   };
 
   return (

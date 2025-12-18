@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Shield, ShieldAlert, Loader2, Save, AlertTriangle, ChevronDown, ChevronRight, Search } from 'lucide-react';
+import { Shield, ShieldAlert, Loader2, Save, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient, apiRequest } from '@/lib/queryClient';
@@ -9,8 +9,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Permission {
   id: string;
@@ -54,6 +54,64 @@ const CATEGORY_LABELS: Record<string, string> = {
   'analysis': 'Análisis',
 };
 
+const PERMISSION_LABELS: Record<string, { label: string; description: string }> = {
+  'projects.view': { label: 'Ver proyectos', description: 'Permite ver la lista de proyectos y sus detalles' },
+  'projects.create': { label: 'Crear proyectos', description: 'Permite crear nuevos proyectos' },
+  'projects.edit': { label: 'Editar proyectos', description: 'Permite modificar proyectos existentes' },
+  'projects.delete': { label: 'Eliminar proyectos', description: 'Permite eliminar proyectos' },
+  'projects.archive': { label: 'Archivar proyectos', description: 'Permite archivar y desarchivar proyectos' },
+  'members.view': { label: 'Ver miembros', description: 'Permite ver la lista de miembros de la organización' },
+  'members.invite': { label: 'Invitar miembros', description: 'Permite invitar nuevos miembros a la organización' },
+  'members.edit': { label: 'Editar miembros', description: 'Permite modificar información de miembros' },
+  'members.remove': { label: 'Eliminar miembros', description: 'Permite eliminar miembros de la organización' },
+  'finances.view': { label: 'Ver finanzas', description: 'Permite ver información financiera' },
+  'finances.create': { label: 'Crear movimientos', description: 'Permite crear movimientos financieros' },
+  'finances.edit': { label: 'Editar movimientos', description: 'Permite editar movimientos financieros' },
+  'finances.delete': { label: 'Eliminar movimientos', description: 'Permite eliminar movimientos financieros' },
+  'finances.export': { label: 'Exportar finanzas', description: 'Permite exportar reportes financieros' },
+  'clients.view': { label: 'Ver clientes', description: 'Permite ver la lista de clientes' },
+  'clients.create': { label: 'Crear clientes', description: 'Permite crear nuevos clientes' },
+  'clients.edit': { label: 'Editar clientes', description: 'Permite modificar clientes existentes' },
+  'clients.delete': { label: 'Eliminar clientes', description: 'Permite eliminar clientes' },
+  'contacts.view': { label: 'Ver contactos', description: 'Permite ver la lista de contactos' },
+  'contacts.create': { label: 'Crear contactos', description: 'Permite crear nuevos contactos' },
+  'contacts.edit': { label: 'Editar contactos', description: 'Permite modificar contactos existentes' },
+  'contacts.delete': { label: 'Eliminar contactos', description: 'Permite eliminar contactos' },
+  'materials.view': { label: 'Ver materiales', description: 'Permite ver la lista de materiales' },
+  'materials.create': { label: 'Crear materiales', description: 'Permite crear nuevos materiales' },
+  'materials.edit': { label: 'Editar materiales', description: 'Permite modificar materiales existentes' },
+  'materials.delete': { label: 'Eliminar materiales', description: 'Permite eliminar materiales' },
+  'personnel.view': { label: 'Ver personal', description: 'Permite ver la lista de personal' },
+  'personnel.create': { label: 'Crear personal', description: 'Permite crear nuevos registros de personal' },
+  'personnel.edit': { label: 'Editar personal', description: 'Permite modificar registros de personal' },
+  'personnel.delete': { label: 'Eliminar personal', description: 'Permite eliminar registros de personal' },
+  'subcontracts.view': { label: 'Ver subcontratos', description: 'Permite ver la lista de subcontratos' },
+  'subcontracts.create': { label: 'Crear subcontratos', description: 'Permite crear nuevos subcontratos' },
+  'subcontracts.edit': { label: 'Editar subcontratos', description: 'Permite modificar subcontratos existentes' },
+  'subcontracts.delete': { label: 'Eliminar subcontratos', description: 'Permite eliminar subcontratos' },
+  'sitelog.view': { label: 'Ver bitácora', description: 'Permite ver entradas de la bitácora' },
+  'sitelog.create': { label: 'Crear entradas', description: 'Permite crear nuevas entradas en la bitácora' },
+  'sitelog.edit': { label: 'Editar entradas', description: 'Permite modificar entradas de la bitácora' },
+  'sitelog.delete': { label: 'Eliminar entradas', description: 'Permite eliminar entradas de la bitácora' },
+  'media.view': { label: 'Ver media', description: 'Permite ver archivos multimedia' },
+  'media.upload': { label: 'Subir archivos', description: 'Permite subir nuevos archivos' },
+  'media.edit': { label: 'Editar media', description: 'Permite modificar archivos multimedia' },
+  'media.delete': { label: 'Eliminar media', description: 'Permite eliminar archivos multimedia' },
+  'settings.view': { label: 'Ver configuración', description: 'Permite ver la configuración' },
+  'settings.edit': { label: 'Editar configuración', description: 'Permite modificar la configuración' },
+  'organization.view': { label: 'Ver organización', description: 'Permite ver detalles de la organización' },
+  'organization.edit': { label: 'Editar organización', description: 'Permite modificar la organización' },
+  'roles.view': { label: 'Ver roles', description: 'Permite ver la lista de roles' },
+  'roles.manage': { label: 'Gestionar roles', description: 'Permite crear, editar y eliminar roles' },
+  'capital.view': { label: 'Ver capital', description: 'Permite ver información de capital' },
+  'capital.manage': { label: 'Gestionar capital', description: 'Permite gestionar el capital' },
+  'budgets.view': { label: 'Ver presupuestos', description: 'Permite ver presupuestos' },
+  'budgets.create': { label: 'Crear presupuestos', description: 'Permite crear nuevos presupuestos' },
+  'budgets.edit': { label: 'Editar presupuestos', description: 'Permite modificar presupuestos' },
+  'budgets.delete': { label: 'Eliminar presupuestos', description: 'Permite eliminar presupuestos' },
+  'analysis.view': { label: 'Ver análisis', description: 'Permite ver análisis y reportes' },
+};
+
 function getCategoryLabel(category: string): string {
   return CATEGORY_LABELS[category.toLowerCase()] || category;
 }
@@ -62,10 +120,26 @@ function isAdminRole(roleName: string): boolean {
   return roleName.toLowerCase().includes('admin');
 }
 
-function getPermissionLabel(key: string): string {
+function getPermissionInfo(key: string): { label: string; description: string } {
+  if (PERMISSION_LABELS[key]) {
+    return PERMISSION_LABELS[key];
+  }
   const parts = key.split('.');
   const action = parts[parts.length - 1];
-  return action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const actionLabels: Record<string, string> = {
+    'view': 'Ver',
+    'create': 'Crear',
+    'edit': 'Editar',
+    'delete': 'Eliminar',
+    'manage': 'Gestionar',
+    'invite': 'Invitar',
+    'remove': 'Eliminar',
+    'upload': 'Subir',
+    'export': 'Exportar',
+    'archive': 'Archivar',
+  };
+  const label = actionLabels[action] || action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  return { label, description: '' };
 }
 
 export function PermissionsTab() {
@@ -80,7 +154,6 @@ export function PermissionsTab() {
   const [localPermissions, setLocalPermissions] = useState<Record<string, string[]>>({});
   const [hasChanges, setHasChanges] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [searchQuery, setSearchQuery] = useState('');
 
   const { data, isLoading, error } = useQuery<RolesPermissionsData>({
     queryKey: [`/api/organizations/${organizationId}/roles-permissions`],
@@ -192,27 +265,9 @@ export function PermissionsTab() {
     });
   };
 
-  const filteredCategories = data?.permissionsByCategory 
-    ? Object.entries(data.permissionsByCategory).reduce((acc, [category, permissions]) => {
-        if (!searchQuery) {
-          acc[category] = permissions;
-          return acc;
-        }
-        const filtered = permissions.filter(p => 
-          p.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          getCategoryLabel(category).toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        if (filtered.length > 0) {
-          acc[category] = filtered;
-        }
-        return acc;
-      }, {} as Record<string, Permission[]>)
-    : {};
-
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-10 w-full max-w-sm" />
         <Skeleton className="h-[400px] w-full" />
       </div>
     );
@@ -229,20 +284,14 @@ export function PermissionsTab() {
   }
 
   const roles = data?.roles || [];
+  const categories = data?.permissionsByCategory || {};
 
   return (
     <div className="space-y-4" data-testid="permissions-tab">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar permiso..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-            data-testid="input-search-permissions"
-          />
-        </div>
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-muted-foreground">
+          Configura los permisos de cada rol. Los cambios afectan a todos los miembros con ese rol.
+        </p>
         
         {hasChanges && canManageRoles && (
           <Button
@@ -272,135 +321,155 @@ export function PermissionsTab() {
       <div className="border rounded-lg overflow-hidden">
         <ScrollArea className="w-full">
           <div className="min-w-[800px]">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-muted/50 border-b">
-                  <th className="text-left p-3 font-medium text-sm text-muted-foreground w-[300px] sticky left-0 bg-muted/50 z-10">
-                    Permiso
-                  </th>
-                  {roles.map((role) => (
-                    <th 
-                      key={role.id} 
-                      className="text-center p-3 font-medium text-sm min-w-[120px]"
-                    >
-                      <div className="flex flex-col items-center gap-1">
-                        <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                          Rol
-                        </span>
-                        <div className="flex items-center gap-1.5">
-                          {isAdminRole(role.name) ? (
-                            <ShieldAlert className="h-3.5 w-3.5 text-amber-500" />
-                          ) : (
-                            <Shield className="h-3.5 w-3.5 text-muted-foreground" />
-                          )}
-                          <span className={cn(
-                            "text-sm",
-                            isAdminRole(role.name) && "text-amber-600 dark:text-amber-400"
-                          )}>
-                            {role.name}
-                          </span>
-                        </div>
-                      </div>
+            <TooltipProvider>
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-muted/50 border-b">
+                    <th className="text-left p-3 font-medium text-sm text-muted-foreground w-[300px] sticky left-0 bg-muted/50 z-10">
+                      Permiso
                     </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(filteredCategories).map(([category, permissions]) => {
-                  const isExpanded = expandedCategories.has(category);
-                  
-                  return (
-                    <Fragment key={category}>
-                      <tr
-                        className="bg-muted/30 border-b cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => toggleCategory(category)}
-                        data-testid={`category-row-${category}`}
+                    {roles.map((role) => (
+                      <th 
+                        key={role.id} 
+                        className="text-center p-3 font-medium text-sm min-w-[120px]"
                       >
-                        <td className="p-3 sticky left-0 bg-muted/30 z-10">
-                          <div className="flex items-center gap-2">
-                            {isExpanded ? (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                            Rol
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            {isAdminRole(role.name) ? (
+                              <ShieldAlert className="h-3.5 w-3.5 text-amber-500" />
                             ) : (
-                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              <Shield className="h-3.5 w-3.5 text-muted-foreground" />
                             )}
-                            <span className="font-medium text-sm">
-                              {getCategoryLabel(category)}
-                            </span>
-                            <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                              {permissions.length}
+                            <span className={cn(
+                              "text-sm",
+                              isAdminRole(role.name) && "text-amber-600 dark:text-amber-400"
+                            )}>
+                              {role.name}
                             </span>
                           </div>
-                        </td>
-                        {roles.map((role) => {
-                          const rolePerms = localPermissions[role.id] || [];
-                          const categoryPermIds = permissions.map(p => p.id);
-                          const selectedCount = categoryPermIds.filter(id => 
-                            isAdminRole(role.name) || rolePerms.includes(id)
-                          ).length;
-                          const allSelected = selectedCount === permissions.length;
-                          const someSelected = selectedCount > 0 && selectedCount < permissions.length;
-                          const isAdmin = isAdminRole(role.name);
-
-                          return (
-                            <td 
-                              key={role.id} 
-                              className="text-center p-3"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <div className="flex justify-center">
-                                <Checkbox
-                                  checked={allSelected}
-                                  disabled={isAdmin || !canManageRoles}
-                                  onCheckedChange={() => handleCategoryToggle(role.id, category, permissions)}
-                                  className={cn(
-                                    someSelected && "opacity-50",
-                                    isAdmin && "opacity-60"
-                                  )}
-                                  data-testid={`checkbox-category-${category}-role-${role.id}`}
-                                />
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                      
-                      {isExpanded && permissions.map((permission) => (
-                        <tr 
-                          key={permission.id}
-                          className="border-b hover:bg-muted/20 transition-colors"
-                          data-testid={`permission-row-${permission.id}`}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(categories).map(([category, permissions]) => {
+                    const isExpanded = expandedCategories.has(category);
+                    
+                    return (
+                      <Fragment key={category}>
+                        <tr
+                          className="bg-muted/30 border-b cursor-pointer hover:bg-muted/50 transition-colors"
+                          onClick={() => toggleCategory(category)}
+                          data-testid={`category-row-${category}`}
                         >
-                          <td className="p-3 pl-10 sticky left-0 bg-background z-10">
-                            <span className="text-sm text-muted-foreground">
-                              {getPermissionLabel(permission.key)}
-                            </span>
+                          <td className="p-3 sticky left-0 bg-muted/30 z-10">
+                            <div className="flex items-center gap-2">
+                              {isExpanded ? (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <span className="font-medium text-sm">
+                                {getCategoryLabel(category)}
+                              </span>
+                              <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                {permissions.length}
+                              </span>
+                            </div>
                           </td>
                           {roles.map((role) => {
-                            const isAdmin = isAdminRole(role.name);
                             const rolePerms = localPermissions[role.id] || [];
-                            const isChecked = isAdmin || rolePerms.includes(permission.id);
+                            const categoryPermIds = permissions.map(p => p.id);
+                            const selectedCount = categoryPermIds.filter(id => 
+                              isAdminRole(role.name) || rolePerms.includes(id)
+                            ).length;
+                            const allSelected = selectedCount === permissions.length;
+                            const someSelected = selectedCount > 0 && selectedCount < permissions.length;
+                            const isAdmin = isAdminRole(role.name);
 
                             return (
-                              <td key={role.id} className="text-center p-3">
+                              <td 
+                                key={role.id} 
+                                className="text-center p-3"
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 <div className="flex justify-center">
                                   <Checkbox
-                                    checked={isChecked}
+                                    checked={allSelected}
                                     disabled={isAdmin || !canManageRoles}
-                                    onCheckedChange={() => handlePermissionToggle(role.id, permission.id)}
-                                    className={cn(isAdmin && "opacity-60")}
-                                    data-testid={`checkbox-permission-${permission.id}-role-${role.id}`}
+                                    onCheckedChange={() => handleCategoryToggle(role.id, category, permissions)}
+                                    className={cn(
+                                      someSelected && "opacity-50",
+                                      isAdmin && "opacity-60"
+                                    )}
+                                    data-testid={`checkbox-category-${category}-role-${role.id}`}
                                   />
                                 </div>
                               </td>
                             );
                           })}
                         </tr>
-                      ))}
-                    </Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
+                        
+                        {isExpanded && permissions.map((permission) => {
+                          const permInfo = getPermissionInfo(permission.key);
+                          const description = permission.description || permInfo.description;
+                          
+                          return (
+                            <tr 
+                              key={permission.id}
+                              className="border-b hover:bg-muted/20 transition-colors"
+                              data-testid={`permission-row-${permission.id}`}
+                            >
+                              <td className="p-3 pl-10 sticky left-0 bg-background z-10">
+                                {description ? (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="text-sm text-muted-foreground cursor-help border-b border-dotted border-muted-foreground/50">
+                                        {permInfo.label}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right" className="max-w-[250px]">
+                                      <p className="text-xs">{description}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                ) : (
+                                  <span className="text-sm text-muted-foreground">
+                                    {permInfo.label}
+                                  </span>
+                                )}
+                              </td>
+                              {roles.map((role) => {
+                                const isAdmin = isAdminRole(role.name);
+                                const rolePerms = localPermissions[role.id] || [];
+                                const isChecked = isAdmin || rolePerms.includes(permission.id);
+
+                                return (
+                                  <td key={role.id} className="text-center p-3">
+                                    <div className="flex justify-center">
+                                      <Checkbox
+                                        checked={isChecked}
+                                        disabled={isAdmin || !canManageRoles}
+                                        onCheckedChange={() => handlePermissionToggle(role.id, permission.id)}
+                                        className={cn(isAdmin && "opacity-60")}
+                                        data-testid={`checkbox-permission-${permission.id}-role-${role.id}`}
+                                      />
+                                    </div>
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          );
+                        })}
+                      </Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </TooltipProvider>
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
