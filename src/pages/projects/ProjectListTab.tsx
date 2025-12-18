@@ -338,6 +338,7 @@ export default function ProjectList() {
     {
       key: 'name' as const,
       label: 'Proyecto',
+      type: 'long-text' as const,
       sortable: false,
       render: (project: any) => (
         <div className="flex items-center gap-2">
@@ -357,6 +358,7 @@ export default function ProjectList() {
     {
       key: 'project_type' as const,
       label: 'Tipo',
+      type: 'short-text' as const,
       sortable: false,
       render: (project: any) => (
         <span className="text-sm">
@@ -367,6 +369,7 @@ export default function ProjectList() {
     {
       key: 'modality' as const,
       label: 'Modalidad',
+      type: 'short-text' as const,
       sortable: false,
       render: (project: any) => (
         <span className="text-sm">
@@ -377,6 +380,7 @@ export default function ProjectList() {
     {
       key: 'currency' as const,
       label: 'Moneda',
+      type: 'short-text' as const,
       sortable: false,
       render: (project: any) => {
         const currency = project.currency || defaultCurrency;
@@ -390,12 +394,14 @@ export default function ProjectList() {
     {
       key: 'status' as const,
       label: 'Estado',
+      type: 'status' as const,
       sortable: false,
       render: (project: any) => getStatusBadge(project.status)
     },
     {
       key: 'created_at' as const,
-      label: 'Fecha de Creación',
+      label: 'Creación',
+      type: 'date' as const,
       sortable: false,
       render: (project: any) => (
         <span className="text-sm text-muted-foreground">
@@ -406,6 +412,7 @@ export default function ProjectList() {
     {
       key: 'last_active_at' as const,
       label: 'Última Actividad',
+      type: 'datetime' as const,
       sortable: false,
       render: (project: any) => (
         <span className="text-sm text-muted-foreground">
