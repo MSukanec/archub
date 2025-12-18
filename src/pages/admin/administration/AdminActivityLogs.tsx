@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Activity as ActivityIcon, Eye, Building2 } from 'lucide-react';
+import { Activity as ActivityIcon } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/shared/table';
@@ -30,9 +30,6 @@ export default function AdminActivityLogs() {
     fetchActivities();
   }, []);
 
-  const handleActivityClick = (activity: AdminActivityLog) => {
-    console.log('Activity details:', activity);
-  };
 
   const columns = [
     {
@@ -129,13 +126,6 @@ export default function AdminActivityLogs() {
         <Table
           data={activities}
           columns={columns}
-          rowActions={(activity) => [
-            {
-              icon: Eye,
-              label: 'Ver detalles',
-              onClick: () => handleActivityClick(activity)
-            }
-          ]}
         />
       )}
     </div>
