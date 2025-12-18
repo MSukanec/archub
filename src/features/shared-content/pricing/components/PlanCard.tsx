@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { getPlanConfig } from "../data/plans-config";
 import { BlockedRestricted, ComingSoonCard } from "@/components/shared/restrictions";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
+import { useMultipleFeatureFlags } from "@/hooks/use-feature-flags";
 import type { Plan, BillingPeriod, PricingMode } from "../types";
 
 interface PlanCardProps {
@@ -32,10 +33,26 @@ export function PlanCard({
   const isPopular = plan.name.toLowerCase() === 'pro';
   const isFree = plan.name.toLowerCase() === 'free';
   const isTeams = plan.name.toLowerCase() === 'teams';
+  const isPro = plan.name.toLowerCase() === 'pro';
   
-  // PRODUCTION MODE: Only Teams blocked
-  const status = isTeams ? (plan.status || 'coming_soon') : 'available';
+  const { flags: featureFlags, isReady: flagsReady } = useMultipleFeatureFlags([
+    'pro_purchases_enabled',
+    'teams_purchases_enabled'
+  ], true);
+  
+  const isProDisabledByFlag = flagsReady && isPro && !featureFlags.pro_purchases_enabled;
+  const isTeamsDisabledByFlag = flagsReady && isTeams && !featureFlags.teams_purchases_enabled;
+  const isDisabledByFlag = isProDisabledByFlag || isTeamsDisabledByFlag;
+  
+  const getStatus = () => {
+    if (isDisabledByFlag && !isAdmin) return 'maintenance';
+    if (isTeams) return plan.status || 'coming_soon';
+    return 'available';
+  };
+  
+  const status = getStatus();
   const isStatusBlocking = status !== 'available' && !isAdmin;
+  const isMaintenanceBlocked = isDisabledByFlag && !isAdmin;
 
   const getMonthlyEquivalent = () => {
     if (billingPeriod === 'annual') {
@@ -211,10 +228,10 @@ export function PlanCard({
             }
             variant={isCurrentPlan ? "outline" : "default"}
             onClick={() => onSelect(plan)}
-            disabled={isCurrentPlan}
+            disabled={isCurrentPlan || isMaintenanceBlocked}
             data-testid={`button-select-plan-${plan.name.toLowerCase()}`}
           >
-            {getButtonText()}
+            {isMaintenanceBlocked ? 'En mantenimiento' : getButtonText()}
           </Button>
         </BlockedRestricted>
 

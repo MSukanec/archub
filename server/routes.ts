@@ -112,6 +112,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register forum routes (categories, threads, posts, reactions)
   registerForumRoutes(app, deps);
 
+  // Public feature flags endpoint (for blocking purchases, etc.)
+  app.get("/api/feature-flags", async (req, res) => {
+    try {
+      const { data: flags, error } = await getAdminClient()
+        .from('feature_flags')
+        .select('key, value, category')
+        .order('key');
+      
+      if (error) {
+        console.error('[FeatureFlags] Error fetching flags:', error);
+        return res.json({});
+      }
+      
+      const flagsMap: Record<string, boolean> = {};
+      for (const flag of flags || []) {
+        flagsMap[flag.key] = flag.value;
+      }
+      
+      res.set('Cache-Control', 'public, max-age=60');
+      return res.json(flagsMap);
+    } catch (e: any) {
+      console.error('[FeatureFlags] Error:', e);
+      return res.json({});
+    }
+  });
+
   // Flow blocking status endpoint (public - for preventive blocking)
   app.get("/api/ops/flow-status", async (req, res) => {
     try {

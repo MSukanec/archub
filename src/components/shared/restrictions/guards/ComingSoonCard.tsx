@@ -26,8 +26,8 @@ const statusConfig = {
   },
   maintenance: {
     icon: Clock,
-    label: "Próximamente",
-    badgeClass: "bg-violet-500 text-white border-0",
+    label: "En mantenimiento",
+    badgeClass: "bg-amber-500 text-white border-0",
     isBlocking: true,
   },
 } as const;
