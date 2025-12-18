@@ -77,32 +77,32 @@ export function MonthlyFlowChart({ data, isLoading }: MonthlyFlowChartProps) {
         <Line 
           type="monotone" 
           dataKey="income" 
-          stroke="var(--chart-positive)" 
+          stroke="var(--positive)" 
           strokeWidth={3}
           name="Ingresos"
           connectNulls={true}
-          dot={{ fill: "var(--chart-positive)", strokeWidth: 2, r: 4 }}
-          activeDot={{ r: 6, fill: "var(--chart-positive)", stroke: "#fff", strokeWidth: 2 }}
+          dot={{ fill: "var(--positive)", strokeWidth: 2, r: 4 }}
+          activeDot={{ r: 6, fill: "var(--positive)", stroke: "#fff", strokeWidth: 2 }}
         />
         <Line 
           type="monotone" 
           dataKey="expenses" 
-          stroke="var(--chart-negative)" 
+          stroke="var(--negative)" 
           strokeWidth={3}
           name="Gastos"
           connectNulls={true}
-          dot={{ fill: "var(--chart-negative)", strokeWidth: 2, r: 4 }}
-          activeDot={{ r: 6, fill: "var(--chart-negative)", stroke: "#fff", strokeWidth: 2 }}
+          dot={{ fill: "var(--negative)", strokeWidth: 2, r: 4 }}
+          activeDot={{ r: 6, fill: "var(--negative)", stroke: "#fff", strokeWidth: 2 }}
         />
         <Line 
           type="monotone" 
           dataKey="net" 
-          stroke="var(--chart-neutral)" 
+          stroke="var(--neutral)" 
           strokeWidth={4}
           name="Flujo neto"
           connectNulls={true}
-          dot={{ fill: "var(--chart-neutral)", strokeWidth: 2, r: 5 }}
-          activeDot={{ r: 7, fill: "var(--chart-neutral)", stroke: "#fff", strokeWidth: 2 }}
+          dot={{ fill: "var(--neutral)", strokeWidth: 2, r: 5 }}
+          activeDot={{ r: 7, fill: "var(--neutral)", stroke: "#fff", strokeWidth: 2 }}
         />
       </LineChart>
     </ResponsiveContainer>

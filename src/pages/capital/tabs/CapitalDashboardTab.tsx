@@ -512,14 +512,14 @@ export default function CapitalDashboardTab({
         title: t.partnerName,
         subtitle: formatDateShort(parseLocalDate(t.date) || new Date()),
         badge: t.type === 'contribution' ? (
-          <ArrowDownCircle className="h-4 w-4 text-[var(--chart-positive)]" />
+          <ArrowDownCircle className="h-4 w-4 text-[var(--positive)]" />
         ) : (
-          <ArrowUpCircle className="h-4 w-4 text-[var(--chart-negative)]" />
+          <ArrowUpCircle className="h-4 w-4 text-[var(--negative)]" />
         ),
         rightContent: (
           <span className={cn(
             "text-sm font-medium",
-            t.type === 'contribution' ? 'text-[var(--chart-positive)]' : 'text-[var(--chart-negative)]'
+            t.type === 'contribution' ? 'text-[var(--positive)]' : 'text-[var(--negative)]'
           )}>
             {t.type === 'contribution' ? '+' : '-'}{t.currencySymbol} {t.amount.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </span>
@@ -568,7 +568,7 @@ export default function CapitalDashboardTab({
             <Wallet className="h-4 w-4" />
             Capital Neto
           </StatCardTitle>
-          <StatCardValue className={kpis.netCapital.value >= 0 ? 'text-[var(--chart-positive)]' : 'text-[var(--chart-negative)]'}>
+          <StatCardValue className={kpis.netCapital.value >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}>
             {kpis.netCapital.value >= 0 ? '' : '-'}{currencySymbol} {formatKPI(Math.abs(kpis.netCapital.value))}
           </StatCardValue>
           {kpis.capitalTrendValue && (
@@ -598,7 +598,7 @@ export default function CapitalDashboardTab({
             <TrendingUp className="h-4 w-4" />
             Total Aportes
           </StatCardTitle>
-          <StatCardValue className="text-[var(--chart-positive)]">
+          <StatCardValue className="text-[var(--positive)]">
             {currencySymbol} {formatKPI(kpis.contributions.value)}
           </StatCardValue>
           {kpis.contributionsTrendValue && (
@@ -620,7 +620,7 @@ export default function CapitalDashboardTab({
             <TrendingDown className="h-4 w-4" />
             Total Retiros
           </StatCardTitle>
-          <StatCardValue className="text-[var(--chart-negative)]">
+          <StatCardValue className="text-[var(--negative)]">
             {currencySymbol} {formatKPI(kpis.withdrawals.value)}
           </StatCardValue>
           {kpis.withdrawalsTrendValue && (

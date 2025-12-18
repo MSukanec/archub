@@ -98,9 +98,9 @@ export default function FinancesDashboard() {
   )
 
   const getBalanceColor = (balance: number) => {
-    if (balance > 0) return { color: 'var(--chart-positive)' }
-    if (balance < 0) return { color: 'var(--chart-negative)' }
-    return { color: 'var(--chart-neutral)' }
+    if (balance > 0) return { color: 'var(--positive)' }
+    if (balance < 0) return { color: 'var(--negative)' }
+    return { color: 'var(--neutral)' }
   }
 
   return (

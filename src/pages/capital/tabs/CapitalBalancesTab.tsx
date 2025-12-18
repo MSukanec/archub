@@ -101,7 +101,7 @@ export function CapitalBalancesTab() {
             <TrendingUp className="h-4 w-4" />
             Total Aportes
           </StatCardTitle>
-          <StatCardValue className="text-[var(--chart-positive)]">
+          <StatCardValue className="text-[var(--positive)]">
             {currencySymbol} {formatCurrency(totalContributions)}
           </StatCardValue>
           <StatCardMeta>
@@ -117,7 +117,7 @@ export function CapitalBalancesTab() {
             <TrendingDown className="h-4 w-4" />
             Total Retiros
           </StatCardTitle>
-          <StatCardValue className="text-[var(--chart-negative)]">
+          <StatCardValue className="text-[var(--negative)]">
             {currencySymbol} {formatCurrency(totalWithdrawals)}
           </StatCardValue>
           <StatCardMeta>
@@ -133,7 +133,7 @@ export function CapitalBalancesTab() {
             <Wallet className="h-4 w-4" />
             Saldo Neto
           </StatCardTitle>
-          <StatCardValue className={isPositiveBalance ? "text-[var(--chart-positive)]" : "text-[var(--chart-negative)]"}>
+          <StatCardValue className={isPositiveBalance ? "text-[var(--positive)]" : "text-[var(--negative)]"}>
             {isPositiveBalance ? '' : '-'}{currencySymbol} {formatCurrency(totalInPrimaryCurrency)}
           </StatCardValue>
           <StatCardMeta>

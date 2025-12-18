@@ -220,11 +220,11 @@ export default function Capital() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={handleAddContribution} data-testid="menu-item-add-contribution">
-              <TrendingUp className="w-4 h-4 mr-2 text-[var(--chart-positive)]" />
+              <TrendingUp className="w-4 h-4 mr-2 text-[var(--positive)]" />
               Nuevo Aporte
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleAddWithdrawal} data-testid="menu-item-add-withdrawal">
-              <TrendingDown className="w-4 h-4 mr-2 text-[var(--chart-negative)]" />
+              <TrendingDown className="w-4 h-4 mr-2 text-[var(--negative)]" />
               Nuevo Retiro
             </DropdownMenuItem>
           </DropdownMenuContent>
