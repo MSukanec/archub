@@ -64,7 +64,7 @@ export function GooglePlacesAutocomplete({
       autocompleteRef.current = autocomplete;
 
       // Listen for place selection
-      autocomplete.addListener('place_changed', () => {
+      const handlePlaceChanged = () => {
         const place = autocomplete.getPlace();
         
         if (!place.geometry || !place.geometry.location) {
@@ -105,7 +105,9 @@ export function GooglePlacesAutocomplete({
         onChange(placeDetails.address_full);
         onPlaceSelected(placeDetails);
         setStatus('idle');
-      });
+      };
+
+      autocomplete.addListener('place_changed', handlePlaceChanged);
     } catch (error) {
       console.error('Error initializing Google Places Autocomplete:', error);
       setStatus('error');
@@ -149,7 +151,7 @@ export function GooglePlacesAutocomplete({
       <div className="relative">
         <Input
           ref={inputRef}
-          defaultValue={value}
+          value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={!isLoaded ? "Cargando Google Maps..." : placeholder}
           disabled={!isLoaded}
