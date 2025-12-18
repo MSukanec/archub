@@ -152,6 +152,22 @@ function isAdminRole(roleName: string): boolean {
   return roleName.toLowerCase().includes('admin');
 }
 
+function sortPermissions(permissions: Permission[]): Permission[] {
+  return [...permissions].sort((a, b) => {
+    const aIsView = a.key.endsWith('.view');
+    const bIsView = b.key.endsWith('.view');
+    const aIsManage = a.key.endsWith('.manage');
+    const bIsManage = b.key.endsWith('.manage');
+    
+    if (aIsView && !bIsView) return -1;
+    if (!aIsView && bIsView) return 1;
+    if (aIsManage && !bIsManage) return -1;
+    if (!aIsManage && bIsManage) return 1;
+    
+    return 0;
+  });
+}
+
 function getPermissionInfo(key: string): { label: string; description: string } {
   if (PERMISSION_LABELS[key]) {
     return PERMISSION_LABELS[key];
@@ -448,7 +464,7 @@ export function PermissionsTab() {
                           })}
                         </tr>
                         
-                        {isExpanded && permissions.map((permission) => {
+                        {isExpanded && sortPermissions(permissions).map((permission) => {
                           const permInfo = getPermissionInfo(permission.key);
                           const description = permission.description || permInfo.description;
                           
