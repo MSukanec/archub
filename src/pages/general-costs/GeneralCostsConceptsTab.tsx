@@ -3,7 +3,8 @@ import { Plus, Edit, Trash2, Search, Filter, Bell, Layers, CheckCircle, XCircle,
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { MiniSparkline } from '@/components/charts/MiniSparkline';
 
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/table';
+import type { Column } from '@/components/shared/table';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { Button } from "@/components/ui/button";
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
@@ -221,10 +222,11 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
   }, [filteredGeneralCosts, payments, defaultCurrency]);
 
   // Column definitions
-  const columns = [
+  const columns: Column<typeof enrichedGeneralCosts[0]>[] = useMemo(() => [
     {
-      key: 'name',
+      key: 'name' as const,
       label: 'Gasto General',
+      sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => (
         <div className="flex flex-col gap-0.5">
           <div className="font-bold text-sm">{item.name}</div>
@@ -235,8 +237,9 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       )
     },
     {
-      key: 'usage',
+      key: 'usage' as const,
       label: 'Uso',
+      sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => {
         if (item.paymentCount === 0) {
           return (
@@ -258,11 +261,12 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       }
     },
     {
-      key: 'totalPaid',
+      key: 'totalPaid' as const,
       label: 'Total Pagado',
+      sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => {
         if (item.paymentCount === 0) {
-          return <div className="text-sm text-muted-foreground">—</div>;
+          return <span className="text-sm text-muted-foreground">—</span>;
         }
         // Check if there are multiple unique currencies in payments
         const uniqueCurrencies = new Set(item.associatedPayments.map(p => p.currency_id));
@@ -286,8 +290,9 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       }
     },
     {
-      key: 'trend',
+      key: 'trend' as const,
       label: 'Tendencia (6 meses)',
+      sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => (
         <MiniSparkline 
           data={item.trendData.map(d => d.value)} 
@@ -296,15 +301,16 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       )
     },
     {
-      key: 'description',
+      key: 'description' as const,
       label: 'Descripción',
+      sortable: false,
       render: (item: typeof enrichedGeneralCosts[0]) => (
-        <div className="text-sm text-muted-foreground line-clamp-2">
+        <span className="text-sm text-muted-foreground line-clamp-2">
           {item.description || '—'}
-        </div>
+        </span>
       )
     }
-  ];
+  ], [defaultCurrency]);
 
   // Handle edit
   const handleEdit = (gc: GeneralCost) => {
@@ -433,11 +439,6 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
       <Table
         data={enrichedGeneralCosts}
         columns={columns}
-        topBar={{
-          searchValue: searchQuery,
-          onSearchChange: setSearchQuery,
-          showSearch: true
-        }}
         rowActions={(item) => [
           {
             icon: Edit,
@@ -451,14 +452,10 @@ export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListP
             variant: 'destructive' as const
           }
         ]}
-        renderCard={(item) => (
-          <GeneralCostRow
-            generalCost={item}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            enableSwipe={true}
-          />
-        )}
+        emptyStateConfig={{
+          title: "No hay conceptos de gastos generales",
+          description: "Comienza agregando tu primer concepto para organizar tus gastos generales."
+        }}
       />
     </div>
   );
