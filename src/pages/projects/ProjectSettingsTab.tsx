@@ -202,28 +202,6 @@ export default function ProjectSettingsTab() {
 
         {/* Right Column - Contenido */}
         <div className="space-y-3">
-          {/* Tipos del Sistema */}
-          {systemTypes.length > 0 && (
-            <>
-              {systemTypes.map((type) => (
-                <div 
-                  key={type.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
-                  data-testid={`card-project-type-${type.id}`}
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{type.name}</p>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                      Sistema
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
-
           {/* Tipos Personalizados */}
           {customTypes.length > 0 && (
             <>
@@ -255,6 +233,28 @@ export default function ProjectSettingsTab() {
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* Tipos del Sistema */}
+          {systemTypes.length > 0 && (
+            <>
+              {systemTypes.map((type) => (
+                <div 
+                  key={type.id}
+                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
+                  data-testid={`card-project-type-${type.id}`}
+                >
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{type.name}</p>
+                  </div>
+                  <div className="flex items-center gap-2 ml-4">
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                      Sistema
+                    </span>
                   </div>
                 </div>
               ))}
@@ -301,28 +301,6 @@ export default function ProjectSettingsTab() {
 
         {/* Right Column - Contenido */}
         <div className="space-y-3">
-          {/* Modalidades del Sistema */}
-          {systemModalities.length > 0 && (
-            <>
-              {systemModalities.map((modality) => (
-                <div 
-                  key={modality.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
-                  data-testid={`card-project-modality-${modality.id}`}
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{modality.name}</p>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                      Sistema
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
-
           {/* Modalidades Personalizadas */}
           {customModalities.length > 0 && (
             <>
@@ -354,6 +332,28 @@ export default function ProjectSettingsTab() {
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* Modalidades del Sistema */}
+          {systemModalities.length > 0 && (
+            <>
+              {systemModalities.map((modality) => (
+                <div 
+                  key={modality.id}
+                  className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
+                  data-testid={`card-project-modality-${modality.id}`}
+                >
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{modality.name}</p>
+                  </div>
+                  <div className="flex items-center gap-2 ml-4">
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                      Sistema
+                    </span>
                   </div>
                 </div>
               ))}
