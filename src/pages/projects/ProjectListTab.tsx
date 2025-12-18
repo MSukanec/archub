@@ -327,13 +327,13 @@ export default function ProjectList() {
     return statusConfig[status as keyof typeof statusConfig] || status || 'Sin estado'
   }
 
-  const getStatusVariant = (status: string): 'status_active' | 'status_completed' | 'status_paused' | 'status_cancelled' | 'status_planning' | 'neutral' => {
-    const variantMap: Record<string, 'status_active' | 'status_completed' | 'status_paused' | 'status_cancelled' | 'status_planning' | 'neutral'> = {
-      'active': 'status_active',
-      'completed': 'status_completed',
-      'paused': 'status_paused',
-      'cancelled': 'status_cancelled',
-      'planning': 'status_planning'
+  const getStatusVariant = (status: string): 'status-active' | 'status-completed' | 'status-paused' | 'status-cancelled' | 'status-planning' | 'neutral' => {
+    const variantMap: Record<string, 'status-active' | 'status-completed' | 'status-paused' | 'status-cancelled' | 'status-planning' | 'neutral'> = {
+      'active': 'status-active',
+      'completed': 'status-completed',
+      'paused': 'status-paused',
+      'cancelled': 'status-cancelled',
+      'planning': 'status-planning'
     }
     return variantMap[status] || 'neutral'
   }

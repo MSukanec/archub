@@ -138,30 +138,10 @@ body[style*="overflow: hidden"] {
   --accent-foreground-hsl: 0 0% 100%;
   --accent-foreground: hsl(0, 0%, 100%);
 
-  --destructive: hsl(0, 75%, 60%);
   --destructive-text: hsl(0, 0%, 100%);
-  --success: hsl(80, 90%, 40%);
   --success-text: hsl(0, 0%, 100%);
-  --warning-hsl: 45 90% 50%;
-  --warning: hsl(45, 90%, 50%);
   --warning-text: hsl(240, 10%, 4%);
-  --info-neutral: hsl(200, 30%, 40%);
   --info-neutral-text: hsl(0, 0%, 100%);
-
-  /* Semantic Badge Colors - ONE color per variant */
-  --semantic-badge-success: hsl(80, 90%, 40%);
-  --semantic-badge-error: hsl(0, 75%, 60%);
-  --semantic-badge-warning: hsl(45, 90%, 50%);
-  --semantic-badge-pending: hsl(200, 30%, 40%);
-  --semantic-badge-info: hsl(197, 37%, 24%);
-  --semantic-badge-neutral: hsl(0, 0%, 50%);
-  --semantic-badge-plan-pro: hsl(213, 100%, 33%);
-  --semantic-badge-plan-free: hsl(76, 100%, 40%);
-  --semantic-badge-status-active: hsl(80, 90%, 40%);
-  --semantic-badge-status-completed: hsl(197, 37%, 24%);
-  --semantic-badge-status-paused: hsl(45, 90%, 50%);
-  --semantic-badge-status-cancelled: hsl(0, 75%, 60%);
-  --semantic-badge-status-planning: hsl(200, 30%, 40%);
 
   /* Charts */
   --chart-1: hsl(76, 100%, 40%);
@@ -200,12 +180,6 @@ body[style*="overflow: hidden"] {
   --text-card-title: hsl(0, 0%, 0%);
   --text-important: hsl(0, 0%, 10%);
 
-  /* Plan Colors */
-  --plan-free-bg: hsl(76, 100%, 40%);
-  --plan-pro-bg: hsl(213, 100%, 33%);
-  --plan-teams-bg: hsl(271, 76%, 53%);
-  --plan-enterprise-bg: hsl(215, 16%, 47%);
-
   /* Borders and Rings */
   --border-default: hsl(240, 6%, 90%);
   --border-strong: hsl(240, 8%, 80%);
@@ -231,21 +205,6 @@ body[style*="overflow: hidden"] {
    ======================================== */
 .dark {
   color-scheme: dark;
-
-  /* Semantic Badge Colors - ONE color per variant */
-  --semantic-badge-success: hsl(76, 100%, 40%);
-  --semantic-badge-error: hsl(0, 84%, 65%);
-  --semantic-badge-warning: hsl(45, 90%, 55%);
-  --semantic-badge-pending: hsl(197, 37%, 40%);
-  --semantic-badge-info: hsl(197, 37%, 40%);
-  --semantic-badge-neutral: hsl(0, 0%, 60%);
-  --semantic-badge-plan-pro: hsl(213, 100%, 43%);
-  --semantic-badge-plan-free: hsl(76, 100%, 48%);
-  --semantic-badge-status-active: hsl(76, 100%, 40%);
-  --semantic-badge-status-completed: hsl(197, 37%, 40%);
-  --semantic-badge-status-paused: hsl(45, 90%, 55%);
-  --semantic-badge-status-cancelled: hsl(0, 84%, 65%);
-  --semantic-badge-status-planning: hsl(197, 37%, 40%);
 
   /* Button Shadows */
   --button-shadow-normal: 0 4px 14px 0 rgba(0, 0, 0, 0.3);
@@ -345,14 +304,9 @@ body[style*="overflow: hidden"] {
   --accent-foreground-hsl: 0 0% 100%;
   --accent-text: hsl(0, 0%, 100%);
 
-  --destructive: hsl(0, 84%, 65%);
   --destructive-text: hsl(0, 0%, 100%);
-  --success: hsl(76, 100%, 40%);
   --success-text: hsl(0, 0%, 100%);
-  --warning-hsl: 45 90% 55%;
-  --warning: hsl(45, 90%, 55%);
   --warning-text: hsl(240, 10%, 4%);
-  --info-neutral: hsl(197, 37%, 40%);
   --info-neutral-text: hsl(0, 0%, 100%);
 
   /* Charts */
@@ -382,12 +336,6 @@ body[style*="overflow: hidden"] {
   --table-row-border: hsl(0, 0%, 22%);
   --table-row-hover-bg: hsl(0, 0%, 12%);
 
-  /* Plan Colors */
-  --plan-free-bg: hsl(76, 100%, 40%);
-  --plan-pro-bg: hsl(213, 100%, 33%);
-  --plan-teams-bg: hsl(271, 76%, 53%);
-  --plan-enterprise-bg: hsl(215, 16%, 47%);
-
   /* Text */
   --text-default: hsl(0, 0%, 98%);
   --text-muted: hsl(240, 5%, 65%);
@@ -413,6 +361,32 @@ body[style*="overflow: hidden"] {
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
+}
+
+/* ========================================
+   🎨 SEMANTIC COLORS - Theme Independent
+   ======================================== */
+:root, .dark {
+  /* State & Semantic Colors */
+  --success: hsl(80, 90%, 40%);
+  --error: hsl(0, 75%, 60%);
+  --warning: hsl(45, 90%, 50%);
+  --pending: hsl(200, 30%, 40%);
+  --info: hsl(197, 37%, 24%);
+  --neutral: hsl(0, 0%, 50%);
+
+  /* Plan Badge Colors */
+  --plan-free: hsl(76, 100%, 40%);
+  --plan-pro: hsl(213, 100%, 33%);
+  --plan-teams: hsl(271, 76%, 53%);
+  --plan-enterprise: hsl(215, 16%, 47%);
+
+  /* Status Badge Colors */
+  --status-active: hsl(80, 90%, 40%);
+  --status-completed: hsl(197, 37%, 24%);
+  --status-paused: hsl(45, 90%, 50%);
+  --status-cancelled: hsl(0, 75%, 60%);
+  --status-planning: hsl(200, 30%, 40%);
 }
 
 /* ========================================

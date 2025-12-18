@@ -14,32 +14,36 @@ export type BadgeVariant =
   | 'pending'
   | 'info'
   | 'neutral'
-  | 'plan_pro'
-  | 'plan_free'
-  | 'status_active'
-  | 'status_completed'
-  | 'status_paused'
-  | 'status_cancelled'
-  | 'status_planning'
+  | 'plan-pro'
+  | 'plan-free'
+  | 'plan-teams'
+  | 'plan-enterprise'
+  | 'status-active'
+  | 'status-completed'
+  | 'status-paused'
+  | 'status-cancelled'
+  | 'status-planning'
 
 /**
  * Mapping of variants to their semantic color variables
  * Single color per variant - badge handles opacity internally
  */
 const BADGE_VARIANT_MAP: Record<BadgeVariant, string> = {
-  success: 'var(--semantic-badge-success)',
-  error: 'var(--semantic-badge-error)',
-  warning: 'var(--semantic-badge-warning)',
-  pending: 'var(--semantic-badge-pending)',
-  info: 'var(--semantic-badge-info)',
-  neutral: 'var(--semantic-badge-neutral)',
-  plan_pro: 'var(--semantic-badge-plan-pro)',
-  plan_free: 'var(--semantic-badge-plan-free)',
-  status_active: 'var(--semantic-badge-status-active)',
-  status_completed: 'var(--semantic-badge-status-completed)',
-  status_paused: 'var(--semantic-badge-status-paused)',
-  status_cancelled: 'var(--semantic-badge-status-cancelled)',
-  status_planning: 'var(--semantic-badge-status-planning)',
+  success: 'var(--success)',
+  error: 'var(--error)',
+  warning: 'var(--warning)',
+  pending: 'var(--pending)',
+  info: 'var(--info)',
+  neutral: 'var(--neutral)',
+  'plan-pro': 'var(--plan-pro)',
+  'plan-free': 'var(--plan-free)',
+  'plan-teams': 'var(--plan-teams)',
+  'plan-enterprise': 'var(--plan-enterprise)',
+  'status-active': 'var(--status-active)',
+  'status-completed': 'var(--status-completed)',
+  'status-paused': 'var(--status-paused)',
+  'status-cancelled': 'var(--status-cancelled)',
+  'status-planning': 'var(--status-planning)',
 }
 
 const badgeVariants = cva(
@@ -47,19 +51,21 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        success: "border border-[color:var(--semantic-badge-success)] bg-[color:var(--semantic-badge-success)]/10 text-[color:var(--semantic-badge-success)] hover:bg-[color:var(--semantic-badge-success)]/15",
-        error: "border border-[color:var(--semantic-badge-error)] bg-[color:var(--semantic-badge-error)]/10 text-[color:var(--semantic-badge-error)] hover:bg-[color:var(--semantic-badge-error)]/15",
-        warning: "border border-[color:var(--semantic-badge-warning)] bg-[color:var(--semantic-badge-warning)]/10 text-[color:var(--semantic-badge-warning)] hover:bg-[color:var(--semantic-badge-warning)]/15",
-        pending: "border border-[color:var(--semantic-badge-pending)] bg-[color:var(--semantic-badge-pending)]/10 text-[color:var(--semantic-badge-pending)] hover:bg-[color:var(--semantic-badge-pending)]/15",
-        info: "border border-[color:var(--semantic-badge-info)] bg-[color:var(--semantic-badge-info)]/10 text-[color:var(--semantic-badge-info)] hover:bg-[color:var(--semantic-badge-info)]/15",
-        neutral: "border border-[color:var(--semantic-badge-neutral)] bg-[color:var(--semantic-badge-neutral)]/10 text-[color:var(--semantic-badge-neutral)] hover:bg-[color:var(--semantic-badge-neutral)]/15",
-        plan_pro: "border border-[color:var(--semantic-badge-plan-pro)] bg-[color:var(--semantic-badge-plan-pro)]/10 text-[color:var(--semantic-badge-plan-pro)] hover:bg-[color:var(--semantic-badge-plan-pro)]/15",
-        plan_free: "border border-[color:var(--semantic-badge-plan-free)] bg-[color:var(--semantic-badge-plan-free)]/10 text-[color:var(--semantic-badge-plan-free)] hover:bg-[color:var(--semantic-badge-plan-free)]/15",
-        status_active: "border border-[color:var(--semantic-badge-status-active)] bg-[color:var(--semantic-badge-status-active)]/10 text-[color:var(--semantic-badge-status-active)] hover:bg-[color:var(--semantic-badge-status-active)]/15",
-        status_completed: "border border-[color:var(--semantic-badge-status-completed)] bg-[color:var(--semantic-badge-status-completed)]/10 text-[color:var(--semantic-badge-status-completed)] hover:bg-[color:var(--semantic-badge-status-completed)]/15",
-        status_paused: "border border-[color:var(--semantic-badge-status-paused)] bg-[color:var(--semantic-badge-status-paused)]/10 text-[color:var(--semantic-badge-status-paused)] hover:bg-[color:var(--semantic-badge-status-paused)]/15",
-        status_cancelled: "border border-[color:var(--semantic-badge-status-cancelled)] bg-[color:var(--semantic-badge-status-cancelled)]/10 text-[color:var(--semantic-badge-status-cancelled)] hover:bg-[color:var(--semantic-badge-status-cancelled)]/15",
-        status_planning: "border border-[color:var(--semantic-badge-status-planning)] bg-[color:var(--semantic-badge-status-planning)]/10 text-[color:var(--semantic-badge-status-planning)] hover:bg-[color:var(--semantic-badge-status-planning)]/15",
+        success: "border border-[color:var(--success)] bg-[color:var(--success)]/10 text-[color:var(--success)] hover:bg-[color:var(--success)]/15",
+        error: "border border-[color:var(--error)] bg-[color:var(--error)]/10 text-[color:var(--error)] hover:bg-[color:var(--error)]/15",
+        warning: "border border-[color:var(--warning)] bg-[color:var(--warning)]/10 text-[color:var(--warning)] hover:bg-[color:var(--warning)]/15",
+        pending: "border border-[color:var(--pending)] bg-[color:var(--pending)]/10 text-[color:var(--pending)] hover:bg-[color:var(--pending)]/15",
+        info: "border border-[color:var(--info)] bg-[color:var(--info)]/10 text-[color:var(--info)] hover:bg-[color:var(--info)]/15",
+        neutral: "border border-[color:var(--neutral)] bg-[color:var(--neutral)]/10 text-[color:var(--neutral)] hover:bg-[color:var(--neutral)]/15",
+        "plan-pro": "border border-[color:var(--plan-pro)] bg-[color:var(--plan-pro)]/10 text-[color:var(--plan-pro)] hover:bg-[color:var(--plan-pro)]/15",
+        "plan-free": "border border-[color:var(--plan-free)] bg-[color:var(--plan-free)]/10 text-[color:var(--plan-free)] hover:bg-[color:var(--plan-free)]/15",
+        "plan-teams": "border border-[color:var(--plan-teams)] bg-[color:var(--plan-teams)]/10 text-[color:var(--plan-teams)] hover:bg-[color:var(--plan-teams)]/15",
+        "plan-enterprise": "border border-[color:var(--plan-enterprise)] bg-[color:var(--plan-enterprise)]/10 text-[color:var(--plan-enterprise)] hover:bg-[color:var(--plan-enterprise)]/15",
+        "status-active": "border border-[color:var(--status-active)] bg-[color:var(--status-active)]/10 text-[color:var(--status-active)] hover:bg-[color:var(--status-active)]/15",
+        "status-completed": "border border-[color:var(--status-completed)] bg-[color:var(--status-completed)]/10 text-[color:var(--status-completed)] hover:bg-[color:var(--status-completed)]/15",
+        "status-paused": "border border-[color:var(--status-paused)] bg-[color:var(--status-paused)]/10 text-[color:var(--status-paused)] hover:bg-[color:var(--status-paused)]/15",
+        "status-cancelled": "border border-[color:var(--status-cancelled)] bg-[color:var(--status-cancelled)]/10 text-[color:var(--status-cancelled)] hover:bg-[color:var(--status-cancelled)]/15",
+        "status-planning": "border border-[color:var(--status-planning)] bg-[color:var(--status-planning)]/10 text-[color:var(--status-planning)] hover:bg-[color:var(--status-planning)]/15",
       },
     },
     defaultVariants: {
