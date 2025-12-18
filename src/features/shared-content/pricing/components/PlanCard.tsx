@@ -45,13 +45,11 @@ export function PlanCard({
   const isDisabledByFlag = isProDisabledByFlag || isTeamsDisabledByFlag;
   
   const getStatus = () => {
-    if (isDisabledByFlag && !isAdmin) return 'maintenance';
-    if (isTeams) return plan.status || 'coming_soon';
+    if (isDisabledByFlag) return 'maintenance';
     return 'available';
   };
   
   const status = getStatus();
-  const isStatusBlocking = status !== 'available' && !isAdmin;
   const isMaintenanceBlocked = isDisabledByFlag && !isAdmin;
 
   const getMonthlyEquivalent = () => {
@@ -132,7 +130,7 @@ export function PlanCard({
         </div>
 
         <div className="py-2">
-          {isStatusBlocking ? (
+          {isDisabledByFlag ? (
             <div className="flex items-baseline gap-1">
               <span className={cn(
                 "text-5xl font-bold tracking-tight",

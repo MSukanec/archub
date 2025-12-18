@@ -46,14 +46,18 @@ export function ComingSoonCard({
   }
 
   const Icon = config.icon;
-  const isBlocking = config.isBlocking && !isAdmin;
+  const shouldShowVisualBlock = config.isBlocking;
+  const shouldBlockInteraction = config.isBlocking && !isAdmin;
 
   return (
     <div
-      className={cn("relative", isBlocking && "select-none", className)}
+      className={cn("relative", shouldBlockInteraction && "select-none", className)}
       data-testid={`card-${status}`}
     >
-      <div className={cn(isBlocking && "opacity-50 pointer-events-none grayscale-[30%]")}>
+      <div className={cn(
+        shouldShowVisualBlock && "opacity-50 grayscale-[30%]",
+        shouldBlockInteraction && "pointer-events-none"
+      )}>
         {children}
       </div>
       {showBadge && status !== 'available' && (

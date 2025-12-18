@@ -6,9 +6,9 @@ type FeatureFlags = Record<string, boolean>;
 export function useFeatureFlags() {
   return useQuery<FeatureFlags>({
     queryKey: ['/api/feature-flags'],
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    staleTime: 5 * 1000,
+    gcTime: 30 * 1000,
+    refetchOnWindowFocus: true,
   });
 }
 

@@ -3,7 +3,8 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ComingSoonRestricted } from "@/components/shared/restrictions/guards/ComingSoonRestricted";
+import { useMultipleFeatureFlags } from "@/hooks/use-feature-flags";
+import { useIsAdmin } from "@/hooks/use-admin-permissions";
 import type { ComparisonCategory, Plan } from "../types";
 
 type SelectedPlan = 'free' | 'pro' | 'teams';
@@ -43,6 +44,12 @@ export function ComparisonTable({
 }: ComparisonTableProps) {
   const [, navigate] = useLocation();
   const [selectedPlanForComparison, setSelectedPlanForComparison] = useState<SelectedPlan>('pro');
+  const isAdmin = useIsAdmin();
+  
+  const { flags: featureFlags, isReady: flagsReady } = useMultipleFeatureFlags([
+    'pro_purchases_enabled',
+    'teams_purchases_enabled'
+  ], true);
 
   const getPlanLevel = (planName: string): number => {
     const levels: Record<string, number> = {
@@ -57,7 +64,11 @@ export function ComparisonTable({
     const isTeams = planName.toLowerCase() === 'teams';
     const isPro = planName.toLowerCase() === 'pro';
     const isCurrentPlan = planName.toLowerCase() === userPlanName?.toLowerCase();
-    const isComingSoon = isPro || isTeams;
+    
+    const isProDisabled = flagsReady && isPro && !featureFlags.pro_purchases_enabled;
+    const isTeamsDisabled = flagsReady && isTeams && !featureFlags.teams_purchases_enabled;
+    const isDisabledByFlag = isProDisabled || isTeamsDisabled;
+    const isMaintenance = isDisabledByFlag && !isAdmin;
     
     const getColor = () => {
       if (isPro) return '#0047AB';
@@ -66,14 +77,18 @@ export function ComparisonTable({
     };
     
     if (isCurrentPlan) {
-      return { text: 'Tu plan actual', color: getColor(), disabled: true, isComingSoon: false };
+      return { text: 'Tu plan actual', color: getColor(), disabled: true, isMaintenance: false, isDisabledByFlag };
+    }
+    
+    if (isMaintenance) {
+      return { text: 'En mantenimiento', color: getColor(), disabled: true, isMaintenance: true, isDisabledByFlag };
     }
     
     if (!isAuthenticated) {
-      return { text: 'Comenzar', color: getColor(), disabled: isComingSoon, isComingSoon };
+      return { text: 'Comenzar', color: getColor(), disabled: false, isMaintenance: false, isDisabledByFlag };
     }
     
-    return { text: `Cambiar a ${planName}`, color: getColor(), disabled: isComingSoon, isComingSoon };
+    return { text: `Cambiar a ${planName}`, color: getColor(), disabled: false, isMaintenance: false, isDisabledByFlag };
   };
 
   const handleTableButtonClick = (planName: string) => {
@@ -111,28 +126,28 @@ export function ComparisonTable({
               
               {planNames.map((planKey) => {
                 const planName = planKey.charAt(0).toUpperCase() + planKey.slice(1);
-                const { text, color, disabled, isComingSoon } = getButtonTextAndColor(planName);
-                
-                const buttonElement = (
-                  <Button 
-                    size="sm" 
-                    style={!disabled || isComingSoon ? { backgroundColor: color } : undefined}
-                    className={cn("text-xs", (!disabled || isComingSoon) && "text-white hover:opacity-90")}
-                    variant={disabled && !isComingSoon ? "outline" : "default"}
-                    disabled={disabled && !isComingSoon}
-                    onClick={() => handleTableButtonClick(planName)}
-                    data-testid={`button-table-${planKey}`}
-                  >
-                    {text}
-                  </Button>
-                );
+                const { text, color, disabled, isMaintenance, isDisabledByFlag } = getButtonTextAndColor(planName);
                 
                 return (
                   <div key={planKey} className="px-6 py-4 text-center">
                     <div className="text-sm font-bold text-[var(--text-default)] mb-2">{planName}</div>
-                    {isComingSoon ? (
-                      <ComingSoonRestricted>{buttonElement}</ComingSoonRestricted>
-                    ) : buttonElement}
+                    <div className={cn(isDisabledByFlag && "opacity-50")}>
+                      <Button 
+                        size="sm" 
+                        style={!disabled ? { backgroundColor: color } : undefined}
+                        className={cn(
+                          "text-xs",
+                          !disabled && "text-white hover:opacity-90",
+                          isMaintenance && "bg-amber-500 hover:bg-amber-600"
+                        )}
+                        variant={disabled ? "outline" : "default"}
+                        disabled={disabled}
+                        onClick={() => handleTableButtonClick(planName)}
+                        data-testid={`button-table-${planKey}`}
+                      >
+                        {text}
+                      </Button>
+                    </div>
                   </div>
                 );
               })}
