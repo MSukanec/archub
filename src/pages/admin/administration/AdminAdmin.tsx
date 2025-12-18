@@ -39,6 +39,7 @@ const AdminAdmin = () => {
 
   const headerProps = {
     title: "Administración",
+    description: "Gestiona usuarios, organizaciones y actividad del sistema.",
     icon: Settings,
     showSearch: false,
     showFilters: false,
