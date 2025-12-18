@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { CheckCircle2, AlertCircle, AlertTriangle, Clock, Info, XCircle, Play, Check, Pause, X, Calendar } from 'lucide-react'
 
 /**
  * SEMANTIC BADGE VARIANTS
@@ -44,6 +45,28 @@ const BADGE_VARIANT_MAP: Record<BadgeVariant, string> = {
   'status-paused': 'var(--status-paused)',
   'status-cancelled': 'var(--status-cancelled)',
   'status-planning': 'var(--status-planning)',
+}
+
+/**
+ * Mapping of variants to their fixed icons
+ * Each variant always displays its associated icon
+ */
+const variantIcons: Record<BadgeVariant, React.ReactNode> = {
+  success: <CheckCircle2 className="w-3.5 h-3.5" />,
+  error: <XCircle className="w-3.5 h-3.5" />,
+  warning: <AlertTriangle className="w-3.5 h-3.5" />,
+  pending: <AlertCircle className="w-3.5 h-3.5" />,
+  info: <Info className="w-3.5 h-3.5" />,
+  neutral: <AlertCircle className="w-3.5 h-3.5" />,
+  'plan-pro': <CheckCircle2 className="w-3.5 h-3.5" />,
+  'plan-free': <CheckCircle2 className="w-3.5 h-3.5" />,
+  'plan-teams': <CheckCircle2 className="w-3.5 h-3.5" />,
+  'plan-enterprise': <CheckCircle2 className="w-3.5 h-3.5" />,
+  'status-active': <Play className="w-3.5 h-3.5" />,
+  'status-completed': <Check className="w-3.5 h-3.5" />,
+  'status-paused': <Pause className="w-3.5 h-3.5" />,
+  'status-cancelled': <X className="w-3.5 h-3.5" />,
+  'status-planning': <Calendar className="w-3.5 h-3.5" />,
 }
 
 const badgeVariants = cva(
@@ -130,12 +153,11 @@ const variantStyles: Record<BadgeVariant, React.CSSProperties> = {
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {
-  icon?: React.ReactNode;
-}
+    VariantProps<typeof badgeVariants> {}
 
-function Badge({ className, variant = 'neutral', icon, children, style, ...props }: BadgeProps) {
+function Badge({ className, variant = 'neutral', children, style, ...props }: BadgeProps) {
   const variantStyle = variantStyles[variant as BadgeVariant] || variantStyles.neutral
+  const icon = variantIcons[variant as BadgeVariant]
   
   return (
     <div 
