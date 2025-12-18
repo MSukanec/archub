@@ -51,8 +51,8 @@ import ConstructionIndirects from "@/pages/professional/project/construction/ind
 import Contacts from "@/pages/contacts/Contacts";
 import Calendar from "@/pages/professional/calendar/Calendar";
 
-// Media Pages (Lazy Loaded - incluye librerías pesadas de PDF)
-const Media = lazy(() => import("@/pages/media/Media"));
+// Media Pages
+import Media from "@/pages/media/Media";
 
 import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
 import OrganizationData from "@/pages/organization-data/OrganizationData";
@@ -218,11 +218,7 @@ function Router() {
         <Route path="/project/dashboard" component={Project} />
         <Route path="/project" component={ProjectData} />
         <Route path="/clients" component={Clients} />
-        <Route path="/media">
-          <Suspense fallback={<LazyLoadFallback />}>
-            <Media />
-          </Suspense>
-        </Route>
+        <Route path="/media" component={Media} />
         <Route path="/budgets" component={Budgets} />
         <Route path="/professional/budgets" component={Budgets} />
         <Route path="/professional/budgets/view/:id" component={BudgetView} />
