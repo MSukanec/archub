@@ -157,6 +157,7 @@ function getPermissionInfo(key: string): { label: string; description: string } 
     return PERMISSION_LABELS[key];
   }
   const parts = key.split('.');
+  const category = parts[0];
   const action = parts[parts.length - 1];
   const actionLabels: Record<string, string> = {
     'view': 'Ver',
@@ -170,7 +171,9 @@ function getPermissionInfo(key: string): { label: string; description: string } 
     'export': 'Exportar',
     'archive': 'Archivar',
   };
-  const label = actionLabels[action] || action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const verb = actionLabels[action] || action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const categoryLabel = getCategoryLabel(category);
+  const label = `${verb} ${categoryLabel}`;
   return { label, description: '' };
 }
 
