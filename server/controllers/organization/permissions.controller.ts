@@ -28,9 +28,15 @@ export async function handleGetRolesWithPermissions(req: Request, res: Response)
       .eq('user_id', user.id)
       .eq('organization_id', organizationId)
       .eq('is_active', true)
-      .single();
+      .maybeSingle();
 
-    if (membershipError || !membership) {
+    if (membershipError) {
+      console.error('[PermissionsController] Membership query error:', membershipError);
+      return res.status(500).json({ error: 'Failed to verify membership' });
+    }
+
+    if (!membership) {
+      console.error('[PermissionsController] No membership found for user:', user.id, 'org:', organizationId);
       return res.status(403).json({ error: 'You are not a member of this organization' });
     }
 
