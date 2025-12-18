@@ -38,6 +38,16 @@ export function GooglePlacesAutocomplete({
   const { isLoaded, loadError } = useGoogleMapsScript({ apiKey, libraries: ['places'] });
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
 
+  // Use refs for callbacks to avoid re-initializing the autocomplete listener on every render
+  const onChangeRef = useRef(onChange);
+  const onPlaceSelectedRef = useRef(onPlaceSelected);
+
+  // Keep refs updated with latest callback versions
+  useEffect(() => {
+    onChangeRef.current = onChange;
+    onPlaceSelectedRef.current = onPlaceSelected;
+  });
+
   // Sync external value changes to the input (e.g., when clearing the field)
   useEffect(() => {
     if (inputRef.current && value !== inputRef.current.value) {
@@ -102,10 +112,9 @@ export function GooglePlacesAutocomplete({
           placeDetails.timezone = '';
         }
 
-        // Call onPlaceSelected FIRST to update coordinates immediately
-        onPlaceSelected(placeDetails);
-        // Then update the input field
-        onChange(placeDetails.address_full);
+        // Use refs to call the latest callbacks without triggering effect re-runs
+        onPlaceSelectedRef.current(placeDetails);
+        onChangeRef.current(placeDetails.address_full);
         setStatus('idle');
       };
 
@@ -120,7 +129,7 @@ export function GooglePlacesAutocomplete({
         google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
     };
-  }, [isLoaded, onChange, onPlaceSelected]);
+  }, [isLoaded]); // Only re-run when isLoaded changes
 
   if (loadError) {
     return (
