@@ -295,27 +295,11 @@ const AdminAdminOrganizations = () => {
       key: 'plan',
       label: 'Plan',
       width: '20%',
-      render: (org: Organization) => {
-        const planName = org.plan?.name || 'Sin plan';
-        let bgColor = '';
-        
-        if (planName === 'Free') {
-          bgColor = 'bg-[var(--plan-free-bg)]';
-        } else if (planName === 'Pro') {
-          bgColor = 'bg-[var(--plan-pro-bg)]';
-        } else if (planName === 'Teams') {
-          bgColor = 'bg-[var(--plan-teams-bg)]';
-        }
-        
-        return (
-          <Badge 
-            variant="default"
-            className={bgColor}
-          >
-            {planName}
-          </Badge>
-        );
-      },
+      render: (org: Organization) => (
+        <Badge variant="default">
+          {org.plan?.name || 'Sin plan'}
+        </Badge>
+      ),
     },
     {
       key: 'members',
