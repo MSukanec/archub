@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { Edit, Trash2 } from 'lucide-react';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/table';
+import type { Column } from '@/components/shared/table';
 import { Badge } from '@/components/ui/badge';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
-import ContactAvatar from './ContactAvatar';
 import type { ContactWithRelations } from '@/features/contacts/types';
 
 interface ContactListProps {
@@ -52,7 +52,7 @@ export default function ContactList({
     };
   }, [contacts]);
   
-  const columns = useMemo(() => [
+  const columns: Column<ContactWithRelations>[] = useMemo(() => [
     {
       key: "first_name" as const,
       label: "Nombre",
