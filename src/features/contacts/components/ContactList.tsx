@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Edit, Trash2 } from 'lucide-react';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
 import { Badge } from '@/components/ui/badge';
+import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import ContactAvatar from './ContactAvatar';
 import type { ContactWithRelations } from '@/features/contacts/types';
@@ -57,15 +58,16 @@ export default function ContactList({
       label: "Nombre",
       sortable: false,
       render: (contact: ContactWithRelations) => {
-        const fullName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.linked_user?.full_name || '—';
+        const fullName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.linked_user?.full_name;
         
         return (
-          <div className="flex items-center gap-3">
-            <ContactAvatar contact={contact} size="md" />
-            <span className="font-semibold text-sm">
-              {fullName}
-            </span>
-          </div>
+          <IdentityBadge
+            name={fullName}
+            linkedUser={contact.linked_user}
+            size="sm"
+            layout="row"
+            showName={true}
+          />
         );
       }
     },
