@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import AdminOpsAlertsTab from './AdminOpsAlertsTab';
 import AdminOpsHistoryTab from './AdminOpsHistoryTab';
 import AdminOpsRunbooksTab from './AdminOpsRunbooksTab';
+import AdminOpsFlagsTab from './AdminOpsFlagsTab';
 
 interface OpsStats {
   open: number;
@@ -65,6 +66,11 @@ export default function AdminOps() {
       id: 'runbooks', 
       label: 'Runbooks', 
       isActive: activeTab === 'runbooks'
+    },
+    { 
+      id: 'flags', 
+      label: 'Feature Flags', 
+      isActive: activeTab === 'flags'
     }
   ];
 
@@ -98,6 +104,8 @@ export default function AdminOps() {
         return <AdminOpsHistoryTab />;
       case 'runbooks':
         return <AdminOpsRunbooksTab />;
+      case 'flags':
+        return <AdminOpsFlagsTab />;
       default:
         return <AdminOpsAlertsTab stats={stats} />;
     }

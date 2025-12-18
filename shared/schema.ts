@@ -2179,3 +2179,26 @@ export const insertForumReactionSchema = createInsertSchema(forum_reactions).omi
 
 export type ForumReaction = typeof forum_reactions.$inferSelect;
 export type InsertForumReaction = z.infer<typeof insertForumReactionSchema>;
+
+// ============================================================
+// FEATURE FLAGS TABLE (Admin Ops Center)
+// ============================================================
+
+export const feature_flags = pgTable("feature_flags", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  value: boolean("value").notNull().default(true),
+  description: text("description"),
+  category: varchar("category", { length: 50 }).default("general"),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const insertFeatureFlagSchema = createInsertSchema(feature_flags).omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+
+export type FeatureFlag = typeof feature_flags.$inferSelect;
+export type InsertFeatureFlag = z.infer<typeof insertFeatureFlagSchema>;

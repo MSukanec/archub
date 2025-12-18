@@ -964,3 +964,122 @@ export async function getOpsStats(req: Request, res: Response) {
     return res.status(500).json({ error: "Internal error" });
   }
 }
+
+// ==================== FEATURE FLAGS ====================
+
+export async function getFeatureFlags(req: Request, res: Response) {
+  try {
+    await verifyAdminUser(req.headers.authorization);
+
+    const { data: flags, error } = await supabaseAdmin
+      .from("feature_flags")
+      .select("*")
+      .order("category")
+      .order("key");
+
+    if (error) {
+      console.error("[OpsCenter] Error fetching feature flags:", error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json(flags || []);
+  } catch (error: any) {
+    console.error("[OpsCenter] Error:", error);
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "Internal error" });
+  }
+}
+
+export async function updateFeatureFlag(req: Request, res: Response) {
+  try {
+    await verifyAdminUser(req.headers.authorization);
+    const { id } = req.params;
+    const { value } = req.body;
+
+    if (typeof value !== "boolean") {
+      return res.status(400).json({ error: "value must be a boolean" });
+    }
+
+    const { data: flag, error } = await supabaseAdmin
+      .from("feature_flags")
+      .update({ value, updated_at: new Date().toISOString() })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("[OpsCenter] Error updating feature flag:", error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json(flag);
+  } catch (error: any) {
+    console.error("[OpsCenter] Error:", error);
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "Internal error" });
+  }
+}
+
+export async function createFeatureFlag(req: Request, res: Response) {
+  try {
+    await verifyAdminUser(req.headers.authorization);
+    const { key, value, description, category } = req.body;
+
+    if (!key || typeof key !== "string") {
+      return res.status(400).json({ error: "key is required" });
+    }
+
+    const { data: flag, error } = await supabaseAdmin
+      .from("feature_flags")
+      .insert({
+        key,
+        value: value ?? true,
+        description: description || null,
+        category: category || "general",
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("[OpsCenter] Error creating feature flag:", error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json(flag);
+  } catch (error: any) {
+    console.error("[OpsCenter] Error:", error);
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "Internal error" });
+  }
+}
+
+export async function deleteFeatureFlag(req: Request, res: Response) {
+  try {
+    await verifyAdminUser(req.headers.authorization);
+    const { id } = req.params;
+
+    const { error } = await supabaseAdmin
+      .from("feature_flags")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("[OpsCenter] Error deleting feature flag:", error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json({ ok: true });
+  } catch (error: any) {
+    console.error("[OpsCenter] Error:", error);
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "Internal error" });
+  }
+}

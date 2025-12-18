@@ -120,4 +120,10 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
   app.get("/api/admin/ops/repair-actions/:alertType", opsController.getRepairActions);
   app.post("/api/admin/ops/alerts/:id/repair", opsController.executeRepairAction);
   app.get("/api/admin/ops/repair-logs", opsController.getRepairLogs);
+
+  // ==================== FEATURE FLAGS ====================
+  app.get("/api/admin/ops/feature-flags", opsController.getFeatureFlags);
+  app.post("/api/admin/ops/feature-flags", opsController.createFeatureFlag);
+  app.patch("/api/admin/ops/feature-flags/:id", opsController.updateFeatureFlag);
+  app.delete("/api/admin/ops/feature-flags/:id", opsController.deleteFeatureFlag);
 }
