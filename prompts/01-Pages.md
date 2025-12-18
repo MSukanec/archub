@@ -708,6 +708,159 @@ Las páginas admin NO deben tener un wrapper `<div className="space-y-6">` adici
 
 ---
 
+---
+
+## 14. Autenticación en Endpoints (CRÍTICO)
+
+### ⚠️ IMPORTANTE: Diferencia entre JWT auth.user.id y userId de la base de datos
+
+La aplicación tiene **DOS IDs de usuario diferentes** que pueden causar bugs graves si se confunden:
+
+1. **`auth.user.id`** - ID del JWT/Supabase Auth (en la tabla `auth.users`)
+2. **`userId`** - ID de la tabla `users` en la base de datos (referencia a `auth.users.id`)
+
+**Las tablas como `organization_members` usan `user_id` que referencia la tabla `users`, NO `auth.users`.**
+
+### ✅ CORRECTO: Usar requireUser para obtener userId correcto
+
+```typescript
+import { extractToken, requireUser } from '../../lib/auth/helpers';
+import type { Request, Response } from "express";
+
+export async function handleMyEndpoint(req: Request, res: Response) {
+  try {
+    // ✅ Usar extractToken + requireUser SIEMPRE
+    const token = extractToken(req.headers.authorization);
+    const { userId, supabase } = await requireUser(token);
+    
+    // userId es el ID correcto de la tabla users
+    const { data: member } = await supabase
+      .from('organization_members')
+      .select('*')
+      .eq('user_id', userId)  // ← Usar userId aquí, NO auth.user.id
+      .eq('organization_id', organizationId)
+      .single();
+
+    return res.json({ member });
+  } catch (error: any) {
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    return res.status(500).json({ error: error.message });
+  }
+}
+```
+
+### ❌ INCORRECTO: Usar auth.user.id directamente
+
+```typescript
+// ❌ MAL - Esto causará 403 Forbidden
+export async function handleMyEndpoint(req: Request, res: Response) {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(' ')[1];
+    const supabase = createAuthenticatedClient(token);
+    
+    // ❌ PROBLEMA: Obtenemos auth.user.id
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    // ❌ ERROR: user.id es del JWT, pero organization_members.user_id
+    // referencia la tabla users, NO auth.users
+    const { data: member } = await supabase
+      .from('organization_members')
+      .select('*')
+      .eq('user_id', user.id)  // ❌ INCORRECTO - Mismatched IDs!
+      .single();
+  }
+}
+```
+
+### 🔍 ¿POR QUÉ OCURRE ESTO?
+
+La tabla `users` tiene esta estructura:
+```sql
+CREATE TABLE users (
+  id UUID PRIMARY KEY,
+  auth_id UUID REFERENCES auth.users(id),  -- ← Referencia a auth.users
+  email TEXT,
+  ...
+);
+
+CREATE TABLE organization_members (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES users(id),  -- ← Referencia a tabla users, NO auth.users!
+  ...
+);
+```
+
+Entonces:
+- `auth.user.id` → ID en `auth.users` (del JWT)
+- `userId` → ID en tabla `users` (obtenido por `requireUser`)
+- `organization_members.user_id` → Referencia a tabla `users`
+
+### 📋 Patrón de autenticación correcto en controladores
+
+```typescript
+import { extractToken, requireUser, HttpError } from '../../lib/auth/helpers';
+
+export async function handleGetData(req: Request, res: Response) {
+  try {
+    // PASO 1: Extraer token
+    const token = extractToken(req.headers.authorization);
+    
+    // PASO 2: Obtener userId y supabase autenticado
+    const { userId, supabase } = await requireUser(token);
+    
+    // PASO 3: Usar userId para queries a organization_members, etc.
+    const { data: membership } = await supabase
+      .from('organization_members')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('organization_id', req.params.organizationId)
+      .single();
+
+    if (!membership) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    // PASO 4: Retornar datos
+    return res.json({ success: true });
+  } catch (error: any) {
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    return res.status(500).json({ error: error.message });
+  }
+}
+```
+
+### Helpers disponibles en `lib/auth/helpers.ts`
+
+```typescript
+// Extraer token del header Authorization
+const token = extractToken(req.headers.authorization);
+
+// Obtener userId y cliente Supabase autenticado
+const { userId, authId, supabase } = await requireUser(token);
+// - userId: ID de la tabla users (el que necesitas para queries)
+// - authId: ID de auth.users (para referencia)
+// - supabase: Cliente Supabase autenticado como ese usuario
+
+// Crear cliente autenticado manualmente (si necesitas)
+const supabase = createAuthenticatedClient(token);
+```
+
+### ✅ Checklist para endpoints
+
+- [ ] ¿Usas `extractToken` para obtener el token?
+- [ ] ¿Usas `requireUser` para autenticación (NO `auth.getUser`)?
+- [ ] ¿Usas `userId` para queries a `organization_members`?
+- [ ] ¿Verificas que el usuario pertenece a la organización?
+- [ ] ¿Usas `HttpError` para errors de autorización?
+- [ ] ¿El catch block maneja `HttpError` correctamente?
+
+---
+
 ## Resumen
 
 **REGLA DE ORO:** Siempre mira una página similar existente antes de crear una nueva. Si es admin, usa AdminAdmin, AdminSupport o AdminDashboard como referencia. Usa `Layout` con `headerProps` y el componente `Tabs` personalizado.
@@ -718,6 +871,7 @@ Las páginas admin NO deben tener un wrapper `<div className="space-y-6">` adici
 - ❌ Crear página sin Layout correcto
 - ❌ Agregar "Analytics" en el sidebar principal
 - ❌ Poner botones de acción en el contenido de la página
+- ❌ Usar `auth.user.id` directamente en queries a `organization_members`
 
 **SIEMPRE:**
 - ✅ Usar Layout con headerProps
@@ -725,3 +879,5 @@ Las páginas admin NO deben tener un wrapper `<div className="space-y-6">` adici
 - ✅ Seguir patrones de páginas existentes
 - ✅ Analytics solo en sidebar específico de admin
 - ✅ Botones de acción en `headerProps.actions`, NO en el contenido
+- ✅ Usar `extractToken` + `requireUser` para autenticación en endpoints
+- ✅ Usar `userId` (de `requireUser`) para queries a `organization_members`
