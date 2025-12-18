@@ -35,8 +35,6 @@ body {
 
   /* Content */
   --content-bg: hsl(0, 0%, 95%);
-  --content-gradient-from: hsl(0, 0%, 96%);
-  --content-gradient-to: hsl(76, 40%, 94%);
 
   /* Header */
   --header-bg: hsl(0, 0%, 95%);
@@ -231,8 +229,6 @@ body {
 
   /* Content */
   --content-bg: hsl(0, 0%, 20%);
-  --content-gradient-from: hsl(0, 0%, 20%);
-  --content-gradient-to: hsl(0, 0%, 15%);
 
   /* Header */
   --header-bg: hsl(0, 0%, 20%);
