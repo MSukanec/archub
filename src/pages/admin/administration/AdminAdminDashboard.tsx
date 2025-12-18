@@ -16,6 +16,7 @@ function formatAcquisitionOrigin(acquisition: { source?: string; medium?: string
   
   // If direct, show simple label
   if (source === 'direct') return 'Directo';
+  if (source === 'unknown') return 'Desconocido';
   
   // Capitalize first letter of source
   const formattedSource = source.charAt(0).toUpperCase() + source.slice(1);

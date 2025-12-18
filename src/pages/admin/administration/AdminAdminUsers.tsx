@@ -19,6 +19,7 @@ function formatAcquisitionOrigin(acquisition: { source?: string; medium?: string
   const { source, medium, campaign } = acquisition;
   
   if (source === 'direct') return 'Directo';
+  if (source === 'unknown') return 'Desconocido';
   
   const formattedSource = source.charAt(0).toUpperCase() + source.slice(1);
   const parts = [formattedSource];
