@@ -1,18 +1,16 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Check, Shield, ShieldAlert, Loader2, Save, AlertTriangle, Lock, ChevronDown, ChevronRight } from 'lucide-react';
+import { Shield, ShieldAlert, Loader2, Save, AlertTriangle, ChevronDown, ChevronRight, Search } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { cn } from '@/lib/utils';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 interface Permission {
   id: string;
@@ -64,6 +62,12 @@ function isAdminRole(roleName: string): boolean {
   return roleName.toLowerCase().includes('admin');
 }
 
+function getPermissionLabel(key: string): string {
+  const parts = key.split('.');
+  const action = parts[parts.length - 1];
+  return action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
 export function PermissionsTab() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
@@ -73,26 +77,15 @@ export function PermissionsTab() {
     (p: { key: string }) => p.key === 'roles.manage'
   ) || userData?.role?.name?.toLowerCase().includes('admin');
   
-  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [localPermissions, setLocalPermissions] = useState<Record<string, string[]>>({});
   const [hasChanges, setHasChanges] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data, isLoading, error } = useQuery<RolesPermissionsData>({
     queryKey: [`/api/organizations/${organizationId}/roles-permissions`],
     enabled: !!organizationId,
   });
-
-  useEffect(() => {
-    if (data?.roles && !selectedRoleId) {
-      const nonAdminRole = data.roles.find(r => !isAdminRole(r.name));
-      if (nonAdminRole) {
-        setSelectedRoleId(nonAdminRole.id);
-      } else if (data.roles.length > 0) {
-        setSelectedRoleId(data.roles[0].id);
-      }
-    }
-  }, [data?.roles, selectedRoleId]);
 
   useEffect(() => {
     if (data?.roles) {
@@ -109,12 +102,6 @@ export function PermissionsTab() {
       setExpandedCategories(new Set(Object.keys(data.permissionsByCategory)));
     }
   }, [data?.permissionsByCategory]);
-
-  const selectedRole = useMemo(() => {
-    return data?.roles?.find(r => r.id === selectedRoleId) || null;
-  }, [data?.roles, selectedRoleId]);
-
-  const isAdmin = selectedRole ? isAdminRole(selectedRole.name) : false;
 
   const updatePermissionsMutation = useMutation({
     mutationFn: async ({ roleId, permissionIds }: { roleId: string; permissionIds: string[] }) => {
@@ -137,29 +124,31 @@ export function PermissionsTab() {
     },
   });
 
-  const handlePermissionToggle = (permissionId: string) => {
-    if (!selectedRoleId || isAdmin || !canManageRoles) return;
+  const handlePermissionToggle = (roleId: string, permissionId: string) => {
+    const role = data?.roles.find(r => r.id === roleId);
+    if (!role || isAdminRole(role.name) || !canManageRoles) return;
 
     setLocalPermissions(prev => {
-      const current = prev[selectedRoleId] || [];
+      const current = prev[roleId] || [];
       const updated = current.includes(permissionId)
         ? current.filter(id => id !== permissionId)
         : [...current, permissionId];
       
-      return { ...prev, [selectedRoleId]: updated };
+      return { ...prev, [roleId]: updated };
     });
     setHasChanges(true);
   };
 
-  const handleCategoryToggle = (category: string, permissions: Permission[]) => {
-    if (!selectedRoleId || isAdmin || !canManageRoles) return;
+  const handleCategoryToggle = (roleId: string, category: string, permissions: Permission[]) => {
+    const role = data?.roles.find(r => r.id === roleId);
+    if (!role || isAdminRole(role.name) || !canManageRoles) return;
 
     const permissionIdsInCategory = permissions.map(p => p.id);
-    const currentPermissions = localPermissions[selectedRoleId] || [];
+    const currentPermissions = localPermissions[roleId] || [];
     const allSelected = permissionIdsInCategory.every(id => currentPermissions.includes(id));
 
     setLocalPermissions(prev => {
-      const current = prev[selectedRoleId] || [];
+      const current = prev[roleId] || [];
       let updated: string[];
 
       if (allSelected) {
@@ -168,33 +157,25 @@ export function PermissionsTab() {
         updated = Array.from(new Set([...current, ...permissionIdsInCategory]));
       }
 
-      return { ...prev, [selectedRoleId]: updated };
+      return { ...prev, [roleId]: updated };
     });
     setHasChanges(true);
   };
 
-  const handleSave = () => {
-    if (!selectedRoleId) return;
-    updatePermissionsMutation.mutate({
-      roleId: selectedRoleId,
-      permissionIds: localPermissions[selectedRoleId] || [],
-    });
-  };
-
-  const handleRoleSelect = (roleId: string) => {
-    if (hasChanges) {
-      const confirm = window.confirm('Tienes cambios sin guardar. ¿Deseas descartarlos?');
-      if (!confirm) return;
-    }
-    setSelectedRoleId(roleId);
-    setHasChanges(false);
-    if (data?.roles) {
-      const role = data.roles.find(r => r.id === roleId);
-      if (role) {
-        setLocalPermissions(prev => ({
-          ...prev,
-          [roleId]: [...role.permissionIds],
-        }));
+  const handleSaveAll = async () => {
+    if (!data?.roles) return;
+    
+    const rolesToUpdate = data.roles.filter(role => !isAdminRole(role.name));
+    
+    for (const role of rolesToUpdate) {
+      const originalPerms = role.permissionIds.sort().join(',');
+      const currentPerms = (localPermissions[role.id] || []).sort().join(',');
+      
+      if (originalPerms !== currentPerms) {
+        await updatePermissionsMutation.mutateAsync({
+          roleId: role.id,
+          permissionIds: localPermissions[role.id] || [],
+        });
       }
     }
   };
@@ -211,21 +192,28 @@ export function PermissionsTab() {
     });
   };
 
+  const filteredCategories = data?.permissionsByCategory 
+    ? Object.entries(data.permissionsByCategory).reduce((acc, [category, permissions]) => {
+        if (!searchQuery) {
+          acc[category] = permissions;
+          return acc;
+        }
+        const filtered = permissions.filter(p => 
+          p.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          getCategoryLabel(category).toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        if (filtered.length > 0) {
+          acc[category] = filtered;
+        }
+        return acc;
+      }, {} as Record<string, Permission[]>)
+    : {};
+
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-48" />
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="space-y-2">
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-          </div>
-          <div className="lg:col-span-3 space-y-4">
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
-          </div>
-        </div>
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full max-w-sm" />
+        <Skeleton className="h-[400px] w-full" />
       </div>
     );
   }
@@ -240,211 +228,182 @@ export function PermissionsTab() {
     );
   }
 
-  const currentPermissions = selectedRoleId ? (localPermissions[selectedRoleId] || []) : [];
+  const roles = data?.roles || [];
 
   return (
-    <div className="space-y-6" data-testid="permissions-tab">
-      <Alert>
-        <Shield className="h-4 w-4" />
-        <AlertTitle>Gestión de permisos</AlertTitle>
-        <AlertDescription>
-          Los cambios de permisos afectan a todos los miembros con el rol seleccionado.
-        </AlertDescription>
-      </Alert>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">Roles</h3>
-          {data?.roles?.map((role) => {
-            const isSelected = role.id === selectedRoleId;
-            const roleIsAdmin = isAdminRole(role.name);
-            
-            return (
-              <Card
-                key={role.id}
-                className={cn(
-                  "cursor-pointer transition-all hover:border-primary/50",
-                  isSelected && "border-primary bg-primary/5"
-                )}
-                onClick={() => handleRoleSelect(role.id)}
-                data-testid={`role-card-${role.id}`}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "p-2 rounded-lg",
-                      roleIsAdmin ? "bg-amber-500/10" : "bg-muted"
-                    )}>
-                      {roleIsAdmin ? (
-                        <ShieldAlert className="h-4 w-4 text-amber-500" />
-                      ) : (
-                        <Shield className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{role.name}</p>
-                      {role.description && (
-                        <p className="text-xs text-muted-foreground truncate">
-                          {role.description}
-                        </p>
-                      )}
-                    </div>
-                    {isSelected && (
-                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+    <div className="space-y-4" data-testid="permissions-tab">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar permiso..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+            data-testid="input-search-permissions"
+          />
         </div>
+        
+        {hasChanges && canManageRoles && (
+          <Button
+            onClick={handleSaveAll}
+            disabled={updatePermissionsMutation.isPending}
+            data-testid="button-save-permissions"
+          >
+            {updatePermissionsMutation.isPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            Guardar cambios
+          </Button>
+        )}
+      </div>
 
-        <div className="lg:col-span-3 space-y-4">
-          {selectedRole && (
-            <>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold">
-                    Permisos de {selectedRole.name}
-                  </h3>
-                  {isAdmin && (
-                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                      <Lock className="h-3 w-3" />
-                      Este rol tiene acceso total por defecto
-                    </p>
-                  )}
-                </div>
-                {!isAdmin && hasChanges && canManageRoles && (
-                  <Button
-                    onClick={handleSave}
-                    disabled={updatePermissionsMutation.isPending}
-                    data-testid="button-save-permissions"
-                  >
-                    {updatePermissionsMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Save className="h-4 w-4 mr-2" />
-                    )}
-                    Guardar cambios
-                  </Button>
-                )}
-              </div>
+      {!canManageRoles && (
+        <Alert>
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            No tienes permisos para modificar los roles. Los cambios están deshabilitados.
+          </AlertDescription>
+        </Alert>
+      )}
 
-              {isAdmin && (
-                <Alert className="bg-amber-500/10 border-amber-500/20">
-                  <ShieldAlert className="h-4 w-4 text-amber-500" />
-                  <AlertDescription className="text-amber-700 dark:text-amber-400">
-                    El rol Administrador tiene todos los permisos habilitados y no se puede modificar.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {!canManageRoles && !isAdmin && (
-                <Alert>
-                  <Lock className="h-4 w-4" />
-                  <AlertDescription>
-                    No tienes permisos para modificar los roles. Contacta a un administrador.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <div className="space-y-3">
-                {Object.entries(data?.permissionsByCategory || {}).map(([category, permissions]) => {
+      <div className="border rounded-lg overflow-hidden">
+        <ScrollArea className="w-full">
+          <div className="min-w-[800px]">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-muted/50 border-b">
+                  <th className="text-left p-3 font-medium text-sm text-muted-foreground w-[300px] sticky left-0 bg-muted/50 z-10">
+                    Permiso
+                  </th>
+                  {roles.map((role) => (
+                    <th 
+                      key={role.id} 
+                      className="text-center p-3 font-medium text-sm min-w-[120px]"
+                    >
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                          Rol
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          {isAdminRole(role.name) ? (
+                            <ShieldAlert className="h-3.5 w-3.5 text-amber-500" />
+                          ) : (
+                            <Shield className="h-3.5 w-3.5 text-muted-foreground" />
+                          )}
+                          <span className={cn(
+                            "text-sm",
+                            isAdminRole(role.name) && "text-amber-600 dark:text-amber-400"
+                          )}>
+                            {role.name}
+                          </span>
+                        </div>
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(filteredCategories).map(([category, permissions]) => {
                   const isExpanded = expandedCategories.has(category);
-                  const selectedCount = permissions.filter(p => 
-                    isAdmin || currentPermissions.includes(p.id)
-                  ).length;
-                  const allSelected = selectedCount === permissions.length;
-                  const someSelected = selectedCount > 0 && selectedCount < permissions.length;
-
+                  
                   return (
-                    <Card key={category} data-testid={`category-card-${category}`}>
-                      <Collapsible open={isExpanded} onOpenChange={() => toggleCategory(category)}>
-                        <CardHeader className="py-3 px-4">
-                          <div className="flex items-center justify-between">
-                            <CollapsibleTrigger asChild>
-                              <div className="flex items-center gap-3 cursor-pointer flex-1">
-                                {isExpanded ? (
-                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                                ) : (
-                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                                )}
-                                <CardTitle className="text-sm font-medium">
-                                  {getCategoryLabel(category)}
-                                </CardTitle>
-                                <Badge variant="secondary" className="text-xs">
-                                  {selectedCount}/{permissions.length}
-                                </Badge>
-                              </div>
-                            </CollapsibleTrigger>
-                            {!isAdmin && canManageRoles && (
-                              <div className="flex items-center gap-2">
+                    <Fragment key={category}>
+                      <tr
+                        className="bg-muted/30 border-b cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => toggleCategory(category)}
+                        data-testid={`category-row-${category}`}
+                      >
+                        <td className="p-3 sticky left-0 bg-muted/30 z-10">
+                          <div className="flex items-center gap-2">
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            )}
+                            <span className="font-medium text-sm">
+                              {getCategoryLabel(category)}
+                            </span>
+                            <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                              {permissions.length}
+                            </span>
+                          </div>
+                        </td>
+                        {roles.map((role) => {
+                          const rolePerms = localPermissions[role.id] || [];
+                          const categoryPermIds = permissions.map(p => p.id);
+                          const selectedCount = categoryPermIds.filter(id => 
+                            isAdminRole(role.name) || rolePerms.includes(id)
+                          ).length;
+                          const allSelected = selectedCount === permissions.length;
+                          const someSelected = selectedCount > 0 && selectedCount < permissions.length;
+                          const isAdmin = isAdminRole(role.name);
+
+                          return (
+                            <td 
+                              key={role.id} 
+                              className="text-center p-3"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="flex justify-center">
                                 <Checkbox
                                   checked={allSelected}
-                                  onCheckedChange={() => handleCategoryToggle(category, permissions)}
-                                  className={cn(someSelected && "opacity-50")}
-                                  data-testid={`checkbox-category-${category}`}
+                                  disabled={isAdmin || !canManageRoles}
+                                  onCheckedChange={() => handleCategoryToggle(role.id, category, permissions)}
+                                  className={cn(
+                                    someSelected && "opacity-50",
+                                    isAdmin && "opacity-60"
+                                  )}
+                                  data-testid={`checkbox-category-${category}-role-${role.id}`}
                                 />
-                                <span className="text-xs text-muted-foreground">
-                                  Todos
-                                </span>
                               </div>
-                            )}
-                          </div>
-                        </CardHeader>
-                        <CollapsibleContent>
-                          <Separator />
-                          <CardContent className="py-3 px-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              {permissions.map((permission) => {
-                                const isChecked = isAdmin || currentPermissions.includes(permission.id);
-                                
-                                return (
-                                  <div
-                                    key={permission.id}
-                                    className={cn(
-                                      "flex items-start gap-3 p-3 rounded-lg border transition-colors",
-                                      (isAdmin || !canManageRoles) ? "opacity-60 bg-muted/30" : "hover:bg-muted/50",
-                                      isChecked && !isAdmin && canManageRoles && "border-primary/30 bg-primary/5"
-                                    )}
-                                    data-testid={`permission-item-${permission.id}`}
-                                  >
-                                    <Checkbox
-                                      id={permission.id}
-                                      checked={isChecked}
-                                      disabled={isAdmin || !canManageRoles}
-                                      onCheckedChange={() => handlePermissionToggle(permission.id)}
-                                      className="mt-0.5"
-                                      data-testid={`checkbox-permission-${permission.id}`}
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                      <label
-                                        htmlFor={permission.id}
-                                        className={cn(
-                                          "text-sm font-medium cursor-pointer block",
-                                          (isAdmin || !canManageRoles) && "cursor-default"
-                                        )}
-                                      >
-                                        {permission.key.split('.').pop()?.replace(/_/g, ' ')}
-                                      </label>
-                                      <p className="text-xs text-muted-foreground mt-0.5">
-                                        {permission.description}
-                                      </p>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </CardContent>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    </Card>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                      
+                      {isExpanded && permissions.map((permission) => (
+                        <tr 
+                          key={permission.id}
+                          className="border-b hover:bg-muted/20 transition-colors"
+                          data-testid={`permission-row-${permission.id}`}
+                        >
+                          <td className="p-3 pl-10 sticky left-0 bg-background z-10">
+                            <span className="text-sm text-muted-foreground">
+                              {getPermissionLabel(permission.key)}
+                            </span>
+                          </td>
+                          {roles.map((role) => {
+                            const isAdmin = isAdminRole(role.name);
+                            const rolePerms = localPermissions[role.id] || [];
+                            const isChecked = isAdmin || rolePerms.includes(permission.id);
+
+                            return (
+                              <td key={role.id} className="text-center p-3">
+                                <div className="flex justify-center">
+                                  <Checkbox
+                                    checked={isChecked}
+                                    disabled={isAdmin || !canManageRoles}
+                                    onCheckedChange={() => handlePermissionToggle(role.id, permission.id)}
+                                    className={cn(isAdmin && "opacity-60")}
+                                    data-testid={`checkbox-permission-${permission.id}-role-${role.id}`}
+                                  />
+                                </div>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </Fragment>
                   );
                 })}
-              </div>
-            </>
-          )}
-        </div>
+              </tbody>
+            </table>
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </div>
     </div>
   );
