@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Permission {
   id: string;
@@ -37,21 +36,46 @@ interface RolesPermissionsData {
 
 const CATEGORY_LABELS: Record<string, string> = {
   'projects': 'Proyectos',
+  'project': 'Proyectos',
   'members': 'Miembros',
+  'member': 'Miembros',
   'finances': 'Finanzas',
+  'finance': 'Finanzas',
+  'financial': 'Finanzas',
   'clients': 'Clientes',
+  'client': 'Clientes',
   'contacts': 'Contactos',
+  'contact': 'Contactos',
   'materials': 'Materiales',
+  'material': 'Materiales',
   'personnel': 'Personal',
   'subcontracts': 'Subcontratos',
+  'subcontract': 'Subcontratos',
   'sitelog': 'Bitácora',
+  'site_log': 'Bitácora',
+  'site-log': 'Bitácora',
   'media': 'Media',
   'settings': 'Configuración',
+  'setting': 'Configuración',
   'organization': 'Organización',
+  'organizations': 'Organización',
+  'org': 'Organización',
   'roles': 'Roles',
+  'role': 'Roles',
   'capital': 'Capital',
   'budgets': 'Presupuestos',
+  'budget': 'Presupuestos',
   'analysis': 'Análisis',
+  'analytics': 'Análisis',
+  'general': 'General',
+  'admin': 'Administración',
+  'administration': 'Administración',
+  'learning': 'Capacitaciones',
+  'courses': 'Cursos',
+  'payments': 'Pagos',
+  'payment': 'Pagos',
+  'subscriptions': 'Suscripciones',
+  'subscription': 'Suscripciones',
 };
 
 const PERMISSION_LABELS: Record<string, { label: string; description: string }> = {
@@ -113,7 +137,14 @@ const PERMISSION_LABELS: Record<string, { label: string; description: string }> 
 };
 
 function getCategoryLabel(category: string): string {
-  return CATEGORY_LABELS[category.toLowerCase()] || category;
+  const normalized = category.toLowerCase().replace(/[-_]/g, '');
+  if (CATEGORY_LABELS[category.toLowerCase()]) {
+    return CATEGORY_LABELS[category.toLowerCase()];
+  }
+  if (CATEGORY_LABELS[normalized]) {
+    return CATEGORY_LABELS[normalized];
+  }
+  return category.charAt(0).toUpperCase() + category.slice(1).replace(/[-_]/g, ' ');
 }
 
 function isAdminRole(roleName: string): boolean {
@@ -321,8 +352,7 @@ export function PermissionsTab() {
       <div className="border rounded-lg overflow-hidden">
         <ScrollArea className="w-full">
           <div className="min-w-[800px]">
-            <TooltipProvider>
-              <table className="w-full">
+            <table className="w-full">
                 <thead>
                   <tr className="bg-muted/50 border-b">
                     <th className="text-left p-3 font-medium text-sm text-muted-foreground w-[300px] sticky left-0 bg-muted/50 z-10">
@@ -425,22 +455,16 @@ export function PermissionsTab() {
                               data-testid={`permission-row-${permission.id}`}
                             >
                               <td className="p-3 pl-10 sticky left-0 bg-background z-10">
-                                {description ? (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <span className="text-sm text-muted-foreground cursor-help border-b border-dotted border-muted-foreground/50">
-                                        {permInfo.label}
-                                      </span>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="right" className="max-w-[250px]">
-                                      <p className="text-xs">{description}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                ) : (
-                                  <span className="text-sm text-muted-foreground">
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium">
                                     {permInfo.label}
                                   </span>
-                                )}
+                                  {description && (
+                                    <span className="text-xs text-muted-foreground mt-0.5">
+                                      {description}
+                                    </span>
+                                  )}
+                                </div>
                               </td>
                               {roles.map((role) => {
                                 const isAdmin = isAdminRole(role.name);
@@ -469,7 +493,6 @@ export function PermissionsTab() {
                   })}
                 </tbody>
               </table>
-            </TooltipProvider>
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
