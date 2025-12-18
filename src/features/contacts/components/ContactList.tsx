@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Users, UserCheck, Building2, Tags } from 'lucide-react';
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { Badge } from '@/components/ui/badge';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
+import { calculateCountKPI, calculatePercentageKPI } from '@/lib/kpis';
 import type { ContactWithRelations } from '@/features/contacts/types';
 
 interface ContactListProps {
@@ -32,7 +33,6 @@ export default function ContactList({
   const kpis = useMemo(() => {
     const totalContacts = contacts.length;
     const archubUsers = contacts.filter(c => c.linked_user).length;
-    
     const organizationMembers = contacts.filter(c => c.is_organization_member).length;
     
     const uniqueTypes = new Set();
@@ -45,10 +45,14 @@ export default function ContactList({
     });
     
     return {
-      total: totalContacts,
-      archubUsers,
-      organizationMembers,
-      uniqueTypes: uniqueTypes.size
+      total: calculateCountKPI({ count: totalContacts }),
+      archubUsers: calculateCountKPI({ count: archubUsers }),
+      archubUsersPercent: calculatePercentageKPI({ 
+        numerator: archubUsers, 
+        denominator: totalContacts || 1 
+      }),
+      organizationMembers: calculateCountKPI({ count: organizationMembers }),
+      uniqueTypes: calculateCountKPI({ count: uniqueTypes.size })
     };
   }, [contacts]);
   
@@ -143,32 +147,39 @@ export default function ContactList({
   
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard>
-          <StatCardTitle>Total Contactos</StatCardTitle>
-          <StatCardValue>{kpis.total}</StatCardValue>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard data-testid="kpi-total-contacts">
+          <StatCardTitle>
+            <Users className="h-4 w-4" />
+            Total Contactos
+          </StatCardTitle>
+          <StatCardValue>{kpis.total.formatted}</StatCardValue>
         </StatCard>
         
-        <StatCard>
-          <StatCardTitle>Usuarios Archub</StatCardTitle>
-          <StatCardValue>{kpis.archubUsers}</StatCardValue>
-          <StatCardMeta>
-            {kpis.total > 0 
-              ? `${Math.round((kpis.archubUsers / kpis.total) * 100)}% del total`
-              : '0% del total'
-            }
-          </StatCardMeta>
+        <StatCard data-testid="kpi-archub-users">
+          <StatCardTitle>
+            <UserCheck className="h-4 w-4" />
+            Usuarios Archub
+          </StatCardTitle>
+          <StatCardValue>{kpis.archubUsers.formatted}</StatCardValue>
+          <StatCardMeta>{kpis.archubUsersPercent.formatted} del total</StatCardMeta>
         </StatCard>
         
-        <StatCard>
-          <StatCardTitle>Miembros</StatCardTitle>
-          <StatCardValue>{kpis.organizationMembers}</StatCardValue>
+        <StatCard data-testid="kpi-organization-members">
+          <StatCardTitle>
+            <Building2 className="h-4 w-4" />
+            Miembros
+          </StatCardTitle>
+          <StatCardValue>{kpis.organizationMembers.formatted}</StatCardValue>
           <StatCardMeta>En la organización</StatCardMeta>
         </StatCard>
         
-        <StatCard>
-          <StatCardTitle>Tipos Únicos</StatCardTitle>
-          <StatCardValue>{kpis.uniqueTypes}</StatCardValue>
+        <StatCard data-testid="kpi-unique-types">
+          <StatCardTitle>
+            <Tags className="h-4 w-4" />
+            Tipos Únicos
+          </StatCardTitle>
+          <StatCardValue>{kpis.uniqueTypes.formatted}</StatCardValue>
           <StatCardMeta>Categorías diferentes</StatCardMeta>
         </StatCard>
       </div>
