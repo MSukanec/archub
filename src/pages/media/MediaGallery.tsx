@@ -78,11 +78,12 @@ export function MediaGallery() {
     }
 
     openModal('delete-confirmation', {
-      mode: 'simple',
+      mode: 'delete',
       title: 'Eliminar archivo',
-      description: `¿Estás seguro de que deseas eliminar "${file.file_name}"? Esta acción no se puede deshacer.`,
+      description: `¿Estás seguro de que deseas eliminar "${file.file_name}"?`,
+      itemName: file.file_name,
       destructiveActionText: 'Eliminar archivo',
-      onConfirm: () => {
+      onDelete: () => {
         deleteFileMutation.mutate(linkId, {
           onSuccess: () => {
             toast({
