@@ -277,13 +277,13 @@ const AdminAdminOrganizations = () => {
     {
       key: 'last_activity',
       label: 'Activo',
-      width: '20%',
+      type: 'status' as const,
       render: (org: Organization) => <LastActivityCell lastSeen={org.last_seen_at} />
     },
     {
       key: 'name',
       label: 'Organización',
-      width: '20%',
+      type: 'long-text' as const,
       render: (org: Organization) => {
         let logoUrl = org.logo_url || undefined;
         if (org.image_bucket && org.image_path && supabase) {
@@ -306,7 +306,7 @@ const AdminAdminOrganizations = () => {
     {
       key: 'plan',
       label: 'Plan',
-      width: '20%',
+      type: 'badge' as const,
       render: (org: Organization) => {
         const planName = org.plan?.name || 'Sin plan';
         let planColorVar = '--plan-free-bg';
@@ -334,7 +334,7 @@ const AdminAdminOrganizations = () => {
     {
       key: 'members',
       label: 'Miembros',
-      width: '20%',
+      type: 'number' as const,
       render: (org: Organization) => (
         <span className="text-sm">{org.members_count}</span>
       ),
@@ -342,7 +342,7 @@ const AdminAdminOrganizations = () => {
     {
       key: 'status',
       label: 'Estado',
-      width: '20%',
+      type: 'status' as const,
       render: (org: Organization) => (
         <Badge variant="default">
           {org.is_active ? 'Activa' : 'Inactiva'}

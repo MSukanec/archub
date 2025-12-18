@@ -221,13 +221,13 @@ const AdminAdminUsers = () => {
     {
       key: 'last_activity',
       label: 'Activo',
-      width: '20%',
+      type: 'status' as const,
       render: (user: User) => <LastActivityCell lastSeen={user.last_seen_at} />
     },
     {
       key: 'full_name',
       label: 'Usuario',
-      width: '20%',
+      type: 'name' as const,
       render: (user: User) => (
         <IdentityBadge
           name={user.full_name || 'Sin nombre'}
@@ -240,7 +240,7 @@ const AdminAdminUsers = () => {
     {
       key: 'organizations_count',
       label: 'Orgs',
-      width: '20%',
+      type: 'number' as const,
       render: (user: User) => (
         <span className="text-sm">{user.organizations_count}</span>
       )
@@ -248,7 +248,7 @@ const AdminAdminUsers = () => {
     {
       key: 'created_at',
       label: 'Registro',
-      width: '20%',
+      type: 'date' as const,
       render: (user: User) => (
         <span className="text-sm text-muted-foreground">
           {format(new Date(user.created_at), 'dd/MM/yy', { locale: es })}
@@ -258,7 +258,7 @@ const AdminAdminUsers = () => {
     {
       key: 'acquisition',
       label: 'Origen',
-      width: '20%',
+      type: 'long-text' as const,
       render: (user: User) => (
         <span className="text-sm text-muted-foreground">
           {formatAcquisitionOrigin(user.acquisition || null)}

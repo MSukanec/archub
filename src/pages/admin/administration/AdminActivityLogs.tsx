@@ -35,7 +35,7 @@ export default function AdminActivityLogs() {
     {
       key: 'created_at',
       label: 'Fecha',
-      width: '20%',
+      type: 'date' as const,
       render: (activity: AdminActivityLog) => (
         <div className="flex flex-col">
           <span className="text-sm font-medium">
@@ -55,7 +55,7 @@ export default function AdminActivityLogs() {
     {
       key: 'user',
       label: 'Usuario',
-      width: '20%',
+      type: 'name' as const,
       render: (activity: AdminActivityLog) => (
         <IdentityBadge
           name={activity.user?.full_name || 'Usuario'}
@@ -70,7 +70,7 @@ export default function AdminActivityLogs() {
     {
       key: 'organization',
       label: 'Organización',
-      width: '20%',
+      type: 'name' as const,
       render: (activity: AdminActivityLog) => (
         <span className="text-sm truncate">
           {activity.organization?.name || 'Sin organización'}
@@ -82,7 +82,7 @@ export default function AdminActivityLogs() {
     {
       key: 'action',
       label: 'Acción',
-      width: '20%',
+      type: 'badge' as const,
       render: (activity: AdminActivityLog) => {
         const displayInfo = getActivityDisplayInfo(activity as any);
         return (
@@ -97,7 +97,7 @@ export default function AdminActivityLogs() {
     {
       key: 'description',
       label: 'Detalle',
-      width: '20%',
+      type: 'long-text' as const,
       render: (activity: AdminActivityLog) => {
         const displayInfo = getActivityDisplayInfo(activity as any);
         return (
