@@ -18,6 +18,10 @@ import {
 } from '../controllers/organization/clientPayments.controller.js';
 import { handleGetOrganizationUsageStats } from '../lib/handlers/organization/getOrganizationUsageStats.js';
 import { handleGetOrganizationRoles } from '../controllers/organization/roles.controller.js';
+import { 
+  handleGetRolesWithPermissions, 
+  handleUpdateRolePermissions 
+} from '../controllers/organization/permissions.controller.js';
 
 /**
  * Register organization-related endpoints (members, invitations, profile, clients)
@@ -27,6 +31,14 @@ export function registerOrganizationRoutes(app: Express, deps: RouteDeps): void 
   
   // GET /api/roles - Get roles for an organization (query param: organizationId)
   app.get("/api/roles", handleGetOrganizationRoles);
+
+  // ========== ORGANIZATION - PERMISSIONS ENDPOINTS ==========
+  
+  // GET /api/organizations/:organizationId/roles-permissions - Get roles with their permissions
+  app.get("/api/organizations/:organizationId/roles-permissions", handleGetRolesWithPermissions);
+  
+  // PUT /api/roles/:roleId/permissions - Update permissions for a role
+  app.put("/api/roles/:roleId/permissions", handleUpdateRolePermissions);
 
   // ========== ORGANIZATION - MEMBERS ENDPOINTS ==========
   

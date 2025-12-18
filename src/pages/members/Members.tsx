@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { MembersListTab } from '@/pages/members/tabs/MembersListTab';
-import { Users, UserPlus, Search, Filter, Bell } from 'lucide-react';
+import { PermissionsTab } from '@/pages/members/tabs/PermissionsTab';
+import { Users, UserPlus, Search, Filter, Bell, Shield } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -75,13 +76,16 @@ export default function Members() {
   }, [isMobile, openModal, organizationMembers.length, setActions, setShowActionBar, clearActions]);
 
   const tabs = [
-    { id: 'list', label: 'Lista', isActive: activeTab === 'list' }
+    { id: 'list', label: 'Lista', isActive: activeTab === 'list' },
+    { id: 'permissions', label: 'Permisos', isActive: activeTab === 'permissions' }
   ];
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'list':
         return <MembersListTab />;
+      case 'permissions':
+        return <PermissionsTab />;
       default:
         return <MembersListTab />;
     }
