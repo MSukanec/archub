@@ -12,7 +12,8 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
 import { useGlobalModalStore } from '@/components/modal'
 import { EmptyState } from '@/components/ui-custom/security/EmptyState'
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { Table } from '@/components/shared/table'
+import type { Column } from '@/components/shared/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { PlanRestricted } from '@/features/users'
@@ -314,33 +315,30 @@ export default function ProjectList() {
   }
 
   // Format status badge
-  const getStatusBadge = (status: string) => {
+  const getStatusText = (status: string) => {
     const statusConfig = {
-      'active': { color: 'var(--accent)', text: 'En proceso' },
-      'inactive': { color: '#6b7280', text: 'Inactivo' },
-      'completed': { color: 'var(--main-sidebar-bg)', text: 'Completado' },
-      'paused': { color: '#f59e0b', text: 'Pausado' },
-      'cancelled': { color: '#ef4444', text: 'Cancelado' },
-      'planning': { color: '#3b82f6', text: 'Planificación' }
+      'active': 'En proceso',
+      'inactive': 'Inactivo',
+      'completed': 'Completado',
+      'paused': 'Pausado',
+      'cancelled': 'Cancelado',
+      'planning': 'Planificación'
     }
-    
-    const config = statusConfig[status as keyof typeof statusConfig] || { color: '#6b7280', text: status || 'Sin estado' }
-    
-    return (
-      <Badge 
-        style={{ backgroundColor: config.color, color: 'white' }}
-        className="text-xs"
-      >
-        {config.text}
-      </Badge>
-    )
+    return statusConfig[status as keyof typeof statusConfig] || status || 'Sin estado'
   }
 
+  const getStatusBadge = (status: string) => (
+    <Badge variant="default">
+      {getStatusText(status)}
+    </Badge>
+  )
+
   // Table columns configuration
-  const columns = [
+  const columns: Column<any>[] = useMemo(() => [
     {
-      key: 'name',
+      key: 'name' as const,
       label: 'Proyecto',
+      sortable: false,
       render: (project: any) => (
         <div className="flex items-center gap-2">
           <div className="font-medium text-sm">{project.name}</div>
@@ -357,61 +355,67 @@ export default function ProjectList() {
       )
     },
     {
-      key: 'project_type',
+      key: 'project_type' as const,
       label: 'Tipo',
+      sortable: false,
       render: (project: any) => (
-        <div className="text-sm">
+        <span className="text-sm">
           {project.project_data?.project_type?.name || 'Sin especificar'}
-        </div>
+        </span>
       )
     },
     {
-      key: 'modality',
+      key: 'modality' as const,
       label: 'Modalidad',
+      sortable: false,
       render: (project: any) => (
-        <div className="text-sm">
+        <span className="text-sm">
           {project.project_data?.project_modality?.name || 'Sin especificar'}
-        </div>
+        </span>
       )
     },
     {
-      key: 'currency',
+      key: 'currency' as const,
       label: 'Moneda',
+      sortable: false,
       render: (project: any) => {
         const currency = project.currency || defaultCurrency;
         return (
-          <div className="text-sm">
+          <span className="text-sm">
             {currency?.name ? `${currency.name} (${currency.symbol})` : 'Sin especificar'}
-          </div>
+          </span>
         );
       }
     },
     {
-      key: 'status',
+      key: 'status' as const,
       label: 'Estado',
+      sortable: false,
       render: (project: any) => getStatusBadge(project.status)
     },
     {
-      key: 'created_at',
+      key: 'created_at' as const,
       label: 'Fecha de Creación',
+      sortable: false,
       render: (project: any) => (
-        <div className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground">
           {project.created_at ? format(new Date(project.created_at), 'dd/MM/yyyy', { locale: es }) : 'Sin fecha'}
-        </div>
+        </span>
       )
     },
     {
-      key: 'last_active_at',
+      key: 'last_active_at' as const,
       label: 'Última Actividad',
+      sortable: false,
       render: (project: any) => (
-        <div className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground">
           {project.last_active_at 
             ? format(new Date(project.last_active_at), 'dd/MM/yyyy HH:mm', { locale: es }) 
             : 'Nunca'}
-        </div>
+        </span>
       )
     }
-  ]
+  ], [defaultCurrency])
 
   const getProjectRowActions = (project: any) => [
     {
@@ -505,69 +509,11 @@ export default function ProjectList() {
           <Table
             data={sortedProjects}
             columns={columns}
-            isLoading={projectsLoading}
-            rowActions={getProjectRowActions}
             onRowClick={(project) => handleSelectProject(project.id)}
-            getIsInactive={(project) => project.status === 'completed'}
-            inactiveSeparatorLabel="Proyectos Completados"
-            emptyState={
-              <EmptyState
-                icon={<Folder className="w-12 h-12" />}
-                title="No hay proyectos que coincidan"
-                description="Ajusta los filtros de búsqueda para encontrar proyectos"
-              />
-            }
-            topBar={{
-              showSearch: true,
-              searchValue: searchValue,
-              onSearchChange: setSearchValue,
-              showClearFilters: searchValue !== '' || filterByProjectType !== 'all' || filterByModality !== 'all' || filterByStatus !== 'all',
-              onClearFilters: handleClearFilters,
-              showFilter: true,
-              renderFilterContent: () => (
-                <div className="space-y-4 w-72">
-                  <div className="space-y-2">
-                    <label className="text-xs font-medium">Tipo de Proyecto</label>
-                    <select 
-                      value={filterByProjectType} 
-                      onChange={(e) => setFilterByProjectType(e.target.value)}
-                      className="w-full h-8 px-2 text-xs border rounded"
-                    >
-                      <option value="all">Todos los tipos</option>
-                      {availableProjectTypes.map(type => (
-                        <option key={type} value={type}>{type}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-medium">Modalidad</label>
-                    <select 
-                      value={filterByModality} 
-                      onChange={(e) => setFilterByModality(e.target.value)}
-                      className="w-full h-8 px-2 text-xs border rounded"
-                    >
-                      <option value="all">Todas las modalidades</option>
-                      {availableModalities.map(modality => (
-                        <option key={modality} value={modality}>{modality}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-medium">Estado</label>
-                    <select 
-                      value={filterByStatus} 
-                      onChange={(e) => setFilterByStatus(e.target.value)}
-                      className="w-full h-8 px-2 text-xs border rounded"
-                    >
-                      <option value="all">Todos los estados</option>
-                      {availableStatuses.map(status => (
-                        <option key={status.value} value={status.value}>{status.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              ),
-              isFilterActive: filterByProjectType !== 'all' || filterByModality !== 'all' || filterByStatus !== 'all'
+            rowActions={getProjectRowActions}
+            emptyStateConfig={{
+              title: "No hay proyectos que coincidan",
+              description: "Ajusta los filtros de búsqueda para encontrar proyectos"
             }}
           />
         )
