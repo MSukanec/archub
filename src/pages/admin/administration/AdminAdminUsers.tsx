@@ -49,7 +49,7 @@ interface User {
   } | null
 }
 
-// Componente para mostrar la última actividad
+// Componente para mostrar la última actividad (simplificado: solo badge y punto)
 function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
   const [tick, setTick] = useState(0);
 
@@ -58,8 +58,8 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
     return () => clearInterval(interval);
   }, []);
 
-  const { label, isOnline, tooltip } = useMemo(() => {
-    if (!lastSeen) return { label: '—', isOnline: false, tooltip: 'Sin registro' };
+  const { isOnline, tooltip } = useMemo(() => {
+    if (!lastSeen) return { isOnline: false, tooltip: 'Sin registro' };
     
     const lastSeenTime = new Date(lastSeen).getTime();
     const now = Date.now();
@@ -67,48 +67,18 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
     
     // Activo si está dentro de 90 segundos
     if (diffMs <= 90_000) {
-      return { label: 'Activo ahora', isOnline: true, tooltip: format(new Date(lastSeen), 'dd/MM/yyyy HH:mm:ss', { locale: es }) };
-    }
-    
-    // Tiempo relativo
-    const diffSec = Math.floor(diffMs / 1000);
-    const diffMin = Math.floor(diffSec / 60);
-    const diffHr = Math.floor(diffMin / 60);
-    const diffDays = Math.floor(diffHr / 24);
-    
-    let relativeLabel = '';
-    if (diffDays >= 1) {
-      relativeLabel = `hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
-    } else if (diffHr >= 1) {
-      relativeLabel = `hace ${diffHr} h`;
-    } else if (diffMin >= 1) {
-      relativeLabel = `hace ${diffMin} min`;
-    } else {
-      relativeLabel = `hace ${diffSec} s`;
+      return { isOnline: true, tooltip: format(new Date(lastSeen), 'dd/MM/yyyy HH:mm:ss', { locale: es }) };
     }
     
     return { 
-      label: relativeLabel, 
       isOnline: false, 
       tooltip: format(new Date(lastSeen), 'dd/MM/yyyy HH:mm:ss', { locale: es })
     };
   }, [lastSeen, tick]);
 
   return (
-    <div className="flex items-center gap-2" title={tooltip}>
-      {isOnline ? (
-        <>
-          <span className="inline-block w-2 h-2 rounded-full bg-[var(--plan-free-bg)]" />
-          <Badge 
-            variant="default"
-            className="bg-[var(--plan-free-bg)] text-white hover:bg-[var(--plan-free-bg)]/90"
-          >
-            {label}
-          </Badge>
-        </>
-      ) : (
-        <span className="text-sm text-muted-foreground">{label}</span>
-      )}
+    <div className="flex items-center" title={tooltip}>
+      <span className={`inline-block w-2 h-2 rounded-full ${isOnline ? 'bg-[var(--plan-free-bg)]' : 'bg-muted-foreground'}`} />
     </div>
   );
 }
@@ -225,14 +195,14 @@ const AdminAdminUsers = () => {
   const columns = [
     {
       key: 'last_activity',
-      label: 'Última Actividad',
-      width: '15%',
+      label: 'Activo',
+      width: '8%',
       render: (user: User) => <LastActivityCell lastSeen={user.last_seen_at} />
     },
     {
       key: 'full_name',
       label: 'Usuario',
-      width: '25%',
+      width: '26%',
       render: (user: User) => (
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
@@ -262,7 +232,7 @@ const AdminAdminUsers = () => {
     {
       key: 'created_at',
       label: 'Registro',
-      width: '15%',
+      width: '14%',
       render: (user: User) => (
         <span className="text-xs text-muted-foreground">
           {format(new Date(user.created_at), 'dd/MM/yy', { locale: es })}

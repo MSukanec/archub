@@ -63,7 +63,7 @@ const AdminAdmin = () => {
   };
 
   return (
-    <Layout wide headerProps={headerProps}>
+    <Layout wide={false} headerProps={headerProps}>
       {renderTabContent()}
     </Layout>
   );
