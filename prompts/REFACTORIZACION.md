@@ -11,6 +11,11 @@ Este documento contiene las instrucciones para refactorizar páginas de Seencel 
 
 ### 1.2 Sistema de Anchos Semánticos
 
+**IMPORTANTE:** Cuando refactorices una tabla:
+1. Asigna un tipo semántico a TODAS las columnas (no dejar ninguna sin tipo)
+2. Los anchos se definen automáticamente según el tipo semántico
+3. Pregunta al usuario cuál columna debería ser `long-text` (ocupar ancho restante)
+
 Las columnas deben usar el sistema de **tipos semánticos** para definir su ancho automáticamente. Ver `src/components/shared/table/tableColumnTypes.ts`.
 
 **Tipos disponibles:**
@@ -37,7 +42,7 @@ Las columnas deben usar el sistema de **tipos semánticos** para definir su anch
 
 ### 1.3 Columna Flexible (`long-text`)
 
-Cuando refactorices una tabla, **siempre pregunta cuál columna debería tomar el ancho restante** (tipo `long-text`). Esta columna:
+Cuando refactorices una tabla, **SIEMPRE pregunta cuál columna debería tomar el ancho restante** (tipo `long-text`). Esta columna:
 
 - Absorbe todo el espacio sobrante de la tabla
 - Garantiza que la tabla ocupe el 100% del ancho disponible
@@ -45,7 +50,15 @@ Cuando refactorices una tabla, **siempre pregunta cuál columna debería tomar e
 
 **Ejemplo:** En la tabla de Organizaciones, la columna "Organización" usa `type: 'long-text'` para ocupar el espacio restante.
 
-### 1.4 Ejemplo de Columna con Tipo Semántico
+### 1.4 Ajuste de Anchos al Refactorizar
+
+**NUNCA dejes columnas sin tipo semántico.** Al refactorizar:
+- Revisa TODAS las columnas
+- Asigna el tipo más apropiado a cada una
+- Si una columna necesita ancho fijo personalizado, primero intenta usar un tipo semántico
+- Si no hay tipo que encaje, consulta con el usuario
+
+### 1.5 Ejemplo de Columna con Tipo Semántico
 
 ```typescript
 const columns = [
@@ -74,8 +87,58 @@ const columns = [
 
 ## 2. Badges
 
-- Usar siempre el componente `Badge.tsx` en su variante `default`.
-- **NO** hardcodear colores ni estilos.
+### 2.1 Sistema Semántico de Badges
+
+**IMPORTANTE:** Cuando refactorices una tabla con badges:
+1. Identifica TODOS los badges en esa página
+2. Refactoriza cada badge para usar el componente `Badge.tsx` con variantes semánticas
+3. Cada variante ya tiene:
+   - Color automático (100% en contenido, 10% de opacidad en fondo)
+   - Icono fijo SIEMPRE (algunos badges pueden no tener icono si se especifica)
+
+### 2.2 Variantes Disponibles
+
+Todas estas variantes están definidas en `src/components/ui/badge.tsx`:
+
+| Variante | Icono | Uso |
+|----------|-------|-----|
+| `success` | ✓ Check | Éxito, completado |
+| `error` | ✓ XCircle | Error, fallido |
+| `warning` | ✓ AlertTriangle | Advertencia |
+| `pending` | ✓ AlertCircle | Pendiente, en espera |
+| `info` | ✓ Info | Información |
+| `neutral` | ✓ AlertCircle | Neutral, sin categoría |
+| `status-active` | ✓ Play | En proceso |
+| `status-completed` | ✓ Check | Completado |
+| `status-paused` | ✓ Pause | Pausado |
+| `status-cancelled` | ✓ X | Cancelado |
+| `status-planning` | ✓ Calendar | Planificación |
+| `plan-pro` | ✓ Check | Plan Pro |
+| `plan-free` | ✓ Check | Plan Free |
+| `plan-teams` | ✓ Check | Plan Teams |
+| `plan-enterprise` | ✓ Check | Plan Enterprise |
+
+### 2.3 Badges SIN Icono
+
+Para casos especiales donde el badge NO debe tener icono:
+1. Crea una nueva variante SIN icono (ej: `type-neutral`)
+2. Define solo el color, sin icono en `variantIcons`
+3. Declara esto en el comentario de la variante
+
+**Ejemplo:** Badge de tipo de contacto sin icono (solo color):
+
+```typescript
+// En badge.tsx, si necesitas un tipo sin icono:
+type ContactType = 'client' | 'supplier' | 'partner'; // Será refactorizado como badge-type-neutral sin icono
+```
+
+### 2.4 Regla de Refactorización de Badges
+
+**Cuando refactorices una tabla o página:**
+- Busca TODOS los badges en esa página
+- Cámbia cualquier badge con color hardcodeado a una variante semántica
+- Si un badge necesita comportamiento especial, crea una nueva variante en `badge.tsx`
+- NUNCA hardcodees colores directamente en el componente Badge
 
 ---
 
@@ -106,8 +169,9 @@ Para mostrar entidades con avatar (usuarios, organizaciones), usar `src/componen
 Antes de considerar una página refactorizada, verificar:
 
 - [ ] Tabla usa `src/components/shared/table`
-- [ ] Columnas usan tipos semánticos (no `width` hardcodeado)
-- [ ] Una columna tiene `type: 'long-text'` para ancho flexible
-- [ ] Badges usan variante `default` sin colores hardcodeados
+- [ ] TODAS las columnas tienen un tipo semántico asignado
+- [ ] Una columna tiene `type: 'long-text'` para ancho flexible (confirmado con usuario)
+- [ ] Badges usan variantes semánticas de `Badge.tsx`
+- [ ] Badges en la página refactorizada no tienen colores hardcodeados
 - [ ] Header tiene ícono y descripción
 - [ ] Entidades con avatar usan `IdentityBadge`

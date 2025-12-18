@@ -50,14 +50,15 @@ const BADGE_VARIANT_MAP: Record<BadgeVariant, string> = {
 /**
  * Mapping of variants to their fixed icons
  * Each variant always displays its associated icon
+ * Use null for variants that should NOT display an icon
  */
-const variantIcons: Record<BadgeVariant, React.ReactNode> = {
+const variantIcons: Record<BadgeVariant, React.ReactNode | null> = {
   success: <CheckCircle2 className="w-3.5 h-3.5" />,
   error: <XCircle className="w-3.5 h-3.5" />,
   warning: <AlertTriangle className="w-3.5 h-3.5" />,
   pending: <AlertCircle className="w-3.5 h-3.5" />,
   info: <Info className="w-3.5 h-3.5" />,
-  neutral: <AlertCircle className="w-3.5 h-3.5" />,
+  neutral: null,
   'plan-pro': <CheckCircle2 className="w-3.5 h-3.5" />,
   'plan-free': <CheckCircle2 className="w-3.5 h-3.5" />,
   'plan-teams': <CheckCircle2 className="w-3.5 h-3.5" />,

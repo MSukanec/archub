@@ -60,6 +60,7 @@ export default function ContactList({
     {
       key: "first_name" as const,
       label: "Nombre",
+      type: 'long-text' as const,
       sortable: false,
       render: (contact: ContactWithRelations) => {
         const fullName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.linked_user?.full_name;
@@ -78,6 +79,7 @@ export default function ContactList({
     {
       key: "email" as const,
       label: "Email",
+      type: 'email' as const,
       sortable: true,
       sortType: "string" as const,
       render: (contact: ContactWithRelations) => {
@@ -99,6 +101,7 @@ export default function ContactList({
     {
       key: "phone" as const,
       label: "Teléfono",
+      type: 'short-text' as const,
       sortable: true,
       sortType: "string" as const,
       render: (contact: ContactWithRelations) => (
@@ -109,7 +112,8 @@ export default function ContactList({
     },
     {
       key: "contact_types" as const,
-      label: "Tipos",
+      label: "Tipo",
+      type: 'badge' as const,
       sortable: false,
       render: (contact: ContactWithRelations) => {
         if (!contact.contact_types || contact.contact_types.length === 0) {
@@ -119,12 +123,12 @@ export default function ContactList({
         return (
           <div className="flex flex-wrap gap-1">
             {contact.contact_types.slice(0, 2).map((type) => (
-              <Badge key={type.id} variant="default">
+              <Badge key={type.id} variant="neutral">
                 {type.name}
               </Badge>
             ))}
             {contact.contact_types.length > 2 && (
-              <Badge variant="default">
+              <Badge variant="neutral">
                 +{contact.contact_types.length - 2}
               </Badge>
             )}
@@ -135,6 +139,7 @@ export default function ContactList({
     {
       key: "company_name" as const,
       label: "Empresa",
+      type: 'short-text' as const,
       sortable: true,
       sortType: "string" as const,
       render: (contact: ContactWithRelations) => (
