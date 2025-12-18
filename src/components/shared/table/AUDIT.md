@@ -8,8 +8,8 @@
 | Líneas de código original | 1761 |
 | Nueva ubicación (MODULAR) | `src/components/shared/table/` |
 | Antigüedad estimada | +6 meses |
-| Fecha de auditoría | 2024-12-16 |
-| Estado | ✅ FASE 1 COMPLETADA - Nueva arquitectura lista |
+| Fecha de auditoría | 2024-12-18 |
+| Estado | ✅ FASE 2 COMPLETADA - Sistema de tipos semánticos de columnas |
 
 ---
 
@@ -19,9 +19,9 @@ Se ha creado una nueva arquitectura modular para el componente Table que:
 
 1. **Mantiene compatibilidad total**: El archivo original `tables-and-trees/Table.tsx` sigue funcionando sin cambios para todos los consumidores actuales
 2. **Ofrece nueva arquitectura**: Componentes modulares en `shared/table/` para uso futuro y migración gradual
-3. **ProjectBadge eliminado**: Ya no existe como componente separado - la funcionalidad de badge de proyecto está embebida en el Table.tsx legacy usando el Badge común de shadcn
+3. **Sistema de tipos semánticos**: Nuevo sistema enterprise de anchos de columna basado en tipos semánticos (Fase 2)
 4. **Centraliza utilidades**: Hooks, tipos, constantes y utilidades en archivos separados
-5. **Sistema i18n**: Nuevo sistema de internacionalización en `src/lib/i18n/` integrado con las constantes de la tabla
+5. **Sistema i18n**: Sistema de internacionalización integrado con las constantes de la tabla
 
 ---
 
@@ -31,13 +31,14 @@ Se ha creado una nueva arquitectura modular para el componente Table que:
 
 ```
 src/components/shared/table/
-├── Table.tsx                 ← Componente wrapper principal (nuevo)
+├── Table.tsx                 ← Componente wrapper principal
 ├── TableDesktop.tsx          ← Vista para pantallas desktop
 ├── TableMobile.tsx           ← Vista para pantallas móviles (cards)
 ├── TableTopBar.tsx           ← Barra superior con búsqueda, filtros, tabs
 ├── TableRow.tsx              ← Fila individual de tabla + InactiveSeparator
 ├── TableGroup.tsx            ← Grupo de filas con header colapsable
 ├── TableLoadingSkeleton.tsx  ← Skeleton de carga responsive
+├── tableColumnTypes.ts       ← 🆕 Sistema de tipos semánticos de columnas
 ├── hooks/
 │   ├── index.ts              ← Exports públicos de hooks
 │   ├── useTableSort.ts       ← Hook de ordenamiento
@@ -60,23 +61,119 @@ src/components/ui-custom/tables-and-trees/
                                  Incluye ProjectBadge como función interna
 ```
 
-### 1.3 Sistema de Internacionalización
+---
 
+## 2. SISTEMA DE TIPOS SEMÁNTICOS DE COLUMNAS (NUEVO)
+
+### 2.1 Filosofía
+
+El sistema de tipos semánticos está inspirado en las mejores prácticas de Stripe, Linear y Notion:
+
+- **Columnas estructuradas** (fecha, monto, estado) tienen ancho fijo
+- **Columna flexible** (`long-text`) ocupa el ancho restante
+- **Tablas** ocupan el 100% del ancho disponible sin desperdicio
+- **Consistencia** automática entre todas las tablas
+
+### 2.2 Tipos Disponibles (`tableColumnTypes.ts`)
+
+```typescript
+export type TableColumnType =
+  | 'date'        // 110px - Fechas simples
+  | 'datetime'    // 150px - Fecha + hora
+  | 'amount'      // 120px - Montos monetarios
+  | 'status'      // 100px - Estados/badges pequeños
+  | 'wallet'      // 140px - Billeteras/cuentas
+  | 'number'      // 80px  - Números simples
+  | 'id'          // 100px - Identificadores
+  | 'actions'     // 48px  - Columna de acciones
+  | 'name'        // 200px - Nombres de entidades
+  | 'email'       // 200px - Emails
+  | 'short-text'  // 140px - Texto corto (DEFAULT)
+  | 'medium-text' // 180px - Texto medio
+  | 'long-text'   // minmax(200px, 1fr) - FLEXIBLE
+  | 'badge'       // 120px - Badges/etiquetas
+  | 'avatar'      // 48px  - Avatares
+  | 'checkbox'    // 40px  - Checkboxes
+  | 'icon';       // 40px  - Iconos
 ```
-src/lib/i18n/
-├── index.tsx                 ← Provider, hook useI18n, contexto
-└── translations/
-    ├── es.ts                 ← Traducciones en español
-    └── en.ts                 ← Traducciones en inglés
+
+### 2.3 Mapa Central de Anchos
+
+```typescript
+export const COLUMN_TYPE_WIDTHS: Record<TableColumnType, string> = {
+  'date': '110px',
+  'datetime': '150px',
+  'amount': '120px',
+  'status': '100px',
+  'wallet': '140px',
+  'number': '80px',
+  'id': '100px',
+  'actions': '48px',
+  'name': '200px',
+  'email': '200px',
+  'short-text': '140px',
+  'medium-text': '180px',
+  'long-text': 'minmax(200px, 1fr)',  // ← FLEXIBLE
+  'badge': '120px',
+  'avatar': '48px',
+  'checkbox': '40px',
+  'icon': '40px',
+};
 ```
+
+### 2.4 Uso en Columnas
+
+```typescript
+const columns = [
+  {
+    key: 'created_at',
+    label: 'Fecha',
+    type: 'date' as const,      // ← NUEVO: tipo semántico
+    render: (item) => formatDate(item.created_at)
+  },
+  {
+    key: 'user',
+    label: 'Usuario',
+    type: 'name' as const,
+    render: (item) => <IdentityBadge name={item.name} />
+  },
+  {
+    key: 'description',
+    label: 'Descripción',
+    type: 'long-text' as const,  // ← FLEXIBLE: absorbe espacio restante
+    render: (item) => item.description
+  },
+  {
+    key: 'status',
+    label: 'Estado',
+    type: 'status' as const,
+    render: (item) => <Badge>{item.status}</Badge>
+  }
+];
+```
+
+### 2.5 Comportamiento Automático
+
+1. **CSS Grid**: El sistema genera `grid-template-columns` automáticamente
+2. **Columna flexible**: Si hay `long-text`, absorbe el espacio restante
+3. **Fallback inteligente**: Si no hay `long-text`, la última columna se vuelve flexible
+4. **Compatibilidad**: Si no se especifica `type`, usa el sistema legacy de `width`
+
+### 2.6 Reglas Importantes
+
+- ❌ NO usar `width` manual cuando se usa `type`
+- ❌ NO hardcodear px en vistas
+- ✅ El layout ocupa siempre el 100% del ancho disponible
+- ✅ Una sola columna con `long-text` por tabla (recomendado)
+- ✅ Compatible con tablas existentes (sin cambios requeridos)
 
 ---
 
-## 2. DESCRIPCIÓN DE CADA ARCHIVO
+## 3. DESCRIPCIÓN DE CADA ARCHIVO
 
-### 2.1 Componentes de Tabla (`src/components/shared/table/`)
+### 3.1 Componentes de Tabla
 
-#### `Table.tsx` (nuevo, ~260 líneas)
+#### `Table.tsx` (~260 líneas)
 **Propósito**: Wrapper principal que orquesta todos los sub-componentes.
 **Responsabilidades**:
 - Determina si mostrar vista desktop o mobile según breakpoint
@@ -87,7 +184,7 @@ src/lib/i18n/
 #### `TableDesktop.tsx`
 **Propósito**: Renderizado de tabla para pantallas grandes.
 **Responsabilidades**:
-- Renderiza `<table>` HTML con headers y filas
+- Renderiza grid con headers y filas
 - Maneja sorting al hacer click en headers
 - Renderiza columnas con sus configuraciones
 - Usa TableRow para cada fila
@@ -95,271 +192,127 @@ src/lib/i18n/
 
 #### `TableMobile.tsx`
 **Propósito**: Renderizado de tabla como cards para móviles.
-**Responsabilidades**:
-- Transforma filas en cards verticales
-- Muestra campos configurados como "mobile visible"
-- Mantiene funcionalidad de selección y acciones
 
 #### `TableTopBar.tsx`
 **Propósito**: Barra superior de la tabla.
-**Responsabilidades**:
-- Input de búsqueda (interna o controlada externamente)
-- Tabs de filtrado rápido
-- Dropdowns de filtros adicionales
-- Contador de selección y botón de acción masiva
-- Botón de "nuevo" elemento
 
 #### `TableRow.tsx`
 **Propósito**: Fila individual de la tabla.
-**Responsabilidades**:
-- Renderiza celdas según configuración de columnas
-- Checkbox de selección (si habilitado)
-- Menú de acciones (dropdown con editar, eliminar, etc.)
-- Estilos de fila activa/inactiva
-- InactiveSeparator: línea visual que separa items activos de inactivos
 
 #### `TableGroup.tsx`
 **Propósito**: Grupo de filas con header colapsable.
-**Responsabilidades**:
-- Header de grupo con nombre y contador
-- Funcionalidad de colapsar/expandir
-- Renderiza TableRow para cada item del grupo
 
 #### `TableLoadingSkeleton.tsx`
 **Propósito**: Estado de carga de la tabla.
-**Responsabilidades**:
-- Skeleton animado responsive
-- Muestra número configurable de filas ficticias
-- Se adapta a desktop/mobile
 
-### 2.2 Hooks (`src/components/shared/table/hooks/`)
+### 3.2 Sistema de Tipos Semánticos
+
+#### `tableColumnTypes.ts` (NUEVO)
+**Propósito**: Single source of truth para anchos de columnas.
+**Contenido**:
+- `TableColumnType`: Union type con todos los tipos disponibles
+- `COLUMN_TYPE_WIDTHS`: Mapa de tipo → ancho CSS
+- `DEFAULT_COLUMN_TYPE`: Tipo por defecto ('short-text')
+- `getColumnWidth()`: Obtiene ancho para un tipo
+- `buildGridTemplateColumns()`: Genera grid-template-columns
+
+### 3.3 Hooks
 
 #### `useTableSort.ts`
 **Propósito**: Manejo de ordenamiento de columnas.
-**API**:
-```typescript
-const { sortKey, sortDirection, handleSort, resetSort } = useTableSort({
-  initialSortKey: 'name',
-  initialSortDirection: 'asc'
-});
-```
-**Características**:
-- Soporta tipos: string, number, date
-- Direcciones: 'asc', 'desc', null (sin ordenar)
-- Estado inicial configurable
 
 #### `useTableFilter.ts`
 **Propósito**: Manejo de filtrado y búsqueda.
-**API**:
-```typescript
-const { 
-  searchTerm, 
-  setSearchTerm, 
-  activeFilters, 
-  setFilter, 
-  clearFilters 
-} = useTableFilter({
-  externalSearchTerm,
-  onSearchChange
-});
-```
-**Características**:
-- Búsqueda interna o controlada externamente
-- Filtros múltiples por key-value
-- Limpieza de todos los filtros
 
 #### `useTablePagination.ts`
 **Propósito**: Manejo de paginación.
-**API**:
-```typescript
-const { 
-  currentPage, 
-  totalPages, 
-  paginatedItems, 
-  goToPage, 
-  nextPage, 
-  prevPage 
-} = useTablePagination({
-  items,
-  pageSize: 100
-});
-```
-**Características**:
-- Tamaño de página configurable (default: 100)
-- Navegación: next, prev, first, last, goToPage
-- Cálculo automático de páginas
 
 #### `useTableSelection.ts`
 **Propósito**: Manejo de selección múltiple.
-**API**:
-```typescript
-const { 
-  selectedItems, 
-  toggleItem, 
-  toggleAll, 
-  clearSelection, 
-  isSelected, 
-  isAllSelected 
-} = useTableSelection({
-  items,
-  selectedItems: externalSelectedItems,
-  onSelectionChange
-});
-```
-**Características**:
-- **Modo controlado**: Si se provee `onSelectionChange`, usa estado externo
-- **Modo no controlado**: Si no hay handler, mantiene estado interno
-- Selección individual y de página completa
 
-### 2.3 Archivos de Soporte
+### 3.4 Archivos de Soporte
 
 #### `types.ts`
 **Propósito**: Definiciones TypeScript para todo el sistema de tabla.
-**Contenido**:
-- `TableColumn<T>`: Configuración de columna
-- `TableProps<T>`: Props del componente Table
-- `RowAction<T>`: Configuración de acciones por fila
-- `FilterOption`: Opciones de filtrado
-- `TabConfig`: Configuración de tabs
-- Tipos auxiliares para sorting, pagination, etc.
+**Cambios Fase 2**:
+- Propiedad `type?: TableColumnType` añadida a `Column<T>`
+- Propiedad `width` marcada como `@deprecated`
 
 #### `utils.ts`
 **Propósito**: Funciones utilitarias puras.
-**Contenido**:
-- `sortItems()`: Ordenar array por key y dirección
-- `filterItems()`: Filtrar array por término de búsqueda
-- `groupItems()`: Agrupar items por key
-- `getNestedValue()`: Acceder a propiedades anidadas (ej: "user.name")
+**Cambios Fase 2**:
+- `getGridTemplateColumns()` detecta tipos semánticos automáticamente
+- Si hay tipos semánticos → usa `buildGridTemplateColumns()`
+- Si no hay tipos → usa sistema legacy de `width`
 
 #### `constants.ts`
 **Propósito**: Constantes y labels de UI.
-**Contenido**:
-- `TABLE_LABELS`: Labels por defecto en español
-- `getTableLabels(locale)`: Función que retorna labels según idioma
-- Integración con sistema i18n de `src/lib/i18n/`
 
 #### `index.ts`
 **Propósito**: Exports públicos del módulo.
-**Contenido**:
-```typescript
-export { Table } from './Table';
-export { TableDesktop } from './TableDesktop';
-export { TableMobile } from './TableMobile';
-// ... todos los componentes y hooks
-```
-
-### 2.4 Sistema i18n (`src/lib/i18n/`)
-
-#### `index.tsx`
-**Propósito**: Provider y hook de internacionalización.
-**Contenido**:
-- `I18nProvider`: Contexto React que envuelve la app
-- `useI18n()`: Hook para acceder a traducciones y cambiar idioma
-- Persistencia en localStorage
-- Detección automática del idioma del navegador
-
-**API**:
-```typescript
-const { locale, setLocale, t } = useI18n();
-
-// Cambiar idioma
-setLocale('en');
-
-// Acceder a traducción
-t('table.search'); // "Buscar..." o "Search..."
-```
-
-#### `translations/es.ts`
-**Propósito**: Traducciones en español.
-**Contenido**: Objeto con todas las strings de UI en español.
-
-#### `translations/en.ts`
-**Propósito**: Traducciones en inglés.
-**Contenido**: Objeto con todas las strings de UI en inglés.
+**Cambios Fase 2**:
+- Exporta `tableColumnTypes.ts` completo
 
 ---
 
-## 3. ESTADO ACTUAL DE MIGRACIÓN
+## 4. ESTADO ACTUAL DE MIGRACIÓN
 
 ### ¿Qué está funcionando ahora?
 
 | Componente | Estado | Notas |
 |------------|--------|-------|
 | Table legacy (`tables-and-trees/`) | ✅ Activo | Mayoría de consumidores lo usan |
-| Table modular (`shared/table/`) | ✅ En uso | Primera migración piloto completada |
-| ProjectBadge | ❌ Eliminado | Funcionalidad en Table legacy |
+| Table modular (`shared/table/`) | ✅ En uso | Migraciones piloto completadas |
+| Sistema de tipos semánticos | ✅ Listo | Fase 2 completada |
 | Sistema i18n | ✅ Listo | Falta agregar Provider al App shell |
 
-### Pantallas Migradas al Nuevo Sistema
+### Pantallas Usando Tipos Semánticos
 
 | Pantalla | Archivo | Fecha | Estado |
 |----------|---------|-------|--------|
-| Finanzas → Movimientos | `src/pages/finances/FinancesMovementsTab.tsx` | 2024-12-16 | ✅ PILOTO |
-| Capital → Participantes | `src/pages/capital/tabs/CapitalParticipantsListTab.tsx` | 2024-12-16 | ✅ Migrado |
-| Capital → Transacciones | `src/pages/capital/tabs/CapitalTransactionsTab.tsx` | 2024-12-16 | ✅ Migrado |
+| Admin → Usuarios | `AdminAdminUsers.tsx` | 2024-12-18 | ✅ Migrado |
+| Admin → Organizaciones | `AdminAdminOrganizations.tsx` | 2024-12-18 | ✅ Migrado |
+| Admin → Actividad | `AdminActivityLogs.tsx` | 2024-12-18 | ✅ Migrado |
 
-### Importaciones Legacy (Resto de consumidores)
-
-```typescript
-// Sigue funcionando para pantallas NO migradas
-import { Table } from "@/components/ui-custom/tables-and-trees/Table";
-```
-
-### Importaciones Nuevas (Pantallas migradas)
+### Importaciones
 
 ```typescript
-// Usado por FinancesMovementsTab y futuras migraciones
+// Nuevo sistema con tipos semánticos
 import { Table } from "@/components/shared/table";
-import type { Column } from "@/components/shared/table";
+import type { Column, TableColumnType } from "@/components/shared/table";
 ```
 
 ---
 
-## 4. PROBLEMAS CONOCIDOS
+## 5. PRÓXIMOS PASOS (FASE 3)
 
-### 4.1 Error de RoleRestricted (Pre-existente)
-- **Error**: "Invalid hook call" en RoleRestricted.tsx línea 22
-- **Causa**: Problema de Hot Module Replacement o React duplicado
-- **Impacto**: No afecta producción, solo desarrollo
-- **Relación con refactor**: NINGUNA - es problema pre-existente
+### 5.1 Migración de Más Consumidores
+1. Identificar tablas con layouts inconsistentes
+2. Aplicar tipos semánticos a cada columna
+3. Validar que el layout sea correcto
 
-### 4.2 ProjectBadge Deprecado
-- **Antes**: Existía como componente separado en `features/projects/`
-- **Ahora**: Eliminado - funcionalidad integrada en Table.tsx legacy
-- **Razón**: Era un wrapper simple sobre Badge de shadcn
-
----
-
-## 5. PRÓXIMOS PASOS (FASE 2)
-
-### 5.1 Integrar I18nProvider
-Agregar `<I18nProvider>` al App shell para habilitar cambio de idioma en runtime.
-
-### 5.2 Migración de Consumidores
-1. Identificar todos los lugares que importan de `tables-and-trees/Table`
-2. Migrar uno a uno a `shared/table`
-3. Validar que funcionen igual
-4. Deprecar archivo legacy cuando todos estén migrados
-
-### 5.3 Mejoras Opcionales
-- React.memo en componentes hijos para performance
-- Tests unitarios para hooks
-- Virtualización para listas >1000 items
+### 5.2 Mejoras Opcionales
+- [ ] Densidad configurable (compact/normal/comfortable)
+- [ ] Columnas redimensionables (drag resize)
+- [ ] Columnas sticky (left/right)
+- [ ] React.memo en componentes hijos para performance
+- [ ] Tests unitarios para hooks
+- [ ] Virtualización para listas >1000 items
 
 ---
 
 ## 6. MÉTRICAS
 
-| Métrica | Antes | Después |
-|---------|-------|---------|
-| Líneas (monolito) | 1761 | Mantenido sin cambios |
-| Líneas (wrapper nuevo) | N/A | ~260 |
-| Componentes | 1 | 8 |
-| Hooks | 0 | 4 |
-| Archivos de tipos | 0 | 1 |
-| Archivos de utils | 0 | 1 |
-| Archivos de constants | 0 | 1 |
-| Sistema i18n | 0 | 3 archivos |
+| Métrica | Antes | Después Fase 1 | Después Fase 2 |
+|---------|-------|----------------|----------------|
+| Líneas (monolito) | 1761 | Mantenido | Mantenido |
+| Líneas (wrapper nuevo) | N/A | ~260 | ~260 |
+| Componentes | 1 | 8 | 8 |
+| Hooks | 0 | 4 | 4 |
+| Archivos de tipos | 0 | 1 | 2 (+tableColumnTypes) |
+| Archivos de utils | 0 | 1 | 1 |
+| Archivos de constants | 0 | 1 | 1 |
+| Sistema i18n | 0 | 3 archivos | 3 archivos |
 
 ---
 
@@ -376,15 +329,23 @@ Agregar `<I18nProvider>` al App shell para habilitar cambio de idioma en runtime
 - [x] Archivo legacy sigue funcionando
 - [x] Build exitoso
 
-### Fase 2 (Pendiente)
+### Fase 2 (Completada)
+- [x] Crear `tableColumnTypes.ts` con tipos semánticos
+- [x] Actualizar `Column<T>` interface con propiedad `type`
+- [x] Actualizar `getGridTemplateColumns()` para detectar tipos
+- [x] Migrar Admin → Usuarios a tipos semánticos
+- [x] Migrar Admin → Organizaciones a tipos semánticos
+- [x] Migrar Admin → Actividad a tipos semánticos
+- [x] Actualizar AUDIT.md
+- [x] Verificar build exitoso
+
+### Fase 3 (Pendiente)
+- [ ] Migrar resto de tablas a tipos semánticos
 - [ ] Agregar I18nProvider al App shell
-- [ ] Migrar primer consumidor de prueba
-- [ ] Migrar resto de consumidores
-- [ ] Deprecar archivo legacy
-- [ ] Eliminar archivo legacy
+- [ ] Deprecar archivo legacy cuando todos estén migrados
 
 ---
 
-*Documento actualizado: 2024-12-16*
-*Fase 1 completada exitosamente*
-*Fase 2 pendiente de aprobación del usuario*
+*Documento actualizado: 2024-12-18*
+*Fase 2 completada exitosamente*
+*Sistema de tipos semánticos implementado y funcionando*

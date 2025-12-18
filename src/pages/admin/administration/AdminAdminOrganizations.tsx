@@ -149,9 +149,9 @@ const AdminAdminOrganizations = () => {
   // Calculate statistics
   const stats = {
     total: organizations?.length || 0,
-    free: organizations?.filter(org => org.plan?.name === 'Free').length || 0,
-    pro: organizations?.filter(org => org.plan?.name === 'Pro').length || 0,
-    teams: organizations?.filter(org => org.plan?.name === 'Teams').length || 0
+    free: organizations?.filter((org: Organization) => org.plan?.name === 'Free').length || 0,
+    pro: organizations?.filter((org: Organization) => org.plan?.name === 'Pro').length || 0,
+    teams: organizations?.filter((org: Organization) => org.plan?.name === 'Teams').length || 0
   };
 
   const handleViewDetails = (organization: Organization) => {
@@ -208,7 +208,7 @@ const AdminAdminOrganizations = () => {
   });
 
   // Filtrar organizaciones
-  const filteredOrganizations = organizations?.filter(org => {
+  const filteredOrganizations = organizations?.filter((org: Organization) => {
     const matchesSearch = org.name.toLowerCase().includes(searchValue.toLowerCase());
     const matchesStatus = statusFilter === 'all' || 
       (statusFilter === 'active' && org.is_active) ||
