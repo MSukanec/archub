@@ -3,8 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Table } from '@/components/shared/table'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { IdentityBadge } from '@/components/shared/IdentityBadge'
 import { useToast } from '@/hooks/use-toast'
 import { Edit, Trash2, Building, Users } from 'lucide-react'
 import { format } from 'date-fns'
@@ -229,18 +229,12 @@ const AdminAdminUsers = () => {
       label: 'Usuario',
       width: '20%',
       render: (user: User) => (
-        <div className="flex items-center gap-2">
-          <Avatar className="h-6 w-6">
-            <AvatarImage src={user.avatar_url} />
-            <AvatarFallback className="text-xs">
-              {user.full_name?.slice(0, 2).toUpperCase() || user.email.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="font-medium text-sm">{user.full_name || 'Sin nombre'}</span>
-            <span className="text-sm text-muted-foreground">{user.email}</span>
-          </div>
-        </div>
+        <IdentityBadge
+          name={user.full_name || 'Sin nombre'}
+          avatarUrl={user.avatar_url}
+          subLabel={user.email}
+          size="sm"
+        />
       )
     },
     {
