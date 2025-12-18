@@ -405,7 +405,7 @@ export default function ProjectList() {
     {
       key: 'status' as const,
       label: 'Estado',
-      type: 'status' as const,
+      type: 'medium-text' as const,
       sortable: false,
       render: (project: any) => getStatusBadge(project.status)
     },
