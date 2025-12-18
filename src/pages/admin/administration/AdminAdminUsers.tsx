@@ -227,7 +227,7 @@ const AdminAdminUsers = () => {
     {
       key: 'full_name',
       label: 'Usuario',
-      type: 'name' as const,
+      type: 'long-text' as const,
       render: (user: User) => (
         <IdentityBadge
           name={user.full_name || 'Sin nombre'}
@@ -258,7 +258,7 @@ const AdminAdminUsers = () => {
     {
       key: 'acquisition',
       label: 'Origen',
-      type: 'long-text' as const,
+      type: 'status' as const,
       render: (user: User) => (
         <span className="text-sm text-muted-foreground">
           {formatAcquisitionOrigin(user.acquisition || null)}

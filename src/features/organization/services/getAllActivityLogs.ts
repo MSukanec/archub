@@ -18,6 +18,8 @@ export interface AdminActivityLog {
   organization?: {
     id: string;
     name: string;
+    image_bucket?: string;
+    image_path?: string;
   };
 }
 
@@ -45,7 +47,9 @@ export async function getAllActivityLogs(
       ),
       organizations (
         id,
-        name
+        name,
+        image_bucket,
+        image_path
       )
     `)
     .order('created_at', { ascending: false })

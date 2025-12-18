@@ -10,6 +10,13 @@ import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { getAllActivityLogs, type AdminActivityLog } from '@/features/organization/services/getAllActivityLogs';
 import { getActivityDisplayInfo } from '@/features/organization/utils';
+import { supabase } from '@/lib/supabase';
+
+function getOrganizationAvatarUrl(org: AdminActivityLog['organization']): string | undefined {
+  if (!org?.image_bucket || !org?.image_path || !supabase) return undefined;
+  const { data } = supabase.storage.from(org.image_bucket).getPublicUrl(org.image_path);
+  return data.publicUrl;
+}
 
 export default function AdminActivityLogs() {
   const [activities, setActivities] = useState<AdminActivityLog[]>([]);
@@ -53,6 +60,21 @@ export default function AdminActivityLogs() {
       sortType: 'date' as const
     },
     {
+      key: 'organization',
+      label: 'Organización',
+      type: 'name' as const,
+      render: (activity: AdminActivityLog) => (
+        <IdentityBadge
+          name={activity.organization?.name || 'Sin organización'}
+          avatarUrl={getOrganizationAvatarUrl(activity.organization)}
+          size="sm"
+          showName={true}
+        />
+      ),
+      sortable: true,
+      sortType: 'string' as const
+    },
+    {
       key: 'user',
       label: 'Usuario',
       type: 'name' as const,
@@ -63,18 +85,6 @@ export default function AdminActivityLogs() {
           size="sm"
           showName={true}
         />
-      ),
-      sortable: true,
-      sortType: 'string' as const
-    },
-    {
-      key: 'organization',
-      label: 'Organización',
-      type: 'name' as const,
-      render: (activity: AdminActivityLog) => (
-        <span className="text-sm truncate">
-          {activity.organization?.name || 'Sin organización'}
-        </span>
       ),
       sortable: true,
       sortType: 'string' as const
