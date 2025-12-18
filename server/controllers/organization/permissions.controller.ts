@@ -1,31 +1,21 @@
 import type { Request, Response } from "express";
-import { createAuthenticatedClient } from '../../routes/_base';
+import { extractToken, requireUser, HttpError } from '../../lib/auth/helpers';
 
 export async function handleGetRolesWithPermissions(req: Request, res: Response) {
   try {
+    const token = extractToken(req.headers.authorization);
+    const { userId, supabase } = await requireUser(token);
+    
     const organizationId = req.params.organizationId;
     
     if (!organizationId) {
       return res.status(400).json({ error: 'organizationId is required' });
     }
 
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'No authorization token provided' });
-    }
-
-    const token = authHeader.split(' ')[1];
-    const supabase = createAuthenticatedClient(token);
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
     const { data: membership, error: membershipError } = await supabase
       .from('organization_members')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('organization_id', organizationId)
       .eq('is_active', true)
       .maybeSingle();
@@ -36,7 +26,6 @@ export async function handleGetRolesWithPermissions(req: Request, res: Response)
     }
 
     if (!membership) {
-      console.error('[PermissionsController] No membership found for user:', user.id, 'org:', organizationId);
       return res.status(403).json({ error: 'You are not a member of this organization' });
     }
 
@@ -110,6 +99,9 @@ export async function handleGetRolesWithPermissions(req: Request, res: Response)
 
 export async function handleUpdateRolePermissions(req: Request, res: Response) {
   try {
+    const token = extractToken(req.headers.authorization);
+    const { userId, supabase } = await requireUser(token);
+    
     const roleId = req.params.roleId;
     const { permissionIds, organizationId } = req.body;
     
@@ -119,19 +111,6 @@ export async function handleUpdateRolePermissions(req: Request, res: Response) {
 
     if (!Array.isArray(permissionIds)) {
       return res.status(400).json({ error: 'permissionIds must be an array' });
-    }
-
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'No authorization token provided' });
-    }
-
-    const token = authHeader.split(' ')[1];
-    const supabase = createAuthenticatedClient(token);
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const { data: role, error: roleError } = await supabase
@@ -169,7 +148,7 @@ export async function handleUpdateRolePermissions(req: Request, res: Response) {
           )
         )
       `)
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('organization_id', targetOrgId)
       .eq('is_active', true)
       .single();
