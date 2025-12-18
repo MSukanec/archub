@@ -1,5 +1,6 @@
 import { Tag, Edit2, Trash2, Layers, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectTypes, useDeleteProjectType, useReplaceProjectType, useProjectModalities, useDeleteProjectModality, useReplaceProjectModality } from '@/features/projects';
 import type { ProjectType, ProjectModality } from '@/features/projects';
@@ -220,9 +221,7 @@ export default function ProjectSettingsTab() {
                     </div>
                     <div className="flex items-center gap-1 ml-4">
                       {isSystemType ? (
-                        <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                          Sistema
-                        </span>
+                        <Badge variant="default">Sistema</Badge>
                       ) : (
                         <>
                           <Button
@@ -305,9 +304,7 @@ export default function ProjectSettingsTab() {
                     </div>
                     <div className="flex items-center gap-1 ml-4">
                       {isSystemModality ? (
-                        <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                          Sistema
-                        </span>
+                        <Badge variant="default">Sistema</Badge>
                       ) : (
                         <>
                           <Button
