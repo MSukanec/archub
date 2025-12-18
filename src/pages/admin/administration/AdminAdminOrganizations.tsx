@@ -24,7 +24,9 @@ interface Organization {
   is_system: boolean;
   plan_id: string;
   created_by: string;
-  logo_url?: string | null;
+  logo_url?: string;
+  image_bucket?: string | null;
+  image_path?: string | null;
   settings: {
     is_founder?: boolean;
     [key: string]: any;
@@ -282,14 +284,24 @@ const AdminAdminOrganizations = () => {
       key: 'name',
       label: 'Organización',
       width: '20%',
-      render: (org: Organization) => (
-        <IdentityBadge
-          name={org.name}
-          avatarUrl={org.logo_url}
-          subLabel={org.creator?.full_name || 'Desconocido'}
-          size="sm"
-        />
-      ),
+      render: (org: Organization) => {
+        let logoUrl = org.logo_url || undefined;
+        if (org.image_bucket && org.image_path && supabase) {
+          const { data } = supabase.storage
+            .from(org.image_bucket)
+            .getPublicUrl(org.image_path);
+          logoUrl = data.publicUrl;
+        }
+        
+        return (
+          <IdentityBadge
+            name={org.name}
+            avatarUrl={logoUrl}
+            subLabel={org.creator?.full_name || 'Desconocido'}
+            size="sm"
+          />
+        );
+      },
     },
     {
       key: 'plan',

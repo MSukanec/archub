@@ -8,7 +8,7 @@ export async function listOrganizations(
     // Get all organizations
     const { data: organizations, error: orgsError } = await ctx.supabase
       .from('organizations')
-      .select('id, name, created_at, is_active, is_system, plan_id, created_by, settings')
+      .select('id, name, created_at, is_active, is_system, plan_id, created_by, settings, logo_url, image_bucket, image_path')
       .eq('is_deleted', false)
       .order('created_at', { ascending: false });
 
