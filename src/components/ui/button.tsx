@@ -12,7 +12,7 @@ const buttonVariants = cva(
         default:
           "bg-accent text-white hover:bg-accent/90 rounded-lg px-3 py-1.5 md:py-1.5 py-3 gap-2 text-sm font-medium [&_svg]:size-4 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5",
         destructive:
-          "bg-destructive text-[var(--destructive-text)] hover:bg-destructive/80 rounded-lg px-3 py-1.5 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
+          "bg-[color:var(--destructive)] text-[var(--destructive-text)] hover:bg-[color:var(--destructive)]/80 rounded-lg px-3 py-1.5 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
         outline:
           "border border-border bg-background hover:bg-accent hover:text-accent-foreground rounded-md px-3 py-1.5 shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 gap-2 text-sm font-medium [&_svg]:size-4",
         secondary:
