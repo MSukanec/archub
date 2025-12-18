@@ -1472,48 +1472,7 @@ export default function MovementsList() {
           )
         }}
 
-        getRowClassName={(item: Movement | ConversionGroup | TransferGroup) => {
-          if ('is_conversion_group' in item) {
-            return "movement-row-conversion";
-          }
-          
-          if ('is_transfer_group' in item) {
-            return "movement-row-transfer";
-          }
-          
-          // For regular movements, determine type
-          const typeName = item.movement_data?.type?.name || "";
-          const categoryName = item.movement_data?.category?.name || "";
-          const subcategoryName = item.movement_data?.subcategory?.name || "";
-          
-          // Check for deprecated concepts (old patterns) - both in category and subcategory names
-          const isDeprecatedAportes = (categoryName.toLowerCase().includes("aportes propios") || 
-                                      categoryName.toLowerCase().includes("aportes_propios") ||
-                                      subcategoryName.toLowerCase().includes("aportes propios") || 
-                                      subcategoryName.toLowerCase().includes("aportes_propios") ||
-                                      subcategoryName.toLowerCase().includes("aportes de socios") ||
-                                      categoryName.toLowerCase().includes("aportes de socios"));
-          
-          const isDeprecatedRetiros = (categoryName.toLowerCase().includes("retiros propios") || 
-                                      categoryName.toLowerCase().includes("retiros_propios") ||
-                                      subcategoryName.toLowerCase().includes("retiros propios") || 
-                                      subcategoryName.toLowerCase().includes("retiros_propios") ||
-                                      subcategoryName.toLowerCase().includes("retiros de socios") ||
-                                      categoryName.toLowerCase().includes("retiros de socios"));
-          
-          if (isDeprecatedAportes) {
-            return "movement-row-aportes-propios";
-          } else if (isDeprecatedRetiros) {
-            return "movement-row-retiros-propios";
-          }
-          
-          if (typeName && (typeName === "Ingresos" || typeName.toLowerCase().includes("ingreso"))) {
-            return "movement-row-income";
-          } else if (typeName && (typeName === "Egresos" || typeName.toLowerCase().includes("egreso"))) {
-            return "movement-row-expense";
-          }
-          return "";
-        }}
+        getRowClassName={() => ""}
         selectedItems={selectedMovements}
         onSelectionChange={(items) => {
           // Only allow selection of regular movements, not group objects
