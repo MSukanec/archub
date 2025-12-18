@@ -66,15 +66,21 @@ export async function ensureOrganizationAccess(
   const authResult = await ensureAuth(ctx);
   
   if (!authResult.success) {
+    console.log('[ensureOrganizationAccess] Auth failed:', authResult.error);
     return authResult;
   }
 
+  console.log('[ensureOrganizationAccess] Checking membership for user:', authResult.user.id, 'org:', organizationId);
+
   const { data: memberships, error } = await ctx.supabase
     .from('organization_members')
-    .select('id')
+    .select('id, is_active')
     .eq('organization_id', organizationId)
     .eq('user_id', authResult.user.id)
+    .eq('is_active', true)
     .limit(1);
+
+  console.log('[ensureOrganizationAccess] Query result:', { memberships, error });
 
   if (error) {
     console.error('Error checking organization membership:', error);
@@ -84,9 +90,11 @@ export async function ensureOrganizationAccess(
   const membership = memberships && memberships.length > 0 ? memberships[0] : null;
 
   if (!membership) {
-    return { success: false, error: 'Forbidden: User does not have access to this organization' };
+    console.log('[ensureOrganizationAccess] No membership found for user:', authResult.user.id, 'in org:', organizationId);
+    return { success: false, error: 'Usuario no es miembro de la organización' };
   }
 
+  console.log('[ensureOrganizationAccess] Membership found:', membership.id);
   return { success: true, memberId: membership.id };
 }
 
