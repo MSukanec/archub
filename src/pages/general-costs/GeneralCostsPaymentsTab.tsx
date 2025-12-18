@@ -687,7 +687,7 @@ export default function GeneralCostsPaymentsTab({
           wallet_name: p.wallet?.wallets?.name,
           general_cost_name: p.general_cost?.name,
           category_name: p.general_cost?.category?.name,
-          creator_name: p.creator?.users?.full_name,
+          creator_name: p.creator?.full_name,
         })),
         total_count: sortedPayments.length,
         total_confirmed: confirmedPayments.length,
@@ -733,14 +733,22 @@ export default function GeneralCostsPaymentsTab({
     return `${symbol} ${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  const getStatusBadgeColorClass = (status: 'confirmed' | 'pending' | 'overdue' | 'cancelled'): string => {
-    const statusColorMap: Record<string, string> = {
-      confirmed: 'bg-green-100/50 text-green-700 border-green-300 hover:bg-green-100',
-      pending: 'bg-amber-100/50 text-amber-700 border-amber-300 hover:bg-amber-100',
-      overdue: 'bg-red-100/50 text-red-700 border-red-300 hover:bg-red-100',
-      cancelled: 'bg-gray-100/50 text-gray-700 border-gray-300 hover:bg-gray-100',
+  const getStatusBadgeStyle = (status: any): React.CSSProperties => {
+    const statusColorMap: Record<string, { colorVar: string }> = {
+      confirmed: { colorVar: '--success' },
+      pending: { colorVar: '--warning' },
+      overdue: { colorVar: '--destructive' },
+      cancelled: { colorVar: '--badge-status-neutral' },
     };
-    return statusColorMap[status] || statusColorMap['cancelled'];
+    const validStatus = status && typeof status === 'string' && status in statusColorMap 
+      ? status 
+      : 'cancelled';
+    const config = statusColorMap[validStatus];
+    return {
+      color: `var(${config.colorVar})`,
+      backgroundColor: `color-mix(in srgb, var(${config.colorVar}) 10%, transparent)`,
+      borderColor: `color-mix(in srgb, var(${config.colorVar}) 30%, transparent)`,
+    };
   };
 
   const getStatusLabel = (status: 'confirmed' | 'pending' | 'overdue' | 'cancelled') => {
@@ -879,15 +887,15 @@ export default function GeneralCostsPaymentsTab({
               <TooltipTrigger asChild>
                 <div>
                   <IdentityBadge 
-                    name={payment.creator?.users?.full_name}
-                    avatarUrl={payment.creator?.users?.avatar_url}
+                    name={payment.creator?.full_name}
+                    avatarUrl={payment.creator?.avatar_url}
                     showName={false}
                     size="sm"
                   />
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {payment.creator?.users?.full_name || 'Sin creador'}
+                {payment.creator?.full_name || 'Sin creador'}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -940,14 +948,19 @@ export default function GeneralCostsPaymentsTab({
       key: 'status',
       label: 'Estado',
       sortable: true,
-      render: (payment: GeneralCostPayment) => (
-        <Badge 
-          variant="default"
-          className={getStatusBadgeColorClass(payment.status)}
-        >
-          {getStatusLabel(payment.status)}
-        </Badge>
-      ),
+      render: (payment: GeneralCostPayment) => {
+        const validStatus = (payment.status === 'confirmed' || payment.status === 'pending' || payment.status === 'overdue' || payment.status === 'cancelled')
+          ? payment.status
+          : 'cancelled';
+        return (
+          <Badge 
+            variant="default"
+            style={getStatusBadgeStyle(validStatus)}
+          >
+            {getStatusLabel(validStatus)}
+          </Badge>
+        );
+      },
     },
   ];
 
