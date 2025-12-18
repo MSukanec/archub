@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Edit, Trash2, Building, Crown, Award, Eye } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';
+import { IdentityBadge } from '@/components/shared/IdentityBadge';
 
 import { useToast } from '@/hooks/use-toast';
 import AdminOrganizationRow from '@/features/organization/components/admin/AdminOrganizationRow';
@@ -23,6 +24,7 @@ interface Organization {
   is_system: boolean;
   plan_id: string;
   created_by: string;
+  logo_url?: string | null;
   settings: {
     is_founder?: boolean;
     [key: string]: any;
@@ -281,12 +283,12 @@ const AdminAdminOrganizations = () => {
       label: 'Organización',
       width: '20%',
       render: (org: Organization) => (
-        <div>
-          <div className="font-bold text-sm">{org.name}</div>
-          <div className="text-sm text-muted-foreground">
-            {org.creator?.full_name || 'Desconocido'}
-          </div>
-        </div>
+        <IdentityBadge
+          name={org.name}
+          avatarUrl={org.logo_url}
+          subLabel={org.creator?.full_name || 'Desconocido'}
+          size="sm"
+        />
       ),
     },
     {
