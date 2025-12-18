@@ -1,5 +1,6 @@
 import { Tag, Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useContactTypes, useDeleteContactType, useReplaceContactType } from '@/features/contacts';
 import { useGlobalModalStore } from '@/components/modal';
@@ -128,9 +129,9 @@ export default function ContactSettings() {
                     </div>
                     <div className="flex items-center gap-1 ml-4">
                       {isSystemType ? (
-                        <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                        <Badge variant="default">
                           Sistema
-                        </span>
+                        </Badge>
                       ) : (
                         <>
                           <Button
