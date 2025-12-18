@@ -5,6 +5,7 @@ export * from './constants';
 export * from './utils';
 
 export { MemberFormModal } from './modals/MemberFormModal';
+export { InviteMemberModal } from './modals/InviteMemberModal';
 export { BoardFormModal } from './modals/BoardFormModal';
 export { CardFormModal } from './modals/CardFormModal';
 export { ListFormModal } from './modals/ListFormModal';
@@ -13,5 +14,6 @@ export { ProfileOrganizationFormModal } from './modals/ProfileOrganizationFormMo
 
 export { OrganizationFormModal } from './modals/admin/OrganizationFormModal';
 export { OrganizationFormFields } from './forms/OrganizationFormFields';
+export { InviteMemberFormFields } from './forms/InviteMemberFormFields';
 
 export { default as AdminOrganizationRow } from './components/admin/AdminOrganizationRow';

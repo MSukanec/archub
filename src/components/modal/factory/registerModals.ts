@@ -1,6 +1,6 @@
 import { registerModal, ModalConfig } from './registry';
 
-import { MemberFormModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, OrganizationFormModal, ProfileOrganizationFormModal } from '@/features/organization';
+import { MemberFormModal, InviteMemberModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, OrganizationFormModal, ProfileOrganizationFormModal } from '@/features/organization';
 import { CapitalParticipantModal, PartnerContributionModal, PartnerWithdrawalModal } from '@/features/capital';
 import { ProjectForm } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
@@ -53,11 +53,15 @@ export function initializeModalRegistry(): void {
   if (initialized) return;
   initialized = true;
 
-  registerModal('member', MemberFormModal as any, {
+  registerModal('member', InviteMemberModal as any, {
     ...organizationConfig,
     mapDataToProps: (data) => ({
-      editingMember: data?.editingMember,
-      defaultEmail: data?.defaultEmail,
+      modalData: {
+        organizationId: data?.organizationId,
+        editingMember: data?.editingMember,
+        defaultEmail: data?.defaultEmail,
+        mode: data?.editingMember ? 'edit' : 'create',
+      },
     }),
   });
   // Capital module modals

@@ -17,11 +17,17 @@ import {
   handleGetOrganizationClientPaymentsMetrics
 } from '../controllers/organization/clientPayments.controller.js';
 import { handleGetOrganizationUsageStats } from '../lib/handlers/organization/getOrganizationUsageStats.js';
+import { handleGetOrganizationRoles } from '../controllers/organization/roles.controller.js';
 
 /**
  * Register organization-related endpoints (members, invitations, profile, clients)
  */
 export function registerOrganizationRoutes(app: Express, deps: RouteDeps): void {
+  // ========== ORGANIZATION - ROLES ENDPOINTS ==========
+  
+  // GET /api/roles - Get roles for an organization (query param: organizationId)
+  app.get("/api/roles", handleGetOrganizationRoles);
+
   // ========== ORGANIZATION - MEMBERS ENDPOINTS ==========
   
   // GET /api/organization-members/:organizationId - Get all members of an organization

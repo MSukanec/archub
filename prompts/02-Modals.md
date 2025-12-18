@@ -412,6 +412,7 @@ export { FeatureFormFields } from './forms/FeatureFormFields';
 | NewMovement | (usa los 3 anteriores) | `modals/NewMovementModal.tsx` | 2025-12-10 |
 | Organization | `forms/OrganizationFormFields.tsx` | `modals/admin/OrganizationFormModal.tsx` | 2025-12-11 |
 | Partner | `forms/PartnerFormFields.tsx` | `modals/PartnerModal.tsx` | 2025-12-11 |
+| InviteMember | `forms/InviteMemberFormFields.tsx` | `modals/InviteMemberModal.tsx` | 2025-12-18 |
 
 ---
 
