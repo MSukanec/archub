@@ -122,7 +122,7 @@ export function InviteMemberFormFields({
   const isEditing = mode === 'edit' || !!editingMember;
 
   const { data: roles = [], isLoading: rolesLoading } = useQuery<{ id: string; name: string; type: string }[]>({
-    queryKey: ['/api/roles', effectiveOrgId],
+    queryKey: [`/api/roles?organizationId=${effectiveOrgId}`],
     enabled: !!effectiveOrgId,
   });
 
