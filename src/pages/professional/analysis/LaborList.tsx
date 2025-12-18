@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { Table } from '@/components/shared/table/Table'
 import { cn } from '@/lib/utils'
 
 import { Plus, Edit, Trash2, Users, Crown, Copy, Wrench } from 'lucide-react'
@@ -310,11 +310,11 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
       width: '8%',
       render: (laborType: LaborType) => (
         <Badge 
-          variant={laborType.is_system ? "default" : "secondary"}
-          className={`text-xs ${laborType.is_system 
-            ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
-            : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
-          }`}
+          variant="default"
+          className={laborType.is_system 
+            ? 'bg-[var(--accent)]/10 text-accent border-accent/30 hover:bg-[var(--accent)]/15' 
+            : 'bg-blue-100/50 text-blue-700 border-blue-300 hover:bg-blue-100'
+          }
         >
           {laborType.is_system ? 'Sistema' : 'Organización'}
         </Badge>
@@ -367,11 +367,11 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
               <div className="flex items-center gap-2 mb-2">
                 <h3 className="font-medium">{laborType.labor_name}</h3>
                 <Badge 
-                  variant={laborType.is_system ? "default" : "secondary"}
-                  className={`text-xs ${laborType.is_system 
-                    ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90' 
-                    : 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300'
-                  }`}
+                  variant="default"
+                  className={laborType.is_system 
+                    ? 'bg-[var(--accent)]/10 text-accent border-accent/30 hover:bg-[var(--accent)]/15' 
+                    : 'bg-blue-100/50 text-blue-700 border-blue-300 hover:bg-blue-100'
+                  }
                 >
                   {laborType.is_system ? 'Sistema' : 'Organización'}
                 </Badge>
