@@ -649,7 +649,7 @@ export function PageLayout({
         {/* Page Content */}
         <div className={(() => {
           const mode = resolveWidthMode(wide);
-          return `${getContainerClasses(mode)} ${getContentPaddingClasses(mode)} pt-6 pb-6 min-h-0 overflow-x-hidden rounded-lg`;
+          return `${getContainerClasses(mode)} ${getContentPaddingClasses(mode)} pt-6 pb-6 min-h-0 overflow-x-hidden`;
         })()}>
           <ReadOnlyBanner show={showReadOnlyBanner} projectName={readOnlyProjectName} />
           {children}
