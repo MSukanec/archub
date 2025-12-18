@@ -18,6 +18,13 @@ export {
   allPaymentRules,
 } from './rules/payment-rules';
 
+export {
+  clientPaymentsWithoutClientRule,
+  paymentsWithoutProjectRule,
+  financesInvalidExchangeRateRule,
+  allFinancesRules,
+} from './rules/finances-rules';
+
 export { dataHealthToInsights, mergeWithBusinessInsights } from './adapters/insights-adapter';
 
 export { 
@@ -44,3 +51,4 @@ export {
 } from './rules/capital-rules';
 
 export { DataHealthAlert } from './components/DataHealthAlert';
+export { DataHealthAlertMulti } from './components/DataHealthAlertMulti';

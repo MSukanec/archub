@@ -64,4 +64,7 @@ export interface NormalizedPayment {
   walletId?: string | null;
   walletName?: string | null;
   description?: string | null;
+  movementType?: string | null;
+  clientId?: string | null;
+  projectId?: string | null;
 }

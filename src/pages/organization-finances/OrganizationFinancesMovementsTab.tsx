@@ -13,7 +13,7 @@ import { useDeleteClientPayment } from '@/features/clients/hooks/use-client-paym
 import { useDeleteMaterialPayment } from '@/features/materials/hooks/use-material-payments';
 import { useDeletePersonnelPayment } from '@/features/personnel/hooks/use-personnel-payments';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
-import { useFinancesDataHealth, DataHealthAlert } from '@/core/data-health';
+import { useFinancesDataHealth, DataHealthAlertMulti } from '@/core/data-health';
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { Badge } from '@/components/ui/badge';
@@ -356,8 +356,8 @@ export function OrganizationFinancesMovementsTab() {
 
   return (
     <div className="space-y-6" data-testid="organization-finances-movements-tab">
-      <DataHealthAlert
-        affectedCount={dataHealth.affectedIds.size}
+      <DataHealthAlertMulti
+        issues={dataHealth.issues}
         entityLabel="movimiento"
         isFiltering={showOnlyProblems}
         onToggleFilter={() => setShowOnlyProblems(!showOnlyProblems)}

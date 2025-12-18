@@ -2,12 +2,14 @@ import { useMemo } from 'react';
 import { DataHealthEngine } from '../engine/DataHealthEngine';
 import { allPaymentRules } from '../rules/payment-rules';
 import { allCapitalRules } from '../rules/capital-rules';
+import { allFinancesRules } from '../rules/finances-rules';
 import { dataHealthToInsights } from '../adapters/insights-adapter';
-import type { DataHealthContext, DataHealthResult, NormalizedPayment } from '../types';
+import type { DataHealthContext, DataHealthResult, NormalizedPayment, DataIssue } from '../types';
 import type { InsightItem } from '@/components/dashboard/InsightCard';
 
 const paymentEngine = new DataHealthEngine(allPaymentRules);
 const capitalEngine = new DataHealthEngine(allCapitalRules);
+const financesEngine = new DataHealthEngine(allFinancesRules);
 
 export interface UseDataHealthOptions {
   organizationId: string;
@@ -136,6 +138,8 @@ export function normalizeUnifiedMovement(movement: {
   movement_type?: string | null;
   entity_name?: string | null;
   amount_sign?: number | null;
+  client_id?: string | null;
+  project_id?: string | null;
 }): NormalizedPayment {
   const typeLabels: Record<string, string> = {
     client_payment: 'Cobro Cliente',
@@ -170,11 +174,15 @@ export function normalizeUnifiedMovement(movement: {
     walletId: movement.wallet_id ?? movement.wallet?.id ?? null,
     walletName: movement.wallet?.name ?? null,
     description: movement.description,
+    movementType: movement.movement_type,
+    clientId: movement.client_id,
+    projectId: movement.project_id,
   };
 }
 
 export interface UseFinancesDataHealthResult extends UseDataHealthResult {
   affectedIds: Set<string | number>;
+  issues: DataIssue[];
 }
 
 export function useFinancesDataHealth(
@@ -192,6 +200,8 @@ export function useFinancesDataHealth(
     movement_type?: string | null;
     entity_name?: string | null;
     amount_sign?: number | null;
+    client_id?: string | null;
+    project_id?: string | null;
   }>,
   options: UseDataHealthOptions
 ): UseFinancesDataHealthResult {
@@ -211,7 +221,7 @@ export function useFinancesDataHealth(
       dateToleranceDays: 0,
     };
 
-    return paymentEngine.check(normalizedMovements, ctx, ['finances']);
+    return financesEngine.check(normalizedMovements, ctx, ['finances']);
   }, [movements, organizationId, defaultCurrencyId, enabled]);
 
   const insights = useMemo(() => {
@@ -240,6 +250,7 @@ export function useFinancesDataHealth(
     warningCount: result?.stats.bySeverity.warning ?? 0,
     infoCount: result?.stats.bySeverity.info ?? 0,
     affectedIds,
+    issues: result?.issues ?? [],
   };
 }
 
