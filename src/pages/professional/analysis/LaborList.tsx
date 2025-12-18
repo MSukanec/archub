@@ -311,9 +311,9 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
       render: (laborType: LaborType) => (
         <Badge 
           variant="default"
-          className={laborType.is_system 
-            ? 'bg-[var(--accent)]/10 text-accent border-accent/30 hover:bg-[var(--accent)]/15' 
-            : 'bg-blue-100/50 text-blue-700 border-blue-300 hover:bg-blue-100'
+          className={!laborType.is_system 
+            ? 'bg-blue-100/50 text-blue-700 border-blue-300 hover:bg-blue-100'
+            : ''
           }
         >
           {laborType.is_system ? 'Sistema' : 'Organización'}
@@ -368,9 +368,9 @@ export default function LaborList({ onNewLabor }: LaborListProps) {
                 <h3 className="font-medium">{laborType.labor_name}</h3>
                 <Badge 
                   variant="default"
-                  className={laborType.is_system 
-                    ? 'bg-[var(--accent)]/10 text-accent border-accent/30 hover:bg-[var(--accent)]/15' 
-                    : 'bg-blue-100/50 text-blue-700 border-blue-300 hover:bg-blue-100'
+                  className={!laborType.is_system 
+                    ? 'bg-blue-100/50 text-blue-700 border-blue-300 hover:bg-blue-100'
+                    : ''
                   }
                 >
                   {laborType.is_system ? 'Sistema' : 'Organización'}
