@@ -1,4 +1,5 @@
 import { Column, SortDirection, SortType } from "./types";
+import { buildGridTemplateColumns, getColumnWidth, TableColumnType } from "./tableColumnTypes";
 
 export function sortData<T>(
   data: T[],
@@ -115,6 +116,13 @@ export function getGridTemplateColumns<T>(
   selectable: boolean,
   hasActions: boolean
 ): string {
+  const hasSemanticTypes = columns.some(col => col.type);
+  
+  if (hasSemanticTypes) {
+    const columnTypes = columns.map(col => col.type);
+    return buildGridTemplateColumns(columnTypes, { selectable, hasActions });
+  }
+  
   const widths = columns.map((col) => col.width || "minmax(0, 1fr)");
   const allSameWidth = widths.every((w) => w === widths[0]);
 

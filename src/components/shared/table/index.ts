@@ -7,6 +7,7 @@ export { TableGroup } from "./TableGroup";
 export { TableLoadingSkeleton } from "./TableLoadingSkeleton";
 
 export * from "./types";
+export * from "./tableColumnTypes";
 export * from "./utils";
 export * from "./constants";
 export * from "./hooks";

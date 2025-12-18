@@ -1,4 +1,5 @@
 import { ReactNode, ComponentType } from "react";
+import { TableColumnType } from "./tableColumnTypes";
 
 export type SortDirection = "asc" | "desc" | null;
 
@@ -11,9 +12,11 @@ export type TableMode = "default" | "budget" | "construction";
 export interface Column<T = any> {
   key: keyof T | string;
   label: string;
+  type?: TableColumnType;
   render?: (item: T) => ReactNode;
   sortable?: boolean;
   sortType?: SortType;
+  /** @deprecated Use `type` property for semantic column widths instead */
   width?: string;
   cellClassName?: string;
   align?: ColumnAlignment;

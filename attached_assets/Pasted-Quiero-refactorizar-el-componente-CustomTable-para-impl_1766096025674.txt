@@ -1,0 +1,86 @@
+Quiero refactorizar el componente CustomTable para implementar un sistema
+ENTERPRISE de anchos de columnas basado en TIPOS SEMÁNTICOS,
+como Stripe / Linear / Notion.
+
+OBJETIVO CLAVE:
+- Las columnas estructuradas (fecha, monto, estado, etc) deben tener ancho fijo
+- Debe existir SIEMPRE una columna flexible que ocupe el ancho restante
+- Esa columna flexible será normalmente `long-text` (descripción, título, etc)
+- Las tablas deben ocupar el 100% del ancho disponible sin desperdicio
+
+--------------------------------------------------
+1) TIPOS DE COLUMNA
+--------------------------------------------------
+
+Agregar una propiedad `type` a cada definición de columna.
+
+Ejemplos de tipos:
+- 'date'
+- 'amount'
+- 'status'
+- 'wallet'
+- 'number'
+- 'id'
+- 'actions'
+- 'name'
+- 'email'
+- 'short-text'
+- 'long-text'   ← ESTE ES EL FLEXIBLE
+
+--------------------------------------------------
+2) MAPA CENTRAL DE ANCHOS (SINGLE SOURCE OF TRUTH)
+--------------------------------------------------
+
+Crear un archivo central (ej: tableColumnTypes.ts) con:
+
+- El tipo `TableColumnType`
+- Un mapa COLUMN_TYPE_WIDTHS
+
+Regla CLAVE:
+- Todos los tipos usan valores fijos (px)
+- EXCEPTO `long-text`, que debe usar:
+  minmax(280px, 1fr)
+
+Ejemplo conceptual:
+- date → 110px
+- amount → 120px
+- status → 100px
+- actions → 60px
+- name → 260px
+- short-text → 180px
+- long-text → minmax(280px, 1fr)
+
+--------------------------------------------------
+3) COMPORTAMIENTO DEL CUSTOMTABLE
+--------------------------------------------------
+
+Modificar CustomTable para que:
+
+- Use CSS Grid
+- Genere automáticamente `grid-template-columns`
+- Traducca cada column.type al valor definido en COLUMN_TYPE_WIDTHS
+- Si una columna no tiene type → usar 'short-text' como default
+- Permitir que SOLO una columna tenga comportamiento flexible (1fr)
+
+--------------------------------------------------
+4) REGLAS IMPORTANTES
+--------------------------------------------------
+
+- NO permitir definir widths manuales por tabla
+- NO hardcodear px en vistas
+- El layout debe ocupar siempre el 100% del ancho disponible
+- La columna `long-text` absorbe el espacio restante
+- Mantener compatibilidad con tablas existentes
+
+--------------------------------------------------
+5) RESULTADO ESPERADO
+--------------------------------------------------
+
+- Todas las tablas se ven consistentes
+- Las columnas chicas no desperdician espacio
+- Las columnas descriptivas respiran
+- El sistema escala a muchas tablas sin ajustes manuales
+- Base sólida para futuras mejoras (densidad, resize, sticky)
+
+Luego de implementar esto, aplicaré los `type` a las columnas
+de las tablas que yo te indique.
