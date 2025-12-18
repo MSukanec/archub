@@ -1,17 +1,31 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { Button } from '@/components/ui/button'
+import { Table } from '@/components/shared/table'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { useToast } from '@/hooks/use-toast'
 import { Edit, Trash2, Building, Users } from 'lucide-react'
-import { format, formatDistanceToNow } from 'date-fns'
+import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useGlobalModalStore } from '@/components/modal'
 import AdminUserRow from '@/features/users/components/admin/AdminUserRow'
+
+// Helper to format user acquisition origin
+function formatAcquisitionOrigin(acquisition: { source?: string; medium?: string; campaign?: string } | null): string {
+  if (!acquisition || !acquisition.source) return 'Desconocido';
+  
+  const { source, medium, campaign } = acquisition;
+  
+  if (source === 'direct') return 'Directo';
+  
+  const formattedSource = source.charAt(0).toUpperCase() + source.slice(1);
+  const parts = [formattedSource];
+  if (campaign) parts.push(`· ${campaign}`);
+  
+  return parts.join(' ');
+}
 
 interface User {
   id: string
@@ -28,6 +42,11 @@ interface User {
   }
   organizations_count: number
   last_seen_at: string | null
+  acquisition?: {
+    source: string
+    medium?: string
+    campaign?: string
+  } | null
 }
 
 // Componente para mostrar la última actividad
@@ -207,7 +226,7 @@ const AdminAdminUsers = () => {
     {
       key: 'last_activity',
       label: 'Última Actividad',
-      width: '20%',
+      width: '15%',
       render: (user: User) => <LastActivityCell lastSeen={user.last_seen_at} />
     },
     {
@@ -231,8 +250,8 @@ const AdminAdminUsers = () => {
     },
     {
       key: 'organizations_count',
-      label: 'Organizaciones',
-      width: '15%',
+      label: 'Orgs',
+      width: '10%',
       render: (user: User) => (
         <div className="flex items-center gap-1">
           <Building className="h-3 w-3 text-muted-foreground" />
@@ -242,11 +261,21 @@ const AdminAdminUsers = () => {
     },
     {
       key: 'created_at',
-      label: 'Fecha de Registro',
-      width: '20%',
+      label: 'Registro',
+      width: '15%',
       render: (user: User) => (
         <span className="text-xs text-muted-foreground">
           {format(new Date(user.created_at), 'dd/MM/yy', { locale: es })}
+        </span>
+      )
+    },
+    {
+      key: 'acquisition',
+      label: 'Origen',
+      width: '20%',
+      render: (user: User) => (
+        <span className="text-xs text-muted-foreground">
+          {formatAcquisitionOrigin(user.acquisition || null)}
         </span>
       )
     }

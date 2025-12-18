@@ -20,7 +20,7 @@ export async function listUsers(
     const sortBy = params?.sortBy || 'created_at';
     const statusFilter = params?.statusFilter || 'all';
     
-    // Build query
+    // Build query - includes user_acquisition for tracking origin
     let query = ctx.supabase
       .from('users')
       .select(`
@@ -29,6 +29,14 @@ export async function listUsers(
           first_name,
           last_name,
           country
+        ),
+        user_acquisition (
+          source,
+          medium,
+          campaign,
+          content,
+          landing_page,
+          referrer
         )
       `);
     
@@ -77,10 +85,16 @@ export async function listUsers(
           .eq('user_id', user.id)
           .eq('is_active', true);
         
+        // Extract first acquisition record (there should only be one per user)
+        const acquisition = Array.isArray(user.user_acquisition) 
+          ? user.user_acquisition[0] 
+          : user.user_acquisition;
+        
         return {
           ...user,
           organizations_count: count || 0,
-          last_seen_at: presenceMap.get(user.id) || null
+          last_seen_at: presenceMap.get(user.id) || null,
+          acquisition: acquisition || null
         };
       })
     );
@@ -96,6 +110,80 @@ export async function listUsers(
     return success(sortedUsers);
   } catch (err: any) {
     console.error('listUsers error:', err);
+    return error(err.message || "Internal error");
+  }
+}
+
+/**
+ * Get recently registered users with their organization and acquisition data
+ */
+export async function getRecentlyRegisteredUsers(
+  ctx: AdminContext,
+  params?: { limit?: number }
+): Promise<AdminHandlerResult> {
+  try {
+    const limit = params?.limit || 10;
+    
+    // Fetch recently registered users with acquisition data
+    const { data: users, error: usersError } = await ctx.supabase
+      .from('users')
+      .select(`
+        id,
+        full_name,
+        email,
+        created_at,
+        user_acquisition (
+          source,
+          medium,
+          campaign
+        )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    
+    if (usersError) {
+      console.error('Error fetching recent users:', usersError);
+      return error("Failed to fetch recent users");
+    }
+    
+    if (!users || users.length === 0) {
+      return success([]);
+    }
+    
+    // Get organizations for each user via organization_members
+    const userIds = users.map(u => u.id);
+    const { data: memberships } = await ctx.supabase
+      .from('organization_members')
+      .select('user_id, organization:organizations(name)')
+      .in('user_id', userIds);
+    
+    // Create map of user -> organization name
+    const userOrgMap = new Map<string, string>();
+    memberships?.forEach((m: any) => {
+      if (!userOrgMap.has(m.user_id) && m.organization?.name) {
+        userOrgMap.set(m.user_id, m.organization.name);
+      }
+    });
+    
+    // Map users with organization and acquisition
+    const result = users.map(user => {
+      const acquisition = Array.isArray(user.user_acquisition) 
+        ? user.user_acquisition[0] 
+        : user.user_acquisition;
+      
+      return {
+        id: user.id,
+        full_name: user.full_name,
+        email: user.email,
+        created_at: user.created_at,
+        organization_name: userOrgMap.get(user.id) || null,
+        acquisition: acquisition || null
+      };
+    });
+    
+    return success(result);
+  } catch (err: any) {
+    console.error('getRecentlyRegisteredUsers error:', err);
     return error(err.message || "Internal error");
   }
 }

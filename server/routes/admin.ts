@@ -25,6 +25,7 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
 
   // ==================== USERS ====================
   app.get("/api/admin/users", usersController.getUsers);
+  app.get("/api/admin/users/recent", usersController.getRecentUsers);
   app.patch("/api/admin/users/:id", usersController.patchUser);
 
   // ==================== COUPONS ====================

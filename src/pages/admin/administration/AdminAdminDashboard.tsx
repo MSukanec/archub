@@ -8,6 +8,26 @@ import { es } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 
+// Helper to format user acquisition origin
+function formatAcquisitionOrigin(acquisition: { source?: string; medium?: string; campaign?: string } | null): string {
+  if (!acquisition || !acquisition.source) return 'Desconocido';
+  
+  const { source, medium, campaign } = acquisition;
+  
+  // If direct, show simple label
+  if (source === 'direct') return 'Directo';
+  
+  // Capitalize first letter of source
+  const formattedSource = source.charAt(0).toUpperCase() + source.slice(1);
+  
+  // Build origin string
+  const parts = [formattedSource];
+  if (medium) parts.push(`(${medium})`);
+  if (campaign) parts.push(`· ${campaign}`);
+  
+  return parts.join(' ');
+}
+
 function formatViewName(view: string | null): string {
   if (!view) return 'Sin ubicación';
   
@@ -203,40 +223,28 @@ export default function AdminAdminDashboard() {
     refetchInterval: 30000 // Auto-refresh cada 30 segundos
   })
 
-  // Últimos usuarios registrados con su organización
+  // Últimos usuarios registrados con su organización y origen (via backend endpoint)
   const { data: recentUsers, isLoading: loadingUsers } = useQuery({
     queryKey: ['recently-registered-users'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not available')
-
-      // Obtener los últimos usuarios registrados con su organización principal
-      const { data: users } = await supabase
-        .from('users')
-        .select('id, full_name, email, created_at')
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-      if (!users || users.length === 0) return []
-
-      // Obtener las organizaciones de cada usuario via organization_members
-      const userIds = users.map(u => u.id)
-      const { data: memberships } = await supabase
-        .from('organization_members')
-        .select('user_id, organization:organizations(name)')
-        .in('user_id', userIds)
-
-      // Crear mapa de usuario -> organización
-      const userOrgMap = new Map<string, string>()
-      memberships?.forEach((m: any) => {
-        if (!userOrgMap.has(m.user_id) && m.organization?.name) {
-          userOrgMap.set(m.user_id, m.organization.name)
+      
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No active session')
+      
+      const response = await fetch('/api/admin/users/recent?limit=10', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
         }
       })
-
-      return users.map(user => ({
-        ...user,
-        organization_name: userOrgMap.get(user.id) || null
-      }))
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to fetch recent users')
+      }
+      
+      return response.json()
     },
     enabled: !!supabase,
     staleTime: 30000,
@@ -425,6 +433,9 @@ export default function AdminAdminDashboard() {
                       <p className="font-semibold truncate text-sm">{user.full_name || user.email}</p>
                       <p className="text-xs text-muted-foreground truncate mt-0.5">
                         {user.organization_name || 'Sin organización'}
+                      </p>
+                      <p className="text-xs text-muted-foreground/70 truncate mt-0.5">
+                        Origen: {formatAcquisitionOrigin(user.acquisition)}
                       </p>
                     </div>
                     <div className="flex-shrink-0">
