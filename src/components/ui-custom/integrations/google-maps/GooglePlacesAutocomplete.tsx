@@ -102,8 +102,10 @@ export function GooglePlacesAutocomplete({
           placeDetails.timezone = '';
         }
 
-        onChange(placeDetails.address_full);
+        // Call onPlaceSelected FIRST to update coordinates immediately
         onPlaceSelected(placeDetails);
+        // Then update the input field
+        onChange(placeDetails.address_full);
         setStatus('idle');
       };
 
@@ -151,7 +153,7 @@ export function GooglePlacesAutocomplete({
       <div className="relative">
         <Input
           ref={inputRef}
-          value={value}
+          defaultValue={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={!isLoaded ? "Cargando Google Maps..." : placeholder}
           disabled={!isLoaded}
