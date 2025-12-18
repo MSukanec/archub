@@ -213,7 +213,7 @@ const AdminAdminUsers = () => {
           </Avatar>
           <div className="flex flex-col">
             <span className="font-medium text-sm">{user.full_name || 'Sin nombre'}</span>
-            <span className="text-xs text-muted-foreground">{user.email}</span>
+            <span className="text-sm text-muted-foreground">{user.email}</span>
           </div>
         </div>
       )
@@ -223,10 +223,7 @@ const AdminAdminUsers = () => {
       label: 'Orgs',
       width: '10%',
       render: (user: User) => (
-        <div className="flex items-center gap-1">
-          <Building className="h-3 w-3 text-muted-foreground" />
-          <span className="text-xs">{user.organizations_count}</span>
-        </div>
+        <span className="text-sm">{user.organizations_count}</span>
       )
     },
     {
@@ -234,7 +231,7 @@ const AdminAdminUsers = () => {
       label: 'Registro',
       width: '14%',
       render: (user: User) => (
-        <span className="text-xs text-muted-foreground">
+        <span className="text-sm text-muted-foreground">
           {format(new Date(user.created_at), 'dd/MM/yy', { locale: es })}
         </span>
       )
@@ -244,7 +241,7 @@ const AdminAdminUsers = () => {
       label: 'Origen',
       width: '20%',
       render: (user: User) => (
-        <span className="text-xs text-muted-foreground">
+        <span className="text-sm text-muted-foreground">
           {formatAcquisitionOrigin(user.acquisition || null)}
         </span>
       )

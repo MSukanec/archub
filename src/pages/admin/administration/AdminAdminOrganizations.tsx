@@ -75,112 +75,32 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
   );
 }
 
-// Hook para obtener todas las organizaciones (admin)
+// Hook para obtener todas las organizaciones (admin) desde backend optimizado
 function useAllOrganizations() {
   return useQuery({
     queryKey: ['admin-organizations'],
     queryFn: async () => {
       if (!supabase) throw new Error('Supabase not initialized');
-
-      const { data, error } = await supabase
-        .from('organizations')
-        .select(`
-          id,
-          name,
-          created_at,
-          is_active,
-          is_system,
-          plan_id,
-          created_by,
-          settings
-        `)
-        .eq('is_deleted', false)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching organizations:', error);
-        throw error;
-      }
-
-      // Obtener los planes y usuarios creadores
-      const planIds = Array.from(new Set(data.map(org => org.plan_id).filter(Boolean)));
-      const creatorIds = Array.from(new Set(data.map(org => org.created_by).filter(Boolean)));
       
-      const [plansResult, usersResult] = await Promise.all([
-        planIds.length > 0 ? supabase!
-          .from('plans')
-          .select('id, name')
-          .in('id', planIds) : { data: [], error: null },
-        creatorIds.length > 0 ? supabase!
-          .from('users')
-          .select('id, full_name, email, avatar_url')
-          .in('id', creatorIds) : { data: [], error: null }
-      ]);
-
-      // Mapear organizaciones con sus relaciones
-      const organizationsWithPlans = data.map(org => ({
-        ...org,
-        plan: plansResult.data?.find(plan => plan.id === org.plan_id) || null,
-        creator: usersResult.data?.find(user => user.id === org.created_by) || null
-      }));
-
-      console.log('Organizations with plans:', organizationsWithPlans);
-
-      // Obtener conteos y actividad en batch (optimizado)
-      const orgIds = organizationsWithPlans.map(org => org.id);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No active session');
       
-      const [membersResult, projectsResult, activityResult] = await Promise.all([
-        supabase!
-          .from('organization_members')
-          .select('organization_id')
-          .in('organization_id', orgIds),
-        supabase!
-          .from('projects')
-          .select('organization_id')
-          .in('organization_id', orgIds),
-        supabase!
-          .from('user_presence')
-          .select('org_id, last_seen_at')
-          .in('org_id', orgIds)
-          .order('last_seen_at', { ascending: false })
-      ]);
-
-      // Contar por organización
-      const membersCounts: Record<string, number> = {};
-      const projectsCounts: Record<string, number> = {};
-      const lastActivity: Record<string, string> = {};
-
-      membersResult.data?.forEach(m => {
-        membersCounts[m.organization_id] = (membersCounts[m.organization_id] || 0) + 1;
-      });
-
-      projectsResult.data?.forEach(p => {
-        projectsCounts[p.organization_id] = (projectsCounts[p.organization_id] || 0) + 1;
-      });
-
-      activityResult.data?.forEach(a => {
-        if (!lastActivity[a.org_id]) {
-          lastActivity[a.org_id] = a.last_seen_at;
+      const response = await fetch('/api/admin/organizations', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
         }
       });
-
-      const organizationsWithCounts = organizationsWithPlans.map(org => ({
-        ...org,
-        members_count: membersCounts[org.id] || 0,
-        projects_count: projectsCounts[org.id] || 0,
-        last_seen_at: lastActivity[org.id] || null
-      }));
-
-      // Ordenar por última actividad (más reciente primero)
-      const sortedOrganizations = organizationsWithCounts.sort((a, b) => {
-        if (!a.last_seen_at && !b.last_seen_at) return 0;
-        if (!a.last_seen_at) return 1; // Sin actividad al final
-        if (!b.last_seen_at) return -1; // Sin actividad al final
-        return new Date(b.last_seen_at).getTime() - new Date(a.last_seen_at).getTime();
-      });
-
-      return sortedOrganizations;
-    }
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch organizations');
+      }
+      
+      return response.json();
+    },
+    staleTime: 30000,
+    refetchInterval: 60000
   });
 }
 
@@ -349,9 +269,9 @@ const AdminAdminOrganizations = () => {
       width: '24%',
       render: (organization: Organization) => (
         <div>
-          <div className="font-bold">{organization.name}</div>
-          <div className="text-xs text-muted-foreground">
-            {organization.creator?.full_name || 'Usuario desconocido'}
+          <div className="font-bold text-sm">{organization.name}</div>
+          <div className="text-sm text-muted-foreground">
+            {organization.creator?.full_name || 'Desconocido'}
           </div>
         </div>
       ),
@@ -411,7 +331,7 @@ const AdminAdminOrganizations = () => {
             {organization.is_active ? 'Activa' : 'Inactiva'}
           </Badge>
           {organization.is_system && (
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-sm">
               <Crown className="w-3 h-3 mr-1" />
               Sistema
             </Badge>
@@ -468,7 +388,7 @@ const AdminAdminOrganizations = () => {
           <div className="text-center py-8 text-muted-foreground">
             <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
             <p className="text-sm">No se encontraron organizaciones</p>
-            <p className="text-xs">No hay organizaciones que coincidan con los filtros aplicados.</p>
+            <p className="text-sm">No hay organizaciones que coincidan con los filtros aplicados.</p>
           </div>
         }
       />

@@ -2,6 +2,7 @@ import type { Express } from "express";
 import type { RouteDeps } from './_base';
 import * as dashboardController from '../controllers/admin/dashboard.controller.js';
 import * as usersController from '../controllers/admin/users.controller.js';
+import * as organizationsController from '../controllers/admin/organizations.controller.js';
 import * as couponsController from '../controllers/admin/coupons.controller.js';
 import * as coursesController from '../controllers/admin/courses.controller.js';
 import * as modulesController from '../controllers/admin/modules.controller.js';
@@ -27,6 +28,9 @@ export function registerAdminRoutes(app: Express, deps: RouteDeps): void {
   app.get("/api/admin/users", usersController.getUsers);
   app.get("/api/admin/users/recent", usersController.getRecentUsers);
   app.patch("/api/admin/users/:id", usersController.patchUser);
+
+  // ==================== ORGANIZATIONS ====================
+  app.get("/api/admin/organizations", organizationsController.getOrganizations);
 
   // ==================== COUPONS ====================
   app.get("/api/admin/coupons", couponsController.getCoupons);
