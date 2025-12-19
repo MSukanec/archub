@@ -116,11 +116,11 @@ export function ComboBox({
         </button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[--radix-popover-trigger-width] p-0 bg-[var(--popover-bg)] border-[var(--card-border)] shadow-lg max-h-60 overflow-hidden" 
+        className="w-[--radix-popover-trigger-width] p-0 bg-[var(--card-bg)] border-[var(--card-border)] shadow-lg max-h-60 overflow-hidden" 
         align="start" 
         style={{ zIndex: 9999 }}
       >
-        <Command className="bg-[var(--popover-bg)]" shouldFilter={false}>
+        <Command className="bg-[var(--card-bg)]" shouldFilter={false}>
           <CommandInput 
             placeholder={searchPlaceholder}
             value={onSearchChange ? searchQuery : searchValue}
@@ -131,7 +131,7 @@ export function ComboBox({
                 setSearchValue(value);
               }
             }}
-            className="text-xs bg-[var(--popover-bg)] border-none text-foreground placeholder:text-[var(--input-placeholder)]"
+            className="text-xs bg-[var(--card-bg)] border-none text-[var(--card-fg)] placeholder:text-[var(--input-placeholder)]"
           />
           <CommandList className="max-h-48 overflow-y-auto scrollbar-thin">
             {filteredOptions.length === 0 && !canCreateNew && (
