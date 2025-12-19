@@ -50,5 +50,4 @@ export {
   allCapitalRules,
 } from './rules/capital-rules';
 
-export { DataHealthAlert } from './components/DataHealthAlert';
 export { DataHealthAlertMulti } from './components/DataHealthAlertMulti';

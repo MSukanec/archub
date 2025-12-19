@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { useCapitalDataHealth, DataHealthAlert, type NormalizedCapitalTransaction } from '@/core/data-health';
+import { useCapitalDataHealth, DataHealthAlertMulti, type NormalizedCapitalTransaction } from '@/core/data-health';
 
 const periodOptions: { value: PeriodFilter; label: string }[] = [
   { value: '30d', label: 'Últimos 30 días' },
@@ -238,13 +238,15 @@ export default function Capital() {
   return (
     <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-6">
-        <DataHealthAlert
-          affectedCount={dataHealth.affectedIds.size}
-          entityLabel="transacción"
-          isFiltering={showOnlyProblems}
-          onToggleFilter={handleDataHealthClick}
-          showClearButton
-        />
+        {dataHealth.result?.issues && (
+          <DataHealthAlertMulti
+            issues={dataHealth.result.issues}
+            entityLabel="transacción"
+            isFiltering={showOnlyProblems}
+            onToggleFilter={handleDataHealthClick}
+            showClearButton
+          />
+        )}
         {renderTabContent()}
       </div>
     </Layout>
