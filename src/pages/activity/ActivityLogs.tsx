@@ -101,16 +101,21 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
     {
       key: 'action' as const,
       label: 'Acción',
-      type: 'badge' as const,
+      type: 'medium-text' as const,
       sortable: false,
       render: (activity: ActivityLog) => {
         const displayInfo = getActivityDisplayInfo(activity);
         return (
-          <Badge 
-            variant={displayInfo.variant}
-          >
-            {displayInfo.label}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge 
+              variant={displayInfo.variant}
+            >
+              {displayInfo.label}
+            </Badge>
+            <span className="text-xs text-muted-foreground">
+              por {activity.user?.full_name || 'Usuario'}
+            </span>
+          </div>
         );
       }
     },
