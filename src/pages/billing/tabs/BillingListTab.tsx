@@ -20,6 +20,7 @@ import { useCurrentUser, refreshCurrentUserCache } from '@/hooks/use-current-use
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useGlobalModalStore } from '@/components/modal';
 import { useLocation } from 'wouter';
+import { getPlanConfig } from '@/features/shared-content/pricing/data/plans-config';
 
 interface OrganizationSubscription {
   id: string;
@@ -481,11 +482,23 @@ export function BillingListTab() {
                   Cambio Programado → {subscription?.scheduled_downgrade_plan?.name}
                 </Badge>
               )}
-              <Badge 
-                className={`text-xs text-white ${getPlanBadgeClass(planSlug)}`}
-              >
-                {planName}
-              </Badge>
+              {(() => {
+                const planConfig = getPlanConfig(planName);
+                const PlanIcon = planConfig.icon;
+                return (
+                  <Badge 
+                    variant="secondary"
+                    className="text-xs text-white gap-1.5"
+                    style={{
+                      backgroundColor: planConfig.iconColor,
+                      color: 'white'
+                    }}
+                  >
+                    <PlanIcon className="h-3.5 w-3.5" />
+                    {planName}
+                  </Badge>
+                );
+              })()}
             </div>
           </div>
           <CardDescription className="mb-4">
