@@ -2,8 +2,8 @@ import type { DataHealthRule, NormalizedPayment, DataIssue } from '../types';
 
 export const capitalMissingExchangeRateRule: DataHealthRule<NormalizedPayment> = {
   id: 'capital-missing-exchange-rate',
-  name: 'Transacciones sin cotización válida',
-  description: 'Detecta transacciones de capital en moneda extranjera que no tienen cotización válida (null, 0, o 1)',
+  name: 'Cotización de moneda no configurada',
+  description: 'Detecta transacciones de capital en moneda extranjera sin cotización válida. La cotización es necesaria para calcular correctamente los totales.',
   category: 'currency',
   appliesTo: ['capital'],
   check: (transactions, ctx) => {
@@ -20,8 +20,8 @@ export const capitalMissingExchangeRateRule: DataHealthRule<NormalizedPayment> =
     return {
       id: `${ctx.organizationId}-capital-missing-exchange-rate`,
       ruleId: 'capital-missing-exchange-rate',
-      title: 'Transacciones sin cotización válida',
-      description: `${affected.length} transacción${affected.length > 1 ? 'es' : ''} en moneda extranjera con cotización inválida (debe ser mayor a 1). Los totales en moneda base son incorrectos.`,
+      title: `${affected.length} transacción${affected.length > 1 ? 'es' : ''} sin cotización`,
+      description: `${affected.length} transacción${affected.length > 1 ? 'es' : ''} de capital registrada${affected.length > 1 ? 's' : ''} en moneda extranjera no ${affected.length > 1 ? 'tienen' : 'tiene'} cotización válida (debe ser mayor a 1). Sin esta información, los cálculos de capital y patrimonio de los socios no son precisos.`,
       severity: 'critical',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(t => ({ 
@@ -29,8 +29,8 @@ export const capitalMissingExchangeRateRule: DataHealthRule<NormalizedPayment> =
         label: t.label || `Transacción #${t.id}` 
       })),
       recommendedAction: {
-        label: 'Corregir cotización',
-        description: 'Editar las transacciones para agregar la cotización correcta (ej: 1 USD = 1400 ARS)',
+        label: 'Configurar cotización',
+        description: 'Abrir cada transacción y establecer la cotización correcta del tipo de cambio (ej: 1 USD = 1400 ARS). Esta cotización se usa para convertir los montos a la moneda base.',
         actionType: 'bulk_edit',
         targetIds: affected.map(t => t.id),
       },

@@ -71,8 +71,8 @@ export const paymentsWithoutProjectRule: DataHealthRule<NormalizedPayment> = {
 
 export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> = {
   id: 'finances-invalid-exchange-rate',
-  name: 'Sin cotización válida',
-  description: 'Detecta movimientos en moneda extranjera sin cotización válida (debe ser mayor a 1)',
+  name: 'Cotización de moneda no configurada',
+  description: 'Detecta movimientos en moneda extranjera sin cotización válida. La cotización es requerida para convertir a moneda base.',
   category: 'currency',
   appliesTo: ['finances'],
   check: (payments, ctx) => {
@@ -88,8 +88,8 @@ export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> 
     return {
       id: `${ctx.organizationId}-finances-invalid-exchange-rate`,
       ruleId: 'finances-invalid-exchange-rate',
-      title: 'Sin cotización válida',
-      description: `${affected.length} movimiento${affected.length > 1 ? 's' : ''} en moneda extranjera con cotización inválida (debe ser mayor a 1). Los totales son incorrectos.`,
+      title: `${affected.length} movimiento${affected.length > 1 ? 's' : ''} con cotización faltante o inválida`,
+      description: `Tu organización opera con múltiples monedas, pero ${affected.length} movimiento${affected.length > 1 ? 's' : ''} financiero${affected.length > 1 ? 's' : ''} no ${affected.length > 1 ? 'tienen' : 'tiene'} cotización válida. Sin la cotización correcta (debe ser > 1), los totales en la moneda base son incorrectos y los cálculos del balance no son confiables.`,
       severity: 'critical',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 
@@ -97,8 +97,8 @@ export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> 
         label: p.label || `Movimiento #${p.id}` 
       })),
       recommendedAction: {
-        label: 'Corregir cotización',
-        description: 'Editar los movimientos para agregar la cotización correcta (ej: 1 USD = 1400 ARS)',
+        label: 'Agregar cotización',
+        description: 'Editar cada movimiento y configurar la cotización correcta entre monedas (ej: 1 USD = 1400 ARS). Esta cotización se usa para convertir el monto a la moneda base.',
         actionType: 'bulk_edit',
         targetIds: affected.map(p => p.id),
       },
