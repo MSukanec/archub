@@ -68,7 +68,7 @@ export interface UpdateUserOrganizationPreferencesInput {
 export interface ActivityDisplayInfo {
   icon: string;
   label: string;
-  color: string;
+  variant: any; // BadgeVariant from @/components/ui/badge
   description: string;
   title: string;
 }

@@ -66,6 +66,7 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
     {
       key: 'created_at' as const,
       label: 'Fecha',
+      type: 'datetime' as const,
       sortable: true,
       sortType: 'date' as const,
       render: (activity: ActivityLog) => (
@@ -85,6 +86,7 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
     {
       key: 'user' as const,
       label: 'Usuario',
+      type: 'avatar' as const,
       sortable: false,
       render: (activity: ActivityLog) => (
         <IdentityBadge
@@ -99,13 +101,13 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
     {
       key: 'action' as const,
       label: 'Acción',
+      type: 'badge' as const,
       sortable: false,
       render: (activity: ActivityLog) => {
         const displayInfo = getActivityDisplayInfo(activity);
         return (
           <Badge 
-            variant="default" 
-            className={`text-xs ${displayInfo.color}`}
+            variant={displayInfo.variant}
           >
             {displayInfo.label}
           </Badge>
@@ -115,6 +117,7 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
     {
       key: 'description' as const,
       label: 'Detalle',
+      type: 'long-text' as const,
       sortable: false,
       render: (activity: ActivityLog) => {
         const displayInfo = getActivityDisplayInfo(activity);

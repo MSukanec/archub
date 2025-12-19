@@ -1,5 +1,6 @@
 import { ACTIVITY_ACTIONS } from '@/utils/logActivity';
 import type { ActivityLog, ActivityDisplayInfo } from '../types';
+import type { BadgeVariant } from '@/components/ui/badge';
 
 /**
  * Obtiene información de display para un log de actividad.
@@ -7,25 +8,25 @@ import type { ActivityLog, ActivityDisplayInfo } from '../types';
  * Transforma el log de actividad en información visual que incluye:
  * - Icono apropiado según el tipo de acción
  * - Label descriptivo de la acción
- * - Color para UI
+ * - Variante semántica para Badge
  * - Descripción detallada basada en metadata
  * 
  * @param log - Log de actividad a procesar
- * @returns Información de display con icon, label, color, description y title
+ * @returns Información de display con icon, label, variant, description y title
  */
 export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
   const { action, target_table, metadata } = log;
 
-  const getActionColorClass = (color: string): string => {
-    const colorMap: Record<string, string> = {
-      'blue': 'bg-blue-100/50 text-blue-700 border-blue-300 hover:bg-blue-100',
-      'yellow': 'bg-amber-100/50 text-amber-700 border-amber-300 hover:bg-amber-100',
-      'red': 'bg-red-100/50 text-red-700 border-red-300 hover:bg-red-100',
-      'green': 'bg-green-100/50 text-green-700 border-green-300 hover:bg-green-100',
-      'purple': 'bg-purple-100/50 text-purple-700 border-purple-300 hover:bg-purple-100',
-      'gray': 'bg-gray-100/50 text-gray-700 border-gray-300 hover:bg-gray-100'
+  const getActionBadgeVariant = (color: string): BadgeVariant => {
+    const variantMap: Record<string, BadgeVariant> = {
+      'blue': 'info',
+      'yellow': 'warning',
+      'red': 'error',
+      'green': 'success',
+      'purple': 'info',
+      'gray': 'neutral'
     };
-    return colorMap[color] || colorMap['gray'];
+    return variantMap[color] || 'neutral';
   };
 
   const actionInfo: Record<string, { icon: string; label: string; color: string }> = {
@@ -78,7 +79,7 @@ export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
   };
 
   const info = actionInfo[action] || { icon: '📊', label: 'Actividad', color: 'gray' };
-  const colorClass = getActionColorClass(info.color);
+  const variant = getActionBadgeVariant(info.color);
 
   let description = '';
   
@@ -143,7 +144,7 @@ export function getActivityDisplayInfo(log: ActivityLog): ActivityDisplayInfo {
 
   return {
     ...info,
-    color: colorClass,
+    variant,
     description: description || `Actividad en ${target_table}`,
     title: info.label
   };
