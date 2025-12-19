@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo } from 'react'
-import { DollarSign, Users, Package, CreditCard, TrendingUp, TrendingDown, Briefcase } from 'lucide-react'
-import { Link } from 'wouter'
+import { DollarSign, Users, Package, CreditCard, TrendingUp, TrendingDown, Briefcase, ExternalLink } from 'lucide-react'
+import { useLocation } from 'wouter'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -150,6 +150,7 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
   const [selectedType, setSelectedType] = useState<MovementType | null>(null)
   const [selectedProjectIdForMovement, setSelectedProjectIdForMovement] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
+  const [, navigate] = useLocation()
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const { data: projects = [] } = useProjectsLite()
 
@@ -241,23 +242,28 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
               {MOVEMENT_TYPES.map((type) => {
                 const nav = MOVEMENT_NAVIGATION[type.id];
                 const navigateUrl = organizationId ? nav.path(organizationId) : '#';
+                const IconComponent = type.icon;
                 
                 return (
                   <SelectItem key={type.id} value={type.id}>
-                    <div className="flex items-center justify-between w-full gap-4">
-                      <span className={type.color}>{type.label}</span>
-                      <Link
-                        href={navigateUrl}
+                    <div className="flex items-center justify-between w-full gap-3">
+                      <div className="flex items-center gap-2">
+                        <IconComponent className={cn("w-4 h-4", type.color)} />
+                        <span className={type.color}>{type.label}</span>
+                      </div>
+                      <button
+                        type="button"
                         onClick={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
+                          navigate(navigateUrl);
+                          onClose();
                         }}
-                        className={cn(
-                          "text-xs font-medium",
-                          "text-[var(--accent)] hover:opacity-80 transition-opacity"
-                        )}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        title={`Ir a ${nav.label}`}
                       >
-                        Ir a {nav.label}
-                      </Link>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </SelectItem>
                 );
