@@ -8,7 +8,7 @@ import { HandHeart, Plus, TrendingUp, TrendingDown, ChevronDown, Check } from 'l
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
-import { usePartnerContributions, usePartnerWithdrawals } from '@/features/capital';
+import { usePartners, usePartnerContributions, usePartnerWithdrawals } from '@/features/capital';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { Button } from '@/components/ui/button';
 import {
@@ -42,6 +42,8 @@ export default function Capital() {
 
   const organizationId = userData?.organization?.id;
 
+  const { data: partners = [] } = usePartners(organizationId);
+  const hasPartners = partners.length > 0;
   const { data: contributions = [] } = usePartnerContributions(organizationId);
   const { data: withdrawals = [] } = usePartnerWithdrawals(organizationId);
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
@@ -118,8 +120,8 @@ export default function Capital() {
   const tabs = [
     { id: 'dashboard', label: 'Visión General', isActive: activeTab === 'dashboard' },
     { id: 'list', label: 'Participantes', isActive: activeTab === 'list' },
-    { id: 'balances', label: 'Balances', isActive: activeTab === 'balances' },
-    { id: 'transactions', label: 'Transacciones', isActive: activeTab === 'transactions' }
+    { id: 'balances', label: 'Balances', isActive: activeTab === 'balances', disabled: !hasPartners },
+    { id: 'transactions', label: 'Transacciones', isActive: activeTab === 'transactions', disabled: !hasPartners }
   ];
 
   const renderTabContent = () => {

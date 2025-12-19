@@ -549,8 +549,10 @@ export default function CapitalDashboardTab({
     return (
       <EmptyState
         icon={<Users />}
-        title="No hay datos de participantes"
-        description="Agrega participantes y registra aportes o retiros para ver las métricas aquí."
+        title="No hay participantes configurados"
+        description="Comienza agregando participantes de capital para gestionar aportes y retiros. Una vez agregues participantes, podrás ver el resumen de capital y las transacciones aquí."
+        actionLabel="Agregar Participante"
+        onActionClick={onNavigateToList}
       />
     );
   }
