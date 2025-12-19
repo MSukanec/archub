@@ -271,7 +271,7 @@ export function OrganizationFinancesMovementsTab() {
     {
       key: 'project',
       label: 'Proyecto',
-      type: 'badge' as const,
+      type: 'name' as const,
       sortable: true,
       render: (movement) => {
         if (!movement.project) return <span className="text-muted-foreground text-sm">-</span>;
@@ -330,7 +330,10 @@ export function OrganizationFinancesMovementsTab() {
         const isPositive = movement.signed_amount >= 0;
         return (
           <div className="flex flex-col items-end">
-            <span className={`text-sm font-bold ${isPositive ? 'text-chart-positive' : 'text-chart-negative'}`}>
+            <span 
+              className="text-sm font-bold"
+              style={{ color: isPositive ? 'var(--positive)' : 'var(--negative)' }}
+            >
               {isPositive ? '+' : '-'}{formatCurrency(movement.amount, movement.currency?.symbol)}
             </span>
             {movement.exchange_rate && (
