@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Activity as ActivityIcon, Eye } from 'lucide-react';
+import { Activity as ActivityIcon } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 import { Badge } from '@/components/ui/badge';
@@ -148,13 +148,6 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
           data={activities}
           columns={columns}
           onRowClick={handleActivityClick}
-          rowActions={(activity) => [
-            {
-              icon: Eye,
-              label: 'Ver detalles',
-              onClick: () => handleActivityClick(activity)
-            }
-          ]}
           emptyStateConfig={{
             title: "No hay actividades registradas",
             description: "Cuando se realicen acciones en la organización, aparecerán aquí."

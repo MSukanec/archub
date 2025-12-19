@@ -65,10 +65,12 @@ export interface UpdateUserOrganizationPreferencesInput {
   lastProjectId: string | null;
 }
 
+import type { BadgeVariant } from '@/components/ui/badge';
+
 export interface ActivityDisplayInfo {
   icon: string;
   label: string;
-  variant: any; // BadgeVariant from @/components/ui/badge
+  variant: BadgeVariant;
   description: string;
   title: string;
 }
