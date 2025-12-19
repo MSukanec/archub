@@ -230,9 +230,9 @@ export function OrganizationFinancesMovementsTab() {
     {
       key: 'payment_date',
       label: 'Fecha',
+      type: 'date' as const,
       sortable: true,
       sortType: 'date',
-      width: 'minmax(90px, 1fr)',
       render: (movement) => {
         const date = parseLocalDate(movement.payment_date);
         return date ? format(date, 'dd/MM/yyyy') : '-';
@@ -241,8 +241,8 @@ export function OrganizationFinancesMovementsTab() {
     {
       key: 'movement_type',
       label: 'Tipo',
+      type: 'name' as const,
       sortable: true,
-      width: 'minmax(160px, 2fr)',
       render: (movement) => {
         const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
         const creatorName = movement.creator_full_name || '';
@@ -271,8 +271,8 @@ export function OrganizationFinancesMovementsTab() {
     {
       key: 'project',
       label: 'Proyecto',
+      type: 'badge' as const,
       sortable: true,
-      width: 'minmax(120px, 1.5fr)',
       render: (movement) => {
         if (!movement.project) return <span className="text-muted-foreground text-sm">-</span>;
         const projectColor = movement.project.color;
@@ -295,8 +295,8 @@ export function OrganizationFinancesMovementsTab() {
     {
       key: 'description',
       label: 'Detalle',
+      type: 'long-text' as const,
       sortable: true,
-      width: 'minmax(150px, 2fr)',
       render: (movement) => (
         <div className="flex items-center gap-1.5 min-w-0">
           {movement.has_attachments && (
@@ -314,8 +314,8 @@ export function OrganizationFinancesMovementsTab() {
     {
       key: 'wallet',
       label: 'Billetera',
+      type: 'wallet' as const,
       sortable: true,
-      width: 'minmax(100px, 1.2fr)',
       render: (movement) => (
         <span className="text-sm truncate" title={movement.wallet?.name}>{movement.wallet?.name || '-'}</span>
       ),
@@ -323,10 +323,9 @@ export function OrganizationFinancesMovementsTab() {
     {
       key: 'amount',
       label: 'Monto',
+      type: 'amount' as const,
       sortable: true,
       sortType: 'number',
-      width: 'minmax(110px, 1.5fr)',
-      align: 'right',
       render: (movement) => {
         const isPositive = movement.signed_amount >= 0;
         return (
