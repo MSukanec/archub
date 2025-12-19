@@ -72,13 +72,14 @@ export const paymentsWithoutProjectRule: DataHealthRule<NormalizedPayment> = {
 export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> = {
   id: 'finances-invalid-exchange-rate',
   name: 'Sin cotización válida',
-  description: 'Detecta movimientos en moneda extranjera sin cotización válida',
+  description: 'Detecta movimientos en moneda extranjera sin cotización válida (debe ser mayor a 1)',
   category: 'currency',
   appliesTo: ['finances'],
   check: (payments, ctx) => {
+    const minValidRate = 1.0;
     const affected = payments.filter(p => {
       const isForeignCurrency = p.currencyId && ctx.defaultCurrencyId && p.currencyId !== ctx.defaultCurrencyId;
-      const hasInvalidRate = p.exchangeRate == null || p.exchangeRate <= 0 || Number.isNaN(p.exchangeRate);
+      const hasInvalidRate = !p.exchangeRate || p.exchangeRate <= minValidRate || Number.isNaN(p.exchangeRate);
       return isForeignCurrency && hasInvalidRate;
     });
     
@@ -88,7 +89,7 @@ export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> 
       id: `${ctx.organizationId}-finances-invalid-exchange-rate`,
       ruleId: 'finances-invalid-exchange-rate',
       title: 'Sin cotización válida',
-      description: `${affected.length} movimiento${affected.length > 1 ? 's' : ''} en moneda extranjera sin cotización válida.`,
+      description: `${affected.length} movimiento${affected.length > 1 ? 's' : ''} en moneda extranjera con cotización inválida (debe ser mayor a 1). Los totales son incorrectos.`,
       severity: 'critical',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 
@@ -97,7 +98,7 @@ export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> 
       })),
       recommendedAction: {
         label: 'Corregir cotización',
-        description: 'Editar los movimientos para agregar la cotización correcta',
+        description: 'Editar los movimientos para agregar la cotización correcta (ej: 1 USD = 1400 ARS)',
         actionType: 'bulk_edit',
         targetIds: affected.map(p => p.id),
       },
