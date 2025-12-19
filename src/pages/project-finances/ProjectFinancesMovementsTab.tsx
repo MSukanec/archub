@@ -214,7 +214,7 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
     });
   };
 
-  const columns: Column<UnifiedMovementWithRelations>[] = useMemo(() => [
+  const columns: Column<UnifiedMovementWithRelations>[] = [
     {
       key: 'payment_date',
       label: 'Fecha',
@@ -307,7 +307,7 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
         );
       },
     },
-  ], []);
+  ];
 
   const isCurrencyReady = !!defaultCurrency;
   const currencySymbol = defaultCurrency?.symbol || '$';

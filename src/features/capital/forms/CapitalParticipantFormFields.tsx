@@ -311,17 +311,17 @@ export function CapitalParticipantFormFields({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Estado</FormLabel>
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
                   <SelectTrigger data-testid="select-status">
                     <SelectValue placeholder="Seleccionar estado..." />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Activo</SelectItem>
-                    <SelectItem value="inactive">Inactivo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormControl>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="active">Activo</SelectItem>
+                  <SelectItem value="inactive">Inactivo</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

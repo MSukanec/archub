@@ -222,7 +222,7 @@ export function OrganizationFinancesMovementsTab() {
     });
   };
 
-  const columns: Column<UnifiedMovementWithRelations>[] = useMemo(() => [
+  const columns: Column<UnifiedMovementWithRelations>[] = [
     {
       key: 'payment_date',
       label: 'Fecha',
@@ -341,7 +341,7 @@ export function OrganizationFinancesMovementsTab() {
         );
       },
     },
-  ], []);
+  ];
 
   const isCurrencyReady = !!defaultCurrency;
   const currencySymbol = defaultCurrency?.symbol || '$';

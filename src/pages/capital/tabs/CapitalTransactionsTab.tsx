@@ -274,7 +274,7 @@ export function CapitalTransactionsTab({
     });
   };
 
-  const columns: Column<UnifiedTransaction>[] = useMemo(() => [
+  const columns: Column<UnifiedTransaction>[] = [
     {
       key: 'date',
       label: 'Fecha',
@@ -367,7 +367,7 @@ export function CapitalTransactionsTab({
         );
       },
     },
-  ], []);
+  ];
 
   const rowActions = (item: UnifiedTransaction) => [
     {

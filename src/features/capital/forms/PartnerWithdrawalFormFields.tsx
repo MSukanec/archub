@@ -397,35 +397,31 @@ export function PartnerWithdrawalFormFields({
           <FormField
             control={form.control}
             name="wallet_id"
-            render={({ field }) => {
-              const walletItems = useMemo(() => wallets?.map((orgWallet) => (
-                <SelectItem 
-                  key={orgWallet.id} 
-                  value={orgWallet.id}
-                >
-                  {orgWallet.wallets?.name || 'Sin nombre'}
-                </SelectItem>
-              )) || [], [wallets]);
-              
-              return (
-                <FormItem>
-                  <FormLabel>
-                    Billetera <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange} disabled={walletsLoading}>
-                      <SelectTrigger data-testid="select-partner-withdrawal-wallet">
-                        <SelectValue placeholder="Seleccionar billetera" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[var(--card-bg)] text-[var(--card-fg)] border-[var(--card-border)]">
-                        {walletItems}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Billetera <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange} disabled={walletsLoading}>
+                    <SelectTrigger data-testid="select-partner-withdrawal-wallet">
+                      <SelectValue placeholder="Seleccionar billetera" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[var(--card-bg)] text-[var(--card-fg)] border-[var(--card-border)]">
+                      {wallets?.map((orgWallet) => (
+                        <SelectItem 
+                          key={orgWallet.id} 
+                          value={orgWallet.id}
+                        >
+                          {orgWallet.wallets?.name || 'Sin nombre'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
           <FormField
@@ -458,35 +454,31 @@ export function PartnerWithdrawalFormFields({
           <FormField
             control={form.control}
             name="currency_id"
-            render={({ field }) => {
-              const currencyItems = useMemo(() => currencies?.map((orgCurrency) => (
-                <SelectItem 
-                  key={orgCurrency.currency?.id} 
-                  value={orgCurrency.currency?.id || ''}
-                >
-                  {orgCurrency.currency?.name} ({orgCurrency.currency?.symbol})
-                </SelectItem>
-              )) || [], [currencies]);
-              
-              return (
-                <FormItem>
-                  <FormLabel>
-                    Moneda <span className="text-red-500">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange} disabled={currenciesLoading}>
-                      <SelectTrigger data-testid="select-partner-withdrawal-currency">
-                        <SelectValue placeholder="Seleccionar moneda" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[var(--card-bg)] text-[var(--card-fg)] border-[var(--card-border)]">
-                        {currencyItems}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Moneda <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange} disabled={currenciesLoading}>
+                    <SelectTrigger data-testid="select-partner-withdrawal-currency">
+                      <SelectValue placeholder="Seleccionar moneda" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[var(--card-bg)] text-[var(--card-fg)] border-[var(--card-border)]">
+                      {currencies?.map((orgCurrency) => (
+                        <SelectItem 
+                          key={orgCurrency.currency?.id} 
+                          value={orgCurrency.currency?.id || ''}
+                        >
+                          {orgCurrency.currency?.name} ({orgCurrency.currency?.symbol})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
           <FormField

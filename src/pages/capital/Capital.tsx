@@ -4,11 +4,11 @@ import CapitalDashboardTab, { calculateAvailablePeriods, type PeriodFilter } fro
 import { CapitalParticipantsListTab } from '@/pages/capital/tabs/CapitalParticipantsListTab';
 import { CapitalBalancesTab } from '@/pages/capital/tabs/CapitalBalancesTab';
 import { CapitalTransactionsTab } from '@/pages/capital/tabs/CapitalTransactionsTab';
-import { HandHeart, Plus, TrendingUp, TrendingDown, ChevronDown, Check, Calendar } from 'lucide-react';
+import { HandHeart, Plus, TrendingUp, TrendingDown, ChevronDown, Check } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
-import { usePartners, usePartnerContributions, usePartnerWithdrawals } from '@/features/capital';
+import { usePartnerContributions, usePartnerWithdrawals } from '@/features/capital';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 import { useCapitalDataHealth, DataHealthAlert, type NormalizedCapitalTransaction } from '@/core/data-health';
 
 const periodOptions: { value: PeriodFilter; label: string }[] = [
@@ -41,12 +42,9 @@ export default function Capital() {
 
   const organizationId = userData?.organization?.id;
 
-  const { data: partners = [] } = usePartners(organizationId);
   const { data: contributions = [] } = usePartnerContributions(organizationId);
   const { data: withdrawals = [] } = usePartnerWithdrawals(organizationId);
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
-
-  const hasParticipants = partners.length > 0;
 
   const availablePeriods = useMemo(() => {
     return calculateAvailablePeriods(contributions, withdrawals);
@@ -120,8 +118,8 @@ export default function Capital() {
   const tabs = [
     { id: 'dashboard', label: 'Visión General', isActive: activeTab === 'dashboard' },
     { id: 'list', label: 'Participantes', isActive: activeTab === 'list' },
-    { id: 'balances', label: 'Balances', isActive: activeTab === 'balances', disabled: !hasParticipants },
-    { id: 'transactions', label: 'Transacciones', isActive: activeTab === 'transactions', disabled: !hasParticipants }
+    { id: 'balances', label: 'Balances', isActive: activeTab === 'balances' },
+    { id: 'transactions', label: 'Transacciones', isActive: activeTab === 'transactions' }
   ];
 
   const renderTabContent = () => {
@@ -162,15 +160,13 @@ export default function Capital() {
 
   const periodFilterComponent = activeTab === 'dashboard' ? (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        className="bg-accent text-white hover:bg-accent/90 rounded-lg px-3 py-1.5 gap-2 text-sm font-medium shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 inline-flex items-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
-        data-testid="select-period"
-      >
-        <Calendar className="h-4 w-4" />
-        <span>{periodOptions.find(p => p.value === selectedPeriod)?.label}</span>
-        <ChevronDown className="h-4 w-4" />
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="h-8 gap-1" data-testid="button-period-filter">
+          {periodOptions.find(p => p.value === selectedPeriod)?.label}
+          <ChevronDown className="h-4 w-4" />
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[180px]">
+      <DropdownMenuContent align="end" className="w-48">
         {periodOptions.map((option) => {
           const isAvailable = availablePeriods[option.value];
           return (
@@ -178,11 +174,16 @@ export default function Capital() {
               key={option.value}
               onClick={() => isAvailable && setSelectedPeriod(option.value)}
               disabled={!isAvailable}
-              className={selectedPeriod === option.value ? "font-medium text-black dark:text-white" : ""}
-              data-testid={`option-period-${option.value}`}
+              className={cn(
+                "flex items-center justify-between",
+                !isAvailable && "opacity-50 cursor-not-allowed"
+              )}
+              data-testid={`menu-item-period-${option.value}`}
             >
-              {option.label}
-              {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
+              <span>{option.label}</span>
+              {selectedPeriod === option.value && (
+                <Check className="h-4 w-4" />
+              )}
             </DropdownMenuItem>
           );
         })}

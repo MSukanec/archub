@@ -13,10 +13,8 @@ export function useDeleteContact() {
   return useMutation({
     mutationFn: ({ contactId, organizationId }: DeleteContactParams) => 
       softDeleteContact(contactId, organizationId),
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CONTACT_QUERY_KEYS.lists() });
-      queryClient.invalidateQueries({ queryKey: ['contacts-for-partner', variables.organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['partner-contact-ids', variables.organizationId] });
     },
   });
 }

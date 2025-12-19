@@ -9,8 +9,7 @@ import {
   BarChart3, 
   PieChart,
   ArrowDownCircle,
-  ArrowUpCircle,
-  Plus
+  ArrowUpCircle
 } from 'lucide-react';
 import { type InsightAction } from '@/components/dashboard/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis';
@@ -33,7 +32,6 @@ import {
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import { Button } from '@/components/ui/button';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
 import { MiniSparkline } from '@/components/charts/MiniSparkline';
@@ -553,26 +551,6 @@ export default function CapitalDashboardTab({
         icon={<Users />}
         title="No hay datos de participantes"
         description="Agrega participantes y registra aportes o retiros para ver las métricas aquí."
-      />
-    );
-  }
-
-  if (!hasData && partners.length > 0) {
-    return (
-      <EmptyState
-        icon={<TrendingUp className="w-12 h-12" />}
-        title="Todavía no hay transacciones de capital registradas"
-        description="Comienza registrando el primer aporte o retiro de los participantes para ver las métricas aquí."
-        action={
-          <Button
-            onClick={onNavigateToTransactions}
-            data-testid="button-create-first-transaction"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Registrar Primera Transacción
-          </Button>
-        }
-        data-testid="empty-dashboard-state"
       />
     );
   }
