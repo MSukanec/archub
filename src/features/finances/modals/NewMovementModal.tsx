@@ -32,19 +32,35 @@ interface MovementTypeConfig {
 
 const MOVEMENT_TYPES: MovementTypeConfig[] = [
   {
+    id: 'partner_contribution',
+    label: 'Aporte de Socio',
+    description: 'Registrar aporte de capital de un socio',
+    icon: TrendingUp,
+    color: 'text-[var(--positive)]',
+    submitLabel: 'Registrar Aporte',
+  },
+  {
     id: 'client_payment',
     label: 'Pago de Cliente',
     description: 'Registrar cobro de un cliente',
     icon: CreditCard,
-    color: 'text-green-600',
+    color: 'text-[var(--positive)]',
     submitLabel: 'Registrar Pago de Cliente',
+  },
+  {
+    id: 'general_cost_payment',
+    label: 'Pago de Gasto General',
+    description: 'Registrar pago de gastos generales',
+    icon: Briefcase,
+    color: 'text-[var(--negative)]',
+    submitLabel: 'Registrar Pago',
   },
   {
     id: 'material_payment',
     label: 'Pago de Material',
     description: 'Registrar pago por compra de materiales',
     icon: Package,
-    color: 'text-orange-600',
+    color: 'text-[var(--negative)]',
     submitLabel: 'Registrar Pago de Material',
   },
   {
@@ -52,32 +68,16 @@ const MOVEMENT_TYPES: MovementTypeConfig[] = [
     label: 'Pago de Personal',
     description: 'Registrar pago a personal de obra',
     icon: Users,
-    color: 'text-blue-600',
+    color: 'text-[var(--negative)]',
     submitLabel: 'Registrar Pago de Personal',
-  },
-  {
-    id: 'partner_contribution',
-    label: 'Aporte de Socio',
-    description: 'Registrar aporte de capital de un socio',
-    icon: TrendingUp,
-    color: 'text-emerald-600',
-    submitLabel: 'Registrar Aporte',
   },
   {
     id: 'partner_withdrawal',
     label: 'Retiro de Socio',
     description: 'Registrar retiro de capital de un socio',
     icon: TrendingDown,
-    color: 'text-rose-600',
+    color: 'text-[var(--negative)]',
     submitLabel: 'Registrar Retiro',
-  },
-  {
-    id: 'general_cost_payment',
-    label: 'Pago de Gasto General',
-    description: 'Registrar pago de gastos generales',
-    icon: Briefcase,
-    color: 'text-red-600',
-    submitLabel: 'Registrar Pago',
   },
 ]
 
@@ -245,7 +245,7 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
                 return (
                   <SelectItem key={type.id} value={type.id}>
                     <div className="flex items-center justify-between w-full gap-4">
-                      <span>{type.label}</span>
+                      <span className={type.color}>{type.label}</span>
                       <Link
                         href={navigateUrl}
                         onClick={(e) => {
