@@ -20,7 +20,7 @@ export const capitalMissingExchangeRateRule: DataHealthRule<NormalizedPayment> =
     return {
       id: `${ctx.organizationId}-capital-missing-exchange-rate`,
       ruleId: 'capital-missing-exchange-rate',
-      title: 'sin cotización válida (moneda extranjera requiere tipo de cambio, ej: 1 USD = 1400 ARS)',
+      title: 'sin cotización válida (moneda extranjera requiere tipo de cambio, ej: 1 USD = 1.400 ARS)',
       description: `${affected.length} transacción${affected.length > 1 ? 'es' : ''} en moneda extranjera necesita${affected.length > 1 ? 'n' : ''} que ingreses el tipo de cambio para calcular los totales correctamente.`,
       severity: 'critical',
       affectedCount: affected.length,

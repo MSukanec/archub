@@ -161,7 +161,7 @@ export function CapitalParticipantsListTab() {
     );
   }
 
-  const columns: Column<EnrichedPartner>[] = [
+  const columns: Column<EnrichedPartner>[] = useMemo(() => [
     {
       key: 'partnerName',
       label: 'Socio',
@@ -199,7 +199,7 @@ export function CapitalParticipantsListTab() {
         return partner.contacts?.phone || '-';
       },
     },
-  ];
+  ], []);
 
   // Show only empty state when no partners
   if (!isLoading && enrichedPartners.length === 0) {
