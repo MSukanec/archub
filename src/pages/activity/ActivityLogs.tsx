@@ -66,13 +66,13 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
     {
       key: 'created_at' as const,
       label: 'Fecha',
-      type: 'datetime' as const,
+      type: 'date' as const,
       sortable: true,
       sortType: 'date' as const,
       render: (activity: ActivityLog) => (
-        <div className="flex flex-col">
-          <span className="text-sm font-medium">
-            {activity.created_at ? format(new Date(activity.created_at), 'dd MMM yyyy', { locale: es }) : 'N/A'}
+        <div className="flex flex-col gap-0.5">
+          <span className="text-xs font-medium">
+            {activity.created_at ? format(new Date(activity.created_at), 'dd MMM', { locale: es }) : 'N/A'}
           </span>
           <span className="text-xs text-muted-foreground">
             {activity.created_at ? formatDistanceToNow(new Date(activity.created_at), { 
@@ -86,7 +86,7 @@ export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
     {
       key: 'user' as const,
       label: 'Usuario',
-      type: 'avatar' as const,
+      type: 'name' as const,
       sortable: false,
       render: (activity: ActivityLog) => (
         <IdentityBadge
