@@ -16,8 +16,8 @@ export const clientPaymentsWithoutClientRule: DataHealthRule<NormalizedPayment> 
     return {
       id: `${ctx.organizationId}-client-payments-without-client`,
       ruleId: 'client-payments-without-client',
-      title: 'Sin cliente asignado',
-      description: `${affected.length} pago${affected.length > 1 ? 's' : ''} de cliente sin cliente asignado.`,
+      title: 'sin cliente asignado (los pagos de cliente requieren seleccionar un cliente)',
+      description: `${affected.length} pago${affected.length > 1 ? 's' : ''} de cliente necesita${affected.length > 1 ? 'n' : ''} que selecciones un cliente.`,
       severity: 'warning',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 
@@ -51,8 +51,8 @@ export const paymentsWithoutProjectRule: DataHealthRule<NormalizedPayment> = {
     return {
       id: `${ctx.organizationId}-payments-without-project`,
       ruleId: 'payments-without-project',
-      title: 'Sin proyecto asignado',
-      description: `${affected.length} movimiento${affected.length > 1 ? 's' : ''} sin proyecto asignado.`,
+      title: 'sin proyecto asignado (este tipo de movimiento requiere seleccionar un proyecto)',
+      description: `${affected.length} movimiento${affected.length > 1 ? 's' : ''} de este tipo necesita${affected.length > 1 ? 'n' : ''} que selecciones un proyecto.`,
       severity: 'warning',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 
@@ -88,8 +88,8 @@ export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> 
     return {
       id: `${ctx.organizationId}-finances-invalid-exchange-rate`,
       ruleId: 'finances-invalid-exchange-rate',
-      title: 'Sin cotización válida',
-      description: `${affected.length} movimiento${affected.length > 1 ? 's' : ''} en moneda extranjera con cotización inválida (debe ser mayor a 1). Los totales son incorrectos.`,
+      title: 'sin cotización válida (moneda extranjera requiere tipo de cambio, ej: 1 USD = 1400 ARS)',
+      description: `${affected.length} movimiento${affected.length > 1 ? 's' : ''} en moneda extranjera necesita${affected.length > 1 ? 'n' : ''} que ingreses el tipo de cambio para calcular los totales correctamente.`,
       severity: 'critical',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 

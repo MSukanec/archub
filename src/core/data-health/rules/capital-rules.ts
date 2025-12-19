@@ -20,8 +20,8 @@ export const capitalMissingExchangeRateRule: DataHealthRule<NormalizedPayment> =
     return {
       id: `${ctx.organizationId}-capital-missing-exchange-rate`,
       ruleId: 'capital-missing-exchange-rate',
-      title: 'Transacciones sin cotización válida',
-      description: `${affected.length} transacción${affected.length > 1 ? 'es' : ''} en moneda extranjera con cotización inválida (debe ser mayor a 1). Los totales en moneda base son incorrectos.`,
+      title: 'sin cotización válida (moneda extranjera requiere tipo de cambio, ej: 1 USD = 1400 ARS)',
+      description: `${affected.length} transacción${affected.length > 1 ? 'es' : ''} en moneda extranjera necesita${affected.length > 1 ? 'n' : ''} que ingreses el tipo de cambio para calcular los totales correctamente.`,
       severity: 'critical',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(t => ({ 
@@ -52,8 +52,8 @@ export const capitalMissingWalletRule: DataHealthRule<NormalizedPayment> = {
     return {
       id: `${ctx.organizationId}-capital-missing-wallet`,
       ruleId: 'capital-missing-wallet',
-      title: 'Transacciones sin billetera',
-      description: `${affected.length} transacción${affected.length > 1 ? 'es' : ''} no tiene${affected.length > 1 ? 'n' : ''} billetera asignada.`,
+      title: 'sin billetera asignada (seleccioná de qué billetera salió o entró el dinero)',
+      description: `${affected.length} transacción${affected.length > 1 ? 'es' : ''} necesita${affected.length > 1 ? 'n' : ''} que selecciones una billetera.`,
       severity: 'warning',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(t => ({ 
@@ -94,7 +94,7 @@ export const capitalWithFutureDateRule: DataHealthRule<NormalizedPayment> = {
     return {
       id: `${ctx.organizationId}-capital-with-future-date`,
       ruleId: 'capital-with-future-date',
-      title: 'Transacciones con fecha futura',
+      title: 'con fecha futura (verificá que la fecha sea correcta)',
       description: `${affected.length} transacción${affected.length > 1 ? 'es' : ''} tiene${affected.length > 1 ? 'n' : ''} fecha posterior a hoy.`,
       severity: 'info',
       affectedCount: affected.length,
