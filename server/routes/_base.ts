@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Environment variables (exported for backward compatibility during migration)
-export const supabaseUrl = process.env.VITE_SUPABASE_URL;
-export const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+export const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+export const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 export const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
