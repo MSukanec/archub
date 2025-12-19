@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { SortDirection, SortType, Column, DefaultSort } from "../types";
 import { sortData } from "../utils";
 
@@ -25,11 +25,6 @@ export function useTableSort<T>({
   const [sortDirection, setSortDirection] = useState<SortDirection>(
     defaultSort?.direction || null
   );
-  
-  // Use ref for columns to avoid recreating getSortedData on column reference changes
-  // Columns are structurally stable (same keys/config) even if reference changes
-  const columnsRef = useRef(columns);
-  columnsRef.current = columns;
 
   const handleSort = useCallback(
     (key: string, _sortType?: SortType) => {
@@ -51,13 +46,11 @@ export function useTableSort<T>({
     [sortKey, sortDirection]
   );
 
-  // ENTERPRISE FIX: getSortedData now only depends on sortKey and sortDirection (primitives)
-  // This breaks the render feedback loop caused by columns reference changing
   const getSortedData = useCallback(
     (data: T[]): T[] => {
-      return sortData(data, sortKey, sortDirection, columnsRef.current);
+      return sortData(data, sortKey, sortDirection, columns);
     },
-    [sortKey, sortDirection]
+    [sortKey, sortDirection, columns]
   );
 
   const resetSort = useCallback(() => {

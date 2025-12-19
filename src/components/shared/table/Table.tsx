@@ -1,8 +1,8 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { useProjectReadOnlyContext } from "@/contexts/ProjectReadOnlyContext";
-import { MemoizedTableDesktop as TableDesktop } from "./TableDesktop";
-import { MemoizedTableMobile as TableMobile } from "./TableMobile";
+import { TableDesktop } from "./TableDesktop";
+import { TableMobile } from "./TableMobile";
 import { TableLoadingSkeleton } from "./TableLoadingSkeleton";
 import { useTableSort } from "./hooks/useTableSort";
 import { useTableFilter } from "./hooks/useTableFilter";
@@ -14,7 +14,6 @@ import {
   separateActiveInactive,
   sortData,
   groupData,
-  filterData,
 } from "./utils";
 import { DEFAULT_ITEMS_PER_PAGE } from "./constants";
 
@@ -72,8 +71,8 @@ export function Table<T = any>({
   });
 
   const filteredData = useMemo(() => {
-    return filterData(data, searchValue);
-  }, [data, searchValue]);
+    return getFilteredData(data);
+  }, [data, getFilteredData]);
 
   const processedData = useMemo(() => {
     if (getIsInactive) {
@@ -128,31 +127,29 @@ export function Table<T = any>({
   });
 
   const hasActions = !!rowActions;
-  
-  // ENTERPRISE FIX: Memoize gridTemplateColumns to prevent unnecessary recalculations
-  const gridTemplateColumns = useMemo(() => 
-    getGridTemplateColumns(columns, selectable, hasActions),
-    [columns.length, selectable, hasActions]
+  const gridTemplateColumns = getGridTemplateColumns(
+    columns,
+    selectable,
+    hasActions
   );
 
-  // ENTERPRISE FIX: Stable callback references to prevent child component re-renders
-  const handleSearchChange = useCallback((value: string) => {
+  const handleSearchChange = (value: string) => {
     setSearchInputValue(value);
     if (topBar?.onSearchChange) {
       topBar.onSearchChange(value);
     } else {
       setSearchValue(value);
     }
-  }, [topBar?.onSearchChange, setSearchValue]);
+  };
 
-  const handleClearFilters = useCallback(() => {
+  const handleClearFilters = () => {
     if (topBar?.onClearFilters) {
       topBar.onClearFilters();
     } else {
       clearFilters();
       setSearchInputValue("");
     }
-  }, [topBar?.onClearFilters, clearFilters]);
+  };
 
   const combinedIsFilterActive =
     topBar?.isFilterActive ?? (isFilterActive || searchInputValue.length > 0);

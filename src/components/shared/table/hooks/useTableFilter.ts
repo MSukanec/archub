@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Column } from "../types";
 import { filterData } from "../utils";
 
@@ -26,11 +26,6 @@ export function useTableFilter<T>({
 }: UseTableFilterOptions<T>): UseTableFilterReturn<T> {
   const [internalSearchValue, setInternalSearchValue] = useState("");
   const [filters, setFilters] = useState<Record<string, any>>({});
-  
-  // Use ref for columns to avoid recreating getFilteredData on column reference changes
-  // Columns are structurally stable (same keys/config) even if reference changes
-  const columnsRef = useRef(columns);
-  columnsRef.current = columns;
 
   const searchValue = externalSearchValue ?? internalSearchValue;
 
@@ -57,13 +52,11 @@ export function useTableFilter<T>({
     setFilters({});
   }, [setSearchValue]);
 
-  // ENTERPRISE FIX: getFilteredData now only depends on searchValue (primitive)
-  // This breaks the render feedback loop caused by columns reference changing
   const getFilteredData = useCallback(
     (data: T[]): T[] => {
-      return filterData(data, searchValue, columnsRef.current);
+      return filterData(data, searchValue, columns);
     },
-    [searchValue]
+    [searchValue, columns]
   );
 
   const isFilterActive = useMemo(() => {

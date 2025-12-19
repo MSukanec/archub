@@ -1,4 +1,4 @@
-import { Fragment, ReactNode, memo } from "react";
+import { Fragment, ReactNode } from "react";
 import {
   ChevronUp,
   ChevronDown,
@@ -382,7 +382,3 @@ export function TableDesktop<T>({
     </div>
   );
 }
-
-// ENTERPRISE FIX: Wrap in React.memo to prevent unnecessary re-renders
-// when parent Table component re-renders with stable prop values
-export const MemoizedTableDesktop = memo(TableDesktop) as typeof TableDesktop;
