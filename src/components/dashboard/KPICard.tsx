@@ -119,14 +119,14 @@ interface StatCardTrendProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const StatCardTrend = ({ direction, value, className, ...props }: StatCardTrendProps) => {
-  const colorClass = direction === 'up' 
-    ? 'text-red-600 dark:text-red-400' 
+  const colorStyle = direction === 'up' 
+    ? { color: 'var(--positive)' }
     : direction === 'down' 
-      ? 'text-green-600 dark:text-green-400' 
-      : 'text-muted-foreground'
+      ? { color: 'var(--negative)' }
+      : { color: 'var(--neutral)' }
   
   return (
-    <div className={cn("flex items-center gap-1 text-xs", colorClass, className)} {...props}>
+    <div className={cn("flex items-center gap-1 text-xs", className)} style={colorStyle} {...props}>
       {direction === 'up' && <span>↑</span>}
       {direction === 'down' && <span>↓</span>}
       {direction === 'neutral' && <span>→</span>}
