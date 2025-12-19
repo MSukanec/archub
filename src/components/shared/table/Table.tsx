@@ -14,6 +14,7 @@ import {
   separateActiveInactive,
   sortData,
   groupData,
+  filterData,
 } from "./utils";
 import { DEFAULT_ITEMS_PER_PAGE } from "./constants";
 
@@ -71,8 +72,8 @@ export function Table<T = any>({
   });
 
   const filteredData = useMemo(() => {
-    return getFilteredData(data);
-  }, [data, getFilteredData]);
+    return filterData(data, searchValue, columns);
+  }, [data, searchValue, columns]);
 
   const processedData = useMemo(() => {
     if (getIsInactive) {
