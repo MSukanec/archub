@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from 'react'
-import { DollarSign, Users, Package, CreditCard, TrendingUp, TrendingDown, Briefcase } from 'lucide-react'
+import { DollarSign, Users, Package, CreditCard, TrendingUp, TrendingDown, Briefcase, HandHeart, BarChart3 } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -88,13 +88,13 @@ interface CascadingOption {
 }
 
 // Mapeo de tipos de movimiento a sus navegaciones
-const MOVEMENT_NAVIGATION: Record<MovementType, { label: string; path: string }> = {
-  client_payment: { label: 'Clientes', path: '/clients' },
-  material_payment: { label: 'Materiales', path: '/construction/materials' },
-  personnel_payment: { label: 'Personal', path: '/construction/personnel' },
-  partner_contribution: { label: 'Capital', path: '/organization/capital' },
-  partner_withdrawal: { label: 'Capital', path: '/organization/capital' },
-  general_cost_payment: { label: 'Gastos Generales', path: '/construction/materials' },
+const MOVEMENT_NAVIGATION: Record<MovementType, { label: string; path: string; icon: typeof Users }> = {
+  client_payment: { label: 'Clientes', path: '/clients', icon: Users },
+  material_payment: { label: 'Materiales', path: '/construction/materials', icon: Package },
+  personnel_payment: { label: 'Personal', path: '/construction/personnel', icon: Users },
+  partner_contribution: { label: 'Capital', path: '/organization/capital', icon: HandHeart },
+  partner_withdrawal: { label: 'Capital', path: '/organization/capital', icon: HandHeart },
+  general_cost_payment: { label: 'Gastos Generales', path: '/construction/materials', icon: CreditCard },
 }
 
 const CASCADING_MOVEMENT_OPTIONS: CascadingOption[] = [
@@ -239,11 +239,15 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
             <SelectContent>
               {MOVEMENT_TYPES.map((type) => {
                 const nav = MOVEMENT_NAVIGATION[type.id];
+                const IconComponent = nav.icon;
                 
                 return (
                   <SelectItem key={type.id} value={type.id}>
                     <div className="flex items-center justify-between w-full gap-6">
-                      <span className={type.color}>{type.label}</span>
+                      <div className="flex items-center gap-2">
+                        <IconComponent className="h-4 w-4" />
+                        <span className={type.color}>{type.label}</span>
+                      </div>
                       <a
                         href={nav.path}
                         onClick={(e) => {
@@ -253,7 +257,7 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
                         }}
                         className={cn(
                           "text-xs",
-                          "text-[var(--accent)] hover:opacity-80 transition-opacity no-underline"
+                          "text-[var(--card-fg)] hover:opacity-80 transition-opacity no-underline"
                         )}
                       >
                         Ir a {nav.label}
