@@ -247,12 +247,10 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
                 const IconComponent = nav.icon;
                 
                 return (
-                  <SelectItem key={type.id} value={type.id}>
-                    <div className="flex items-center justify-between w-full gap-6">
-                      <div className="flex items-center gap-2">
-                        <IconComponent className={cn("h-4 w-4", type.color)} />
-                        <span className={type.color}>{type.label}</span>
-                      </div>
+                  <SelectItem key={type.id} value={type.id} className="pr-3">
+                    <div className="flex items-center gap-2 flex-1 min-w-[280px]">
+                      <IconComponent className={cn("h-4 w-4 shrink-0", type.color)} />
+                      <span className={type.color}>{type.label}</span>
                       <button
                         type="button"
                         onPointerDown={(e) => {
@@ -263,7 +261,7 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
                           navigate(nav.path);
                         }}
                         className={cn(
-                          "text-xs",
+                          "text-xs ml-auto",
                           "text-muted-foreground/60 hover:text-muted-foreground transition-colors"
                         )}
                       >
