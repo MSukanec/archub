@@ -44,17 +44,26 @@ export function sortData<T>(
 export function filterData<T>(
   data: T[],
   searchValue: string,
-  columns: Column<T>[]
+  columns?: Column<T>[]
 ): T[] {
   if (!searchValue) return data;
 
   const lowerSearch = searchValue.toLowerCase();
 
   return data.filter((item) => {
-    return columns.some((column) => {
-      const value = item[column.key as keyof T];
-      if (value == null) return false;
-      return String(value).toLowerCase().includes(lowerSearch);
+    // If columns provided, search only in those columns; otherwise search all values
+    if (columns && columns.length > 0) {
+      return columns.some((column) => {
+        const value = item[column.key as keyof T];
+        if (value == null) return false;
+        return String(value).toLowerCase().includes(lowerSearch);
+      });
+    }
+    
+    // Fallback: search all values in the object
+    return Object.values(item).some((val) => {
+      if (val == null) return false;
+      return String(val).toLowerCase().includes(lowerSearch);
     });
   });
 }

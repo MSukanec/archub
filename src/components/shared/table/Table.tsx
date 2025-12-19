@@ -72,8 +72,8 @@ export function Table<T = any>({
   });
 
   const filteredData = useMemo(() => {
-    return filterData(data, searchValue, columns);
-  }, [data, searchValue, columns]);
+    return filterData(data, searchValue);
+  }, [data, searchValue]);
 
   const processedData = useMemo(() => {
     if (getIsInactive) {
