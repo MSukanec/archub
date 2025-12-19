@@ -631,19 +631,7 @@ export default function GeneralCostsDashboardTab({
             )}
           </div>
         ),
-        badge: (
-          <Badge 
-            variant="default"
-            style={{
-              color: `var(--badge-status-success)`,
-              backgroundColor: `color-mix(in srgb, var(--badge-status-success) 10%, transparent)`,
-              borderColor: `color-mix(in srgb, var(--badge-status-success) 30%, transparent)`,
-            }}
-          >
-            <CheckCircle2 className="h-3 w-3 mr-1" />
-            Confirmado
-          </Badge>
-        )
+        badge: "Confirmado"
       }));
   }, [confirmedPayments, defaultCurrency]);
 
