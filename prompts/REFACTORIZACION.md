@@ -144,8 +144,47 @@ type ContactType = 'client' | 'supplier' | 'partner'; // Será refactorizado com
 
 ## 3. Headers de Página
 
+### 3.1 Estándares Básicos
+
 - La página debe tener en su header el **mismo ícono** que en su sidebar.
 - El header debe tener una **descripción** en su prop `description`.
+
+### 3.2 Botones y Acciones en el Header
+
+**IMPORTANTE:** NUNCA hardcodees botones en el header. Siempre usa las props diseñadas para tal fin:
+
+1. **Para botones primarios:** Usa la prop `actionButton`
+   - Proporciona `{ label, icon, onClick }`
+   - Aparece en el header con estilo automático
+
+2. **Para múltiples acciones/dropdowns:** Usa la prop `actions`
+   - Acepta un array de componentes JSX
+   - Los componentes dentro deben usar los estilos correctos del sistema (ej: `bg-accent text-white`)
+   - Evita usar `variant="outline"` para botones principales
+
+3. **Ejemplo correcto** (de GeneralCosts.tsx):
+   ```typescript
+   const getPeriodSelector = () => {
+     if (activeTab !== "dashboard") return []
+     return [
+       <DropdownMenu key="period-selector">
+         <DropdownMenuTrigger
+           className="bg-accent text-white hover:bg-accent/90 rounded-lg px-3 py-1.5 gap-2 text-sm font-medium shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 inline-flex items-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+         >
+           {/* contenido */}
+         </DropdownMenuTrigger>
+       </DropdownMenu>
+     ]
+   }
+   
+   // Luego en headerProps:
+   actions: getPeriodSelector()
+   ```
+
+4. **Estilos predefinidos para botones en actions:**
+   - Usa `className="bg-accent text-white"` para botones principales
+   - Usa `className="h-8 px-3 text-xs"` para tamaño pequeño
+   - Incluye siempre hover effects y transitions
 
 ---
 
