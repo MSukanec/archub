@@ -482,23 +482,11 @@ export function BillingListTab() {
                   Cambio Programado → {subscription?.scheduled_downgrade_plan?.name}
                 </Badge>
               )}
-              {(() => {
-                const planConfig = getPlanConfig(planName);
-                const PlanIcon = planConfig.icon;
-                return (
-                  <Badge 
-                    variant="secondary"
-                    className="text-xs text-white gap-1.5"
-                    style={{
-                      backgroundColor: planConfig.iconColor,
-                      color: 'white'
-                    }}
-                  >
-                    <PlanIcon className="h-3.5 w-3.5" />
-                    {planName}
-                  </Badge>
-                );
-              })()}
+              <Badge 
+                variant={`plan-${planSlug}` as any}
+              >
+                {planName}
+              </Badge>
             </div>
           </div>
           <CardDescription className="mb-4">
@@ -627,12 +615,13 @@ export function BillingListTab() {
 
                 {isCancelled && (
                   <Button 
-                    className={cn(
-                      "w-full text-white",
-                      `plan-card-${planSlug}`
-                    )}
+                    style={{ 
+                      backgroundColor: getPlanConfig(planName).iconColor,
+                      color: 'white'
+                    }}
                     onClick={() => setLocation('/settings/pricing-plan')}
                     data-testid="button-reactivate-subscription"
+                    className="w-full"
                   >
                     <RotateCcw className="w-4 h-4 mr-2" />
                     Reactivar {planName}
@@ -641,10 +630,10 @@ export function BillingListTab() {
                 
                 {getNextPlan() && !isCancelled && (
                   <Button 
-                    className={cn(
-                      "w-full text-white",
-                      `plan-card-${getNextPlan()?.slug}`
-                    )}
+                    style={{ 
+                      backgroundColor: getPlanConfig(getNextPlan()!.name).iconColor,
+                      color: 'white'
+                    }}
                     onClick={() => {
                       if (getNextPlan()?.slug === 'enterprise') {
                         setLocation('/contact');
@@ -653,6 +642,7 @@ export function BillingListTab() {
                       }
                     }}
                     data-testid="button-upgrade-plan"
+                    className="w-full"
                   >
                     <ArrowUpCircle className="w-4 h-4 mr-2" />
                     {isFreePlan 
