@@ -259,11 +259,12 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
                           e.preventDefault();
                           e.stopPropagation();
                           setSelectOpen(false);
+                          onClose();
                           navigate(nav.path);
                         }}
                         className={cn(
                           "text-xs",
-                          "text-muted-foreground hover:text-foreground transition-colors"
+                          "text-muted-foreground/60 hover:text-muted-foreground transition-colors"
                         )}
                       >
                         Ir a {nav.label}
