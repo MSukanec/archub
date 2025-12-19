@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from 'react'
+import { useLocation } from 'wouter'
 import { DollarSign, Users, Package, CreditCard, TrendingUp, TrendingDown, Briefcase, HandHeart, BarChart3 } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Label } from '@/components/ui/label'
@@ -146,8 +147,10 @@ interface NewMovementModalProps {
 }
 
 export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) {
+  const [, navigate] = useLocation()
   const [selectedType, setSelectedType] = useState<MovementType | null>(null)
   const [selectedProjectIdForMovement, setSelectedProjectIdForMovement] = useState<string | null>(null)
+  const [selectOpen, setSelectOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const { data: projects = [] } = useProjectsLite()
@@ -230,6 +233,8 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
         <div className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">Tipo de Movimiento</Label>
           <Select
+            open={selectOpen}
+            onOpenChange={setSelectOpen}
             value={selectedType || ''}
             onValueChange={(value) => setSelectedType(value as MovementType)}
           >
@@ -245,23 +250,24 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
                   <SelectItem key={type.id} value={type.id}>
                     <div className="flex items-center justify-between w-full gap-6">
                       <div className="flex items-center gap-2">
-                        <IconComponent className="h-4 w-4" />
+                        <IconComponent className={cn("h-4 w-4", type.color)} />
                         <span className={type.color}>{type.label}</span>
                       </div>
-                      <a
-                        href={nav.path}
-                        onClick={(e) => {
+                      <button
+                        type="button"
+                        onPointerDown={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          window.location.href = nav.path;
+                          setSelectOpen(false);
+                          navigate(nav.path);
                         }}
                         className={cn(
                           "text-xs",
-                          "text-[var(--card-fg)] hover:opacity-80 transition-opacity no-underline"
+                          "text-muted-foreground hover:text-foreground transition-colors"
                         )}
                       >
                         Ir a {nav.label}
-                      </a>
+                      </button>
                     </div>
                   </SelectItem>
                 );
