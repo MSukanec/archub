@@ -3,11 +3,8 @@ import type { CapitalParticipant, CapitalParticipantContact } from '../types';
 
 export async function getCapitalParticipants(organizationId: string): Promise<CapitalParticipant[]> {
   if (!organizationId) {
-    console.log('[getCapitalParticipants] No organizationId provided');
     return [];
   }
-  
-  console.log('[getCapitalParticipants] Fetching participants for organization:', organizationId);
   
   const { data, error } = await supabase
     .from('capital_participants')
@@ -45,17 +42,11 @@ export async function getCapitalParticipants(organizationId: string): Promise<Ca
     throw error;
   }
   
-  console.log('[getCapitalParticipants] Raw data received:', data?.length, 'participants');
-  if (data && data.length > 0) {
-    console.log('[getCapitalParticipants] First participant:', data[0]);
-  }
-  
   if (!data) return [];
   
   return data.map((participant: any) => {
     const rawContacts = participant.contacts;
     const contact: CapitalParticipantContact = Array.isArray(rawContacts) ? rawContacts[0] : rawContacts;
-    console.log('[getCapitalParticipants] Processing participant, contact has linked_user:', !!contact?.linked_user, contact?.linked_user);
     
     return {
       ...participant,
