@@ -50,7 +50,7 @@ export default function OrganizationFinances() {
               data-testid="button-add-movement"
             >
               <Plus className="w-4 h-4 mr-1" />
-              Agregar
+              Nuevo Movimiento
             </Button>
           ),
         ].filter(Boolean),
