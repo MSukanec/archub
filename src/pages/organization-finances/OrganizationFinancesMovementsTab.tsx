@@ -4,7 +4,7 @@
  * Finanzas de ORGANIZACIÓN - muestra TODOS los movimientos de la organización
  * incluyendo los de proyectos. Incluye columna "Proyecto" para identificar origen.
  */
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useUnifiedMovements } from '@/features/finances/hooks/use-unified-movements';
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
@@ -13,11 +13,14 @@ import { useDeleteClientPayment } from '@/features/clients/hooks/use-client-paym
 import { useDeleteMaterialPayment } from '@/features/materials/hooks/use-material-payments';
 import { useDeletePersonnelPayment } from '@/features/personnel/hooks/use-personnel-payments';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useFinancesDataHealth, DataHealthAlertMulti } from '@/core/data-health';
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { 
   StatCard, 
   StatCardTitle, 
@@ -31,7 +34,7 @@ import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown, hasMultipleCu
 import { format as formatMoney } from '@/lib/money';
 import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/date-utils';
-import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Scale, Hash } from 'lucide-react';
+import { DollarSign, Edit, Trash2, Paperclip, User, Package, Users, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Scale, Hash, Plus } from 'lucide-react';
 import chroma from 'chroma-js';
 import type { UnifiedMovementWithRelations } from '@/features/finances/services/getUnifiedMovements';
 
@@ -74,10 +77,19 @@ const MOVEMENT_TYPE_CONFIG: Record<string, {
 
 export function OrganizationFinancesMovementsTab() {
   const { currentOrganizationId } = useProjectContext();
+  const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
   
   const [showOnlyProblems, setShowOnlyProblems] = useState(false);
+
+  const handleAddMovement = useCallback(() => {
+    openModal('unified-payment', {
+      organizationId: currentOrganizationId,
+      projectId: undefined,
+      isProjectContext: false,
+    });
+  }, [currentOrganizationId, openModal]);
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined);
   
@@ -351,6 +363,24 @@ export function OrganizationFinancesMovementsTab() {
 
   const showIngresosBreakdown = isCurrencyReady && hasMultipleCurrencies(kpis.ingresos) && kpis.ingresos.breakdown && kpis.ingresos.breakdown.length > 0;
   const showEgresosBreakdown = isCurrencyReady && hasMultipleCurrencies(kpis.egresos) && kpis.egresos.breakdown && kpis.egresos.breakdown.length > 0;
+
+  // Show empty state if no movements
+  if (sortedMovements.length === 0 && !isLoading) {
+    return (
+      <EmptyState
+        icon={<DollarSign className="w-12 h-12" />}
+        title="Aún no tenés movimientos financieros"
+        description="Comienza registrando tu primer movimiento: pago a cliente, material, personal, o aporte de socio."
+        action={
+          <Button onClick={handleAddMovement} data-testid="button-create-first-movement">
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Movimiento
+          </Button>
+        }
+        data-testid="empty-finances-state"
+      />
+    );
+  }
 
   return (
     <div className="space-y-6" data-testid="organization-finances-movements-tab">
