@@ -4,7 +4,7 @@
  * Finanzas de ORGANIZACIÓN - muestra TODOS los movimientos de la organización
  * incluyendo los de proyectos. Incluye columna "Proyecto" para identificar origen.
  */
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useUnifiedMovements } from '@/features/finances/hooks/use-unified-movements';
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
@@ -166,7 +166,8 @@ export function OrganizationFinancesMovementsTab() {
     }).format(Math.abs(amount))}`;
   };
 
-  const handleEdit = (movement: UnifiedMovementWithRelations) => {
+  // ENTERPRISE FIX: Stable callback references to prevent row action re-renders
+  const handleEdit = useCallback((movement: UnifiedMovementWithRelations) => {
     const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
     if (!config) return;
 
@@ -176,9 +177,9 @@ export function OrganizationFinancesMovementsTab() {
       paymentId: movement.id,
       mode: 'edit',
     });
-  };
+  }, [openModal]);
 
-  const handleDelete = (movement: UnifiedMovementWithRelations) => {
+  const handleDelete = useCallback((movement: UnifiedMovementWithRelations) => {
     if (!currentOrganizationId) return;
 
     const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
@@ -220,7 +221,22 @@ export function OrganizationFinancesMovementsTab() {
                  deleteMaterialPaymentMutation.isPending || 
                  deletePersonnelPaymentMutation.isPending,
     });
-  };
+  }, [currentOrganizationId, showDeleteConfirmation, deleteClientPaymentMutation, deleteMaterialPaymentMutation, deletePersonnelPaymentMutation]);
+
+  // ENTERPRISE FIX: Memoize rowActions factory to prevent DropdownMenu infinite loop
+  const getRowActions = useCallback((movement: UnifiedMovementWithRelations) => [
+    {
+      label: 'Editar',
+      icon: Edit,
+      onClick: () => handleEdit(movement),
+    },
+    {
+      label: 'Eliminar',
+      icon: Trash2,
+      onClick: () => handleDelete(movement),
+      variant: 'destructive' as const,
+    },
+  ], [handleEdit, handleDelete]);
 
   const columns: Column<UnifiedMovementWithRelations>[] = useMemo(() => [
     {
@@ -439,19 +455,7 @@ export function OrganizationFinancesMovementsTab() {
           key: 'payment_date',
           direction: 'desc',
         }}
-        rowActions={(movement: UnifiedMovementWithRelations) => [
-          {
-            label: 'Editar',
-            icon: Edit,
-            onClick: () => handleEdit(movement),
-          },
-          {
-            label: 'Eliminar',
-            icon: Trash2,
-            onClick: () => handleDelete(movement),
-            variant: 'destructive' as const,
-          },
-        ]}
+        rowActions={getRowActions}
       />
     </div>
   );
