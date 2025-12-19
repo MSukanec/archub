@@ -1,6 +1,5 @@
 import { useState, useRef, useMemo } from 'react'
 import { DollarSign, Users, Package, CreditCard, TrendingUp, TrendingDown, Briefcase } from 'lucide-react'
-import { Link } from 'wouter'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -89,13 +88,13 @@ interface CascadingOption {
 }
 
 // Mapeo de tipos de movimiento a sus navegaciones
-const MOVEMENT_NAVIGATION: Record<MovementType, { label: string; path: (orgId: string) => string }> = {
-  client_payment: { label: 'Clientes', path: (orgId) => `/organization/${orgId}/clients?tab=payments` },
-  material_payment: { label: 'Materiales', path: (orgId) => `/organization/${orgId}/materials?tab=payments` },
-  personnel_payment: { label: 'Personal', path: (orgId) => `/organization/${orgId}/personnel?tab=payments` },
-  partner_contribution: { label: 'Capital', path: (orgId) => `/organization/capital?tab=payments` },
-  partner_withdrawal: { label: 'Capital', path: (orgId) => `/organization/capital?tab=payments` },
-  general_cost_payment: { label: 'Gastos Generales', path: (orgId) => `/organization/${orgId}/general-costs?tab=payments` },
+const MOVEMENT_NAVIGATION: Record<MovementType, { label: string; path: string }> = {
+  client_payment: { label: 'Clientes', path: '/clients' },
+  material_payment: { label: 'Materiales', path: '/construction/materials' },
+  personnel_payment: { label: 'Personal', path: '/construction/personnel' },
+  partner_contribution: { label: 'Capital', path: '/organization/capital' },
+  partner_withdrawal: { label: 'Capital', path: '/organization/capital' },
+  general_cost_payment: { label: 'Gastos Generales', path: '/construction/materials' },
 }
 
 const CASCADING_MOVEMENT_OPTIONS: CascadingOption[] = [
@@ -240,24 +239,25 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
             <SelectContent>
               {MOVEMENT_TYPES.map((type) => {
                 const nav = MOVEMENT_NAVIGATION[type.id];
-                const navigateUrl = organizationId ? nav.path(organizationId) : '#';
                 
                 return (
                   <SelectItem key={type.id} value={type.id}>
-                    <div className="flex items-center justify-between w-full gap-4">
+                    <div className="flex items-center justify-between w-full gap-6">
                       <span className={type.color}>{type.label}</span>
-                      <Link
-                        href={navigateUrl}
+                      <a
+                        href={nav.path}
                         onClick={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
+                          window.location.href = nav.path;
                         }}
                         className={cn(
-                          "text-xs font-medium",
-                          "text-[var(--accent)] hover:opacity-80 transition-opacity"
+                          "text-xs",
+                          "text-[var(--accent)] hover:opacity-80 transition-opacity no-underline"
                         )}
                       >
                         Ir a {nav.label}
-                      </Link>
+                      </a>
                     </div>
                   </SelectItem>
                 );
