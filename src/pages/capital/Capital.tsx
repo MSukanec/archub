@@ -4,7 +4,7 @@ import CapitalDashboardTab, { calculateAvailablePeriods, type PeriodFilter } fro
 import { CapitalParticipantsListTab } from '@/pages/capital/tabs/CapitalParticipantsListTab';
 import { CapitalBalancesTab } from '@/pages/capital/tabs/CapitalBalancesTab';
 import { CapitalTransactionsTab } from '@/pages/capital/tabs/CapitalTransactionsTab';
-import { HandHeart, Plus, TrendingUp, TrendingDown, ChevronDown, Check } from 'lucide-react';
+import { HandHeart, Plus, TrendingUp, TrendingDown, ChevronDown, Check, Calendar } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
@@ -17,7 +17,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
 import { useCapitalDataHealth, DataHealthAlert, type NormalizedCapitalTransaction } from '@/core/data-health';
 
 const periodOptions: { value: PeriodFilter; label: string }[] = [
@@ -160,13 +159,15 @@ export default function Capital() {
 
   const periodFilterComponent = activeTab === 'dashboard' ? (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8 gap-1" data-testid="button-period-filter">
-          {periodOptions.find(p => p.value === selectedPeriod)?.label}
-          <ChevronDown className="h-4 w-4" />
-        </Button>
+      <DropdownMenuTrigger
+        className="bg-accent text-white hover:bg-accent/90 rounded-lg px-3 py-1.5 gap-2 text-sm font-medium shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 inline-flex items-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+        data-testid="select-period"
+      >
+        <Calendar className="h-4 w-4" />
+        <span>{periodOptions.find(p => p.value === selectedPeriod)?.label}</span>
+        <ChevronDown className="h-4 w-4" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="min-w-[180px]">
         {periodOptions.map((option) => {
           const isAvailable = availablePeriods[option.value];
           return (
@@ -174,16 +175,11 @@ export default function Capital() {
               key={option.value}
               onClick={() => isAvailable && setSelectedPeriod(option.value)}
               disabled={!isAvailable}
-              className={cn(
-                "flex items-center justify-between",
-                !isAvailable && "opacity-50 cursor-not-allowed"
-              )}
-              data-testid={`menu-item-period-${option.value}`}
+              className={selectedPeriod === option.value ? "font-medium text-black dark:text-white" : ""}
+              data-testid={`option-period-${option.value}`}
             >
-              <span>{option.label}</span>
-              {selectedPeriod === option.value && (
-                <Check className="h-4 w-4" />
-              )}
+              {option.label}
+              {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
             </DropdownMenuItem>
           );
         })}
