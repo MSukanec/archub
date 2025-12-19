@@ -615,10 +615,6 @@ export function BillingListTab() {
 
                 {isCancelled && (
                   <Button 
-                    style={{ 
-                      backgroundColor: getPlanConfig(planName).iconColor,
-                      color: 'white'
-                    }}
                     onClick={() => setLocation('/settings/pricing-plan')}
                     data-testid="button-reactivate-subscription"
                     className="w-full"
@@ -630,10 +626,6 @@ export function BillingListTab() {
                 
                 {getNextPlan() && !isCancelled && (
                   <Button 
-                    style={{ 
-                      backgroundColor: getPlanConfig(getNextPlan()!.name).iconColor,
-                      color: 'white'
-                    }}
                     onClick={() => {
                       if (getNextPlan()?.slug === 'enterprise') {
                         setLocation('/contact');
