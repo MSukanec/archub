@@ -9,7 +9,8 @@ import {
   BarChart3, 
   PieChart,
   ArrowDownCircle,
-  ArrowUpCircle
+  ArrowUpCircle,
+  Plus
 } from 'lucide-react';
 import { type InsightAction } from '@/components/dashboard/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown } from '@/lib/kpis';
@@ -37,6 +38,7 @@ import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownCha
 import { MiniSparkline } from '@/components/charts/MiniSparkline';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
 import { 
@@ -551,10 +553,12 @@ export default function CapitalDashboardTab({
         icon={<Users />}
         title="No hay participantes configurados"
         description="Comienza agregando participantes de capital para gestionar aportes y retiros. Una vez agregues participantes, podrás ver el resumen de capital y las transacciones aquí."
-        action={{
-          label: "Agregar Participante",
-          onClick: onNavigateToList
-        }}
+        action={
+          <Button onClick={onNavigateToList} data-testid="button-add-participant">
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Participante
+          </Button>
+        }
       />
     );
   }
