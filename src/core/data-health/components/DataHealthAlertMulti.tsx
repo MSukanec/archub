@@ -21,10 +21,22 @@ const issueIcons: Record<string, typeof Users> = {
   'payments-missing-exchange-rate': DollarSign,
 };
 
-const severityColors: Record<string, string> = {
-  critical: 'border-destructive bg-destructive/10 text-destructive',
-  warning: 'border-warning bg-warning/10 text-warning',
-  info: 'border-blue-500 bg-blue-500/10 text-blue-500',
+const severityColors: Record<string, { borderVar: string; bgVar: string; textVar: string }> = {
+  critical: {
+    borderVar: '--error',
+    bgVar: '--error',
+    textVar: '--error'
+  },
+  warning: {
+    borderVar: '--warning',
+    bgVar: '--warning',
+    textVar: '--warning'
+  },
+  info: {
+    borderVar: '--info',
+    bgVar: '--info',
+    textVar: '--info'
+  },
 };
 
 export function DataHealthAlertMulti({
@@ -42,17 +54,21 @@ export function DataHealthAlertMulti({
     <div className="space-y-2">
       {issues.map((issue) => {
         const Icon = issueIcons[issue.ruleId] || AlertTriangle;
-        const colorClass = severityColors[issue.severity] || severityColors.warning;
+        const colorVars = severityColors[issue.severity] || severityColors.warning;
         
         return (
           <div 
             key={issue.id}
             className={cn(
               "flex items-center justify-between w-full px-4 py-2.5 rounded-lg cursor-pointer transition-all border",
-              colorClass,
               "hover:opacity-90",
               isFiltering && "ring-2 ring-offset-1"
             )}
+            style={{
+              borderColor: `var(${colorVars.borderVar})`,
+              backgroundColor: `color-mix(in srgb, var(${colorVars.bgVar}) 10%, transparent)`,
+              color: `var(${colorVars.textVar})`
+            }}
             onClick={onToggleFilter}
             data-testid={`data-health-alert-${issue.ruleId}`}
           >

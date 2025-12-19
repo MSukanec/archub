@@ -11,27 +11,27 @@ interface PlanBadgeProps {
 
 const planConfig: Record<PlanType, { 
   icon: React.ComponentType<{ className?: string }>;
-  bgVar: string;
+  colorVar: string;
   label: string;
 }> = {
   free: {
     icon: Sparkles,
-    bgVar: 'var(--plan-free-bg)',
+    colorVar: '--plan-free',
     label: 'Plan Free'
   },
   pro: {
     icon: Crown,
-    bgVar: 'var(--plan-pro-bg)',
+    colorVar: '--plan-pro',
     label: 'Plan Pro'
   },
   teams: {
     icon: Users,
-    bgVar: 'var(--plan-teams-bg)',
+    colorVar: '--plan-teams',
     label: 'Plan Teams'
   },
   enterprise: {
     icon: Building2,
-    bgVar: 'var(--plan-enterprise-bg)',
+    colorVar: '--plan-enterprise',
     label: 'Plan Enterprise'
   }
 };
@@ -66,7 +66,7 @@ export function PlanBadge({ planName, className }: PlanBadgeProps) {
         "hover:scale-105 hover:opacity-90",
         className
       )}
-      style={{ backgroundColor: config.bgVar }}
+      style={{ backgroundColor: `var(${config.colorVar})` }}
     >
       <Icon className="h-4 w-4 text-white" />
     </button>
