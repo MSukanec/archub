@@ -52,8 +52,8 @@ export const paymentsMissingExchangeRateRule: DataHealthRule<NormalizedPayment> 
     return {
       id: `${ctx.organizationId}-payments-missing-exchange-rate`,
       ruleId: 'payments-missing-exchange-rate',
-      title: `${affected.length} pago${affected.length > 1 ? 's' : ''} sin cotización`,
-      description: `${affected.length} pago${affected.length > 1 ? 's' : ''} registrado${affected.length > 1 ? 's' : ''} en moneda extranjera no ${affected.length > 1 ? 'tienen' : 'tiene'} cotización válida (debe ser mayor a 1). Sin esta información, el sistema no puede convertir los montos a la moneda base, lo que afecta el balance total y los reportes financieros.`,
+      title: `pago${affected.length > 1 ? 's' : ''} sin cotización válida`,
+      description: `Tu organización opera con múltiples monedas. ${affected.length} pago${affected.length > 1 ? 's' : ''} está${affected.length > 1 ? 'n' : ''} registrado${affected.length > 1 ? 's' : ''} en moneda extranjera pero no ${affected.length > 1 ? 'tienen' : 'tiene'} cotización válida (debe ser mayor a 1). Sin esta información, el sistema no puede convertir correctamente los montos a la moneda base.\n\nEjemplos de cotización válida:\n• Si tu moneda base es ARS: 1 USD = 1400 ARS\n• Si tu moneda base es USD: 1 ARS = 0.0007 USD\n\nSin la cotización correcta, los totales del balance y los reportes financieros serán incorrectos.`,
       severity: 'critical',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 
@@ -62,7 +62,7 @@ export const paymentsMissingExchangeRateRule: DataHealthRule<NormalizedPayment> 
       })),
       recommendedAction: {
         label: 'Configurar cotización',
-        description: 'Abrir cada pago y establecer la cotización correcta del tipo de cambio (ej: 1 USD = 1400 ARS). Esta cotización se utiliza para convertir correctamente el monto a la moneda base de tu organización.',
+        description: 'Editar cada pago y establecer la cotización correcta del tipo de cambio. La cotización se utiliza para convertir correctamente el monto a la moneda base de tu organización.',
         actionType: 'bulk_edit',
         targetIds: affected.map(p => p.id),
       },

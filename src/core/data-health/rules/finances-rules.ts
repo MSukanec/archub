@@ -88,8 +88,8 @@ export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> 
     return {
       id: `${ctx.organizationId}-finances-invalid-exchange-rate`,
       ruleId: 'finances-invalid-exchange-rate',
-      title: `movimiento${affected.length > 1 ? 's' : ''} con cotización faltante o inválida`,
-      description: `Tu organización opera con múltiples monedas. ${affected.length} movimiento${affected.length > 1 ? 's' : ''} financiero${affected.length > 1 ? 's' : ''} ${affected.length > 1 ? 'tiene' : 'tienen'} la cotización configurada como 1 (o no tiene cotización), lo que impide convertir correctamente el monto a tu moneda base.\n\n⚠️ Cuando usas varias monedas, la cotización debe ser > 1. Por ejemplo:\n• Si tu moneda base es ARS, configura: 1 USD = 1400 ARS (no 1)\n• Si tu moneda base es USD, configura: 1 ARS = 0.0007 USD (no 1)\n\nSin la cotización correcta, los totales mostrados en tu balance y dashboards serán incorrectos.`,
+      title: `movimiento${affected.length > 1 ? 's' : ''} sin cotización válida`,
+      description: `Tu organización opera con múltiples monedas. ${affected.length} movimiento${affected.length > 1 ? 's' : ''} financiero${affected.length > 1 ? 's' : ''} está${affected.length > 1 ? 'n' : ''} registrado${affected.length > 1 ? 's' : ''} en moneda extranjera pero no ${affected.length > 1 ? 'tienen' : 'tiene'} cotización válida (debe ser mayor a 1). Sin esta información, el sistema no puede convertir correctamente los montos a la moneda base.\n\nEjemplos de cotización válida:\n• Si tu moneda base es ARS: 1 USD = 1400 ARS\n• Si tu moneda base es USD: 1 ARS = 0.0007 USD\n\nSin la cotización correcta, los totales del balance y los reportes financieros serán incorrectos.`,
       severity: 'critical',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 
@@ -97,8 +97,8 @@ export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> 
         label: p.label || `Movimiento #${p.id}` 
       })),
       recommendedAction: {
-        label: 'Configurar cotizaciones',
-        description: 'Editar cada movimiento y configurar la cotización correcta entre monedas. La cotización debe ser mayor a 1 y refleja cómo se convierte de una moneda a otra.',
+        label: 'Configurar cotización',
+        description: 'Editar cada movimiento y establecer la cotización correcta del tipo de cambio. La cotización se utiliza para convertir correctamente el monto a la moneda base de tu organización.',
         actionType: 'bulk_edit',
         targetIds: affected.map(p => p.id),
       },

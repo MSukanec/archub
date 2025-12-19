@@ -20,8 +20,8 @@ export const capitalMissingExchangeRateRule: DataHealthRule<NormalizedPayment> =
     return {
       id: `${ctx.organizationId}-capital-missing-exchange-rate`,
       ruleId: 'capital-missing-exchange-rate',
-      title: `${affected.length} transacción${affected.length > 1 ? 'es' : ''} sin cotización`,
-      description: `${affected.length} transacción${affected.length > 1 ? 'es' : ''} de capital registrada${affected.length > 1 ? 's' : ''} en moneda extranjera no ${affected.length > 1 ? 'tienen' : 'tiene'} cotización válida (debe ser mayor a 1). Sin esta información, los cálculos de capital y patrimonio de los socios no son precisos.`,
+      title: `transacción${affected.length > 1 ? 'es' : ''} sin cotización válida`,
+      description: `Tu organización opera con múltiples monedas. ${affected.length} transacción${affected.length > 1 ? 'es' : ''} de capital está${affected.length > 1 ? 'n' : ''} registrada${affected.length > 1 ? 's' : ''} en moneda extranjera pero no ${affected.length > 1 ? 'tienen' : 'tiene'} cotización válida (debe ser mayor a 1). Sin esta información, el sistema no puede convertir correctamente los montos a la moneda base.\n\nEjemplos de cotización válida:\n• Si tu moneda base es ARS: 1 USD = 1400 ARS\n• Si tu moneda base es USD: 1 ARS = 0.0007 USD\n\nSin la cotización correcta, los cálculos de capital y patrimonio de los socios no serán precisos.`,
       severity: 'critical',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(t => ({ 
@@ -30,7 +30,7 @@ export const capitalMissingExchangeRateRule: DataHealthRule<NormalizedPayment> =
       })),
       recommendedAction: {
         label: 'Configurar cotización',
-        description: 'Abrir cada transacción y establecer la cotización correcta del tipo de cambio (ej: 1 USD = 1400 ARS). Esta cotización se usa para convertir los montos a la moneda base.',
+        description: 'Editar cada transacción y establecer la cotización correcta del tipo de cambio. La cotización se utiliza para convertir correctamente el monto a la moneda base de tu organización.',
         actionType: 'bulk_edit',
         targetIds: affected.map(t => t.id),
       },
