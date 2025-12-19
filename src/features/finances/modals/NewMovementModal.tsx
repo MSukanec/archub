@@ -217,8 +217,8 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
       }
     >
       <ModalBody>
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Tipo de Movimiento</Label>
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium text-muted-foreground">Tipo de Movimiento</Label>
           <CascadingSelect
             options={CASCADING_MOVEMENT_OPTIONS}
             value={selectedType ? [selectedType] : []}
@@ -234,8 +234,8 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
         </div>
 
         {requiresProjectSelector && (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Proyecto</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-muted-foreground">Proyecto</Label>
             <Select
               value={selectedProjectIdForMovement || ''}
               onValueChange={(value) => setSelectedProjectIdForMovement(value)}

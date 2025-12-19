@@ -222,13 +222,18 @@ export function CascadingSelect({
         )} />
       </button>
 
-      {/* Dropdown Content - Estéticamente idéntico al Select */}
+      {/* Dropdown Content - Estéticamente idéntico al Select, usando fixed para escapar del modal */}
       {isOpen && (
         <div
           ref={contentRef}
           className={cn(
-            "absolute z-[100000] w-full mt-1 max-h-60 overflow-hidden rounded-md border border-[var(--card-border)] bg-[var(--popover-bg)] text-[var(--popover-fg)] shadow-lg animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
+            "fixed z-[100000] max-h-60 overflow-hidden rounded-md border border-[var(--card-border)] bg-[var(--popover-bg)] text-[var(--popover-fg)] shadow-lg animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
           )}
+          style={{
+            width: triggerRef.current?.offsetWidth || 'auto',
+            top: (triggerRef.current?.getBoundingClientRect().bottom || 0) + 'px',
+            left: (triggerRef.current?.getBoundingClientRect().left || 0) + 'px',
+          }}
         >
           <div className="p-1 max-h-56 overflow-auto overscroll-contain">
             {currentOptions.map((option) => (
