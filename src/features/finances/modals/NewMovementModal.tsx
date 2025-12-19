@@ -198,7 +198,7 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
   return (
     <ModalLayout 
       onClose={onClose} 
-      size={selectedType ? 'lg' : 'md'}
+      size="lg"
       headerContent={
         <ModalHeader
           icon={selectedConfig?.icon || DollarSign}
