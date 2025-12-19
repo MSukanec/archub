@@ -3,7 +3,6 @@ import { DollarSign, Users, Package, CreditCard, TrendingUp, TrendingDown, Brief
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectField'
 import { useProjectContext } from '@/stores/projectContext'
 import { useProjectsLite } from '@/features/projects'
 import { ClientPaymentFormFields } from '@/features/clients/forms/ClientPaymentFormFields'
@@ -219,18 +218,22 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
       <ModalBody>
         <div className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">Tipo de Movimiento</Label>
-          <CascadingSelect
-            options={CASCADING_MOVEMENT_OPTIONS}
-            value={selectedType ? [selectedType] : []}
-            onValueChange={(value) => {
-              // El último valor en la ruta es el tipo de movimiento final
-              if (value.length > 0) {
-                setSelectedType(value[value.length - 1] as MovementType)
-              }
-            }}
-            placeholder="Selecciona un tipo de movimiento"
-            data-testid="select-movement-type"
-          />
+          <Select
+            value={selectedType || ''}
+            onValueChange={(value) => setSelectedType(value as MovementType)}
+          >
+            <SelectTrigger data-testid="select-movement-type">
+              <SelectValue placeholder="Selecciona un tipo de movimiento" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="client_payment">Pago de Cliente</SelectItem>
+              <SelectItem value="material_payment">Pago de Material</SelectItem>
+              <SelectItem value="personnel_payment">Pago de Personal</SelectItem>
+              <SelectItem value="partner_contribution">Aporte de Socio</SelectItem>
+              <SelectItem value="partner_withdrawal">Retiro de Socio</SelectItem>
+              <SelectItem value="general_cost_payment">Pago de Gasto General</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {requiresProjectSelector && (
