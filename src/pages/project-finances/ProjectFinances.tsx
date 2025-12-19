@@ -60,7 +60,7 @@ export default function ProjectFinances() {
 
   if (!isProjectReady) {
     return (
-      <Layout wide headerProps={headerProps}>
+      <Layout wide={false} headerProps={headerProps}>
         <div className="flex items-center justify-center h-64">
           <LoadingSpinner size="lg" />
         </div>
@@ -69,7 +69,7 @@ export default function ProjectFinances() {
   }
 
   return (
-    <Layout wide headerProps={headerProps}>
+    <Layout wide={false} headerProps={headerProps}>
       {activeTab === "movements" && (
         <ProjectFinancesMovementsTab projectId={selectedProjectId} />
       )}

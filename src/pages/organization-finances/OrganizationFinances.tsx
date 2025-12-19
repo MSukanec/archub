@@ -31,7 +31,7 @@ export default function OrganizationFinances() {
 
   return (
     <Layout
-      wide
+      wide={false}
       headerProps={{
         icon: DollarSign,
         title: "Finanzas",
