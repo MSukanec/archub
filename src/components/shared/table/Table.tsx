@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useProjectReadOnlyContext } from "@/contexts/ProjectReadOnlyContext";
-import { TableDesktop } from "./TableDesktop";
-import { TableMobile } from "./TableMobile";
+import { MemoizedTableDesktop as TableDesktop } from "./TableDesktop";
+import { MemoizedTableMobile as TableMobile } from "./TableMobile";
 import { TableLoadingSkeleton } from "./TableLoadingSkeleton";
 import { useTableSort } from "./hooks/useTableSort";
 import { useTableFilter } from "./hooks/useTableFilter";
@@ -128,29 +128,31 @@ export function Table<T = any>({
   });
 
   const hasActions = !!rowActions;
-  const gridTemplateColumns = getGridTemplateColumns(
-    columns,
-    selectable,
-    hasActions
+  
+  // ENTERPRISE FIX: Memoize gridTemplateColumns to prevent unnecessary recalculations
+  const gridTemplateColumns = useMemo(() => 
+    getGridTemplateColumns(columns, selectable, hasActions),
+    [columns.length, selectable, hasActions]
   );
 
-  const handleSearchChange = (value: string) => {
+  // ENTERPRISE FIX: Stable callback references to prevent child component re-renders
+  const handleSearchChange = useCallback((value: string) => {
     setSearchInputValue(value);
     if (topBar?.onSearchChange) {
       topBar.onSearchChange(value);
     } else {
       setSearchValue(value);
     }
-  };
+  }, [topBar?.onSearchChange, setSearchValue]);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     if (topBar?.onClearFilters) {
       topBar.onClearFilters();
     } else {
       clearFilters();
       setSearchInputValue("");
     }
-  };
+  }, [topBar?.onClearFilters, clearFilters]);
 
   const combinedIsFilterActive =
     topBar?.isFilterActive ?? (isFilterActive || searchInputValue.length > 0);

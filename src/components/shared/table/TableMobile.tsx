@@ -1,4 +1,4 @@
-import { Fragment, ReactNode } from "react";
+import { Fragment, ReactNode, memo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -223,3 +223,7 @@ export function TableMobile<T>({
     </div>
   );
 }
+
+// ENTERPRISE FIX: Wrap in React.memo to prevent unnecessary re-renders
+// when parent Table component re-renders with stable prop values
+export const MemoizedTableMobile = memo(TableMobile) as typeof TableMobile;
