@@ -17,6 +17,8 @@ import {
 } from "./utils";
 import { DEFAULT_ITEMS_PER_PAGE } from "./constants";
 
+const EMPTY_ARRAY: any[] = [];
+
 export function Table<T = any>({
   columns,
   data,
@@ -25,7 +27,7 @@ export function Table<T = any>({
   isLoading = false,
   className,
   selectable = false,
-  selectedItems: externalSelectedItems = [],
+  selectedItems: externalSelectedItems = EMPTY_ARRAY,
   onSelectionChange,
   getItemId = (item: T) => (item as any).id,
   getRowClassName,
