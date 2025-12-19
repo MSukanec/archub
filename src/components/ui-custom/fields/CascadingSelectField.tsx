@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useLayoutEffect } from "react"
 import { ChevronDown, ArrowLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -35,9 +35,26 @@ export function CascadingSelect({
   const [selectedPath, setSelectedPath] = useState<CascadingOption[]>([])
   const triggerRef = useRef<HTMLButtonElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: string; left: string; width: string }>({
+    top: '0px',
+    left: '0px',
+    width: 'auto'
+  })
 
   // Estado para prevenir loops de sincronización
   const [isInternalUpdate, setIsInternalUpdate] = React.useState(false)
+
+  // Calcular posición del dropdown cuando se abre
+  useLayoutEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setDropdownPosition({
+        top: (rect.bottom + window.scrollY) + 'px',
+        left: (rect.left + window.scrollX) + 'px',
+        width: rect.width + 'px'
+      })
+    }
+  }, [isOpen])
 
   // Sincronizar con el valor externo solo cuando NO es una actualización interna
   React.useEffect(() => {
@@ -230,9 +247,9 @@ export function CascadingSelect({
             "fixed z-[100000] max-h-60 overflow-hidden rounded-md border border-[var(--card-border)] bg-[var(--popover-bg)] text-[var(--popover-fg)] shadow-lg animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
           )}
           style={{
-            width: triggerRef.current?.offsetWidth || 'auto',
-            top: (triggerRef.current?.getBoundingClientRect().bottom || 0) + 'px',
-            left: (triggerRef.current?.getBoundingClientRect().left || 0) + 'px',
+            width: dropdownPosition.width,
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
           }}
         >
           <div className="p-1 max-h-56 overflow-auto overscroll-contain">
