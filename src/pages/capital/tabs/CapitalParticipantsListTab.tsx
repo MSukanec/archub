@@ -20,7 +20,7 @@ import { EmptyState } from '@/components/ui-custom/security/EmptyState';
 import { useGlobalModalStore } from '@/components/modal';
 import { parseLocalDate } from '@/lib/date-utils';
 import { useMobile } from '@/hooks/use-mobile';
-import { usePartners, usePartnerContributions, usePartnerWithdrawals } from '@/features/capital';
+import { usePartners, usePartnerContributions, usePartnerWithdrawals, CAPITAL_QUERY_KEYS } from '@/features/capital';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
@@ -81,9 +81,10 @@ export function CapitalParticipantsListTab() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['partners'] });
-      queryClient.invalidateQueries({ queryKey: ['partner-contributions'] });
-      queryClient.invalidateQueries({ queryKey: ['partner-withdrawals'] });
+      queryClient.invalidateQueries({ queryKey: CAPITAL_QUERY_KEYS.participants(organizationId!) });
+      queryClient.invalidateQueries({ queryKey: ['capital-contributions', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['capital-withdrawals', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['unified-movements'] });
       toast({
         title: "Socio eliminado",
         description: "El socio ha sido eliminado de la organización.",
