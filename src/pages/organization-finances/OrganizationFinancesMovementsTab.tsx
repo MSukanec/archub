@@ -125,9 +125,7 @@ export function OrganizationFinancesMovementsTab() {
         currency: m.currency,
         exchange_rate: m.exchange_rate
       })),
-      baseCurrencyId: defaultCurrency?.code,
-      symbol: defaultCurrency?.symbol,
-      quoteCurrency: 'USD'
+      baseCurrencyId: defaultCurrency?.code
     });
 
     const egresosKPI = calculateMonetaryKPI({
@@ -137,9 +135,7 @@ export function OrganizationFinancesMovementsTab() {
         currency: m.currency,
         exchange_rate: m.exchange_rate
       })),
-      baseCurrencyId: defaultCurrency?.code,
-      symbol: defaultCurrency?.symbol,
-      quoteCurrency: 'USD'
+      baseCurrencyId: defaultCurrency?.code
     });
 
     const balanceValue = ingresosKPI.value - egresosKPI.value;
@@ -372,7 +368,7 @@ export function OrganizationFinancesMovementsTab() {
             <ArrowUpRight className="h-4 w-4 text-chart-positive" />
             Ingresos
           </StatCardTitle>
-          <StatCardValue className="text-chart-positive">
+          <StatCardValue style={{ color: 'var(--positive)' }}>
             {isCurrencyReady ? formatMoney(kpis.ingresos.value, currencySymbol) : '-'}
           </StatCardValue>
           {showIngresosBreakdown && (
@@ -388,7 +384,7 @@ export function OrganizationFinancesMovementsTab() {
             <ArrowDownRight className="h-4 w-4 text-chart-negative" />
             Egresos
           </StatCardTitle>
-          <StatCardValue className="text-chart-negative">
+          <StatCardValue style={{ color: 'var(--negative)' }}>
             {isCurrencyReady ? formatMoney(kpis.egresos.value, currencySymbol) : '-'}
           </StatCardValue>
           {showEgresosBreakdown && (
@@ -404,7 +400,7 @@ export function OrganizationFinancesMovementsTab() {
             <Scale className="h-4 w-4" />
             Balance
           </StatCardTitle>
-          <StatCardValue className={kpis.balance >= 0 ? 'text-chart-positive' : 'text-chart-negative'}>
+          <StatCardValue style={{ color: kpis.balance >= 0 ? 'var(--positive)' : 'var(--negative)' }}>
             {isCurrencyReady 
               ? `${kpis.balance >= 0 ? '+' : ''}${formatMoney(kpis.balance, currencySymbol)}`
               : '-'
