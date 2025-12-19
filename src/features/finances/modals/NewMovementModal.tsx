@@ -3,6 +3,7 @@ import { DollarSign, Users, Package, CreditCard, TrendingUp, TrendingDown, Brief
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectField'
 import { useProjectContext } from '@/stores/projectContext'
 import { useProjectsLite } from '@/features/projects'
 import { ClientPaymentFormFields } from '@/features/clients/forms/ClientPaymentFormFields'
@@ -76,6 +77,52 @@ const MOVEMENT_TYPES: MovementTypeConfig[] = [
     icon: Briefcase,
     color: 'text-red-600',
     submitLabel: 'Registrar Pago',
+  },
+]
+
+// Opciones jerárquicas para CascadingSelect
+interface CascadingOption {
+  value: string
+  label: string
+  children?: CascadingOption[]
+}
+
+const CASCADING_MOVEMENT_OPTIONS: CascadingOption[] = [
+  {
+    value: 'ingresos',
+    label: 'Ingresos',
+    children: [
+      {
+        value: 'client_payment',
+        label: 'Pago de Cliente',
+      },
+      {
+        value: 'partner_contribution',
+        label: 'Aporte de Socio',
+      },
+    ],
+  },
+  {
+    value: 'egresos',
+    label: 'Egresos',
+    children: [
+      {
+        value: 'material_payment',
+        label: 'Pago de Material',
+      },
+      {
+        value: 'personnel_payment',
+        label: 'Pago de Personal',
+      },
+      {
+        value: 'partner_withdrawal',
+        label: 'Retiro de Socio',
+      },
+      {
+        value: 'general_cost_payment',
+        label: 'Pago de Gasto General',
+      },
+    ],
   },
 ]
 
@@ -172,31 +219,18 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
       <ModalBody>
         <div className="space-y-2">
           <Label className="text-sm font-medium">Tipo de Movimiento</Label>
-          <Select
-            value={selectedType || ''}
-            onValueChange={(value) => setSelectedType(value as MovementType)}
-          >
-            <SelectTrigger data-testid="select-movement-type">
-              <SelectValue placeholder="Selecciona un tipo de movimiento" />
-            </SelectTrigger>
-            <SelectContent>
-              {MOVEMENT_TYPES.map((type) => {
-                const Icon = type.icon
-                return (
-                  <SelectItem 
-                    key={type.id} 
-                    value={type.id}
-                    data-testid={`option-movement-type-${type.id}`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Icon className={`w-4 h-4 ${type.color}`} />
-                      <span>{type.label}</span>
-                    </div>
-                  </SelectItem>
-                )
-              })}
-            </SelectContent>
-          </Select>
+          <CascadingSelect
+            options={CASCADING_MOVEMENT_OPTIONS}
+            value={selectedType ? [selectedType] : []}
+            onValueChange={(value) => {
+              // El último valor en la ruta es el tipo de movimiento final
+              if (value.length > 0) {
+                setSelectedType(value[value.length - 1] as MovementType)
+              }
+            }}
+            placeholder="Selecciona un tipo de movimiento"
+            data-testid="select-movement-type"
+          />
         </div>
 
         {requiresProjectSelector && (
