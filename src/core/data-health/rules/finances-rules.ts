@@ -88,8 +88,8 @@ export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> 
     return {
       id: `${ctx.organizationId}-finances-invalid-exchange-rate`,
       ruleId: 'finances-invalid-exchange-rate',
-      title: `${affected.length} movimiento${affected.length > 1 ? 's' : ''} con cotización faltante o inválida`,
-      description: `Tu organización opera con múltiples monedas, pero ${affected.length} movimiento${affected.length > 1 ? 's' : ''} financiero${affected.length > 1 ? 's' : ''} no ${affected.length > 1 ? 'tienen' : 'tiene'} cotización válida. Sin la cotización correcta (debe ser > 1), los totales en la moneda base son incorrectos y los cálculos del balance no son confiables.`,
+      title: `movimiento${affected.length > 1 ? 's' : ''} con cotización faltante o inválida`,
+      description: `Tu organización opera con múltiples monedas. ${affected.length} movimiento${affected.length > 1 ? 's' : ''} financiero${affected.length > 1 ? 's' : ''} ${affected.length > 1 ? 'tiene' : 'tienen'} la cotización configurada como 1 (o no tiene cotización), lo que impide convertir correctamente el monto a tu moneda base.\n\n⚠️ Cuando usas varias monedas, la cotización debe ser > 1. Por ejemplo:\n• Si tu moneda base es ARS, configura: 1 USD = 1400 ARS (no 1)\n• Si tu moneda base es USD, configura: 1 ARS = 0.0007 USD (no 1)\n\nSin la cotización correcta, los totales mostrados en tu balance y dashboards serán incorrectos.`,
       severity: 'critical',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 
@@ -97,8 +97,8 @@ export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> 
         label: p.label || `Movimiento #${p.id}` 
       })),
       recommendedAction: {
-        label: 'Agregar cotización',
-        description: 'Editar cada movimiento y configurar la cotización correcta entre monedas (ej: 1 USD = 1400 ARS). Esta cotización se usa para convertir el monto a la moneda base.',
+        label: 'Configurar cotizaciones',
+        description: 'Editar cada movimiento y configurar la cotización correcta entre monedas. La cotización debe ser mayor a 1 y refleja cómo se convierte de una moneda a otra.',
         actionType: 'bulk_edit',
         targetIds: affected.map(p => p.id),
       },
