@@ -617,7 +617,8 @@ export function BillingListTab() {
                   <Button 
                     onClick={() => setLocation('/settings/pricing-plan')}
                     data-testid="button-reactivate-subscription"
-                    className="w-full"
+                    className="w-full text-white"
+                    style={{ backgroundColor: `var(--plan-${planSlug})` }}
                   >
                     <RotateCcw className="w-4 h-4 mr-2" />
                     Reactivar {planName}
@@ -634,7 +635,8 @@ export function BillingListTab() {
                       }
                     }}
                     data-testid="button-upgrade-plan"
-                    className="w-full"
+                    className="w-full text-white"
+                    style={{ backgroundColor: `var(--plan-${getNextPlan()?.slug})` }}
                   >
                     <ArrowUpCircle className="w-4 h-4 mr-2" />
                     {isFreePlan 
