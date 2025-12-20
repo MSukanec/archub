@@ -35,6 +35,7 @@ export default function Capital() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
   const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null);
+  const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setSidebarLevel('organization');
@@ -225,7 +226,13 @@ export default function Capital() {
             entityLabel="transacción"
             activeFilterIssueId={activeFilterIssueId}
             onToggleFilter={handleDataHealthClick}
-            showClearButton
+            dismissedIssueIds={dismissedIssueIds}
+            onDismissIssue={(issueId: string) => {
+              if (activeFilterIssueId === issueId) {
+                setActiveFilterIssueId(null);
+              }
+              setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
+            }}
           />
         )}
         {renderTabContent()}

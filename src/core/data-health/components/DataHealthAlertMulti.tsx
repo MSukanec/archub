@@ -7,7 +7,8 @@ interface DataHealthAlertMultiProps {
   entityLabel?: string;
   activeFilterIssueId?: string | null;
   onToggleFilter: (issueId: string) => void;
-  showClearButton?: boolean;
+  dismissedIssueIds?: Set<string>;
+  onDismissIssue?: (issueId: string) => void;
 }
 
 const issueIcons: Record<string, typeof Users> = {
@@ -31,9 +32,12 @@ export function DataHealthAlertMulti({
   entityLabel = 'elemento',
   activeFilterIssueId,
   onToggleFilter,
-  showClearButton = false,
+  dismissedIssueIds = new Set(),
+  onDismissIssue,
 }: DataHealthAlertMultiProps) {
-  if (issues.length === 0) return null;
+  const visibleIssues = issues.filter(issue => !dismissedIssueIds.has(issue.id));
+  
+  if (visibleIssues.length === 0) return null;
 
   const isFiltering = !!activeFilterIssueId;
   const filteredIssue = issues.find(i => i.id === activeFilterIssueId);
@@ -41,7 +45,7 @@ export function DataHealthAlertMulti({
 
   return (
     <div className="space-y-2">
-      {issues.map((issue) => {
+      {visibleIssues.map((issue) => {
         const Icon = issueIcons[issue.ruleId] || AlertTriangle;
         const bgColor = severityColors[issue.severity] || severityColors.warning;
         const isThisIssueFiltered = activeFilterIssueId === issue.id;
@@ -56,7 +60,7 @@ export function DataHealthAlertMulti({
               label: 'Filtro activo',
               onClick: () => onToggleFilter(issue.id)
             } : undefined}
-            onClose={() => onToggleFilter(issue.id)}
+            onClose={onDismissIssue ? () => onDismissIssue(issue.id) : undefined}
             onClick={() => onToggleFilter(issue.id)}
           />
         );

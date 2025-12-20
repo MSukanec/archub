@@ -82,6 +82,7 @@ export function OrganizationFinancesMovementsTab() {
   const { showDeleteConfirmation } = useDeleteConfirmation();
   
   const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null);
+  const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
 
   const handleAddMovement = useCallback(() => {
     openModal('unified-payment', {
@@ -395,7 +396,13 @@ export function OrganizationFinancesMovementsTab() {
             setActiveFilterIssueId(issueId);
           }
         }}
-        showClearButton
+        dismissedIssueIds={dismissedIssueIds}
+        onDismissIssue={(issueId: string) => {
+          if (activeFilterIssueId === issueId) {
+            setActiveFilterIssueId(null);
+          }
+          setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
+        }}
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

@@ -66,6 +66,7 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
   const { showDeleteConfirmation } = useDeleteConfirmation();
   
   const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null);
+  const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined);
   
@@ -331,7 +332,13 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
             setActiveFilterIssueId(issueId);
           }
         }}
-        showClearButton
+        dismissedIssueIds={dismissedIssueIds}
+        onDismissIssue={(issueId: string) => {
+          if (activeFilterIssueId === issueId) {
+            setActiveFilterIssueId(null);
+          }
+          setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
+        }}
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
