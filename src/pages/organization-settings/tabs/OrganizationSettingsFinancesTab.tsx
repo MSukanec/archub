@@ -26,7 +26,6 @@ export function OrganizationSettingsFinancesTab() {
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
   const [defaultWallet, setDefaultWallet] = useState<string>('');
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
-  const [useCurrencyExchange, setUseCurrencyExchange] = useState<string>('no');
 
   useEffect(() => {
     if (organizationCurrencies?.length) {
@@ -55,11 +54,6 @@ export function OrganizationSettingsFinancesTab() {
     }
   }, [organizationWallets]);
 
-  useEffect(() => {
-    if (userData?.organization?.preferences) {
-      setUseCurrencyExchange(userData.organization.preferences.use_currency_exchange ? 'si' : 'no');
-    }
-  }, [userData?.organization?.preferences]);
 
   const saveDefaultCurrencyMutation = useMutation({
     mutationFn: async (currencyId: string) => {
@@ -332,30 +326,6 @@ export function OrganizationSettingsFinancesTab() {
     }
   });
 
-  const updateCurrencyExchangeMutation = useMutation({
-    mutationFn: async (useExchange: string) => {
-      const { error } = await supabase
-        .from('organization_preferences')
-        .update({ use_currency_exchange: useExchange === 'si' })
-        .eq('organization_id', userData?.organization?.id);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast({ 
-        title: 'Configuración actualizada', 
-        description: 'La configuración de cotización se ha guardado exitosamente.' 
-      });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    },
-    onError: (error) => {
-      toast({ 
-        title: 'Error', 
-        description: 'No se pudo actualizar la configuración de cotización.',
-        variant: 'destructive'
-      });
-    }
-  });
 
   const handleDefaultCurrencyChange = (currencyId: string) => {
     setDefaultCurrency(currencyId);
@@ -379,10 +349,6 @@ export function OrganizationSettingsFinancesTab() {
     updateSecondaryWalletsMutation.mutate(walletIds);
   };
 
-  const handleCurrencyExchangeChange = (useExchange: string) => {
-    setUseCurrencyExchange(useExchange);
-    updateCurrencyExchangeMutation.mutate(useExchange);
-  };
 
   const availableSecondaryCurrencies = allCurrencies?.filter(c => c.id !== defaultCurrency) || [];
   const availableSecondaryWallets = allWallets?.filter(w => w.id !== defaultWallet) || [];
@@ -424,10 +390,10 @@ export function OrganizationSettingsFinancesTab() {
         <div>
           <div className="flex items-center gap-2 mb-6">
             <Coins className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Monedas Secundarias y Cotización</h2>
+            <h2 className="text-lg font-semibold">Monedas Secundarias</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Configura monedas adicionales y habilita la funcionalidad de cotización para gestionar tasas de cambio personalizadas.
+            Configura monedas adicionales para tu organización. Cuando tengas más de una moneda activa, podrás registrar movimientos en diferentes divisas.
           </p>
         </div>
 
@@ -445,18 +411,6 @@ export function OrganizationSettingsFinancesTab() {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="currency-exchange-select">Usar Cotización de Monedas</Label>
-            <Select value={useCurrencyExchange} onValueChange={handleCurrencyExchangeChange}>
-              <SelectTrigger id="currency-exchange-select">
-                <SelectValue placeholder="Selecciona una opción" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="no">No usar cotización</SelectItem>
-                <SelectItem value="si">Usar cotización</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
       </div>
 

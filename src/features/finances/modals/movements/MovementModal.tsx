@@ -137,8 +137,9 @@ export function MovementModal({ modalData, onClose, editingMovement: propEditing
   const { toast } = useToast()
   const queryClient = useQueryClient()
   
-  // Get exchange rate visibility configuration from organization preferences
-  const showExchangeRate = userData?.organization?.preferences?.use_currency_exchange || false
+  // Exchange rate is always available when there are multiple currencies
+  // (use_currency_exchange preference is deprecated and no longer used)
+  const showExchangeRate = currencies.length > 1
   
   // Filter movement concepts based on available currencies and wallets
   const filteredMovementConcepts = React.useMemo(() => {
