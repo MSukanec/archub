@@ -103,6 +103,9 @@ export async function getUnifiedMovements(
   const projectIds = Array.from(new Set(movements.map(m => m.project_id).filter(Boolean))) as string[];
   const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean))) as string[];
   const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean))) as string[];
+  const clientIds = Array.from(new Set(movements.filter(m => m.movement_type === 'client_payment' && m.client_id).map(m => m.client_id).filter(Boolean))) as string[];
+  const materialIds = Array.from(new Set(movements.filter(m => m.movement_type === 'material_payment' && m.material_id).map(m => m.material_id).filter(Boolean))) as string[];
+  const personnelIds = Array.from(new Set(movements.filter(m => m.movement_type === 'personnel_payment' && m.personnel_id).map(m => m.personnel_id).filter(Boolean))) as string[];
 
   // Build separate ID arrays for each payment type for media_links query
   const clientPaymentIdSet = new Set(movements.filter(m => m.movement_type === 'client_payment').map(m => m.id));
@@ -133,9 +136,8 @@ export async function getUnifiedMovements(
     orFilterParts.push(`general_cost_payment_id.in.(${Array.from(generalCostPaymentIdSet).join(',')})`);
   }
 
-  // Fetch relations (projects, currencies, wallets) and attachments
-  // Note: creator info and entity_name now come from the view v2 columns
-  const [projectsResult, currenciesResult, walletsResult, attachmentsResult] = await Promise.all([
+  // Fetch relations (projects, currencies, wallets), entity names (clients, materials, personnel), and attachments
+  const [projectsResult, currenciesResult, walletsResult, clientsResult, materialsResult, personnelResult, attachmentsResult] = await Promise.all([
     projectIds.length > 0 
       ? supabase.from('projects').select('id, name, code, color').in('id', projectIds)
       : { data: [], error: null },
@@ -144,6 +146,15 @@ export async function getUnifiedMovements(
       : { data: [], error: null },
     walletIds.length > 0
       ? supabase.from('organization_wallets').select('id, wallets:wallet_id(id, name)').in('id', walletIds)
+      : { data: [], error: null },
+    clientIds.length > 0
+      ? supabase.from('clients').select('id, name').in('id', clientIds)
+      : { data: [], error: null },
+    materialIds.length > 0
+      ? supabase.from('materials').select('id, name').in('id', materialIds)
+      : { data: [], error: null },
+    personnelIds.length > 0
+      ? supabase.from('personnel').select('id, full_name').in('id', personnelIds)
       : { data: [], error: null },
     orFilterParts.length > 0
       ? supabase.from('media_links')
@@ -158,6 +169,9 @@ export async function getUnifiedMovements(
     w.id, 
     w.wallets ? { id: w.id, name: w.wallets.name } : null
   ]));
+  const clientsMap = new Map((clientsResult.data || []).map((c: any) => [c.id, c.name]));
+  const materialsMap = new Map((materialsResult.data || []).map((m: any) => [m.id, m.name]));
+  const personnelMap = new Map((personnelResult.data || []).map((p: any) => [p.id, p.full_name]));
   
   const attachmentsSet = new Set<string>();
   (attachmentsResult.data || []).forEach((link: any) => {
@@ -169,14 +183,30 @@ export async function getUnifiedMovements(
     if (link.general_cost_payment_id) attachmentsSet.add(link.general_cost_payment_id);
   });
 
-  return movements.map((movement: any) => ({
-    ...movement,
-    project: movement.project_id ? projectsMap.get(movement.project_id) || null : null,
-    currency: movement.currency_id ? currenciesMap.get(movement.currency_id) || null : null,
-    wallet: movement.wallet_id ? walletsMap.get(movement.wallet_id) || null : null,
-    signed_amount: movement.amount * movement.amount_sign,
-    has_attachments: attachmentsSet.has(movement.id),
-  }));
+  return movements.map((movement: any) => {
+    let entityName = movement.entity_name;
+    
+    // Enrich entity_name if missing
+    if (!entityName) {
+      if (movement.movement_type === 'client_payment' && movement.client_id) {
+        entityName = clientsMap.get(movement.client_id) || null;
+      } else if (movement.movement_type === 'material_payment' && movement.material_id) {
+        entityName = materialsMap.get(movement.material_id) || null;
+      } else if (movement.movement_type === 'personnel_payment' && movement.personnel_id) {
+        entityName = personnelMap.get(movement.personnel_id) || null;
+      }
+    }
+    
+    return {
+      ...movement,
+      entity_name: entityName,
+      project: movement.project_id ? projectsMap.get(movement.project_id) || null : null,
+      currency: movement.currency_id ? currenciesMap.get(movement.currency_id) || null : null,
+      wallet: movement.wallet_id ? walletsMap.get(movement.wallet_id) || null : null,
+      signed_amount: movement.amount * movement.amount_sign,
+      has_attachments: attachmentsSet.has(movement.id),
+    };
+  });
 }
 
 /**
