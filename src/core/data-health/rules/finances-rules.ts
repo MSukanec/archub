@@ -2,6 +2,7 @@ import type { DataHealthRule, NormalizedPayment } from '../types';
 import { 
   createMissingExchangeRateRule,
   createMissingRelationRule,
+  createMissingPersonnelRule,
 } from './micro';
 import { 
   createFeatureRule, 
@@ -9,6 +10,7 @@ import {
   createExchangeRateDescription,
   createMissingClientDescription,
   createMissingProjectDescription,
+  createMissingPersonnelDescription,
 } from './micro/adapter';
 
 const FEATURE_TAG = 'finances';
@@ -63,6 +65,25 @@ export const paymentsWithoutProjectRule: DataHealthRule<NormalizedPayment> = cre
   }),
 });
 
+export const personnelPaymentsWithoutPersonnelRule: DataHealthRule<NormalizedPayment> = createFeatureRule({
+  ruleId: 'personnel-payments-without-personnel',
+  featureTag: FEATURE_TAG,
+  microRule: createMissingPersonnelRule<NormalizedPayment>({
+    filterFn: (item) => item.movementType === 'personnel_payment',
+  }),
+  entityLabels,
+  formatTitle: () => `Pagos de personal sin personal asignado`,
+  formatDescription: (count, labels) => 
+    createMissingPersonnelDescription(count, labels),
+  getItemLabel: (item) => item.label || `Pago #${item.id}`,
+  getRecommendedAction: (affectedIds) => ({
+    label: 'Asignar personal',
+    description: 'Editar los pagos para asignar el personal que recibió el pago',
+    actionType: 'bulk_edit',
+    targetIds: affectedIds,
+  }),
+});
+
 export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> = createFeatureRule({
   ruleId: 'finances-invalid-exchange-rate',
   featureTag: FEATURE_TAG,
@@ -83,6 +104,7 @@ export const financesInvalidExchangeRateRule: DataHealthRule<NormalizedPayment> 
 
 export const allFinancesRules: DataHealthRule<NormalizedPayment>[] = [
   clientPaymentsWithoutClientRule,
+  personnelPaymentsWithoutPersonnelRule,
   paymentsWithoutProjectRule,
   financesInvalidExchangeRateRule,
 ];

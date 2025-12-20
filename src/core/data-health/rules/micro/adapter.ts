@@ -118,6 +118,25 @@ Sin billetera asignada, no puedes:
 Edita cada movimiento y asigna la billetera (cuenta bancaria, caja de efectivo, etc.). Si necesitas crear una billetera nueva, hazlo en la sección de configuración.`;
 }
 
+export function createMissingPersonnelDescription(count: number, labels: EntityLabels): string {
+  const entity = count === 1 ? labels.singular : labels.plural;
+  const estan = count > 1 ? 'están' : 'está';
+  const registrados = count > 1 ? 'registrados' : 'registrado';
+  
+  return `${count} ${entity} de personal ${estan} ${registrados} sin personal asignado. El sistema no sabe a quién se le realizó el pago.
+
+**¿POR QUÉ IMPORTA?**
+Sin personal asignado, no puedes:
+• Ver el historial de pagos para cada miembro del equipo
+• Generar reportes de costos de mano de obra por persona
+• Hacer seguimiento de cuánto ganó cada empleado o subcontratista
+• Analizar productividad y costos por persona
+• Conciliar nóminas con los pagos registrados
+
+**CÓMO ARREGLARLO:**
+Edita cada movimiento y asigna el personal correspondiente. Si la persona no existe en tu lista de personal, primero agrégala a tu equipo de obra.`;
+}
+
 export function createExchangeRateDescription(count: number, labels: EntityLabels): string {
   const entity = count === 1 ? labels.singular : labels.plural;
   const estan = count > 1 ? 'están' : 'está';

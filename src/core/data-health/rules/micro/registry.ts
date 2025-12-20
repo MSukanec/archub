@@ -58,6 +58,18 @@ export const microRuleRegistry: Record<string, RuleMetadata> = {
     severity: 'warning',
     category: 'missing_relation',
   },
+  'missing-personnel': {
+    id: 'missing-personnel',
+    icon: Users,
+    severity: 'warning',
+    category: 'missing_relation',
+  },
+  'personnel-payments-without-personnel': {
+    id: 'personnel-payments-without-personnel',
+    icon: Users,
+    severity: 'warning',
+    category: 'missing_relation',
+  },
   'missing-project': {
     id: 'missing-project',
     icon: FolderOpen,

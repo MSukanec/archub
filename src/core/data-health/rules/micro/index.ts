@@ -20,6 +20,12 @@ export {
 } from './missing-relation';
 
 export { 
+  createMissingPersonnelRule, 
+  missingPersonnelConfig,
+  type PersonnelEntity 
+} from './missing-personnel';
+
+export { 
   createMissingWalletRule, 
   missingWalletConfig,
   type WalletEntity 
