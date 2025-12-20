@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { Table } from '@/components/shared/trees/Table'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { Edit, Trash2, Bell, AlertTriangle, Info, CheckCircle, XCircle } from 'lucide-react'

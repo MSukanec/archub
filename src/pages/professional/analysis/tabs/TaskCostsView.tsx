@@ -3,7 +3,7 @@ import { Package, Plus, Edit, Trash2, DollarSign, TrendingUp, Calendar, Settings
 import { formatDate, formatTime } from "@/lib/date-utils";
 import { useLocation } from "wouter";
 
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/trees/Table';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { BreakdownChart } from '@/components/charts/legacy/BreakdownChart';
 import { Badge } from "@/components/ui/badge";

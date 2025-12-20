@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { formatDate } from '@/lib/date-utils'
 import { Edit, Trash2 } from 'lucide-react'
 
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { Table } from '@/components/shared/trees/Table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'

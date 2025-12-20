@@ -3,7 +3,7 @@ import { DollarSign, Plus, Edit, Trash2, CheckCircle2, Calendar } from 'lucide-r
 import { convert } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { Table } from '@/components/shared/trees/Table'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'

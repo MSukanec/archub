@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContext } from '@/stores/projectContext';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/trees/Table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

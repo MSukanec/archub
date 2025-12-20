@@ -1,5 +1,5 @@
 import React from 'react'
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { Table } from '@/components/shared/trees/Table'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 interface MemberSummary {

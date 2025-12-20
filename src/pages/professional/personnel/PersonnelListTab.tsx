@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Users } from 'lucide-react'
 import { format } from 'date-fns'
-import { Table } from "@/components/ui-custom/tables-and-trees/Table"
+import { Table } from "@/components/shared/trees/Table"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

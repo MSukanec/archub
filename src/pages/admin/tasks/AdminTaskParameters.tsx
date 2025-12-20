@@ -4,7 +4,7 @@ import { Settings, Edit, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/trees/Table';
 import { EmptyState } from '@/components/shared/EmptyState';
 
 import { useTaskParametersAdmin, useDeleteTaskParameter, useDeleteTaskParameterOption, TaskParameterOption, TaskParameterWithOptions } from '@/hooks/use-task-parameters-admin';

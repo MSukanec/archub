@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { Table } from '@/components/shared/trees/Table'
 import { useGlobalModalStore } from '@/components/modal'
 import { useTaskKinds, useDeleteTaskKind, type TaskKind } from '@/hooks/use-actions'
 

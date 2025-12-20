@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Tag, Plus, Search, Filter, Bell, Edit, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { Table } from '@/components/shared/trees/Table'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'

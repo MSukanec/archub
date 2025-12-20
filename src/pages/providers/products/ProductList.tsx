@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Table } from '@/components/ui-custom/tables-and-trees/Table'
+import { Table } from '@/components/shared/trees/Table'
 import { useProducts, Product, useDeleteProduct } from '@/features/materials'
 import MaterialRow from '@/features/materials/components/MaterialRow'
 import { Package, Edit, Trash2, Copy, ExternalLink, Image } from 'lucide-react'

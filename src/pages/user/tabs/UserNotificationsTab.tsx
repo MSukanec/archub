@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/trees/Table';
 import { Bell, CheckCircle, Circle, CheckCheck } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { supabase } from '@/lib/supabase';

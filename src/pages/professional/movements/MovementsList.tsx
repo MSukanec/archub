@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
-import { Table, ProjectBadge } from "@/components/ui-custom/tables-and-trees/Table";
+import { Table, ProjectBadge } from "@/components/shared/trees/Table";
 import { EmptyState } from "@/components/shared/EmptyState";
 
 import TransferRow, { type TransferGroup } from "@/features/finances/components/TransferRow";

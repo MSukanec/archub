@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useGlobalModalStore } from '@/components/modal';
-import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/HierarchicalTree';
+import { HierarchicalTree } from '@/components/shared/trees/HierarchicalTree';
 import { Inbox } from 'lucide-react';
 import type { ForumCategory } from '@/features/forum/services';
 

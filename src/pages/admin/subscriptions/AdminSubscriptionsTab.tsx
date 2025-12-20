@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Inbox, Search, Bell, Edit, Trash2 } from 'lucide-react';
 import { useGlobalModalStore } from '@/components/modal';

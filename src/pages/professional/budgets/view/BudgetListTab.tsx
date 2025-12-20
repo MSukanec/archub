@@ -1,6 +1,6 @@
 import { DollarSign, Plus, Package, Calculator, FolderOpen, TrendingUp } from 'lucide-react'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { BudgetTree } from '@/components/ui-custom/tables-and-trees/BudgetTree'
+import { BudgetTree } from '@/components/shared/trees/BudgetTree'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useMemo, useState } from 'react'

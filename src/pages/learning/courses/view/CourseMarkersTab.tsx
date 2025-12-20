@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, Bookmark, ArrowRight, Trash2 } from 'lucide-react';

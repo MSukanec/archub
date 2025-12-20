@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ShoppingCart, Plus, Edit, Trash2, CheckCircle2, Clock, DollarSign, Paperclip } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContext } from '@/stores/projectContext';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/trees/Table';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/HierarchicalTree';
+import { HierarchicalTree } from '@/components/shared/trees/HierarchicalTree';
 import { useGlobalModalStore } from '@/components/modal';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';

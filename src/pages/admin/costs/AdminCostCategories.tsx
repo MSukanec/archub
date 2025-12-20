@@ -4,7 +4,7 @@ import { Plus, Tag, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
-import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/HierarchicalTree';
+import { HierarchicalTree } from '@/components/shared/trees/HierarchicalTree';
 
 import { useMaterialCategories, useDeleteMaterialCategory, MaterialCategory } from '@/features/materials';
 import { useGlobalModalStore } from '@/components/modal';

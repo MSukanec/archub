@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Table } from '@/components/ui-custom/tables-and-trees/Table';
+import { Table } from '@/components/shared/trees/Table';
 import { Badge } from '@/components/ui/badge';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';
 import { DollarSign, TrendingUp, CreditCard, Inbox, Search, Bell, Banknote, Edit, Trash2 } from 'lucide-react';
