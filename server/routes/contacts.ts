@@ -124,4 +124,69 @@ export function registerContactRoutes(app: Express, deps: RouteDeps) {
       return res.status(500).json({ error: error.message || "Failed to fetch contacts" });
     }
   });
+
+  // POST /api/contacts/fix-full-names - Fill missing full_name fields by concatenating first_name + last_name
+  app.post("/api/contacts/fix-full-names", async (req, res) => {
+    try {
+      const { organization_id } = req.query;
+      
+      if (!organization_id) {
+        return res.status(400).json({ error: "organization_id is required" });
+      }
+      
+      const token = extractToken(req.headers.authorization);
+      if (!token) {
+        return res.status(401).json({ error: "No authorization token provided" });
+      }
+      
+      const userAuth = await getUserFromToken(token);
+      if (!userAuth) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Fetch all contacts without full_name in this organization
+      const { data: contactsToFix, error: fetchError } = await userAuth.supabase
+        .from('contacts')
+        .select('id, first_name, last_name')
+        .eq('organization_id', organization_id)
+        .or('full_name.is.null,full_name.eq.');
+
+      if (fetchError) {
+        return res.status(500).json({ error: "Failed to fetch contacts" });
+      }
+
+      if (!contactsToFix || contactsToFix.length === 0) {
+        return res.status(200).json({ success: true, updated: 0, message: "No contacts to update" });
+      }
+
+      // Update each contact with concatenated full_name
+      let updated = 0;
+      for (const contact of contactsToFix) {
+        const fullName = [contact.first_name, contact.last_name]
+          .filter(Boolean)
+          .join(' ')
+          .trim() || null;
+
+        const { error: updateError } = await userAuth.supabase
+          .from('contacts')
+          .update({ full_name: fullName })
+          .eq('id', contact.id);
+
+        if (!updateError) {
+          updated++;
+        }
+      }
+
+      return res.status(200).json({ 
+        success: true, 
+        updated, 
+        total: contactsToFix.length,
+        message: `Updated ${updated} contacts with full_name`
+      });
+
+    } catch (error: any) {
+      console.error('Error in fix-full-names handler:', error);
+      return res.status(500).json({ error: error.message || "Failed to fix full names" });
+    }
+  });
 }

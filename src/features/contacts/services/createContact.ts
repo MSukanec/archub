@@ -17,12 +17,19 @@ export async function createContact(
     throw new Error('Missing required parameters');
   }
 
+  // Generate full_name by concatenating first_name and last_name
+  const full_name = [input.first_name, input.last_name]
+    .filter(Boolean)
+    .join(' ')
+    .trim() || null;
+
   const { data, error } = await supabase
     .from('contacts')
     .insert({
       organization_id: organizationId,
       first_name: input.first_name,
       last_name: input.last_name || null,
+      full_name: full_name,
       email: input.email || null,
       phone: input.phone || null,
       company_name: input.company_name || null,
