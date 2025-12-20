@@ -38,7 +38,7 @@ export function DataHealthDetailsContent({ issue }: DataHealthDetailsContentProp
           </div>
         )}
         <div className="flex-1">
-          <h3 className="font-semibold text-lg text-foreground">{issue.title}</h3>
+          <h3 className="font-semibold text-lg text-foreground capitalize">{issue.title}</h3>
           <div className="flex gap-2 mt-2">
             <Badge variant={variant}>
               {severityLabels[issue.severity]}
@@ -51,9 +51,14 @@ export function DataHealthDetailsContent({ issue }: DataHealthDetailsContentProp
       </div>
 
       <div className="space-y-4">
-        <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground bg-muted/50 p-4 rounded-lg">
-          {issue.description}
-        </div>
+        <div 
+          className="text-sm leading-relaxed text-foreground bg-muted/50 p-4 rounded-lg [&_strong]:font-semibold [&_strong]:text-foreground"
+          dangerouslySetInnerHTML={{ 
+            __html: issue.description
+              .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+              .replace(/\n/g, '<br/>')
+          }}
+        />
 
         {issue.recommendedAction && (
           <div className="border-t pt-4">

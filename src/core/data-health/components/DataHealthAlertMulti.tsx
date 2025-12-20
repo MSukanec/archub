@@ -1,4 +1,3 @@
-import { ChevronRight } from 'lucide-react';
 import { Callout } from '@/components/shared/Callout';
 import type { DataIssue } from '../types';
 import { getRuleIcon } from '../rules/micro';
@@ -49,28 +48,25 @@ export function DataHealthAlertMulti({
         const isThisIssueFiltered = activeFilterIssueId === issue.id;
         
         return (
-          <div key={issue.id} className="flex gap-2 items-center">
-            <Callout
-              icon={Icon}
-              text={`${issue.affectedCount} ${issue.title.toLowerCase()}`}
-              backgroundColor={bgColor}
-              button={isThisIssueFiltered ? {
-                label: 'Filtro activo',
-                onClick: () => onToggleFilter(issue.id)
-              } : undefined}
-              onClose={onDismissIssue ? () => onDismissIssue(issue.id) : undefined}
-              onClick={() => onToggleFilter(issue.id)}
-              className="flex-1"
-            />
-            <button
-              onClick={() => handleOpenDetails(issue)}
-              className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
-              title="Ver detalles"
-              data-testid={`data-health-details-${issue.ruleId}`}
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </div>
+          <Callout
+            key={issue.id}
+            icon={Icon}
+            text={`${issue.affectedCount} ${issue.title.toLowerCase()}`}
+            backgroundColor={bgColor}
+            button={{
+              label: isThisIssueFiltered ? 'Filtro activo' : 'Más información',
+              onClick: (e) => {
+                e?.stopPropagation();
+                if (isThisIssueFiltered) {
+                  onToggleFilter(issue.id);
+                } else {
+                  handleOpenDetails(issue);
+                }
+              }
+            }}
+            onClose={onDismissIssue ? () => onDismissIssue(issue.id) : undefined}
+            onClick={() => onToggleFilter(issue.id)}
+          />
         );
       })}
       
