@@ -39,7 +39,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { PlanRestricted } from "@/features/users";
-import { ExpandableAvatarGroup } from "@/components/ui-custom/ExpandableAvatarGroup";
+import { ExpandableAvatarGroup } from "@/components/shared/layout/ExpandableAvatarGroup";
 import { ReadOnlyBanner } from "@/components/ui-custom/ReadOnlyBanner";
 import { ContextSelector } from "./components/Topbar/ContextSelector";
 import { useSidebarStore } from "@/stores/sidebarStore";

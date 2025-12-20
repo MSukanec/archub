@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ExpandableAvatarGroup } from "@/components/ui-custom/ExpandableAvatarGroup";
+import { ExpandableAvatarGroup } from "@/components/shared/layout/ExpandableAvatarGroup";
 import { ContextSelector } from "./ContextSelector";
 
 interface Tab {
