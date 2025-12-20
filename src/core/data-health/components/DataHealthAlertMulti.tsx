@@ -35,7 +35,8 @@ export function DataHealthAlertMulti({
     
     if (filteredItemIds && filteredItemIds.size > 0) {
       const issueTargetIds = issue.recommendedAction.targetIds || [];
-      const hasOverlap = issueTargetIds.some(id => filteredItemIds.has(id));
+      const filteredIdsAsStrings = new Set(Array.from(filteredItemIds).map(id => String(id)));
+      const hasOverlap = issueTargetIds.some(id => filteredIdsAsStrings.has(String(id)));
       if (!hasOverlap) return false;
     }
     
