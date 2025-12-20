@@ -255,7 +255,6 @@ export function PartnerContributionFormFields({
             notes: data.notes || null,
           },
           organizationId,
-          updatedBy: currentMember.id,
         })
       } else {
         result = await createMutation.mutateAsync({

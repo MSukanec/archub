@@ -54,13 +54,11 @@ export function useUpdatePartnerWithdrawal() {
       withdrawalId,
       updates,
       organizationId,
-      updatedBy,
     }: {
       withdrawalId: string;
       updates: Partial<Omit<PartnerWithdrawal, 'id' | 'created_at' | 'organization_id' | 'created_by'>>;
       organizationId: string;
-      updatedBy?: string;
-    }) => updatePartnerWithdrawal(withdrawalId, updates, organizationId, updatedBy),
+    }) => updatePartnerWithdrawal(withdrawalId, updates, organizationId),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: PARTNER_QUERY_KEYS.withdrawals(data.organization_id, data.project_id || undefined),

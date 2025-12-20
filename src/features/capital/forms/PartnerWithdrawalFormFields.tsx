@@ -242,7 +242,6 @@ export function PartnerWithdrawalFormFields({
             notes: data.notes || null,
           },
           organizationId,
-          updatedBy: currentMember.id,
         })
       } else {
         result = await createMutation.mutateAsync({
