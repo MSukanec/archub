@@ -83,25 +83,31 @@ export function initializeModalRegistry(): void {
   });
   registerModal('capital-contribution', PartnerContributionModal as any, {
     ...financeConfig,
-    mapDataToProps: (data) => ({
-      modalData: {
-        projectId: data?.projectId,
-        organizationId: data?.organizationId,
-        contributionId: data?.contributionId,
-      },
-      mode: data?.contributionId ? (data?.mode || 'edit') : (data?.mode || 'create')
-    })
+    mapDataToProps: (data) => {
+      const contributionId = data?.contributionId || data?.paymentId;
+      return {
+        modalData: {
+          projectId: data?.projectId,
+          organizationId: data?.organizationId,
+          contributionId,
+        },
+        mode: contributionId ? (data?.mode || 'edit') : (data?.mode || 'create')
+      };
+    }
   });
   registerModal('capital-withdrawal', PartnerWithdrawalModal as any, {
     ...financeConfig,
-    mapDataToProps: (data) => ({
-      modalData: {
-        projectId: data?.projectId,
-        organizationId: data?.organizationId,
-        withdrawalId: data?.withdrawalId,
-      },
-      mode: data?.withdrawalId ? (data?.mode || 'edit') : (data?.mode || 'create')
-    })
+    mapDataToProps: (data) => {
+      const withdrawalId = data?.withdrawalId || data?.paymentId;
+      return {
+        modalData: {
+          projectId: data?.projectId,
+          organizationId: data?.organizationId,
+          withdrawalId,
+        },
+        mode: withdrawalId ? (data?.mode || 'edit') : (data?.mode || 'create')
+      };
+    }
   });
   // Legacy aliases for backward compatibility
   registerModal('partner', CapitalParticipantModal as any, {
@@ -116,25 +122,31 @@ export function initializeModalRegistry(): void {
   });
   registerModal('partner-contribution', PartnerContributionModal as any, {
     ...financeConfig,
-    mapDataToProps: (data) => ({
-      modalData: {
-        projectId: data?.projectId,
-        organizationId: data?.organizationId,
-        contributionId: data?.contributionId,
-      },
-      mode: data?.contributionId ? (data?.mode || 'edit') : (data?.mode || 'create')
-    })
+    mapDataToProps: (data) => {
+      const contributionId = data?.contributionId || data?.paymentId;
+      return {
+        modalData: {
+          projectId: data?.projectId,
+          organizationId: data?.organizationId,
+          contributionId,
+        },
+        mode: contributionId ? (data?.mode || 'edit') : (data?.mode || 'create')
+      };
+    }
   });
   registerModal('partner-withdrawal', PartnerWithdrawalModal as any, {
     ...financeConfig,
-    mapDataToProps: (data) => ({
-      modalData: {
-        projectId: data?.projectId,
-        organizationId: data?.organizationId,
-        withdrawalId: data?.withdrawalId,
-      },
-      mode: data?.withdrawalId ? (data?.mode || 'edit') : (data?.mode || 'create')
-    })
+    mapDataToProps: (data) => {
+      const withdrawalId = data?.withdrawalId || data?.paymentId;
+      return {
+        modalData: {
+          projectId: data?.projectId,
+          organizationId: data?.organizationId,
+          withdrawalId,
+        },
+        mode: withdrawalId ? (data?.mode || 'edit') : (data?.mode || 'create')
+      };
+    }
   });
   registerModal('capital-transaction', CapitalTransactionModal as any, {
     ...financeConfig,
