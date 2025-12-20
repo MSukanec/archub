@@ -259,10 +259,9 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
                           navigate(navigateUrl);
                           onClose();
                         }}
-                        className="text-muted-foreground hover:text-foreground transition-colors"
-                        title={`Ir a ${nav.label}`}
+                        className="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors"
                       >
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        Ir a {nav.label}
                       </button>
                     </div>
                   </SelectItem>

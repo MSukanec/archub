@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react'
-import { TrendingUp, TrendingDown, Wallet, ExternalLink } from 'lucide-react'
-import { useLocation } from 'wouter'
+import { TrendingUp, TrendingDown, Wallet } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -49,7 +48,6 @@ interface CapitalTransactionModalProps {
 export function CapitalTransactionModal({ modalData, onClose }: CapitalTransactionModalProps) {
   const formRef = useRef<HTMLFormElement>(null)
   const [selectedType, setSelectedType] = useState<TransactionType | null>(null)
-  const [, navigate] = useLocation()
 
   const selectedConfig = selectedType 
     ? TRANSACTION_TYPES.find(t => t.id === selectedType) 
@@ -121,24 +119,9 @@ export function CapitalTransactionModal({ modalData, onClose }: CapitalTransacti
                 
                 return (
                   <SelectItem key={type.id} value={type.id}>
-                    <div className="flex items-center justify-between w-full gap-3">
-                      <div className="flex items-center gap-2">
-                        <IconComponent className={cn("w-4 h-4", type.color)} />
-                        <span className={type.color}>{type.label}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          navigate('/organization/capital?tab=transactions');
-                          onClose();
-                        }}
-                        className="text-muted-foreground hover:text-foreground transition-colors"
-                        title="Ir a Capital"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </button>
+                    <div className="flex items-center gap-2">
+                      <IconComponent className={cn("w-4 h-4", type.color)} />
+                      <span className={type.color}>{type.label}</span>
                     </div>
                   </SelectItem>
                 );
