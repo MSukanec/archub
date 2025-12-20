@@ -19,16 +19,41 @@ function check<T extends ExchangeRateEntity>(
   items: T[],
   ctx: DataHealthContext
 ): MicroRuleResult<T> {
+  // Detectar si hay múltiples monedas en los datos
+  const uniqueCurrencies = new Set<string>();
+  for (const item of items) {
+    if (item.currencyId) {
+      uniqueCurrencies.add(item.currencyId);
+    }
+  }
+  
+  // Si solo hay una moneda, no hay problemas de cotización
+  if (uniqueCurrencies.size <= 1) {
+    return {
+      affected: [],
+      isEmpty: true,
+    };
+  }
+  
+  // Hay múltiples monedas: validar cotización para movimientos en moneda no-base
   const minValidRate = 1.0;
   
   const affected = items.filter(item => {
-    const isForeignCurrency = item.currencyId && 
-      ctx.defaultCurrencyId && 
-      item.currencyId !== ctx.defaultCurrencyId;
+    // Si no tiene currencyId, skip
+    if (!item.currencyId) return false;
+    
+    // Si es la moneda base, no necesita validación especial
+    if (ctx.defaultCurrencyId && item.currencyId === ctx.defaultCurrencyId) {
+      return false;
+    }
+    
+    // Para movimientos en moneda no-base, validar cotización
+    // Inválida si: no existe, es <= 1.0, o es NaN
     const hasInvalidRate = !item.exchangeRate || 
       item.exchangeRate <= minValidRate || 
       Number.isNaN(item.exchangeRate);
-    return isForeignCurrency && hasInvalidRate;
+    
+    return hasInvalidRate;
   });
 
   return {
