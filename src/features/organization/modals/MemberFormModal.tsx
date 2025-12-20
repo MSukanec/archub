@@ -251,6 +251,7 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organization-members'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-members-full'] });
       toast({
         title: 'Miembro actualizado',
         description: 'El rol del miembro ha sido actualizado correctamente',
