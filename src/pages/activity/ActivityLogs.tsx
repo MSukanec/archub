@@ -9,7 +9,7 @@ import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { getOrganizationActivityLogs } from '@/features/organization/services/getOrganizationActivityLogs';
 import { getActivityDisplayInfo } from '@/features/organization/utils';
 import type { ActivityLog } from '@/features/organization/types';

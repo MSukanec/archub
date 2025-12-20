@@ -18,7 +18,7 @@ import { useSubcontracts, useDeleteSubcontract, useSubcontractAnalysis } from "@
 import SubcontractRow from "@/features/subcontracts/components/SubcontractRow";
 import { useQuery } from '@tanstack/react-query';
 import { useMobile } from '@/hooks/use-mobile';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 
 interface SubcontractListProps {
   filterByStatus?: string;

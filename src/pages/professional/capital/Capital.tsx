@@ -10,7 +10,7 @@ import { useMovements } from '@/hooks/use-movements'
 import { supabase } from '@/lib/supabase'
 import { useGlobalModalStore } from '@/components/modal'
 import { useToast } from '@/hooks/use-toast'
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner'
 
 import { CapitalMembersSummaryTab } from './CapitalMembersSummaryTab'
 import { CapitalHistoryTab } from './CapitalHistoryTab'

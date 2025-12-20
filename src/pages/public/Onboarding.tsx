@@ -11,7 +11,7 @@ import { useThemeStore } from "@/stores/themeStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { Step1UserData } from "@/features/users";
-import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
+import { LoadingSpinner } from "@/components/shared/layout/LoadingSpinner";
 
 export default function Onboarding() {
   const [, navigate] = useLocation();

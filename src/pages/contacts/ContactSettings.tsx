@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useContactTypes, useDeleteContactType, useReplaceContactType } from '@/features/contacts';
 import { useGlobalModalStore } from '@/components/modal';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
 import type { ContactType } from '@/features/contacts';
 

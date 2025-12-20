@@ -6,7 +6,7 @@ import { PortalDashboardTab } from './PortalDashboardTab';
 import { PortalInstallmentsTab } from './PortalInstallmentsTab';
 import { PortalPaymentsTab } from './PortalPaymentsTab';
 import { PortalLogsTab } from './PortalLogsTab';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle, Users, Loader2 } from 'lucide-react';
 import {

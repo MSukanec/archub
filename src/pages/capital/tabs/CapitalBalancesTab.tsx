@@ -4,7 +4,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { usePartnerMovements } from '@/features/finances/hooks/use-partner-movements';
 import { usePartnerMetrics } from '@/features/finances/hooks/use-partner-metrics';
 import { usePartners } from '@/features/capital';

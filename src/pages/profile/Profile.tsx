@@ -9,7 +9,7 @@ import { ProfileOrganizations } from './ProfileOrganizations';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useIsAdmin } from "@/hooks/use-admin-permissions";
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useGlobalModalStore } from '@/components/modal';
 
 export default function Profile() {

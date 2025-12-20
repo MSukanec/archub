@@ -22,7 +22,7 @@ import { formatKPI, format as formatMoneyAmount } from '@/lib/money';
 import { calculateMonetaryKPI, formatBreakdown as kpiFormatBreakdown } from '@/lib/kpis';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import { EmptyState } from '@/components/ui-custom/security/EmptyState';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import {

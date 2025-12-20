@@ -7,7 +7,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from "@/components/modal/state/globalModalStore";
 import { useProjectContext } from "@/stores/projectContext";
 import { useNavigationStore } from "@/stores/navigationStore";
-import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
+import { LoadingSpinner } from "@/components/shared/layout/LoadingSpinner";
 
 export default function ProjectFinances() {
   const [activeTab, setActiveTab] = useState("movements");

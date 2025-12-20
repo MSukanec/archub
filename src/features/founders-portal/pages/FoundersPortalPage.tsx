@@ -3,7 +3,7 @@ import { Layout } from '@/layouts/dashboard/DashboardLayout';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import { useLocation } from 'wouter';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { FounderDirectory } from '../components/FounderDirectory';
 import { FounderEvents } from '../components/FounderEvents';
 import { FounderVoting } from '../components/FounderVoting';

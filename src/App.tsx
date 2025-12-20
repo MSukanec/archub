@@ -139,7 +139,7 @@ import User from "@/pages/user/User";
 import NotFound from "@/pages/public/NotFound";
 import { ModalProvider } from "@/components/modal";
 import { PresenceInitializer, ProjectContextInitializer } from "@/layouts/initializers";
-import { LoadingSpinner } from "@/components/ui-custom/LoadingSpinner";
+import { LoadingSpinner } from "@/components/shared/layout/LoadingSpinner";
 
 function LazyLoadFallback() {
   return (

@@ -4,7 +4,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useClientRoles, useDeleteClientRole } from '@/features/clients/hooks/use-client-roles';
 import { useReplaceClientRole } from '@/features/clients/hooks/use-replace-client-role';
 import { useGlobalModalStore } from '@/components/modal';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
 import { getClientRoleUsageCount } from '@/features/clients/services/clientRoles';
 import type { ClientRole } from '@/features/clients/types';

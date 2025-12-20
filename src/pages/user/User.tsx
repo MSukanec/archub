@@ -3,7 +3,7 @@ import { User as UserIcon } from 'lucide-react';
 
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 
 import UserBasicDataTab from './tabs/UserBasicDataTab';
 import UserPreferencesTab from './tabs/UserPreferencesTab';

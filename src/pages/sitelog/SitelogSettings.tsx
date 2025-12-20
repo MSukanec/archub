@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useSiteLogTypes, useDeleteSiteLogType, useReplaceSiteLogType } from '@/features/sitelog/hooks/use-sitelog-types';
 import { useGlobalModalStore } from '@/components/modal';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
 import { getSiteLogEntriesByType } from '@/features/sitelog/services/getSiteLogEntriesByType';
 import type { SiteLogType } from '@/features/sitelog/services/getSiteLogTypes';

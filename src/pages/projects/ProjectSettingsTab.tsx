@@ -5,7 +5,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectTypes, useDeleteProjectType, useReplaceProjectType, useProjectModalities, useDeleteProjectModality, useReplaceProjectModality } from '@/features/projects';
 import type { ProjectType, ProjectModality } from '@/features/projects';
 import { useGlobalModalStore } from '@/components/modal';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ProjectSettingsTab() {

@@ -37,7 +37,7 @@ import { useMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/lib/supabase';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { uploadOrgLogo } from '@/lib/storage';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getOrganizationInitials } from '@/utils/initials';

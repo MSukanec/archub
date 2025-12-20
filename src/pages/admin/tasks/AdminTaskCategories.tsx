@@ -9,7 +9,7 @@ import { HierarchicalTree } from '@/components/ui-custom/tables-and-trees/Hierar
 
 import { useTaskCategoriesAdmin, useAllTaskCategories, useDeleteTaskCategory, TaskCategoryAdmin } from '@/hooks/use-task-categories-admin';
 import { useGlobalModalStore } from '@/components/modal';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 
 const AdminTaskCategories = () => {
   const [searchTerm, setSearchTerm] = useState('');

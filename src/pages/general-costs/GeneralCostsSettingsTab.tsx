@@ -5,7 +5,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGeneralCostCategories, useDeleteGeneralCostCategory } from '@/features/general-costs/hooks/use-general-cost-categories';
 import { useReplaceGeneralCostCategory } from '@/features/general-costs/hooks/use-replace-general-cost-category';
 import { useGlobalModalStore } from '@/components/modal';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
 import { getGeneralCostCategoryUsageCount } from '@/features/general-costs/services/generalCostCategories';
 import type { GeneralCostCategory } from '@/features/general-costs/types';

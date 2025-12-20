@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, ShieldCheck, ShieldAlert, ShieldX, Shield, User } from "lucide-react"
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner'
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner'
 import { useProjectPersonnel, useDeletePersonnel, useReplacePersonnel, usePersonnelPayments } from '@/features/personnel/hooks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'

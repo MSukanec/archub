@@ -18,7 +18,7 @@ import { ActionBarMobileProvider, useActionBarMobile } from '@/layouts';
 import { ActionBarMobile } from '@/layouts';
 
 import { Card } from '@/components/ui/card';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 
 function CalendarContent() {
   const { setSidebarContext } = useNavigationStore();

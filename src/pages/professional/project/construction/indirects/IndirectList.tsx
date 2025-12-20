@@ -15,7 +15,7 @@ import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal';
 import { useMobile } from '@/hooks/use-mobile';
 import { useIndirectCosts } from '@/hooks/use-indirect-costs';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 
 interface IndirectListProps {
   filterByStatus?: string;

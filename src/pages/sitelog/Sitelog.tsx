@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { BookOpen, Plus } from "lucide-react";
 
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';

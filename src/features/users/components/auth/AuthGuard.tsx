@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { useAuthStore } from '@/stores/authStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContextInit } from '@/hooks/use-project-context-init';
-import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 
 interface AuthGuardProps {
   children: ReactNode;
