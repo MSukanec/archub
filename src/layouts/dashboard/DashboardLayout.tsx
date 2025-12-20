@@ -19,7 +19,7 @@ import { HeaderMobile } from './components/MobileMenu';
 import { useMobile } from "@/hooks/use-mobile";
 import { useProjectAccentColor } from "@/features/projects";
 import { useContentBackground } from "@/hooks/use-content-background";
-import { FloatingAIChat } from "@/components/ui-custom/layout/FloatingAIChat";
+import { FloatingAIChat } from "@/features/ai/components/FloatingAIChat";
 import { FloatingCourseLessons, CoursePlayerDrawerHost } from "@/features/learning";
 import { InvitationModal } from "@/features/users/modals/InvitationModal";
 import { OrganizationRemovedModal } from "@/features/organization/modals/OrganizationRemovedModal";
