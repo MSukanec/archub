@@ -188,12 +188,22 @@ export function OrganizationFinancesMovementsTab() {
     const config = MOVEMENT_TYPE_CONFIG[movement.movement_type];
     if (!config) return;
 
-    openModal(config.modalType, {
+    const modalData: any = {
       projectId: movement.project_id,
       organizationId: movement.organization_id,
-      paymentId: movement.id,
       mode: 'edit',
-    });
+    };
+
+    // Map the ID field based on movement type
+    if (movement.movement_type === 'partner_contribution') {
+      modalData.contributionId = movement.id;
+    } else if (movement.movement_type === 'partner_withdrawal') {
+      modalData.withdrawalId = movement.id;
+    } else {
+      modalData.paymentId = movement.id;
+    }
+
+    openModal(config.modalType, modalData);
   };
 
   const handleDelete = (movement: UnifiedMovementWithRelations) => {
