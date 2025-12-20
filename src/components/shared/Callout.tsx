@@ -3,15 +3,18 @@ import { cn } from '@/lib/utils';
 import { LucideIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+interface CalloutButton {
+  label: string;
+  onClick: (e?: React.MouseEvent) => void;
+}
+
 interface CalloutProps {
   icon?: LucideIcon;
   title?: string;
   children?: React.ReactNode;
   text?: string;
-  button?: {
-    label: string;
-    onClick: (e?: React.MouseEvent) => void;
-  };
+  button?: CalloutButton;
+  buttons?: CalloutButton[];
   backgroundColor?: string;
   onClose?: () => void;
   className?: string;
@@ -24,13 +27,15 @@ export function Callout({
   children, 
   text,
   button,
+  buttons,
   backgroundColor,
   onClose,
   className,
   onClick 
 }: CalloutProps) {
   const [isClosed, setIsClosed] = useState(false);
-  const isVolumetric = !!backgroundColor || !!text || !!button || !!onClose;
+  const allButtons = buttons || (button ? [button] : []);
+  const isVolumetric = !!backgroundColor || !!text || allButtons.length > 0 || !!onClose;
   
   if (isVolumetric) {
     if (isClosed) return null;
@@ -58,19 +63,20 @@ export function Callout({
         </div>
 
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          {button && (
+          {allButtons.map((btn, index) => (
             <Button
+              key={index}
               size="sm"
               variant="ghost"
               className="h-7 px-3 text-white bg-white/20 hover:bg-white/30 transition-colors text-xs font-medium rounded-lg"
               onClick={(e) => {
                 e.stopPropagation();
-                button.onClick(e);
+                btn.onClick(e);
               }}
             >
-              {button.label}
+              {btn.label}
             </Button>
-          )}
+          ))}
           <Button
             size="sm"
             variant="ghost"

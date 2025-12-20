@@ -53,17 +53,22 @@ export function DataHealthAlertMulti({
             icon={Icon}
             text={`${issue.affectedCount} ${issue.title.toLowerCase()}`}
             backgroundColor={bgColor}
-            button={{
-              label: isThisIssueFiltered ? 'Filtro activo' : 'Más información',
-              onClick: (e) => {
-                e?.stopPropagation();
-                if (isThisIssueFiltered) {
-                  onToggleFilter(issue.id);
-                } else {
+            buttons={[
+              {
+                label: 'Más información',
+                onClick: (e) => {
+                  e?.stopPropagation();
                   handleOpenDetails(issue);
                 }
+              },
+              {
+                label: isThisIssueFiltered ? 'Filtro activo' : 'Mostrar',
+                onClick: (e) => {
+                  e?.stopPropagation();
+                  onToggleFilter(issue.id);
+                }
               }
-            }}
+            ]}
             onClose={onDismissIssue ? () => onDismissIssue(issue.id) : undefined}
             onClick={() => onToggleFilter(issue.id)}
           />
