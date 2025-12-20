@@ -1,7 +1,7 @@
 import { UnifiedCourseCard } from './UnifiedCourseCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { BookOpen } from 'lucide-react';
-import { Tabs } from '@/components/ui-custom/Tabs';
+import { Tabs } from '@/components/shared/Tabs';
 
 type CourseMode = 'public' | 'dashboard';
 

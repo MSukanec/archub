@@ -23,7 +23,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Tabs } from "@/components/ui-custom/Tabs";
+import { Tabs } from "@/components/shared/Tabs";
 import { TopBarConfig, GroupingOption } from "./types";
 import { TABLE_LABELS, TABLE_ANIMATION, TABLE_BULK_ANIMATION } from "./constants";
 

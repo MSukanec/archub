@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { BarChart3, Users, Clock, TrendingUp, Activity, Eye } from 'lucide-react'
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
-import { Tabs } from '@/components/ui-custom/Tabs'
+import { Tabs } from '@/components/shared/Tabs'
 import { startOfDay, subDays } from 'date-fns'
 
 type DateRange = 'today' | '7days' | '30days'

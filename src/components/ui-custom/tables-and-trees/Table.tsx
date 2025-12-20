@@ -38,7 +38,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { Tabs } from "@/components/ui-custom/Tabs";
+import { Tabs } from "@/components/shared/Tabs";
 
 type SortDirection = "asc" | "desc" | null;
 

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar, ChevronLeft, ChevronRight, Download, CalendarDays, UserX } from 'lucide-react'
 import { format, addDays, eachDayOfInterval, isWeekend, isToday, startOfDay, subDays } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Tabs } from '@/components/ui-custom/Tabs'
+import { Tabs } from '@/components/shared/Tabs'
 import { parseLocalDate } from '@/lib/date-utils'
 
 interface Worker {

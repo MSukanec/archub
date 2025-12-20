@@ -10,7 +10,7 @@ import { CheckCircle2, XCircle, Eye, AlertCircle, Inbox, Clock, TrendingUp, Sear
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { Tabs } from '@/components/ui-custom/Tabs';
+import { Tabs } from '@/components/shared/Tabs';
 import { useGlobalModalStore } from '@/components/modal';
 import AdminPaymentTransferRow from '@/features/finances/components/admin/AdminPaymentTransferRow';
 import { useActionBarMobile } from '@/layouts';

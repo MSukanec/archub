@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BookOpen, Bookmark, Play, CheckCircle2, Circle, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Tabs } from '@/components/ui-custom/Tabs';
+import { Tabs } from '@/components/shared/Tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Module {
