@@ -97,8 +97,9 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
 
   const movements = useMemo(() => {
     if (!activeFilterIssueId) return sortedMovements;
-    return sortedMovements.filter(m => dataHealth.affectedIds.has(m.id));
-  }, [sortedMovements, activeFilterIssueId, dataHealth.affectedIds]);
+    const issueIds = dataHealth.getAffectedIdsForIssue(activeFilterIssueId);
+    return sortedMovements.filter(m => issueIds.has(m.id));
+  }, [sortedMovements, activeFilterIssueId, dataHealth]);
 
   const kpis = useMemo(() => {
     const ingresosMovements = movements.filter(m => m.amount_sign > 0);

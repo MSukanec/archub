@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { DataHealthEngine } from '../engine/DataHealthEngine';
 import { allPaymentRules } from '../rules/payment-rules';
 import { allCapitalRules } from '../rules/capital-rules';
@@ -182,7 +182,9 @@ export function normalizeUnifiedMovement(movement: {
 
 export interface UseFinancesDataHealthResult extends UseDataHealthResult {
   affectedIds: Set<string | number>;
+  affectedIdsByIssue: Map<string, Set<string | number>>;
   issues: DataIssue[];
+  getAffectedIdsForIssue: (issueId: string) => Set<string | number>;
 }
 
 export function useFinancesDataHealth(
@@ -242,6 +244,25 @@ export function useFinancesDataHealth(
     return ids;
   }, [result]);
 
+  const affectedIdsByIssue = useMemo(() => {
+    const map = new Map<string, Set<string | number>>();
+    if (!result) return map;
+    for (const issue of result.issues) {
+      const ids = new Set<string | number>();
+      if (issue.recommendedAction.targetIds) {
+        for (const id of issue.recommendedAction.targetIds) {
+          ids.add(id);
+        }
+      }
+      map.set(issue.id, ids);
+    }
+    return map;
+  }, [result]);
+
+  const getAffectedIdsForIssue = useCallback((issueId: string): Set<string | number> => {
+    return affectedIdsByIssue.get(issueId) || new Set();
+  }, [affectedIdsByIssue]);
+
   return {
     result,
     insights,
@@ -250,7 +271,9 @@ export function useFinancesDataHealth(
     warningCount: result?.stats.bySeverity.warning ?? 0,
     infoCount: result?.stats.bySeverity.info ?? 0,
     affectedIds,
+    affectedIdsByIssue,
     issues: result?.issues ?? [],
+    getAffectedIdsForIssue,
   };
 }
 
@@ -291,6 +314,9 @@ export function normalizeCapitalTransaction(tx: NormalizedCapitalTransaction): N
 
 export interface UseCapitalDataHealthResult extends UseDataHealthResult {
   affectedIds: Set<string>;
+  affectedIdsByIssue: Map<string, Set<string>>;
+  issues: DataIssue[];
+  getAffectedIdsForIssue: (issueId: string) => Set<string>;
 }
 
 export function useCapitalDataHealth(
@@ -334,6 +360,25 @@ export function useCapitalDataHealth(
     return ids;
   }, [result]);
 
+  const affectedIdsByIssue = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    if (!result) return map;
+    for (const issue of result.issues) {
+      const ids = new Set<string>();
+      if (issue.recommendedAction.targetIds) {
+        for (const id of issue.recommendedAction.targetIds) {
+          ids.add(String(id));
+        }
+      }
+      map.set(issue.id, ids);
+    }
+    return map;
+  }, [result]);
+
+  const getAffectedIdsForIssue = useCallback((issueId: string): Set<string> => {
+    return affectedIdsByIssue.get(issueId) || new Set();
+  }, [affectedIdsByIssue]);
+
   return {
     result,
     insights,
@@ -342,5 +387,8 @@ export function useCapitalDataHealth(
     warningCount: result?.stats.bySeverity.warning ?? 0,
     infoCount: result?.stats.bySeverity.info ?? 0,
     affectedIds,
+    affectedIdsByIssue,
+    issues: result?.issues ?? [],
+    getAffectedIdsForIssue,
   };
 }

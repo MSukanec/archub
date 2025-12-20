@@ -145,7 +145,7 @@ export default function Capital() {
         return (
           <CapitalTransactionsTab 
             activeFilterIssueId={activeFilterIssueId}
-            affectedIds={dataHealth.affectedIds}
+            getAffectedIdsForIssue={dataHealth.getAffectedIdsForIssue}
           />
         );
       default:

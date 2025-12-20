@@ -38,7 +38,7 @@ import { getPartnerTransactionStatusBadgeConfig } from '@/features/capital/utils
 
 interface CapitalTransactionsTabProps {
   activeFilterIssueId?: string | null;
-  affectedIds?: Set<string>;
+  getAffectedIdsForIssue?: (issueId: string) => Set<string>;
 }
 
 type TransactionType = 'contribution' | 'withdrawal';
@@ -71,7 +71,7 @@ function formatPartnerName(partner?: { contacts: { full_name: string | null; fir
 
 export function CapitalTransactionsTab({ 
   activeFilterIssueId, 
-  affectedIds = new Set() 
+  getAffectedIdsForIssue = () => new Set() 
 }: CapitalTransactionsTabProps) {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
@@ -149,8 +149,9 @@ export function CapitalTransactionsTab({
   // Filtrar transacciones: mostrar todas o solo las que tienen problemas
   const filteredTransactions = useMemo(() => {
     if (!activeFilterIssueId) return transactionsWithLinkedUser;
-    return transactionsWithLinkedUser.filter(t => affectedIds.has(t.id));
-  }, [transactionsWithLinkedUser, activeFilterIssueId, affectedIds]);
+    const issueIds = getAffectedIdsForIssue(activeFilterIssueId);
+    return transactionsWithLinkedUser.filter(t => issueIds.has(t.id));
+  }, [transactionsWithLinkedUser, activeFilterIssueId, getAffectedIdsForIssue]);
 
   // KPI system - REFACTORIZADO
   const metrics = useMemo(() => {
