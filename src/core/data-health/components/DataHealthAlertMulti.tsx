@@ -51,14 +51,10 @@ export function DataHealthAlertMulti({
             backgroundColor={bgColor}
             button={isFiltering ? {
               label: 'Filtro activo',
-              onClick: (e) => {
-                e?.stopPropagation();
-                onToggleFilter();
-              }
+              onClick: () => onToggleFilter()
             } : undefined}
             onClose={showClearButton && isFiltering ? onToggleFilter : undefined}
-            className="cursor-pointer"
-            data-testid={`data-health-alert-${issue.ruleId}`}
+            onClick={onToggleFilter}
           />
         );
       })}

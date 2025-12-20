@@ -1,11 +1,19 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface CalloutProps {
   icon?: LucideIcon;
   title?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  text?: string;
+  button?: {
+    label: string;
+    onClick: (e?: React.MouseEvent) => void;
+  };
+  backgroundColor?: string;
+  onClose?: () => void;
   className?: string;
   onClick?: () => void;
 }
@@ -14,9 +22,70 @@ export function Callout({
   icon: Icon, 
   title, 
   children, 
+  text,
+  button,
+  backgroundColor,
+  onClose,
   className,
   onClick 
 }: CalloutProps) {
+  const isVolumetric = !!backgroundColor || !!text || !!button || !!onClose;
+  
+  if (isVolumetric) {
+    return (
+      <div
+        className={cn(
+          "relative w-full rounded-xl p-3.5 flex items-center justify-between gap-3 shadow-lg transition-all",
+          "hover:shadow-xl",
+          onClick && "cursor-pointer",
+          className
+        )}
+        style={{
+          backgroundColor: backgroundColor || 'var(--chart-neutral)'
+        }}
+        onClick={onClick}
+      >
+        <div className="flex items-center gap-3 flex-1">
+          {Icon && (
+            <Icon className="h-4 w-4 text-white flex-shrink-0" />
+          )}
+          <span className="text-sm font-medium text-white">
+            {text || children}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {button && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 px-3 text-white bg-white/20 hover:bg-white/30 transition-colors text-xs font-medium rounded-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                button.onClick(e);
+              }}
+            >
+              {button.label}
+            </Button>
+          )}
+          {onClose && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 w-7 p-0 text-white hover:bg-white/20 transition-colors rounded-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   const Component = onClick ? 'button' : 'div';
   
   return (
