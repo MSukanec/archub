@@ -9,7 +9,8 @@ import {
   Lock,
   ArrowUpCircle,
   UserPlus,
-  Trash2
+  Trash2,
+  Shield
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -476,6 +477,13 @@ export function MembersListTab() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem 
+                                  onClick={() => openModal('member', { editingMember: member })}
+                                  className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-[var(--accent)] transition-colors"
+                                >
+                                  <Shield className="h-4 w-4" />
+                                  Cambiar rol
+                                </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={() => handleRemoveMember(member)}
                                   className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-red-600 dark:hover:text-red-500 transition-colors"
