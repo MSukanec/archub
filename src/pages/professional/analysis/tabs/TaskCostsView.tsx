@@ -4,7 +4,7 @@ import { formatDate, formatTime } from "@/lib/date-utils";
 import { useLocation } from "wouter";
 
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { BreakdownChart } from '@/components/charts/legacy/BreakdownChart';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

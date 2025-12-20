@@ -16,7 +16,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Table } from '@/components/ui-custom/tables-and-trees/Table';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { useQuery } from "@tanstack/react-query";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';

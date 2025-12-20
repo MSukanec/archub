@@ -3,7 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { BookOpen, ChevronLeft, ChevronRight, CheckCircle, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { useCourseOverview, useCourseEnrollment, useLastLessonInProgress, useCoursePlayerStore } from '@/features/learning';
 
 import { Layout } from "@/layouts/dashboard/DashboardLayout";

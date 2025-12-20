@@ -5,7 +5,7 @@ import { Activity as ActivityIcon } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/shared/table';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { getAllActivityLogs, type AdminActivityLog } from '@/features/organization/services/getAllActivityLogs';

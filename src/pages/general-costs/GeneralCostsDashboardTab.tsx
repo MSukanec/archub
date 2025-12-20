@@ -27,7 +27,7 @@ import {
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { useGeneralCostsDataHealth, mergeWithBusinessInsights } from '@/core/data-health';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
 import { Skeleton } from '@/components/ui/skeleton';

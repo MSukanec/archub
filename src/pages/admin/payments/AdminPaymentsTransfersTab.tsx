@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CheckCircle2, XCircle, Eye, AlertCircle, Inbox, Clock, TrendingUp, Search, Filter, Bell, Trash2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { Tabs } from '@/components/ui-custom/Tabs';
 import { useGlobalModalStore } from '@/components/modal';
 import AdminPaymentTransferRow from '@/features/finances/components/admin/AdminPaymentTransferRow';

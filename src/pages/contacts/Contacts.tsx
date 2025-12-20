@@ -5,7 +5,7 @@ import { Search, Filter, UserPlus, Bell, Settings } from 'lucide-react';
 import { LuContact } from 'react-icons/lu';
 import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { useGlobalModalStore } from '@/components/modal';

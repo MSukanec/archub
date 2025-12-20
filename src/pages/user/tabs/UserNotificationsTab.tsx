@@ -8,7 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { markAsRead, markAllAsRead, resolveNotificationHref, type UserNotificationRow } from '@/lib/notifications';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 

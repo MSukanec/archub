@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
-import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { Button } from '@/components/ui/button'
 
 import { useCurrentUser } from '@/hooks/use-current-user'

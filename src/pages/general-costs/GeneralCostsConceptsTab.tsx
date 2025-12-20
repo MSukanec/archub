@@ -5,7 +5,7 @@ import { MiniSparkline } from '@/components/charts/MiniSparkline';
 
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from "@/components/ui/button";
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 

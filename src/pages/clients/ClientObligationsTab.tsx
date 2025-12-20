@@ -8,7 +8,7 @@ import { useProjectContext } from '@/stores/projectContext'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard'
-import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { EmptyState } from '@/components/shared/EmptyState'
 import CommitmentAccordion from '@/features/clients/components/CommitmentAccordion'
 import {
   useClientDashboard,

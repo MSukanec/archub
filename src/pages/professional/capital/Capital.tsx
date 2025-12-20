@@ -3,7 +3,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { TrendingUp, Plus } from 'lucide-react'
 
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
-import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { Button } from '@/components/ui/button'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useMovements } from '@/hooks/use-movements'

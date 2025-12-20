@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { EmptyState } from "@/components/ui-custom/security/EmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { Tabs } from "@/components/ui-custom/Tabs";
 
 type SortDirection = "asc" | "desc" | null;

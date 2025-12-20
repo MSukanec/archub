@@ -5,7 +5,7 @@ import { useSitelogGallery } from '@/features/sitelog/hooks/use-sitelog-gallery'
 import { useDeleteMediaFile } from '@/features/media';
 import { SitelogGalleryCard } from '@/features/sitelog/components/SitelogGalleryCard';
 import { SitelogGallery } from '@/features/sitelog/components/SitelogGallery';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Images } from 'lucide-react';
 import type { SitelogGalleryFile } from '@/features/sitelog/types';

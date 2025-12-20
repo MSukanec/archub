@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { getOrganizationActivityLogs } from '@/features/organization/services/getOrganizationActivityLogs';
 import { getActivityDisplayInfo } from '@/features/organization/utils';

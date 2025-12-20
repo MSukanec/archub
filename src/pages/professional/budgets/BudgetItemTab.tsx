@@ -1,5 +1,5 @@
 import { DollarSign, Plus, Edit, Trash2, Eye } from 'lucide-react'
-import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

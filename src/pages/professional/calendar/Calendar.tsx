@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { KanbanBox } from '@/components/ui-custom/KanbanBox';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckSquare, Plus, Kanban, Edit, Trash2, List, Search, Filter, X } from 'lucide-react';

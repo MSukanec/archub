@@ -6,7 +6,7 @@ import { useGlobalModalStore } from "@/components/modal";
 import { useMobile } from "@/hooks/use-mobile";
 import SitelogRow from "@/features/sitelog/components/SitelogRow";
 import { useActionBarMobile } from '@/layouts';
-import { EmptyState } from "@/components/ui-custom/security/EmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { LogTimeline } from "@/features/sitelog/components/LogTimeline";
 import { ENTRY_TYPE_OPTIONS } from '@/features/sitelog/constants';
 import { Button } from "@/components/ui/button";

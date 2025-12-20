@@ -8,7 +8,7 @@ import { useDesignDocumentFolders, useDeleteDesignDocumentFolder } from '@/hooks
 import { useDesignDocuments, useDesignDocumentsByFolder, useDeleteDesignDocument } from '@/hooks/use-design-documents';
 import { useGlobalModalStore } from '@/components/modal';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 

@@ -6,7 +6,7 @@ import { useGlobalModalStore } from '@/components/modal'
 import { useToast } from '@/hooks/use-toast'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
-import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { EmptyState } from '@/components/shared/EmptyState'
 
 const AdminLayoutContentTab = () => {
   const { data: heroSections = [], isLoading } = useHeroSections('learning_dashboard')

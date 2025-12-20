@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { EmptyState } from "@/components/ui-custom/security/EmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import {
   Column,
   EmptyStateConfig,

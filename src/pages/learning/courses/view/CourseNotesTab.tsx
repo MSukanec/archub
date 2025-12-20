@@ -9,7 +9,7 @@ import { es } from 'date-fns/locale';
 import { useLocation } from 'wouter';
 import { useCourseSidebarStore } from '@/stores/sidebarStore';
 import { useCoursePlayerStore } from '@/features/learning';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { useGlobalModalStore } from '@/components/modal';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';

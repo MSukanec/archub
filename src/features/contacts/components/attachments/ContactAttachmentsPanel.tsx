@@ -14,7 +14,7 @@ import {
   MoreHorizontal
 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox';
 import { 
   useContactAttachments, 

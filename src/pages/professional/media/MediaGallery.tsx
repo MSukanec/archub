@@ -1,6 +1,6 @@
 import React from 'react';
 import { Gallery as GalleryComponent } from '@/components/ui-custom/media/Gallery';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
 import { useCurrentUser } from '@/hooks/use-current-user';

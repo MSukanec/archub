@@ -27,7 +27,7 @@ import { useModalPanelStore } from "@/components/modal";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useProjectContext } from "@/stores/projectContext";
 import { FileUploader } from "@/components/shared/fields/FileUploader";
-import { EmptyState } from "@/components/ui-custom/security/EmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { uploadSiteLogFiles } from "@/features/sitelog/services/uploadSiteLogFiles";
 import { createSiteLog } from '../services/createSiteLog';
 import { updateSiteLog } from '../services/updateSiteLog';

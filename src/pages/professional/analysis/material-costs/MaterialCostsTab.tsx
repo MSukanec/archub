@@ -1,5 +1,5 @@
 import { Package } from "lucide-react";
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 
 interface MaterialCostsTabProps {
   material: any;

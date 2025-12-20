@@ -1,5 +1,5 @@
 import { DollarSign, Plus, Package, Calculator, FolderOpen, TrendingUp } from 'lucide-react'
-import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { BudgetTree } from '@/components/ui-custom/tables-and-trees/BudgetTree'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'

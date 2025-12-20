@@ -6,7 +6,7 @@ import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { EmptyState } from '@/components/shared/EmptyState'
 
 interface CapitalMovement {
   id: string

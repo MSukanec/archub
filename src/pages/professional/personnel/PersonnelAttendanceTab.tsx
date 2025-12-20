@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import AttendanceGradebook from '@/components/charts/graphics/AttendanceGradebook'
-import { EmptyState } from '@/components/ui-custom/security/EmptyState'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { UserCheck } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { format } from 'date-fns'

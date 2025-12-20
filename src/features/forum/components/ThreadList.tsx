@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { MessageSquare, Plus } from 'lucide-react';
 import { ThreadCard } from './ThreadCard';
 import { getIconComponent } from './CategoryList';
-import { EmptyState } from '@/components/ui-custom/security/EmptyState';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import type { ForumThreadWithAuthor, ForumCategoryWithCounts } from '../services';
 
