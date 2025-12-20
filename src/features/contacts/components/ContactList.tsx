@@ -60,7 +60,7 @@ export default function ContactList({
     {
       key: "first_name" as const,
       label: "Nombre",
-      type: 'long-text' as const,
+      type: 'medium-text' as const,
       sortable: false,
       render: (contact: ContactWithRelations) => {
         const fullName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.linked_user?.full_name;
@@ -113,7 +113,7 @@ export default function ContactList({
     {
       key: "contact_types" as const,
       label: "Tipo",
-      type: 'badge' as const,
+      type: 'long-text' as const,
       sortable: false,
       render: (contact: ContactWithRelations) => {
         if (!contact.contact_types || contact.contact_types.length === 0) {
