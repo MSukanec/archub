@@ -53,7 +53,7 @@ export function DataHealthAlertMulti({
               label: 'Filtro activo',
               onClick: () => onToggleFilter()
             } : undefined}
-            onClose={showClearButton && isFiltering ? onToggleFilter : undefined}
+            onClose={onToggleFilter}
             onClick={onToggleFilter}
           />
         );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { LucideIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -29,9 +29,12 @@ export function Callout({
   className,
   onClick 
 }: CalloutProps) {
+  const [isClosed, setIsClosed] = useState(false);
   const isVolumetric = !!backgroundColor || !!text || !!button || !!onClose;
   
   if (isVolumetric) {
+    if (isClosed) return null;
+
     return (
       <div
         className={cn(
@@ -68,19 +71,21 @@ export function Callout({
               {button.label}
             </Button>
           )}
-          {onClose && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 w-7 p-0 text-white hover:bg-white/20 transition-colors rounded-lg"
-              onClick={(e) => {
-                e.stopPropagation();
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 w-7 p-0 text-white hover:bg-white/20 transition-colors rounded-lg"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onClose) {
                 onClose();
-              }}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
+              } else {
+                setIsClosed(true);
+              }
+            }}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     );
