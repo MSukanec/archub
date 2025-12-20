@@ -34,7 +34,7 @@ export default function Capital() {
   const { openModal } = useGlobalModalStore();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
-  const [showOnlyProblems, setShowOnlyProblems] = useState(false);
+  const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null);
 
   useEffect(() => {
     setSidebarLevel('organization');
@@ -87,19 +87,23 @@ export default function Capital() {
   });
 
   useEffect(() => {
-    if (showOnlyProblems && !dataHealth.hasIssues) {
-      setShowOnlyProblems(false);
+    if (activeFilterIssueId && !dataHealth.hasIssues) {
+      setActiveFilterIssueId(null);
     }
-  }, [showOnlyProblems, dataHealth.hasIssues]);
+  }, [activeFilterIssueId, dataHealth.hasIssues]);
 
-  const handleDataHealthClick = useCallback(() => {
+  const handleDataHealthClick = useCallback((issueId: string) => {
     if (activeTab !== 'transactions') {
       setActiveTab('transactions');
-      setShowOnlyProblems(true);
+      setActiveFilterIssueId(issueId);
     } else {
-      setShowOnlyProblems(prev => !prev);
+      if (activeFilterIssueId === issueId) {
+        setActiveFilterIssueId(null);
+      } else {
+        setActiveFilterIssueId(issueId);
+      }
     }
-  }, [activeTab]);
+  }, [activeTab, activeFilterIssueId]);
 
   const handleAddParticipant = () => {
     openModal('capital-participant', { organizationId });
@@ -139,7 +143,7 @@ export default function Capital() {
       case 'transactions':
         return (
           <CapitalTransactionsTab 
-            showOnlyProblems={showOnlyProblems}
+            activeFilterIssueId={activeFilterIssueId}
             affectedIds={dataHealth.affectedIds}
           />
         );
@@ -219,7 +223,7 @@ export default function Capital() {
           <DataHealthAlertMulti
             issues={dataHealth.result.issues}
             entityLabel="transacción"
-            isFiltering={showOnlyProblems}
+            activeFilterIssueId={activeFilterIssueId}
             onToggleFilter={handleDataHealthClick}
             showClearButton
           />

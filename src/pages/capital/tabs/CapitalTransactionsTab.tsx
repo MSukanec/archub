@@ -37,7 +37,7 @@ import {
 import { getPartnerTransactionStatusBadgeConfig } from '@/features/capital/utils/statusBadge';
 
 interface CapitalTransactionsTabProps {
-  showOnlyProblems?: boolean;
+  activeFilterIssueId?: string | null;
   affectedIds?: Set<string>;
 }
 
@@ -70,7 +70,7 @@ function formatPartnerName(partner?: { contacts: { full_name: string | null; fir
 }
 
 export function CapitalTransactionsTab({ 
-  showOnlyProblems = false, 
+  activeFilterIssueId, 
   affectedIds = new Set() 
 }: CapitalTransactionsTabProps) {
   const { data: userData } = useCurrentUser();
@@ -148,9 +148,9 @@ export function CapitalTransactionsTab({
 
   // Filtrar transacciones: mostrar todas o solo las que tienen problemas
   const filteredTransactions = useMemo(() => {
-    if (!showOnlyProblems) return transactionsWithLinkedUser;
+    if (!activeFilterIssueId) return transactionsWithLinkedUser;
     return transactionsWithLinkedUser.filter(t => affectedIds.has(t.id));
-  }, [transactionsWithLinkedUser, showOnlyProblems, affectedIds]);
+  }, [transactionsWithLinkedUser, activeFilterIssueId, affectedIds]);
 
   // KPI system - REFACTORIZADO
   const metrics = useMemo(() => {

@@ -65,7 +65,7 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
   
-  const [showOnlyProblems, setShowOnlyProblems] = useState(false);
+  const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null);
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined);
   
@@ -89,15 +89,15 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
   });
 
   useEffect(() => {
-    if (showOnlyProblems && !dataHealth.hasIssues) {
-      setShowOnlyProblems(false);
+    if (activeFilterIssueId && !dataHealth.hasIssues) {
+      setActiveFilterIssueId(null);
     }
-  }, [showOnlyProblems, dataHealth.hasIssues]);
+  }, [activeFilterIssueId, dataHealth.hasIssues]);
 
   const movements = useMemo(() => {
-    if (!showOnlyProblems) return sortedMovements;
+    if (!activeFilterIssueId) return sortedMovements;
     return sortedMovements.filter(m => dataHealth.affectedIds.has(m.id));
-  }, [sortedMovements, showOnlyProblems, dataHealth.affectedIds]);
+  }, [sortedMovements, activeFilterIssueId, dataHealth.affectedIds]);
 
   const kpis = useMemo(() => {
     const ingresosMovements = movements.filter(m => m.amount_sign > 0);
@@ -323,8 +323,14 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
       <DataHealthAlertMulti
         issues={dataHealth.issues}
         entityLabel="movimiento"
-        isFiltering={showOnlyProblems}
-        onToggleFilter={() => setShowOnlyProblems(!showOnlyProblems)}
+        activeFilterIssueId={activeFilterIssueId}
+        onToggleFilter={(issueId: string) => {
+          if (activeFilterIssueId === issueId) {
+            setActiveFilterIssueId(null);
+          } else {
+            setActiveFilterIssueId(issueId);
+          }
+        }}
         showClearButton
       />
 

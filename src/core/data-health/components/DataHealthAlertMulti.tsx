@@ -5,8 +5,8 @@ import type { DataIssue } from '../types';
 interface DataHealthAlertMultiProps {
   issues: DataIssue[];
   entityLabel?: string;
-  isFiltering: boolean;
-  onToggleFilter: () => void;
+  activeFilterIssueId?: string | null;
+  onToggleFilter: (issueId: string) => void;
   showClearButton?: boolean;
 }
 
@@ -29,19 +29,22 @@ const severityColors: Record<string, string> = {
 export function DataHealthAlertMulti({
   issues,
   entityLabel = 'elemento',
-  isFiltering,
+  activeFilterIssueId,
   onToggleFilter,
   showClearButton = false,
 }: DataHealthAlertMultiProps) {
   if (issues.length === 0) return null;
 
-  const totalAffected = issues.reduce((sum, issue) => sum + issue.affectedCount, 0);
+  const isFiltering = !!activeFilterIssueId;
+  const filteredIssue = issues.find(i => i.id === activeFilterIssueId);
+  const totalAffected = filteredIssue?.affectedCount || 0;
 
   return (
     <div className="space-y-2">
       {issues.map((issue) => {
         const Icon = issueIcons[issue.ruleId] || AlertTriangle;
         const bgColor = severityColors[issue.severity] || severityColors.warning;
+        const isThisIssueFiltered = activeFilterIssueId === issue.id;
         
         return (
           <Callout
@@ -49,12 +52,12 @@ export function DataHealthAlertMulti({
             icon={Icon}
             text={`${issue.affectedCount} ${issue.title.toLowerCase()}`}
             backgroundColor={bgColor}
-            button={isFiltering ? {
+            button={isThisIssueFiltered ? {
               label: 'Filtro activo',
-              onClick: () => onToggleFilter()
+              onClick: () => onToggleFilter(issue.id)
             } : undefined}
-            onClose={onToggleFilter}
-            onClick={onToggleFilter}
+            onClose={() => onToggleFilter(issue.id)}
+            onClick={() => onToggleFilter(issue.id)}
           />
         );
       })}
