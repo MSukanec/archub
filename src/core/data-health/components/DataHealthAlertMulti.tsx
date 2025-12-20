@@ -10,6 +10,7 @@ interface DataHealthAlertMultiProps {
   onToggleFilter: (issueId: string) => void;
   dismissedIssueIds?: Set<string>;
   onDismissIssue?: (issueId: string) => void;
+  filteredItemIds?: Set<string | number>;
 }
 
 const severityColors: Record<string, string> = {
@@ -25,10 +26,21 @@ export function DataHealthAlertMulti({
   onToggleFilter,
   dismissedIssueIds = new Set(),
   onDismissIssue,
+  filteredItemIds,
 }: DataHealthAlertMultiProps) {
   const openModal = useGlobalModalStore((state) => state.openModal);
   
-  const visibleIssues = issues.filter(issue => !dismissedIssueIds.has(issue.id));
+  const visibleIssues = issues.filter(issue => {
+    if (dismissedIssueIds.has(issue.id)) return false;
+    
+    if (filteredItemIds && filteredItemIds.size > 0) {
+      const issueTargetIds = issue.recommendedAction.targetIds || [];
+      const hasOverlap = issueTargetIds.some(id => filteredItemIds.has(id));
+      if (!hasOverlap) return false;
+    }
+    
+    return true;
+  });
   
   if (visibleIssues.length === 0) return null;
 

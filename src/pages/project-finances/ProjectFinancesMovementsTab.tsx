@@ -95,11 +95,15 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
     }
   }, [activeFilterIssueId, dataHealth.hasIssues]);
 
+  const filteredMovementIds = useMemo(() => {
+    if (!activeFilterIssueId) return null;
+    return dataHealth.getAffectedIdsForIssue(activeFilterIssueId);
+  }, [activeFilterIssueId, dataHealth]);
+
   const movements = useMemo(() => {
-    if (!activeFilterIssueId) return sortedMovements;
-    const issueIds = dataHealth.getAffectedIdsForIssue(activeFilterIssueId);
-    return sortedMovements.filter(m => issueIds.has(m.id));
-  }, [sortedMovements, activeFilterIssueId, dataHealth]);
+    if (!filteredMovementIds) return sortedMovements;
+    return sortedMovements.filter(m => filteredMovementIds.has(m.id));
+  }, [sortedMovements, filteredMovementIds]);
 
   const kpis = useMemo(() => {
     const ingresosMovements = movements.filter(m => m.amount_sign > 0);
@@ -340,6 +344,7 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
           }
           setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
         }}
+        filteredItemIds={filteredMovementIds || undefined}
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

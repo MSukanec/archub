@@ -93,6 +93,11 @@ export default function Capital() {
     }
   }, [activeFilterIssueId, dataHealth.hasIssues]);
 
+  const filteredTransactionIds = useMemo(() => {
+    if (!activeFilterIssueId) return null;
+    return dataHealth.getAffectedIdsForIssue(activeFilterIssueId);
+  }, [activeFilterIssueId, dataHealth]);
+
   const handleDataHealthClick = useCallback((issueId: string) => {
     if (activeTab !== 'transactions') {
       setActiveTab('transactions');
@@ -233,6 +238,7 @@ export default function Capital() {
               }
               setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
             }}
+            filteredItemIds={filteredTransactionIds || undefined}
           />
         )}
         {renderTabContent()}
