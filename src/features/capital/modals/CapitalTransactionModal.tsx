@@ -1,11 +1,42 @@
 import { useRef, useState } from 'react'
-import { TrendingUp, TrendingDown } from 'lucide-react'
+import { TrendingUp, TrendingDown, Wallet, ExternalLink } from 'lucide-react'
+import { useLocation } from 'wouter'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
+import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@/lib/utils'
 import { PartnerContributionFormFields } from '../forms/PartnerContributionFormFields'
 import { PartnerWithdrawalFormFields } from '../forms/PartnerWithdrawalFormFields'
 
-type TransactionType = 'contribution' | 'withdrawal' | null
+type TransactionType = 'contribution' | 'withdrawal'
+
+interface TransactionTypeConfig {
+  id: TransactionType
+  label: string
+  description: string
+  icon: typeof TrendingUp
+  color: string
+  submitLabel: string
+}
+
+const TRANSACTION_TYPES: TransactionTypeConfig[] = [
+  {
+    id: 'contribution',
+    label: 'Aporte de Socio',
+    description: 'Registrar aporte de capital de un socio',
+    icon: TrendingUp,
+    color: 'text-[var(--positive)]',
+    submitLabel: 'Registrar Aporte',
+  },
+  {
+    id: 'withdrawal',
+    label: 'Retiro de Socio',
+    description: 'Registrar retiro de capital de un socio',
+    icon: TrendingDown,
+    color: 'text-[var(--negative)]',
+    submitLabel: 'Registrar Retiro',
+  },
+]
 
 interface CapitalTransactionModalProps {
   modalData?: {
@@ -17,29 +48,12 @@ interface CapitalTransactionModalProps {
 
 export function CapitalTransactionModal({ modalData, onClose }: CapitalTransactionModalProps) {
   const formRef = useRef<HTMLFormElement>(null)
-  const [selectedType, setSelectedType] = useState<TransactionType>(null)
+  const [selectedType, setSelectedType] = useState<TransactionType | null>(null)
+  const [, navigate] = useLocation()
 
-  const getHeader = () => {
-    if (selectedType === 'contribution') {
-      return {
-        title: 'Nuevo Aporte de Socio',
-        description: 'Registra un nuevo aporte de capital de un socio',
-        icon: TrendingUp,
-      }
-    }
-    if (selectedType === 'withdrawal') {
-      return {
-        title: 'Nuevo Retiro de Socio',
-        description: 'Registra un nuevo retiro de capital de un socio',
-        icon: TrendingDown,
-      }
-    }
-    return {
-      title: 'Nueva Transacción de Capital',
-      description: 'Selecciona el tipo de transacción a registrar',
-      icon: undefined,
-    }
-  }
+  const selectedConfig = selectedType 
+    ? TRANSACTION_TYPES.find(t => t.id === selectedType) 
+    : null
 
   const handleSubmit = () => {
     if (formRef.current) {
@@ -47,75 +61,96 @@ export function CapitalTransactionModal({ modalData, onClose }: CapitalTransacti
     }
   }
 
-  const header = getHeader()
+  const renderFormFields = () => {
+    if (!selectedType) return null
+
+    const commonProps = {
+      projectId: modalData?.projectId,
+      organizationId: modalData?.organizationId,
+      mode: 'create' as const,
+      onSuccess: onClose,
+      onCancel: onClose,
+      hideActions: true,
+      formRef,
+    }
+
+    switch (selectedType) {
+      case 'contribution':
+        return <PartnerContributionFormFields {...commonProps} />
+      case 'withdrawal':
+        return <PartnerWithdrawalFormFields {...commonProps} />
+      default:
+        return null
+    }
+  }
 
   return (
     <ModalLayout 
       onClose={onClose} 
-      size={selectedType ? 'lg' : 'md'}
+      size="lg"
       headerContent={
         <ModalHeader
-          title={header.title}
-          description={header.description}
-          icon={header.icon}
+          icon={selectedConfig?.icon || Wallet}
+          title={selectedConfig?.label || 'Nueva Transacción'}
+          description={selectedConfig?.description || 'Selecciona el tipo de transacción a registrar'}
         />
       }
       footerContent={
         <ModalFooter
           leftLabel="Cancelar"
           onLeftClick={onClose}
-          submitText={selectedType ? 'Registrar' : 'Seleccionar'}
+          submitText={selectedConfig?.submitLabel || 'Continuar'}
           onSubmit={handleSubmit}
           submitDisabled={!selectedType}
         />
       }
     >
       <ModalBody>
-        {!selectedType ? (
-          <div className="space-y-4">
-            <label className="text-sm font-medium text-foreground">
-              Tipo de Transacción <span className="text-red-500">*</span>
-            </label>
-            <Select value={selectedType || ''} onValueChange={(value) => setSelectedType(value as TransactionType)}>
-              <SelectTrigger data-testid="select-transaction-type">
-                <SelectValue placeholder="Seleccionar tipo de transacción" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="contribution">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-[var(--positive)]" />
-                    <span>Nuevo Aporte</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="withdrawal">
-                  <div className="flex items-center gap-2">
-                    <TrendingDown className="h-4 w-4 text-[var(--negative)]" />
-                    <span>Nuevo Retiro</span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium text-muted-foreground">Tipo de Transacción</Label>
+          <Select
+            value={selectedType || ''}
+            onValueChange={(value) => setSelectedType(value as TransactionType)}
+          >
+            <SelectTrigger data-testid="select-transaction-type">
+              <SelectValue placeholder="Selecciona un tipo de transacción" />
+            </SelectTrigger>
+            <SelectContent>
+              {TRANSACTION_TYPES.map((type) => {
+                const IconComponent = type.icon;
+                
+                return (
+                  <SelectItem key={type.id} value={type.id}>
+                    <div className="flex items-center justify-between w-full gap-3">
+                      <div className="flex items-center gap-2">
+                        <IconComponent className={cn("w-4 h-4", type.color)} />
+                        <span className={type.color}>{type.label}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          navigate('/organization/capital?tab=transactions');
+                          onClose();
+                        }}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        title="Ir a Capital"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {selectedType && (
+          <div className="pt-4 border-t">
+            {renderFormFields()}
           </div>
-        ) : selectedType === 'contribution' ? (
-          <PartnerContributionFormFields
-            projectId={modalData?.projectId}
-            organizationId={modalData?.organizationId}
-            mode="create"
-            onSuccess={onClose}
-            onCancel={onClose}
-            hideActions={true}
-            formRef={formRef}
-          />
-        ) : (
-          <PartnerWithdrawalFormFields
-            projectId={modalData?.projectId}
-            organizationId={modalData?.organizationId}
-            mode="create"
-            onSuccess={onClose}
-            onCancel={onClose}
-            hideActions={true}
-            formRef={formRef}
-          />
         )}
       </ModalBody>
     </ModalLayout>
