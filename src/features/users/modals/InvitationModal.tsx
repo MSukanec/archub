@@ -13,7 +13,7 @@ import { FormModalFooter } from '@/components/modal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CompactAvatarGroup } from '@/components/ui-custom/general/CompactAvatarGroup';
+import { CompactAvatarGroup } from '@/components/shared/legacy/general/CompactAvatarGroup';
 import type { PendingInvitation } from '@/hooks/use-pending-invitations';
 
 interface InvitationModalProps {

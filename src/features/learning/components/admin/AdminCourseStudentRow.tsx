@@ -1,4 +1,4 @@
-import DataRowCard from '@/components/ui-custom/general/DataRowCard';
+import DataRowCard from '@/components/shared/legacy/general/DataRowCard';
 import { GraduationCap } from 'lucide-react';
 
 interface EnrollmentProgress {

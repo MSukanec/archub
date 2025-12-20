@@ -1,4 +1,4 @@
-import DataRowCard from '@/components/ui-custom/general/DataRowCard';
+import DataRowCard from '@/components/shared/legacy/general/DataRowCard';
 import { Badge } from "@/components/ui/badge";
 import { Lock } from "lucide-react";
 

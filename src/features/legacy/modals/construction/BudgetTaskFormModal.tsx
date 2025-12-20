@@ -4,7 +4,7 @@ import { FormModalHeader } from '@/components/modal';
 import { FormModalFooter } from '@/components/modal';
 import { FormModalLayout } from '@/components/modal';
 import { useModalPanelStore } from '@/components/modal';
-import { TaskSelectionTable, SelectedTask } from '@/components/ui-custom/TaskSelectionTable';
+import { TaskSelectionTable, SelectedTask } from '@/components/shared/legacy/TaskSelectionTable';
 import { useBudgetTasks } from '@/hooks/use-budget-tasks';
 import { useCurrentUser } from '@/hooks/use-current-user';
 

@@ -1,4 +1,4 @@
-import DataRowCard, { DataRowCardProps } from '@/components/ui-custom/general/DataRowCard';
+import DataRowCard, { DataRowCardProps } from '@/components/shared/legacy/general/DataRowCard';
 import { TaskCostPopover } from '@/features/projects/components/TaskCostPopover';
 import TaskLaborCost from '@/components/construction/TaskLaborCost';
 import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtotal';

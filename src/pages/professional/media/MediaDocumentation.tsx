@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { DocumentExplorer } from '@/components/ui-custom/DocumentExplorer';
-import { DocumentInfo } from '@/components/ui-custom/DocumentInfo';
+import { DocumentExplorer } from '@/components/shared/legacy/DocumentExplorer';
+import { DocumentInfo } from '@/components/shared/legacy/DocumentInfo';
 import { DocumentPreviewModal } from '@/features/projects';
 import { UnifiedViewer } from '@/components/shared/viewers/UnifiedViewer';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';

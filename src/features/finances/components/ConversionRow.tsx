@@ -1,4 +1,4 @@
-import DataRowCard, { DataRowCardProps } from '@/components/ui-custom/general/DataRowCard';
+import DataRowCard, { DataRowCardProps } from '@/components/shared/legacy/general/DataRowCard';
 
 interface ConversionGroup {
   id: string;

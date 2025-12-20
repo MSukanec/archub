@@ -1,5 +1,5 @@
 import React from 'react';
-import DataRowCard, { DataRowCardProps } from '@/components/ui-custom/general/DataRowCard';
+import DataRowCard, { DataRowCardProps } from '@/components/shared/legacy/general/DataRowCard';
 import { SwipeableCard } from '@/layouts';
 import { Edit, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';

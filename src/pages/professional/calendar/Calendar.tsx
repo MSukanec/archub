@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import { KanbanBox } from '@/components/ui-custom/KanbanBox';
+import { KanbanBox } from '@/components/shared/legacy/KanbanBox';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
