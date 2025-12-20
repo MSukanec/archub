@@ -7,12 +7,25 @@ interface SavePinBody {
   image: string;
 }
 
-export async function savePin(req: Request, res: Response) {
-  try {
-    if (req.method !== 'POST') {
-      return res.status(405).json({ error: 'Method not allowed' });
-    }
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
 
+function setCorsHeaders(res: Response) {
+  res.set(CORS_HEADERS);
+}
+
+export function savePinPreflight(req: Request, res: Response) {
+  setCorsHeaders(res);
+  return res.status(204).send();
+}
+
+export async function savePin(req: Request, res: Response) {
+  setCorsHeaders(res);
+  
+  try {
     const body = req.body as SavePinBody;
     
     console.log('[Pins] Received payload:', {
