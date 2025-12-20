@@ -103,7 +103,6 @@ export async function getUnifiedMovements(
   const projectIds = Array.from(new Set(movements.map(m => m.project_id).filter(Boolean))) as string[];
   const currencyIds = Array.from(new Set(movements.map(m => m.currency_id).filter(Boolean))) as string[];
   const walletIds = Array.from(new Set(movements.map(m => m.wallet_id).filter(Boolean))) as string[];
-  const clientIds = Array.from(new Set(movements.filter(m => m.movement_type === 'client_payment').map(m => m.client_id).filter(Boolean))) as string[];
 
   // Build separate ID arrays for each payment type for media_links query
   const clientPaymentIdSet = new Set(movements.filter(m => m.movement_type === 'client_payment').map(m => m.id));
@@ -134,9 +133,9 @@ export async function getUnifiedMovements(
     orFilterParts.push(`general_cost_payment_id.in.(${Array.from(generalCostPaymentIdSet).join(',')})`);
   }
 
-  // Fetch relations (projects, currencies, wallets), clients, and attachments
+  // Fetch relations (projects, currencies, wallets) and attachments
   // Note: creator info and entity_name now come from the view v2 columns
-  const [projectsResult, currenciesResult, walletsResult, clientsResult, attachmentsResult] = await Promise.all([
+  const [projectsResult, currenciesResult, walletsResult, attachmentsResult] = await Promise.all([
     projectIds.length > 0 
       ? supabase.from('projects').select('id, name, code, color').in('id', projectIds)
       : { data: [], error: null },
@@ -145,9 +144,6 @@ export async function getUnifiedMovements(
       : { data: [], error: null },
     walletIds.length > 0
       ? supabase.from('organization_wallets').select('id, wallets:wallet_id(id, name)').in('id', walletIds)
-      : { data: [], error: null },
-    clientIds.length > 0
-      ? supabase.from('clients').select('id, name').in('id', clientIds)
       : { data: [], error: null },
     orFilterParts.length > 0
       ? supabase.from('media_links')
@@ -162,7 +158,6 @@ export async function getUnifiedMovements(
     w.id, 
     w.wallets ? { id: w.id, name: w.wallets.name } : null
   ]));
-  const clientsMap = new Map((clientsResult.data || []).map((c: any) => [c.id, c]));
   
   const attachmentsSet = new Set<string>();
   (attachmentsResult.data || []).forEach((link: any) => {
@@ -174,26 +169,14 @@ export async function getUnifiedMovements(
     if (link.general_cost_payment_id) attachmentsSet.add(link.general_cost_payment_id);
   });
 
-  return movements.map((movement: any) => {
-    // Enrich entity_name for client_payment if missing
-    let entityName = movement.entity_name;
-    if (movement.movement_type === 'client_payment' && !entityName && movement.client_id) {
-      const client = clientsMap.get(movement.client_id);
-      if (client) {
-        entityName = client.name;
-      }
-    }
-    
-    return {
-      ...movement,
-      entity_name: entityName,
-      project: movement.project_id ? projectsMap.get(movement.project_id) || null : null,
-      currency: movement.currency_id ? currenciesMap.get(movement.currency_id) || null : null,
-      wallet: movement.wallet_id ? walletsMap.get(movement.wallet_id) || null : null,
-      signed_amount: movement.amount * movement.amount_sign,
-      has_attachments: attachmentsSet.has(movement.id),
-    };
-  });
+  return movements.map((movement: any) => ({
+    ...movement,
+    project: movement.project_id ? projectsMap.get(movement.project_id) || null : null,
+    currency: movement.currency_id ? currenciesMap.get(movement.currency_id) || null : null,
+    wallet: movement.wallet_id ? walletsMap.get(movement.wallet_id) || null : null,
+    signed_amount: movement.amount * movement.amount_sign,
+    has_attachments: attachmentsSet.has(movement.id),
+  }));
 }
 
 /**
