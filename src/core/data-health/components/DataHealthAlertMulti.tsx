@@ -7,7 +7,7 @@ interface DataHealthAlertMultiProps {
   issues: DataIssue[];
   entityLabel?: string;
   activeFilterIssueId?: string | null;
-  onToggleFilter: (issueId: string) => void;
+  onToggleFilter?: (issueId: string) => void;
   dismissedIssueIds?: Set<string>;
   onDismissIssue?: (issueId: string) => void;
   filteredItemIds?: Set<string | number>;
@@ -20,7 +20,7 @@ const severityColors: Record<string, string> = {
 };
 
 export function DataHealthAlertMulti({
-  issues,
+  issues = [],
   entityLabel = 'elemento',
   activeFilterIssueId,
   onToggleFilter,
@@ -29,6 +29,8 @@ export function DataHealthAlertMulti({
   filteredItemIds,
 }: DataHealthAlertMultiProps) {
   const openModal = useGlobalModalStore((state) => state.openModal);
+  
+  if (!issues || issues.length === 0) return null;
   
   const visibleIssues = issues.filter(issue => {
     if (dismissedIssueIds.has(issue.id)) return false;
@@ -74,16 +76,16 @@ export function DataHealthAlertMulti({
                   handleOpenDetails(issue);
                 }
               },
-              {
+              ...(onToggleFilter ? [{
                 label: isThisIssueFiltered ? 'Filtro activo' : 'Mostrar',
-                onClick: (e) => {
+                onClick: (e: React.MouseEvent | undefined) => {
                   e?.stopPropagation();
                   onToggleFilter(issue.id);
                 }
-              }
+              }] : [])
             ]}
             onClose={onDismissIssue ? () => onDismissIssue(issue.id) : undefined}
-            onClick={() => onToggleFilter(issue.id)}
+            onClick={onToggleFilter ? () => onToggleFilter(issue.id) : undefined}
           />
         );
       })}
