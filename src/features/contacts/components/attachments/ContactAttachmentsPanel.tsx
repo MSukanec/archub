@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox';
+import { ImageLightbox, useImageLightbox } from '@/components/shared/viewers/ImageLightbox';
 import { 
   useContactAttachments, 
   useCreateContactAttachment, 

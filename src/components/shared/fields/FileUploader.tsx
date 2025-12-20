@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useDropzone } from 'react-dropzone';
 import { useToast } from "@/hooks/use-toast";
-import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox';
+import { ImageLightbox, useImageLightbox } from '@/components/shared/viewers/ImageLightbox';
 import { cn } from "@/lib/utils";
 import { compressImage, shouldCompress, formatCompressionStats, type ImagePreset } from '@/lib/imageCompression';
 

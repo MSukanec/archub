@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { startOfWeek, endOfWeek, format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Gallery } from '@/components/ui-custom/media/Gallery';
+import { Gallery } from '@/components/shared/viewers/Gallery';
 import type { SitelogGalleryFile } from '../types';
 
 // GalleryFile type compatible with Gallery component

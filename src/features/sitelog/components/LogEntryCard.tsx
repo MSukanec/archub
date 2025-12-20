@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
-import { useMediaLightbox, type MediaItem } from "@/components/ui-custom/media/ImageLightbox";
+import { useMediaLightbox, type MediaItem } from "@/components/shared/viewers/ImageLightbox";
 import { WEATHER_TYPES } from '../constants';
 
 interface LogEntryCardProps {

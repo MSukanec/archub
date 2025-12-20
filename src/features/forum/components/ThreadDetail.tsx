@@ -31,7 +31,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
-import { ImageLightbox, useImageLightbox } from '@/components/ui-custom/media/ImageLightbox';
+import { ImageLightbox, useImageLightbox } from '@/components/shared/viewers/ImageLightbox';
 
 function getInitials(name: string): string {
   return name

@@ -5,7 +5,7 @@ import { Play, CheckCircle, FileText, Bookmark, Clock, Plus } from 'lucide-react
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useCourseSidebarStore } from '@/stores/sidebarStore'
-import { VimeoPlayer } from '@/components/ui-custom/media'
+import { VimeoPlayer } from '@/components/shared/viewers'
 import { apiRequest, queryClient } from '@/lib/queryClient'
 import { useToast } from '@/hooks/use-toast'
 import { LessonSummaryNote, LessonMarkers, FavoriteButton, useCourseStructure, useCourseProgress, useUpdateLessonProgress, useCoursePlayerStore } from '@/features/learning'

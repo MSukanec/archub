@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Gallery as GalleryComponent } from '@/components/ui-custom/media/Gallery';
+import { Gallery as GalleryComponent } from '@/components/shared/viewers/Gallery';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';

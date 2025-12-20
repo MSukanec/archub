@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ImageLightbox, useImageLightbox } from "@/components/ui-custom/media/ImageLightbox";
+import { ImageLightbox, useImageLightbox } from "@/components/shared/viewers/ImageLightbox";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/features/organization";

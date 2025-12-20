@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { format, parseISO } from "date-fns";
-import { useMediaLightbox, MediaLightbox, type MediaItem } from "@/components/ui-custom/media/ImageLightbox";
+import { useMediaLightbox, MediaLightbox, type MediaItem } from "@/components/shared/viewers/ImageLightbox";
 import { DateSeparator } from "./DateSeparator";
 import { LogEntryCard } from "./LogEntryCard";
 
