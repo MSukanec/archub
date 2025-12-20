@@ -1,7 +1,9 @@
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, ChevronRight } from 'lucide-react';
 import { Callout } from '@/components/shared/Callout';
 import type { DataIssue } from '../types';
 import { getRuleIcon } from '../rules/micro';
+import { useState } from 'react';
+import { DataHealthDetailsModal } from './DataHealthDetailsModal';
 
 interface DataHealthAlertMultiProps {
   issues: DataIssue[];
@@ -26,6 +28,9 @@ export function DataHealthAlertMulti({
   dismissedIssueIds = new Set(),
   onDismissIssue,
 }: DataHealthAlertMultiProps) {
+  const [selectedIssue, setSelectedIssue] = useState<DataIssue | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  
   const visibleIssues = issues.filter(issue => !dismissedIssueIds.has(issue.id));
   
   if (visibleIssues.length === 0) return null;
@@ -34,34 +39,56 @@ export function DataHealthAlertMulti({
   const filteredIssue = issues.find(i => i.id === activeFilterIssueId);
   const totalAffected = filteredIssue?.affectedCount || 0;
 
+  const handleOpenDetails = (issue: DataIssue) => {
+    setSelectedIssue(issue);
+    setModalOpen(true);
+  };
+
   return (
-    <div className="space-y-2">
-      {visibleIssues.map((issue) => {
-        const Icon = getRuleIcon(issue.ruleId);
-        const bgColor = severityColors[issue.severity] || severityColors.warning;
-        const isThisIssueFiltered = activeFilterIssueId === issue.id;
+    <>
+      <div className="space-y-2">
+        {visibleIssues.map((issue) => {
+          const Icon = getRuleIcon(issue.ruleId);
+          const bgColor = severityColors[issue.severity] || severityColors.warning;
+          const isThisIssueFiltered = activeFilterIssueId === issue.id;
+          
+          return (
+            <div key={issue.id} className="flex gap-2 items-center">
+              <Callout
+                icon={Icon}
+                text={`${issue.affectedCount} ${issue.title.toLowerCase()}`}
+                backgroundColor={bgColor}
+                button={isThisIssueFiltered ? {
+                  label: 'Filtro activo',
+                  onClick: () => onToggleFilter(issue.id)
+                } : undefined}
+                onClose={onDismissIssue ? () => onDismissIssue(issue.id) : undefined}
+                onClick={() => onToggleFilter(issue.id)}
+                className="flex-1"
+              />
+              <button
+                onClick={() => handleOpenDetails(issue)}
+                className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+                title="Ver detalles"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          );
+        })}
         
-        return (
-          <Callout
-            key={issue.id}
-            icon={Icon}
-            text={`${issue.affectedCount} ${issue.title.toLowerCase()}`}
-            backgroundColor={bgColor}
-            button={isThisIssueFiltered ? {
-              label: 'Filtro activo',
-              onClick: () => onToggleFilter(issue.id)
-            } : undefined}
-            onClose={onDismissIssue ? () => onDismissIssue(issue.id) : undefined}
-            onClick={() => onToggleFilter(issue.id)}
-          />
-        );
-      })}
-      
-      {isFiltering && (
-        <div className="text-xs text-muted-foreground text-center">
-          Mostrando solo {totalAffected} {entityLabel}{totalAffected !== 1 ? 's' : ''} con problemas
-        </div>
-      )}
-    </div>
+        {isFiltering && (
+          <div className="text-xs text-muted-foreground text-center">
+            Mostrando solo {totalAffected} {entityLabel}{totalAffected !== 1 ? 's' : ''} con problemas
+          </div>
+        )}
+      </div>
+
+      <DataHealthDetailsModal
+        issue={selectedIssue}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+      />
+    </>
   );
 }
