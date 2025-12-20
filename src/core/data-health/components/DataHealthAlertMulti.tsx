@@ -1,6 +1,7 @@
-import { AlertTriangle, Users, FolderOpen, DollarSign, Calendar, Tag } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { Callout } from '@/components/shared/Callout';
 import type { DataIssue } from '../types';
+import { getRuleIcon } from '../rules/micro';
 
 interface DataHealthAlertMultiProps {
   issues: DataIssue[];
@@ -10,16 +11,6 @@ interface DataHealthAlertMultiProps {
   dismissedIssueIds?: Set<string>;
   onDismissIssue?: (issueId: string) => void;
 }
-
-const issueIcons: Record<string, typeof Users> = {
-  'client-payments-without-client': Users,
-  'payments-without-project': FolderOpen,
-  'finances-invalid-exchange-rate': DollarSign,
-  'payments-with-future-date': Calendar,
-  'payments-without-category': Tag,
-  'payments-without-concept': Tag,
-  'payments-missing-exchange-rate': DollarSign,
-};
 
 const severityColors: Record<string, string> = {
   critical: 'var(--error)',
@@ -46,7 +37,7 @@ export function DataHealthAlertMulti({
   return (
     <div className="space-y-2">
       {visibleIssues.map((issue) => {
-        const Icon = issueIcons[issue.ruleId] || AlertTriangle;
+        const Icon = getRuleIcon(issue.ruleId);
         const bgColor = severityColors[issue.severity] || severityColors.warning;
         const isThisIssueFiltered = activeFilterIssueId === issue.id;
         
