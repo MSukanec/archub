@@ -1,6 +1,5 @@
-import { AlertTriangle, X, Users, FolderOpen, DollarSign, Calendar, Tag } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { AlertTriangle, Users, FolderOpen, DollarSign, Calendar, Tag } from 'lucide-react';
+import { Callout } from '@/components/shared/Callout';
 import type { DataIssue } from '../types';
 
 interface DataHealthAlertMultiProps {
@@ -21,22 +20,10 @@ const issueIcons: Record<string, typeof Users> = {
   'payments-missing-exchange-rate': DollarSign,
 };
 
-const severityColors: Record<string, { borderVar: string; bgVar: string; textVar: string }> = {
-  critical: {
-    borderVar: '--error',
-    bgVar: '--error',
-    textVar: '--error'
-  },
-  warning: {
-    borderVar: '--warning',
-    bgVar: '--warning',
-    textVar: '--warning'
-  },
-  info: {
-    borderVar: '--info',
-    bgVar: '--info',
-    textVar: '--info'
-  },
+const severityColors: Record<string, string> = {
+  critical: 'var(--error)',
+  warning: 'var(--warning)',
+  info: 'var(--info)',
 };
 
 export function DataHealthAlertMulti({
@@ -54,47 +41,25 @@ export function DataHealthAlertMulti({
     <div className="space-y-2">
       {issues.map((issue) => {
         const Icon = issueIcons[issue.ruleId] || AlertTriangle;
-        const colorVars = severityColors[issue.severity] || severityColors.warning;
+        const bgColor = severityColors[issue.severity] || severityColors.warning;
         
         return (
-          <div 
+          <Callout
             key={issue.id}
-            className={cn(
-              "flex items-center justify-between w-full px-4 py-2.5 rounded-lg cursor-pointer transition-all border",
-              "hover:opacity-90",
-              isFiltering && "ring-2 ring-offset-1"
-            )}
-            style={{
-              borderColor: `var(${colorVars.borderVar})`,
-              backgroundColor: `color-mix(in srgb, var(${colorVars.bgVar}) 10%, transparent)`,
-              color: `var(${colorVars.textVar})`
-            }}
-            onClick={onToggleFilter}
+            icon={Icon}
+            text={`${issue.affectedCount} ${issue.title.toLowerCase()}`}
+            backgroundColor={bgColor}
+            button={isFiltering ? {
+              label: 'Filtro activo',
+              onClick: (e) => {
+                e?.stopPropagation();
+                onToggleFilter();
+              }
+            } : undefined}
+            onClose={showClearButton && isFiltering ? onToggleFilter : undefined}
+            className="cursor-pointer"
             data-testid={`data-health-alert-${issue.ruleId}`}
-          >
-            <div className="flex items-center gap-3">
-              <Icon className="h-4 w-4 flex-shrink-0" />
-              <div className="text-sm">
-                <span className="font-medium">
-                  {issue.affectedCount} {issue.title.toLowerCase()}
-                </span>
-              </div>
-            </div>
-            {showClearButton && isFiltering && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-6 px-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleFilter();
-                }}
-                data-testid={`clear-problems-filter-${issue.ruleId}`}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
+          />
         );
       })}
       
