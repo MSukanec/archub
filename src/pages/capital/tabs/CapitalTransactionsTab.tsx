@@ -268,7 +268,7 @@ export function CapitalTransactionsTab({
     {
       key: 'date',
       label: 'Fecha',
-      width: '1fr',
+      type: 'date' as const,
       sortType: 'date' as const,
       render: (item: UnifiedTransaction) => (
         <span className="text-sm text-muted-foreground">
@@ -279,7 +279,7 @@ export function CapitalTransactionsTab({
     {
       key: 'type',
       label: 'Tipo',
-      width: '1fr',
+      type: 'medium-text' as const,
       render: (item: UnifiedTransaction) => (
         <div className="flex items-center gap-2">
           {item.type === 'contribution' ? (
@@ -299,7 +299,7 @@ export function CapitalTransactionsTab({
     {
       key: 'partner_name',
       label: 'Socio',
-      width: '1fr',
+      type: 'long-text' as const,
       render: (item: UnifiedTransaction) => (
         <IdentityBadge 
           name={item.partner_name}
@@ -311,7 +311,7 @@ export function CapitalTransactionsTab({
     {
       key: 'wallet_name',
       label: 'Billetera',
-      width: '1fr',
+      type: 'wallet' as const,
       render: (item: UnifiedTransaction) => (
         <span className="text-sm text-muted-foreground">
           {item.wallet_name || '-'}
@@ -321,7 +321,7 @@ export function CapitalTransactionsTab({
     {
       key: 'amount',
       label: 'Monto',
-      width: '1fr',
+      type: 'amount' as const,
       align: 'right' as const,
       sortType: 'number' as const,
       render: (item: UnifiedTransaction) => (
@@ -340,7 +340,7 @@ export function CapitalTransactionsTab({
     {
       key: 'status',
       label: 'Estado',
-      width: '1fr',
+      type: 'status' as const,
       render: (item: UnifiedTransaction) => {
         const config = getPartnerTransactionStatusBadgeConfig(item.status);
         return (
