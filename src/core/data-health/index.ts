@@ -51,3 +51,5 @@ export {
 } from './rules/capital-rules';
 
 export { DataHealthAlertMulti } from './components/DataHealthAlertMulti';
+export { DataHealthDetailsModal } from './components/DataHealthDetailsModal';
+export { DataHealthDetailsContent } from './components/DataHealthDetailsContent';

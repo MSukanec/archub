@@ -37,6 +37,7 @@ import ForumPostForm from '@/features/forum/forms/ForumPostForm';
 import ForumCategoryForm from '@/features/forum/forms/ForumCategoryForm';
 import CourseForumCategoryForm from '@/features/forum/forms/CourseForumCategoryForm';
 import { NewMovementModal } from '@/features/finances/modals/NewMovementModal';
+import { DataHealthDetailsModal } from '@/core/data-health/components/DataHealthDetailsModal';
 
 const organizationConfig: ModalConfig = { category: 'organization', size: 'md' };
 const foundersConfig: ModalConfig = { category: 'founders', size: 'md' };
@@ -551,6 +552,16 @@ export function initializeModalRegistry(): void {
         ...data,
         projectId: data?.projectId,
         organizationId: data?.organizationId,
+      },
+    }),
+  });
+
+  registerModal('data-health-details', DataHealthDetailsModal as any, {
+    ...generalConfig,
+    size: 'lg',
+    mapDataToProps: (data) => ({
+      modalData: {
+        issue: data?.issue,
       },
     }),
   });
