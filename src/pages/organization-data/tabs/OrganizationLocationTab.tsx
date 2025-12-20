@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MapPin, Building2, Navigation, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { GooglePlacesAutocomplete, GoogleMap } from '@/components/ui-custom/integrations/google-maps'
+import { GooglePlacesAutocomplete, GoogleMap } from '@/components/shared/integrations/google-maps'
 
 export function OrganizationLocationTab() {
   const { toast } = useToast();

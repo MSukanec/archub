@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { MapPin, Building2, Navigation, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
-import { GooglePlacesAutocomplete, GoogleMap } from '@/components/ui-custom/integrations/google-maps'
+import { GooglePlacesAutocomplete, GoogleMap } from '@/components/shared/integrations/google-maps'
 
 interface ProjectLocationTabProps {
   projectId?: string;
