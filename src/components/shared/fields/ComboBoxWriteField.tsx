@@ -116,8 +116,10 @@ export function ComboBox({
         </button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[--radix-popover-trigger-width] p-0 fixed z-[10000] border border-[var(--card-border)] bg-[var(--card-bg)] text-[var(--card-fg)] rounded-md shadow-lg max-h-60 overflow-hidden" 
-        align="start" 
+        className="w-[--radix-popover-trigger-width] p-0 z-[10000] border border-[var(--card-border)] bg-[var(--card-bg)] text-[var(--card-fg)] rounded-md shadow-lg max-h-60 overflow-hidden" 
+        align="start"
+        avoidCollisions={true}
+        collisionPadding={10}
       >
         <Command className="bg-[var(--card-bg)]" shouldFilter={false}>
           <CommandInput 
