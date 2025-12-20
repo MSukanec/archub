@@ -22,7 +22,7 @@ import {
 } from '@/components/dashboard';
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
-import { useFinancesDataHealth, mergeWithBusinessInsights } from '@/core/data-health';
+import { useFinancesDataHealth, DataHealthAlertMulti } from '@/core/data-health';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
@@ -37,6 +37,8 @@ interface FinancesDashboardTabProps {
   onNavigateToTab?: (tab: string, filters?: Record<string, unknown>) => void;
   onScrollToPanel?: (panelId: string) => void;
   selectedPeriod?: PeriodFilter;
+  dismissedIssueIds?: Set<string>;
+  onDismissIssue?: (issueId: string) => void;
 }
 
 const MOVEMENT_TYPE_LABELS: Record<string, string> = {
@@ -149,7 +151,9 @@ export default function OrganizationFinancesDashboardTab({
   onNavigateToMovements,
   onNavigateToTab,
   onScrollToPanel,
-  selectedPeriod = 'all' 
+  selectedPeriod = 'all',
+  dismissedIssueIds = new Set(),
+  onDismissIssue
 }: FinancesDashboardTabProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
@@ -477,6 +481,15 @@ export default function OrganizationFinancesDashboardTab({
 
   return (
     <div className="space-y-6">
+      <DataHealthAlertMulti
+        issues={dataHealth.issues}
+        entityLabel="movimiento"
+        dismissedIssueIds={dismissedIssueIds}
+        onDismissIssue={(issueId: string) => {
+          onDismissIssue?.(issueId);
+        }}
+      />
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="kpi-total-ingresos">
           <StatCardTitle>
@@ -576,7 +589,7 @@ export default function OrganizationFinancesDashboardTab({
         <InsightCard
           title="Insights"
           titleIcon={<Lightbulb />}
-          items={mergeWithBusinessInsights(toInsightItems(autoInsights), dataHealth.insights, { dataHealthFirst: true })}
+          items={toInsightItems(autoInsights)}
           emptyText="Sin insights en este período. Continuá registrando movimientos para obtener análisis."
           onAction={handleInsightAction}
           data-testid="insights-section"

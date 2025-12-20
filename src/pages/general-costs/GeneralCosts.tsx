@@ -41,6 +41,7 @@ export default function GeneralCosts() {
   const [activeTab, setActiveTab] = useState("dashboard")
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all')
   const [drillDownFilters, setDrillDownFilters] = useState<DrillDownFilters>({})
+  const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set())
   
   // Get general costs to check if we should disable the Pagos tab
   const { data: generalCosts = [] } = useGeneralCosts(organizationId ?? null)
@@ -193,7 +194,11 @@ export default function GeneralCosts() {
             const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart' ? 'monthly-trend' : panelId}"]`);
             element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }}
-          selectedPeriod={validSelectedPeriod} 
+          selectedPeriod={validSelectedPeriod}
+          dismissedIssueIds={dismissedIssueIds}
+          onDismissIssue={(issueId: string) => {
+            setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
+          }}
         />
       )}
       {activeTab === "conceptos" && <GeneralCostsConceptsTab onNewGeneralCost={handleNewGeneralCost} />}

@@ -26,7 +26,7 @@ import {
 } from '@/components/dashboard';
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
-import { useGeneralCostsDataHealth, mergeWithBusinessInsights } from '@/core/data-health';
+import { useGeneralCostsDataHealth, DataHealthAlertMulti } from '@/core/data-health';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
@@ -44,6 +44,8 @@ interface GeneralCostsDashboardTabProps {
   onScrollToPanel?: (panelId: string) => void;
   onFilterCategory?: (category: string) => void;
   selectedPeriod?: PeriodFilter;
+  dismissedIssueIds?: Set<string>;
+  onDismissIssue?: (issueId: string) => void;
 }
 
 function getPeriodLabel(period: PeriodFilter): string {
@@ -154,7 +156,9 @@ export default function GeneralCostsDashboardTab({
   onNavigateToTab,
   onScrollToPanel,
   onFilterCategory,
-  selectedPeriod = 'all' 
+  selectedPeriod = 'all',
+  dismissedIssueIds = new Set(),
+  onDismissIssue
 }: GeneralCostsDashboardTabProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
@@ -673,6 +677,15 @@ export default function GeneralCostsDashboardTab({
 
   return (
     <div className="space-y-6" data-testid="general-costs-dashboard">
+      <DataHealthAlertMulti
+        issues={dataHealth.issues}
+        entityLabel="pago"
+        dismissedIssueIds={dismissedIssueIds}
+        onDismissIssue={(issueId: string) => {
+          onDismissIssue?.(issueId);
+        }}
+      />
+
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="kpi-total-gasto">
           <StatCardTitle>
@@ -769,7 +782,7 @@ export default function GeneralCostsDashboardTab({
         <InsightCard
           title="Insights"
           titleIcon={<Lightbulb />}
-          items={mergeWithBusinessInsights(toInsightItems(autoInsights), dataHealth.insights, { dataHealthFirst: true })}
+          items={toInsightItems(autoInsights)}
           emptyText="Sin insights en este período. Continuá registrando pagos para obtener análisis."
           onAction={handleInsightAction}
           data-testid="insights-section"

@@ -26,6 +26,7 @@ const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
 export default function OrganizationFinances() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
+  const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const { setSidebarLevel } = useNavigationStore();
@@ -149,6 +150,10 @@ export default function OrganizationFinances() {
             element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }}
           selectedPeriod={validSelectedPeriod}
+          dismissedIssueIds={dismissedIssueIds}
+          onDismissIssue={(issueId: string) => {
+            setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
+          }}
         />
       )}
       {activeTab === "movements" && <OrganizationFinancesMovementsTab />}
