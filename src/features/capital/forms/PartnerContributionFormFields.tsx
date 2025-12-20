@@ -255,6 +255,7 @@ export function PartnerContributionFormFields({
             notes: data.notes || null,
           },
           organizationId,
+          updatedBy: currentMember.id,
         })
       } else {
         result = await createMutation.mutateAsync({
@@ -303,9 +304,10 @@ export function PartnerContributionFormFields({
         setFilesToUpload([])
       }
 
+      const successMessage = mode === 'edit' ? 'actualizado' : 'registrado';
       toast({
-        title: "Aporte registrado",
-        description: "El aporte de socio se ha registrado correctamente",
+        title: `Aporte ${successMessage}`,
+        description: `El aporte de socio se ha ${successMessage} correctamente`,
       })
 
       onSuccess()

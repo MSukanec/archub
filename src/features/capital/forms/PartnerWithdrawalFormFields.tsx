@@ -242,6 +242,7 @@ export function PartnerWithdrawalFormFields({
             notes: data.notes || null,
           },
           organizationId,
+          updatedBy: currentMember.id,
         })
       } else {
         result = await createMutation.mutateAsync({
@@ -290,9 +291,10 @@ export function PartnerWithdrawalFormFields({
         setFilesToUpload([])
       }
 
+      const successMessage = mode === 'edit' ? 'actualizado' : 'registrado';
       toast({
-        title: "Retiro registrado",
-        description: "El retiro de socio se ha registrado correctamente",
+        title: `Retiro ${successMessage}`,
+        description: `El retiro de socio se ha ${successMessage} correctamente`,
       })
 
       onSuccess()

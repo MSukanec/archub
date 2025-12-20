@@ -54,11 +54,13 @@ export function useUpdatePartnerContribution() {
       contributionId,
       updates,
       organizationId,
+      updatedBy,
     }: {
       contributionId: string;
       updates: Partial<Omit<PartnerContribution, 'id' | 'created_at' | 'organization_id' | 'created_by'>>;
       organizationId: string;
-    }) => updatePartnerContribution(contributionId, updates, organizationId),
+      updatedBy?: string;
+    }) => updatePartnerContribution(contributionId, updates, organizationId, updatedBy),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: PARTNER_QUERY_KEYS.contributions(data.organization_id, data.project_id || undefined),
