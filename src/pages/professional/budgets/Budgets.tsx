@@ -357,7 +357,7 @@ export default function Budgets() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps} wide={true}>
+      <Layout headerProps={headerProps} wide={false}>
         <div className="flex items-center justify-center h-64">
           <div className="text-muted-foreground">Cargando tareas...</div>
         </div>
@@ -366,7 +366,7 @@ export default function Budgets() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide={true}>
+    <Layout headerProps={headerProps} wide={false}>
       {activeTab === 'listado-tareas' && (
         <BudgetItems 
           onAddTask={handleAddBudget}

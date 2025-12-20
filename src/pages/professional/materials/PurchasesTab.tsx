@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ShoppingCart, Plus, Edit, Trash2, CheckCircle2, Clock, DollarSign, Paperclip } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContext } from '@/stores/projectContext';
-import { Table } from '@/components/shared/trees/Table';
+import { Table, Column } from '@/components/shared/table';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
@@ -227,26 +227,19 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
     });
   };
 
-  const columns: Array<{
-    key: string;
-    label: string;
-    render?: (item: MaterialPurchase) => React.ReactNode;
-    sortable?: boolean;
-    sortType?: "string" | "number" | "date";
-    width?: string;
-    align?: 'left' | 'center' | 'right';
-    cellClassName?: string;
-  }> = [
+  const columns: Column<MaterialPurchase>[] = [
     {
       key: 'purchase_date',
       label: 'Fecha',
+      type: 'date',
       sortable: true,
-      sortType: 'date' as const,
+      sortType: 'date',
       render: (purchase: MaterialPurchase) => formatDate(purchase.purchase_date, 'dd/MM/yyyy'),
     },
     {
       key: 'provider',
       label: 'Proveedor',
+      type: 'long-text',
       sortable: true,
       render: (purchase: MaterialPurchase) => {
         if (!purchase.provider) return <span className="text-muted-foreground">Sin proveedor</span>;
@@ -257,6 +250,7 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
     {
       key: 'document_type',
       label: 'Documento',
+      type: 'medium-text',
       sortable: true,
       render: (purchase: MaterialPurchase) => {
         const docType = DOCUMENT_TYPES[purchase.document_type as keyof typeof DOCUMENT_TYPES];
@@ -273,9 +267,10 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
     {
       key: 'total_amount',
       label: 'Total',
+      type: 'amount',
       sortable: true,
-      sortType: 'number' as const,
-      align: 'right' as const,
+      sortType: 'number',
+      align: 'right',
       render: (purchase: MaterialPurchase) => {
         return (
           <span className="font-medium">
@@ -287,11 +282,12 @@ export default function PurchasesTab({ projectId, organizationId: propOrganizati
     {
       key: 'status',
       label: 'Estado',
+      type: 'status',
       sortable: true,
       render: (purchase: MaterialPurchase) => {
         const statusInfo = getMaterialPurchaseStatusBadgeConfig(purchase.status);
         return (
-          <Badge variant={statusInfo.variant} className={statusInfo.className}>
+          <Badge variant={statusInfo.variant}>
             {statusInfo.label}
           </Badge>
         );

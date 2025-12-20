@@ -156,7 +156,7 @@ export default function Personnel() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide>
+    <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-6 max-w-full min-w-0 overflow-x-hidden">
         {activeTab === 'dashboard' && (
           <PersonnelDashboardTab

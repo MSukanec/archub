@@ -1,8 +1,7 @@
-import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Table } from '@/components/shared/trees/Table'
+import { Table, Column } from '@/components/shared/table'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
@@ -106,12 +105,11 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
     enabled: !!organizationId && !!projectId && !!supabase
   })
 
-  // Detailed table columns (Fecha, Costo Indirecto, Categoría, Billetera, Monto, Cotización)
-  const detailColumns = [
+  const detailColumns: Column[] = [
     {
       key: "movement_date",
       label: "Fecha",
-      width: "15%",
+      type: 'date',
       sortable: true,
       sortType: "date" as const,
       render: (item: any) => {
@@ -131,7 +129,7 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
     {
       key: "indirect_name",
       label: "Costo Indirecto",
-      width: "25%",
+      type: 'long-text',
       sortable: true,
       render: (item: any) => (
         <div className="text-sm">
@@ -149,7 +147,7 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
     {
       key: "category",
       label: "Categoría",
-      width: "20%",
+      type: 'status',
       sortable: true,
       render: (item: any) => (
         <div className="text-sm font-medium">
@@ -160,7 +158,7 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
     {
       key: "wallet",
       label: "Billetera",
-      width: "15%",
+      type: 'wallet',
       render: (item: any) => (
         <div className="flex items-center gap-2 text-sm">
           <Wallet className="w-4 h-4 text-muted-foreground" />
@@ -171,7 +169,7 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
     {
       key: "amount",
       label: "Monto",
-      width: "15%",
+      type: 'amount',
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => (
@@ -188,7 +186,7 @@ export function IndirectPayments({ projectId, organizationId }: IndirectPayments
     {
       key: "exchange_rate",
       label: "Cotización",
-      width: "10%",
+      type: 'number',
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => (

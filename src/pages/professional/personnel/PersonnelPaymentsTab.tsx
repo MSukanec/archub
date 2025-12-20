@@ -3,7 +3,7 @@ import { DollarSign, Plus, Edit, Trash2, CheckCircle2, Calendar } from 'lucide-r
 import { convert } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
-import { Table } from '@/components/shared/trees/Table'
+import { Table, Column } from '@/components/shared/table'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
@@ -656,42 +656,30 @@ export default function PersonnelPaymentsTab({ projectId }: PersonnelPaymentsTab
     return contact.full_name || '-';
   };
 
-  const columns: Array<{
-    key: string;
-    label: string;
-    render?: (item: PersonnelPaymentWithRelations) => React.ReactNode;
-    sortable?: boolean;
-    sortType?: "string" | "number" | "date";
-    width?: string;
-    align?: 'left' | 'center' | 'right';
-    cellClassName?: string;
-  }> = [
+  const columns: Column<PersonnelPaymentWithRelations>[] = [
     {
       key: 'payment_date',
       label: 'Fecha',
+      type: 'date' as const,
       sortable: true,
       render: (payment: PersonnelPaymentWithRelations) => formatDate(payment.payment_date, 'dd/MM/yyyy'),
     },
     {
       key: 'personnel',
       label: 'Personal',
+      type: 'name' as const,
       sortable: true,
       render: (payment: PersonnelPaymentWithRelations) => getPersonnelName(payment),
     },
     ...(activeProjectId ? [] : [{
       key: 'project',
       label: 'Proyecto',
+      type: 'badge' as const,
       sortable: true,
       render: (payment: PersonnelPaymentWithRelations) => {
         if (!payment.project) return '-';
         return (
-          <Badge 
-            className="font-medium whitespace-nowrap"
-            style={{ 
-              backgroundColor: payment.project.color,
-              color: 'white'
-            }}
-          >
+          <Badge variant="neutral">
             {payment.project.name}
           </Badge>
         );
@@ -700,18 +688,21 @@ export default function PersonnelPaymentsTab({ projectId }: PersonnelPaymentsTab
     {
       key: 'notes',
       label: 'Descripción',
+      type: 'long-text' as const,
       sortable: true,
       render: (payment: PersonnelPaymentWithRelations) => payment.notes || '-',
     },
     {
       key: 'wallet',
       label: 'Billetera',
+      type: 'wallet' as const,
       sortable: true,
       render: (payment: PersonnelPaymentWithRelations) => payment.wallet?.wallets?.name || '-',
     },
     {
       key: 'amount',
       label: 'Monto',
+      type: 'amount' as const,
       sortable: true,
       sortType: 'number' as const,
       render: (payment: PersonnelPaymentWithRelations) => (
@@ -728,6 +719,7 @@ export default function PersonnelPaymentsTab({ projectId }: PersonnelPaymentsTab
     {
       key: 'status',
       label: 'Estado',
+      type: 'status' as const,
       sortable: true,
       render: (payment: PersonnelPaymentWithRelations) => {
         const statusInfo = getPersonnelPaymentStatusBadgeConfig(payment.status);
@@ -738,7 +730,7 @@ export default function PersonnelPaymentsTab({ projectId }: PersonnelPaymentsTab
         );
       },
     },
-  ] as const;
+  ];
 
   const isFilterActive = 
     filterWallet !== 'all' || 

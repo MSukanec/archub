@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ShoppingCart, Plus, Edit, Trash2, CheckCircle2, Clock } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useProjectContext } from '@/stores/projectContext';
-import { Table } from '@/components/shared/trees/Table';
+import { Table, Column } from '@/components/shared/table';
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
@@ -11,7 +11,7 @@ import { parseLocalDate } from '@/lib/date-utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { useToast } from '@/hooks/use-toast';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import {
@@ -222,43 +222,35 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
     });
   };
 
-  const columns: Array<{
-    key: string;
-    label: string;
-    render?: (item: PurchaseOrder) => React.ReactNode;
-    sortable?: boolean;
-    sortType?: "string" | "number" | "date";
-    width?: string;
-    align?: 'left' | 'center' | 'right';
-    cellClassName?: string;
-  }> = [
+  const columns: Column<PurchaseOrder>[] = [
     {
       key: 'order_date',
       label: 'Fecha',
+      type: 'date' as const,
       sortable: true,
       render: (order: PurchaseOrder) => formatDate(order.order_date, 'dd/MM/yyyy'),
     },
     {
       key: 'requester',
       label: 'Solicitante',
+      type: 'name' as const,
       sortable: true,
       render: (order: PurchaseOrder) => {
         if (!order.requester?.user) return '-';
-        const initials = (order.requester.user.full_name || '').split(' ').map(n => n[0]).join('').toUpperCase();
         return (
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6">
-              <AvatarImage src={order.requester.user.avatar_url || undefined} />
-              <AvatarFallback className="text-xs">{initials || '?'}</AvatarFallback>
-            </Avatar>
-            <span className="text-sm">{order.requester.user.full_name || '-'}</span>
-          </div>
+          <IdentityBadge
+            name={order.requester.user.full_name}
+            avatarUrl={order.requester.user.avatar_url}
+            size="sm"
+            showName
+          />
         );
       },
     },
     {
       key: 'provider',
       label: 'Proveedor',
+      type: 'long-text' as const,
       sortable: true,
       render: (order: PurchaseOrder) => {
         if (!order.provider) return <span className="text-muted-foreground">Sin proveedor</span>;
@@ -268,6 +260,7 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
     {
       key: 'notes',
       label: 'Notas',
+      type: 'medium-text' as const,
       sortable: false,
       render: (order: PurchaseOrder) => {
         if (!order.notes) return '-';
@@ -281,12 +274,13 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
     {
       key: 'items_count',
       label: 'Items',
+      type: 'badge' as const,
       sortable: true,
       sortType: 'number' as const,
       render: (order: PurchaseOrder) => {
         const count = order.items?.length || 0;
         return (
-          <Badge variant="outline" className="font-medium">
+          <Badge variant="neutral" className="font-medium">
             {count} {count === 1 ? 'ítem' : 'ítems'}
           </Badge>
         );
@@ -295,11 +289,12 @@ export default function PurchaseOrdersTab({ projectId, organizationId: propOrgan
     {
       key: 'status',
       label: 'Estado',
+      type: 'status' as const,
       sortable: true,
       render: (order: PurchaseOrder) => {
         const statusInfo = getPurchaseOrderStatusBadgeConfig(order.status);
         return (
-          <Badge variant={statusInfo.variant} className={statusInfo.className}>
+          <Badge variant={statusInfo.variant}>
             {statusInfo.label}
           </Badge>
         );

@@ -164,7 +164,7 @@ export default function Materials() {
 
   if (isLoading) {
     return (
-      <Layout headerProps={headerProps} wide>
+      <Layout headerProps={headerProps} wide={false}>
         <div className="flex items-center justify-center h-64">
           <div className="text-sm text-muted-foreground">Cargando...</div>
         </div>
@@ -173,7 +173,7 @@ export default function Materials() {
   }
 
   return (
-    <Layout headerProps={headerProps} wide>
+    <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-4">
         {activeTab === 'dashboard' && (
           <MaterialsDashboardTab

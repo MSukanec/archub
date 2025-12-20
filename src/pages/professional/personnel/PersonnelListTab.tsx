@@ -2,12 +2,12 @@ import { useMemo } from 'react'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Users } from 'lucide-react'
 import { format } from 'date-fns'
-import { Table } from "@/components/shared/trees/Table"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Table } from "@/components/shared/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2, ShieldCheck, ShieldAlert, ShieldX, Shield, User } from "lucide-react"
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner'
+import { IdentityBadge } from '@/components/shared/IdentityBadge'
 import { useProjectPersonnel, useDeletePersonnel, useReplacePersonnel, usePersonnelPayments } from '@/features/personnel/hooks'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useToast } from '@/hooks/use-toast'
@@ -60,21 +60,21 @@ function renderInsuranceStatusBadge(status: string, daysToExpiry: number | null)
   switch (status) {
     case 'vigente':
       return (
-        <Badge variant="default" className="bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
+        <Badge variant="success">
           <ShieldCheck className="w-3 h-3 mr-1" />
           Vigente
         </Badge>
       )
     case 'por_vencer':
       return (
-        <Badge variant="default" className="bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800">
+        <Badge variant="warning">
           <ShieldAlert className="w-3 h-3 mr-1" />
           {daysToExpiry !== null && daysToExpiry >= 0 ? `${daysToExpiry} días` : 'Por vencer'}
         </Badge>
       )
     case 'vencido':
       return (
-        <Badge variant="destructive" className="bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800">
+        <Badge variant="error">
           <ShieldX className="w-3 h-3 mr-1" />
           Vencido
         </Badge>
@@ -82,7 +82,7 @@ function renderInsuranceStatusBadge(status: string, daysToExpiry: number | null)
     case 'sin_seguro':
     default:
       return (
-        <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700">
+        <Badge variant="neutral">
           <Shield className="w-3 h-3 mr-1" />
           Sin seguro
         </Badge>
@@ -125,7 +125,6 @@ export default function PersonnelListTab({
       return;
     }
 
-    // Prefetch contact data before opening modal
     if (organizationId && record.contact.id) {
       queryClient.prefetchQuery({
         queryKey: [`/api/contacts/${record.contact.id}?organization_id=${organizationId}`],
@@ -152,7 +151,6 @@ export default function PersonnelListTab({
       ...item,
       displayName: getDisplayName(item.contact)
     })).sort((a: any, b: any) => {
-      // Sort active first, then by name
       const aStatus = a.status || 'active'
       const bStatus = b.status || 'active'
       const aIsInactive = aStatus === 'inactive' || aStatus === 'absent'
@@ -191,17 +189,10 @@ export default function PersonnelListTab({
   const handleDelete = (record: any) => {
     if (!organizationId) return
     
-    // Pagos relacionados a este personal
     const associatedPayments = paymentsData.filter((p: any) => p.personnel_id === record.id)
-    
-    // Otros personal disponibles para reemplazo (excluir el que se va a eliminar)
-    // Usar processedPersonnelData que tiene displayName ya calculado
     const otherPersonnel = processedPersonnelData.filter((p: any) => p.id !== record.id)
-    
-    // Determinar si es posible reemplazar
     const canReplace = associatedPayments.length > 0 && otherPersonnel.length > 0
     
-    // Consecuencias
     const consequences = []
     if (associatedPayments.length > 0) {
       consequences.push(
@@ -214,7 +205,6 @@ export default function PersonnelListTab({
       }
     }
     
-    // Opciones de reemplazo
     const replacementOptions = otherPersonnel
       .sort((a: any, b: any) => (a.displayName || '').localeCompare(b.displayName || ''))
       .map((p: any) => ({
@@ -261,7 +251,7 @@ export default function PersonnelListTab({
         {
           key: "displayName",
           label: "Nombre",
-          width: "28%",
+          type: 'long-text' as const,
           sortable: true,
           sortType: "string",
           render: (record: any) => {
@@ -270,45 +260,21 @@ export default function PersonnelListTab({
               return <span className="text-muted-foreground">Sin datos</span>
             }
             
-            const displayName = record.displayName
-            
-            let initials = '?'
-            if (contact.first_name || contact.last_name) {
-              initials = `${contact.first_name?.charAt(0) || ''}${contact.last_name?.charAt(0) || ''}`.toUpperCase()
-            } else if (contact.full_name) {
-              const parts = contact.full_name.trim().split(' ')
-              if (parts.length >= 2) {
-                initials = `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
-              } else {
-                initials = contact.full_name[0]?.toUpperCase() || '?'
-              }
-            }
-            
             return (
-              <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8 flex-shrink-0">
-                  <AvatarFallback className="text-xs">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate">
-                    {displayName}
-                  </p>
-                  {record.labor_type?.name && (
-                    <p className="text-xs text-muted-foreground truncate mt-0.5">
-                      {record.labor_type.name}
-                    </p>
-                  )}
-                </div>
-              </div>
+              <IdentityBadge
+                name={record.displayName}
+                avatarUrl={contact.avatar_url}
+                size="sm"
+                showName
+                subLabel={record.labor_type?.name}
+              />
             )
           }
         },
         {
           key: "start_date",
           label: "Fecha de inicio",
-          width: "28%",
+          type: 'date' as const,
           sortable: true,
           sortType: "date",
           render: (record: any) => {
@@ -325,7 +291,7 @@ export default function PersonnelListTab({
         {
           key: "insurance_status",
           label: "Estado Seguro",
-          width: "28%",
+          type: 'status' as const,
           sortable: true,
           sortType: "string",
           render: (record: any) => {

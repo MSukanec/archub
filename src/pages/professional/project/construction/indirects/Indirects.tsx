@@ -174,7 +174,7 @@ export default function Indirects() {
   };
 
   return (
-    <Layout headerProps={getHeaderProps()} wide>
+    <Layout headerProps={getHeaderProps()} wide={false}>
       <div className="h-full">
         {activeTab === 'lista' && <IndirectList filterByStatus={filterByStatus} filterByType={filterByType} />}
         

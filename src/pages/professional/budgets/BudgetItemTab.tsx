@@ -1,6 +1,6 @@
 import { DollarSign, Plus, Edit, Trash2, Eye } from 'lucide-react'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { Table } from '@/components/shared/trees/Table'
+import { Table, Column } from '@/components/shared/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
@@ -64,7 +64,6 @@ export function BudgetItems({
     })
   }
 
-  // Formatear moneda
   const formatCurrency = (amount: number, symbol: string = '$') => {
     return new Intl.NumberFormat('es-AR', {
       minimumFractionDigits: 0,
@@ -72,12 +71,26 @@ export function BudgetItems({
     }).format(amount)
   }
 
-  // Definir columnas de la tabla
-  const columns = [
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'draft':
+        return <Badge variant="neutral">Borrador</Badge>
+      case 'approved':
+        return <Badge variant="success">Aprobado</Badge>
+      case 'in_progress':
+        return <Badge variant="status-active">En Progreso</Badge>
+      case 'completed':
+        return <Badge variant="status-completed">Completado</Badge>
+      default:
+        return <Badge variant="neutral">{status}</Badge>
+    }
+  }
+
+  const columns: Column[] = [
     {
       key: 'name',
       label: 'Nombre',
-      width: '25%',
+      type: 'long-text' as const,
       render: (budget: any) => (
         <div>
           <div className="font-medium text-sm">{budget.name}</div>
@@ -92,7 +105,7 @@ export function BudgetItems({
     {
       key: 'version',
       label: 'Versión',
-      width: '7%',
+      type: 'number' as const,
       render: (budget: any) => (
         <span className="text-sm">v{budget.version}</span>
       )
@@ -100,7 +113,7 @@ export function BudgetItems({
     {
       key: 'currency',
       label: 'Moneda',
-      width: '7%',
+      type: 'short-text' as const,
       render: (budget: any) => (
         <div className="text-sm font-medium">
           {budget.currency?.code || 'N/A'}
@@ -110,7 +123,7 @@ export function BudgetItems({
     {
       key: 'total',
       label: 'Total',
-      width: '15%',
+      type: 'amount' as const,
       render: (budget: any) => (
         <div className="text-sm">
           <div className="font-medium text-green-700">
@@ -127,7 +140,7 @@ export function BudgetItems({
     {
       key: 'created_at',
       label: 'Creado',
-      width: '8%',
+      type: 'date' as const,
       sortable: true,
       sortType: 'date' as const,
       render: (budget: any) => (
@@ -139,24 +152,8 @@ export function BudgetItems({
     {
       key: 'status',
       label: 'Estado',
-      width: '8%',
-      render: (budget: any) => {
-        const getStatusBadge = (status: string) => {
-          switch (status) {
-            case 'draft':
-              return <Badge className="bg-gray-500 text-white hover:bg-gray-600">Borrador</Badge>
-            case 'approved':
-              return <Badge className="bg-green-600 text-white hover:bg-green-700">Aprobado</Badge>
-            case 'in_progress':
-              return <Badge className="bg-blue-600 text-white hover:bg-blue-700">En progreso</Badge>
-            case 'completed':
-              return <Badge className="bg-emerald-600 text-white hover:bg-emerald-700">Completado</Badge>
-            default:
-              return <Badge className="bg-gray-500 text-white hover:bg-gray-600">{status}</Badge>
-          }
-        }
-        return getStatusBadge(budget.status)
-      }
+      type: 'status' as const,
+      render: (budget: any) => getStatusBadge(budget.status)
     }
   ]
 

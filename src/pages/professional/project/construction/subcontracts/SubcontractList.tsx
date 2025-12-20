@@ -4,9 +4,10 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
 
-import { Table } from '@/components/shared/trees/Table';
+import { Table, Column } from '@/components/shared/table';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Badge } from "@/components/ui/badge";
+import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
@@ -176,13 +177,11 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
     // Filtro por status
     const statusMatch = filterByStatus === 'all' || subcontract.status === filterByStatus;
     
-    // Filtro por tipo (asumiendo que se puede determinar del título o descripción)
+    // Filtro por tipo (asumiendo que se puede determinar del título)
     let typeMatch = true;
     if (filterByType !== 'all') {
       const titleLower = (subcontract.title || '').toLowerCase();
-      const descriptionLower = (subcontract.description || '').toLowerCase();
-      typeMatch = titleLower.includes(filterByType.toLowerCase()) || 
-                  descriptionLower.includes(filterByType.toLowerCase());
+      typeMatch = titleLower.includes(filterByType.toLowerCase());
     }
     
     return searchMatch && statusMatch && typeMatch;
@@ -220,10 +219,11 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
   };
 
   // Configuración de las columnas de la tabla
-  const columns = [
+  const columns: Column<any>[] = [
     {
       key: 'title',
       label: 'Subcontrato',
+      type: 'long-text' as const,
       render: (subcontract: any) => (
         <div>
           <div className="font-medium">{subcontract.title}</div>
@@ -236,128 +236,70 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
     {
       key: 'contact',
       label: 'Subcontratista',
+      type: 'medium-text' as const,
       render: (subcontract: any) => {
-        // Si el subcontrato está adjudicado y tiene contacto
         const contact = subcontract.contact || subcontract.winner_bid?.contacts;
         if (subcontract.status === 'awarded' && contact) {
           const contactName = contact.full_name || 
             contact.company_name ||
             `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
           return (
-            <div>
-              <div className="font-medium">{contactName}</div>
-              {contact.email && <div className="text-xs text-muted-foreground">{contact.email}</div>}
-            </div>
+            <IdentityBadge
+              name={contactName}
+              avatarUrl={contact.avatar_url || contact.image_url}
+              subLabel={contact.email}
+              size="sm"
+            />
           );
         }
         
-        // Si no está adjudicado, mostrar "Sin adjudicar"
         if (subcontract.status !== 'awarded') {
           return (
-            <div className="text-muted-foreground">
-              Sin adjudicar
-            </div>
+            <span className="text-muted-foreground">Sin adjudicar</span>
           );
         }
         
-        // Fallback para subcontratos adjudicados sin datos de contacto
         return (
-          <div className="text-muted-foreground">
-            Sin subcontratista
-          </div>
+          <span className="text-muted-foreground">Sin subcontratista</span>
         );
       }
     },
     {
       key: 'status',
       label: 'Estado',
+      type: 'status' as const,
       render: (subcontract: any) => {
         const status = subcontract.status;
-        let badgeStyle = {};
-        let displayText = '';
         
         switch (status) {
           case 'draft':
-            badgeStyle = { 
-              backgroundColor: '#f3f4f6', 
-              color: '#374151',
-              border: '1px solid #d1d5db'
-            };
-            displayText = 'Borrador';
-            break;
+            return <Badge variant="neutral">Borrador</Badge>;
           case 'active':
-            badgeStyle = { 
-              backgroundColor: '#3b82f6', // Azul
-              color: 'white',
-              border: 'none'
-            };
-            displayText = 'Activo';
-            break;
+            return <Badge variant="info">Activo</Badge>;
           case 'awarded':
-            badgeStyle = { 
-              backgroundColor: 'var(--accent)', // Verde accent
-              color: 'white',
-              border: 'none'
-            };
-            displayText = 'Adjudicado';
-            break;
+            return <Badge variant="success">Adjudicado</Badge>;
           case 'completed':
-            badgeStyle = { 
-              backgroundColor: '#22c55e', // Verde
-              color: 'white',
-              border: 'none'
-            };
-            displayText = 'Completado';
-            break;
+            return <Badge variant="status-completed">Completado</Badge>;
           case 'cancelled':
-            badgeStyle = { 
-              backgroundColor: '#ef4444', // Rojo
-              color: 'white',
-              border: 'none'
-            };
-            displayText = 'Cancelado';
-            break;
+            return <Badge variant="error">Cancelado</Badge>;
           case 'en_progreso':
           case 'in_progress':
-            badgeStyle = { 
-              backgroundColor: '#f59e0b', // Naranja/Amarillo
-              color: 'white',
-              border: 'none'
-            };
-            displayText = 'En Progreso';
-            break;
+            return <Badge variant="status-active">En Progreso</Badge>;
           case 'pendiente':
           case 'pending':
-            badgeStyle = { 
-              backgroundColor: '#8b5cf6', // Púrpura
-              color: 'white',
-              border: 'none'
-            };
-            displayText = 'Pendiente';
-            break;
+            return <Badge variant="pending">Pendiente</Badge>;
           default:
-            badgeStyle = { 
-              backgroundColor: '#f3f4f6', 
-              color: '#374151',
-              border: '1px solid #d1d5db'
-            };
-            displayText = status || 'Sin estado';
+            return <Badge variant="neutral">{status || 'Sin estado'}</Badge>;
         }
-        
-        return (
-          <Badge style={badgeStyle} className="border-0">
-            {displayText}
-          </Badge>
-        );
       }
     },
     {
       key: 'amount',
       label: 'Monto Total',
+      type: 'amount' as const,
       render: (subcontract: any) => {
         const amountARS = subcontract.amount_total || 0;
         const amountUSD = amountARS / (subcontract.exchange_rate || 1);
-        // Determinar la moneda original del subcontrato
         const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
         return formatSingleCurrency(amountARS, amountUSD, originalCurrency);
       }
@@ -365,13 +307,13 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
     {
       key: 'paid_amount',
       label: 'A la Fecha',
+      type: 'amount' as const,
       render: (subcontract: any) => {
         const analysis = subcontract.analysis;
         if (!analysis) return '-';
         
         const paidARS = analysis.pagoALaFecha || 0;
         const paidUSD = analysis.pagoALaFechaUSD || 0;
-        // Usar la misma moneda original que el monto total
         const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
         return formatSingleCurrency(paidARS, paidUSD, originalCurrency);
       }
@@ -379,13 +321,13 @@ export default function SubcontractList({ filterByStatus = 'all', filterByType =
     {
       key: 'balance',
       label: 'Saldo',
+      type: 'amount' as const,
       render: (subcontract: any) => {
         const analysis = subcontract.analysis;
         if (!analysis) return '-';
         
         const balanceARS = analysis.saldo || 0;
         const balanceUSD = analysis.saldoUSD || 0;
-        // Usar la misma moneda original que el monto total
         const originalCurrency = subcontract.currency_id === '58c50aa7-b8b1-4035-b509-58028dd0e33f' ? 'USD' : 'ARS';
         return formatSingleCurrency(balanceARS, balanceUSD, originalCurrency);
       }

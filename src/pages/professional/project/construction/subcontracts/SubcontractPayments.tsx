@@ -1,8 +1,7 @@
-import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Table } from '@/components/shared/trees/Table'
+import { Table, Column } from '@/components/shared/table'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
@@ -115,12 +114,11 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
     enabled: !!organizationId && !!projectId && !!supabase
   })
 
-  // Detailed table columns (Fecha, Subcontrato, Contratista, Billetera, Monto, Cotización)
-  const detailColumns = [
+  const detailColumns: Column[] = [
     {
       key: "movement_date",
       label: "Fecha",
-      width: "15%",
+      type: 'date',
       sortable: true,
       sortType: "date" as const,
       render: (item: any) => {
@@ -140,7 +138,7 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
     {
       key: "subcontract_title",
       label: "Subcontrato",
-      width: "25%",
+      type: 'long-text',
       sortable: true,
       render: (item: any) => (
         <div className="text-sm">
@@ -158,7 +156,7 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
     {
       key: "contractor",
       label: "Contratista",
-      width: "20%",
+      type: 'name',
       sortable: true,
       render: (item: any) => (
         <div className="text-sm font-medium">
@@ -169,7 +167,7 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
     {
       key: "wallet",
       label: "Billetera",
-      width: "15%",
+      type: 'wallet',
       render: (item: any) => (
         <div className="flex items-center gap-2 text-sm">
           <Wallet className="w-4 h-4 text-muted-foreground" />
@@ -180,7 +178,7 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
     {
       key: "amount",
       label: "Monto",
-      width: "15%",
+      type: 'amount',
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => (
@@ -197,7 +195,7 @@ export function SubcontractPayments({ projectId, organizationId }: SubcontractPa
     {
       key: "exchange_rate",
       label: "Cotización",
-      width: "10%",
+      type: 'number',
       sortable: true,
       sortType: "number" as const,
       render: (item: any) => (

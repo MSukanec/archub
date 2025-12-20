@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useLocation } from "wouter";
 
-import { Table } from '@/components/shared/trees/Table';
+import { Table, Column } from '@/components/shared/table';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -173,10 +173,11 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
   };
 
   // Configuración de las columnas de la tabla
-  const columns = [
+  const columns: Column[] = [
     {
       key: 'name',
       label: 'Costo Indirecto',
+      type: 'long-text' as const,
       render: (indirect: any) => (
         <div>
           <div className="font-medium">{indirect.name}</div>
@@ -189,6 +190,7 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
     {
       key: 'category',
       label: 'Categoría',
+      type: 'short-text' as const,
       render: (indirect: any) => (
         <div className="text-sm">
           {indirect.category_id ? 'Categoría asignada' : 'Sin categoría'}
@@ -198,6 +200,7 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
     {
       key: 'current_value',
       label: 'Valor Actual',
+      type: 'amount' as const,
       render: (indirect: any) => {
         const currentValue = indirect.current_value;
         if (!currentValue) return '-';
@@ -216,13 +219,14 @@ export default function IndirectList({ filterByStatus = 'all', filterByType = 'a
     {
       key: 'status',
       label: 'Estado',
+      type: 'status' as const,
       render: (indirect: any) => {
         return indirect.is_active ? (
-          <Badge className="bg-green-50 text-green-700 border-green-200">
+          <Badge variant="success">
             Activo
           </Badge>
         ) : (
-          <Badge variant="secondary">
+          <Badge variant="neutral">
             Inactivo
           </Badge>
         );

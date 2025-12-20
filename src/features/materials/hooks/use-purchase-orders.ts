@@ -58,12 +58,12 @@ export interface PurchaseOrder {
 }
 
 export const PURCHASE_ORDER_STATUS = {
-  draft: { label: 'Borrador', variant: 'secondary' as const, className: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
-  sent: { label: 'Enviado', variant: 'default' as const, className: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
-  quoted: { label: 'Cotizado', variant: 'default' as const, className: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' },
-  approved: { label: 'Aprobado', variant: 'default' as const, className: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' },
-  rejected: { label: 'Rechazado', variant: 'destructive' as const, className: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' },
-  converted: { label: 'Convertido', variant: 'default' as const, className: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300' },
+  draft: { label: 'Borrador', variant: 'neutral' as const },
+  sent: { label: 'Enviado', variant: 'info' as const },
+  quoted: { label: 'Cotizado', variant: 'pending' as const },
+  approved: { label: 'Aprobado', variant: 'success' as const },
+  rejected: { label: 'Rechazado', variant: 'error' as const },
+  converted: { label: 'Convertido', variant: 'status-completed' as const },
 };
 
 export function getPurchaseOrderStatusBadgeConfig(status: PurchaseOrder['status']) {

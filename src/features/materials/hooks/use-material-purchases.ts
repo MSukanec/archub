@@ -53,10 +53,10 @@ export interface MaterialPurchase {
 }
 
 export const MATERIAL_PURCHASE_STATUS = {
-  pending: { label: 'Pendiente', variant: 'secondary' as const, className: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300' },
-  partially_paid: { label: 'Pago Parcial', variant: 'default' as const, className: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
-  paid: { label: 'Pagado', variant: 'default' as const, className: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' },
-  cancelled: { label: 'Cancelado', variant: 'destructive' as const, className: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' },
+  pending: { label: 'Pendiente', variant: 'pending' as const },
+  partially_paid: { label: 'Pago Parcial', variant: 'warning' as const },
+  paid: { label: 'Pagado', variant: 'success' as const },
+  cancelled: { label: 'Cancelado', variant: 'error' as const },
 };
 
 export const DOCUMENT_TYPES = {

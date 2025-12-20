@@ -177,7 +177,7 @@ export default function Subcontracts() {
   };
 
   return (
-    <Layout headerProps={getHeaderProps()} wide>
+    <Layout headerProps={getHeaderProps()} wide={false}>
       <div className="h-full">
         {activeTab === 'lista' && <SubcontractList filterByStatus={filterByStatus} filterByType={filterByType} />}
         
