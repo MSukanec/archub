@@ -58,10 +58,10 @@ export function StepConflicts({
   const [expandedSuccessful, setExpandedSuccessful] = useState<Set<string>>(new Set());
 
   const handleHelpLinkClick = (path: string) => {
-    if (onCloseModal) {
-      onCloseModal();
-    }
     navigate(path);
+    if (onCloseModal) {
+      setTimeout(() => onCloseModal(), 0);
+    }
   };
 
   const getFieldLabel = (fieldName: string): string => {
@@ -183,7 +183,7 @@ export function StepConflicts({
                 <h3 className="font-medium text-green-700 dark:text-green-400">
                   Valores Mapeados Automáticamente
                 </h3>
-                <Badge variant="outline" className="border-green-500/50 text-green-600 dark:text-green-400 ml-auto">
+                <Badge variant="success" className="ml-auto">
                   {totalSuccessfulMappings} valores
                 </Badge>
               </div>
@@ -215,7 +215,7 @@ export function StepConflicts({
                             </p>
                           </div>
                         </div>
-                        <Badge variant="default" className="bg-green-500/20 text-green-700 dark:text-green-300 border-green-500/30">
+                        <Badge variant="success">
                           <Check className="h-3 w-3 mr-1" />
                           Resuelto
                         </Badge>
@@ -251,7 +251,7 @@ export function StepConflicts({
                                 className="flex items-center gap-2 p-2 rounded-lg border border-green-500/30 bg-green-500/5"
                               >
                                 <div className="flex-1 min-w-0">
-                                  <Badge variant="outline" className="font-mono text-xs">
+                                  <Badge variant="neutral" className="font-mono text-xs">
                                     {mapping.originalValue}
                                   </Badge>
                                 </div>
@@ -309,11 +309,7 @@ export function StepConflicts({
                 <h3 className="font-medium text-amber-700 dark:text-amber-400">
                   Valores Sin Coincidencia (Resolver Manualmente)
                 </h3>
-                <Badge variant="outline" className={cn(
-                  "ml-auto",
-                  resolvedConflicts === totalConflicts && "border-green-500/50 text-green-500",
-                  resolvedConflicts < totalConflicts && "border-amber-500/50 text-amber-500"
-                )}>
+                <Badge variant={resolvedConflicts === totalConflicts ? "success" : "warning"} className="ml-auto">
                   {resolvedConflicts} / {totalConflicts} resueltos
                 </Badge>
               </div>
@@ -349,7 +345,7 @@ export function StepConflicts({
                             </p>
                           </div>
                         </div>
-                        <Badge variant={isFullyResolved(conflict) ? "default" : "secondary"}>
+                        <Badge variant={isFullyResolved(conflict) ? "success" : "warning"}>
                           {isFullyResolved(conflict) ? (
                             <>
                               <Check className="h-3 w-3 mr-1" />
@@ -393,7 +389,7 @@ export function StepConflicts({
                                 )}
                               >
                                 <div className="flex-1 min-w-0">
-                                  <Badge variant="outline" className="font-mono text-xs">
+                                  <Badge variant="neutral" className="font-mono text-xs">
                                     {originalValue}
                                   </Badge>
                                 </div>

@@ -376,8 +376,11 @@ export function GeneralCostPaymentFormFields({
 
   const isLoading = currenciesLoading || generalCostsLoading || walletsLoading || (mode === 'edit' && loadingPayment)
 
+  const hasLoadedPaymentRef = useRef<string | null>(null)
   useEffect(() => {
     if (mode !== 'edit' || !paymentLoaded || !existingPayment) return
+    if (hasLoadedPaymentRef.current === paymentId) return
+    hasLoadedPaymentRef.current = paymentId ?? null
     
     let paymentDate: Date
     if (existingPayment.payment_date) {
