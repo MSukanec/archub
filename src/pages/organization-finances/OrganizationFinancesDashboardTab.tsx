@@ -22,7 +22,6 @@ import {
 } from '@/components/dashboard';
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
-import { useFinancesDataHealth, mergeWithBusinessInsights } from '@/core/data-health';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
@@ -213,12 +212,6 @@ export default function OrganizationFinancesDashboardTab({
       return movementDateAtMidnight >= dateFrom;
     });
   }, [allMovements, dateFrom]);
-
-  const dataHealth = useFinancesDataHealth(allMovements, {
-    organizationId: organizationId ?? '',
-    defaultCurrencyId: defaultCurrencyId ?? undefined,
-    enabled: !!organizationId && allMovements.length > 0,
-  });
 
   const previousPeriodMovements = useMemo(() => {
     const previousRange = getPreviousPeriodDateRange(selectedPeriod);
@@ -576,7 +569,7 @@ export default function OrganizationFinancesDashboardTab({
         <InsightCard
           title="Insights"
           titleIcon={<Lightbulb />}
-          items={mergeWithBusinessInsights(toInsightItems(autoInsights), dataHealth.insights, { dataHealthFirst: true })}
+          items={toInsightItems(autoInsights)}
           emptyText="Sin insights en este período. Continuá registrando movimientos para obtener análisis."
           onAction={handleInsightAction}
           data-testid="insights-section"
