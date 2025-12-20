@@ -28,7 +28,7 @@ import {
   getMaterialPurchaseStatusBadgeConfig,
   DOCUMENT_TYPES,
 } from '@/features/materials/hooks/use-material-purchases'
-import { FileUploader } from '@/components/shared/FileUploader'
+import { FileUploader } from '@/components/shared/fields/FileUploader'
 import { uploadFile, deleteFile } from '@/lib/storage'
 
 const materialPurchaseSchema = z.object({

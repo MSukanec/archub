@@ -27,7 +27,7 @@ import { siteLogSchema, type SiteLogFormData } from "../schemas";
 import type { SiteLogFileInput } from "../types";
 import { useSiteLogTypes } from "../hooks/use-sitelog-types";
 import { useSiteLogFiles } from "../hooks/use-sitelog-files";
-import { FileUploader } from "@/components/shared/FileUploader";
+import { FileUploader } from "@/components/shared/fields/FileUploader";
 import { deleteMediaFileV2 } from "@/features/media/services/deleteMediaFileV2";
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 

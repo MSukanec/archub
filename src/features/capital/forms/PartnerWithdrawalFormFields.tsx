@@ -19,7 +19,7 @@ import { useOrganizationWallets, useOrganizationMembers } from '@/features/organ
 import { usePartners, useCreatePartnerWithdrawal, useUpdatePartnerWithdrawal, usePartnerWithdrawal } from '../hooks'
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { IdentityBadge } from '@/components/shared/IdentityBadge'
-import { FileUploader } from '@/components/shared/FileUploader'
+import { FileUploader } from '@/components/shared/fields/FileUploader'
 import { uploadFile, deleteFile } from '@/lib/storage'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'

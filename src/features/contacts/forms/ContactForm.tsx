@@ -15,9 +15,9 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ComboBoxMultiSelectField } from "@/components/shared/fields/ComboBoxMultiSelectField";
-import { FileUploader } from "@/components/shared/FileUploader";
+import { FileUploader } from "@/components/shared/fields/FileUploader";
 import { PhoneField } from "@/components/shared/fields/PhoneField";
-import { AvatarUploader } from "@/components/shared/AvatarUploader";
+import { AvatarUploader } from "@/components/shared/fields/AvatarUploader";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useContactTypes } from "@/features/contacts/hooks";

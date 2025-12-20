@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Building2, FileText, Users, Globe } from 'lucide-react';
 
-import { AvatarUploader } from '@/components/shared/AvatarUploader';
+import { AvatarUploader } from '@/components/shared/fields/AvatarUploader';
 import { FounderBadge } from '@/components/shared/FounderBadge';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';

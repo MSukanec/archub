@@ -18,7 +18,7 @@ import { useNavigationStore } from "@/stores/navigationStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCountries } from "@/hooks/use-countries";
 import { PhoneField } from "@/components/shared/fields/PhoneField";
-import { FileUploader } from "@/components/shared/FileUploader";
+import { FileUploader } from "@/components/shared/fields/FileUploader";
 import {
   ShoppingCart,
   ArrowLeft,

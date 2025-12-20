@@ -19,7 +19,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { uploadFile, deleteFile } from '@/lib/storage'
-import { FileUploader } from '@/components/shared/FileUploader'
+import { FileUploader } from '@/components/shared/fields/FileUploader'
 import { useQueryClient } from '@tanstack/react-query'
 import { 
   useMaterialPayment, 

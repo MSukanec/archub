@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { FileUploader } from "@/components/shared/FileUploader";
+import { FileUploader } from "@/components/shared/fields/FileUploader";
 import { deleteMediaFileV2 } from "@/features/media/services/deleteMediaFileV2";
 import type { SiteLogFileInput } from '../../types';
 

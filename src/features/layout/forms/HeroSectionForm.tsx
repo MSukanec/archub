@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { useCreateHeroSection, useUpdateHeroSection } from '../hooks/use-hero-sections'
 import { useToast } from '@/hooks/use-toast'
-import { FileUploader } from '@/components/shared/FileUploader'
+import { FileUploader } from '@/components/shared/fields/FileUploader'
 import { uploadFile } from '@/lib/storage'
 import { supabase } from '@/lib/supabase'
 

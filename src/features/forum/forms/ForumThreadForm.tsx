@@ -8,8 +8,8 @@ import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/m
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RichTextEditor } from '@/components/shared/RichTextEditor';
-import { FileUploader } from '@/components/shared/FileUploader';
+import { RichTextEditor } from '@/components/shared/fields/RichTextEditor';
+import { FileUploader } from '@/components/shared/fields/FileUploader';
 import { useForumCategories, useCreateThread, useUpdateThread, ForumThreadWithAuthor } from '../services';
 import { useToast } from '@/hooks/use-toast';
 import { uploadFile } from '@/lib/storage';

@@ -20,7 +20,7 @@ import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { formatContactName } from '@/utils/contacts'
 import { uploadFile, deleteFile } from '@/lib/storage'
-import { FileUploader } from '@/components/shared/FileUploader'
+import { FileUploader } from '@/components/shared/fields/FileUploader'
 import { useQueryClient } from '@tanstack/react-query'
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { 

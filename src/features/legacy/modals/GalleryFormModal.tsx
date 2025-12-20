@@ -10,7 +10,7 @@ import { FormModalFooter } from '@/components/modal';
 import { useModalPanelStore } from '@/components/modal';
 import { Images } from 'lucide-react';
 import { useProjectContext } from '@/stores/projectContext';
-import { FileUploader } from '@/components/shared/FileUploader';
+import { FileUploader } from '@/components/shared/fields/FileUploader';
 import { supabase } from '@/lib/supabase';
 
 interface GalleryFormModalProps {

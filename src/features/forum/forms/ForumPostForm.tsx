@@ -5,7 +5,7 @@ import { MessageSquare } from 'lucide-react';
 
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { RichTextEditor } from '@/components/shared/RichTextEditor';
+import { RichTextEditor } from '@/components/shared/fields/RichTextEditor';
 import { useCreatePost, useUpdatePost, ForumPostWithAuthor } from '../services';
 import { useToast } from '@/hooks/use-toast';
 
