@@ -482,7 +482,7 @@ export function MembersListTab() {
                                   className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-[var(--accent)] transition-colors"
                                 >
                                   <Shield className="h-4 w-4" />
-                                  Cambiar rol
+                                  Editar Miembro
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={() => handleRemoveMember(member)}
