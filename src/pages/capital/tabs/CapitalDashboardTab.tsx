@@ -563,6 +563,22 @@ export default function CapitalDashboardTab({
     );
   }
 
+  if (!hasData && partners.length > 0) {
+    return (
+      <EmptyState
+        icon={<BarChart3 />}
+        title="No hay transacciones registradas"
+        description="Comienza agregando transacciones (aportes y retiros) para ver el resumen de capital y el análisis de participación."
+        action={
+          <Button onClick={onNavigateToTransactions} data-testid="button-add-transaction">
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Transacción
+          </Button>
+        }
+      />
+    );
+  }
+
   const currencySymbol = defaultCurrency?.symbol || '$';
 
   return (
