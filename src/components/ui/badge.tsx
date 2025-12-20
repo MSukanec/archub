@@ -71,7 +71,31 @@ const variantIcons: Record<BadgeVariant, React.ReactNode | null> = {
 }
 
 const badgeVariants = cva(
-  "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border"
+  "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border",
+  {
+    variants: {
+      variant: {
+        success: "",
+        error: "",
+        warning: "",
+        pending: "",
+        info: "",
+        neutral: "",
+        "plan-pro": "",
+        "plan-free": "",
+        "plan-teams": "",
+        "plan-enterprise": "",
+        "status-active": "",
+        "status-completed": "",
+        "status-paused": "",
+        "status-cancelled": "",
+        "status-planning": "",
+      }
+    },
+    defaultVariants: {
+      variant: "neutral"
+    }
+  }
 )
 
 const variantStyles: Record<BadgeVariant, React.CSSProperties> = {
@@ -154,7 +178,9 @@ const variantStyles: Record<BadgeVariant, React.CSSProperties> = {
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+    VariantProps<typeof badgeVariants> {
+  variant?: BadgeVariant;
+}
 
 function Badge({ className, variant = 'neutral', children, style, ...props }: BadgeProps) {
   const variantStyle = variantStyles[variant as BadgeVariant] || variantStyles.neutral

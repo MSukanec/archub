@@ -1,30 +1,29 @@
 /**
  * Partner transaction status badge styling
  * 
- * Uses CSS variables for dynamic color application (light/dark mode support)
- * Matches the pattern from GeneralCostPaymentRow for consistency
+ * Uses semantic Badge variants for proper color application
  */
 
 export type PartnerTransactionStatus = 'confirmed' | 'pending' | 'rejected' | 'void';
 
 export interface PartnerStatusBadgeConfig {
   label: string;
-  colorVar: string;
+  variant: 'success' | 'warning' | 'error' | 'neutral';
 }
 
 /**
  * Get badge configuration for a partner transaction status
  * 
  * @param status - The transaction status
- * @returns Configuration object with label and CSS variable
+ * @returns Configuration object with label and semantic variant
  */
 export function getPartnerTransactionStatusBadgeConfig(status: PartnerTransactionStatus): PartnerStatusBadgeConfig {
   const statusConfig: Record<PartnerTransactionStatus, PartnerStatusBadgeConfig> = {
-    confirmed: { label: 'Confirmado', colorVar: '--badge-status-success' },
-    pending: { label: 'Pendiente', colorVar: '--badge-status-warning' },
-    rejected: { label: 'Rechazado', colorVar: '--badge-status-destructive' },
-    void: { label: 'Anulado', colorVar: '--badge-status-neutral' },
+    confirmed: { label: 'Confirmado', variant: 'success' },
+    pending: { label: 'Pendiente', variant: 'warning' },
+    rejected: { label: 'Rechazado', variant: 'error' },
+    void: { label: 'Anulado', variant: 'neutral' },
   };
   
-  return statusConfig[status] || { label: status, colorVar: '--badge-status-neutral' };
+  return statusConfig[status] || { label: status, variant: 'neutral' };
 }

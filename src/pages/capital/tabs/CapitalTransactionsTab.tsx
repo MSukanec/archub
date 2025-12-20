@@ -344,14 +344,7 @@ export function CapitalTransactionsTab({
       render: (item: UnifiedTransaction) => {
         const config = getPartnerTransactionStatusBadgeConfig(item.status);
         return (
-          <Badge 
-            variant="default"
-            style={{
-              color: `var(${config.colorVar})`,
-              backgroundColor: `color-mix(in srgb, var(${config.colorVar}) 10%, transparent)`,
-              borderColor: `color-mix(in srgb, var(${config.colorVar}) 30%, transparent)`,
-            }}
-          >
+          <Badge variant={config.variant}>
             {config.label}
           </Badge>
         );
@@ -491,14 +484,7 @@ export function CapitalTransactionsTab({
               {(() => {
                 const config = getPartnerTransactionStatusBadgeConfig(item.status);
                 return (
-                  <Badge 
-                    variant="default"
-                    style={{
-                      color: `var(${config.colorVar})`,
-                      backgroundColor: `color-mix(in srgb, var(${config.colorVar}) 10%, transparent)`,
-                      borderColor: `color-mix(in srgb, var(${config.colorVar}) 30%, transparent)`,
-                    }}
-                  >
+                  <Badge variant={config.variant}>
                     {config.label}
                   </Badge>
                 );
