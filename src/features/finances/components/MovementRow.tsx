@@ -1,4 +1,4 @@
-import DataRowCard, { DataRowCardProps } from '@/components/shared/legacy/general/DataRowCard';
+import DataRowCard, { DataRowCardProps } from '@/components/shared/DataRowCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 

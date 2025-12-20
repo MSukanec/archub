@@ -1,6 +1,6 @@
 import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import DataRowCard from '@/components/shared/legacy/general/DataRowCard';
+import DataRowCard from '@/components/shared/DataRowCard';
 
 interface NoteRowProps {
   note: {

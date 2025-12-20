@@ -1,5 +1,5 @@
 import React from 'react';
-import DataRowCard from '@/components/shared/legacy/general/DataRowCard';
+import DataRowCard from '@/components/shared/DataRowCard';
 import { cn } from '@/lib/utils';
 import { Calendar } from 'lucide-react';
 import { format } from 'date-fns';

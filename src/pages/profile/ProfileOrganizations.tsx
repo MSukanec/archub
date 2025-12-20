@@ -18,8 +18,8 @@ import { useLocation } from 'wouter'
 import { useOrganizationMembers } from '@/features/organization'
 import AdminOrganizationRow from '@/features/organization/components/admin/AdminOrganizationRow'
 import { useGlobalModalStore } from '@/components/modal'
-import { OrganizationMemberAvatars } from '@/components/shared/legacy/general/OrganizationMemberAvatars'
-import { CompactAvatarGroup } from '@/components/shared/legacy/general/CompactAvatarGroup'
+import { OrganizationMemberAvatars } from '@/components/shared/OrganizationMemberAvatars'
+import { CompactAvatarGroup } from '@/components/shared/CompactAvatarGroup'
 import { useMobile } from '@/hooks/use-mobile'
 
 // Componente para una sola tarjeta de organización

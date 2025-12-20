@@ -1,5 +1,5 @@
 import React from 'react';
-import DataRowCard from '@/components/shared/legacy/general/DataRowCard';
+import DataRowCard from '@/components/shared/DataRowCard';
 
 // Interface para la unidad de presentación (usando la estructura real de la app)
 interface UnitPresentation {

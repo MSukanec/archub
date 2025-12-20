@@ -1,5 +1,5 @@
 import React from 'react';
-import DataRowCard from '@/components/shared/legacy/general/DataRowCard';
+import DataRowCard from '@/components/shared/DataRowCard';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 

@@ -1,6 +1,6 @@
 import { Trash2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import DataRowCard from '@/components/shared/legacy/general/DataRowCard';
+import DataRowCard from '@/components/shared/DataRowCard';
 
 interface MarkerRowProps {
   marker: {

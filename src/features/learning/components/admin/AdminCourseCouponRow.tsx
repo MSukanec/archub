@@ -1,4 +1,4 @@
-import DataRowCard from '@/components/shared/legacy/general/DataRowCard';
+import DataRowCard from '@/components/shared/DataRowCard';
 import { Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
