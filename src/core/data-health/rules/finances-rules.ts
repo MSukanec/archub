@@ -6,7 +6,9 @@ import {
 import { 
   createFeatureRule, 
   pluralize, 
-  createExchangeRateDescription 
+  createExchangeRateDescription,
+  createMissingClientDescription,
+  createMissingProjectDescription,
 } from './micro/adapter';
 
 const FEATURE_TAG = 'finances';
@@ -25,9 +27,9 @@ export const clientPaymentsWithoutClientRule: DataHealthRule<NormalizedPayment> 
     filterFn: (item) => item.movementType === 'client_payment',
   }),
   entityLabels,
-  formatTitle: () => `Sin cliente asignado`,
-  formatDescription: (count) => 
-    `${count} pago${count > 1 ? 's' : ''} de cliente sin cliente asignado.`,
+  formatTitle: () => `Pagos sin cliente asignado`,
+  formatDescription: (count, labels) => 
+    createMissingClientDescription(count, labels),
   getItemLabel: (item) => item.label || `Pago #${item.id}`,
   getRecommendedAction: (affectedIds) => ({
     label: 'Asignar cliente',
@@ -49,9 +51,9 @@ export const paymentsWithoutProjectRule: DataHealthRule<NormalizedPayment> = cre
     },
   }),
   entityLabels,
-  formatTitle: () => `Sin proyecto asignado`,
+  formatTitle: () => `Movimientos sin proyecto asignado`,
   formatDescription: (count, labels) => 
-    `${count} ${pluralize(count, labels.singular, labels.plural)} sin proyecto asignado.`,
+    createMissingProjectDescription(count, labels),
   getItemLabel: (item) => item.label || `Pago #${item.id}`,
   getRecommendedAction: (affectedIds) => ({
     label: 'Asignar proyecto',

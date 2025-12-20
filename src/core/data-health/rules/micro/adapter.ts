@@ -61,17 +61,85 @@ export function pluralize(count: number, singular: string, plural: string): stri
   return count === 1 ? singular : plural;
 }
 
+export function createMissingClientDescription(count: number, labels: EntityLabels): string {
+  const entity = count === 1 ? labels.singular : labels.plural;
+  const tienen = count > 1 ? 'tienen' : 'tiene';
+  const estan = count > 1 ? 'están' : 'está';
+  const registrados = count > 1 ? 'registrados' : 'registrado';
+  
+  return `${count} ${entity} de cliente ${estan} ${registrados} sin el cliente asignado. Esto significa que el sistema no sabe quién pagó o recibió el dinero.
+
+¿POR QUÉ IMPORTA?
+Sin cliente asignado, no puedes:
+• Ver el historial de movimientos de cada cliente
+• Generar reportes de ingresos/gastos por cliente
+• Hacer seguimiento de deudas o pagos pendientes
+• Conciliar facturas con pagos recibidos
+• Analizar cuáles clientes son más rentables
+
+CÓMO ARREGLARLO:
+Edita cada movimiento y asigna el cliente correspondiente. Si no existe, crea un nuevo cliente primero.`;
+}
+
+export function createMissingProjectDescription(count: number, labels: EntityLabels): string {
+  const entity = count === 1 ? labels.singular : labels.plural;
+  const estan = count > 1 ? 'están' : 'está';
+  const registrados = count > 1 ? 'registrados' : 'registrado';
+  
+  return `${count} ${entity} ${estan} ${registrados} sin proyecto asignado. El sistema no sabe a qué obra u proyecto corresponde el dinero.
+
+¿POR QUÉ IMPORTA?
+Sin proyecto asignado, no puedes:
+• Ver los costos reales de cada proyecto (materiales, mano de obra, etc.)
+• Comparar presupuesto vs. gasto en cada proyecto
+• Identificar qué proyectos son más rentables
+• Generar reportes de rentabilidad por proyecto
+• Controlar el flujo de caja de cada obra
+
+CÓMO ARREGLARLO:
+Edita cada movimiento y asigna el proyecto correspondiente. Si el gasto es general (no asociado a un proyecto), considera crear una categoría separada.`;
+}
+
+export function createMissingWalletDescription(count: number, labels: EntityLabels): string {
+  const entity = count === 1 ? labels.singular : labels.plural;
+  const estan = count > 1 ? 'están' : 'está';
+  const registrados = count > 1 ? 'registrados' : 'registrado';
+  
+  return `${count} ${entity} ${estan} ${registrados} sin billetera asignada. El sistema no sabe en qué cuenta o medio de pago se movió el dinero.
+
+¿POR QUÉ IMPORTA?
+Sin billetera asignada, no puedes:
+• Ver el saldo real de cada cuenta (banco, efectivo, etc.)
+• Reconciliar movimientos con tus estados bancarios
+• Identificar pagos duplicados o inconsistencias
+• Analizar cuál medio de pago usas más
+• Generar reportes de flujo de caja por cuenta
+
+CÓMO ARREGLARLO:
+Edita cada movimiento y asigna la billetera (cuenta bancaria, caja de efectivo, etc.). Si necesitas crear una billetera nueva, hazlo en la sección de configuración.`;
+}
+
 export function createExchangeRateDescription(count: number, labels: EntityLabels): string {
   const entity = count === 1 ? labels.singular : labels.plural;
   const tienen = count > 1 ? 'tienen' : 'tiene';
   const estan = count > 1 ? 'están' : 'está';
   const registrados = count > 1 ? 'registrados' : 'registrado';
   
-  return `Tu organización opera con múltiples monedas. ${count} ${entity} ${estan} ${registrados} en moneda extranjera pero no ${tienen} cotización válida (debe ser mayor a 1). Sin esta información, el sistema no puede convertir correctamente los montos a la moneda base.
+  return `Tu organización usa múltiples monedas en los ajustes, pero ${count} ${entity} ${estan} ${registrados} en moneda extranjera sin cotización válida. Una cotización VÁLIDA debe ser un número mayor a 1 que represente el tipo de cambio real.
 
-Ejemplos de cotización válida:
+¿POR QUÉ IMPORTA?
+Si la cotización es 1 (o falta), el sistema asumiría que 1 USD = 1 ARS (o lo que sea tu moneda base), lo cual es incorrecto. Esto causa:
+• Totales y balances incorrectos en reportes
+• Análisis de rentabilidad distorsionado
+• Decisiones financieras basadas en información falsa
+• Problemas al reconciliar con tu contador
+
+EJEMPLOS DE COTIZACIÓN VÁLIDA:
 • Si tu moneda base es ARS: 1 USD = 1400 ARS
 • Si tu moneda base es USD: 1 ARS = 0.0007 USD
+• Si tu moneda base es USD: 1 ARS = 0.0007 USD, 1 COP = 0.00025 USD, etc.
 
-Sin la cotización correcta, los totales y reportes serán incorrectos.`;
+CÓMO ARREGLARLO:
+Edita cada movimiento y establece la cotización correcta (el tipo de cambio aplicado ese día).`;
 }
+

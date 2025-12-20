@@ -7,7 +7,8 @@ import {
 import { 
   createFeatureRule, 
   pluralize, 
-  createExchangeRateDescription 
+  createExchangeRateDescription,
+  createMissingWalletDescription,
 } from './micro/adapter';
 
 const FEATURE_TAG = 'capital';
@@ -46,7 +47,7 @@ export const capitalMissingWalletRule: DataHealthRule<NormalizedPayment> = creat
   entityLabels,
   formatTitle: () => 'Transacciones sin billetera',
   formatDescription: (count, labels) => 
-    `${count} ${pluralize(count, labels.singular, labels.plural)} no tiene${count > 1 ? 'n' : ''} billetera asignada.`,
+    createMissingWalletDescription(count, labels),
   getItemLabel: (item) => item.label || `Transacción #${item.id}`,
   getRecommendedAction: (affectedIds) => ({
     label: 'Asignar billetera',
