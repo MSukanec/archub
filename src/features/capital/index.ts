@@ -17,6 +17,7 @@ export { PartnerWithdrawalFormFields } from './forms/PartnerWithdrawalFormFields
 export { CapitalParticipantModal } from './modals/CapitalParticipantModal';
 export { PartnerContributionModal } from './modals/PartnerContributionModal';
 export { PartnerWithdrawalModal } from './modals/PartnerWithdrawalModal';
+export { CapitalTransactionModal } from './modals/CapitalTransactionModal';
 
 export * from './types';
 

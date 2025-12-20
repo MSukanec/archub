@@ -1,7 +1,7 @@
 import { registerModal, ModalConfig } from './registry';
 
 import { MemberFormModal, InviteMemberModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, OrganizationFormModal, ProfileOrganizationFormModal } from '@/features/organization';
-import { CapitalParticipantModal, PartnerContributionModal, PartnerWithdrawalModal } from '@/features/capital';
+import { CapitalParticipantModal, PartnerContributionModal, PartnerWithdrawalModal, CapitalTransactionModal } from '@/features/capital';
 import { ProjectForm } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
 import ContactForm from '@/features/contacts/forms/ContactForm';
@@ -133,6 +133,15 @@ export function initializeModalRegistry(): void {
         withdrawalId: data?.withdrawalId,
       },
       mode: data?.withdrawalId ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
+  registerModal('capital-transaction', CapitalTransactionModal as any, {
+    ...financeConfig,
+    mapDataToProps: (data) => ({
+      modalData: {
+        projectId: data?.projectId,
+        organizationId: data?.organizationId,
+      },
     })
   });
   registerModal('board', BoardFormModal as any, organizationConfig);

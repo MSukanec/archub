@@ -254,22 +254,12 @@ export function CapitalTransactionsTab({
     });
   };
 
-  const handleAddContribution = () => {
+  const handleAddTransaction = () => {
     if (!organizationId) {
-      console.error('Cannot add contribution: organizationId is required');
+      console.error('Cannot add transaction: organizationId is required');
       return;
     }
-    openModal('partner-contribution', {
-      organizationId,
-    });
-  };
-
-  const handleAddWithdrawal = () => {
-    if (!organizationId) {
-      console.error('Cannot add withdrawal: organizationId is required');
-      return;
-    }
-    openModal('partner-withdrawal', {
+    openModal('capital-transaction', {
       organizationId,
     });
   };
@@ -399,16 +389,10 @@ export function CapitalTransactionsTab({
         title="No hay transacciones"
         description="Aún no se han registrado aportes ni retiros de capital."
         action={
-          <div className="flex items-center gap-2">
-            <Button onClick={handleAddContribution} data-testid="button-empty-add-contribution">
-              <Plus className="h-4 w-4 mr-1" />
-              Nuevo Aporte
-            </Button>
-            <Button onClick={handleAddWithdrawal} data-testid="button-empty-add-withdrawal">
-              <Plus className="h-4 w-4 mr-1" />
-              Nuevo Retiro
-            </Button>
-          </div>
+          <Button onClick={handleAddTransaction} data-testid="button-empty-add-transaction">
+            <Plus className="h-4 w-4 mr-1" />
+            Nueva Transacción
+          </Button>
         }
       />
     );

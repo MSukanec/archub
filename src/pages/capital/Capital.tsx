@@ -4,7 +4,7 @@ import CapitalDashboardTab, { calculateAvailablePeriods, type PeriodFilter } fro
 import { CapitalParticipantsListTab } from '@/pages/capital/tabs/CapitalParticipantsListTab';
 import { CapitalBalancesTab } from '@/pages/capital/tabs/CapitalBalancesTab';
 import { CapitalTransactionsTab } from '@/pages/capital/tabs/CapitalTransactionsTab';
-import { HandHeart, Plus, TrendingUp, TrendingDown, ChevronDown, Check } from 'lucide-react';
+import { HandHeart, Plus, ChevronDown, Check } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
@@ -105,12 +105,8 @@ export default function Capital() {
     openModal('capital-participant', { organizationId });
   };
 
-  const handleAddContribution = () => {
-    openModal('capital-contribution', { organizationId });
-  };
-
-  const handleAddWithdrawal = () => {
-    openModal('capital-withdrawal', { organizationId });
+  const handleAddTransaction = () => {
+    openModal('capital-transaction', { organizationId });
   };
 
   const handleNavigateToTab = useCallback((tab: string, filters?: Record<string, unknown>) => {
@@ -208,26 +204,11 @@ export default function Capital() {
       }
     }),
     ...(activeTab === 'transactions' && {
-      actions: [
-        <DropdownMenu key="add-transaction">
-          <DropdownMenuTrigger asChild>
-            <Button className="h-8 px-3 text-xs" data-testid="button-add-transaction">
-              <Plus className="w-4 h-4 mr-1" />
-              Nueva Transacción
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleAddContribution} data-testid="menu-item-add-contribution">
-              <TrendingUp className="w-4 h-4 mr-2 text-[var(--positive)]" />
-              Nuevo Aporte
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleAddWithdrawal} data-testid="menu-item-add-withdrawal">
-              <TrendingDown className="w-4 h-4 mr-2 text-[var(--negative)]" />
-              Nuevo Retiro
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ]
+      actionButton: {
+        label: "Nueva Transacción",
+        icon: Plus,
+        onClick: handleAddTransaction
+      }
     })
   };
 
