@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
+import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 
 import { useCreateProduct, useUpdateProduct, Product, NewProductData } from '@/features/materials'
 import { useMaterials } from '@/features/materials'

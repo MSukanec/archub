@@ -4,7 +4,7 @@ import { Coins, Wallet } from 'lucide-react';
 
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ComboBoxMultiSelectField } from '@/components/ui-custom/fields/ComboBoxMultiSelectField';
+import { ComboBoxMultiSelectField } from '@/components/shared/fields/ComboBoxMultiSelectField';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';

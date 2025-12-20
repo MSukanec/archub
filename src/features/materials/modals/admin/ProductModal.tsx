@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
-import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField'
+import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
+import { CurrencyAmountField } from '@/components/shared/fields/CurrencyAmountField'
 
 import { useCreateProduct, useUpdateProduct, NewProductData } from '@/features/materials'
 import { useBrands, useCreateBrand } from '@/hooks/use-brands'

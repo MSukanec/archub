@@ -18,7 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField';
+import { CurrencyAmountField } from '@/components/shared/fields/CurrencyAmountField';
 import { Badge } from "@/components/ui/badge";
 
 const formSchema = z.object({

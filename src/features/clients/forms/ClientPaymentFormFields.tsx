@@ -22,7 +22,7 @@ import { formatContactName } from '@/utils/contacts'
 import { uploadFile, deleteFile } from '@/lib/storage'
 import { FileUploader } from '@/components/shared/FileUploader'
 import { useQueryClient } from '@tanstack/react-query'
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
+import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { 
   useProjectClients, 
   useClientPayment, 

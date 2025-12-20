@@ -15,7 +15,7 @@ import { compressImage, formatCompressionStats } from '@/lib/imageCompression'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useProjectTypes, useProjectModalities, ProjectColorAdvanced } from '@/features/projects'
-import { ColorPaletteField } from '@/components/ui-custom/fields/ColorPaletteField'
+import { ColorPaletteField } from '@/components/shared/fields/ColorPaletteField'
 import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage'
 
 interface ProjectDataTabProps {

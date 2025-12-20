@@ -10,7 +10,7 @@ import { useModalPanelStore } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
+import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'

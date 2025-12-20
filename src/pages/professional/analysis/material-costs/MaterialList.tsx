@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useLocation } from 'wouter'
-import { ComboBox as ComboBoxWriteField } from '@/components/ui-custom/fields/ComboBoxWriteField'
+import { ComboBox as ComboBoxWriteField } from '@/components/shared/fields/ComboBoxWriteField'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useMaterials, Material, useDeleteMaterial } from '@/features/materials'
 import { Package, Eye, Edit, Copy, Trash2 } from 'lucide-react'

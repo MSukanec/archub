@@ -6,7 +6,7 @@ import { FounderBadge } from '@/components/shared/FounderBadge';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { PhoneField } from '@/components/ui-custom/fields/PhoneField';
+import { PhoneField } from '@/components/shared/fields/PhoneField';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 

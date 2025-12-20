@@ -17,7 +17,7 @@ import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useNavigationStore } from "@/stores/navigationStore";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCountries } from "@/hooks/use-countries";
-import { PhoneField } from "@/components/ui-custom/fields/PhoneField";
+import { PhoneField } from "@/components/shared/fields/PhoneField";
 import { FileUploader } from "@/components/shared/FileUploader";
 import {
   ShoppingCart,

@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
+import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField';
 import { DrawerSection } from '@/components/drawer';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';

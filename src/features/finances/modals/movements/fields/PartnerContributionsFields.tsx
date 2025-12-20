@@ -2,7 +2,7 @@ import React from 'react'
 import { TrendingUp } from 'lucide-react'
 import { usePartners, type Partner } from '@/features/capital'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
+import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { FormLabel } from '@/components/ui/form'
 import { IdentityBadge } from '@/components/shared/IdentityBadge'
 

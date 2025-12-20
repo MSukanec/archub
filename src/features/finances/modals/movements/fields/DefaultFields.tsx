@@ -2,7 +2,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormSubsectionButton } from '@/components/modal'
-import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField'
+import { CurrencyAmountField } from '@/components/shared/fields/CurrencyAmountField'
 import { Package, Users, Folder } from 'lucide-react'
 import { ProjectSelectorField } from '@/features/projects'
 import { SubcontractsFields } from '@/features/subcontracts'

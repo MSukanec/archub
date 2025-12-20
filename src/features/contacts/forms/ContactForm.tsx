@@ -14,9 +14,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { ComboBoxMultiSelectField } from "@/components/ui-custom/fields/ComboBoxMultiSelectField";
+import { ComboBoxMultiSelectField } from "@/components/shared/fields/ComboBoxMultiSelectField";
 import { FileUploader } from "@/components/shared/FileUploader";
-import { PhoneField } from "@/components/ui-custom/fields/PhoneField";
+import { PhoneField } from "@/components/shared/fields/PhoneField";
 import { AvatarUploader } from "@/components/shared/AvatarUploader";
 
 import { useCurrentUser } from "@/hooks/use-current-user";

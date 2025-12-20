@@ -3,7 +3,7 @@ import { UseFormReturn } from 'react-hook-form'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { CurrencyAmountField } from '@/components/ui-custom/fields/CurrencyAmountField'
+import { CurrencyAmountField } from '@/components/shared/fields/CurrencyAmountField'
 
 import { UserSelectorField } from '@/features/users'
 

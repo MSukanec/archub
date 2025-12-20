@@ -13,8 +13,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
-import { MiniEmptyState } from '@/components/ui-custom/fields/MiniEmptyState';
+import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField';
+import { MiniEmptyState } from '@/components/shared/fields/MiniEmptyState';
 import { Users, UserPlus, FileText, Mail, Phone, Badge as BadgeIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';

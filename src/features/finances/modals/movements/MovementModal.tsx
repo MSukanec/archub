@@ -14,7 +14,7 @@ import { FormModalLayout } from '@/components/modal'
 import { FormModalHeader } from '@/components/modal'
 import { FormModalFooter } from '@/components/modal'
 
-import { CascadingSelect } from '@/components/ui-custom/fields/CascadingSelectField'
+import { CascadingSelect } from '@/components/shared/fields/CascadingSelectField'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { CalendarIcon } from 'lucide-react'

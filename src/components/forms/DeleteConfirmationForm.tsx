@@ -5,7 +5,7 @@ import { Trash2, AlertTriangle } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { ComboBox } from "@/components/ui-custom/fields/ComboBoxWriteField"
+import { ComboBox } from "@/components/shared/fields/ComboBoxWriteField"
 
 interface ReplacementOption {
   label: string

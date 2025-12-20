@@ -9,7 +9,7 @@ import { FormModalHeader } from "@/components/modal";
 import { FormModalFooter } from "@/components/modal";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ComboBox } from "@/components/ui-custom/fields/ComboBoxWriteField";
+import { ComboBox } from "@/components/shared/fields/ComboBoxWriteField";
 
 import { useCreateTaskCategory, useUpdateTaskCategory, TaskCategoryAdmin } from "@/hooks/use-task-categories-admin";
 import { useAllTaskCategories } from "@/hooks/use-task-categories-admin";

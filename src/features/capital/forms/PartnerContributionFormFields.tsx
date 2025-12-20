@@ -18,7 +18,7 @@ import { useOrganizationCurrencies, useOrgCurrencyContext } from '@/hooks/use-cu
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { getCurrencyFieldsVisibility } from '@/lib/currency-visibility'
 import { usePartners, useCreatePartnerContribution, useUpdatePartnerContribution, usePartnerContribution } from '../hooks'
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
+import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { IdentityBadge } from '@/components/shared/IdentityBadge'
 import { FileUploader } from '@/components/shared/FileUploader'
 import { uploadFile, deleteFile } from '@/lib/storage'

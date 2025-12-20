@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField'
+import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
 import { Users } from 'lucide-react'
 import { useProjectPersonnel, type ProjectPersonnel } from '@/features/personnel'
 import { useCurrentUser } from '@/hooks/use-current-user'

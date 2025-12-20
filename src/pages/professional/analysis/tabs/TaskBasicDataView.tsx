@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormSubsectionButton } from '@/components/modal';
-import { ComboBox } from '@/components/ui-custom/fields/ComboBoxWriteField';
+import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Calendar, DollarSign } from "lucide-react";
-import { SearchField } from "@/components/ui-custom/fields/SearchField";
+import { SearchField } from "@/components/shared/fields/SearchField";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateBudgetItem, useUpdateBudgetItem } from "@/hooks/use-budget-items";
 import { useOrganizationTaskPrice } from "@/hooks/use-organization-task-prices";

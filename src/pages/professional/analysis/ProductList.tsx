@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { ComboBox as ComboBoxWriteField } from '@/components/ui-custom/fields/ComboBoxWriteField'
+import { ComboBox as ComboBoxWriteField } from '@/components/shared/fields/ComboBoxWriteField'
 import { Table } from '@/components/ui-custom/tables-and-trees/Table'
 import { useProducts, Product, useDeleteProduct } from '@/features/materials'
 import MaterialRow from '@/features/materials/components/MaterialRow'
