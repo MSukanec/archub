@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/popover";
 import { PlanRestricted } from "@/features/users";
 import { ExpandableAvatarGroup } from "@/components/shared/layout/ExpandableAvatarGroup";
-import { ReadOnlyBanner } from "@/components/ui-custom/ReadOnlyBanner";
+import { ReadOnlyBanner } from "@/components/shared/ReadOnlyBanner";
 import { ContextSelector } from "./components/Topbar/ContextSelector";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { useNavigationStore } from "@/stores/navigationStore";
