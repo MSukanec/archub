@@ -360,10 +360,10 @@ export function OrganizationSettingsFinancesTab() {
         <div>
           <div className="flex items-center gap-2 mb-6">
             <Coins className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Moneda por Defecto</h2>
+            <h2 className="text-lg font-semibold">Monedas</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Selecciona la moneda principal que se usará automáticamente en todos los movimientos financieros de tu organización.
+            Define la moneda principal de tu organización y agrega monedas secundarias para gestionar movimientos en diferentes divisas.
           </p>
         </div>
 
@@ -383,21 +383,7 @@ export function OrganizationSettingsFinancesTab() {
               </SelectContent>
             </Select>
           </div>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <Coins className="h-5 w-5 text-[var(--accent)]" />
-            <h2 className="text-lg font-semibold">Monedas Secundarias</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Configura monedas adicionales para tu organización. Cuando tengas más de una moneda activa, podrás registrar movimientos en diferentes divisas.
-          </p>
-        </div>
-
-        <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="secondary-currencies">Monedas Secundarias</Label>
             <ComboBoxMultiSelectField
@@ -410,7 +396,6 @@ export function OrganizationSettingsFinancesTab() {
               placeholder="Selecciona monedas secundarias"
             />
           </div>
-
         </div>
       </div>
 
