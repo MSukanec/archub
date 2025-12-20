@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Callout } from '@/components/ui-custom/general/Callout';
+import { Callout } from '@/components/shared/Callout';
 import { FormSubsectionButton } from '@/components/modal';
 import { useGlobalModalStore } from '@/components/modal';
 
