@@ -128,16 +128,19 @@ export function createExchangeRateDescription(count: number, labels: EntityLabel
   return `Tu organización usa múltiples monedas en los ajustes, pero ${count} ${entity} ${estan} ${registrados} en moneda extranjera sin cotización válida. Una cotización VÁLIDA debe ser un número mayor a 1 que represente el tipo de cambio real.
 
 ¿POR QUÉ IMPORTA?
-Si la cotización es 1 (o falta), el sistema asumiría que 1 USD = 1 ARS (o lo que sea tu moneda base), lo cual es incorrecto. Esto causa:
+Si la cotización es 1 (o falta), el sistema asumiría que 1 USD = 1 ARS, lo cual es incorrecto. Esto causa:
 • Totales y balances incorrectos en reportes
 • Análisis de rentabilidad distorsionado
 • Decisiones financieras basadas en información falsa
 • Problemas al reconciliar con tu contador
 
-EJEMPLOS DE COTIZACIÓN VÁLIDA:
-• Si tu moneda base es ARS: 1 USD = 1400 ARS
-• Si tu moneda base es USD: 1 ARS = 0.0007 USD
-• Si tu moneda base es USD: 1 ARS = 0.0007 USD, 1 COP = 0.00025 USD, etc.
+¿QUÉ NÚMERO PONER?
+Siempre ingresa el tipo de cambio del día (por ejemplo: 1400). El sistema se encarga automáticamente de convertir los montos correctamente, sin importar cuál sea tu moneda base:
+
+• Si tu moneda base es ARS y registras un movimiento en USD → pones 1400
+• Si tu moneda base es USD y registras un movimiento en ARS → también pones 1400
+
+No necesitas calcular nada diferente. El número es siempre el mismo tipo de cambio del mercado. El sistema sabe internamente si debe multiplicar o dividir según la dirección de la conversión.
 
 CÓMO ARREGLARLO:
 Edita cada movimiento y establece la cotización correcta (el tipo de cambio aplicado ese día).`;

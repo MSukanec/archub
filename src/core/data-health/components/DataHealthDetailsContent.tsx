@@ -55,27 +55,6 @@ export function DataHealthDetailsContent({ issue }: DataHealthDetailsContentProp
           {issue.description}
         </div>
 
-        {issue.affectedEntities && issue.affectedEntities.length > 0 && (
-          <div className="border-t pt-4">
-            <h4 className="font-semibold text-sm mb-3 text-foreground">
-              Elementos afectados ({issue.affectedEntities.length}
-              {issue.affectedCount > issue.affectedEntities.length
-                ? ` de ${issue.affectedCount}`
-                : ''})
-            </h4>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {issue.affectedEntities.map((entity) => (
-                <div
-                  key={entity.id}
-                  className="p-2.5 rounded-lg bg-muted text-sm flex items-center justify-between"
-                >
-                  <span className="text-foreground">{entity.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {issue.recommendedAction && (
           <div className="border-t pt-4">
             <div className="bg-accent/10 border border-accent/20 p-4 rounded-lg">
