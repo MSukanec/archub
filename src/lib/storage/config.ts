@@ -176,6 +176,12 @@ export const ENTITY_CONFIG: Record<EntityType, EntityConfig> = {
     basePath: 'forum/{org_id}/threads',
     compressionPreset: 'sitelog-photo',
     visibility: 'organization'
+  },
+  'inspiration_pin': {
+    bucket: 'private-assets',
+    basePath: 'organizations/{org_id}/moodboard/pins',
+    compressionPreset: 'sitelog-photo',
+    visibility: 'organization'
   }
 };
 

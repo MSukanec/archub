@@ -26,7 +26,8 @@ export type EntityType =
   | 'course_purchase_receipt'
   | 'testimonial_avatar'
   | 'hero_section_media'
-  | 'forum_thread_attachment';
+  | 'forum_thread_attachment'
+  | 'inspiration_pin';
 
 export type BucketName = 'public-assets' | 'private-assets' | 'social-assets';
 
@@ -55,6 +56,7 @@ export interface UploadContext {
     testimonial_id?: string;
     hero_section_id?: string;
     forum_thread_id?: string;
+    pin_id?: string;
   };
   category?: string;
   description?: string;

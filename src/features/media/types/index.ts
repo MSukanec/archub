@@ -25,7 +25,9 @@ export type MediaCategory =
   | 'testimonial_logo'
   | 'project_photo'
   | 'og_image'
-  | 'client_gallery';
+  | 'client_gallery'
+  | 'forum_attachment'
+  | 'inspiration_pin';
 
 /**
  * Registro en tabla media_files (archivo físico centralizado)
