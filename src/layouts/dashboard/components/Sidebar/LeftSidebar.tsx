@@ -72,7 +72,8 @@ import {
   HandHeart,
   FlaskConical,
   Award,
-  Eye
+  Eye,
+  Palette
 } from "lucide-react";
 import { LuContact } from 'react-icons/lu';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -256,6 +257,8 @@ export function LeftSidebar() {
         { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project' },
         { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media' },
         { id: 'finances', label: 'Finanzas', icon: DollarSign, href: '/project/finances', restricted: 'lab_user' },
+        { type: 'section-header', id: 'section-diseño', label: 'Diseño' },
+        { id: 'moodboard', label: 'Moodboard', icon: Palette, href: '/project/moodboard' },
         { type: 'section-header', id: 'section-construccion', label: 'Construcción' },
         { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets', restricted: 'coming_soon' },
         { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel' },
