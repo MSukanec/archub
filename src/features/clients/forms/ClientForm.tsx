@@ -19,6 +19,7 @@ import { Users, UserPlus, FileText, Mail, Phone, Badge as BadgeIcon } from 'luci
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { IdentityBadge } from '@/components/shared/IdentityBadge';
 
 const clientSchema = z.object({
   contactId: z.string().min(1, 'Debe seleccionar un contacto'),
@@ -54,10 +55,20 @@ function FormPanel({
   handleGoToContacts: () => void;
   isLoadingExisting?: boolean;
 }) {
-  const contactOptions = contacts.map(contact => ({
-    value: contact.id,
-    label: `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.email,
-  }));
+  const contactOptions = contacts.map(contact => {
+    const fullName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.company_name;
+    return {
+      value: contact.id,
+      label: fullName || contact.email,
+      firstName: contact.first_name,
+      lastName: contact.last_name,
+      fullName: fullName,
+      email: contact.email,
+      avatarUrl: contact.image_bucket && contact.image_path 
+        ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${contact.image_bucket}/${contact.image_path}`
+        : null,
+    };
+  });
 
   if (isLoadingExisting) {
     return (
@@ -101,6 +112,14 @@ function FormPanel({
                       className="w-full"
                       disabled={isEditing || isViewMode || contactsLoading}
                       data-testid="combobox-client-contact"
+                      renderOption={(option) => (
+                        <IdentityBadge
+                          name={option.fullName || option.label}
+                          avatarUrl={option.avatarUrl}
+                          subLabel={option.email}
+                          size="sm"
+                        />
+                      )}
                     />
                   )}
                 </FormControl>
@@ -557,7 +576,7 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
   const isLoadingData = existingClientLoading || contactsLoading || clientRolesLoading;
 
   return (
-    <ModalLayout onClose={handleClose} size="xl">
+    <ModalLayout onClose={handleClose} size="lg">
       <ModalHeader
         title={header.title}
         description={header.description}

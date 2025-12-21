@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard'
 import { useGlobalModalStore } from '@/components/modal'
 import { IdentityBadge } from '@/components/shared/IdentityBadge'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { Link, useLocation } from 'wouter'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -269,6 +270,42 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
         <p className="text-muted-foreground">No se pudo cargar la información de la organización</p>
       </div>
     )
+  }
+
+  // Show full empty state if no clients
+  if (!isLoading && enrichedClients.length === 0) {
+    return (
+      <EmptyState
+        icon={<Users />}
+        title="No hay clientes en este proyecto"
+        description={
+          <>
+            Agrega clientes para gestionar la información del proyecto. Recuerda que un cliente, antes debe ser un{' '}
+            <button
+              onClick={() => {
+                setSidebarLevel('organization');
+                navigate('/contacts');
+              }}
+              className="hover:underline font-bold cursor-pointer"
+              style={{ color: 'var(--accent)' }}
+            >
+              contacto
+            </button>
+            .
+          </>
+        }
+        action={
+          <Button
+            onClick={handleAddClient}
+            size="sm"
+            data-testid="button-add-client-empty"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Cliente
+          </Button>
+        }
+      />
+    );
   }
 
   // Helper function to format currency
