@@ -8,13 +8,10 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
 
-type TabType = 'boards' | 'gallery';
-
 export default function Moodboard() {
   const { setSidebarContext } = useNavigationStore();
   const { currentOrganizationId, selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
-  const [activeTab, setActiveTab] = useState<TabType>('boards');
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,8 +26,7 @@ export default function Moodboard() {
   };
 
   const tabs = [
-    { id: 'boards', label: 'Tableros', isActive: activeTab === 'boards' },
-    { id: 'gallery', label: 'Galería', isActive: activeTab === 'gallery' },
+    { id: 'boards', label: 'Tableros', isActive: true },
   ];
 
   const headerProps = {
@@ -41,10 +37,6 @@ export default function Moodboard() {
     showMembers: true,
     showProjectSelector: true,
     tabs,
-    onTabChange: (tabId: string) => {
-      setActiveTab(tabId as TabType);
-      setSelectedBoardId(null);
-    },
     actionButton: {
       label: "Agregar",
       icon: Plus,
@@ -54,10 +46,9 @@ export default function Moodboard() {
 
   return (
     <Layout headerProps={headerProps} wide={true}>
-      {activeTab === 'boards' && !selectedBoardId && (
+      {!selectedBoardId ? (
         <MoodboardBoards onSelectBoard={setSelectedBoardId} />
-      )}
-      {selectedBoardId && (
+      ) : (
         <div className="space-y-4">
           <Button
             variant="ghost"
@@ -71,9 +62,6 @@ export default function Moodboard() {
           </Button>
           <MoodboardGallery boardId={selectedBoardId} />
         </div>
-      )}
-      {activeTab === 'gallery' && !selectedBoardId && (
-        <MoodboardGallery />
       )}
     </Layout>
   );
