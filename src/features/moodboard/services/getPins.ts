@@ -1,15 +1,8 @@
 import { apiRequest } from '@/lib/queryClient';
 import type { Pin } from '../types';
 
-export async function getPins(
-  organizationId: string | undefined,
-  projectId: string | undefined
-): Promise<Pin[]> {
-  if (!organizationId || !projectId) {
-    return [];
-  }
-
-  const url = `/api/projects/${projectId}/pins`;
+export async function getPins(): Promise<Pin[]> {
+  const url = `/api/pins`;
   
   const response = await apiRequest('GET', url);
   
@@ -24,7 +17,5 @@ export async function getPins(
     return [];
   }
 
-  return data.sort((a: Pin, b: Pin) => 
-    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
+  return data;
 }

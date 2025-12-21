@@ -7,6 +7,29 @@ interface SavePinBody {
   image: string;
 }
 
+export async function getPins(req: Request, res: Response) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('pins')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[Pins] Error fetching pins:', error);
+      return res.status(500).json({ 
+        error: error.message 
+      });
+    }
+
+    return res.json(data || []);
+  } catch (error: any) {
+    console.error('[Pins] Unexpected error:', error);
+    return res.status(500).json({ 
+      error: error.message || 'Unknown error' 
+    });
+  }
+}
+
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
