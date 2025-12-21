@@ -846,9 +846,18 @@ export async function createBoard(req: Request, res: Response) {
 
 export async function createPinWithFile(req: Request, res: Response) {
   try {
+    console.log('[Pins] createPinWithFile START - body:', {
+      title: req.body.title,
+      project_id: req.body.project_id,
+      board_id: req.body.board_id,
+      source_url: req.body.source_url,
+      file: req.file ? { originalname: req.file.originalname, size: req.file.size } : 'NO FILE'
+    });
+
     // Autenticación
     const token = extractToken(req.headers.authorization);
     if (!token) {
+      console.log('[Pins] No auth token');
       return res.status(401).json({ error: 'No authorization token provided' });
     }
 
@@ -986,8 +995,16 @@ export async function createPinWithFile(req: Request, res: Response) {
       return res.status(500).json({ error: pinError.message });
     }
 
+    console.log('[Pins] Pin created successfully:', {
+      id: pin.id,
+      title: pin.title,
+      organization_id: pin.organization_id,
+      project_id: pin.project_id,
+      media_file_id: pin.media_file_id
+    });
+
     // Crear media_link
-    await supabaseAdmin
+    const { error: mediaLinkError } = await supabaseAdmin
       .from('media_links')
       .insert({
         media_file_id: mediaFileId,
@@ -998,6 +1015,12 @@ export async function createPinWithFile(req: Request, res: Response) {
         visibility: 'organization',
         is_public: false,
       });
+
+    if (mediaLinkError) {
+      console.warn('[Pins] Warning creating media_link:', mediaLinkError);
+    } else {
+      console.log('[Pins] Media link created successfully');
+    }
 
     // Resolver board
     let resolvedBoardId: string;
@@ -1051,13 +1074,19 @@ export async function createPinWithFile(req: Request, res: Response) {
     }
 
     // Asociar pin al board
-    await supabaseAdmin
+    const { error: boardItemError } = await supabaseAdmin
       .from('pin_board_items')
       .insert({
         pin_id: pin.id,
         board_id: resolvedBoardId,
         position: null,
       });
+
+    if (boardItemError) {
+      console.warn('[Pins] Warning creating pin_board_item:', boardItemError);
+    } else {
+      console.log('[Pins] Pin board item created successfully');
+    }
 
     console.log('[Pins] Pin created successfully:', pin.id);
     return res.json({
