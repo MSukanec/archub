@@ -1,0 +1,154 @@
+✅ PROMPT COMPLETO PARA REPLIT (COPIAR / PEGAR TAL CUAL)
+
+Contexto del proyecto
+Estamos trabajando en Seencel (SaaS multi-organización, multi-proyecto).
+La autenticación ya funciona por cookies HTTP-only en seencel.com.
+El backend puede detectar:
+
+el user_id
+
+la organización activa del usuario
+
+La Chrome Extension y el frontend NO envían organization_id, eso se resuelve siempre server-side.
+
+🎯 Objetivo de esta tarea
+
+Ajustar el endpoint POST /api/pins/save para implementar correctamente la lógica de asignación de pins a boards a nivel PROYECTO, siguiendo estas reglas de negocio.
+
+🧠 Reglas de negocio (IMPORTANTE)
+
+Todo pin pertenece obligatoriamente a un proyecto
+
+Todo pin pertenece obligatoriamente a un board
+
+NO existen boards a nivel organización por ahora
+
+La organización se obtiene automáticamente desde la sesión activa del usuario
+
+📥 Input esperado del endpoint
+
+El endpoint puede recibir:
+
+{
+  title: string,
+  source_url: string,
+  image_url: string,
+  project_id: uuid,
+  board_id?: uuid
+}
+
+
+project_id es obligatorio
+
+board_id es opcional
+
+🧩 Lógica exacta a implementar
+
+Dentro de POST /api/pins/save, luego de resolver:
+
+sesión del usuario
+
+organización activa
+
+Implementar el siguiente flujo:
+
+Paso 1 — Validaciones
+
+Verificar que el usuario esté autenticado
+
+Verificar que project_id pertenezca a la organización activa
+
+Si no, devolver 403
+
+Paso 2 — Crear el pin
+
+Crear el registro en pins con:
+
+organization_id = organización activa
+
+project_id
+
+media_file_id (ya resuelto por la lógica de upload)
+
+title
+
+source_url
+
+Guardar el pin_id.
+
+Paso 3 — Resolver el board
+Caso A — Viene board_id
+
+Verificar que:
+
+el board exista
+
+pertenezca al mismo project_id
+
+pertenezca a la organización activa
+
+Si no, devolver 403
+
+Usar ese board_id
+
+Caso B — NO viene board_id
+
+Buscar un board en pin_boards con:
+
+project_id = $project_id
+and name = 'Inspiración'
+
+
+Si existe → usarlo
+
+Si NO existe → crearlo con:
+
+organization_id = organización activa
+
+project_id
+
+name = 'Inspiración'
+
+description = null
+
+created_by = organization_member_id
+
+Guardar el board_id.
+
+Paso 4 — Asociar pin al board
+
+Insertar en pin_board_items:
+
+pin_id
+
+board_id
+
+position = null
+
+⚠️ Restricciones
+
+❌ NO crear boards a nivel organización
+
+❌ NO usar triggers SQL
+
+❌ NO modificar esquemas existentes
+
+❌ NO aceptar organization_id desde el cliente
+
+❌ NO romper la lógica actual de uploads
+
+✅ Resultado esperado
+
+Cada pin queda siempre asociado a un board del proyecto
+
+Si el usuario no eligió board, se usa “Inspiración”
+
+El sistema queda listo para:
+
+selector de board
+
+creación de boards desde la UI
+
+compartir con clientes en el futuro
+
+Implementar esta lógica manteniendo el código existente intacto y agregando solo lo necesario.
