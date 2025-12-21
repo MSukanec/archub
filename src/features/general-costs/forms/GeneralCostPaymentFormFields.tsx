@@ -13,8 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-import { useOrgCurrencyContext } from '@/hooks/use-currencies'
+import { useOrgCurrencyContext, type OrgCurrencyContext } from '@/hooks/use-currencies'
 import { getCurrencyFieldsVisibility } from '@/lib/currency-visibility'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { uploadFile, deleteFile } from '@/lib/storage'
@@ -42,6 +41,7 @@ function FormPanel({
   onExistingFileDelete,
   openDatePicker,
   setOpenDatePicker,
+  visibility,
 }: {
   form: ReturnType<typeof useForm<GeneralCostPaymentFormData>>;
   currencies: any[];
@@ -57,6 +57,7 @@ function FormPanel({
   onExistingFileDelete?: (fileId: string) => Promise<void>;
   openDatePicker: boolean;
   setOpenDatePicker: (open: boolean) => void;
+  visibility: any;
 }) {
   if (isLoading) {
     return (
@@ -592,6 +593,7 @@ export function GeneralCostPaymentFormFields({
           onExistingFileDelete={handleExistingFileDelete}
           openDatePicker={openDatePicker}
           setOpenDatePicker={setOpenDatePicker}
+          visibility={visibility}
         />
 
         {!hideActions && (
