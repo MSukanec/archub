@@ -30,6 +30,7 @@ import { registerPdfRoutes } from './routes/pdf';
 import { registerFounderRoutes } from './routes/founders';
 import { registerForumRoutes } from './routes/forum';
 import { registerPinsRoutes } from './routes/pins';
+import { registerExtensionRoutes } from './routes/extension';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
@@ -115,6 +116,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register pins routes (Chrome extension - Pinterest-like pins)
   registerPinsRoutes(app, deps);
+
+  // Register extension routes (context endpoint for Chrome extension)
+  registerExtensionRoutes(app, deps);
 
   // Public feature flags endpoint (for blocking purchases, etc.)
   app.get("/api/feature-flags", async (req, res) => {
