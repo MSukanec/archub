@@ -13,6 +13,7 @@ import { useDeleteClientPayment } from '@/features/clients/hooks/use-client-paym
 import { useDeleteMaterialPayment } from '@/features/materials/hooks/use-material-payments';
 import { useDeletePersonnelPayment } from '@/features/personnel/hooks/use-personnel-payments';
 import { useDeleteGeneralCostPayment } from '@/hooks/use-general-costs-payments';
+import { useDeletePartnerContribution, useDeletePartnerWithdrawal } from '@/features/capital';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useFinancesDataHealth, DataHealthAlertMulti } from '@/core/data-health';
@@ -179,6 +180,8 @@ export function OrganizationFinancesMovementsTab() {
   const deleteMaterialPaymentMutation = useDeleteMaterialPayment();
   const deletePersonnelPaymentMutation = useDeletePersonnelPayment();
   const { mutate: deleteGeneralCostPayment, isPending: isDeleteGeneralCostPending } = useDeleteGeneralCostPayment();
+  const deletePartnerContributionMutation = useDeletePartnerContribution();
+  const deletePartnerWithdrawalMutation = useDeletePartnerWithdrawal();
 
   const formatCurrency = (amount: number, currencySymbol: string = '$') => {
     return `${currencySymbol} ${new Intl.NumberFormat('es-AR', {
@@ -242,6 +245,16 @@ export function OrganizationFinancesMovementsTab() {
             paymentId: movement.id,
             organizationId: currentOrganizationId,
           });
+        case 'partner_contribution':
+          return deletePartnerContributionMutation.mutate({
+            contributionId: movement.id,
+            organizationId: currentOrganizationId,
+          });
+        case 'partner_withdrawal':
+          return deletePartnerWithdrawalMutation.mutate({
+            withdrawalId: movement.id,
+            organizationId: currentOrganizationId,
+          });
       }
     };
 
@@ -255,7 +268,9 @@ export function OrganizationFinancesMovementsTab() {
       isLoading: deleteClientPaymentMutation.isPending || 
                  deleteMaterialPaymentMutation.isPending || 
                  deletePersonnelPaymentMutation.isPending ||
-                 isDeleteGeneralCostPending,
+                 isDeleteGeneralCostPending ||
+                 deletePartnerContributionMutation.isPending ||
+                 deletePartnerWithdrawalMutation.isPending,
     });
   };
 
