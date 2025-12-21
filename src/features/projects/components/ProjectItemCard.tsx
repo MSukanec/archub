@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Lock } from 'lucide-react';
@@ -75,6 +76,10 @@ export default function ProjectItemCard({
   const statusText = getStatusText(project.status);
   const isOverLimit = project.is_over_limit === true;
 
+  // Track image load state to prevent flicker
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  
   // Generate image URL on-demand from bucket+path with React Query
   // Data comes from projects_view which includes image_bucket, image_path, is_public
   const { data: imageUrl } = useQuery({
@@ -83,7 +88,21 @@ export default function ProjectItemCard({
     enabled: !!project.project_data?.image_bucket && !!project.project_data?.image_path,
     refetchInterval: 30 * 60 * 1000,  // Refresh every 30 min
     staleTime: 25 * 60 * 1000,         // Stale after 25 min
+    refetchOnWindowFocus: false,       // Prevent refetch on window focus (reduces failures)
+    retry: 2,                          // Retry failed requests
+    retryDelay: 1000,                  // Wait 1 second between retries
   });
+  
+  // Handle image load success
+  const handleImageLoad = useCallback(() => {
+    setImageLoaded(true);
+    setImageError(false);
+  }, []);
+  
+  // Handle image load error - show fallback gradient
+  const handleImageError = useCallback(() => {
+    setImageError(true);
+  }, []);
   
   // Obtener el color real del proyecto desde el objeto project
   const actualProjectColor = (project as any).use_custom_color && (project as any).custom_color_hex 
@@ -125,23 +144,25 @@ export default function ProjectItemCard({
     >
       {/* Imagen de fondo - SIEMPRE 100% de altura */}
       <div className="absolute inset-0">
-        {/* Imagen de fondo del proyecto con lazy loading */}
-        {imageUrl ? (
+        {/* Fallback gradient - always rendered behind the image */}
+        <div 
+          className="absolute inset-0"
+          style={{ 
+            background: actualProjectColor && !actualProjectColor.includes('var(')
+              ? `radial-gradient(ellipse at top right, ${chroma(actualProjectColor).alpha(0.25).css()} 0%, ${chroma(actualProjectColor).alpha(0.15).css()} 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.7) 100%)`
+              : `radial-gradient(ellipse at top right, rgba(139, 92, 246, 0.25) 0%, rgba(139, 92, 246, 0.15) 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.7) 100%)`
+          }}
+        />
+        {/* Imagen de fondo del proyecto con lazy loading - layered on top */}
+        {imageUrl && !imageError && (
           <img
             src={imageUrl}
             alt={project.name}
             loading="lazy"
             decoding="async"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        ) : (
-          <div 
-            className="absolute inset-0"
-            style={{ 
-              background: actualProjectColor && !actualProjectColor.includes('var(')
-                ? `radial-gradient(ellipse at top right, ${chroma(actualProjectColor).alpha(0.25).css()} 0%, ${chroma(actualProjectColor).alpha(0.15).css()} 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.7) 100%)`
-                : `radial-gradient(ellipse at top right, rgba(139, 92, 246, 0.25) 0%, rgba(139, 92, 246, 0.15) 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.7) 100%)`
-            }}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
         )}
         

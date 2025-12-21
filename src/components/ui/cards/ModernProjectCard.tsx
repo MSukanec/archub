@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -37,6 +38,10 @@ interface ModernProjectCardProps {
 export default function ModernProjectCard({ project, onEdit, onDelete, onSelect, onNavigateToBasicData, isActiveProject = false }: ModernProjectCardProps) {
   const statusConfig = projectStatuses[project.status as keyof typeof projectStatuses] || projectStatuses.planning;
 
+  // Track image load state to prevent flicker
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  
   // Generate image URL on-demand from bucket+path with React Query
   const { data: imageUrl } = useQuery({
     queryKey: ['project-image', project.id, project.project_data?.image_bucket, project.project_data?.image_path],
@@ -44,7 +49,19 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
     enabled: !!project.project_data?.image_bucket && !!project.project_data?.image_path,
     refetchInterval: 30 * 60 * 1000,  // Refresh every 30 min
     staleTime: 25 * 60 * 1000,         // Stale after 25 min
+    refetchOnWindowFocus: false,       // Prevent refetch on window focus (reduces failures)
+    retry: 2,                          // Retry failed requests
+    retryDelay: 1000,                  // Wait 1 second between retries
   });
+  
+  const handleImageLoad = useCallback(() => {
+    setImageLoaded(true);
+    setImageError(false);
+  }, []);
+  
+  const handleImageError = useCallback(() => {
+    setImageError(true);
+  }, []);
 
   return (
     <SwipeableCard
@@ -72,32 +89,32 @@ export default function ModernProjectCard({ project, onEdit, onDelete, onSelect,
       <Card className="w-full overflow-hidden hover:shadow-lg transition-all duration-200 cursor-default">
         {/* HERO SECTION - Imagen completa con avatar y acciones superpuestas */}
         <div className="relative h-48 w-full">
-          {/* Background Image */}
-          {imageUrl ? (
+          {/* Fallback gradient - always rendered behind the image */}
+          <div 
+            className="w-full h-full flex items-center justify-center text-6xl font-bold text-white/80 relative overflow-hidden"
+          >
+            <div 
+              className="absolute inset-0"
+              style={{ 
+                background: `radial-gradient(ellipse at top right, ${project.color || '#8b5cf6'}40 0%, ${project.color || '#8b5cf6'}26 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.7) 100%)`
+              }}
+            />
+            <span className="relative z-10">
+              {getProjectInitials(project.name)}
+            </span>
+          </div>
+          {/* Background Image - layered on top */}
+          {imageUrl && !imageError && (
             <img 
               src={imageUrl} 
               alt={project.name}
               loading="lazy"
               decoding="async"
-              className="w-full h-full object-cover"
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
               key={imageUrl}
             />
-          ) : (
-            <div 
-              className="w-full h-full flex items-center justify-center text-6xl font-bold text-white/80 relative overflow-hidden"
-            >
-              {/* Degradado radial suave de fondo */}
-              <div 
-                className="absolute inset-0"
-                style={{ 
-                  background: `radial-gradient(ellipse at top right, ${project.color || '#8b5cf6'}40 0%, ${project.color || '#8b5cf6'}26 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.7) 100%)`
-                }}
-              />
-              {/* Iniciales del proyecto sobre el degradado */}
-              <span className="relative z-10">
-                {getProjectInitials(project.name)}
-              </span>
-            </div>
           )}
           
           {/* Gradient overlay for better text readability */}

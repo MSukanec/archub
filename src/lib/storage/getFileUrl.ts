@@ -33,7 +33,13 @@ export async function getFileUrl(
     return client.storage.from(bucket).getPublicUrl(path).data.publicUrl;
   }
   
-  // social-assets and private buckets: use signed URLs (RLS controlled)
+  // social-assets: meant to be publicly accessible, use public URL to avoid signed URL issues
+  // This fixes the issue where images disappear in production due to signed URL failures
+  if (bucket === 'social-assets') {
+    return client.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+  }
+  
+  // Private buckets: use signed URLs (RLS controlled)
   const { data, error } = await client.storage
     .from(bucket)
     .createSignedUrl(path, expiresIn);
