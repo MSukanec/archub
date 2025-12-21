@@ -79,6 +79,19 @@ export async function createProject(
       return orgAccessResult;
     }
 
+    // Check if a project with the same name already exists (only active projects)
+    const { data: existingProject } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('organization_id', params.organization_id)
+      .eq('name', params.name)
+      .eq('is_deleted', false)
+      .maybeSingle();
+
+    if (existingProject) {
+      return { success: false, error: 'Ya existe un proyecto con este nombre en tu organización' };
+    }
+
     // Create new project
     const { data: newProject, error: projectError } = await supabase
       .from('projects')
@@ -178,6 +191,22 @@ export async function updateProject(
     const orgAccessResult = await ensureOrganizationAccess(ctx, project.organization_id);
     if (!orgAccessResult.success) {
       return orgAccessResult;
+    }
+
+    // Check if a project with the same name already exists (only active projects, excluding current project)
+    if (params.name) {
+      const { data: existingProject } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('organization_id', project.organization_id)
+        .eq('name', params.name)
+        .eq('is_deleted', false)
+        .neq('id', params.projectId)
+        .maybeSingle();
+
+      if (existingProject) {
+        return { success: false, error: 'Ya existe un proyecto con este nombre en tu organización' };
+      }
     }
 
     // Update main project
