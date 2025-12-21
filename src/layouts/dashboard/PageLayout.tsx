@@ -23,6 +23,7 @@ import {
   MessageCircle,
   Wallet
 } from "lucide-react";
+import { LuHandshake } from 'react-icons/lu';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -71,7 +72,7 @@ const PAGE_CONFIG: Record<string, { name: string; icon: any }> = {
   '/construction/indirects': { name: 'Indirectos', icon: Layers },
   '/construction/subcontracts': { name: 'Subcontratos', icon: FileText },
   '/construction/logs': { name: 'Bitácora de Obra', icon: FileText },
-  '/clients': { name: 'Clientes', icon: Users },
+  '/clients': { name: 'Clientes', icon: LuHandshake },
   
   // Admin
   '/admin/dashboard': { name: 'Analytics Dashboard', icon: Activity },

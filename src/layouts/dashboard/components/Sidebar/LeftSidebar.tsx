@@ -75,7 +75,7 @@ import {
   Eye,
   Palette
 } from "lucide-react";
-import { LuContact } from 'react-icons/lu';
+import { LuContact, LuHandshake } from 'react-icons/lu';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlanRestricted, RoleRestricted } from "@/features/users";
 import { ComingSoonRestricted } from "@/components/shared/restrictions/guards/ComingSoonRestricted";
@@ -267,7 +267,7 @@ export function LeftSidebar() {
         { id: 'indirects', label: 'Indirectos', icon: Layers, href: '/construction/indirects', restricted: 'coming_soon' },
         { id: 'logs', label: 'Bitácora de Obra', icon: BookOpen, href: '/construction/logs' },
         { type: 'section-header', id: 'section-comercializacion', label: 'Comercialización y Venta' },
-        { id: 'clients', label: 'Clientes', icon: Users, href: '/clients' },
+        { id: 'clients', label: 'Clientes', icon: LuHandshake, href: '/clients' },
       ];
     } else if (sidebarLevel === 'admin' && isAdmin) {
       return ADMIN_NAVIGATION;
