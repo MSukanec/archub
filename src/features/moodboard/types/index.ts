@@ -27,6 +27,9 @@ export interface PinBoard {
   created_by: string;
   created_at: string;
   updated_at: string;
+  _count?: {
+    pins?: number;
+  };
 }
 
 export interface PinBoardItem {

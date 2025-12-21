@@ -693,7 +693,7 @@ export async function getBoards(req: Request, res: Response) {
 
     let query = supabaseAdmin
       .from('pin_boards')
-      .select('*')
+      .select('*, pin_board_items(count)')
       .eq('organization_id', organizationId)
       .order('created_at', { ascending: false });
 
@@ -719,7 +719,16 @@ export async function getBoards(req: Request, res: Response) {
       return res.status(500).json({ error: error.message });
     }
 
-    return res.json(data || []);
+    // Transform data to include _count.pins
+    const boardsWithCounts = (data || []).map((board: any) => ({
+      ...board,
+      _count: {
+        pins: board.pin_board_items?.length || 0
+      },
+      pin_board_items: undefined
+    }));
+
+    return res.json(boardsWithCounts);
   } catch (error: any) {
     console.error('[Boards] Unexpected error:', error);
     return res.status(500).json({ error: error.message || 'Unknown error' });

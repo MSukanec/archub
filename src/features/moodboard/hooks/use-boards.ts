@@ -8,6 +8,8 @@ export function useBoards(projectId?: string) {
     queryKey: [QUERY_KEYS.BOARDS, projectId],
     queryFn: () => getBoards(projectId),
     enabled: !!projectId,
+    staleTime: 30 * 1000, // Cache for 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep in memory for 5 minutes
   });
 }
 

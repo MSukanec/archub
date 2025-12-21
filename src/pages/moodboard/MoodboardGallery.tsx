@@ -5,7 +5,11 @@ import { usePins } from '@/features/moodboard';
 import type { Pin } from '@/features/moodboard';
 import { useProjectContext } from '@/stores/projectContext';
 
-export function MoodboardGallery() {
+interface MoodboardGalleryProps {
+  boardId?: string;
+}
+
+export function MoodboardGallery({ boardId }: MoodboardGalleryProps) {
   const { currentOrganizationId, selectedProjectId } = useProjectContext();
   
   const { 
@@ -35,17 +39,26 @@ export function MoodboardGallery() {
     );
   }
 
-  if (pins.length === 0) {
+  // Si estamos viendo un tablero específico, filtrar pins de ese tablero
+  const filteredPins = boardId 
+    ? pins.filter((pin: Pin) => {
+        // Nota: Necesitaremos agregar board_id a los pins del backend
+        // Por ahora mostramos todos los pins
+        return true;
+      })
+    : pins;
+
+  if (filteredPins.length === 0) {
     return (
       <EmptyState
         icon={<Palette />}
-        title="Sin pins de inspiración"
-        description="Aún no hay imágenes guardadas en el moodboard. Usa la extensión de Chrome para guardar inspiración desde la web."
+        title="Sin pins en este tablero"
+        description="Aún no hay imágenes en este tablero. Usa el botón Agregar para subir inspiración."
       />
     );
   }
 
-  const galleryItems = pins
+  const galleryItems = filteredPins
     .filter((pin: Pin) => pin.signed_url || pin.image_url)
     .map((pin: Pin) => ({
       id: pin.id,
@@ -76,3 +89,4 @@ export function MoodboardGallery() {
     </div>
   );
 }
+
