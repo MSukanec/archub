@@ -19,8 +19,6 @@ export async function getOrganizationWallets(
 ): Promise<OrganizationWallet[]> {
   if (!organizationId) return [];
   
-  console.log('Fetching organization wallets for:', organizationId);
-  
   const { data, error } = await supabase
     .from('organization_wallets')
     .select(`
@@ -42,6 +40,5 @@ export async function getOrganizationWallets(
     throw error;
   }
   
-  console.log('Organization wallets fetched:', data);
   return data as OrganizationWallet[];
 }
