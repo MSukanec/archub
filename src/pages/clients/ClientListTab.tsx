@@ -340,10 +340,11 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
       label: 'Cliente',
       sortable: true,
       render: (client: EnrichedClient) => {
-        // Get avatar URL from contact image
-        const avatarUrl = client.contacts?.image_bucket && client.contacts?.image_path 
-          ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${client.contacts.image_bucket}/${client.contacts.image_path}`
-          : null;
+        // Get avatar URL: prioritize linked user avatar, then contact image
+        const avatarUrl = client.contacts?.linked_user?.avatar_url 
+          || (client.contacts?.image_bucket && client.contacts?.image_path 
+            ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${client.contacts.image_bucket}/${client.contacts.image_path}`
+            : null);
         
         // Priority: full_name > first_name + last_name > company_name
         const displayName = client.contacts?.full_name || 
@@ -357,6 +358,7 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
           <IdentityBadge 
             name={displayName || '-'}
             avatarUrl={avatarUrl}
+            linkedUser={client.contacts?.linked_user}
             size="sm"
             subLabel={client.role?.name || undefined}
             badges={badgesArray}

@@ -289,7 +289,7 @@ function ViewPanel({
             {statusBadge.label}
           </Badge>
           {existingClient?.is_primary && (
-            <Badge variant="default" className="bg-green-600 text-white" data-testid="badge-client-primary">
+            <Badge variant="success" data-testid="badge-client-primary">
               Cliente Principal
             </Badge>
           )}
@@ -379,10 +379,10 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
   });
 
   // Query to get existing project clients (to filter them from contact selector)
-  const { data: existingProjectClients = [] } = useQuery<any[]>({
+  const { data: existingProjectClients = [], refetch: refetchProjectClients } = useQuery<any[]>({
     queryKey: CLIENT_QUERY_KEYS.projectClients(projectId),
     enabled: !!organizationId && !!projectId && !isEditing && !isViewMode,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 0, // Always fresh to prevent showing already-added clients
   });
 
   // Query to get client roles
