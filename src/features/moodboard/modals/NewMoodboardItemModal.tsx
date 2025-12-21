@@ -103,7 +103,7 @@ export function NewMoodboardItemModal({ modalData, onClose }: NewMoodboardItemMo
         />
       }
     >
-      <ModalBody className="min-h-[200px]">
+      <ModalBody>
         <div className="space-y-1.5 w-full">
           <Label className="text-xs font-medium text-muted-foreground">¿Qué deseas agregar?</Label>
           <Select
