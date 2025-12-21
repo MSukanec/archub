@@ -9,8 +9,8 @@ export function useDeleteGeneralCost(organizationId: string | null) {
   return useMutation({
     mutationFn: (generalCostId: string) => deleteGeneralCost(generalCostId),
     onSuccess: () => {
-      // Invalidate both general costs and payments queries with correct organizationId
-      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.lists() });
+      // Invalidate both general costs and payments queries
+      queryClient.invalidateQueries({ queryKey: ['general-costs'] });
       queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.paymentsList(organizationId) });
       
       toast({
