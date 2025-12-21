@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { useOrgCurrencyContext, type OrgCurrencyContext } from '@/hooks/use-currencies'
+import { useOrganizationCurrencies, useOrgCurrencyContext, type OrgCurrencyContext } from '@/hooks/use-currencies'
 import { getCurrencyFieldsVisibility } from '@/lib/currency-visibility'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
 import { uploadFile, deleteFile } from '@/lib/storage'
