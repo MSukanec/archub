@@ -14,7 +14,8 @@ import { Calendar } from "@/components/ui/calendar"
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
-import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
+import { useOrgCurrencyContext } from '@/hooks/use-currencies'
+import { getCurrencyFieldsVisibility } from '@/lib/currency-visibility'
 import { uploadFile, deleteFile } from '@/lib/storage'
 import { FileUploader } from '@/components/shared/fields/FileUploader'
 import { useQueryClient } from '@tanstack/react-query'
@@ -192,53 +193,67 @@ function FormPanel({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="currency_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Moneda <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange} disabled={currenciesLoading}>
-                  <SelectTrigger data-testid="select-general-cost-payment-currency">
-                    <SelectValue placeholder="Seleccionar moneda" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currencies?.map((orgCurrency) => (
-                      <SelectItem key={`currency-${orgCurrency.currency?.id}`} value={orgCurrency.currency?.id || ''}>
-                        {orgCurrency.currency?.name} ({orgCurrency.currency?.symbol})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {visibility.showCurrencySelector ? (
+          <FormField
+            control={form.control}
+            name="currency_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Moneda <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange} disabled={currenciesLoading}>
+                    <SelectTrigger data-testid="select-general-cost-payment-currency">
+                      <SelectValue placeholder="Seleccionar moneda" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies?.map((orgCurrency) => (
+                        <SelectItem key={`currency-${orgCurrency.currency?.id}`} value={orgCurrency.currency?.id || ''}>
+                          {orgCurrency.currency?.name} ({orgCurrency.currency?.symbol})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <div className="hidden">
+            <FormField
+              control={form.control}
+              name="currency_id"
+              render={({ field }) => <input type="hidden" {...field} />}
+            />
+          </div>
+        )}
 
-        <FormField
-          control={form.control}
-          name="exchange_rate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cotización (opcional)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.0001"
-                  placeholder="Ej: 1000.00"
-                  value={field.value || ''}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                  data-testid="input-general-cost-payment-exchange-rate"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {visibility.showExchangeRate ? (
+          <FormField
+            control={form.control}
+            name="exchange_rate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cotización (opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    placeholder="Ej: 1000.00"
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                    data-testid="input-general-cost-payment-exchange-rate"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          visibility.showCurrencySelector && <div />
+        )}
       </div>
 
       <FormField
@@ -344,6 +359,7 @@ export function GeneralCostPaymentFormFields({
   const queryClient = useQueryClient()
   
   const effectiveOrganizationId = organizationId || userData?.organization?.id
+  const orgCurrencyContext = useOrgCurrencyContext(effectiveOrganizationId)
 
   const [filesToUpload, setFilesToUpload] = useState<any[]>([])
   const [existingFiles, setExistingFiles] = useState<any[]>([])
@@ -374,7 +390,12 @@ export function GeneralCostPaymentFormFields({
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(effectiveOrganizationId)
   const { data: members = [] } = useOrganizationMembers(effectiveOrganizationId)
 
-  const isLoading = currenciesLoading || generalCostsLoading || walletsLoading || (mode === 'edit' && loadingPayment)
+  const visibility = getCurrencyFieldsVisibility({
+    context: orgCurrencyContext,
+    selectedCurrencyId: form.watch('currency_id')
+  })
+
+  const isLoading = currenciesLoading || generalCostsLoading || walletsLoading || (mode === 'edit' && loadingPayment) || orgCurrencyContext.isLoading
 
   const hasLoadedPaymentRef = useRef<string | null>(null)
   useEffect(() => {
