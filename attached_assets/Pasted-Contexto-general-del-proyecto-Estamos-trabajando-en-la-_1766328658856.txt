@@ -1,0 +1,223 @@
+Contexto general del proyecto
+Estamos trabajando en la app Seencel (SaaS).
+Ya existe un sistema de uploads maduro y en producción, con:
+
+Supabase Storage
+
+buckets public-assets, social-assets, private-assets
+
+función centralizada uploadFile(...)
+
+compresión de imágenes con browser-image-compression
+
+tablas media_files y media_links
+
+IMPORTANTE:
+No se debe crear ningún sistema nuevo de uploads ni subir archivos directamente a Storage desde el frontend.
+Todo debe reutilizar exactamente la infraestructura existente.
+
+🎯 OBJETIVO DE ESTA TAREA
+
+Integrar la funcionalidad de Pins (guardados desde una Chrome Extension) con el sistema de uploads existente, de forma correcta y consistente con la arquitectura actual.
+
+Actualmente:
+
+El endpoint /api/pins/save ya existe
+
+Ya guarda correctamente un registro en la tabla pins
+
+Recibe desde la extensión:
+
+{
+  "title": "...",
+  "source_url": "...",
+  "image_url": "https://externa.com/imagen.jpg"
+}
+
+
+El frontend y la extensión YA FUNCIONAN (no tocar)
+
+Lo que falta es:
+👉 Descargar la imagen remota y guardarla en Supabase Storage usando el sistema existente
+
+🧠 DEFINICIÓN FUNCIONAL CLAVE (NO DISCUTIBLE)
+
+Los Pins son contenido PRIVADO
+
+No son sociales
+
+No son públicos
+
+Son material interno de una organización
+
+Pueden ser compartidos con clientes, pero NO son indexables ni públicos
+
+Por lo tanto:
+
+✅ Bucket: private-assets
+
+✅ Ubicación paralela a finances y sitelogs
+
+❌ NO usar social-assets
+
+❌ NO crear buckets nuevos
+
+📁 ESTRUCTURA CORRECTA EN STORAGE
+
+Dentro de private-assets:
+
+organizations/{organization_id}/pins/{pin_id}.{ext}
+
+
+Ejemplo:
+
+private-assets/
+└── organizations/
+    └── 5fd4cc23-624e-4787-94fc-ae647edc2344/
+        └── pins/
+            └── a1b2c3d4.jpg
+
+🧩 CAMBIOS A IMPLEMENTAR (PASO A PASO)
+1️⃣ Agregar un nuevo EntityType
+
+Agregar un nuevo tipo SIN MODIFICAR LOS EXISTENTES:
+
+inspiration_pin
+
+2️⃣ Configurar el EntityType en el sistema actual
+
+En el archivo de configuración correspondiente (ej: config.ts o similar), agregar:
+
+inspiration_pin: {
+  bucket: 'private-assets',
+  path: 'organizations/{organization_id}/pins/',
+  compression: 'default', // o el preset más cercano ya existente
+  visibility: 'private'
+}
+
+
+No crear presets nuevos si no es estrictamente necesario.
+
+3️⃣ Modificar el endpoint /api/pins/save
+
+Actualizar el endpoint existente para que haga lo siguiente:
+
+Reciba:
+
+{
+  title: string,
+  source_url: string,
+  image_url: string
+}
+
+
+Descargue la imagen remota (image_url) en el backend:
+
+usar fetch
+
+convertir a Buffer / File compatible con uploadFile
+
+Llamar a la función existente uploadFile(...) usando:
+
+entity_type: 'inspiration_pin'
+
+organization_id (el mismo que ya se usa para guardar el pin)
+
+nombre de archivo generado (ej: ${pin_id}.jpg)
+
+Reutilizar TODO el pipeline actual:
+
+compresión
+
+subida a Storage
+
+inserción en media_files
+
+inserción en media_links
+
+rollback automático si algo falla
+
+4️⃣ Guardar relación en la tabla pins
+
+Modificar el insert del pin para que:
+
+en lugar de guardar image_url externo
+
+guarde:
+
+media_file_id
+
+mantener source_url como referencia externa
+
+Ejemplo conceptual:
+
+pins {
+  id,
+  title,
+  source_url,
+  media_file_id,
+  organization_id,
+  created_at
+}
+
+🔐 SEGURIDAD / PERMISOS
+
+El endpoint /api/pins/save se ejecuta server-side
+
+Puede usar service role (como otras subidas actuales)
+
+No tocar RLS existente
+
+No exponer URLs públicas
+
+El acceso a los archivos debe seguir siendo privado (signed URLs como el resto del sistema)
+
+🚫 RESTRICCIONES IMPORTANTES
+
+❌ No tocar la Chrome Extension
+
+❌ No tocar el frontend existente
+
+❌ No crear lógica duplicada de uploads
+
+❌ No subir archivos directo a Storage desde el cliente
+
+❌ No cambiar la lógica de buckets existente
+
+❌ No mover ni migrar archivos actuales
+
+✅ RESULTADO ESPERADO
+
+Cuando el usuario guarda un Pin desde la extensión:
+
+El pin se guarda en DB
+
+La imagen externa se descarga
+
+Se sube a private-assets/organizations/{org_id}/pins/
+
+Se crea media_file
+
+Se vincula al pin
+
+El pin queda:
+
+privado
+
+robusto
+
+sin hotlinking
+
+alineado al sistema actual
+
+🧪 IMPORTANTE
+
+Si durante la implementación detectás que:
+
+falta algún helper
+
+hay que adaptar mínimamente uploadFile
+
+hay que agregar soporte a imágenes remotas
+
+HACERLO EXTENDIENDO, no modificando comportamientos existentes.
