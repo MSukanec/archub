@@ -101,7 +101,11 @@ export function PinFormFields({
         board_id: data.board_id || undefined,
         file: selectedFile,
       })
-      toast({ title: 'Pin creado correctamente' })
+      toast({ 
+        title: 'Pin guardado', 
+        description: `"${data.title}" se agregó a tu moodboard.`,
+        variant: 'default'
+      })
       onSuccess()
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Error al crear pin', description: error.message })

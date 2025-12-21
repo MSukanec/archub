@@ -1,4 +1,4 @@
-import { apiRequest } from '@/lib/queryClient';
+import { supabase } from '@/lib/supabase';
 import type { PinBoard } from '../types';
 
 export interface CreateBoardInput {
@@ -8,7 +8,23 @@ export interface CreateBoardInput {
 }
 
 export async function createBoard(input: CreateBoardInput): Promise<PinBoard> {
-  const response = await apiRequest('POST', '/api/pin-boards', input);
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData?.session?.access_token;
+  
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  const response = await fetch('/api/pin-boards', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers,
+    },
+    body: JSON.stringify(input),
+    credentials: 'include',
+  });
   
   if (!response.ok) {
     const errorData = await response.json();

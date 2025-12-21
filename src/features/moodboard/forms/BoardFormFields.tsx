@@ -58,7 +58,11 @@ export function BoardFormFields({
         description: data.description || null,
         project_id: projectId,
       })
-      toast({ title: 'Tablero creado correctamente' })
+      toast({ 
+        title: 'Tablero creado', 
+        description: `"${data.name}" está listo. Puedes agregar pins.`,
+        variant: 'default'
+      })
       onSuccess()
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Error al crear tablero', description: error.message })
