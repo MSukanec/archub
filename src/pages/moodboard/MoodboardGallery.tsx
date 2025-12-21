@@ -3,13 +3,16 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { Palette } from 'lucide-react';
 import { usePins } from '@/features/moodboard';
 import type { Pin } from '@/features/moodboard';
+import { useProjectContext } from '@/stores/projectContext';
 
 export function MoodboardGallery() {
+  const { currentOrganizationId, selectedProjectId } = useProjectContext();
+  
   const { 
     data: pins = [], 
     isLoading, 
     error 
-  } = usePins();
+  } = usePins(currentOrganizationId || undefined, selectedProjectId || undefined);
 
   if (isLoading) {
     return (
@@ -43,17 +46,17 @@ export function MoodboardGallery() {
   }
 
   const galleryItems = pins
-    .filter((pin: Pin) => pin.image_url)
+    .filter((pin: Pin) => pin.signed_url || pin.image_url)
     .map((pin: Pin) => ({
       id: pin.id,
       link_id: pin.id,
-      file_url: pin.image_url!,
+      file_url: pin.signed_url || pin.image_url!,
       file_name: pin.title || 'Sin título',
       file_type: 'image',
       file_size: undefined,
       created_at: pin.created_at,
-      project_id: '',
-      project_name: 'Global',
+      project_id: pin.project_id || '',
+      project_name: pin.project_id ? 'Proyecto' : 'Organización',
       description: pin.source_url || undefined,
       visibility: 'organization',
       created_by: 'Extensión Chrome'
@@ -63,7 +66,7 @@ export function MoodboardGallery() {
     <div className="space-y-6" data-testid="moodboard-gallery">
       <GalleryComponent
         files={galleryItems}
-        style="masonry"
+        galleryStyle="masonry"
         onDownload={(file) => {
           if (file.file_url) {
             window.open(file.file_url, '_blank');

@@ -131,6 +131,7 @@ Complete mapping of all entity types to their bucket destinations:
 | `project_document` | social-assets | projects/{org_id}/{project_id}/documents/ | document |
 | `client_payment_attachment` | private-assets | organizations/{org_id}/finance/payments/ | document |
 | `general_cost_payment_attachment` | private-assets | organizations/{org_id}/finance/general-costs/ | document |
+| `inspiration_pin` | private-assets | organizations/{org_id}/moodboard/pins/ | sitelog-photo |
 
 ---
 

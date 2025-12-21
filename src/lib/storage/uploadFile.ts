@@ -168,6 +168,7 @@ export async function uploadFile(
       if (context.link_to.testimonial_id) mediaLinkData.testimonial_id = context.link_to.testimonial_id;
       if (context.link_to.hero_section_id) mediaLinkData.hero_section_id = context.link_to.hero_section_id;
       if (context.link_to.forum_thread_id) mediaLinkData.forum_thread_id = context.link_to.forum_thread_id;
+      if (context.link_to.pin_id) mediaLinkData.pin_id = context.link_to.pin_id;
       if (context.category) mediaLinkData.category = context.category;
       if (context.description) mediaLinkData.description = context.description;
       if (context.position !== undefined) mediaLinkData.position = context.position;
