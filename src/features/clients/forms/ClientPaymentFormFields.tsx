@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization'
+import { useProjects } from '@/features/projects/hooks/use-projects'
 import { formatContactName } from '@/utils/contacts'
 import { uploadFile, deleteFile } from '@/lib/storage'
 import { FileUploader } from '@/components/shared/fields/FileUploader'
@@ -38,6 +39,7 @@ const clientPaymentSchema = z.object({
     required_error: "Fecha de pago es requerida",
   }),
   created_by: z.string().min(1, 'Creador es requerido'),
+  project_id: z.string().optional(),
   client_id: z.string().min(1, 'Cliente es requerido'),
   commitment_id: z.string().optional(),
   wallet_id: z.string().min(1, 'Billetera es requerida'),
@@ -84,7 +86,9 @@ function FormPanel({
   existingFiles: any[];
   onExistingFileDelete?: (fileId: string) => Promise<void>;
 }) {
+  // Extract unique values for filters
   const selectedClientId = form.watch('client_id');
+  const project_id = form.watch('project_id');
 
   const clientOptions = useMemo(() => {
     if (!projectClients) return []
@@ -142,6 +146,19 @@ function FormPanel({
     }
   }, [clientCommitments, form])
 
+  const activeProjects = useMemo(() => {
+    if (!projects) return [];
+    // Only show projects that are 'in_process'
+    return projects.filter(p => p.status === 'in_process');
+  }, [projects]);
+
+  const projectOptions = useMemo(() => {
+    return activeProjects.map(p => ({
+      value: p.id,
+      label: p.name,
+    }));
+  }, [activeProjects]);
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -154,7 +171,37 @@ function FormPanel({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-4">
+      {/* Top Section with Project Selector if not provided */}
+      {!projectId && (
+        <FormField
+          control={form.control}
+          name="project_id"
+          render={({ field }) => (
+            <FormItem className="mb-2">
+              <FormLabel>
+                Proyecto <span className="text-red-500">*</span>
+              </FormLabel>
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange} disabled={projectsLoading}>
+                  <SelectTrigger data-testid="select-payment-project">
+                    <SelectValue placeholder="Seleccionar proyecto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projectOptions.map((project) => (
+                      <SelectItem key={project.value} value={project.value}>
+                        {project.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
@@ -628,8 +675,9 @@ export function ClientPaymentFormFields({
   )
 
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
-  const { data: projectClients, isLoading: clientsLoading } = useProjectClients(projectId, organizationId)
-  const { data: commitments, isLoading: commitmentsLoading } = useClientCommitments(projectId, organizationId)
+  const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId)
+  const { data: projectClients, isLoading: clientsLoading } = useProjectClients(project_id || projectId, organizationId)
+  const { data: commitments, isLoading: commitmentsLoading } = useClientCommitments(project_id || projectId, organizationId)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId || '')
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
 
@@ -642,6 +690,7 @@ export function ClientPaymentFormFields({
     defaultValues: {
       payment_date: new Date(),
       created_by: '',
+      project_id: projectId || '',
       client_id: '',
       commitment_id: undefined,
       wallet_id: '',
@@ -654,7 +703,145 @@ export function ClientPaymentFormFields({
     }
   })
 
-  const isLoading = currenciesLoading || clientsLoading || walletsLoading || membersLoading || ((mode === 'edit' || mode === 'view') && loadingPayment)
+  const isLoading = currenciesLoading || clientsLoading || walletsLoading || membersLoading || projectsLoading || ((mode === 'edit' || mode === 'view') && loadingPayment)
+
+  const createPaymentMutation = useCreateClientPayment()
+  const updatePaymentMutation = useUpdateClientPayment()
+  const queryClient = useQueryClient()
+
+  const handleExistingFileDelete = async (fileId: string) => {
+    try {
+      await deleteFile(fileId, false)
+      queryClient.invalidateQueries({ queryKey: ['client-payment-media', paymentId] })
+      toast({
+        title: 'Archivo eliminado',
+        description: 'El archivo ha sido eliminado correctamente',
+      })
+    } catch (error: any) {
+      toast({
+        title: 'Error al eliminar archivo',
+        description: error.message,
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const isSubmitting = createPaymentMutation.isPending || updatePaymentMutation.isPending
+
+  const onSubmit = async (data: ClientPaymentFormData) => {
+    try {
+      let paymentResult;
+      
+      if (mode === 'edit' && paymentId) {
+        paymentResult = await updatePaymentMutation.mutateAsync({
+          paymentId,
+          updates: {
+            project_id: data.project_id || projectId,
+            client_id: data.client_id,
+            commitment_id: data.commitment_id || null,
+            wallet_id: data.wallet_id,
+            amount: data.amount,
+            currency_id: data.currency_id,
+            exchange_rate: data.exchange_rate || null,
+            payment_date: formatDateForDB(data.payment_date),
+            status: data.status,
+            reference: data.reference || null,
+            notes: data.notes || null,
+          },
+          organizationId: organizationId || '',
+        })
+      } else {
+        paymentResult = await createPaymentMutation.mutateAsync({
+          payment: {
+            client_id: data.client_id,
+            wallet_id: data.wallet_id,
+            amount: data.amount,
+            currency_id: data.currency_id,
+            exchange_rate: data.exchange_rate || null,
+            payment_date: formatDateForDB(data.payment_date),
+            status: data.status,
+            reference: data.reference || null,
+            notes: data.notes || null,
+            commitment_id: data.commitment_id || null,
+            schedule_id: null,
+          },
+          projectId: data.project_id || projectId || '',
+          organizationId: organizationId || '',
+          createdBy: data.created_by,
+        })
+      }
+
+      const createdPaymentId = paymentResult?.id || paymentId
+      
+      if (filesToUpload.length > 0 && createdPaymentId) {
+        if (!organizationId) {
+          toast({
+            variant: 'destructive',
+            title: 'Error al subir archivos',
+            description: 'No se encontró el ID de la organización.',
+            duration: 8000,
+          })
+          return;
+        }
+
+        for (const fileInput of filesToUpload) {
+          try {
+            console.log('[ClientPaymentFormFields] Uploading file:', {
+              fileName: fileInput.file?.name,
+              fileSize: fileInput.file?.size,
+              organizationId,
+              projectId: data.project_id || projectId,
+              createdPaymentId,
+              createdByMemberId: currentMember?.id,
+            })
+            
+            if (!fileInput.file) {
+              console.error('[ClientPaymentFormFields] No file object in fileInput:', fileInput)
+              continue
+            }
+            
+            const uploadResult = await uploadFile(fileInput.file, {
+              entity: 'client_payment_attachment',
+              organization_id: organizationId,
+              project_id: data.project_id || projectId,
+              created_by_member_id: currentMember?.id,
+              link_to: {
+                client_payment_id: createdPaymentId,
+              },
+              category: 'document',
+              description: fileInput.description || fileInput.file.name,
+            })
+            
+            console.log('[ClientPaymentFormFields] Upload successful:', uploadResult)
+          } catch (uploadError: any) {
+            console.error('[ClientPaymentFormFields] Error uploading file:', {
+              error: uploadError,
+              message: uploadError?.message,
+              code: uploadError?.code,
+              details: uploadError?.details,
+              hint: uploadError?.hint,
+              stack: uploadError?.stack,
+            })
+            toast({
+              variant: 'destructive',
+              title: 'Error al subir archivo',
+              description: uploadError?.message || String(uploadError) || 'Error desconocido',
+              duration: 8000,
+            })
+          }
+        }
+      }
+
+      onSuccess()
+    } catch (error) {
+      console.error('Error saving payment:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Error al guardar el pago',
+        description: 'Hubo un problema al procesar la solicitud.',
+      })
+    }
+  }
 
   React.useEffect(() => {
     if (existingPayment && (mode === 'edit' || mode === 'view')) {
@@ -663,6 +850,7 @@ export function ClientPaymentFormFields({
       form.reset({
         payment_date: paymentDate,
         created_by: existingPayment.created_by || currentMember?.id || '',
+        project_id: existingPayment.project_id || projectId || '',
         client_id: existingPayment.client_id || '',
         commitment_id: existingPayment.commitment_id || undefined,
         wallet_id: existingPayment.wallet_id || '',
@@ -674,7 +862,7 @@ export function ClientPaymentFormFields({
         notes: existingPayment.notes || '',
       })
     }
-  }, [existingPayment, mode, form, currentMember?.id])
+  }, [existingPayment, mode, form, currentMember?.id, projectId])
 
   React.useEffect(() => {
     const fetchAttachments = async () => {
@@ -750,8 +938,6 @@ export function ClientPaymentFormFields({
     }
   }, [currencies, wallets, mode, paymentId, currentMember?.id, form])
 
-  const createPaymentMutation = useCreateClientPayment()
-  const updatePaymentMutation = useUpdateClientPayment()
   const queryClient = useQueryClient()
 
   const handleExistingFileDelete = async (fileId: string) => {
