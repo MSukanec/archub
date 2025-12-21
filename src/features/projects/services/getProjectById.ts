@@ -40,6 +40,10 @@ export async function getProjectById(projectId: string): Promise<Project | null>
     .single();
   
   if (error) {
+    // PGRST116 = no rows found, which is normal when project doesn't exist
+    if (error.code === 'PGRST116') {
+      return null;
+    }
     console.error('Error fetching project:', error);
     throw error;
   }
