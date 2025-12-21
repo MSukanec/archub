@@ -84,6 +84,7 @@ export function OrganizationFinancesMovementsTab() {
   
   const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null);
   const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
+  const [selectedMovements, setSelectedMovements] = useState<UnifiedMovementWithRelations[]>([]);
 
   const handleAddMovement = useCallback(() => {
     openModal('unified-payment', {
@@ -497,6 +498,9 @@ export function OrganizationFinancesMovementsTab() {
         columns={columns}
         data={movements}
         isLoading={isLoading}
+        selectable={true}
+        selectedItems={selectedMovements}
+        onSelectionChange={setSelectedMovements}
         emptyStateConfig={{
           icon: <DollarSign className="h-12 w-12 text-muted-foreground" />,
           title: 'No hay movimientos',
