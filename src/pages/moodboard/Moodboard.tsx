@@ -8,10 +8,13 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
 import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
 
+type TabType = 'boards' | 'gallery';
+
 export default function Moodboard() {
   const { setSidebarContext } = useNavigationStore();
   const { currentOrganizationId, selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
+  const [activeTab, setActiveTab] = useState<TabType>('boards');
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,15 +28,23 @@ export default function Moodboard() {
     });
   };
 
+  const tabs = [
+    { id: 'boards', label: 'Tableros', isActive: activeTab === 'boards' },
+    { id: 'gallery', label: 'Galería', isActive: activeTab === 'gallery' },
+  ];
+
   const headerProps = {
     icon: Palette,
-    title: selectedBoardId ? "Pins del Tablero" : "Moodboard",
-    description: selectedBoardId 
-      ? "Imágenes y referencias visuales organizadas"
-      : "Tablero de inspiración con imágenes y referencias visuales para el proyecto",
+    title: "Moodboard",
+    description: "Tablero de inspiración con imágenes y referencias visuales para el proyecto",
     organizationId: currentOrganizationId ?? undefined,
     showMembers: true,
     showProjectSelector: true,
+    tabs,
+    onTabChange: (tabId: string) => {
+      setActiveTab(tabId as TabType);
+      setSelectedBoardId(null);
+    },
     actionButton: {
       label: "Agregar",
       icon: Plus,
@@ -41,29 +52,29 @@ export default function Moodboard() {
     },
   };
 
-  if (!selectedBoardId) {
-    return (
-      <Layout headerProps={headerProps} wide={true}>
-        <MoodboardBoards onSelectBoard={setSelectedBoardId} />
-      </Layout>
-    );
-  }
-
   return (
     <Layout headerProps={headerProps} wide={true}>
-      <div className="space-y-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setSelectedBoardId(null)}
-          className="gap-1"
-          data-testid="button-back-to-boards"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Volver a Tableros
-        </Button>
-        <MoodboardGallery boardId={selectedBoardId} />
-      </div>
+      {activeTab === 'boards' && !selectedBoardId && (
+        <MoodboardBoards onSelectBoard={setSelectedBoardId} />
+      )}
+      {selectedBoardId && (
+        <div className="space-y-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedBoardId(null)}
+            className="gap-1"
+            data-testid="button-back-to-boards"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Volver a Tableros
+          </Button>
+          <MoodboardGallery boardId={selectedBoardId} />
+        </div>
+      )}
+      {activeTab === 'gallery' && !selectedBoardId && (
+        <MoodboardGallery />
+      )}
     </Layout>
   );
 }
