@@ -77,7 +77,7 @@ import {
 } from "lucide-react";
 import { LuContact, LuHandshake } from 'react-icons/lu';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PlanRestricted } from "@/components/shared/restrictions/PlanRestricted";
+import { PlanRestricted } from "@/components/shared/restrictions/guards/PlanRestricted";
 import { RoleRestricted } from "@/components/shared/restrictions/guards/RoleRestricted";
 import { ComingSoonRestricted } from "@/components/shared/restrictions/guards/ComingSoonRestricted";
 import { NotificationBell } from "@/features/users";

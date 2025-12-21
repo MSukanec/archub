@@ -906,142 +906,8 @@ export function ClientPaymentFormFields({
         }
       }
 
-      onSuccess()
-    } catch (error) {
-      console.error('Error saving payment:', error)
-      toast({
-        variant: 'destructive',
-        title: 'Error al guardar el pago',
-        description: 'Hubo un problema al procesar la solicitud.',
-      })
-    }
-  }
-
-  const queryClient = useQueryClient()
-
-  const handleExistingFileDelete = async (fileId: string) => {
-    try {
-      await deleteFile(fileId, false)
-      queryClient.invalidateQueries({ queryKey: ['client-payment-media', paymentId] })
-      toast({
-        title: 'Archivo eliminado',
-        description: 'El archivo ha sido eliminado correctamente',
-      })
-    } catch (error: any) {
-      toast({
-        title: 'Error al eliminar archivo',
-        description: error.message,
-        variant: 'destructive',
-      })
-    }
-  }
-
-  const isSubmitting = createPaymentMutation.isPending || updatePaymentMutation.isPending
-
-  const onSubmit = async (data: ClientPaymentFormData) => {
-    try {
-      let paymentResult;
-      
-      if (mode === 'edit' && paymentId) {
-        paymentResult = await updatePaymentMutation.mutateAsync({
-          paymentId,
-          updates: {
-            client_id: data.client_id,
-            commitment_id: data.commitment_id || null,
-            wallet_id: data.wallet_id,
-            amount: data.amount,
-            currency_id: data.currency_id,
-            exchange_rate: data.exchange_rate || null,
-            payment_date: formatDateForDB(data.payment_date),
-            status: data.status,
-            reference: data.reference || null,
-            notes: data.notes || null,
-          },
-          organizationId: organizationId || '',
-        })
-      } else {
-        paymentResult = await createPaymentMutation.mutateAsync({
-          payment: {
-            client_id: data.client_id,
-            wallet_id: data.wallet_id,
-            amount: data.amount,
-            currency_id: data.currency_id,
-            exchange_rate: data.exchange_rate || null,
-            payment_date: formatDateForDB(data.payment_date),
-            status: data.status,
-            reference: data.reference || null,
-            notes: data.notes || null,
-            commitment_id: data.commitment_id || null,
-            schedule_id: null,
-          },
-          projectId: projectId || '',
-          organizationId: organizationId || '',
-          createdBy: data.created_by,
-        })
-      }
-
-      const createdPaymentId = paymentResult?.id || paymentId
-      
-      if (filesToUpload.length > 0 && createdPaymentId) {
-        if (!organizationId) {
-          toast({
-            variant: 'destructive',
-            title: 'Error al subir archivos',
-            description: 'No se encontró el ID de la organización.',
-            duration: 8000,
-          })
-          return;
-        }
-
-        for (const fileInput of filesToUpload) {
-          try {
-            console.log('[ClientPaymentFormFields] Uploading file:', {
-              fileName: fileInput.file?.name,
-              fileSize: fileInput.file?.size,
-              organizationId,
-              projectId,
-              createdPaymentId,
-              createdByMemberId: currentMember?.id,
-            })
-            
-            if (!fileInput.file) {
-              console.error('[ClientPaymentFormFields] No file object in fileInput:', fileInput)
-              continue
-            }
-            
-            const uploadResult = await uploadFile(fileInput.file, {
-              entity: 'client_payment_attachment',
-              organization_id: organizationId,
-              project_id: projectId,
-              created_by_member_id: currentMember?.id,
-              link_to: {
-                client_payment_id: createdPaymentId,
-              },
-              category: 'document',
-              description: fileInput.description || fileInput.file.name,
-            })
-            
-            console.log('[ClientPaymentFormFields] Upload successful:', uploadResult)
-          } catch (uploadError: any) {
-            console.error('[ClientPaymentFormFields] Error uploading file:', {
-              error: uploadError,
-              message: uploadError?.message,
-              code: uploadError?.code,
-              details: uploadError?.details,
-              hint: uploadError?.hint,
-              stack: uploadError?.stack,
-            })
-            toast({
-              variant: 'destructive',
-              title: 'Error al subir archivo',
-              description: uploadError?.message || String(uploadError) || 'Error desconocido',
-              duration: 8000,
-            })
-          }
-        }
-        queryClient.invalidateQueries({ queryKey: ['client-payment-media', createdPaymentId] })
-        setFilesToUpload([])
-      }
+      queryClient.invalidateQueries({ queryKey: ['client-payment-media', createdPaymentId] })
+      setFilesToUpload([])
       
       toast({
         title: mode === 'edit' ? 'Pago actualizado' : 'Pago registrado',
@@ -1052,6 +918,7 @@ export function ClientPaymentFormFields({
       form.reset()
       onSuccess()
     } catch (error: any) {
+      console.error('Error saving payment:', error)
       toast({
         variant: 'destructive',
         title: 'Error',
