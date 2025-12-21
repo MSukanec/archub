@@ -1,17 +1,26 @@
 import { useEffect } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { MoodboardGallery } from './MoodboardGallery';
-import { Palette } from 'lucide-react';
+import { Palette, Plus } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
+import { useGlobalModalStore } from '@/components/modal/state/globalModalStore';
 
 export default function Moodboard() {
   const { setSidebarContext } = useNavigationStore();
-  const { currentOrganizationId } = useProjectContext();
+  const { currentOrganizationId, selectedProjectId } = useProjectContext();
+  const { openModal } = useGlobalModalStore();
 
   useEffect(() => {
     setSidebarContext('project');
   }, [setSidebarContext]);
+
+  const handleAddItem = () => {
+    openModal('new-moodboard-item', {
+      projectId: selectedProjectId,
+      organizationId: currentOrganizationId,
+    });
+  };
 
   const tabs = [
     { id: 'gallery', label: 'Galería', isActive: true }
@@ -25,7 +34,12 @@ export default function Moodboard() {
     showMembers: true,
     showProjectSelector: true,
     tabs,
-    onTabChange: () => {}
+    onTabChange: () => {},
+    actionButton: {
+      label: "Agregar",
+      icon: Plus,
+      onClick: handleAddItem,
+    },
   };
 
   return (

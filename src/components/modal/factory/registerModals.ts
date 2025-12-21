@@ -38,6 +38,7 @@ import ForumCategoryForm from '@/features/forum/forms/ForumCategoryForm';
 import CourseForumCategoryForm from '@/features/forum/forms/CourseForumCategoryForm';
 import { NewMovementModal } from '@/features/finances/modals/NewMovementModal';
 import { DataHealthDetailsModal } from '@/core/data-health/components/DataHealthDetailsModal';
+import { NewMoodboardItemModal } from '@/features/moodboard';
 
 const organizationConfig: ModalConfig = { category: 'organization', size: 'md' };
 const foundersConfig: ModalConfig = { category: 'founders', size: 'md' };
@@ -574,6 +575,17 @@ export function initializeModalRegistry(): void {
     mapDataToProps: (data) => ({
       modalData: {
         issue: data?.issue,
+      },
+    }),
+  });
+
+  registerModal('new-moodboard-item', NewMoodboardItemModal as any, {
+    ...projectConfig,
+    size: 'lg',
+    mapDataToProps: (data) => ({
+      modalData: {
+        projectId: data?.projectId,
+        organizationId: data?.organizationId,
       },
     }),
   });

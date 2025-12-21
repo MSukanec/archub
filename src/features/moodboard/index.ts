@@ -1,4 +1,12 @@
 export * from './types';
 export * from './constants';
 export * from './hooks/use-pins';
+export * from './hooks/use-boards';
+export * from './hooks/use-create-pin';
 export { getPins } from './services/getPins';
+export { getBoards } from './services/getBoards';
+export { createBoard } from './services/createBoard';
+export { createPin } from './services/createPin';
+export { BoardFormFields } from './forms/BoardFormFields';
+export { PinFormFields } from './forms/PinFormFields';
+export { NewMoodboardItemModal } from './modals/NewMoodboardItemModal';
