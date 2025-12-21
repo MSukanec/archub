@@ -18,6 +18,8 @@ interface Client {
     email: string | null;
     phone?: string | null;
     company_name?: string | null;
+    image_bucket?: string | null;
+    image_path?: string | null;
     linked_user?: {
       id: string;
       avatar_url?: string;
@@ -26,7 +28,7 @@ interface Client {
   role: {
     id: string;
     name: string;
-    is_default: boolean;
+    is_default?: boolean;
   } | null;
   financialByCurrency: Array<{
     currency: {
@@ -37,6 +39,12 @@ interface Client {
     total_committed_amount: number;
     total_paid_amount: number;
     balance_due: number;
+    next_due_date?: string | null;
+    next_due_amount?: number | null;
+    last_payment_date?: string | null;
+    total_schedule_items?: number;
+    schedule_paid?: number;
+    schedule_overdue?: number;
   }>;
   total_committed_amount: number;
   total_paid_amount: number;
@@ -202,7 +210,7 @@ export default function ClientRow({
       <div className="flex flex-col items-end gap-1 flex-shrink-0">
         {/* Badge de Estado */}
         <Badge 
-          variant="outline"
+          variant="neutral"
           className={`${statusConfig.borderColor} ${statusConfig.textColor} border-2 text-xs`}
         >
           {statusConfig.label}
@@ -221,7 +229,7 @@ export default function ClientRow({
   // Card base usando DataRowCard
   const clientCard = (
     <DataRowCard
-      avatarUrl={avatarUrl}
+      avatarUrl={avatarUrl ?? undefined}
       avatarFallback={avatarFallback}
       selected={selected}
       density={density}

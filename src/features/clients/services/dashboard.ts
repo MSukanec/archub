@@ -61,46 +61,84 @@ export async function getClientDashboardData(
   if (clientsResult.error) throw clientsResult.error;
   if (financialSummaryResult.error) throw financialSummaryResult.error;
 
+  // Transform view data to match ProjectClientWithRelations
+  const clients = (clientsResult.data || []).map(c => ({
+    id: c.id,
+    project_id: c.project_id,
+    organization_id: c.organization_id,
+    contact_id: c.contact_id,
+    client_role_id: c.client_role_id,
+    is_primary: c.is_primary,
+    status: c.status,
+    notes: c.notes,
+    created_at: c.created_at,
+    updated_at: c.created_at,
+    is_deleted: false,
+    deleted_at: null,
+    created_by: null,
+    contact: {
+      id: c.contact_id,
+      organization_id: c.organization_id,
+      full_name: c.contact_full_name,
+      first_name: null,
+      last_name: null,
+      email: c.contact_email,
+      phone: c.contact_phone,
+      company_name: c.contact_company_name,
+      location: null,
+      notes: null,
+      national_id: null,
+      image_bucket: c.contact_image_bucket,
+      image_path: c.contact_image_path,
+      avatar_updated_at: null,
+      is_local: true,
+      display_name_override: null,
+      linked_user_id: c.linked_user_id,
+      linked_at: null,
+      sync_status: null,
+      created_at: c.created_at,
+      updated_at: c.created_at,
+    },
+    role: c.role_name ? { 
+      id: c.client_role_id, 
+      organization_id: c.organization_id,
+      name: c.role_name, 
+      description: null,
+      is_default: false,
+      created_at: c.created_at,
+      updated_at: null,
+      is_deleted: false,
+      deleted_at: null 
+    } : null
+  }));
+
+  // Transform financial summary from view
+  const financialSummaries = (financialSummaryResult.data || []).map(f => ({
+    clientId: f.client_id,
+    summaries: [{
+      client_id: f.client_id,
+      currency_id: f.currency_id,
+      total_committed: f.total_committed_amount || 0,
+      total_paid: f.total_paid_amount || 0,
+      balance_due: f.balance_due || 0,
+      total_scheduled: 0,
+      total_schedule_items: 0,
+      schedule_paid: 0,
+      schedule_pending: 0,
+      schedule_overdue: 0,
+      next_due_date: null,
+      next_due_amount: null,
+      last_payment_date: null,
+      last_payment_amount: null,
+    }]
+  }));
+
   return {
-    clients: (clientsResult.data || []).map(c => ({
-      ...c,
-      contacts: {
-        id: c.contact_id,
-        full_name: c.contact_full_name,
-        first_name: null,
-        last_name: null,
-        email: c.contact_email,
-        phone: c.contact_phone,
-        company_name: c.contact_company_name,
-        linked_user: c.linked_user_id ? { id: c.linked_user_id, avatar_url: c.contact_avatar_url } : null,
-        image_bucket: c.contact_image_bucket,
-        image_path: c.contact_image_path
-      },
-      role: c.role_name ? { id: c.client_role_id, name: c.role_name } : null
-    })),
+    clients,
     commitments: commitmentsResult,
     payments: paymentsResult,
     schedule: scheduleResult,
-    financialSummaries: (financialSummaryResult.data || []).map(f => ({
-      clientId: f.client_id,
-      summaries: [{
-        ...f,
-        total_committed: f.total_committed_amount,
-        total_paid: f.total_paid_amount,
-        balance_due: f.balance_due,
-        // Mantener campos adicionales que calculateFinancialSummaries calculaba pero la vista aún no tiene (se pueden agregar a la vista después)
-        total_scheduled: 0,
-        total_schedule_items: 0,
-        schedule_paid: 0,
-        schedule_pending: 0,
-        schedule_overdue: 0,
-        next_due_date: null,
-        next_due_amount: null,
-        last_payment_date: null,
-        last_payment_amount: null,
-        currency: { id: f.currency_id, code: f.currency_code, symbol: f.currency_symbol }
-      }]
-    })),
+    financialSummaries,
   };
 }
 

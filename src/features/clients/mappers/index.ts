@@ -43,6 +43,8 @@ export interface ProjectClientSummary {
     email: string | null;
     phone?: string | null;
     company_name?: string | null;
+    image_bucket?: string | null;
+    image_path?: string | null;
     linked_user?: {
       id: string;
       avatar_url?: string;
@@ -51,7 +53,7 @@ export interface ProjectClientSummary {
   role: {
     id: string;
     name: string;
-    is_default: boolean;
+    is_default?: boolean;
   } | null;
   financialByCurrency: CurrencyFinancial[];
   total_committed_amount: number;
@@ -263,6 +265,8 @@ export function mapToClientSummary(
       email: client.contact.email,
       phone: client.contact.phone,
       company_name: client.contact.company_name,
+      image_bucket: client.contact.image_bucket,
+      image_path: client.contact.image_path,
       linked_user: client.contact.linked_user_id ? {
         id: client.contact.linked_user_id,
         avatar_url: undefined,
