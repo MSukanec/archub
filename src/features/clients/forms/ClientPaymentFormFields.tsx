@@ -64,6 +64,9 @@ function FormPanel({
   currenciesLoading,
   wallets,
   walletsLoading,
+  projects,
+  projectsLoading,
+  projectId,
   isLoading,
   filesToUpload,
   setFilesToUpload,
@@ -80,6 +83,9 @@ function FormPanel({
   currenciesLoading: boolean;
   wallets: any[];
   walletsLoading: boolean;
+  projects: any[];
+  projectsLoading: boolean;
+  projectId?: string;
   isLoading: boolean;
   filesToUpload: any[];
   setFilesToUpload: (files: any[]) => void;
@@ -676,8 +682,11 @@ export function ClientPaymentFormFields({
 
   const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId || '')
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId)
-  const { data: projectClients, isLoading: clientsLoading } = useProjectClients(project_id || projectId, organizationId)
-  const { data: commitments, isLoading: commitmentsLoading } = useClientCommitments(project_id || projectId, organizationId)
+  
+  const [effectiveProjectId, setEffectiveProjectId] = useState<string | undefined>(projectId)
+  
+  const { data: projectClients, isLoading: clientsLoading } = useProjectClients(effectiveProjectId, organizationId)
+  const { data: commitments, isLoading: commitmentsLoading } = useClientCommitments(effectiveProjectId, organizationId)
   const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId || '')
   const { data: members = [], isLoading: membersLoading } = useOrganizationMembers(organizationId || '')
 
@@ -707,6 +716,13 @@ export function ClientPaymentFormFields({
 
   const createPaymentMutation = useCreateClientPayment()
   const updatePaymentMutation = useUpdateClientPayment()
+
+  const watchedProjectId = form.watch('project_id')
+  React.useEffect(() => {
+    if (watchedProjectId && watchedProjectId !== effectiveProjectId) {
+      setEffectiveProjectId(watchedProjectId)
+    }
+  }, [watchedProjectId, effectiveProjectId])
 
   React.useEffect(() => {
     if (existingPayment && (mode === 'edit' || mode === 'view')) {
@@ -810,7 +826,6 @@ export function ClientPaymentFormFields({
         paymentResult = await updatePaymentMutation.mutateAsync({
           paymentId,
           updates: {
-            project_id: data.project_id || projectId,
             client_id: data.client_id,
             commitment_id: data.commitment_id || null,
             wallet_id: data.wallet_id,
@@ -965,6 +980,9 @@ export function ClientPaymentFormFields({
           currenciesLoading={currenciesLoading}
           wallets={wallets || []}
           walletsLoading={walletsLoading}
+          projects={projects}
+          projectsLoading={projectsLoading}
+          projectId={projectId}
           isLoading={isLoading}
           filesToUpload={filesToUpload}
           setFilesToUpload={setFilesToUpload}

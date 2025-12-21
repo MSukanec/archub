@@ -473,37 +473,42 @@ export function PartnerContributionFormFields({
           
           return (
             <>
-              {visibility.showCurrencySelector ? (
+              {!visibility.showCurrencySelector && (
+                <input type="hidden" {...form.register('currency_id')} />
+              )}
+              {(visibility.showCurrencySelector || visibility.showExchangeRate) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="currency_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Moneda <span className="text-red-500">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Select value={field.value} onValueChange={field.onChange} disabled={currenciesLoading}>
-                            <SelectTrigger data-testid="select-partner-contribution-currency">
-                              <SelectValue placeholder="Seleccionar moneda" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-[var(--card-bg)] text-[var(--card-fg)] border-[var(--card-border)]">
-                              {currencies?.map((orgCurrency) => (
-                                <SelectItem 
-                                  key={orgCurrency.currency?.id} 
-                                  value={orgCurrency.currency?.id || ''}
-                                >
-                                  {orgCurrency.currency?.name} ({orgCurrency.currency?.symbol})
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {visibility.showCurrencySelector && (
+                    <FormField
+                      control={form.control}
+                      name="currency_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Moneda <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Select value={field.value} onValueChange={field.onChange} disabled={currenciesLoading}>
+                              <SelectTrigger data-testid="select-partner-contribution-currency">
+                                <SelectValue placeholder="Seleccionar moneda" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[var(--card-bg)] text-[var(--card-fg)] border-[var(--card-border)]">
+                                {currencies?.map((orgCurrency) => (
+                                  <SelectItem 
+                                    key={orgCurrency.currency?.id} 
+                                    value={orgCurrency.currency?.id || ''}
+                                  >
+                                    {orgCurrency.currency?.name} ({orgCurrency.currency?.symbol})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
 
                   {visibility.showExchangeRate && (
                     <FormField
@@ -529,8 +534,6 @@ export function PartnerContributionFormFields({
                     />
                   )}
                 </div>
-              ) : (
-                <input type="hidden" {...form.register('currency_id')} />
               )}
             </>
           );

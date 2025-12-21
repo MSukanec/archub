@@ -19,7 +19,7 @@ export const generalCostPaymentSchema = z.object({
   exchange_rate: z.number().optional(),
   notes: z.string().optional(),
   reference: z.string().optional(),
-  status: z.enum(['pending', 'confirmed', 'overdue', 'cancelled']).default('confirmed'),
+  status: z.enum(['pending', 'confirmed', 'rejected', 'void']).default('confirmed'),
 });
 
 export type GeneralCostPaymentFormData = z.infer<typeof generalCostPaymentSchema>;

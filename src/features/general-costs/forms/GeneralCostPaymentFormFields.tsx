@@ -194,69 +194,61 @@ function FormPanel({
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {visibility.showCurrencySelector ? (
-          <FormField
-            control={form.control}
-            name="currency_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Moneda <span className="text-red-500">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange} disabled={currenciesLoading}>
-                    <SelectTrigger data-testid="select-general-cost-payment-currency">
-                      <SelectValue placeholder="Seleccionar moneda" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencies?.map((orgCurrency) => (
-                        <SelectItem key={`currency-${orgCurrency.currency?.id}`} value={orgCurrency.currency?.id || ''}>
-                          {orgCurrency.currency?.name} ({orgCurrency.currency?.symbol})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        ) : (
-          <div className="hidden">
+      {(visibility.showCurrencySelector || visibility.showExchangeRate) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {visibility.showCurrencySelector && (
             <FormField
               control={form.control}
               name="currency_id"
-              render={({ field }) => <input type="hidden" {...field} />}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Moneda <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange} disabled={currenciesLoading}>
+                      <SelectTrigger data-testid="select-general-cost-payment-currency">
+                        <SelectValue placeholder="Seleccionar moneda" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {currencies?.map((orgCurrency) => (
+                          <SelectItem key={`currency-${orgCurrency.currency?.id}`} value={orgCurrency.currency?.id || ''}>
+                            {orgCurrency.currency?.name} ({orgCurrency.currency?.symbol})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-        )}
+          )}
 
-        {visibility.showExchangeRate ? (
-          <FormField
-            control={form.control}
-            name="exchange_rate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cotización (opcional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.0001"
-                    placeholder="Ej: 1000.00"
-                    value={field.value || ''}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
-                    data-testid="input-general-cost-payment-exchange-rate"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        ) : (
-          visibility.showCurrencySelector && <div />
-        )}
-      </div>
+          {visibility.showExchangeRate && (
+            <FormField
+              control={form.control}
+              name="exchange_rate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cotización (opcional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.0001"
+                      placeholder="Ej: 1000.00"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || undefined)}
+                      data-testid="input-general-cost-payment-exchange-rate"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
+      )}
 
       <FormField
         control={form.control}
@@ -274,8 +266,8 @@ function FormPanel({
                 <SelectContent>
                   <SelectItem value="pending">Pendiente</SelectItem>
                   <SelectItem value="confirmed">Confirmado</SelectItem>
-                  <SelectItem value="overdue">Vencido</SelectItem>
-                  <SelectItem value="cancelled">Cancelado</SelectItem>
+                  <SelectItem value="rejected">Rechazado</SelectItem>
+                  <SelectItem value="void">Anulado</SelectItem>
                 </SelectContent>
               </Select>
             </FormControl>
@@ -424,7 +416,7 @@ export function GeneralCostPaymentFormFields({
       exchange_rate: existingPayment.exchange_rate ?? undefined,
       notes: existingPayment.notes || '',
       reference: existingPayment.reference || '',
-      status: (existingPayment.status || 'confirmed') as 'pending' | 'confirmed' | 'overdue' | 'cancelled',
+      status: (existingPayment.status || 'confirmed') as 'pending' | 'confirmed' | 'rejected' | 'void',
     })
   }, [paymentId, paymentLoaded, existingPayment, mode, form])
 
@@ -522,7 +514,7 @@ export function GeneralCostPaymentFormFields({
       exchange_rate: data.exchange_rate ?? undefined,
       reference: data.reference || null,
       general_cost_id: data.general_cost_id || null,
-      status: (data.status || 'confirmed') as 'pending' | 'confirmed' | 'overdue' | 'cancelled',
+      status: data.status || 'confirmed',
       created_by: currentMember.id,
     }
 
