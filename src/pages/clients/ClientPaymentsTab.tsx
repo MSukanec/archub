@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, CheckCircle2, AlertCircle, Calendar, Upload, Download } from 'lucide-react'
+import React, { useState, useMemo, useEffect } from 'react';
+import { DollarSign, Plus, Edit, Trash2, Paperclip, Eye, CheckCircle2, AlertCircle, Calendar, Upload, Download, Filter, X } from 'lucide-react'
 import { convertToBaseCurrency, formatKPI, format as formatMoney } from '@/lib/money'
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakdown } from '@/lib/kpis'
 import { useCurrentUser } from '@/hooks/use-current-user'
@@ -39,6 +39,9 @@ import { useIsAdmin } from '@/hooks/use-admin-permissions'
 
 interface ClientPaymentsTabProps {
   projectId?: string;
+  initialFilterMonth?: string;
+  initialFilterClient?: string;
+  onClearDrillDown?: () => void;
 }
 
 interface PaymentMetrics {
@@ -59,7 +62,7 @@ interface PaymentMetrics {
   pending_by_currency: Array<{ currency_symbol: string; amount: number }>;
 }
 
-export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps) {
+export default function ClientPaymentsTab({ projectId, initialFilterMonth, initialFilterClient, onClearDrillDown }: ClientPaymentsTabProps) {
   const { data: userData } = useCurrentUser();
   const isAdmin = useIsAdmin();
   const { selectedProjectId } = useProjectContext();
@@ -86,14 +89,28 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
   // Get organization members to find current member for created_by FK
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
 
-  // Filter states
+  // Filter states - initialized with drill-down filters if provided
   const [filterWallet, setFilterWallet] = useState<string>('all');
   const [filterCurrency, setFilterCurrency] = useState<string>('all');
   const [filterHasSchedule, setFilterHasSchedule] = useState<string>('all');
   const [filterHasCommitment, setFilterHasCommitment] = useState<string>('all');
-  const [filterClient, setFilterClient] = useState<string>('all');
+  const [filterClient, setFilterClient] = useState<string>(initialFilterClient || 'all');
   const [filterUnit, setFilterUnit] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterMonth, setFilterMonth] = useState<string>(initialFilterMonth || 'all');
+
+  // Sync drill-down filters when props change
+  useEffect(() => {
+    if (initialFilterMonth !== undefined) {
+      setFilterMonth(initialFilterMonth || 'all');
+    }
+  }, [initialFilterMonth]);
+
+  useEffect(() => {
+    if (initialFilterClient !== undefined) {
+      setFilterClient(initialFilterClient || 'all');
+    }
+  }, [initialFilterClient]);
 
   // Multi-select state
   const [selectedPayments, setSelectedPayments] = useState<ClientPaymentWithRelations[]>([]);
@@ -206,6 +223,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     const currencies = new Set<string>();
     const clients = new Set<string>();
     const units = new Set<string>();
+    const months = new Set<string>();
 
     allPayments.forEach(payment => {
       if (payment.wallet?.wallets?.name) wallets.add(payment.wallet.wallets.name);
@@ -216,6 +234,14 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       }
       // Unit comes from commitment, not project client
       if (payment.commitment?.unit_name) units.add(payment.commitment.unit_name);
+      // Extract month from payment date
+      if (payment.payment_date) {
+        const date = parseLocalDate(payment.payment_date);
+        if (date) {
+          const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          months.add(monthKey);
+        }
+      }
     });
 
     return {
@@ -223,6 +249,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       currencies: Array.from(currencies).sort(),
       clients: Array.from(clients).sort(),
       units: Array.from(units).sort(),
+      months: Array.from(months).sort().reverse(),
     };
   }, [allPayments]);
 
@@ -255,9 +282,18 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
       // Filter by status
       if (filterStatus !== 'all' && payment.status !== filterStatus) return false;
       
+      // Filter by month
+      if (filterMonth !== 'all' && payment.payment_date) {
+        const date = parseLocalDate(payment.payment_date);
+        if (date) {
+          const paymentMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          if (paymentMonth !== filterMonth) return false;
+        }
+      }
+      
       return true;
     });
-  }, [allPayments, filterWallet, filterCurrency, filterHasSchedule, filterHasCommitment, filterClient, filterUnit, filterStatus]);
+  }, [allPayments, filterWallet, filterCurrency, filterHasSchedule, filterHasCommitment, filterClient, filterUnit, filterStatus, filterMonth]);
 
   // Delete payment mutation using feature hook
   const deletePaymentMutation = useDeleteClientPayment();
@@ -1056,7 +1092,23 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     filterHasCommitment !== 'all' || 
     filterClient !== 'all' || 
     filterUnit !== 'all' ||
-    filterStatus !== 'all';
+    filterStatus !== 'all' ||
+    filterMonth !== 'all';
+
+  // Check if we have drill-down filters from dashboard
+  const hasDrillDownFilter = !!(initialFilterMonth || initialFilterClient);
+  const drillDownLabel = useMemo(() => {
+    const parts: string[] = [];
+    if (initialFilterMonth) {
+      const [year, month] = initialFilterMonth.split('-');
+      const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      parts.push(`${monthNames[parseInt(month) - 1]} ${year}`);
+    }
+    if (initialFilterClient) {
+      parts.push(initialFilterClient);
+    }
+    return parts.join(' - ');
+  }, [initialFilterMonth, initialFilterClient]);
 
   const handleClearFilters = () => {
     setFilterWallet('all');
@@ -1066,6 +1118,8 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     setFilterClient('all');
     setFilterUnit('all');
     setFilterStatus('all');
+    setFilterMonth('all');
+    onClearDrillDown?.();
   };
 
   const handleViewPayment = (payment: ClientPaymentWithRelations) => {
@@ -1079,6 +1133,28 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
 
   return (
     <div className="space-y-6">
+      {/* Drill-down filter banner */}
+      {hasDrillDownFilter && drillDownLabel && (
+        <div className="flex items-center justify-between bg-accent/10 border border-accent/20 rounded-lg px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-accent" />
+            <span className="text-sm font-medium">
+              Filtrando desde dashboard: <span className="text-accent">{drillDownLabel}</span>
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClearFilters}
+            className="text-xs"
+            data-testid="button-clear-drilldown"
+          >
+            <X className="h-3 w-3 mr-1" />
+            Limpiar filtro
+          </Button>
+        </div>
+      )}
+
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {/* Card 1: Total Confirmado (2 cols en desktop, full row en mobile) */}
