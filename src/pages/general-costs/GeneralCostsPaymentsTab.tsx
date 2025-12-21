@@ -687,7 +687,7 @@ export default function GeneralCostsPaymentsTab({
           wallet_name: p.wallet?.wallets?.name,
           general_cost_name: p.general_cost?.name,
           category_name: p.general_cost?.category?.name,
-          creator_name: p.creator?.full_name,
+          creator_name: p.creator?.users?.full_name,
         })),
         total_count: sortedPayments.length,
         total_confirmed: confirmedPayments.length,
@@ -887,15 +887,15 @@ export default function GeneralCostsPaymentsTab({
               <TooltipTrigger asChild>
                 <div>
                   <IdentityBadge 
-                    name={payment.creator?.full_name}
-                    avatarUrl={payment.creator?.avatar_url}
+                    name={payment.creator?.users?.full_name}
+                    avatarUrl={payment.creator?.users?.avatar_url}
                     showName={false}
                     size="sm"
                   />
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {payment.creator?.full_name || 'Sin creador'}
+                {payment.creator?.users?.full_name || 'Sin creador'}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

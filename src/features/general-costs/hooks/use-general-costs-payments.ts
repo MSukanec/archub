@@ -49,9 +49,11 @@ export interface GeneralCostPayment {
   } | null
   creator?: {
     id: string
-    full_name: string | null
-    email: string
-    avatar_url: string | null
+    users?: {
+      id: string
+      full_name: string | null
+      avatar_url: string | null
+    } | null
   } | null
   media_links?: Array<{
     id: string

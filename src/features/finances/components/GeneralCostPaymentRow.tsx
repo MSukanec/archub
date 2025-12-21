@@ -51,9 +51,11 @@ interface GeneralCostPayment {
   } | null;
   creator?: {
     id: string;
-    full_name: string | null;
-    email: string;
-    avatar_url: string | null;
+    users?: {
+      id: string;
+      full_name: string | null;
+      avatar_url: string | null;
+    } | null;
   } | null;
 }
 
@@ -125,7 +127,7 @@ export default function GeneralCostPaymentRow({
 
   // Obtener avatar del creador
   const getCreatorAvatar = () => {
-    return payment.creator?.avatar_url;
+    return payment.creator?.users?.avatar_url;
   };
 
   // Formatear fecha de pago
