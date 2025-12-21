@@ -4,8 +4,8 @@ import { convertToBaseCurrency, formatKPI, format as formatMoney } from '@/lib/m
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakdown } from '@/lib/kpis'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
-import { Table } from '@/components/shared/trees/Table'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Table } from '@/components/shared/table'
+import { IdentityBadge } from '@/components/shared/IdentityBadge'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation'
@@ -928,20 +928,12 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     }).join(' + ');
   };
 
-  // Table columns
-  const columns: Array<{
-    key: string;
-    label: string;
-    render?: (item: ClientPaymentWithRelations) => React.ReactNode;
-    sortable?: boolean;
-    sortType?: "string" | "number" | "date";
-    width?: string;
-    align?: 'left' | 'center' | 'right';
-    cellClassName?: string;
-  }> = [
+  // Table columns with semantic types per REFACTORIZACION.md
+  const columns = [
     {
       key: 'payment_date',
       label: 'Fecha de Pago',
+      type: 'date' as const,
       sortable: true,
       render: (payment: ClientPaymentWithRelations) => formatDate(payment.payment_date, 'dd/MM/yyyy'),
     },
@@ -949,6 +941,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     ...(activeProjectId ? [] : [{
       key: 'project',
       label: 'Proyecto',
+      type: 'badge' as const,
       sortable: true,
       render: (payment: ClientPaymentWithRelations) => {
         if (!payment.project) return '-';
@@ -968,35 +961,32 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     {
       key: 'contact',
       label: 'Cliente',
+      type: 'long-text' as const,
       sortable: true,
       render: (payment: ClientPaymentWithRelations) => {
-        const initials = payment.client?.contact?.first_name?.[0] && payment.client?.contact?.last_name?.[0]
-          ? `${payment.client.contact.first_name[0]}${payment.client.contact.last_name[0]}`
-          : payment.client?.contact?.first_name?.[0] || '?';
+        const contact = payment.client?.contact;
+        const displayName = formatContactName(contact) || '-';
         
-        const displayName = formatContactName(payment.client?.contact);
+        const avatarUrl = (contact?.image_bucket && contact?.image_path)
+          ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${contact.image_bucket}/${contact.image_path}`
+          : null;
         
-        // Unit comes from commitment, not project client
         const unit = payment.commitment?.unit_name;
         
         return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col min-w-0">
-              <span className="font-bold truncate">{displayName || '-'}</span>
-              {unit && <span className="text-xs text-muted-foreground truncate">{unit}</span>}
-            </div>
-          </div>
+          <IdentityBadge
+            name={displayName}
+            avatarUrl={avatarUrl}
+            size="sm"
+            subLabel={unit}
+          />
         );
       },
     },
     {
       key: 'commitment_id',
       label: 'Compromiso',
+      type: 'amount' as const,
       sortable: true,
       render: (payment: ClientPaymentWithRelations) => {
         if (!payment.commitment) return '-';
@@ -1010,6 +1000,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     {
       key: 'schedule_id',
       label: 'Cuota',
+      type: 'date' as const,
       sortable: true,
       render: (payment: ClientPaymentWithRelations) => {
         if (!payment.schedule) return '-';
@@ -1023,6 +1014,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     {
       key: 'amount',
       label: 'Monto',
+      type: 'amount' as const,
       sortable: true,
       sortType: 'number' as const,
       render: (payment: ClientPaymentWithRelations) => (
@@ -1044,6 +1036,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
     {
       key: 'status',
       label: 'Estado',
+      type: 'status' as const,
       sortable: true,
       render: (payment: ClientPaymentWithRelations) => {
         const statusInfo = getClientPaymentStatusBadgeConfig(payment.status);
@@ -1054,7 +1047,7 @@ export default function ClientPaymentsTab({ projectId }: ClientPaymentsTabProps)
         );
       },
     },
-  ] as const;
+  ];
 
   const isFilterActive = 
     filterWallet !== 'all' || 

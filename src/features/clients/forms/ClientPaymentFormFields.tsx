@@ -104,18 +104,21 @@ function FormPanel({
         return {
           value: client.id,
           label: name,
-          render: () => (
-            <IdentityBadge
-              name={name}
-              avatarUrl={avatarUrl}
-              size="xs"
-              subLabel={client.role_name}
-            />
-          )
+          avatarUrl,
+          roleName: client.role_name,
         }
       })
       .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
   }, [projectClients])
+
+  const renderClientOption = (option: typeof clientOptions[number]) => (
+    <IdentityBadge
+      name={option.label}
+      avatarUrl={option.avatarUrl}
+      size="xs"
+      subLabel={option.roleName}
+    />
+  )
 
   const clientCommitments = useMemo(() => {
     if (!commitments || !selectedClientId) return [];
@@ -208,6 +211,7 @@ function FormPanel({
                   placeholder="Seleccionar cliente"
                   searchPlaceholder="Buscar cliente..."
                   emptyMessage="No se encontraron clientes"
+                  renderOption={(option) => renderClientOption(option as typeof clientOptions[number])}
                   data-testid="combobox-payment-client"
                 />
               </FormControl>
