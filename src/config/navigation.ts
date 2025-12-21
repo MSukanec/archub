@@ -144,7 +144,7 @@ export const PROJECT_NAVIGATION: NavigationEntry[] = [
   { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project', testId: 'nav-project-basic-data' },
   { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media', testId: 'nav-project-media' },
   { type: 'section-header', id: 'section-diseno', label: 'Diseño' },
-  { id: 'moodboard', label: 'Moodboard', icon: Palette, href: '/moodboard', testId: 'nav-project-moodboard' },
+  { id: 'moodboard', label: 'Moodboard', icon: Palette, href: '/project/moodboard', testId: 'nav-project-moodboard' },
   { type: 'section-header', id: 'section-construccion', label: 'Construcción' },
   { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel', restricted: 'coming_soon', testId: 'nav-project-personnel' },
   { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', testId: 'nav-project-materials' },

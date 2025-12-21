@@ -46,15 +46,17 @@ export function MoodboardGallery() {
     .filter((pin: Pin) => pin.image_url)
     .map((pin: Pin) => ({
       id: pin.id,
+      link_id: pin.id,
       file_url: pin.image_url!,
       file_name: pin.title || 'Sin título',
       file_type: 'image',
       file_size: undefined,
       created_at: pin.created_at,
       project_id: '',
-      project_name: undefined,
+      project_name: 'Global',
       description: pin.source_url || undefined,
-      link_id: pin.id
+      visibility: 'organization',
+      created_by: 'Extensión Chrome'
     }));
 
   return (

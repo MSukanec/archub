@@ -222,7 +222,7 @@ function Router() {
         <Route path="/project" component={ProjectData} />
         <Route path="/clients" component={Clients} />
         <Route path="/media" component={Media} />
-        <Route path="/moodboard" component={Moodboard} />
+        <Route path="/project/moodboard" component={Moodboard} />
         <Route path="/budgets" component={Budgets} />
         <Route path="/professional/budgets" component={Budgets} />
         <Route path="/professional/budgets/view/:id" component={BudgetView} />
