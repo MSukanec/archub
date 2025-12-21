@@ -380,6 +380,8 @@ export function GeneralCostPaymentFormFields({
   useEffect(() => {
     if (mode !== 'edit' || !paymentLoaded || !existingPayment) return
     if (hasLoadedPaymentRef.current === paymentId) return
+    
+    // Set ref immediately to prevent re-entry
     hasLoadedPaymentRef.current = paymentId ?? null
     
     let paymentDate: Date
@@ -403,7 +405,12 @@ export function GeneralCostPaymentFormFields({
     })
   }, [paymentId, paymentLoaded, existingPayment, mode, form])
 
+  const mediaFilesRef = useRef<string>('')
   useEffect(() => {
+    const currentMediaIds = (mediaFiles || []).map(f => f.id).sort().join(',')
+    if (mediaFilesRef.current === currentMediaIds) return
+    mediaFilesRef.current = currentMediaIds
+
     if (mediaFiles && mediaFiles.length > 0) {
       setExistingFiles(mediaFiles)
     } else {
