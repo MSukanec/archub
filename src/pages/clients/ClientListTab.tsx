@@ -353,7 +353,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             linkedUser={client.contacts?.linked_user}
             size="sm"
             subLabel={client.role?.name || undefined}
-            badges={client.role?.name ? [{ label: client.role.name, variant: 'secondary' as const }] : undefined}
           />
         );
       },
