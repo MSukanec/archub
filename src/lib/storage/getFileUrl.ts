@@ -28,13 +28,13 @@ export async function getFileUrl(
     }
   }
   
-  // public-assets: true public bucket, use public URL
-  if (bucket === 'public-assets') {
+  // public-assets and social-assets: use public URL
+  // social-assets contains project images that should be publicly accessible
+  if (bucket === 'public-assets' || bucket === 'social-assets') {
     return client.storage.from(bucket).getPublicUrl(path).data.publicUrl;
   }
   
-  // social-assets and private-assets: use signed URLs (RLS controlled)
-  // social-assets is "Hybrid" bucket with Project-scoped RLS, not truly public
+  // private-assets: use signed URLs (requires authentication)
   const { data, error } = await client.storage
     .from(bucket)
     .createSignedUrl(path, expiresIn);
