@@ -29,7 +29,8 @@ Preferred communication style: Simple, everyday language.
 - **Performance Optimizations**: Code-splitting, lazy loading, database views, smart caching, optimized backend endpoints.
 
 ### System Design Choices
-- **Module Architecture**: Feature-Sliced Design for core modules (PROJECTS, SUBCONTRACTS, PERSONNEL, CLIENTS, FINANCES, CAPITAL, LEARNING, MEDIA, SITELOG, etc.).
+- **Module Architecture**: Feature-Sliced Design for core modules (PROJECTS, SUBCONTRACTS, PERSONNEL, CLIENTS, FINANCES, CAPITAL, LEARNING, MEDIA, SITELOG, MOODBOARD, etc.).
+- **Moodboard Module**: Pinterest-style inspiration board accessible at `/project/moodboard`. Located in "DISEÑO" navigation section between "GESTIÓN" and "CONSTRUCCIÓN". Uses shared Gallery component to display pins from Chrome extension. Feature code in `src/features/moodboard/` and page in `src/pages/moodboard/`. Backend endpoint at `GET /api/pins`. Note: Current pins table is global (no project_id column), so pins are shared across all projects.
 - **Finances Module (Dual-Context)**: Accessible from both Organization sidebar (`/finances`) and Project sidebar (`/project/finances`). When accessed from Project context, movements auto-assign `project_id`. From Organization context, modal shows project selector only for types that require it. Movement types WITH project: `client_payment`, `material_payment`, `personnel_payment`. Movement types WITHOUT project: `partner_contribution`, `partner_withdrawal`, `general_cost_payment`.
 - **Capital Module**: Manages capital participants (formerly "partners/socios"). Database tables: `capital_participants` (main), `partner_contributions`, `partner_withdrawals`. Located at `/organization/capital` with feature code in `src/features/capital` and pages in `src/pages/capital`.
 - **Multi-tenancy**: Services consistently filter data by `organization_id`.
