@@ -419,6 +419,14 @@ export function initializeModalRegistry(): void {
       mode: data?.paymentId ? (data?.mode || 'edit') : (data?.mode || 'create')
     })
   });
+  registerModal('general-cost-payment', GeneralCostPaymentForm as any, {
+    ...financeConfig,
+    mapDataToProps: (data) => ({
+      paymentId: data?.paymentId,
+      organizationId: data?.organizationId,
+      mode: data?.paymentId ? (data?.mode || 'edit') : (data?.mode || 'create')
+    })
+  });
   registerModal('labor-type-form', AdminLaborModal as any, adminConfig);
   
   registerModal('subcontract', SubcontractFormModal as any, { ...projectConfig, size: 'xl' });

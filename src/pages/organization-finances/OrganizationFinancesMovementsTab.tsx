@@ -12,6 +12,7 @@ import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
 import { useDeleteClientPayment } from '@/features/clients/hooks/use-client-payments';
 import { useDeleteMaterialPayment } from '@/features/materials/hooks/use-material-payments';
 import { useDeletePersonnelPayment } from '@/features/personnel/hooks/use-personnel-payments';
+import { useDeleteGeneralCostPayment } from '@/hooks/use-general-costs-payments';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useFinancesDataHealth, DataHealthAlertMulti } from '@/core/data-health';
@@ -176,6 +177,7 @@ export function OrganizationFinancesMovementsTab() {
   const deleteClientPaymentMutation = useDeleteClientPayment();
   const deleteMaterialPaymentMutation = useDeleteMaterialPayment();
   const deletePersonnelPaymentMutation = useDeletePersonnelPayment();
+  const { mutate: deleteGeneralCostPayment, isPending: isDeleteGeneralCostPending } = useDeleteGeneralCostPayment();
 
   const formatCurrency = (amount: number, currencySymbol: string = '$') => {
     return `${currencySymbol} ${new Intl.NumberFormat('es-AR', {
