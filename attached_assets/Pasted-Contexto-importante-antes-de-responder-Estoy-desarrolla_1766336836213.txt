@@ -1,0 +1,53 @@
+Contexto importante antes de responder:
+Estoy desarrollando una extensión de Chrome llamada “Guardar en Seencel”.
+La extensión NO está en este proyecto de Replit y vos NO la conocés.
+La extensión fue desarrollada externamente y solo se comunica con el backend mediante HTTP (fetch).
+
+Tu tarea es explicarme TODO lo que VOS sabés y asumís desde el lado del BACKEND y SUPABASE, para poder integrar correctamente una extensión externa.
+
+Necesito que me expliques, de forma explícita y sin asumir nada, lo siguiente:
+
+1) BACKEND ACTUAL
+- Qué endpoints existen hoy relacionados con guardar contenido externo (pins, ideas, media, inspiración, etc).
+- Si existe o no un endpoint tipo POST /api/pins/save o similar.
+- Qué espera ese endpoint como input (payload exacto).
+- Qué devuelve realmente hoy.
+- Si hay lógica mockeada o incompleta.
+
+2) AUTENTICACIÓN Y SESIÓN
+- Cómo detecta el backend que un usuario está logueado.
+- Si depende de cookies, headers, tokens, Supabase Auth, etc.
+- Qué debería enviar una extensión externa para ser considerada “logueada”.
+
+3) MODELO DE DATOS REAL (Supabase)
+- Qué representan realmente estas entidades:
+  - organizations
+  - projects
+  - boards / tableros de inspiración (si existen)
+  - pins
+- Si existe una relación clara:
+  organización → proyecto → tablero → pin
+- Qué tablas existen hoy y cuáles NO.
+
+4) ESTADO REAL DEL GUARDADO
+- Si hoy se puede guardar un “pin” de forma real en la base de datos.
+- Si no, qué parte falta exactamente.
+- Qué cosas están hardcodeadas actualmente en el frontend del proyecto (por ejemplo mostrar “Seencel” como si fuera un tablero).
+
+5) DESCONEXIONES Y PROBLEMAS
+- Dónde ves una desconexión entre:
+  - lo que un cliente externo (extensión) necesitaría
+  - y lo que el backend realmente expone hoy.
+- Qué cosas deberían resolverse primero antes de que una extensión externa pueda guardar contenido correctamente.
+
+6) RECOMENDACIÓN TÉCNICA
+- Qué flujo recomendarías para integrar una extensión externa:
+  desde que el usuario hace “Guardar” hasta que el pin queda persistido.
+- Qué endpoints habría que crear o ajustar.
+- Qué información debería devolver el backend para que el frontend externo muestre:
+  - el proyecto correcto
+  - el tablero correcto
+  - sin hardcodear nombres como “Seencel”.
+
+Quiero una respuesta estructurada, honesta y basada SOLO en lo que existe hoy en este proyecto.
+No asumas features que no estén implementadas.
