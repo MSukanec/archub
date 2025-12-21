@@ -25,6 +25,14 @@ function getSupabaseClient() {
 
 export const supabase = getSupabaseClient()
 
+// Expose Supabase client to window for Chrome extension access (lazy getter to avoid duplicate instances)
+if (typeof window !== "undefined") {
+  Object.defineProperty(window, 'supabase', {
+    get: () => supabaseInstance,
+    configurable: true
+  });
+}
+
 // Helper function to refresh session when needed
 export async function refreshSupabaseSession() {
   try {

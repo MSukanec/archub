@@ -4,6 +4,7 @@ import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useIsAdmin } from '@/hooks/use-admin-permissions';
 import AdminOpsAlertsTab from './AdminOpsAlertsTab';
 import AdminOpsHistoryTab from './AdminOpsHistoryTab';
 import AdminOpsRunbooksTab from './AdminOpsRunbooksTab';
@@ -27,9 +28,11 @@ interface OpsStats {
 export default function AdminOps() {
   const [activeTab, setActiveTab] = useState('alertas');
   const { toast } = useToast();
+  const isAdmin = useIsAdmin();
 
   const { data: stats } = useQuery<OpsStats>({
     queryKey: ['/api/admin/ops/stats'],
+    enabled: isAdmin,
   });
 
   const runChecksMutation = useMutation({
@@ -75,7 +78,7 @@ export default function AdminOps() {
   ];
 
   const getActionButton = () => {
-    if (activeTab === 'alertas') {
+    if (activeTab === 'alertas' && isAdmin) {
       return {
         label: runChecksMutation.isPending ? "Ejecutando..." : "Ejecutar Checks",
         icon: runChecksMutation.isPending ? RefreshCw : Play,
