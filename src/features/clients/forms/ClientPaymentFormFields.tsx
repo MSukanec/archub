@@ -707,6 +707,80 @@ export function ClientPaymentFormFields({
 
   const createPaymentMutation = useCreateClientPayment()
   const updatePaymentMutation = useUpdateClientPayment()
+
+  React.useEffect(() => {
+    if (existingPayment && (mode === 'edit' || mode === 'view')) {
+      const paymentDate = parseLocalDate(existingPayment.payment_date) || new Date()
+      
+      form.reset({
+        payment_date: paymentDate,
+        created_by: existingPayment.created_by || currentMember?.id || '',
+        project_id: existingPayment.project_id || projectId || '',
+        client_id: existingPayment.client_id || '',
+        commitment_id: existingPayment.commitment_id || undefined,
+        wallet_id: existingPayment.wallet_id || '',
+        amount: existingPayment.amount || 0,
+        currency_id: existingPayment.currency_id || '',
+        exchange_rate: existingPayment.exchange_rate || undefined,
+        status: existingPayment.status || 'confirmed',
+        reference: existingPayment.reference || '',
+        notes: existingPayment.notes || '',
+      })
+    }
+  }, [existingPayment, mode, form, currentMember?.id, projectId])
+
+  React.useEffect(() => {
+    const fetchAttachments = async () => {
+      if (!paymentId || !organizationId || !projectId) return
+      
+      try {
+        const { supabase } = await import('@/lib/supabase')
+        const { data: sessionData } = await supabase.auth.getSession()
+        const token = sessionData?.session?.access_token
+        
+        if (!token) {
+          console.error('No auth token available for fetching attachments')
+          return
+        }
+        
+        const response = await fetch(
+          `/api/projects/${projectId}/client-payments/${paymentId}/attachments?organization_id=${organizationId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        )
+        
+        if (response.ok) {
+          const result = await response.json()
+          if (result.data) {
+            setAttachments(result.data)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching payment attachments:', error)
+      }
+    }
+    
+    if (mode === 'edit' || mode === 'view') {
+      fetchAttachments()
+    }
+  }, [paymentId, organizationId, projectId, mode])
+  
+  const existingFiles = useMemo(() => {
+    if (!attachments || attachments.length === 0) return []
+    
+    return attachments.map((attachment: any) => ({
+      id: attachment.id,
+      file_name: attachment.media_file?.file_name || 'Archivo adjunto',
+      file_type: attachment.media_file?.file_type || 'document',
+      file_size: attachment.media_file?.file_size || 0,
+      file_url: attachment.media_file?.file_url || '',
+      isExisting: true,
+    }))
+  }, [attachments])
+
   const queryClient = useQueryClient()
 
   const handleExistingFileDelete = async (fileId: string) => {
@@ -842,101 +916,6 @@ export function ClientPaymentFormFields({
       })
     }
   }
-
-  React.useEffect(() => {
-    if (existingPayment && (mode === 'edit' || mode === 'view')) {
-      const paymentDate = parseLocalDate(existingPayment.payment_date) || new Date()
-      
-      form.reset({
-        payment_date: paymentDate,
-        created_by: existingPayment.created_by || currentMember?.id || '',
-        project_id: existingPayment.project_id || projectId || '',
-        client_id: existingPayment.client_id || '',
-        commitment_id: existingPayment.commitment_id || undefined,
-        wallet_id: existingPayment.wallet_id || '',
-        amount: existingPayment.amount || 0,
-        currency_id: existingPayment.currency_id || '',
-        exchange_rate: existingPayment.exchange_rate || undefined,
-        status: existingPayment.status || 'confirmed',
-        reference: existingPayment.reference || '',
-        notes: existingPayment.notes || '',
-      })
-    }
-  }, [existingPayment, mode, form, currentMember?.id, projectId])
-
-  React.useEffect(() => {
-    const fetchAttachments = async () => {
-      if (!paymentId || !organizationId || !projectId) return
-      
-      try {
-        const { supabase } = await import('@/lib/supabase')
-        const { data: sessionData } = await supabase.auth.getSession()
-        const token = sessionData?.session?.access_token
-        
-        if (!token) {
-          console.error('No auth token available for fetching attachments')
-          return
-        }
-        
-        const response = await fetch(
-          `/api/projects/${projectId}/client-payments/${paymentId}/attachments?organization_id=${organizationId}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          }
-        )
-        
-        if (response.ok) {
-          const result = await response.json()
-          if (result.data) {
-            setAttachments(result.data)
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching payment attachments:', error)
-      }
-    }
-    
-    if (mode === 'edit' || mode === 'view') {
-      fetchAttachments()
-    }
-  }, [paymentId, organizationId, projectId, mode])
-  
-  const existingFiles = useMemo(() => {
-    if (!attachments || attachments.length === 0) return []
-    
-    return attachments.map((attachment: any) => ({
-      id: attachment.id,
-      file_name: attachment.media_file?.file_name || 'Archivo adjunto',
-      file_type: attachment.media_file?.file_type || 'document',
-      file_size: attachment.media_file?.file_size || 0,
-      file_url: attachment.media_file?.file_url || '',
-      isExisting: true,
-    }))
-  }, [attachments])
-
-  React.useEffect(() => {
-    if (mode === 'create' && !paymentId && currentMember?.id) {
-      form.setValue('created_by', currentMember.id)
-      
-      if (currencies && currencies.length > 0) {
-        const defaultCurrency = currencies.find(c => c.is_default)
-        const currencyId = defaultCurrency?.currency?.id || currencies[0].currency?.id
-        if (currencyId) {
-          form.setValue('currency_id', currencyId)
-        }
-      }
-      
-      if (wallets && wallets.length > 0) {
-        const defaultWallet = wallets.find(w => w.is_default)
-        const walletId = defaultWallet?.id || wallets[0].id
-        if (walletId) {
-          form.setValue('wallet_id', walletId)
-        }
-      }
-    }
-  }, [currencies, wallets, mode, paymentId, currentMember?.id, form])
 
   const queryClient = useQueryClient()
 
