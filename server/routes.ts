@@ -31,7 +31,6 @@ import { registerFounderRoutes } from './routes/founders';
 import { registerForumRoutes } from './routes/forum';
 import { registerPinsRoutes } from './routes/pins';
 import { registerExtensionRoutes } from './routes/extension';
-import { registerGeneralCostsRoutes } from './routes/general-costs';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get shared dependencies
@@ -120,9 +119,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register extension routes (context endpoint for Chrome extension)
   registerExtensionRoutes(app, deps);
-
-  // Register general costs routes (delete with admin privileges)
-  registerGeneralCostsRoutes(app, deps);
 
   // Public feature flags endpoint (for blocking purchases, etc.)
   app.get("/api/feature-flags", async (req, res) => {
