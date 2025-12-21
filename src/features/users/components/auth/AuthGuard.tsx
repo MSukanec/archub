@@ -13,8 +13,10 @@ interface AuthGuardProps {
 const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password', '/privacy', '/precios', '/founders', '/contact'];
 const PUBLIC_ROUTE_PREFIXES = ['/cursos', '/portal'];
 const ONBOARDING_ROUTES = ['/onboarding', '/select-mode'];
-// Routes where authenticated users should be redirected to /home
+// Routes where authenticated users should be redirected to organization dashboard
 const AUTH_REDIRECT_ROUTES = ['/login', '/register', '/forgot-password'];
+// PWA initial route - redirect authenticated users with completed onboarding
+const PWA_INITIAL_ROUTE = '/';
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const { 
@@ -134,9 +136,15 @@ export function AuthGuard({ children }: AuthGuardProps) {
     lastNavigationRef.current = null;
     
     // CASE 4: Redirect authenticated users away from auth routes (login/register)
-    // Allow landing page "/" to be viewed by authenticated users
     if (AUTH_REDIRECT_ROUTES.includes(location)) {
-      navigate('/home');
+      navigate('/organization/dashboard', { replace: true });
+      return;
+    }
+    
+    // CASE 5: PWA initial route - redirect authenticated users with completed onboarding to dashboard
+    // This handles when PWA opens at "/" for logged-in users
+    if (location === PWA_INITIAL_ROUTE && onboardingCompleted && hasPersonalData) {
+      navigate('/organization/dashboard', { replace: true });
       return;
     }
   }, [
