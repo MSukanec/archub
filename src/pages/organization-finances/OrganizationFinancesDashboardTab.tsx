@@ -4,7 +4,7 @@ import { type InsightAction } from '@/components/dashboard/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown, hasMultipleCurrencies } from '@/lib/kpis';
 import { format as formatMoney, formatKPI, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';
 import { 
   StatCard, 
   StatCardTitle, 
@@ -161,6 +161,7 @@ export default function OrganizationFinancesDashboardTab({
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
   const defaultCurrencyId = userData?.organization?.preferences?.default_currency_id;
+  const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
 
   const handleInsightAction = useCallback((action: InsightAction) => {
     switch (action.type) {
@@ -222,6 +223,7 @@ export default function OrganizationFinancesDashboardTab({
   const dataHealth = useFinancesDataHealth(allMovements, {
     organizationId: organizationId ?? '',
     defaultCurrencyId: defaultCurrencyId ?? undefined,
+    isMultiCurrency,
     enabled: !!organizationId && allMovements.length > 0,
   });
 

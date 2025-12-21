@@ -9,7 +9,7 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
 import { usePartners, usePartnerContributions, usePartnerWithdrawals } from '@/features/capital';
-import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -48,6 +48,7 @@ export default function Capital() {
   const { data: contributions = [] } = usePartnerContributions(organizationId);
   const { data: withdrawals = [] } = usePartnerWithdrawals(organizationId);
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
+  const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
 
   const availablePeriods = useMemo(() => {
     return calculateAvailablePeriods(contributions, withdrawals);
@@ -84,6 +85,7 @@ export default function Capital() {
   const dataHealth = useCapitalDataHealth(normalizedTransactions, {
     organizationId: organizationId || '',
     defaultCurrencyId: defaultCurrency?.id,
+    isMultiCurrency,
     enabled: !!organizationId && normalizedTransactions.length > 0,
   });
 

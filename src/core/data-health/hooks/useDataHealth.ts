@@ -14,6 +14,8 @@ const financesEngine = new DataHealthEngine(allFinancesRules);
 export interface UseDataHealthOptions {
   organizationId: string;
   defaultCurrencyId?: string;
+  /** Whether the organization has multi-currency enabled (more than 1 active currency) */
+  isMultiCurrency?: boolean;
   enabled?: boolean;
   filterTags?: string[];
 }
@@ -90,7 +92,7 @@ export function useGeneralCostsDataHealth(
   }>,
   options: UseDataHealthOptions
 ): UseDataHealthResult {
-  const { organizationId, defaultCurrencyId, enabled = true, filterTags } = options;
+  const { organizationId, defaultCurrencyId, isMultiCurrency, enabled = true, filterTags } = options;
 
   const result = useMemo(() => {
     if (!enabled || payments.length === 0) {
@@ -102,12 +104,13 @@ export function useGeneralCostsDataHealth(
     const ctx: DataHealthContext = {
       organizationId,
       defaultCurrencyId,
+      isMultiCurrency,
       locale: 'es-AR',
       dateToleranceDays: 0,
     };
 
     return paymentEngine.check(normalizedPayments, ctx, filterTags);
-  }, [payments, organizationId, defaultCurrencyId, enabled, filterTags]);
+  }, [payments, organizationId, defaultCurrencyId, isMultiCurrency, enabled, filterTags]);
 
   const insights = useMemo(() => {
     if (!result) return [];
@@ -207,7 +210,7 @@ export function useFinancesDataHealth(
   }>,
   options: UseDataHealthOptions
 ): UseFinancesDataHealthResult {
-  const { organizationId, defaultCurrencyId, enabled = true } = options;
+  const { organizationId, defaultCurrencyId, isMultiCurrency, enabled = true } = options;
 
   const result = useMemo(() => {
     if (!enabled || movements.length === 0) {
@@ -219,12 +222,13 @@ export function useFinancesDataHealth(
     const ctx: DataHealthContext = {
       organizationId,
       defaultCurrencyId,
+      isMultiCurrency,
       locale: 'es-AR',
       dateToleranceDays: 0,
     };
 
     return financesEngine.check(normalizedMovements, ctx, ['finances']);
-  }, [movements, organizationId, defaultCurrencyId, enabled]);
+  }, [movements, organizationId, defaultCurrencyId, isMultiCurrency, enabled]);
 
   const insights = useMemo(() => {
     if (!result) return [];
@@ -323,7 +327,7 @@ export function useCapitalDataHealth(
   transactions: NormalizedCapitalTransaction[],
   options: UseDataHealthOptions
 ): UseCapitalDataHealthResult {
-  const { organizationId, defaultCurrencyId, enabled = true } = options;
+  const { organizationId, defaultCurrencyId, isMultiCurrency, enabled = true } = options;
 
   const result = useMemo(() => {
     if (!enabled || transactions.length === 0) {
@@ -335,12 +339,13 @@ export function useCapitalDataHealth(
     const ctx: DataHealthContext = {
       organizationId,
       defaultCurrencyId,
+      isMultiCurrency,
       locale: 'es-AR',
       dateToleranceDays: 0,
     };
 
     return capitalEngine.check(normalizedTransactions, ctx, ['capital']);
-  }, [transactions, organizationId, defaultCurrencyId, enabled]);
+  }, [transactions, organizationId, defaultCurrencyId, isMultiCurrency, enabled]);
 
   const insights = useMemo(() => {
     if (!result) return [];

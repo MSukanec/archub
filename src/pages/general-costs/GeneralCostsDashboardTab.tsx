@@ -4,7 +4,7 @@ import { type InsightAction } from '@/components/dashboard/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakdown } from '@/lib/kpis';
 import { format, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';
 import { useGeneralCostsPayments } from '@/hooks/use-general-costs-payments';
 import { useGeneralCostsMonthlySummary } from '@/features/general-costs/hooks/use-general-costs-monthly-summary';
 import { useGeneralCostsByCategory } from '@/features/general-costs/hooks/use-general-costs-by-category';
@@ -165,6 +165,7 @@ export default function GeneralCostsDashboardTab({
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
   const defaultCurrencyId = userData?.organization?.preferences?.default_currency_id;
+  const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
 
   const handleInsightAction = useCallback((action: InsightAction) => {
     switch (action.type) {
@@ -246,6 +247,7 @@ export default function GeneralCostsDashboardTab({
   const dataHealth = useGeneralCostsDataHealth(allPayments, {
     organizationId: organizationId ?? '',
     defaultCurrencyId: defaultCurrencyId ?? undefined,
+    isMultiCurrency,
     enabled: !!organizationId && allPayments.length > 0,
     filterTags: ['general-costs'],
   });

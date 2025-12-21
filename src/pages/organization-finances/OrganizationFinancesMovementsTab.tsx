@@ -14,7 +14,7 @@ import { useDeleteMaterialPayment } from '@/features/materials/hooks/use-materia
 import { useDeletePersonnelPayment } from '@/features/personnel/hooks/use-personnel-payments';
 import { useDeleteGeneralCostPayment } from '@/hooks/use-general-costs-payments';
 import { useDeletePartnerContribution, useDeletePartnerWithdrawal } from '@/features/capital';
-import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useFinancesDataHealth, DataHealthAlertMulti } from '@/core/data-health';
 import { Table } from '@/components/shared/table';
@@ -96,6 +96,7 @@ export function OrganizationFinancesMovementsTab() {
   }, [currentOrganizationId, openModal]);
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined);
+  const { isMultiCurrency } = useOrgCurrencyContext(currentOrganizationId || undefined);
   
   const { data: rawMovements = [], isLoading } = useUnifiedMovements(
     currentOrganizationId || undefined,
@@ -113,6 +114,7 @@ export function OrganizationFinancesMovementsTab() {
   const dataHealth = useFinancesDataHealth(sortedMovements, {
     organizationId: currentOrganizationId || '',
     defaultCurrencyId: defaultCurrency?.id,
+    isMultiCurrency,
     enabled: !!currentOrganizationId && sortedMovements.length > 0,
   });
 

@@ -13,7 +13,7 @@ import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
 import { useDeleteClientPayment } from '@/features/clients/hooks/use-client-payments';
 import { useDeleteMaterialPayment } from '@/features/materials/hooks/use-material-payments';
 import { useDeletePersonnelPayment } from '@/features/personnel/hooks/use-personnel-payments';
-import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';
 import { useFinancesDataHealth, DataHealthAlertMulti } from '@/core/data-health';
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
@@ -69,6 +69,7 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
   const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined);
+  const { isMultiCurrency } = useOrgCurrencyContext(currentOrganizationId || undefined);
   
   const { data: rawMovements = [], isLoading } = useUnifiedMovements(
     currentOrganizationId || undefined,
@@ -86,6 +87,7 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
   const dataHealth = useFinancesDataHealth(sortedMovements, {
     organizationId: currentOrganizationId || '',
     defaultCurrencyId: defaultCurrency?.id,
+    isMultiCurrency,
     enabled: !!currentOrganizationId && sortedMovements.length > 0,
   });
 

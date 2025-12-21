@@ -26,6 +26,8 @@ export interface DataHealthContext {
   currencyMap?: Map<string, { code: string; symbol: string }>;
   defaultCurrencyId?: string;
   dateToleranceDays?: number;
+  /** Whether the organization has multi-currency enabled (more than 1 active currency) */
+  isMultiCurrency?: boolean;
 }
 
 export interface DataHealthRule<TInput = unknown> {

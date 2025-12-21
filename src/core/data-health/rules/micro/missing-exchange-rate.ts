@@ -19,27 +19,26 @@ function check<T extends ExchangeRateEntity>(
   items: T[],
   ctx: DataHealthContext
 ): MicroRuleResult<T> {
-  // Detectar si hay múltiples monedas en los datos
-  const uniqueCurrencies = new Set<string>();
-  for (const item of items) {
-    if (item.currencyId) {
-      uniqueCurrencies.add(item.currencyId);
-    }
-  }
-  
-  // Si solo hay una moneda, no hay problemas de cotización
-  if (uniqueCurrencies.size <= 1) {
+  // Si la organización NO es multimoneda, no hay problemas de cotización
+  // IMPORTANTE: Usamos el contexto de la org, no los datos
+  if (!ctx.isMultiCurrency) {
     return {
       affected: [],
       isEmpty: true,
     };
   }
   
-  // Hay múltiples monedas: CUALQUIER movimiento con exchange_rate = 1.0 es sospechoso
+  // La organización es multimoneda: verificar cada movimiento
+  // Cualquier movimiento con exchange_rate = 1.0 o null es sospechoso
   // porque 1.0 es el valor por defecto sin configuración de cotización
   const affected = items.filter(item => {
     // Si no tiene currencyId, skip
     if (!item.currencyId) return false;
+    
+    // Si es la moneda por defecto, exchange_rate = 1.0 está bien
+    if (ctx.defaultCurrencyId && item.currencyId === ctx.defaultCurrencyId) {
+      return false;
+    }
     
     // Si no tiene exchange_rate, es problema (falta configurar)
     if (!item.exchangeRate) return true;
@@ -47,7 +46,7 @@ function check<T extends ExchangeRateEntity>(
     // Si es NaN, es problema
     if (Number.isNaN(item.exchangeRate)) return true;
     
-    // Si es exactamente 1.0, es problema (valor por defecto sin configuración)
+    // Si es exactamente 1.0 y NO es la moneda por defecto, es problema
     if (item.exchangeRate === 1.0) return true;
     
     // Si es menor a 1.0, es problema (cotización inválida)
