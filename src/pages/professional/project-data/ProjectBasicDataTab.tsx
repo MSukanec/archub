@@ -90,7 +90,7 @@ export default function ProjectDataTab({ projectId }: ProjectDataTabProps) {
         .eq('is_deleted', false)
         .single();
         
-      if (error) {
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
         console.error('Error fetching project info:', error);
         throw error;
       }
