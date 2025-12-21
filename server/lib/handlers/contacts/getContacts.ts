@@ -26,10 +26,10 @@ export async function getContacts(
     if (mode === 'light') {
       const { data: contacts, error: contactsError } = await ctx.supabase
         .from('contacts')
-        .select('id, first_name, last_name, full_name, email, phone, linked_user_id, image_bucket, image_path, company_name')
+        .select('id, first_name, last_name, full_name, email, phone, linked_user_id, image_bucket, image_path, company_name, linked_user:users!contacts_linked_user_id_fkey(id, avatar_url)')
         .eq('organization_id', organizationId)
         .eq('is_deleted', false)
-        .order('first_name', { ascending: true });
+        .order('full_name', { ascending: true });
       
       if (contactsError) {
         console.error('Error fetching contacts (light):', contactsError);

@@ -55,20 +55,25 @@ function FormPanel({
   handleGoToContacts: () => void;
   isLoadingExisting?: boolean;
 }) {
-  const contactOptions = contacts.map(contact => {
-    const fullName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.company_name;
-    return {
-      value: contact.id,
-      label: fullName || contact.email,
-      firstName: contact.first_name,
-      lastName: contact.last_name,
-      fullName: fullName,
-      email: contact.email,
-      avatarUrl: contact.image_bucket && contact.image_path 
-        ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${contact.image_bucket}/${contact.image_path}`
-        : null,
-    };
-  });
+  const contactOptions = contacts
+    .map(contact => {
+      const fullName = contact.full_name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.company_name;
+      const avatarUrl = contact.linked_user?.avatar_url 
+        || (contact.image_bucket && contact.image_path 
+          ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${contact.image_bucket}/${contact.image_path}`
+          : null);
+      return {
+        value: contact.id,
+        label: fullName || contact.email,
+        firstName: contact.first_name,
+        lastName: contact.last_name,
+        fullName: fullName,
+        email: contact.email,
+        avatarUrl,
+        linkedUser: contact.linked_user,
+      };
+    })
+    .sort((a, b) => (a.label || '').localeCompare(b.label || '', 'es'));
 
   if (isLoadingExisting) {
     return (
@@ -116,6 +121,7 @@ function FormPanel({
                         <IdentityBadge
                           name={option.fullName || option.label}
                           avatarUrl={option.avatarUrl}
+                          linkedUser={option.linkedUser}
                           subLabel={option.email}
                           size="sm"
                         />
