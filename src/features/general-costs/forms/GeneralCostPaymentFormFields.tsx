@@ -407,7 +407,7 @@ export function GeneralCostPaymentFormFields({
 
   const mediaFilesRef = useRef<string>('')
   useEffect(() => {
-    const currentMediaIds = (mediaFiles || []).map(f => f.id).sort().join(',')
+    const currentMediaIds = (mediaFiles || []).map((f: any) => f.id).sort().join(',')
     if (mediaFilesRef.current === currentMediaIds) return
     mediaFilesRef.current = currentMediaIds
 
