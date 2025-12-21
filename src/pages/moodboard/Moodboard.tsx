@@ -45,7 +45,7 @@ export default function Moodboard() {
   };
 
   return (
-    <Layout headerProps={headerProps} wide={true}>
+    <Layout headerProps={headerProps} wide={false}>
       {!selectedBoardId ? (
         <MoodboardBoards onSelectBoard={setSelectedBoardId} />
       ) : (

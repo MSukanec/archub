@@ -258,7 +258,7 @@ export function LeftSidebar() {
         { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media' },
         { id: 'finances', label: 'Finanzas', icon: DollarSign, href: '/project/finances', restricted: 'lab_user' },
         { type: 'section-header', id: 'section-diseño', label: 'Diseño' },
-        { id: 'moodboard', label: 'Moodboard', icon: Palette, href: '/project/moodboard' },
+        { id: 'moodboard', label: 'Moodboard', icon: Palette, href: '/project/moodboard', restricted: 'coming_soon' },
         { type: 'section-header', id: 'section-construccion', label: 'Construcción' },
         { id: 'budgets', label: 'Cómputo y Presupuesto', icon: Calculator, href: '/budgets', restricted: 'coming_soon' },
         { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel' },
