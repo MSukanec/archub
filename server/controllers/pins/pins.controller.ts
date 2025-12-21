@@ -3,13 +3,14 @@ import { supabaseAdmin } from '../../lib/supabase/admin';
 import { nanoid } from 'nanoid';
 import dns from 'dns/promises';
 import https from 'https';
+import { extractToken, createAuthenticatedClient } from '../../lib/auth/helpers';
 
 interface SavePinBody {
   title: string;
-  url: string;
-  image: string;
-  organization_id?: string;
-  project_id?: string;
+  source_url: string;
+  image_url: string;
+  project_id: string;
+  board_id?: string;
 }
 
 interface GetPinsQuery {
@@ -384,75 +385,144 @@ export async function savePin(req: Request, res: Response) {
     
     console.log('[Pins] Received payload:', {
       title: body.title,
-      url: body.url,
-      image: body.image?.substring(0, 100) + '...',
-      organization_id: body.organization_id,
+      source_url: body.source_url,
+      image_url: body.image_url?.substring(0, 100) + '...',
       project_id: body.project_id,
+      board_id: body.board_id,
     });
 
-    if (!body.title || !body.url || !body.image) {
+    // === PASO 1: VALIDACIONES ===
+    
+    // 1.1 Verificar autenticación
+    const token = extractToken(req.headers.authorization);
+    if (!token) {
+      return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    const authenticatedSupabase = createAuthenticatedClient(token);
+    const { data: { user }, error: authError } = await authenticatedSupabase.auth.getUser();
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // 1.2 Obtener userId de la base de datos
+    const { data: dbUser, error: dbUserError } = await authenticatedSupabase
+      .from('users')
+      .select('id')
+      .eq('auth_id', user.id)
+      .single();
+
+    if (dbUserError || !dbUser) {
+      return res.status(404).json({ error: 'User not found in database' });
+    }
+    const userId = dbUser.id;
+
+    // 1.3 Obtener organización activa desde user_preferences
+    const { data: userPrefs, error: prefsError } = await authenticatedSupabase
+      .from('user_preferences')
+      .select('last_organization_id')
+      .eq('user_id', userId)
+      .single();
+
+    if (prefsError || !userPrefs?.last_organization_id) {
+      return res.status(400).json({ error: 'No active organization found' });
+    }
+    const organizationId = userPrefs.last_organization_id;
+
+    // 1.4 Obtener organization_member_id
+    const { data: member, error: memberError } = await authenticatedSupabase
+      .from('organization_members')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('organization_id', organizationId)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (memberError || !member) {
+      return res.status(403).json({ error: 'User is not a member of the active organization' });
+    }
+    const organizationMemberId = member.id;
+
+    // 1.5 Validar campos requeridos
+    if (!body.title || !body.source_url || !body.image_url || !body.project_id) {
       return res.status(400).json({ 
-        error: 'Missing required fields: title, url, image' 
+        error: 'Missing required fields: title, source_url, image_url, project_id' 
       });
     }
 
+    // 1.6 Verificar que project_id pertenezca a la organización activa
+    const { data: project, error: projectError } = await supabaseAdmin
+      .from('projects')
+      .select('id, organization_id')
+      .eq('id', body.project_id)
+      .single();
+
+    if (projectError || !project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    if (project.organization_id !== organizationId) {
+      return res.status(403).json({ error: 'Project does not belong to active organization' });
+    }
+
+    // === PASO 2: CREAR EL PIN ===
+    
     let mediaFileId: string | null = null;
-    let imageUrl = body.image;
 
-    if (body.organization_id) {
-      const downloaded = await downloadImage(body.image);
-      
-      if (downloaded) {
-        const uniqueFileName = `${nanoid(12)}-${downloaded.fileName}`;
-        const storagePath = `organizations/${body.organization_id}/moodboard/pins/${uniqueFileName}`;
+    // 2.1 Descargar imagen y subirla al storage
+    const downloaded = await downloadImage(body.image_url);
+    
+    if (downloaded) {
+      const uniqueFileName = `${nanoid(12)}-${downloaded.fileName}`;
+      const storagePath = `organizations/${organizationId}/moodboard/pins/${uniqueFileName}`;
 
-        console.log('[Pins] Uploading to storage:', storagePath);
+      console.log('[Pins] Uploading to storage:', storagePath);
 
-        const { error: uploadError } = await supabaseAdmin.storage
-          .from('private-assets')
-          .upload(storagePath, downloaded.buffer, {
-            contentType: downloaded.contentType,
-            cacheControl: '3600',
-            upsert: false,
-          });
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from('private-assets')
+        .upload(storagePath, downloaded.buffer, {
+          contentType: downloaded.contentType,
+          cacheControl: '3600',
+          upsert: false,
+        });
 
-        if (uploadError) {
-          console.error('[Pins] Storage upload error:', uploadError);
+      if (uploadError) {
+        console.error('[Pins] Storage upload error:', uploadError);
+      } else {
+        const { data: mediaFile, error: mediaFileError } = await supabaseAdmin
+          .from('media_files')
+          .insert({
+            bucket: 'private-assets',
+            file_path: storagePath,
+            file_name: downloaded.fileName,
+            file_type: getFileType(downloaded.contentType),
+            file_size: downloaded.buffer.length,
+            is_public: false,
+            is_deleted: false,
+            organization_id: organizationId,
+          })
+          .select()
+          .single();
+
+        if (mediaFileError) {
+          console.error('[Pins] Error creating media_file:', mediaFileError);
+          await supabaseAdmin.storage.from('private-assets').remove([storagePath]);
         } else {
-          const { data: mediaFile, error: mediaFileError } = await supabaseAdmin
-            .from('media_files')
-            .insert({
-              bucket: 'private-assets',
-              file_path: storagePath,
-              file_name: downloaded.fileName,
-              file_type: getFileType(downloaded.contentType),
-              file_size: downloaded.buffer.length,
-              is_public: false,
-              is_deleted: false,
-              organization_id: body.organization_id,
-            })
-            .select()
-            .single();
-
-          if (mediaFileError) {
-            console.error('[Pins] Error creating media_file:', mediaFileError);
-            await supabaseAdmin.storage.from('private-assets').remove([storagePath]);
-          } else {
-            mediaFileId = mediaFile.id;
-            console.log('[Pins] Created media_file:', mediaFileId);
-          }
+          mediaFileId = mediaFile.id;
+          console.log('[Pins] Created media_file:', mediaFileId);
         }
       }
     }
 
+    // 2.2 Insertar el pin
     const { data: pin, error: pinError } = await supabaseAdmin
       .from('pins')
       .insert({
         title: body.title,
-        source_url: body.url,
-        image_url: mediaFileId ? null : imageUrl,
-        organization_id: body.organization_id || null,
-        project_id: body.project_id || null,
+        source_url: body.source_url,
+        image_url: mediaFileId ? null : body.image_url,
+        organization_id: organizationId,
+        project_id: body.project_id,
         media_file_id: mediaFileId,
       })
       .select()
@@ -460,19 +530,17 @@ export async function savePin(req: Request, res: Response) {
 
     if (pinError) {
       console.error('[Pins] Error inserting pin:', pinError);
-      return res.status(500).json({ 
-        ok: false, 
-        error: pinError.message 
-      });
+      return res.status(500).json({ ok: false, error: pinError.message });
     }
 
+    // 2.3 Crear media_link si tenemos mediaFileId
     if (mediaFileId) {
       const { error: linkError } = await supabaseAdmin
         .from('media_links')
         .insert({
           media_file_id: mediaFileId,
-          organization_id: body.organization_id,
-          project_id: body.project_id || null,
+          organization_id: organizationId,
+          project_id: body.project_id,
           pin_id: pin.id,
           category: 'inspiration_pin',
           visibility: 'organization',
@@ -486,8 +554,92 @@ export async function savePin(req: Request, res: Response) {
       }
     }
 
+    // === PASO 3: RESOLVER EL BOARD ===
+    
+    let boardId: string;
+
+    if (body.board_id) {
+      // Caso A: Viene board_id - validar que exista, pertenezca al proyecto y a la organización
+      const { data: board, error: boardError } = await supabaseAdmin
+        .from('pin_boards')
+        .select('id, organization_id, project_id')
+        .eq('id', body.board_id)
+        .single();
+
+      if (boardError || !board) {
+        return res.status(404).json({ error: 'Board not found' });
+      }
+
+      if (board.organization_id !== organizationId || board.project_id !== body.project_id) {
+        return res.status(403).json({ error: 'Board does not belong to the specified project' });
+      }
+
+      boardId = board.id;
+    } else {
+      // Caso B: No viene board_id - buscar o crear "Inspiración"
+      const { data: existingBoard, error: searchError } = await supabaseAdmin
+        .from('pin_boards')
+        .select('id')
+        .eq('project_id', body.project_id)
+        .eq('name', 'Inspiración')
+        .maybeSingle();
+
+      if (searchError) {
+        console.error('[Pins] Error searching for default board:', searchError);
+        return res.status(500).json({ ok: false, error: 'Error searching for default board' });
+      }
+
+      if (existingBoard) {
+        boardId = existingBoard.id;
+        console.log('[Pins] Using existing "Inspiración" board:', boardId);
+      } else {
+        // Crear el board "Inspiración"
+        const { data: newBoard, error: createBoardError } = await supabaseAdmin
+          .from('pin_boards')
+          .insert({
+            organization_id: organizationId,
+            project_id: body.project_id,
+            name: 'Inspiración',
+            description: null,
+            created_by: organizationMemberId,
+          })
+          .select()
+          .single();
+
+        if (createBoardError || !newBoard) {
+          console.error('[Pins] Error creating default board:', createBoardError);
+          return res.status(500).json({ ok: false, error: 'Error creating default board' });
+        }
+
+        boardId = newBoard.id;
+        console.log('[Pins] Created new "Inspiración" board:', boardId);
+      }
+    }
+
+    // === PASO 4: ASOCIAR PIN AL BOARD ===
+    
+    const { error: itemError } = await supabaseAdmin
+      .from('pin_board_items')
+      .insert({
+        pin_id: pin.id,
+        board_id: boardId,
+        position: null,
+      });
+
+    if (itemError) {
+      console.error('[Pins] Error associating pin to board:', itemError);
+      // No fallamos completamente, el pin ya está creado
+    } else {
+      console.log('[Pins] Pin associated to board:', { pin_id: pin.id, board_id: boardId });
+    }
+
     console.log('[Pins] Pin saved successfully:', pin.id);
-    return res.json({ ok: true, id: pin.id, media_file_id: mediaFileId });
+    return res.json({ 
+      ok: true, 
+      id: pin.id, 
+      media_file_id: mediaFileId,
+      board_id: boardId,
+    });
 
   } catch (error: any) {
     console.error('[Pins] Unexpected error:', error);
