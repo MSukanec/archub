@@ -16,153 +16,45 @@ import type { ProjectClient, ProjectClientWithRelations } from '../types';
 export async function getProjectClients(
   projectId: string,
   organizationId: string
-): Promise<ProjectClientWithRelations[]> {
+): Promise<any[]> {
   if (!supabase || !organizationId || !projectId) {
     return [];
   }
 
-  const { data: clientsData, error } = await supabase
-    .from('project_clients')
-    .select(`
-      *,
-      contact:contacts(
-        id,
-        organization_id,
-        first_name,
-        last_name,
-        full_name,
-        email,
-        phone,
-        company_name,
-        location,
-        notes,
-        national_id,
-        linked_user_id,
-        image_bucket,
-        image_path,
-        avatar_updated_at,
-        is_local,
-        display_name_override,
-        linked_at,
-        sync_status,
-        created_at,
-        updated_at,
-        is_deleted,
-        deleted_at
-      ),
-      role:client_roles(
-        id,
-        organization_id,
-        name,
-        description,
-        is_default,
-        created_at,
-        updated_at,
-        is_deleted,
-        deleted_at
-      )
-    `)
+  const { data, error } = await supabase
+    .from('project_clients_view')
+    .select('*')
     .eq('organization_id', organizationId)
     .eq('project_id', projectId)
-    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (error) {
     throw error;
   }
 
-  if (!clientsData || clientsData.length === 0) {
-    return [];
-  }
-
-  const data = clientsData.map(client => ({
-    ...client,
-    contact: client.contact && !client.contact.is_deleted ? client.contact : null,
-    role: client.role && !client.role.is_deleted ? client.role : null,
-  }));
-
-  return data;
+  return data || [];
 }
 
-/**
- * Obtiene un cliente de proyecto específico por su ID.
- * 
- * Incluye:
- * - Contacto (contacts)
- * - Rol del cliente (client_roles)
- * 
- * @param clientId - ID del cliente de proyecto
- * @param organizationId - ID de la organización
- * @returns Cliente del proyecto con relaciones, o null si no existe
- * @throws {Error} Si falla la query de Supabase
- */
 export async function getProjectClientById(
   clientId: string,
   organizationId: string
-): Promise<ProjectClientWithRelations | null> {
+): Promise<any | null> {
   if (!supabase || !organizationId || !clientId) {
     return null;
   }
 
   const { data, error } = await supabase
-    .from('project_clients')
-    .select(`
-      *,
-      contact:contacts(
-        id,
-        organization_id,
-        first_name,
-        last_name,
-        full_name,
-        email,
-        phone,
-        company_name,
-        location,
-        notes,
-        national_id,
-        linked_user_id,
-        image_bucket,
-        image_path,
-        avatar_updated_at,
-        is_local,
-        display_name_override,
-        linked_at,
-        sync_status,
-        created_at,
-        updated_at,
-        is_deleted,
-        deleted_at
-      ),
-      role:client_roles(
-        id,
-        organization_id,
-        name,
-        description,
-        is_default,
-        created_at,
-        updated_at,
-        is_deleted,
-        deleted_at
-      )
-    `)
+    .from('project_clients_view')
+    .select('*')
     .eq('id', clientId)
     .eq('organization_id', organizationId)
-    .eq('is_deleted', false)
     .single();
 
   if (error) {
     throw error;
   }
 
-  if (!data) {
-    return null;
-  }
-
-  return {
-    ...data,
-    contact: data.contact && !data.contact.is_deleted ? data.contact : null,
-    role: data.role && !data.role.is_deleted ? data.role : null,
-  };
+  return data;
 }
 
 /**

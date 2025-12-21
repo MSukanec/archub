@@ -158,8 +158,11 @@ export default function ClientRow({
   'data-testid': dataTestId
 }: ClientRowProps) {
   
-  // Get avatar from contact's linked user
-  const avatarUrl = client.contacts?.linked_user?.avatar_url;
+  // Get avatar from contact's linked user or from images
+  const avatarUrl = client.contacts?.linked_user?.avatar_url 
+    || (client.contacts?.image_bucket && client.contacts?.image_path 
+      ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${client.contacts.image_bucket}/${client.contacts.image_path}`
+      : null);
   const avatarFallback = getClientInitials(client);
   
   // Get primary currency data (first currency in array)

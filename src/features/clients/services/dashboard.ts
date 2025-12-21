@@ -33,10 +33,7 @@ export async function getClientDashboardData(
   projectId: string,
   organizationId: string
 ): Promise<ClientDashboardData> {
-  console.log('[getClientDashboardData] Called with:', { projectId, organizationId, hasSupabase: !!supabase });
-  
   if (!supabase || !organizationId || !projectId) {
-    console.log('[getClientDashboardData] Early return - missing params');
     return {
       clients: [],
       commitments: [],
@@ -46,71 +43,65 @@ export async function getClientDashboardData(
     };
   }
 
-  let clients, commitments, payments, schedule;
-  
-  try {
-    console.log('[getClientDashboardData] Fetching project clients...');
-    clients = await getProjectClients(projectId, organizationId);
-    console.log('[getClientDashboardData] Project clients fetched:', clients.length);
-  } catch (error) {
-    console.error('[getClientDashboardData] Error fetching project clients:', error);
-    throw error;
-  }
+  // Paralelizar todas las consultas usando las nuevas vistas
+  const [
+    clientsResult,
+    commitmentsResult,
+    paymentsResult,
+    scheduleResult,
+    financialSummaryResult
+  ] = await Promise.all([
+    supabase.from('project_clients_view').select('*').eq('project_id', projectId).eq('organization_id', organizationId),
+    getClientCommitments(projectId, organizationId),
+    getClientPayments(projectId, organizationId),
+    getClientPaymentSchedule(projectId, organizationId),
+    supabase.from('client_financial_summary_view').select('*').eq('project_id', projectId).eq('organization_id', organizationId)
+  ]);
 
-  try {
-    console.log('[getClientDashboardData] Fetching commitments...');
-    commitments = await getClientCommitments(projectId, organizationId);
-    console.log('[getClientDashboardData] Commitments fetched:', commitments.length);
-  } catch (error) {
-    console.error('[getClientDashboardData] Error fetching commitments:', error);
-    throw error;
-  }
+  if (clientsResult.error) throw clientsResult.error;
+  if (financialSummaryResult.error) throw financialSummaryResult.error;
 
-  try {
-    console.log('[getClientDashboardData] Fetching payments...');
-    payments = await getClientPayments(projectId, organizationId);
-    console.log('[getClientDashboardData] Payments fetched:', payments.length);
-  } catch (error) {
-    console.error('[getClientDashboardData] Error fetching payments:', error);
-    throw error;
-  }
-
-  try {
-    console.log('[getClientDashboardData] Fetching schedule...');
-    schedule = await getClientPaymentSchedule(projectId, organizationId);
-    console.log('[getClientDashboardData] Schedule fetched:', schedule.length);
-  } catch (error) {
-    console.error('[getClientDashboardData] Error fetching schedule:', error);
-    throw error;
-  }
-
-  console.log('[getClientDashboardData] Fetched data:', {
-    clientsCount: clients.length,
-    commitmentsCount: commitments.length,
-    paymentsCount: payments.length,
-    scheduleCount: schedule.length,
-  });
-
-  const financialSummaries = calculateFinancialSummaries(
-    clients.map(c => c.id),
-    commitments,
-    payments,
-    schedule
-  );
-
-  console.log('[getClientDashboardData] Financial summaries count:', financialSummaries.length);
-
-  const result = {
-    clients,
-    commitments,
-    payments,
-    schedule,
-    financialSummaries,
+  return {
+    clients: (clientsResult.data || []).map(c => ({
+      ...c,
+      contacts: {
+        id: c.contact_id,
+        full_name: c.contact_full_name,
+        first_name: null,
+        last_name: null,
+        email: c.contact_email,
+        phone: c.contact_phone,
+        company_name: c.contact_company_name,
+        linked_user: c.linked_user_id ? { id: c.linked_user_id, avatar_url: c.contact_avatar_url } : null,
+        image_bucket: c.contact_image_bucket,
+        image_path: c.contact_image_path
+      },
+      role: c.role_name ? { id: c.client_role_id, name: c.role_name } : null
+    })),
+    commitments: commitmentsResult,
+    payments: paymentsResult,
+    schedule: scheduleResult,
+    financialSummaries: (financialSummaryResult.data || []).map(f => ({
+      clientId: f.client_id,
+      summaries: [{
+        ...f,
+        total_committed: f.total_committed_amount,
+        total_paid: f.total_paid_amount,
+        balance_due: f.balance_due,
+        // Mantener campos adicionales que calculateFinancialSummaries calculaba pero la vista aún no tiene (se pueden agregar a la vista después)
+        total_scheduled: 0,
+        total_schedule_items: 0,
+        schedule_paid: 0,
+        schedule_pending: 0,
+        schedule_overdue: 0,
+        next_due_date: null,
+        next_due_amount: null,
+        last_payment_date: null,
+        last_payment_amount: null,
+        currency: { id: f.currency_id, code: f.currency_code, symbol: f.currency_symbol }
+      }]
+    })),
   };
-
-  console.log('[getClientDashboardData] Returning result:', result);
-
-  return result;
 }
 
 /**

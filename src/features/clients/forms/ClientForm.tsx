@@ -487,6 +487,10 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
           queryKey: CLIENT_QUERY_KEYS.projectClients(projectId),
           refetchType: 'all',
         }),
+        queryClient.invalidateQueries({
+          queryKey: [`/api/contacts?organization_id=${organizationId}&mode=light`],
+          refetchType: 'all',
+        }),
         ...(isEditing && clientId && organizationId ? [
           queryClient.invalidateQueries({
             queryKey: [clientQueryUrl],
