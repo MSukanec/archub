@@ -118,7 +118,8 @@ export async function getClientPaymentSchedule(
     `)
     .in('commitment_id', commitmentIds)
     .eq('organization_id', organizationId)
-    .order('due_date', { ascending: true });
+    .order('due_date', { ascending: true })
+    .order('created_at', { ascending: false });
 
   if (error) {
     throw error;

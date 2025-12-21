@@ -51,7 +51,7 @@ export async function getClientDashboardData(
     scheduleResult,
     financialSummaryResult
   ] = await Promise.all([
-    supabase.from('project_clients_view').select('*').eq('project_id', projectId).eq('organization_id', organizationId),
+    supabase.from('project_clients_view').select('*').eq('project_id', projectId).eq('organization_id', organizationId).order('created_at', { ascending: false }),
     getClientCommitments(projectId, organizationId),
     getClientPayments(projectId, organizationId),
     getClientPaymentSchedule(projectId, organizationId),

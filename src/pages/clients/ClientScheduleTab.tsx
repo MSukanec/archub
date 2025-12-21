@@ -41,11 +41,11 @@ interface ClientScheduleTabProps {
 
 type ScheduleStatus = 'pending' | 'paid' | 'overdue' | 'cancelled';
 
-const STATUS_CONFIG: Record<ScheduleStatus, { label: string; variant: 'default' | 'destructive' | 'outline' | 'secondary'; className: string; icon: typeof Clock }> = {
-  pending: { label: 'Pendiente', variant: 'outline', className: 'border-amber-500/50 text-amber-500', icon: Clock },
-  paid: { label: 'Pagada', variant: 'default', className: 'bg-green-500/10 text-green-500 border-green-500/30', icon: CheckCircle2 },
-  overdue: { label: 'Vencida', variant: 'destructive', className: '', icon: AlertCircle },
-  cancelled: { label: 'Cancelada', variant: 'secondary', className: 'text-muted-foreground', icon: Ban },
+const STATUS_CONFIG: Record<ScheduleStatus, { label: string; variant: 'pending' | 'success' | 'error' | 'neutral'; className: string; icon: typeof Clock }> = {
+  pending: { label: 'Pendiente', variant: 'pending', className: '', icon: Clock },
+  paid: { label: 'Pagada', variant: 'success', className: '', icon: CheckCircle2 },
+  overdue: { label: 'Vencida', variant: 'error', className: '', icon: AlertCircle },
+  cancelled: { label: 'Cancelada', variant: 'neutral', className: '', icon: Ban },
 };
 
 export default function ClientScheduleTab({ projectId }: ClientScheduleTabProps) {
@@ -455,7 +455,7 @@ export default function ClientScheduleTab({ projectId }: ClientScheduleTabProps)
       {/* Filter indicator */}
       {filterStatus !== 'all' && (
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="gap-1">
+          <Badge variant="neutral" className="gap-1">
             Filtrando: {STATUS_CONFIG[filterStatus].label}
             <button 
               onClick={() => setFilterStatus('all')}
@@ -500,7 +500,6 @@ export default function ClientScheduleTab({ projectId }: ClientScheduleTabProps)
           rowActions={getRowActions}
           onRowClick={handleView}
           isLoading={isLoading}
-          emptyMessage="No hay cuotas que coincidan con el filtro"
           data-testid="table-schedule"
         />
       )}

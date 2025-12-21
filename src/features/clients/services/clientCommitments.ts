@@ -85,7 +85,8 @@ export async function getClientCommitments(
     .eq('organization_id', organizationId)
     .eq('project_id', projectId)
     .eq('is_deleted', false)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false });
 
   if (error) {
     throw error;

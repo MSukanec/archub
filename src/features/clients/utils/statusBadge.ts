@@ -1,15 +1,15 @@
 /**
  * Shared utility for client payment status badge styling
  * 
- * Maps payment status to shadcn Badge variant and theme-based className
- * Supports light/dark mode via CSS tokens instead of hardcoded colors
+ * Maps payment status to semantic Badge variant
+ * Supports light/dark mode via CSS tokens
  */
 
 export type ClientPaymentStatus = 'confirmed' | 'pending' | 'rejected' | 'void';
 
 export interface StatusBadgeConfig {
   label: string;
-  variant: 'default' | 'secondary' | 'destructive' | 'outline';
+  variant: 'success' | 'pending' | 'error' | 'neutral';
   className: string;
 }
 
@@ -23,23 +23,23 @@ export function getClientPaymentStatusBadgeConfig(status: ClientPaymentStatus): 
   const statusConfig: Record<ClientPaymentStatus, StatusBadgeConfig> = {
     confirmed: { 
       label: 'Confirmado', 
-      variant: 'default', 
-      className: 'bg-green-500/10 text-green-700 dark:text-green-400 hover:bg-green-500/20 border-green-500/20' 
+      variant: 'success', 
+      className: '' 
     },
     pending: { 
       label: 'Pendiente', 
-      variant: 'secondary', 
-      className: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 hover:bg-orange-500/20 border-orange-500/20' 
+      variant: 'pending', 
+      className: '' 
     },
     rejected: { 
       label: 'Rechazado', 
-      variant: 'destructive', 
+      variant: 'error', 
       className: '' 
     },
     void: { 
       label: 'Anulado', 
-      variant: 'outline', 
-      className: 'bg-muted/50 text-muted-foreground' 
+      variant: 'neutral', 
+      className: '' 
     },
   };
   

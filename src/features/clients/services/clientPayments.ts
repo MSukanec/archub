@@ -158,7 +158,8 @@ export async function getClientPayments(
     .eq('organization_id', organizationId)
     .eq('project_id', projectId)
     .or('is_deleted.is.null,is_deleted.eq.false')
-    .order('payment_date', { ascending: false });
+    .order('payment_date', { ascending: false })
+    .order('created_at', { ascending: false });
 
   if (error) {
     throw error;
