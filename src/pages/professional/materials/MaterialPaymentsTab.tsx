@@ -19,8 +19,8 @@ import {
   useCreateMaterialPayment,
   type MaterialPaymentWithRelations,
   MATERIAL_PAYMENT_STATUS,
-  getMaterialPaymentStatusBadgeConfig,
 } from '@/features/materials'
+import { PaymentStatusBadge, type PaymentStatus } from '@/components/shared/PaymentStatusBadge'
 import { useProject } from '@/features/projects/hooks/use-project'
 import { useProjects } from '@/features/projects/hooks/use-projects'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization/hooks'
@@ -709,14 +709,9 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
       label: 'Estado',
       type: 'status' as const,
       sortable: true,
-      render: (payment: MaterialPaymentWithRelations) => {
-        const statusInfo = getMaterialPaymentStatusBadgeConfig(payment.status);
-        return (
-          <Badge variant={statusInfo.variant} className={statusInfo.className}>
-            {statusInfo.label}
-          </Badge>
-        );
-      },
+      render: (payment: MaterialPaymentWithRelations) => (
+        <PaymentStatusBadge status={payment.status as PaymentStatus} />
+      ),
     },
   ];
 
@@ -903,9 +898,7 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
               <span className="text-sm text-muted-foreground">
                 {formatDate(payment.payment_date, 'dd/MM/yyyy')}
               </span>
-              <Badge variant={getMaterialPaymentStatusBadgeConfig(payment.status).variant} className={getMaterialPaymentStatusBadgeConfig(payment.status).className}>
-                {getMaterialPaymentStatusBadgeConfig(payment.status).label}
-              </Badge>
+              <PaymentStatusBadge status={payment.status as PaymentStatus} />
             </div>
             <div className="font-bold text-lg">
               {formatAmount(payment.amount, payment.currency?.symbol)}

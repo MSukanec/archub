@@ -29,6 +29,7 @@ import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
 
 export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all';
@@ -633,7 +634,7 @@ export default function PersonnelDashboardTab({
             )}
           </div>
         ),
-        badge: "Confirmado"
+        badge: <PaymentStatusBadge status="confirmed" />
       }));
   }, [confirmedPayments, defaultCurrency]);
 

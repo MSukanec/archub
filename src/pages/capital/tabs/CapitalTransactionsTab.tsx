@@ -13,7 +13,6 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useGlobalModalStore } from '@/components/modal';
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
 import { format } from 'date-fns';
@@ -34,7 +33,7 @@ import {
   type PartnerContribution,
   type PartnerWithdrawal,
 } from '@/features/capital';
-import { getPartnerTransactionStatusBadgeConfig } from '@/features/capital/utils/statusBadge';
+import { PaymentStatusBadge, type PaymentStatus } from '@/components/shared/PaymentStatusBadge';
 
 interface CapitalTransactionsTabProps {
   activeFilterIssueId?: string | null;
@@ -342,14 +341,9 @@ export function CapitalTransactionsTab({
       key: 'status',
       label: 'Estado',
       type: 'status' as const,
-      render: (item: UnifiedTransaction) => {
-        const config = getPartnerTransactionStatusBadgeConfig(item.status);
-        return (
-          <Badge variant={config.variant}>
-            {config.label}
-          </Badge>
-        );
-      },
+      render: (item: UnifiedTransaction) => (
+        <PaymentStatusBadge status={item.status as PaymentStatus} />
+      ),
     },
   ];
 
@@ -482,14 +476,7 @@ export function CapitalTransactionsTab({
                 )}
                 <span className="font-medium">{item.type === 'contribution' ? 'Aporte' : 'Retiro'}</span>
               </div>
-              {(() => {
-                const config = getPartnerTransactionStatusBadgeConfig(item.status);
-                return (
-                  <Badge variant={config.variant}>
-                    {config.label}
-                  </Badge>
-                );
-              })()}
+              <PaymentStatusBadge status={item.status as PaymentStatus} />
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{item.partner_name}</span>

@@ -28,7 +28,7 @@ import {
 } from '@/features/clients'
 import { useProject } from '@/features/projects/hooks/use-project'
 import { useProjects } from '@/features/projects/hooks/use-projects'
-import { getClientPaymentStatusBadgeConfig } from '@/features/clients/utils/statusBadge'
+import { PaymentStatusBadge, type PaymentStatus } from '@/components/shared/PaymentStatusBadge'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization/hooks'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import type { TargetField, ImportConfig, ProjectContext } from '@/features/imports/types'
@@ -1074,14 +1074,9 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
       label: 'Estado',
       type: 'status' as const,
       sortable: true,
-      render: (payment: ClientPaymentWithRelations) => {
-        const statusInfo = getClientPaymentStatusBadgeConfig(payment.status);
-        return (
-          <Badge variant={statusInfo.variant} className={statusInfo.className}>
-            {statusInfo.label}
-          </Badge>
-        );
-      },
+      render: (payment: ClientPaymentWithRelations) => (
+        <PaymentStatusBadge status={payment.status as PaymentStatus} />
+      ),
     },
   ];
 

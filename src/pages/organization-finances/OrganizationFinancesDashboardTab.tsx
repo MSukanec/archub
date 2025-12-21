@@ -28,6 +28,7 @@ import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
 import { cn } from '@/lib/utils';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
+import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
 
 export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all';
 
@@ -461,7 +462,8 @@ export default function OrganizationFinancesDashboardTab({
             <ArrowUpRight className="h-4 w-4 text-chart-positive" />
           ) : (
             <ArrowDownRight className="h-4 w-4 text-chart-negative" />
-          )
+          ),
+          badge: <PaymentStatusBadge status="confirmed" />
         };
       });
   }, [confirmedMovements, ingresoTypes]);
@@ -482,7 +484,7 @@ export default function OrganizationFinancesDashboardTab({
   return (
     <div className="space-y-6">
       <DataHealthAlertMulti
-        issues={dataHealth.issues}
+        issues={dataHealth.result?.issues || []}
         entityLabel="movimiento"
         dismissedIssueIds={dismissedIssueIds}
         onDismissIssue={(issueId: string) => {

@@ -31,7 +31,7 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
+import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
@@ -635,7 +635,7 @@ export default function GeneralCostsDashboardTab({
             )}
           </div>
         ),
-        badge: "Confirmado"
+        badge: <PaymentStatusBadge status="confirmed" />
       }));
   }, [confirmedPayments, defaultCurrency]);
 
@@ -678,7 +678,7 @@ export default function GeneralCostsDashboardTab({
   return (
     <div className="space-y-6" data-testid="general-costs-dashboard">
       <DataHealthAlertMulti
-        issues={dataHealth.issues}
+        issues={dataHealth.result?.issues || []}
         entityLabel="pago"
         dismissedIssueIds={dismissedIssueIds}
         onDismissIssue={(issueId: string) => {

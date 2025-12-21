@@ -37,8 +37,8 @@ import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
 import { MiniSparkline } from '@/components/charts/MiniSparkline';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
 import { cn } from '@/lib/utils';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
 import { 
@@ -513,11 +513,7 @@ export default function CapitalDashboardTab({
         id: t.id,
         title: t.partnerName,
         subtitle: formatDateShort(parseLocalDate(t.date) || new Date()),
-        badge: t.type === 'contribution' ? (
-          <ArrowDownCircle className="h-4 w-4 text-[var(--positive)]" />
-        ) : (
-          <ArrowUpCircle className="h-4 w-4 text-[var(--negative)]" />
-        ),
+        badge: <PaymentStatusBadge status="confirmed" />,
         rightContent: (
           <span className={cn(
             "text-sm font-medium",
