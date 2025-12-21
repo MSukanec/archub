@@ -71,7 +71,7 @@ const MOVEMENT_TYPE_CONFIG: Record<string, {
   },
   general_cost_payment: { 
     label: 'Gastos Generales', 
-    modalType: 'general-cost-payment',
+    modalType: 'general-costs-payment',
     icon: DollarSign,
   },
 };
@@ -236,6 +236,11 @@ export function OrganizationFinancesMovementsTab() {
             organizationId: currentOrganizationId,
             projectId: movement.project_id || '',
           });
+        case 'general_cost_payment':
+          return deleteGeneralCostPayment({
+            paymentId: movement.id,
+            organizationId: currentOrganizationId,
+          });
       }
     };
 
@@ -248,7 +253,8 @@ export function OrganizationFinancesMovementsTab() {
       onDelete: deleteHandler,
       isLoading: deleteClientPaymentMutation.isPending || 
                  deleteMaterialPaymentMutation.isPending || 
-                 deletePersonnelPaymentMutation.isPending,
+                 deletePersonnelPaymentMutation.isPending ||
+                 isDeleteGeneralCostPending,
     });
   };
 
