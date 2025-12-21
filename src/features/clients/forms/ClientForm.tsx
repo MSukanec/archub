@@ -380,7 +380,7 @@ export function ClientForm({ modalData, onClose, mode = 'create' }: ClientFormPr
 
   // Query to get existing project clients (to filter them from contact selector)
   const { data: existingProjectClients = [] } = useQuery<any[]>({
-    queryKey: [`/api/projects/${projectId}/clients?organization_id=${organizationId}`],
+    queryKey: CLIENT_QUERY_KEYS.projectClients(projectId),
     enabled: !!organizationId && !!projectId && !isEditing && !isViewMode,
     staleTime: 2 * 60 * 1000,
   });
