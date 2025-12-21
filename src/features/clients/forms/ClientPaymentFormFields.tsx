@@ -23,10 +23,11 @@ import { uploadFile, deleteFile } from '@/lib/storage'
 import { FileUploader } from '@/components/shared/fields/FileUploader'
 import { useQueryClient } from '@tanstack/react-query'
 import { ComboBox } from '@/components/shared/fields/ComboBoxWriteField'
-import { 
-  useProjectClients, 
-  useClientPayment, 
-  useCreateClientPayment, 
+import { IdentityBadge } from '@/components/shared/IdentityBadge'
+import {
+  useProjectClients,
+  useClientPayment,
+  useCreateClientPayment,
   useUpdateClientPayment,
   useClientCommitments,
 } from '@/features/clients/hooks'
@@ -87,13 +88,30 @@ function FormPanel({
 
   const clientOptions = useMemo(() => {
     if (!projectClients) return []
-    
+
     return projectClients
       .map(client => {
-        const name = formatContactName(client.contact)
+        const name = client.contact_full_name ||
+                    client.contact_company_name ||
+                    `${client.contact_first_name || ''} ${client.contact_last_name || ''}`.trim() ||
+                    '-';
+
+        const avatarUrl = client.linked_user_avatar_url
+          || (client.contact_image_bucket && client.contact_image_path
+            ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${client.contact_image_bucket}/${client.contact_image_path}`
+            : null);
+
         return {
           value: client.id,
-          label: name
+          label: name,
+          render: () => (
+            <IdentityBadge
+              name={name}
+              avatarUrl={avatarUrl}
+              size="xs"
+              subLabel={client.role_name}
+            />
+          )
         }
       })
       .sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }))
@@ -449,9 +467,18 @@ function ViewPanel({
         <div>
           <h4 className="text-xs font-medium text-muted-foreground mb-1.5">Cliente</h4>
           <div className="flex flex-col">
-            <span className="text-base font-semibold" data-testid="text-payment-client-name">
-              {formatContactName(existingPayment.client?.contact) || '-'}
-            </span>
+            <IdentityBadge
+              name={existingPayment.client?.contact_full_name || 
+                    existingPayment.client?.contact_company_name || 
+                    `${existingPayment.client?.contact_first_name || ''} ${existingPayment.client?.contact_last_name || ''}`.trim() || 
+                    '-'}
+              avatarUrl={existingPayment.client?.linked_user_avatar_url || 
+                        (existingPayment.client?.contact_image_bucket && existingPayment.client?.contact_image_path 
+                          ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${existingPayment.client.contact_image_bucket}/${existingPayment.client.contact_image_path}`
+                          : null)}
+              size="sm"
+              subLabel={existingPayment.client?.role_name}
+            />
           </div>
         </div>
         <div>
