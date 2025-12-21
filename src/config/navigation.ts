@@ -28,7 +28,8 @@ import {
   HandHeart,
   Award,
   Mail,
-  FlaskConical
+  FlaskConical,
+  Palette
 } from "lucide-react";
 import { LuContact } from "react-icons/lu";
 import { LuHandshake } from "react-icons/lu";
@@ -142,6 +143,8 @@ export const PROJECT_NAVIGATION: NavigationEntry[] = [
   { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard', testId: 'nav-project-dashboard' },
   { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project', testId: 'nav-project-basic-data' },
   { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media', testId: 'nav-project-media' },
+  { type: 'section-header', id: 'section-diseno', label: 'Diseño' },
+  { id: 'moodboard', label: 'Moodboard', icon: Palette, href: '/moodboard', testId: 'nav-project-moodboard' },
   { type: 'section-header', id: 'section-construccion', label: 'Construcción' },
   { id: 'personnel', label: 'Mano de Obra', icon: Users, href: '/construction/personnel', restricted: 'coming_soon', testId: 'nav-project-personnel' },
   { id: 'materials', label: 'Materiales', icon: Package, href: '/construction/materials', testId: 'nav-project-materials' },

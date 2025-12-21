@@ -54,6 +54,9 @@ import Calendar from "@/pages/professional/calendar/Calendar";
 // Media Pages
 import Media from "@/pages/media/Media";
 
+// Moodboard Pages
+import Moodboard from "@/pages/moodboard/Moodboard";
+
 import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
 import OrganizationData from "@/pages/organization-data/OrganizationData";
 import OrganizationSettings from "@/pages/organization-settings/OrganizationSettings";
@@ -219,6 +222,7 @@ function Router() {
         <Route path="/project" component={ProjectData} />
         <Route path="/clients" component={Clients} />
         <Route path="/media" component={Media} />
+        <Route path="/moodboard" component={Moodboard} />
         <Route path="/budgets" component={Budgets} />
         <Route path="/professional/budgets" component={Budgets} />
         <Route path="/professional/budgets/view/:id" component={BudgetView} />

@@ -1,0 +1,73 @@
+import { Gallery as GalleryComponent } from '@/components/shared/viewers/Gallery';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { Palette } from 'lucide-react';
+import { usePins } from '@/features/moodboard';
+import type { Pin } from '@/features/moodboard';
+
+export function MoodboardGallery() {
+  const { 
+    data: pins = [], 
+    isLoading, 
+    error 
+  } = usePins();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64" data-testid="loading-moodboard">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando moodboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <EmptyState
+        icon={<Palette />}
+        title="Error al cargar el moodboard"
+        description="Hubo un problema al cargar los pins de inspiración"
+      />
+    );
+  }
+
+  if (pins.length === 0) {
+    return (
+      <EmptyState
+        icon={<Palette />}
+        title="Sin pins de inspiración"
+        description="Aún no hay imágenes guardadas en el moodboard. Usa la extensión de Chrome para guardar inspiración desde la web."
+      />
+    );
+  }
+
+  const galleryItems = pins
+    .filter((pin: Pin) => pin.image_url)
+    .map((pin: Pin) => ({
+      id: pin.id,
+      file_url: pin.image_url!,
+      file_name: pin.title || 'Sin título',
+      file_type: 'image',
+      file_size: undefined,
+      created_at: pin.created_at,
+      project_id: '',
+      project_name: undefined,
+      description: pin.source_url || undefined,
+      link_id: pin.id
+    }));
+
+  return (
+    <div className="space-y-6" data-testid="moodboard-gallery">
+      <GalleryComponent
+        files={galleryItems}
+        style="masonry"
+        onDownload={(file) => {
+          if (file.file_url) {
+            window.open(file.file_url, '_blank');
+          }
+        }}
+      />
+    </div>
+  );
+}
