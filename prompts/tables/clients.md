@@ -1,6 +1,6 @@
-# Detalle de las tablas de Supabase de Construction:
+# Detalle de las tablas de Supabase de CLIENTES:
 
----------- TABLA CLIENT_COMMITMENTS:
+## Tabla CLIENT_COMMITMENTS:
 
 create table public.client_commitments (
   id uuid not null default gen_random_uuid (),
@@ -50,7 +50,7 @@ create trigger client_commitments_set_updated_at BEFORE
 update on client_commitments for EACH row
 execute FUNCTION update_timestamp ();
 
----------- TABLA CLIENT_PAYMENT_SCHEDULE:
+## Tabla CLIENT_PAYMENT_SCHEDULE:
 
 create table public.client_payment_schedule (
   id uuid not null default gen_random_uuid (),
@@ -89,7 +89,7 @@ create index IF not exists client_payment_schedule_commitment_idx on public.clie
 
 create index IF not exists client_payment_schedule_due_idx on public.client_payment_schedule using btree (due_date) TABLESPACE pg_default;
 
----------- TABLA CLIENT_PAYMENTS:
+## Tabla CLIENT_PAYMENTS:
 
 create table public.client_payments (
   id uuid not null default gen_random_uuid (),
@@ -146,7 +146,7 @@ create index IF not exists idx_client_payments_view_project on public.client_pay
 
 create index IF not exists idx_client_payments_view_org on public.client_payments using btree (organization_id, payment_date desc) TABLESPACE pg_default;
 
----------- TABLA CLIENT_ROLES:
+## Tabla CLIENT_ROLES:
 
 create table public.client_roles (
   id uuid not null default gen_random_uuid (),
@@ -162,7 +162,7 @@ create table public.client_roles (
   constraint client_roles_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
----------- TABLA PROJECT_CLIENTS:
+## Tabla PROJECT_CLIENTS:
 
 create table public.project_clients (
   id uuid not null default gen_random_uuid (),
@@ -210,7 +210,7 @@ create index IF not exists idx_project_clients_client on public.project_clients 
 
 create index IF not exists idx_project_clients_created_at on public.project_clients using btree (created_at) TABLESPACE pg_default;
 
-  ---------- TABLA CONTACTS:
+## Tabla CONTACTS:
 
  create table public.contacts (
   id uuid not null default gen_random_uuid (),
@@ -253,7 +253,7 @@ or
 update OF email on contacts for EACH row
 execute FUNCTION handle_contact_link_user ();
 
----------- TABLA USERS:
+## Tabla USERS:
 
 create table public.users (
   id uuid not null default gen_random_uuid (),

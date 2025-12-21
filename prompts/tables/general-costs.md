@@ -1,6 +1,6 @@
 # Detalle de las tablas de Supabase de COSTOS GENERALES:
 
----------- TABLA GENERAL_COST_CATEGORIES:
+## Tabla GENERAL_COST_CATEGORIES:
 
 create table public.general_cost_categories (
   id uuid not null default gen_random_uuid (),
@@ -48,7 +48,7 @@ create trigger trg_set_updated_at_general_cost_categories BEFORE
 update on general_cost_categories for EACH row
 execute FUNCTION set_updated_at ();
 
----------- TABLA GENERAL_COST_PAYMENT_ALLOCATIONS:
+## Tabla GENERAL_COST_PAYMENT_ALLOCATIONS:
 
 create table public.general_cost_payment_allocations (
   id uuid not null default gen_random_uuid (),
@@ -62,7 +62,7 @@ create table public.general_cost_payment_allocations (
   constraint general_cost_payment_allocations_percentage_check check ((percentage > (0)::numeric))
 ) TABLESPACE pg_default;
 
----------- TABLA GENERAL_COSTS:
+## Tabla GENERAL_COSTS:
 
 create table public.general_costs (
   id uuid not null default gen_random_uuid (),
@@ -86,7 +86,7 @@ create table public.general_costs (
 
 create index IF not exists idx_general_costs_org_deleted on public.general_costs using btree (organization_id, is_deleted) TABLESPACE pg_default;
 
----------- TABLA GENERAL_COSTS_PAYMENTS:
+## Tabla GENERAL_COSTS_PAYMENTS:
 
 create table public.general_costs_payments (
   id uuid not null default gen_random_uuid (),
@@ -132,7 +132,7 @@ create index IF not exists idx_gc_payments_general_cost on public.general_costs_
 
 create index IF not exists idx_gc_payments_wallet on public.general_costs_payments using btree (wallet_id) TABLESPACE pg_default;
 
----------- VISTA GENERAL_COSTS_BY_CATEGORY_VIEW:
+## Vista GENERAL_COSTS_BY_CATEGORY_VIEW:
 
 create view public.general_costs_by_category_view as
 select
@@ -149,7 +149,7 @@ group by
   general_costs_payments_view.category_id,
   general_costs_payments_view.category_name;
 
-  ---------- VISTA GENERAL_COSTS_MONTHLY_SUMMARY_VIEW:
+## Vista GENERAL_COSTS_MONTHLY_SUMMARY_VIEW:
 
   create view public.general_costs_monthly_summary_view as
   select
@@ -163,7 +163,7 @@ group by
     general_costs_payments_view.organization_id,
     general_costs_payments_view.payment_month;
 
----------- VISTA GENERAL_COSTS_PAYMENTS_VIEW:
+## Vista GENERAL_COSTS_PAYMENTS_VIEW:
 
 create view public.general_costs_payments_view as
 select
