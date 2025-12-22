@@ -143,6 +143,7 @@ export const PROJECT_NAVIGATION: NavigationEntry[] = [
   { id: 'dashboard', label: 'Visión General', icon: Home, href: '/project/dashboard', testId: 'nav-project-dashboard' },
   { id: 'basic-data', label: 'Datos Básicos', icon: FileText, href: '/project', testId: 'nav-project-basic-data' },
   { id: 'media', label: 'Archivos y Media', icon: FolderOpen, href: '/media', testId: 'nav-project-media' },
+  { id: 'finances', label: 'Finanzas', icon: DollarSign, href: '/project/finances', restricted: 'lab_user', testId: 'nav-project-finances' },
   { type: 'section-header', id: 'section-diseno', label: 'Diseño' },
   { id: 'moodboard', label: 'Moodboard', icon: Palette, href: '/project/moodboard', testId: 'nav-project-moodboard' },
   { type: 'section-header', id: 'section-construccion', label: 'Construcción' },
@@ -153,8 +154,6 @@ export const PROJECT_NAVIGATION: NavigationEntry[] = [
   { id: 'logs', label: 'Bitácora de Obra', icon: BookOpen, href: '/construction/logs', testId: 'nav-project-logs' },
   { type: 'section-header', id: 'section-comercializacion', label: 'Comercialización y Venta' },
   { id: 'clients', label: 'Clientes', icon: LuHandshake, href: '/clients', testId: 'nav-project-clients' },
-  { type: 'section-header', id: 'section-finanzas-proyecto', label: 'Finanzas' },
-  { id: 'finances', label: 'Finanzas', icon: DollarSign, href: '/project/finances', restricted: 'lab_user', testId: 'nav-project-finances' },
 ];
 
 export const ADMIN_NAVIGATION: NavigationItem[] = [
