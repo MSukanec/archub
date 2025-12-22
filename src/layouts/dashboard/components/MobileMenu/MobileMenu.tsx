@@ -219,7 +219,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                             setSidebarLevel('project');
                             if (contextButton.href) {
                               navigate(contextButton.href);
-                              handleCloseMenu();
                             }
                           }}
                           isActive={isActive}
@@ -237,7 +236,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       setSidebarLevel(contextButton.id);
                       if (contextButton.href) {
                         navigate(contextButton.href);
-                        handleCloseMenu();
                       }
                     };
 
@@ -301,7 +299,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                                     window.open(item.href, '_blank');
                                   } else {
                                     navigate(item.href);
-                                    handleCloseMenu();
                                   }
                                 }}
                                 isActive={isActive}
@@ -356,7 +353,6 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                             window.open(item.href, '_blank');
                           } else {
                             navigate(item.href);
-                            handleCloseMenu();
                           }
                         }}
                         isActive={isActive}
