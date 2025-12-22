@@ -47,11 +47,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
   const organizationId = userData?.organization?.id
   const activeProjectId = projectId || selectedProjectId
 
-  // Debug: log values
-  console.log('[ClientListTab] organizationId:', organizationId);
-  console.log('[ClientListTab] activeProjectId:', activeProjectId);
-  console.log('[ClientListTab] enabled:', !!activeProjectId && !!organizationId);
-
   // Prefetch contacts (LIGHT mode) and client roles for faster modal opening
   useQuery({
     queryKey: [`/api/contacts?organization_id=${organizationId}&mode=light`],
@@ -67,10 +62,6 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
 
   // Use feature hook to get dashboard data with financial summaries
   const { data: dashboardData, isLoading } = useClientDashboard(activeProjectId || undefined, organizationId);
-
-  // Debug: log dashboard data
-  console.log('[ClientListTab] dashboardData:', dashboardData);
-  console.log('[ClientListTab] isLoading:', isLoading);
 
   // Transform dashboard data using mappers (no inline calculations)
   const projectClients = useMemo(() => {

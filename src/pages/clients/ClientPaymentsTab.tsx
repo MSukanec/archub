@@ -727,26 +727,20 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
           // Fallback to organization wallets if no payments exist
           // IMPORTANT: client_payments.wallet_id is FK to organization_wallets.id, NOT wallets.id
           if (walletsMap.size === 0 && organizationWallets && organizationWallets.length > 0) {
-            console.log('[Import] Using organizationWallets fallback:', organizationWallets);
             organizationWallets.forEach(ow => {
               if (ow.wallets?.name && ow.id) {
                 const normalizedName = ow.wallets.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-                console.log('[Import] Adding wallet to map:', { name: normalizedName, id: ow.id, is_default: ow.is_default });
                 walletsMap.set(normalizedName, ow.id); // Use organization_wallets.id
                 if (!defaultWalletId && ow.is_default) {
                   defaultWalletId = ow.id; // Use organization_wallets.id
-                  console.log('[Import] Set defaultWalletId from is_default:', defaultWalletId);
                 }
               }
             });
             // If no default wallet, use the first one
             if (!defaultWalletId && organizationWallets.length > 0) {
               defaultWalletId = organizationWallets[0].id; // Use organization_wallets.id
-              console.log('[Import] Set defaultWalletId from first wallet:', defaultWalletId);
             }
           }
-          console.log('[Import] Final walletsMap:', Object.fromEntries(walletsMap));
-          console.log('[Import] Final defaultWalletId:', defaultWalletId);
 
           // Validar que TODOS los clientes existan ANTES de importar
           const invalidRows: Array<{ index: number; reason: string }> = [];
@@ -858,15 +852,10 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
                 const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(walletInput);
                 if (isUUID) {
                   resolvedWalletId = walletInput;
-                  console.log('[Import] wallet_name is UUID, using directly:', resolvedWalletId);
                 } else {
                   resolvedWalletId = walletsMap.get(walletInput.toLowerCase()) || defaultWalletId;
-                  console.log('[Import] Resolved wallet_name:', { input: walletInput, resolved: resolvedWalletId });
                 }
-              } else {
-                console.log('[Import] No wallet_name in row, using defaultWalletId:', defaultWalletId);
               }
-              console.log('[Import] Final resolvedWalletId for this row:', resolvedWalletId);
 
               const resolvedStatus = validStatuses.includes(row.status) ? row.status : 'confirmed';
 
