@@ -44,8 +44,10 @@ export function LabLayout({
             {...toolbarProps} 
           />
         )}
-        <div className="flex-1 overflow-auto p-6">
-          {children}
+        <div className="flex-1 overflow-auto p-6 min-h-0">
+          <div className="min-h-full">
+            {children}
+          </div>
         </div>
       </div>
     </LabProvider>
