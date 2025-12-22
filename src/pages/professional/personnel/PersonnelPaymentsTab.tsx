@@ -219,6 +219,13 @@ export default function PersonnelPaymentsTab({
       if (filterStatus !== 'all' && payment.status !== filterStatus) return false;
       
       return true;
+    }).sort((a, b) => {
+      // First sort by payment_date (descending - newest first)
+      const dateComparison = new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
+      if (dateComparison !== 0) return dateComparison;
+      
+      // Then sort by created_at (descending - newest first)
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   }, [allPayments, filterWallet, filterCurrency, filterStatus, externalFilterIds]);
 
