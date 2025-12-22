@@ -635,10 +635,10 @@ export default function OrganizationFinancesDashboardTab({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="kpi-total-ingresos">
           <StatCardTitle>
-            <ArrowUpRight className="h-4 w-4 text-positive" />
+            <ArrowUpRight className="h-4 w-4" style={{ color: 'var(--positive)' }} />
             Total Ingresos
           </StatCardTitle>
-          <StatCardValue className="text-positive">
+          <StatCardValue style={{ color: 'var(--positive)' }}>
             {currencySymbol} {kpis.totalIngresos.formatted}
           </StatCardValue>
           {kpis.ingresosTrendValue && (
@@ -651,10 +651,10 @@ export default function OrganizationFinancesDashboardTab({
 
         <StatCard data-testid="kpi-total-egresos">
           <StatCardTitle>
-            <ArrowDownRight className="h-4 w-4 text-negative" />
+            <ArrowDownRight className="h-4 w-4" style={{ color: 'var(--negative)' }} />
             Total Egresos
           </StatCardTitle>
-          <StatCardValue className="text-negative">
+          <StatCardValue style={{ color: 'var(--negative)' }}>
             {currencySymbol} {kpis.totalEgresos.formatted}
           </StatCardValue>
           {kpis.egresosTrendValue && (
@@ -670,7 +670,7 @@ export default function OrganizationFinancesDashboardTab({
             <Scale className="h-4 w-4" />
             Balance
           </StatCardTitle>
-          <StatCardValue className={kpis.balance >= 0 ? "text-positive" : "text-negative"}>
+          <StatCardValue style={{ color: kpis.balance >= 0 ? 'var(--positive)' : 'var(--negative)' }}>
             {kpis.balance >= 0 ? '+' : '-'}{currencySymbol} {formatKPI(Math.abs(kpis.balance))}
           </StatCardValue>
           {currentMonthComparison && (

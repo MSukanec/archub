@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard'
+import { EmptyState } from '@/components/shared/EmptyState'
 import {
   usePersonnelPayments,
   useDeletePersonnelPayment,
@@ -747,6 +748,23 @@ export default function PersonnelPaymentsTab({ projectId }: PersonnelPaymentsTab
       mode: 'view',
     });
   };
+
+  if (allPayments.length === 0 && !isLoading) {
+    return (
+      <EmptyState
+        icon={<DollarSign className="w-12 h-12" />}
+        title="No hay pagos de personal"
+        description="Agrega pagos de mano de obra para llevar un registro de los gastos del proyecto."
+        action={
+          <Button onClick={handleAddPayment} data-testid="button-add-payment-empty">
+            <Plus className="w-4 h-4 mr-2" />
+            Agregar Pago
+          </Button>
+        }
+        data-testid="empty-personnel-payments-state"
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
