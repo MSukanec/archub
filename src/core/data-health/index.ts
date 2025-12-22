@@ -50,6 +50,12 @@ export {
   allCapitalRules,
 } from './rules/capital-rules';
 
+export {
+  personnelPaymentsWithoutPersonnelRule,
+  personnelInvalidExchangeRateRule,
+  allPersonnelRules,
+} from './rules/personnel-rules';
+
 export { DataHealthAlertMulti } from './components/DataHealthAlertMulti';
 export { DataHealthDetailsModal } from './components/DataHealthDetailsModal';
 export { DataHealthDetailsContent } from './components/DataHealthDetailsContent';
