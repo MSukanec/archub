@@ -37,8 +37,11 @@ function MegaMenuTrigger({ label, sublabel, isOpen, className }: MegaMenuTrigger
   return (
     <div
       className={cn(
-        "h-full flex flex-col justify-center px-4 border-r border-[var(--header-border)] cursor-pointer transition-colors",
-        isOpen ? "bg-[var(--card-hover-bg)]" : "hover:bg-[var(--card-hover-bg)]",
+        "h-full flex flex-col justify-center px-4 border-r cursor-pointer transition-colors",
+        "border-r-[var(--header-border)]",
+        isOpen 
+          ? "bg-[var(--card-hover-bg)] border-b-2 border-b-[var(--header-border)]" 
+          : "border-b border-b-transparent hover:bg-[var(--card-hover-bg)]",
         className
       )}
     >
@@ -157,10 +160,11 @@ export function ContextMegaMenu() {
       
       {isOpen && (
         <div 
-          className="absolute top-full left-0 bg-[var(--header-bg)] border-t border-b border-[var(--header-border)] shadow-lg z-50"
+          className="absolute top-full left-0 bg-[var(--layout-bg)] border-b border-[var(--header-border)] shadow-lg z-50"
           style={{ 
             left: containerRef.current ? -containerRef.current.offsetLeft : 0,
-            width: '100vw'
+            width: '100vw',
+            marginTop: '-2px'
           }}
         >
           <div className="max-w-7xl mx-auto px-6 py-6">
@@ -282,10 +286,11 @@ export function PagesMegaMenu() {
       
       {isOpen && (
         <div 
-          className="absolute top-full left-0 bg-[var(--header-bg)] border-t border-b border-[var(--header-border)] shadow-lg z-50"
+          className="absolute top-full left-0 bg-[var(--layout-bg)] border-b border-[var(--header-border)] shadow-lg z-50"
           style={{ 
             left: containerRef.current ? -containerRef.current.offsetLeft : 0,
-            width: '100vw'
+            width: '100vw',
+            marginTop: '-2px'
           }}
         >
           <div className="max-w-7xl mx-auto px-6 py-6">
