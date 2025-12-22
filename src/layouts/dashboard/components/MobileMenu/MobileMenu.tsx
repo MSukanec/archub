@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { flushSync } from "react-dom";
 import {
   X,
   Building,
@@ -239,17 +238,13 @@ function DashboardMenuContent({ onClose }: ContentProps) {
     userFullName,
   });
 
-  const handleInternalNavigation = (href: string, newSidebarLevel?: SidebarLevel, shouldClose: boolean = true) => {
-    // Forzar React a actualizar el estado ANTES de navegar, evitando parpadeos
-    if (newSidebarLevel) {
-      flushSync(() => {
-        setSidebarLevel(newSidebarLevel as any);
-      });
-    }
+  const handleContextChange = (newLevel: SidebarLevel) => {
+    setSidebarLevel(newLevel as any);
+  };
+
+  const handleInternalNavigation = (href: string) => {
     navigate(href);
-    if (shouldClose) {
-      onClose();
-    }
+    onClose();
   };
 
   return (
@@ -312,8 +307,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
                       icon={contextButton.icon}
                       label={contextButton.label}
                       onClick={() => {
-                        const href = contextButton.href || '/project/dashboard';
-                        handleInternalNavigation(href, 'project', false);
+                        handleContextChange('project');
                       }}
                       isActive={isActive}
                       showChevron={true}
@@ -327,8 +321,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
 
                 const handleClick = () => {
                   if (contextButton.adminOnly && !isAdmin) return;
-                  const href = contextButton.href || `/${contextButton.id}/dashboard`;
-                  handleInternalNavigation(href, contextButton.id as SidebarLevel, false);
+                  handleContextChange(contextButton.id as SidebarLevel);
                 };
 
                 const button = (
