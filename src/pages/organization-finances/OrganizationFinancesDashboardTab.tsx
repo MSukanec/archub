@@ -23,7 +23,7 @@ import {
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateFinancialInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
+import { MonthlyTrendChart, MultiSeriesTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
 import { IncomeExpenseChart } from '@/components/charts/IncomeExpenseChart';
 import { cn } from '@/lib/utils';
@@ -652,15 +652,27 @@ export default function OrganizationFinancesDashboardTab({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DashboardCard 
           id="monthlyChart"
-          title="Evolución del Balance" 
+          title="Evolución Financiera" 
           icon={<BarChart3 />}
-          description="Hacé click en un punto para ver los movimientos de ese mes"
+          description="Ingresos, egresos y balance mensual"
           data-testid="chart-monthly-trend"
         >
-          <MonthlyTrendChart 
-            data={monthlyChartData} 
+          <MultiSeriesTrendChart 
+            data={monthlyFinancialData.map(d => ({
+              month: d.month,
+              income: d.income,
+              expense: d.expense,
+              balance: d.balance
+            }))}
+            series={[
+              { key: 'income', label: 'Ingresos', color: 'hsl(var(--chart-positive))', type: 'bar' },
+              { key: 'expense', label: 'Egresos', color: 'hsl(var(--chart-negative))', type: 'bar' },
+              { key: 'balance', label: 'Balance', color: 'hsl(var(--chart-1))', type: 'line' }
+            ]}
             height={280}
             emptyText="No hay movimientos registrados"
+            showLegend
+            showZeroLine
             clickable
             onBarClick={(month) => handleMonthDrillDown(month)}
           />
