@@ -2,7 +2,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ExpandableAvatarGroup } from "@/components/shared/layout/ExpandableAvatarGroup";
-import { ContextSelector } from "./ContextSelector";
 
 interface Tab {
   id: string;
@@ -29,10 +28,8 @@ interface HeaderProps {
   tabs?: Tab[];
   actions?: ActionButton[];
   className?: string;
-  selector?: React.ReactNode; // Nuevo: selector de proyecto/organización
-  organizationId?: string; // Nuevo: ID de la organización para mostrar miembros
-  showMembers?: boolean; // Nuevo: si mostrar o no los miembros
-  showProjectSelector?: boolean; // Nuevo: si mostrar el selector de proyectos
+  organizationId?: string;
+  showMembers?: boolean;
 }
 
 export function Header({ 
@@ -42,10 +39,8 @@ export function Header({
   tabs = [], 
   actions = [], 
   className, 
-  selector,
   organizationId,
-  showMembers = true,
-  showProjectSelector = false
+  showMembers = true
 }: HeaderProps) {
   return (
     <div className={cn(
@@ -79,13 +74,10 @@ export function Header({
             </div>
           </div>
 
-          {/* Right: Expandable Avatar Group + Project Selector */}
+          {/* Right: Expandable Avatar Group */}
           <div className="flex items-center gap-3">
             {showMembers && organizationId && (
               <ExpandableAvatarGroup organizationId={organizationId} />
-            )}
-            {showProjectSelector && (
-              <ContextSelector />
             )}
           </div>
         </div>
