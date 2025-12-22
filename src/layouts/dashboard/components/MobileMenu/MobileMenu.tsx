@@ -224,6 +224,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
   const handleProjectSelect = (projectId: string) => {
     setSelectedProject(projectId);
     projectMutation.mutate(projectId);
+    onClose();
   };
 
   const organizationName = userData?.organization?.name || 'Organización';
@@ -239,10 +240,10 @@ function DashboardMenuContent({ onClose }: ContentProps) {
 
   const handleInternalNavigation = (href: string, newSidebarLevel?: SidebarLevel) => {
     if (newSidebarLevel) {
-      setSidebarLevel(newSidebarLevel);
+      setSidebarLevel(newSidebarLevel as any);
     }
     navigate(href);
-    // NO cerramos el menú aquí para evitar el parpadeo
+    onClose();
   };
 
   return (
@@ -544,6 +545,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
               className="h-11 w-11 cursor-pointer hover:opacity-80 transition-opacity border-2 border-[var(--mobile-menu-border)]"
               onClick={() => {
                 handleInternalNavigation('/user');
+                onClose();
               }}
             >
               <AvatarImage src={userData?.user?.avatar_url} />
@@ -590,7 +592,7 @@ export function MobileMenu({ onClose }: MobileMenuProps = {}): React.ReactPortal
   };
 
   const menuContent = (
-    <div className="fixed inset-0" style={{ backgroundColor: 'var(--mobile-menu-overlay-bg)', zIndex: 9999 }} onClick={handleCloseMenu}>
+    <div className="fixed inset-0" style={{ backgroundColor: 'var(--mobile-menu-overlay-bg)', zIndex: 9999 }} onClick={() => closeMenu()}>
       <div 
         className="fixed inset-0 flex flex-row overflow-hidden"
         style={{ 
