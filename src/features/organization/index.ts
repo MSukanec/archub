@@ -17,3 +17,8 @@ export { OrganizationFormFields } from './forms/OrganizationFormFields';
 export { InviteMemberFormFields } from './forms/InviteMemberFormFields';
 
 export { default as AdminOrganizationRow } from './components/admin/AdminOrganizationRow';
+
+export { OrganizationDashboardView } from './views/OrganizationDashboardView';
+export { WelcomePanel } from './panels/WelcomePanel';
+export { StatsPanel } from './panels/StatsPanel';
+export { ProjectsPanel } from './panels/ProjectsPanel';

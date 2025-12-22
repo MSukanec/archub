@@ -57,7 +57,7 @@ import Media from "@/pages/media/Media";
 // Moodboard Pages
 import Moodboard from "@/pages/moodboard/Moodboard";
 
-import OrganizationDashboard from "@/pages/organization/OrganizationDashboard";
+import OrganizationDashboardPage from "@/pages/organization/OrganizationDashboardPage";
 import OrganizationData from "@/pages/organization-data/OrganizationData";
 import OrganizationSettings from "@/pages/organization-settings/OrganizationSettings";
 
@@ -188,10 +188,10 @@ function Router() {
         <Route path="/home" component={Home} />
 
         {/* Main Dashboard - Independent dashboard */}
-        <Route path="/dashboard" component={OrganizationDashboard} />
+        <Route path="/dashboard" component={OrganizationDashboardPage} />
 
         {/* Organization Routes - ORDEN IMPORTANTE: rutas específicas primero */}
-        <Route path="/organization/dashboard" component={OrganizationDashboard} />
+        <Route path="/organization/dashboard" component={OrganizationDashboardPage} />
         <Route path="/organization/basic-data" component={OrganizationData} />
         <Route path="/organization/activity" component={Activity} />
         <Route path="/organization/founders-portal">
@@ -209,7 +209,7 @@ function Router() {
         <Route path="/finances" component={OrganizationFinances} />
         <Route path="/project/finances" component={ProjectFinances} />
         
-        <Route path="/organization" component={OrganizationDashboard} />
+        <Route path="/organization" component={OrganizationDashboardPage} />
 
         <Route path="/calendar" component={Calendar} />
 
