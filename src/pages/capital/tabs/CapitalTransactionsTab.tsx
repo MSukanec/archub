@@ -300,13 +300,23 @@ export function CapitalTransactionsTab({
     {
       key: 'partner_name',
       label: 'Socio',
-      type: 'long-text' as const,
+      type: 'medium-text' as const,
       render: (item: UnifiedTransaction) => (
         <IdentityBadge 
           name={item.partner_name}
           linkedUser={item.linkedUser}
           size="sm"
         />
+      ),
+    },
+    {
+      key: 'notes',
+      label: 'Notas',
+      type: 'long-text' as const,
+      render: (item: UnifiedTransaction) => (
+        <span className="text-sm text-muted-foreground truncate">
+          {item.notes || '-'}
+        </span>
       ),
     },
     {
