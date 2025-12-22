@@ -201,7 +201,13 @@ export default function OrganizationFinances() {
               if (tab === 'movements') setActiveTab('movements');
             }}
             onScrollToPanel={(panelId) => {
-              const element = document.querySelector(`[data-testid="chart-${panelId === 'monthlyChart' ? 'monthly-trend' : panelId}"]`);
+              const panelIdToTestId: Record<string, string> = {
+                monthlyChart: 'chart-monthly-trend',
+                incomeExpenseChart: 'chart-income-expense',
+                categoryBreakdown: 'chart-category-breakdown'
+              };
+              const testId = panelIdToTestId[panelId] || `chart-${panelId}`;
+              const element = document.querySelector(`[data-testid="${testId}"]`);
               element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }}
             selectedPeriod={validSelectedPeriod}

@@ -546,6 +546,220 @@ export const spendAccelerationInsight: InsightRule = (context: InsightContext): 
   };
 };
 
+/**
+ * Insight 9 – Balance negativo sostenido
+ * Detecta cuando hay déficit financiero en múltiples períodos consecutivos
+ */
+export const sustainedNegativeBalanceInsight: InsightRule = (context: InsightContext): Insight | null => {
+  if (!context.monthlyFinancialData || context.monthlyFinancialData.length < 2) return null;
+  
+  const sortedData = [...context.monthlyFinancialData].sort((a, b) => a.month.localeCompare(b.month));
+  
+  let consecutiveNegative = 0;
+  let maxConsecutiveNegative = 0;
+  
+  for (const monthData of sortedData) {
+    if (monthData.balance < 0) {
+      consecutiveNegative++;
+      maxConsecutiveNegative = Math.max(maxConsecutiveNegative, consecutiveNegative);
+    } else {
+      consecutiveNegative = 0;
+    }
+  }
+  
+  if (maxConsecutiveNegative < 2) return null;
+  
+  const currentBalance = context.balance ?? 0;
+  const isCurrentlyNegative = currentBalance < 0;
+  
+  if (maxConsecutiveNegative >= 3) {
+    return {
+      id: 'sustained-negative-balance-critical',
+      type: 'alert',
+      title: 'Déficit financiero sostenido',
+      description: `El balance ha sido negativo durante ${maxConsecutiveNegative} meses consecutivos.`,
+      icon: 'AlertTriangle',
+      priority: 1,
+      context: isCurrentlyNegative 
+        ? `El balance actual sigue siendo negativo.`
+        : `El balance se ha recuperado en el período actual.`,
+      actionHint: 'Revisá los egresos y buscá oportunidades de incrementar ingresos.',
+      actions: [
+        {
+          id: 'view-income-expense',
+          label: 'Ver ingresos vs egresos',
+          type: 'open',
+          payload: { panel: 'incomeExpenseChart' }
+        }
+      ]
+    };
+  }
+  
+  return {
+    id: 'sustained-negative-balance-warning',
+    type: 'warning',
+    title: 'Balance negativo reciente',
+    description: `El balance fue negativo durante ${maxConsecutiveNegative} meses consecutivos.`,
+    icon: 'TrendingDown',
+    priority: 2,
+    context: 'Los egresos superaron a los ingresos en múltiples períodos.',
+    actionHint: 'Monitoreá la evolución del balance.',
+    actions: [
+      {
+        id: 'view-income-expense',
+        label: 'Ver ingresos vs egresos',
+        type: 'open',
+        payload: { panel: 'incomeExpenseChart' }
+      }
+    ]
+  };
+};
+
+/**
+ * Insight 10 – Dependencia de un proyecto
+ * Detecta cuando un solo proyecto representa la mayoría de los ingresos o egresos
+ */
+export const projectDependencyInsight: InsightRule = (context: InsightContext): Insight | null => {
+  if (!context.projectFinancialData || context.projectFinancialData.length < 2) return null;
+  
+  const totalIncome = context.projectFinancialData.reduce((sum, p) => sum + p.income, 0);
+  const totalExpense = context.projectFinancialData.reduce((sum, p) => sum + Math.abs(p.expense), 0);
+  
+  if (totalIncome === 0 && totalExpense === 0) return null;
+  
+  const sortedByIncome = [...context.projectFinancialData].sort((a, b) => b.income - a.income);
+  const topIncomeProject = sortedByIncome[0];
+  const topIncomePercentage = totalIncome > 0 ? Math.round((topIncomeProject.income / totalIncome) * 100) : 0;
+  
+  const sortedByExpense = [...context.projectFinancialData].sort((a, b) => Math.abs(b.expense) - Math.abs(a.expense));
+  const topExpenseProject = sortedByExpense[0];
+  const topExpensePercentage = totalExpense > 0 ? Math.round((Math.abs(topExpenseProject.expense) / totalExpense) * 100) : 0;
+  
+  if (topIncomePercentage >= 70 && totalIncome > 0) {
+    return {
+      id: 'project-income-dependency',
+      type: topIncomePercentage >= 85 ? 'alert' : 'warning',
+      title: 'Alta dependencia de ingresos',
+      description: `El proyecto "${topIncomeProject.projectName}" representa el ${topIncomePercentage}% de los ingresos.`,
+      icon: 'Target',
+      priority: topIncomePercentage >= 85 ? 1 : 2,
+      context: 'La diversificación de ingresos reduce el riesgo financiero.',
+      actionHint: 'Considerá expandir la cartera de proyectos con facturación.',
+      actions: [
+        {
+          id: 'view-category-breakdown',
+          label: 'Ver distribución',
+          type: 'open',
+          payload: { panel: 'categoryBreakdown' }
+        }
+      ]
+    };
+  }
+  
+  if (topExpensePercentage >= 70 && totalExpense > 0) {
+    return {
+      id: 'project-expense-concentration',
+      type: 'info',
+      title: 'Concentración de egresos',
+      description: `El proyecto "${topExpenseProject.projectName}" concentra el ${topExpensePercentage}% de los egresos.`,
+      icon: 'Wallet',
+      priority: 4,
+      context: 'Este proyecto demanda la mayor inversión actualmente.',
+      actionHint: 'Verificá que el proyecto esté generando el retorno esperado.',
+      actions: [
+        {
+          id: 'view-category-breakdown',
+          label: 'Ver distribución',
+          type: 'open',
+          payload: { panel: 'categoryBreakdown' }
+        }
+      ]
+    };
+  }
+  
+  return null;
+};
+
+/**
+ * Insight 11 – Ratio ingreso/egreso desfavorable
+ * Detecta cuando los egresos son significativamente mayores que los ingresos
+ */
+export const incomeExpenseRatioInsight: InsightRule = (context: InsightContext): Insight | null => {
+  const totalIngresos = context.totalIngresos ?? 0;
+  const totalEgresos = context.totalEgresos ?? 0;
+  
+  if (totalIngresos === 0 && totalEgresos === 0) return null;
+  
+  if (totalIngresos === 0 && totalEgresos > 0) {
+    return {
+      id: 'no-income-recorded',
+      type: 'warning',
+      title: 'Sin ingresos registrados',
+      description: 'No hay ingresos en este período, pero sí hay egresos.',
+      icon: 'AlertCircle',
+      priority: 2,
+      context: 'Puede que falten registrar cobros de clientes o aportes.',
+      actionHint: 'Verificá si hay cobros pendientes de registrar.',
+      actions: [
+        {
+          id: 'view-movements',
+          label: 'Ver movimientos',
+          type: 'navigate',
+          payload: { tab: 'movements' }
+        }
+      ]
+    };
+  }
+  
+  if (totalIngresos > 0) {
+    const ratio = totalEgresos / totalIngresos;
+    
+    if (ratio >= 1.5) {
+      return {
+        id: 'high-expense-ratio',
+        type: 'alert',
+        title: 'Egresos superan ingresos',
+        description: `Los egresos son ${ratio.toFixed(1)}x mayores que los ingresos.`,
+        icon: 'Scale',
+        priority: 1,
+        context: 'El flujo de caja está siendo afectado negativamente.',
+        actionHint: 'Revisá los egresos mayores y buscá optimizarlos.',
+        actions: [
+          {
+            id: 'view-category-breakdown',
+            label: 'Ver distribución',
+            type: 'open',
+            payload: { panel: 'categoryBreakdown' }
+          }
+        ]
+      };
+    }
+    
+    if (ratio >= 1.0 && ratio < 1.5) {
+      return {
+        id: 'expense-exceeds-income',
+        type: 'warning',
+        title: 'Balance negativo',
+        description: `Los egresos superan a los ingresos en un ${Math.round((ratio - 1) * 100)}%.`,
+        icon: 'TrendingDown',
+        priority: 3,
+        context: 'El período cerró con déficit financiero.',
+        actionHint: 'Monitoreá la evolución del balance.',
+        actions: [
+          {
+            id: 'view-monthly-trend',
+            label: 'Ver evolución',
+            type: 'open',
+            payload: { panel: 'monthlyChart' }
+          }
+        ]
+      };
+    }
+  }
+  
+  return null;
+};
+
 export const allInsightRules: InsightRule[] = [
   growthExplainedInsight,
   concentrationNarrativeInsight,
@@ -554,5 +768,18 @@ export const allInsightRules: InsightRule[] = [
   consolidationOpportunityInsight,
   sustainedTrendInsight,
   yearEndProjectionInsight,
+  spendAccelerationInsight,
+  sustainedNegativeBalanceInsight,
+  projectDependencyInsight,
+  incomeExpenseRatioInsight
+];
+
+export const financialInsightRules: InsightRule[] = [
+  sustainedNegativeBalanceInsight,
+  projectDependencyInsight,
+  incomeExpenseRatioInsight,
+  concentrationNarrativeInsight,
+  operationalLoadInsight,
+  sustainedTrendInsight,
   spendAccelerationInsight
 ];

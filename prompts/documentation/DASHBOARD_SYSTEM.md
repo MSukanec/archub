@@ -186,7 +186,9 @@ Charts PUROS sin contenedor. El consumidor agrega el Card.
 | Componente | Tipo | Props principales |
 |------------|------|-------------------|
 | `MonthlyTrendChart` | Area Chart | `data: { month, value }[]`, `height` |
+| `MultiSeriesTrendChart` | Composed Chart | `data: MultiSeriesData[]`, `series: SeriesConfig[]`, `height` |
 | `CategoryBreakdownChart` | Donut Chart | `data: { name, value }[]`, `height` |
+| `IncomeExpenseChart` | Bar Chart | `data: { period, income, expense }[]`, `height` |
 
 ### 3.2 Uso Correcto
 
@@ -210,13 +212,40 @@ function BadChart() {
 
 ```
 src/components/charts/
-├── MonthlyTrendChart.tsx      # Chart principal de tendencia
+├── MonthlyTrendChart.tsx      # Chart de tendencia (simple o multi-series)
 ├── CategoryBreakdownChart.tsx # Chart de distribución
+├── IncomeExpenseChart.tsx     # Chart de ingresos vs egresos
 ├── gantt/                     # Charts para Gantt/proyectos
 ├── courses/                   # Charts para cursos
 ├── legacy/                    # Charts antiguos (migrar gradualmente)
 └── README.md
 ```
+
+### 3.4 IncomeExpenseChart - Uso
+
+```tsx
+import { IncomeExpenseChart } from '@/components/charts/IncomeExpenseChart';
+
+const data = [
+  { period: '2025-01', income: 100000, expense: 80000 },
+  { period: '2025-02', income: 120000, expense: 90000 },
+];
+
+<DashboardCard title="Ingresos vs Egresos">
+  <IncomeExpenseChart 
+    data={data} 
+    height={280}
+    clickable
+    onBarClick={(period) => handleDrillDown(period)}
+  />
+</DashboardCard>
+```
+
+**Features:**
+- Barras agrupadas para ingresos (positivo) y egresos (negativo)
+- Tooltip con balance calculado automáticamente
+- Colores semánticos: `chart-positive` y `chart-negative`
+- Soporte para drill-down al hacer click
 
 ---
 
@@ -273,6 +302,39 @@ interface Insight {
 | `sustainedTrend` | Tendencia >10% mensual sostenida | open → monthlyChart |
 | `yearEndProjection` | Proyección >10% vs baseline anual | open → monthlyChart |
 | `spendAcceleration` | Aceleración >10% entre mitades del período | open → monthlyChart |
+
+#### 4.3.1 Reglas Financieras (FINANZAS)
+
+| Regla | Condición | Acción |
+|-------|-----------|--------|
+| `sustainedNegativeBalance` | Balance negativo 2 meses (warning), 3+ meses (alert) | open → incomeExpenseChart |
+| `projectDependency` | Un proyecto concentra >70% ingresos o >70% egresos | open → categoryBreakdown |
+| `incomeExpenseRatio` | Egresos >80% o >100% de ingresos | filter → expense categories |
+
+**Uso con `generateFinancialInsights`:**
+```typescript
+import { generateFinancialInsights, buildInsightContext } from '@/components/dashboard/insights';
+
+const context = buildInsightContext({
+  // Campos base
+  totalGasto: kpis.totalEgresos.value,
+  ...
+  // Campos financieros adicionales
+  totalIngresos: kpis.totalIngresos.value,
+  totalEgresos: kpis.totalEgresos.value,
+  balance: kpis.balance,
+  monthlyFinancialData: [
+    { month: '2025-01', income: 100000, expense: 80000, balance: 20000 },
+    ...
+  ],
+  projectFinancialData: [
+    { projectId: 'abc', projectName: 'Obra X', income: 90000, expense: 40000, balance: 50000 },
+    ...
+  ]
+});
+
+const insights = generateFinancialInsights(context, 3);
+```
 
 ### 4.4 Uso Completo
 

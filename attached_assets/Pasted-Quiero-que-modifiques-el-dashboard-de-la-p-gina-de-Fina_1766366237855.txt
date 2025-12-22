@@ -1,0 +1,61 @@
+Quiero que modifiques el dashboard de la página de Finanzas (Organización).
+
+Contexto importante:
+- La página de Finanzas es una vista unificada de TODOS los ingresos y egresos:
+  - De todos los proyectos
+  - Y de conceptos a nivel organización (ej. gastos generales, aportes de socios)
+- NO es equivalente al dashboard de Gastos Generales.
+- Los KPIs actuales y la tabla de últimos movimientos están correctos y NO deben tocarse.
+
+Problema actual:
+- Los gráficos y los insights heredan lógica de “Gastos Generales” y no representan correctamente una vista financiera global.
+- Falta visión macro de ingresos vs egresos y distribución financiera.
+
+Principios obligatorios:
+1) NO crear gráficos específicos para “finanzas” o “gastos generales”.
+2) Todos los gráficos deben ser AGNÓSTICOS y reutilizables.
+3) Los gráficos nuevos o modificados deben guardarse en la misma carpeta donde están:
+   - CategoryBreakdownChart
+   - MonthlyTrendChart
+4) Los gráficos deben funcionar por props / datasets, no por lógica hardcodeada.
+
+Cambios requeridos:
+
+1) MonthlyTrendChart
+- Mantener el componente.
+- Adaptarlo para que soporte:
+  - ingresos
+  - egresos
+  - balance neto
+- Usarlo en Finanzas Organización con datos agregados mensuales.
+
+2) CategoryBreakdownChart
+- Mantener el componente.
+- Usarlo con categorías financieras macro:
+  - Ingresos (clientes, socios, otros)
+  - Egresos (materiales, mano de obra, indirectos, generales)
+
+3) Crear un nuevo gráfico agnóstico:
+- Nombre sugerido: IncomeExpenseDistributionChart
+- Debe mostrar:
+  - ingresos vs egresos
+  - por período
+- Reutilizable en otras vistas financieras.
+
+4) (Opcional pero recomendado)
+- Crear un gráfico agnóstico de contribución por proyecto:
+  - ingresos y/o egresos por proyecto
+- Debe poder ocultarse vía props cuando no aplique.
+
+Insights:
+- Ajustar la lógica para que sea financiera general:
+  - concentración financiera
+  - balance negativo sostenido
+  - dependencia de un proyecto
+  - tendencia mensual
+- NO hardcodear conceptos de gastos generales.
+
+Objetivo final:
+- Un dashboard de Finanzas Organización que tenga sentido a nivel macro,
+- sin duplicar componentes,
+- manteniendo todo reutilizable y escalable.

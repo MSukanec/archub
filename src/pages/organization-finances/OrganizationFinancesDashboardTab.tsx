@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, Scale, Lightbulb, Clock, BarChart3, PieChart, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { type InsightAction } from '@/components/dashboard/insights/types';
+import { TrendingUp, TrendingDown, DollarSign, Scale, Lightbulb, Clock, BarChart3, PieChart, ArrowUpRight, ArrowDownRight, Wallet } from 'lucide-react';
+import { type InsightAction, type MonthlyFinancialData, type ProjectFinancialData } from '@/components/dashboard/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown, hasMultipleCurrencies } from '@/lib/kpis';
 import { format as formatMoney, formatKPI, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -21,10 +21,11 @@ import {
   type TrendDirection
 } from '@/components/dashboard';
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
-import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
+import { generateFinancialInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
+import { IncomeExpenseChart } from '@/components/charts/IncomeExpenseChart';
 import { cn } from '@/lib/utils';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
 import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
@@ -405,6 +406,94 @@ export default function OrganizationFinancesDashboardTab({
       .slice(0, 8);
   }, [confirmedMovements, defaultCurrency]);
 
+  const incomeExpenseChartData = useMemo(() => {
+    const monthlyData = new Map<string, { income: number; expense: number }>();
+    
+    allMovements.forEach(m => {
+      if (m.status !== 'confirmed') return;
+      const date = parseLocalDate(m.payment_date);
+      if (!date) return;
+      if (dateFrom) {
+        const movementDateAtMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+        if (movementDateAtMidnight < dateFrom) return;
+      }
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      const convertedAmount = convertToBaseCurrency(
+        m.currency?.code || 'ARS',
+        defaultCurrency?.code,
+        Math.abs(m.amount),
+        m.exchange_rate ?? null,
+        { quoteCurrency: 'USD' }
+      );
+      
+      const existing = monthlyData.get(monthKey) || { income: 0, expense: 0 };
+      const isIngreso = ingresoTypes.includes(m.movement_type);
+      
+      if (isIngreso) {
+        existing.income += convertedAmount;
+      } else {
+        existing.expense += convertedAmount;
+      }
+      monthlyData.set(monthKey, existing);
+    });
+
+    return Array.from(monthlyData.entries())
+      .map(([period, data]) => ({
+        period,
+        income: data.income,
+        expense: data.expense,
+        balance: data.income - data.expense
+      }))
+      .sort((a, b) => a.period.localeCompare(b.period));
+  }, [allMovements, dateFrom, defaultCurrency, ingresoTypes]);
+
+  const monthlyFinancialData: MonthlyFinancialData[] = useMemo(() => {
+    return incomeExpenseChartData.map(d => ({
+      month: d.period,
+      income: d.income,
+      expense: d.expense,
+      balance: d.balance
+    }));
+  }, [incomeExpenseChartData]);
+
+  const projectFinancialData: ProjectFinancialData[] = useMemo(() => {
+    const projectTotals = new Map<string, { projectId: string; projectName: string; income: number; expense: number }>();
+    
+    confirmedMovements.forEach(m => {
+      if (!m.project_id) return;
+      
+      const convertedAmount = convertToBaseCurrency(
+        m.currency?.code || 'ARS',
+        defaultCurrency?.code,
+        Math.abs(m.amount),
+        m.exchange_rate ?? null,
+        { quoteCurrency: 'USD' }
+      );
+      
+      const existing = projectTotals.get(m.project_id) || { 
+        projectId: m.project_id, 
+        projectName: m.project?.name || `Proyecto ${m.project_id.slice(0, 8)}`,
+        income: 0, 
+        expense: 0 
+      };
+      const isIngreso = ingresoTypes.includes(m.movement_type);
+      
+      if (isIngreso) {
+        existing.income += convertedAmount;
+      } else {
+        existing.expense += convertedAmount;
+      }
+      projectTotals.set(m.project_id, existing);
+    });
+
+    return Array.from(projectTotals.values())
+      .map(p => ({
+        ...p,
+        balance: p.income - p.expense
+      }));
+  }, [confirmedMovements, defaultCurrency, ingresoTypes]);
+
   const autoInsights = useMemo(() => {
     const categoryData = categoryChartData.map(c => ({
       name: c.name,
@@ -422,10 +511,15 @@ export default function OrganizationFinancesDashboardTab({
       paymentsByConcept: [],
       isShortPeriod: periodMeta.isShortPeriod,
       daysCount: periodMeta.daysCount,
-      currentMonth: new Date().getMonth() + 1
+      currentMonth: new Date().getMonth() + 1,
+      totalIngresos: kpis.totalIngresos.value,
+      totalEgresos: kpis.totalEgresos.value,
+      balance: kpis.balance,
+      monthlyFinancialData,
+      projectFinancialData
     });
-    return generateInsights(context, 3);
-  }, [kpis, categoryChartData, monthlyChartData, confirmedMovements, periodMeta]);
+    return generateFinancialInsights(context, 3);
+  }, [kpis, categoryChartData, monthlyChartData, confirmedMovements, periodMeta, monthlyFinancialData, projectFinancialData]);
 
   const recentActivityItems = useMemo((): ActivityItem[] => {
     return [...confirmedMovements]
@@ -539,8 +633,25 @@ export default function OrganizationFinancesDashboardTab({
         </StatCard>
       </div>
 
+      <DashboardCard 
+        id="incomeExpenseChart"
+        title="Ingresos vs Egresos" 
+        icon={<Wallet />}
+        description="Comparación mensual de ingresos y egresos"
+        data-testid="chart-income-expense"
+      >
+        <IncomeExpenseChart 
+          data={incomeExpenseChartData} 
+          height={280}
+          emptyText="No hay movimientos registrados"
+          clickable
+          onBarClick={(period) => handleMonthDrillDown(period)}
+        />
+      </DashboardCard>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DashboardCard 
+          id="monthlyChart"
           title="Evolución del Balance" 
           icon={<BarChart3 />}
           description="Hacé click en un punto para ver los movimientos de ese mes"
@@ -556,6 +667,7 @@ export default function OrganizationFinancesDashboardTab({
         </DashboardCard>
 
         <DashboardCard 
+          id="categoryBreakdown"
           title="Distribución por Tipo" 
           icon={<PieChart />}
           description="Hacé click en un tipo para ver sus movimientos"

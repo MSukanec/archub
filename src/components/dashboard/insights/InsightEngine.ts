@@ -1,5 +1,5 @@
-import { type Insight, type InsightContext, type InsightRule, type CategoryData, type PaymentsByConceptData } from './types';
-import { allInsightRules } from './insightRules';
+import { type Insight, type InsightContext, type InsightRule, type CategoryData, type PaymentsByConceptData, type MonthlyFinancialData, type ProjectFinancialData } from './types';
+import { allInsightRules, financialInsightRules } from './insightRules';
 
 /**
  * Ejecuta un conjunto de reglas custom contra el contexto.
@@ -32,6 +32,10 @@ export function generateInsights(context: InsightContext, maxInsights: number = 
   return runInsightRules(context, allInsightRules, maxInsights);
 }
 
+export function generateFinancialInsights(context: InsightContext, maxInsights: number = 3): Insight[] {
+  return runInsightRules(context, financialInsightRules, maxInsights);
+}
+
 export function buildInsightContext(params: {
   totalGasto: number;
   previousPeriodGasto: number;
@@ -44,6 +48,11 @@ export function buildInsightContext(params: {
   isShortPeriod?: boolean;
   daysCount?: number;
   currentMonth?: number;
+  totalIngresos?: number;
+  totalEgresos?: number;
+  balance?: number;
+  monthlyFinancialData?: MonthlyFinancialData[];
+  projectFinancialData?: ProjectFinancialData[];
 }): InsightContext {
   const { 
     totalGasto, 
@@ -56,7 +65,12 @@ export function buildInsightContext(params: {
     paymentsByConcept = [],
     isShortPeriod = false,
     daysCount = 0,
-    currentMonth = new Date().getMonth() + 1
+    currentMonth = new Date().getMonth() + 1,
+    totalIngresos,
+    totalEgresos,
+    balance,
+    monthlyFinancialData,
+    projectFinancialData
   } = params;
   
   let topCategoryName = '';
@@ -86,6 +100,11 @@ export function buildInsightContext(params: {
     paymentsByConcept,
     isShortPeriod,
     daysCount,
-    currentMonth
+    currentMonth,
+    totalIngresos,
+    totalEgresos,
+    balance,
+    monthlyFinancialData,
+    projectFinancialData
   };
 }

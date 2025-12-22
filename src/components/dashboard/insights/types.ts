@@ -32,6 +32,21 @@ export interface PaymentsByConceptData {
   totalAmount: number;
 }
 
+export interface ProjectFinancialData {
+  projectId: string;
+  projectName: string;
+  income: number;
+  expense: number;
+  balance: number;
+}
+
+export interface MonthlyFinancialData {
+  month: string;
+  income: number;
+  expense: number;
+  balance: number;
+}
+
 export interface InsightContext {
   totalGasto: number;
   previousPeriodGasto: number;
@@ -46,6 +61,11 @@ export interface InsightContext {
   isShortPeriod: boolean;
   daysCount: number;
   currentMonth?: number;
+  totalIngresos?: number;
+  totalEgresos?: number;
+  balance?: number;
+  monthlyFinancialData?: MonthlyFinancialData[];
+  projectFinancialData?: ProjectFinancialData[];
 }
 
 export type InsightRule = (context: InsightContext) => Insight | null;

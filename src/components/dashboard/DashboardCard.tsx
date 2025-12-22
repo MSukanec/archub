@@ -4,6 +4,7 @@ import { DashboardCardHeader } from './internal/DashboardCardHeader';
 import { cn } from '@/lib/utils';
 
 export interface DashboardCardProps {
+  id?: string;
   title?: string;
   description?: string;
   icon?: ReactNode;
@@ -15,6 +16,7 @@ export interface DashboardCardProps {
 }
 
 export function DashboardCard({
+  id,
   title,
   description,
   icon,
@@ -27,7 +29,7 @@ export function DashboardCard({
   const hasHeader = title || icon;
 
   return (
-    <Card className={cn('p-4', className)} data-testid={testId}>
+    <Card id={id} className={cn('p-4', className)} data-testid={testId}>
       {hasHeader && (
         <DashboardCardHeader
           icon={icon}
