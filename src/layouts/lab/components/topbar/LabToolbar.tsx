@@ -22,7 +22,7 @@ export function LabToolbar({
   showMembers = true,
 }: LabToolbarProps) {
   return (
-    <div className="w-full flex flex-col bg-[var(--layout-bg)]">
+    <div className="w-full flex flex-col bg-background">
       <div className="h-14 w-full flex border-b border-[var(--header-border)]">
         <ContextMegaMenu />
         
@@ -48,7 +48,7 @@ export function LabToolbar({
       </div>
       
       {showSearch && (
-        <div className="h-12 w-full flex items-center border-b border-[var(--header-border)] bg-[var(--layout-bg)]">
+        <div className="h-12 w-full flex items-center border-b border-[var(--header-border)] bg-background">
           <div className="flex items-center gap-3 px-4 w-full max-w-2xl">
             <Search className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
             <input
