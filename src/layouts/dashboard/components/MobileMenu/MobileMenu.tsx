@@ -8,8 +8,15 @@ import {
   ChevronDown,
   Crown,
   GraduationCap,
-  ChevronLeft,
+  ArrowLeft,
   Globe,
+  Palette,
+  FileText,
+  Users,
+  Package,
+  Layers,
+  BookOpen,
+  DollarSign
 } from "lucide-react";
 import { 
   getNavigationItems, 
@@ -161,36 +168,36 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex items-center h-14 px-4 border-b border-[var(--mobile-menu-border)] bg-[var(--mobile-menu-header-bg)]">
+          <div className="flex items-center h-14 px-4 bg-[var(--mobile-menu-header-bg)] relative">
             {sidebarLevel !== 'general' ? (
               <>
                 <button
                   onClick={() => {
                     setSidebarLevel('general');
                   }}
-                  className="flex items-center gap-2 flex-1 p-2 -ml-2 hover:bg-[var(--mobile-menu-item-active-bg)] rounded-lg transition-colors"
+                  className="absolute left-4 p-2 hover:bg-[var(--mobile-menu-item-active-bg)] rounded-lg transition-colors z-10"
                   data-testid="button-mobile-back"
                 >
-                  <ChevronLeft className="h-5 w-5 text-[var(--mobile-menu-fg)]" />
-                  <h1 className="text-lg font-semibold !text-white">
-                    {getContextTitle(sidebarLevel as SidebarLevel)}
-                  </h1>
+                  <ArrowLeft className="h-5 w-5 text-[var(--mobile-menu-fg)]" />
                 </button>
+                <h1 className="flex-1 text-center text-lg font-semibold text-[var(--mobile-menu-fg)]">
+                  {getContextTitle(sidebarLevel as SidebarLevel)}
+                </h1>
                 <button
                   onClick={handleCloseMenu}
-                  className="p-2 -mr-2 hover:bg-[var(--mobile-menu-item-active-bg)] rounded-lg transition-colors"
+                  className="absolute right-4 p-2 hover:bg-[var(--mobile-menu-item-active-bg)] rounded-lg transition-colors z-10"
                 >
                   <X className="h-5 w-5 text-[var(--mobile-menu-item-fg)]" />
                 </button>
               </>
             ) : (
               <>
-                <h1 className="text-lg font-semibold flex-1 !text-white">
+                <h1 className="flex-1 text-center text-lg font-semibold text-[var(--mobile-menu-fg)]">
                   {getContextTitle(sidebarLevel as SidebarLevel)}
                 </h1>
                 <button
                   onClick={handleCloseMenu}
-                  className="p-2 -mr-2 hover:bg-[var(--mobile-menu-item-active-bg)] rounded-lg transition-colors"
+                  className="absolute right-4 p-2 hover:bg-[var(--mobile-menu-item-active-bg)] rounded-lg transition-colors z-10"
                 >
                   <X className="h-5 w-5 text-[var(--mobile-menu-item-fg)]" />
                 </button>
@@ -386,13 +393,13 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </nav>
           </div>
 
-          <div className="p-4 border-t border-[var(--mobile-menu-border)] bg-[var(--mobile-menu-footer-bg)]">
+          <div className="p-4 bg-[var(--mobile-menu-footer-bg)]">
             <div className="flex items-center gap-3">
               {sidebarLevel === 'organization' && (
                 <div className="flex-1 relative">
                   <button
                     onClick={() => setExpandedOrganizationSelector(!expandedOrganizationSelector)}
-                    className="w-full p-3 text-left border-0 rounded-xl text-[var(--mobile-menu-fg)] flex items-center hover:bg-[var(--mobile-menu-item-active-bg)] transition-colors duration-150"
+                    className="w-full p-3 text-left border border-[var(--mobile-menu-border)] rounded-xl text-[var(--mobile-menu-fg)] flex items-center hover:bg-[var(--mobile-menu-item-active-bg)] transition-colors duration-150"
                     style={{ backgroundColor: 'var(--mobile-menu-item-active-bg)' }}
                   >
                     <Building className="h-5 w-5 mr-3 text-[var(--accent)]" />
@@ -424,7 +431,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <div className="flex-1 relative">
                   <button
                     onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-                    className="w-full p-3 text-left border-0 rounded-xl text-[var(--mobile-menu-fg)] flex items-center hover:bg-[var(--mobile-menu-item-active-bg)] transition-colors duration-150"
+                    className="w-full p-3 text-left border border-[var(--mobile-menu-border)] rounded-xl text-[var(--mobile-menu-fg)] flex items-center hover:bg-[var(--mobile-menu-item-active-bg)] transition-colors duration-150"
                     style={{ backgroundColor: 'var(--mobile-menu-item-active-bg)' }}
                   >
                     <FolderOpen className="h-5 w-5 mr-3 text-[var(--accent)]" />
