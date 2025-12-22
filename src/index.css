@@ -388,6 +388,9 @@ body[data-scroll-locked] {
   /* Chart Sentiment Colors */
   --positive: hsl(80, 90%, 40%);
   --negative: hsl(0, 75%, 60%);
+  --chart-positive: hsl(80, 90%, 40%);
+  --chart-negative: hsl(0, 75%, 60%);
+  --chart-neutral: hsl(0, 0%, 50%);
 }
 
 /* ========================================

@@ -203,7 +203,6 @@ export default function OrganizationFinances() {
             onScrollToPanel={(panelId) => {
               const panelIdToTestId: Record<string, string> = {
                 monthlyChart: 'chart-monthly-trend',
-                incomeExpenseChart: 'chart-income-expense',
                 categoryBreakdown: 'chart-category-breakdown'
               };
               const testId = panelIdToTestId[panelId] || `chart-${panelId}`;

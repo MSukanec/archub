@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, Scale, Lightbulb, Clock, BarChart3, PieChart, ArrowUpRight, ArrowDownRight, Wallet } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Scale, Lightbulb, Clock, BarChart3, PieChart, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { type InsightAction, type MonthlyFinancialData, type ProjectFinancialData } from '@/components/dashboard/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown, hasMultipleCurrencies } from '@/lib/kpis';
 import { format as formatMoney, formatKPI, convertToBaseCurrency } from '@/lib/money';
@@ -23,9 +23,8 @@ import {
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateFinancialInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { MonthlyTrendChart, MultiSeriesTrendChart } from '@/components/charts/MonthlyTrendChart';
+import { MultiSeriesTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
-import { IncomeExpenseChart } from '@/components/charts/IncomeExpenseChart';
 import { cn } from '@/lib/utils';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
 import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
@@ -634,66 +633,48 @@ export default function OrganizationFinancesDashboardTab({
       </div>
 
       <DashboardCard 
-        id="incomeExpenseChart"
-        title="Ingresos vs Egresos" 
-        icon={<Wallet />}
-        description="Comparación mensual de ingresos y egresos"
-        data-testid="chart-income-expense"
+        id="monthlyChart"
+        title="Evolución Financiera" 
+        icon={<BarChart3 />}
+        description="Ingresos, egresos y balance mensual"
+        data-testid="chart-monthly-trend"
       >
-        <IncomeExpenseChart 
-          data={incomeExpenseChartData} 
+        <MultiSeriesTrendChart 
+          data={monthlyFinancialData.map(d => ({
+            month: d.month,
+            income: d.income,
+            expense: d.expense,
+            balance: d.balance
+          }))}
+          series={[
+            { key: 'income', label: 'Ingresos', color: 'hsl(var(--chart-positive))', type: 'bar' },
+            { key: 'expense', label: 'Egresos', color: 'hsl(var(--chart-negative))', type: 'bar' },
+            { key: 'balance', label: 'Balance', color: 'hsl(var(--chart-1))', type: 'line' }
+          ]}
           height={280}
           emptyText="No hay movimientos registrados"
+          showLegend
+          showZeroLine
           clickable
-          onBarClick={(period) => handleMonthDrillDown(period)}
+          onBarClick={(month) => handleMonthDrillDown(month)}
         />
       </DashboardCard>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DashboardCard 
-          id="monthlyChart"
-          title="Evolución Financiera" 
-          icon={<BarChart3 />}
-          description="Ingresos, egresos y balance mensual"
-          data-testid="chart-monthly-trend"
-        >
-          <MultiSeriesTrendChart 
-            data={monthlyFinancialData.map(d => ({
-              month: d.month,
-              income: d.income,
-              expense: d.expense,
-              balance: d.balance
-            }))}
-            series={[
-              { key: 'income', label: 'Ingresos', color: 'hsl(var(--chart-positive))', type: 'bar' },
-              { key: 'expense', label: 'Egresos', color: 'hsl(var(--chart-negative))', type: 'bar' },
-              { key: 'balance', label: 'Balance', color: 'hsl(var(--chart-1))', type: 'line' }
-            ]}
-            height={280}
-            emptyText="No hay movimientos registrados"
-            showLegend
-            showZeroLine
-            clickable
-            onBarClick={(month) => handleMonthDrillDown(month)}
-          />
-        </DashboardCard>
-
-        <DashboardCard 
-          id="categoryBreakdown"
-          title="Distribución por Tipo" 
-          icon={<PieChart />}
-          description="Hacé click en un tipo para ver sus movimientos"
-          data-testid="chart-category-breakdown"
-        >
-          <CategoryBreakdownChart 
-            data={categoryChartData} 
-            height={280}
-            emptyText="No hay movimientos registrados"
-            clickable
-            onSliceClick={(name) => handleCategoryDrillDown(name)}
-          />
-        </DashboardCard>
-      </div>
+      <DashboardCard 
+        id="categoryBreakdown"
+        title="Distribución por Tipo" 
+        icon={<PieChart />}
+        description="Hacé click en un tipo para ver sus movimientos"
+        data-testid="chart-category-breakdown"
+      >
+        <CategoryBreakdownChart 
+          data={categoryChartData} 
+          height={280}
+          emptyText="No hay movimientos registrados"
+          clickable
+          onSliceClick={(name) => handleCategoryDrillDown(name)}
+        />
+      </DashboardCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <InsightCard
