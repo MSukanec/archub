@@ -14,6 +14,7 @@ Preferred communication style: Simple, everyday language.
 - **Dynamic Color System**: Project-based color theming using `chroma-js` for intelligent color calculations, including dynamic accent colors and organic radial gradients.
 - **Modal Architecture**: Enterprise SaaS-level modal system with stacking, dirty form blocking, size variants, portal rendering, and a registry pattern.
 - **Navigation**: Redesigned sidebar with project selector, breadcrumb-style main header, and a centralized "general" hub with a two-level sidebar system.
+- **Unified Mobile Menu Architecture**: Single `MobileMenu` component in `src/layouts/dashboard/components/MobileMenu/` serves both marketing and dashboard contexts. Uses `useMobileMenuStore` with mode-aware rendering ('marketing' vs 'dashboard'). Wrapper-based architecture with `MarketingMenuContent` (lightweight: only useAuthStore + useLocation) and `DashboardMenuContent` (full dashboard hooks) to prevent unnecessary data fetching in marketing mode. Marketing mode includes smooth scroll for hash anchors. Open via `openMenu('marketing')` or `openMenu('dashboard')`.
 - **Layout Architecture**: Experience-based layouts including Dashboard Layout (authenticated app) and Marketing Layout (public-facing pages).
 - **Content Theming System**: Unified CSS theming layer with dynamic background switching.
 - **Smart Filtering**: Period filters disable options without data, preventing empty state confusion.

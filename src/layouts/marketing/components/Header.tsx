@@ -1,12 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, Home, LogOut, User, BookOpen, Sparkles, HelpCircle, Mail, CreditCard, ChevronRight, ArrowLeft } from "lucide-react";
+import { Menu, Home, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from "@/stores/authStore";
-import { createPortal } from "react-dom";
-import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useMobileMenuStore } from "@/layouts/dashboard/components/MobileMenu/useMobileMenuStore";
+import { MobileMenu } from "@/layouts/dashboard/components/MobileMenu/MobileMenu";
 
 interface HeaderProps {
   navigation?: Array<{ label: string; href: string }>;
@@ -29,42 +28,8 @@ const DEFAULT_NAVIGATION: Array<{ label: string; href: string }> = [
   { label: "Contacto", href: "/contact" }
 ];
 
-// Componente de botón estilo dashboard mobile
-function MarketingMobileMenuButton({
-  icon: Icon,
-  label,
-  onClick,
-  href,
-  testId,
-}: {
-  icon: any;
-  label: string;
-  onClick?: () => void;
-  href?: string;
-  testId?: string;
-}) {
-  const content = (
-    <button
-      onClick={onClick}
-      data-testid={testId}
-      className={cn(
-        "w-full flex items-center gap-3 px-4 py-3 text-left transition-colors",
-        "border-b border-[var(--main-sidebar-border)]",
-        "hover:bg-[var(--main-sidebar-button-hover-bg)]"
-      )}
-    >
-      <Icon className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
-      <span className="flex-1 text-base text-[var(--main-sidebar-fg)]">
-        {label}
-      </span>
-    </button>
-  );
-
-  return content;
-}
-
 export function Header({ navigation, hasAnnouncement = false, announcementHeight = 0 }: HeaderProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isOpen: mobileMenuOpen, openMenu, closeMenu } = useMobileMenuStore();
   const { user, loading, initialized, initialize, logout } = useAuthStore();
   const [location, setLocation] = useLocation();
   
@@ -77,17 +42,6 @@ export function Header({ navigation, hasAnnouncement = false, announcementHeight
     }
   }, [initialize, initialized, loading]);
 
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [mobileMenuOpen]);
-
   const getUserInitials = (user: any) => {
     if (!user) return "U";
     const name = user.user_metadata?.full_name || user.email || "Usuario";
@@ -95,12 +49,10 @@ export function Header({ navigation, hasAnnouncement = false, announcementHeight
   };
 
   const handleNavigate = (href: string) => {
-    setMobileMenuOpen(false);
-    // Si es un anchor, hacer scroll con animación
+    closeMenu();
     if (href.startsWith('#')) {
       const element = document.querySelector(href);
       if (element) {
-        // Agregar animación al elemento antes de hacer scroll
         element.animate([
           { transform: 'translateY(-20px)', opacity: 0.7 },
           { transform: 'translateY(0)', opacity: 1 }
@@ -126,18 +78,6 @@ export function Header({ navigation, hasAnnouncement = false, announcementHeight
       e.preventDefault();
       setLocation('/');
     }
-  };
-
-  const getIconForNavItem = (label: string) => {
-    const lower = label.toLowerCase();
-    if (lower.includes('inicio')) return Home;
-    if (lower.includes('curso')) return BookOpen;
-    if (lower.includes('fundador')) return Sparkles;
-    if (lower.includes('precio')) return CreditCard;
-    if (lower.includes('característica')) return Sparkles;
-    if (lower.includes('ayuda') || lower.includes('faq')) return HelpCircle;
-    if (lower.includes('contacto')) return Mail;
-    return BookOpen;
   };
 
   const renderAuthActions = () => {
@@ -221,136 +161,6 @@ export function Header({ navigation, hasAnnouncement = false, announcementHeight
     );
   };
 
-  const renderMobileMenu = () => {
-    if (!mobileMenuOpen) return null;
-
-    return createPortal(
-      <div 
-        className="fixed inset-0" 
-        style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }} 
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        <div 
-          className="fixed inset-0 flex flex-row overflow-hidden"
-          style={{ backgroundColor: 'var(--main-sidebar-bg)' }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Header del menú */}
-            <div className="flex items-center h-14 px-4 border-b border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)]">
-              <h1 className="text-lg font-semibold flex-1 !text-white">
-                Menú
-              </h1>
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-2 -mr-2 hover:bg-[var(--main-sidebar-button-hover-bg)] rounded-lg transition-colors"
-              >
-                <X className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
-              </button>
-            </div>
-
-            {/* Contenido del menú */}
-            <div className="flex-1 overflow-y-auto">
-              <nav>
-                {/* Botones de autenticación */}
-                {user ? (
-                  <>
-                    {/* Dashboard Button */}
-                    <div onClick={() => setMobileMenuOpen(false)}>
-                      <Link href="/home">
-                        <MarketingMobileMenuButton
-                          icon={Home}
-                          label="Dashboard"
-                          testId="button-mobile-dashboard"
-                        />
-                      </Link>
-                    </div>
-
-                    {/* Logout Button */}
-                    <MarketingMobileMenuButton
-                      icon={LogOut}
-                      label="Cerrar sesión"
-                      onClick={() => {
-                        logout();
-                        setMobileMenuOpen(false);
-                      }}
-                      testId="button-mobile-logout"
-                    />
-                  </>
-                ) : (
-                  <>
-                    {/* Login Button */}
-                    <div onClick={() => setMobileMenuOpen(false)}>
-                      <Link href="/login">
-                        <MarketingMobileMenuButton
-                          icon={User}
-                          label="Iniciar Sesión"
-                          testId="button-mobile-login"
-                        />
-                      </Link>
-                    </div>
-
-                    {/* Register Button */}
-                    <div onClick={() => setMobileMenuOpen(false)}>
-                      <Link href="/register">
-                        <MarketingMobileMenuButton
-                          icon={User}
-                          label="Comenzar Gratis"
-                          testId="button-mobile-register"
-                        />
-                      </Link>
-                    </div>
-                  </>
-                )}
-
-                {/* Espacio vacío del tamaño de un botón */}
-                <div className="h-12" />
-
-                {/* Links de navegación */}
-                {navItems && navItems.length > 0 && navItems.map((item) => {
-                  const isSamePageAnchor = item.href.startsWith('#') && !item.href.includes('/');
-                  const ItemIcon = getIconForNavItem(item.label);
-                  
-                  if (isSamePageAnchor) {
-                    return (
-                      <a
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => handleNavigate(item.href)}
-                      >
-                        <MarketingMobileMenuButton
-                          icon={ItemIcon}
-                          label={item.label}
-                          testId={`link-mobile-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                        />
-                      </a>
-                    );
-                  }
-                  
-                  return (
-                    <div 
-                      key={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Link href={item.href}>
-                        <MarketingMobileMenuButton
-                          icon={ItemIcon}
-                          label={item.label}
-                          testId={`link-mobile-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                        />
-                      </Link>
-                    </div>
-                  );
-                })}
-              </nav>
-            </div>
-          </div>
-        </div>
-      </div>,
-      document.body
-    );
-  };
-
   const headerClasses = "fixed left-0 right-0 z-50 backdrop-blur-md bg-black/30 border-b border-white/10";
   const headerHeight = "h-16";
   const logoTextClasses = "font-bold text-xl text-white";
@@ -421,7 +231,7 @@ export function Header({ navigation, hasAnnouncement = false, announcementHeight
               variant="ghost"
               size="icon"
               className="md:hidden text-white hover:bg-white/10"
-              onClick={() => setMobileMenuOpen(true)}
+              onClick={() => openMenu('marketing')}
               data-testid="button-mobile-menu"
             >
               <Menu className="h-5 w-5" />
@@ -434,8 +244,8 @@ export function Header({ navigation, hasAnnouncement = false, announcementHeight
         </div>
       </header>
 
-      {/* Mobile Menu Portal */}
-      {renderMobileMenu()}
+      {/* Unified Mobile Menu */}
+      <MobileMenu />
     </>
   );
 }

@@ -88,7 +88,7 @@ export function HeaderMobile({
           <div className="flex items-center gap-2">
             <Menu 
               className="w-6 h-6 text-[var(--layout-text)] cursor-pointer hover:text-[var(--accent)] transition-colors" 
-              onClick={openMenu}
+              onClick={() => openMenu('dashboard')}
             />
           </div>
         </div>
@@ -119,9 +119,7 @@ export function HeaderMobile({
         )}
       </div>
 
-      {isMobileMenuOpen && (
-        <MobileMenu isOpen={isMobileMenuOpen} onClose={closeMenu} />
-      )}
+      <MobileMenu onClose={closeMenu} />
 
       {children && (
         <div className="md:hidden">
