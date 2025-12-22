@@ -35,7 +35,8 @@ interface CreateWalletTransferParams {
   destination_wallet_id: string
   currency_id: string
   amount: number
-  created_by: string
+  created_by_user_id: string
+  created_by_member_id: string
 }
 
 interface CreateCurrencyExchangeParams {
@@ -48,7 +49,8 @@ interface CreateCurrencyExchangeParams {
   destination_currency_id: string
   source_amount: number
   exchange_rate: number
-  created_by: string
+  created_by_user_id: string
+  created_by_member_id: string
 }
 
 export function useCreateWalletTransfer() {
@@ -64,7 +66,7 @@ export function useCreateWalletTransfer() {
           type: 'wallet_transfer',
           operation_date: params.operation_date,
           description: params.description || null,
-          created_by: params.created_by,
+          created_by: params.created_by_user_id,
         })
         .select()
         .single()
@@ -81,7 +83,7 @@ export function useCreateWalletTransfer() {
           amount: params.amount,
           direction: 'out' as const,
           exchange_rate: 1,
-          created_by: params.created_by,
+          created_by: params.created_by_member_id,
         },
         {
           financial_operation_id: operation.id,
@@ -92,7 +94,7 @@ export function useCreateWalletTransfer() {
           amount: params.amount,
           direction: 'in' as const,
           exchange_rate: 1,
-          created_by: params.created_by,
+          created_by: params.created_by_member_id,
         },
       ]
 
@@ -127,7 +129,7 @@ export function useCreateCurrencyExchange() {
           type: 'currency_exchange',
           operation_date: params.operation_date,
           description: params.description || null,
-          created_by: params.created_by,
+          created_by: params.created_by_user_id,
         })
         .select()
         .single()
@@ -144,7 +146,7 @@ export function useCreateCurrencyExchange() {
           amount: params.source_amount,
           direction: 'out' as const,
           exchange_rate: params.exchange_rate,
-          created_by: params.created_by,
+          created_by: params.created_by_member_id,
         },
         {
           financial_operation_id: operation.id,
@@ -155,7 +157,7 @@ export function useCreateCurrencyExchange() {
           amount: destinationAmount,
           direction: 'in' as const,
           exchange_rate: params.exchange_rate,
-          created_by: params.created_by,
+          created_by: params.created_by_member_id,
         },
       ]
 

@@ -115,7 +115,8 @@ export function WalletTransferFormFields({
         destination_wallet_id: data.destination_wallet_id,
         currency_id: data.currency_id,
         amount: data.amount,
-        created_by: currentMember.id,
+        created_by_user_id: currentMember.user_id,
+        created_by_member_id: currentMember.id,
       })
 
       toast({

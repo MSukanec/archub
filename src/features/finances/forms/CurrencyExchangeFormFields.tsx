@@ -128,7 +128,8 @@ export function CurrencyExchangeFormFields({
         destination_currency_id: data.destination_currency_id,
         source_amount: data.source_amount,
         exchange_rate: data.exchange_rate,
-        created_by: currentMember.id,
+        created_by_user_id: currentMember.user_id,
+        created_by_member_id: currentMember.id,
       })
 
       toast({

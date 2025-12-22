@@ -15,6 +15,11 @@ export * from './hooks/use-unified-movements';
 export * from './hooks/use-financial-metrics';
 export * from './hooks/use-partner-movements';
 export * from './hooks/use-partner-metrics';
+export * from './hooks/use-financial-operations';
+
+// Forms
+export { WalletTransferFormFields } from './forms/WalletTransferFormFields';
+export { CurrencyExchangeFormFields } from './forms/CurrencyExchangeFormFields';
 
 // Mappers
 export * from './mappers';
