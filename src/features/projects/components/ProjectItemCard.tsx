@@ -87,8 +87,10 @@ export default function ProjectItemCard({
     queryFn: () => getProjectImageUrlFromData(project.project_data || {}),
     enabled: !!project.project_data?.image_bucket && !!project.project_data?.image_path,
     refetchInterval: 30 * 60 * 1000,  // Refresh every 30 min
-    staleTime: 25 * 60 * 1000,         // Stale after 25 min
+    staleTime: Infinity,               // Never consider URL stale during session
+    gcTime: 60 * 60 * 1000,            // Keep in cache for 1 hour
     refetchOnWindowFocus: false,       // Prevent refetch on window focus (reduces failures)
+    refetchOnMount: false,             // Don't refetch on mount if we have data
     retry: 2,                          // Retry failed requests
     retryDelay: 1000,                  // Wait 1 second between retries
   });
@@ -158,11 +160,13 @@ export default function ProjectItemCard({
           <img
             src={imageUrl}
             alt={project.name}
-            loading="lazy"
-            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+            style={{ 
+              opacity: imageLoaded ? 1 : 0,
+              visibility: imageLoaded ? 'visible' : 'hidden'
+            }}
             onLoad={handleImageLoad}
             onError={handleImageError}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
         )}
         
