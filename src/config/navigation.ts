@@ -185,8 +185,14 @@ export const LEARNING_NAVIGATION: NavigationItem[] = [
   { id: 'courses', label: 'Cursos', icon: GraduationCap, href: '/learning/courses', testId: 'nav-learning-courses' },
 ];
 
+export const MARKETING_NAVIGATION: NavigationItem[] = [
+  { id: 'cursos', label: 'Cursos', icon: BookOpen, href: '/cursos', testId: 'nav-marketing-cursos' },
+  { id: 'fundadores', label: 'Fundadores', icon: Award, href: '/founders', testId: 'nav-marketing-fundadores' },
+  { id: 'precios', label: 'Precios', icon: CreditCard, href: '/precios', testId: 'nav-marketing-precios' },
+  { id: 'contacto', label: 'Contacto', icon: Mail, href: '/contact', testId: 'nav-marketing-contacto' },
+];
 
-export type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning' | 'founders';
+export type SidebarLevel = 'general' | 'organization' | 'project' | 'construction' | 'finances' | 'library' | 'provider' | 'admin' | 'community' | 'learning' | 'founders' | 'marketing';
 
 export interface GetNavigationItemsParams {
   sidebarLevel: SidebarLevel;
@@ -218,6 +224,8 @@ export function getNavigationItems(params: GetNavigationItemsParams): Navigation
       return COMMUNITY_NAVIGATION;
     case 'learning':
       return LEARNING_NAVIGATION;
+    case 'marketing':
+      return MARKETING_NAVIGATION;
     default:
       return [];
   }
@@ -258,6 +266,7 @@ export function getContextTitle(sidebarLevel: SidebarLevel): string {
     case 'learning': return 'Capacitaciones';
     case 'admin': return 'Administración';
     case 'general': return 'Menú';
+    case 'marketing': return 'Menú';
     default: return 'Menú';
   }
 }
