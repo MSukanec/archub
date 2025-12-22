@@ -238,12 +238,14 @@ function DashboardMenuContent({ onClose }: ContentProps) {
     userFullName,
   });
 
-  const handleInternalNavigation = (href: string, newSidebarLevel?: SidebarLevel) => {
+  const handleInternalNavigation = (href: string, newSidebarLevel?: SidebarLevel, shouldClose: boolean = true) => {
     if (newSidebarLevel) {
       setSidebarLevel(newSidebarLevel as any);
     }
     navigate(href);
-    onClose();
+    if (shouldClose) {
+      onClose();
+    }
   };
 
   return (
@@ -307,7 +309,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
                       label={contextButton.label}
                       onClick={() => {
                         const href = contextButton.href || '/project/dashboard';
-                        handleInternalNavigation(href, 'project');
+                        handleInternalNavigation(href, 'project', false);
                       }}
                       isActive={isActive}
                       showChevron={true}
@@ -322,7 +324,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
                 const handleClick = () => {
                   if (contextButton.adminOnly && !isAdmin) return;
                   const href = contextButton.href || `/${contextButton.id}/dashboard`;
-                  handleInternalNavigation(href, contextButton.id as SidebarLevel);
+                  handleInternalNavigation(href, contextButton.id as SidebarLevel, false);
                 };
 
                 const button = (
@@ -545,7 +547,6 @@ function DashboardMenuContent({ onClose }: ContentProps) {
               className="h-11 w-11 cursor-pointer hover:opacity-80 transition-opacity border-2 border-[var(--mobile-menu-border)]"
               onClick={() => {
                 handleInternalNavigation('/user');
-                onClose();
               }}
             >
               <AvatarImage src={userData?.user?.avatar_url} />
