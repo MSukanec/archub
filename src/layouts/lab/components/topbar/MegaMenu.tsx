@@ -1,11 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { ChevronDown, Building, FolderOpen, GraduationCap, Crown, Globe, Award } from 'lucide-react';
+import { ChevronDown, Building, FolderOpen, GraduationCap, Crown, Globe, Award, User, Home, Mail, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigationStore, type SidebarLevel } from '@/stores/navigationStore';
 import { useProjectContext } from '@/stores/projectContext';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useIsAdmin } from '@/hooks/use-admin-permissions';
+import { useAuthStore } from '@/stores/authStore';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { 
   CONTEXT_BUTTONS, 
   ORGANIZATION_NAVIGATION, 
@@ -21,12 +30,10 @@ interface MegaMenuTriggerProps {
   label: string;
   sublabel?: string;
   isOpen: boolean;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
   className?: string;
 }
 
-function MegaMenuTrigger({ label, sublabel, isOpen, onMouseEnter, onMouseLeave, className }: MegaMenuTriggerProps) {
+function MegaMenuTrigger({ label, sublabel, isOpen, className }: MegaMenuTriggerProps) {
   return (
     <div
       className={cn(
@@ -34,8 +41,6 @@ function MegaMenuTrigger({ label, sublabel, isOpen, onMouseEnter, onMouseLeave, 
         isOpen ? "bg-[var(--card-hover-bg)]" : "hover:bg-[var(--card-hover-bg)]",
         className
       )}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
     >
       <div className="flex items-center gap-2">
         <div className="flex flex-col items-start text-left">
@@ -67,7 +72,6 @@ interface ContextOption {
 export function ContextMegaMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [, navigate] = useLocation();
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const { sidebarLevel, setSidebarLevel } = useNavigationStore();
@@ -130,15 +134,6 @@ export function ContextMegaMenu() {
 
   const currentContext = contextOptions.find(c => c.id === sidebarLevel) || contextOptions[0];
 
-  const handleMouseEnter = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setIsOpen(true);
-  };
-
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => setIsOpen(false), 150);
-  };
-
   const handleSelect = (option: ContextOption) => {
     if (option.disabled) return;
     setSidebarLevel(option.id);
@@ -146,31 +141,23 @@ export function ContextMegaMenu() {
     setIsOpen(false);
   };
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
-
   return (
     <div 
       ref={containerRef}
       className="relative h-full"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
     >
       <MegaMenuTrigger
         sublabel="Contexto"
         label={currentContext.label}
         isOpen={isOpen}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
         className="w-44"
       />
       
       {isOpen && (
         <div 
-          className="absolute top-full left-0 right-0 w-screen bg-[var(--header-bg)] border-b border-[var(--header-border)] shadow-lg z-50"
+          className="absolute top-full left-0 bg-[var(--header-bg)] border-b border-[var(--header-border)] shadow-lg z-50"
           style={{ 
             left: containerRef.current ? -containerRef.current.offsetLeft : 0,
             width: '100vw'
@@ -226,7 +213,6 @@ export function PagesMegaMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [, navigate] = useLocation();
   const [location] = useLocation();
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const { sidebarLevel } = useNavigationStore();
@@ -261,25 +247,10 @@ export function PagesMegaMenu() {
     return 'Seleccionar página';
   };
 
-  const handleMouseEnter = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setIsOpen(true);
-  };
-
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => setIsOpen(false), 150);
-  };
-
   const handleSelect = (href: string) => {
     navigate(href);
     setIsOpen(false);
   };
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
 
   const groupedItems = navigationItems.reduce<{ section: string; items: NavigationItem[] }[]>((acc, item) => {
     if ('type' in item && item.type === 'section-header') {
@@ -299,21 +270,19 @@ export function PagesMegaMenu() {
     <div 
       ref={containerRef}
       className="relative h-full"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
     >
       <MegaMenuTrigger
         sublabel="Página"
         label={getCurrentPageLabel()}
         isOpen={isOpen}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
         className="w-52"
       />
       
       {isOpen && (
         <div 
-          className="absolute top-full left-0 right-0 w-screen bg-[var(--header-bg)] border-b border-[var(--header-border)] shadow-lg z-50"
+          className="absolute top-full left-0 bg-[var(--header-bg)] border-b border-[var(--header-border)] shadow-lg z-50"
           style={{ 
             left: containerRef.current ? -containerRef.current.offsetLeft : 0,
             width: '100vw'
@@ -363,5 +332,93 @@ export function PagesMegaMenu() {
         </div>
       )}
     </div>
+  );
+}
+
+export function UserAvatarMenu() {
+  const [, navigate] = useLocation();
+  const { data: userData } = useCurrentUser();
+
+  const handleLogout = async () => {
+    try {
+      await useAuthStore.getState().logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className="group relative cursor-pointer transition-all duration-200 hover:scale-105 h-full flex items-center px-4"
+          data-testid="button-user-menu"
+          title="Menú de usuario"
+        >
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={userData?.user?.avatar_url} />
+            <AvatarFallback className="text-xs font-semibold uppercase bg-accent text-white border-0">
+              {userData?.user?.first_name?.[0] || userData?.user?.email?.[0] || 'U'}
+            </AvatarFallback>
+          </Avatar>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent 
+        side="bottom" 
+        align="end"
+        className="w-[200px]"
+        sideOffset={8}
+      >
+        <DropdownMenuItem
+          onClick={() => navigate('/user')}
+          className="flex items-center gap-2 text-sm cursor-pointer"
+          data-testid="button-profile"
+        >
+          <User className="h-4 w-4" />
+          Mi Perfil
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        <DropdownMenuItem
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-sm cursor-pointer"
+          data-testid="button-home"
+        >
+          <Home className="h-4 w-4" />
+          Página de Inicio
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => navigate('/contact')}
+          className="flex items-center gap-2 text-sm cursor-pointer"
+          data-testid="button-contact"
+        >
+          <Mail className="h-4 w-4" />
+          Contacto
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        <DropdownMenuItem
+          onClick={() => navigate('/select-mode')}
+          className="flex items-center gap-2 text-sm cursor-pointer"
+          data-testid="button-change-mode"
+        >
+          <Settings className="h-4 w-4" />
+          Cambiar Modo
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="flex items-center gap-2 text-sm cursor-pointer text-foreground hover:text-red-600 dark:hover:text-red-500"
+          data-testid="button-logout"
+        >
+          <LogOut className="h-4 w-4" />
+          Cerrar Sesión
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

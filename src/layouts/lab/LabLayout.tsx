@@ -13,12 +13,12 @@ interface LabLayoutProps {
     showMembers?: boolean;
   };
   showToolbar?: boolean;
+  showSearch?: boolean;
   toolbarProps?: {
     searchPlaceholder?: string;
     searchValue?: string;
     onSearchChange?: (value: string) => void;
     rightSlot?: React.ReactNode;
-    showOrgProjectSelectors?: boolean;
   };
 }
 
@@ -26,13 +26,14 @@ export function LabLayout({
   children, 
   headerProps,
   showToolbar = true,
+  showSearch = false,
   toolbarProps = {},
 }: LabLayoutProps) {
   return (
     <LabProvider>
       <div className="h-full w-full flex flex-col overflow-hidden bg-background">
         {showToolbar && (
-          <LabToolbar {...toolbarProps} />
+          <LabToolbar showSearch={showSearch} {...toolbarProps} />
         )}
         {headerProps && (
           <Header {...headerProps} />
