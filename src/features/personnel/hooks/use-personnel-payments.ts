@@ -18,6 +18,8 @@ export function usePersonnelPayments(
     queryKey: PERSONNEL_PAYMENT_QUERY_KEYS.payments(projectId),
     queryFn: () => getPersonnelPayments(projectId!, organizationId!),
     enabled: !!projectId && !!organizationId,
+    staleTime: 30000,
+    gcTime: 60000,
   });
 }
 
