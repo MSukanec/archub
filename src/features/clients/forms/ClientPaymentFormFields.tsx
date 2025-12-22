@@ -745,6 +745,13 @@ export function ClientPaymentFormFields({
     }
   }, [existingPayment, mode, form, currentMember?.id, projectId])
 
+  // Auto-populate created_by for CREATE mode
+  React.useEffect(() => {
+    if (mode === 'create' && currentMember?.id) {
+      form.setValue('created_by', currentMember.id)
+    }
+  }, [mode, currentMember?.id, form])
+
   React.useEffect(() => {
     const fetchAttachments = async () => {
       if (!paymentId || !organizationId || !projectId) return
