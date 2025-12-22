@@ -157,7 +157,7 @@ export function ContextMegaMenu() {
       
       {isOpen && (
         <div 
-          className="absolute top-full left-0 bg-[var(--header-bg)] border-b border-[var(--header-border)] shadow-lg z-50"
+          className="absolute top-full left-0 bg-[var(--header-bg)] border-t border-b border-[var(--header-border)] shadow-lg z-50"
           style={{ 
             left: containerRef.current ? -containerRef.current.offsetLeft : 0,
             width: '100vw'
@@ -282,7 +282,7 @@ export function PagesMegaMenu() {
       
       {isOpen && (
         <div 
-          className="absolute top-full left-0 bg-[var(--header-bg)] border-b border-[var(--header-border)] shadow-lg z-50"
+          className="absolute top-full left-0 bg-[var(--header-bg)] border-t border-b border-[var(--header-border)] shadow-lg z-50"
           style={{ 
             left: containerRef.current ? -containerRef.current.offsetLeft : 0,
             width: '100vw'
