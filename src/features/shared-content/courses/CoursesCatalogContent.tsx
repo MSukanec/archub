@@ -98,7 +98,7 @@ export function CoursesCatalogContent({ mode, showTabs = true }: CoursesCatalogC
     <UnifiedCourseGrid 
       courses={filteredCourses}
       mode={mode}
-      isLoading={isLoading}
+      isLoading={false}
       showTabs={showTabs && isAuthenticated}
       activeTab={activeTab}
       onTabChange={(tab) => setActiveTab(tab as CourseCatalogTab)}
