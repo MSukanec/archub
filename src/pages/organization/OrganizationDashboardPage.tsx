@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Home } from 'lucide-react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import { LabPageLayout } from "@/layouts/lab/components/LabPageLayout";
+import { LabLayout } from "@/layouts/lab/LabLayout";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
@@ -56,14 +56,12 @@ export default function OrganizationDashboardPage() {
   if (isLabLayout) {
     return (
       <Layout hideHeader wide={true}>
-        <LabPageLayout showToolbar={false}>
-          <div className="p-6">
-            <OrganizationDashboardView 
-              onProjectSelected={handleProjectSelected}
-              onNavigateToProjects={handleNavigateToProjects}
-            />
-          </div>
-        </LabPageLayout>
+        <LabLayout headerProps={headerProps} showToolbar={true}>
+          <OrganizationDashboardView 
+            onProjectSelected={handleProjectSelected}
+            onNavigateToProjects={handleNavigateToProjects}
+          />
+        </LabLayout>
       </Layout>
     );
   }
