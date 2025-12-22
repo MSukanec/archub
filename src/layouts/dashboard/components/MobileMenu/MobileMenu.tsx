@@ -580,19 +580,6 @@ export function MobileMenu({ onClose }: MobileMenuProps = {}): React.ReactPortal
 
   if (!storeIsOpen) return null;
 
-  const handleInternalNavigation = (href: string, newSidebarLevel?: SidebarLevel) => {
-    // Primero cambiamos el estado interno si es necesario
-    if (newSidebarLevel) {
-      setSidebarLevel(newSidebarLevel);
-    }
-    
-    // Navegamos
-    navigate(href);
-    
-    // NO cerramos el menú aquí para evitar el parpadeo
-    // El menú se mantiene abierto y React simplemente re-renderiza el contenido
-  };
-
   const handleCloseMenu = (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
