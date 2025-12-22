@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
 import { ContextMegaMenu, PagesMegaMenu, UserAvatarMenu } from './MegaMenu';
+import { ExpandableAvatarGroup } from '@/components/shared/layout/ExpandableAvatarGroup';
 
 interface LabToolbarProps {
   showSearch?: boolean;
@@ -7,6 +8,8 @@ interface LabToolbarProps {
   searchValue?: string;
   onSearchChange?: (value: string) => void;
   rightSlot?: React.ReactNode;
+  organizationId?: string;
+  showMembers?: boolean;
 }
 
 export function LabToolbar({
@@ -15,6 +18,8 @@ export function LabToolbar({
   searchValue = "",
   onSearchChange,
   rightSlot,
+  organizationId,
+  showMembers = true,
 }: LabToolbarProps) {
   return (
     <div className="w-full flex flex-col bg-[var(--header-bg)]">
@@ -28,6 +33,12 @@ export function LabToolbar({
         {rightSlot && (
           <div className="flex items-center px-4 border-l border-[var(--header-border)]">
             {rightSlot}
+          </div>
+        )}
+        
+        {showMembers && organizationId && (
+          <div className="flex items-center px-4 border-l border-[var(--header-border)]">
+            <ExpandableAvatarGroup organizationId={organizationId} />
           </div>
         )}
         
