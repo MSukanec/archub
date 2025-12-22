@@ -1,0 +1,211 @@
+create view public.unified_financial_movements_view as
+select
+  cp.id,
+  cp.organization_id,
+  cp.project_id,
+  cp.amount,
+  cp.currency_id,
+  COALESCE(cp.exchange_rate, 1::numeric) as exchange_rate,
+  cp.payment_date,
+  COALESCE(cp.notes, cp.reference, 'Pago de cliente'::text) as description,
+  cp.reference,
+  cp.wallet_id,
+  cp.status,
+  cp.created_by,
+  cp.created_at,
+  cp.updated_at,
+  'client_payment'::text as movement_type,
+  cp.client_id,
+  null::uuid as material_id,
+  null::uuid as personnel_id,
+  null::uuid as purchase_id,
+  null::uuid as partner_id,
+  null::uuid as general_cost_id,
+  1 as amount_sign,
+  u.full_name as creator_full_name,
+  u.avatar_url as creator_avatar_url,
+  COALESCE(c.full_name, c.company_name) as entity_name
+from
+  client_payments cp
+  left join organization_members om on om.id = cp.created_by
+  left join users u on u.id = om.user_id
+  left join project_clients pc on pc.id = cp.client_id
+  left join contacts c on c.id = pc.contact_id
+where
+  cp.is_deleted is not true
+union all
+select
+  mp.id,
+  mp.organization_id,
+  mp.project_id,
+  mp.amount,
+  mp.currency_id,
+  COALESCE(mp.exchange_rate, 1::numeric) as exchange_rate,
+  mp.payment_date,
+  COALESCE(mp.notes, mp.reference, 'Pago de material'::text) as description,
+  mp.reference,
+  mp.wallet_id,
+  mp.status,
+  mp.created_by,
+  mp.created_at,
+  mp.updated_at,
+  'material_payment'::text as movement_type,
+  null::uuid as client_id,
+  null::uuid as material_id,
+  null::uuid as personnel_id,
+  mp.purchase_id,
+  null::uuid as partner_id,
+  null::uuid as general_cost_id,
+  '-1'::integer as amount_sign,
+  u.full_name as creator_full_name,
+  u.avatar_url as creator_avatar_url,
+  COALESCE(mp.notes, mp.reference, 'Material'::text) as entity_name
+from
+  material_payments mp
+  left join organization_members om on om.id = mp.created_by
+  left join users u on u.id = om.user_id
+where
+  mp.is_deleted is not true
+union all
+select
+  pp.id,
+  pp.organization_id,
+  pp.project_id,
+  pp.amount,
+  pp.currency_id,
+  COALESCE(pp.exchange_rate, 1::numeric) as exchange_rate,
+  pp.payment_date,
+  COALESCE(pp.notes, pp.reference, 'Pago de personal'::text) as description,
+  pp.reference,
+  pp.wallet_id,
+  pp.status,
+  pp.created_by,
+  pp.created_at,
+  pp.updated_at,
+  'personnel_payment'::text as movement_type,
+  null::uuid as client_id,
+  null::uuid as material_id,
+  pp.personnel_id,
+  null::uuid as purchase_id,
+  null::uuid as partner_id,
+  null::uuid as general_cost_id,
+  '-1'::integer as amount_sign,
+  u.full_name as creator_full_name,
+  u.avatar_url as creator_avatar_url,
+  pu.full_name as entity_name
+from
+  personnel_payments pp
+  left join organization_members om on om.id = pp.created_by
+  left join users u on u.id = om.user_id
+  left join organization_members pom on pom.id = pp.personnel_id
+  left join users pu on pu.id = pom.user_id
+where
+  pp.is_deleted is not true
+union all
+select
+  pc.id,
+  pc.organization_id,
+  pc.project_id,
+  pc.amount,
+  pc.currency_id,
+  COALESCE(pc.exchange_rate, 1::numeric) as exchange_rate,
+  pc.contribution_date as payment_date,
+  COALESCE(pc.notes, pc.reference, 'Aporte de socio'::text) as description,
+  pc.reference,
+  pc.wallet_id,
+  pc.status,
+  pc.created_by,
+  pc.created_at,
+  pc.updated_at,
+  'partner_contribution'::text as movement_type,
+  null::uuid as client_id,
+  null::uuid as material_id,
+  null::uuid as personnel_id,
+  null::uuid as purchase_id,
+  pc.partner_id,
+  null::uuid as general_cost_id,
+  1 as amount_sign,
+  u.full_name as creator_full_name,
+  u.avatar_url as creator_avatar_url,
+  COALESCE(c.full_name, c.company_name) as entity_name
+from
+  partner_contributions pc
+  left join organization_members om on om.id = pc.created_by
+  left join users u on u.id = om.user_id
+  left join capital_participants cp on cp.id = pc.partner_id
+  left join contacts c on c.id = cp.contact_id
+where
+  pc.is_deleted is not true
+union all
+select
+  pw.id,
+  pw.organization_id,
+  pw.project_id,
+  pw.amount,
+  pw.currency_id,
+  COALESCE(pw.exchange_rate, 1::numeric) as exchange_rate,
+  pw.withdrawal_date as payment_date,
+  COALESCE(pw.notes, pw.reference, 'Retiro de socio'::text) as description,
+  pw.reference,
+  pw.wallet_id,
+  pw.status,
+  pw.created_by,
+  pw.created_at,
+  pw.updated_at,
+  'partner_withdrawal'::text as movement_type,
+  null::uuid as client_id,
+  null::uuid as material_id,
+  null::uuid as personnel_id,
+  null::uuid as purchase_id,
+  pw.partner_id,
+  null::uuid as general_cost_id,
+  '-1'::integer as amount_sign,
+  u.full_name as creator_full_name,
+  u.avatar_url as creator_avatar_url,
+  COALESCE(c.full_name, c.company_name) as entity_name
+from
+  partner_withdrawals pw
+  left join organization_members om on om.id = pw.created_by
+  left join users u on u.id = om.user_id
+  left join capital_participants cp on cp.id = pw.partner_id
+  left join contacts c on c.id = cp.contact_id
+where
+  pw.is_deleted is not true
+union all
+select
+  gcp.id,
+  gcp.organization_id,
+  null::uuid as project_id,
+  gcp.amount,
+  gcp.currency_id,
+  COALESCE(gcp.exchange_rate, 1::numeric) as exchange_rate,
+  gcp.payment_date,
+  COALESCE(
+    gcp.notes,
+    gcp.reference,
+    'Pago de gasto general'::text
+  ) as description,
+  gcp.reference,
+  gcp.wallet_id,
+  gcp.status,
+  gcp.created_by,
+  gcp.created_at,
+  gcp.updated_at,
+  'general_cost_payment'::text as movement_type,
+  null::uuid as client_id,
+  null::uuid as material_id,
+  null::uuid as personnel_id,
+  null::uuid as purchase_id,
+  null::uuid as partner_id,
+  gcp.general_cost_id,
+  '-1'::integer as amount_sign,
+  u.full_name as creator_full_name,
+  u.avatar_url as creator_avatar_url,
+  gc.name as entity_name
+from
+  general_costs_payments gcp
+  left join organization_members om on om.id = gcp.created_by
+  left join users u on u.id = om.user_id
+  left join general_costs gc on gc.id = gcp.general_cost_id
+where
+  gcp.is_deleted is not true;
