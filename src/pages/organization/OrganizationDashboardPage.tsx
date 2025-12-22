@@ -55,14 +55,12 @@ export default function OrganizationDashboardPage() {
 
   if (isLabLayout) {
     return (
-      <Layout hideHeader wide={true}>
-        <LabLayout headerProps={headerProps} showToolbar={true}>
-          <OrganizationDashboardView 
-            onProjectSelected={handleProjectSelected}
-            onNavigateToProjects={handleNavigateToProjects}
-          />
-        </LabLayout>
-      </Layout>
+      <LabLayout headerProps={headerProps} showToolbar={true}>
+        <OrganizationDashboardView 
+          onProjectSelected={handleProjectSelected}
+          onNavigateToProjects={handleNavigateToProjects}
+        />
+      </LabLayout>
     );
   }
 
