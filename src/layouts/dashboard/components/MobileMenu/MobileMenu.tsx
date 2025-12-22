@@ -112,9 +112,12 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
   const isButtonActive = (href: string) => {
     if (!href || href === '#') return false;
-    if (href === '/organization/dashboard') {
-      return location === '/organization/dashboard';
+    
+    // Exact matches for dashboards and project root
+    if (href === '/organization/dashboard' || href === '/project/dashboard' || href === '/project') {
+      return location === href;
     }
+    
     if (href.startsWith('http')) {
       return false;
     }
