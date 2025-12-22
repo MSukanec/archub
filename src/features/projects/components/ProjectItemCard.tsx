@@ -91,6 +91,7 @@ export default function ProjectItemCard({
     gcTime: 60 * 60 * 1000,            // Keep in cache for 1 hour
     refetchOnWindowFocus: false,       // Prevent refetch on window focus (reduces failures)
     refetchOnMount: false,             // Don't refetch on mount if we have data
+    refetchOnReconnect: false,         // Don't refetch on reconnect
     retry: 2,                          // Retry failed requests
     retryDelay: 1000,                  // Wait 1 second between retries
   });
