@@ -251,7 +251,7 @@ export default function PersonnelListTab({
         {
           key: "displayName",
           label: "Nombre",
-          type: 'long-text' as const,
+          type: 'name' as const,
           sortable: true,
           sortType: "string",
           render: (record: any) => {
@@ -291,7 +291,7 @@ export default function PersonnelListTab({
         {
           key: "insurance_status",
           label: "Estado Seguro",
-          type: 'status' as const,
+          type: 'name' as const,
           sortable: true,
           sortType: "string",
           render: (record: any) => {

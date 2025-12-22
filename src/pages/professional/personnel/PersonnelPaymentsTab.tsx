@@ -697,7 +697,7 @@ export default function PersonnelPaymentsTab({ projectId }: PersonnelPaymentsTab
     {
       key: 'wallet',
       label: 'Billetera',
-      type: 'wallet' as const,
+      type: 'name' as const,
       sortable: true,
       render: (payment: PersonnelPaymentWithRelations) => payment.wallet?.wallets?.name || '-',
     },
