@@ -29,8 +29,7 @@ export function MobileMenuButton({
       disabled={disabled}
       data-testid={testId}
       className={cn(
-        "w-full flex items-center gap-3 px-4 py-3 text-left transition-colors relative",
-        "border-b border-[var(--mobile-menu-border)]",
+        "w-full flex items-center gap-4 px-6 py-5 text-left transition-colors relative",
         disabled && "opacity-50 cursor-not-allowed",
         !disabled && !isActive && "hover:bg-[var(--mobile-menu-item-active-bg)]",
         isActive && "bg-[var(--mobile-menu-item-active-bg)]"

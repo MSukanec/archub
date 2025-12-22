@@ -285,7 +285,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       const section = entry as NavigationSection;
                       return (
                         <div key={`section-${index}`}>
-                          <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--mobile-menu-item-fg)] opacity-40">
+                          <div className="px-6 py-2 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--mobile-menu-item-fg)] opacity-40">
                             {section.title}
                           </div>
                           {section.items.map((item) => {
@@ -333,7 +333,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     
                     if ('type' in entry && entry.type === 'section-header') {
                       return (
-                        <div key={`header-${entry.id}`} className="px-4 py-2 mt-4 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--mobile-menu-item-fg)] opacity-40">
+                        <div key={`header-${entry.id}`} className="px-6 py-2 mt-4 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--mobile-menu-item-fg)] opacity-40">
                           {entry.label}
                         </div>
                       );
