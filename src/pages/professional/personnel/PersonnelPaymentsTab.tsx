@@ -15,6 +15,8 @@ import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { IdentityBadge } from '@/components/shared/IdentityBadge'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   usePersonnelPayments,
   useDeletePersonnelPayment,
@@ -192,7 +194,8 @@ export default function PersonnelPaymentsTab({
     const currencies = new Set<string>();
 
     allPayments.forEach(payment => {
-      if (payment.wallet?.wallets?.name) wallets.add(payment.wallet.wallets.name);
+      const walletName = payment.wallet?.name || (payment.wallet as any)?.wallets?.name;
+      if (walletName) wallets.add(walletName);
       if (payment.currency?.code) currencies.add(payment.currency.code);
     });
 
@@ -210,7 +213,8 @@ export default function PersonnelPaymentsTab({
   const personnelPayments = useMemo(() => {
     return allPayments.filter(payment => {
       if (externalFilterIds && !externalFilterIds.has(payment.id)) return false;
-      if (filterWallet !== 'all' && payment.wallet?.wallets?.name !== filterWallet) return false;
+      const walletName = payment.wallet?.name || (payment.wallet as any)?.wallets?.name;
+      if (filterWallet !== 'all' && walletName !== filterWallet) return false;
       if (filterCurrency !== 'all' && payment.currency?.code !== filterCurrency) return false;
       if (filterStatus !== 'all' && payment.status !== filterStatus) return false;
       
@@ -478,8 +482,9 @@ export default function PersonnelPaymentsTab({
           let defaultWalletId: string | null = null;
           
           allPayments.forEach(payment => {
-            if (payment.wallet?.wallets?.name && payment.wallet.id) {
-              const normalizedName = payment.wallet.wallets.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+            const walletName = payment.wallet?.name || (payment.wallet as any)?.wallets?.name;
+            if (walletName && payment.wallet?.id) {
+              const normalizedName = walletName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
               walletsMap.set(normalizedName, payment.wallet.id);
               if (!defaultWalletId) {
                 defaultWalletId = payment.wallet.id;
@@ -692,7 +697,35 @@ export default function PersonnelPaymentsTab({
       label: 'Personal',
       type: 'name' as const,
       sortable: true,
-      render: (payment: PersonnelPaymentWithRelations) => getPersonnelName(payment),
+      render: (payment: PersonnelPaymentWithRelations) => (
+        <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <div>
+                  <IdentityBadge 
+                    name={payment.creator?.user?.full_name}
+                    avatarUrl={payment.creator?.user?.avatar_url}
+                    showName={false}
+                    size="sm"
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                {payment.creator?.user?.full_name || 'Sin creador'}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <div className="flex-1 min-w-0">
+            <div className="font-bold text-sm">{getPersonnelName(payment)}</div>
+            {payment.personnel?.labor_type_name ? (
+              <div className="text-xs text-muted-foreground line-clamp-1">{payment.personnel.labor_type_name}</div>
+            ) : (
+              <div className="text-xs text-muted-foreground">Sin tipo de mano de obra</div>
+            )}
+          </div>
+        </div>
+      ),
     },
     ...(activeProjectId ? [] : [{
       key: 'project',
@@ -720,7 +753,10 @@ export default function PersonnelPaymentsTab({
       label: 'Billetera',
       type: 'name' as const,
       sortable: true,
-      render: (payment: PersonnelPaymentWithRelations) => payment.wallet?.wallets?.name || '-',
+      render: (payment: PersonnelPaymentWithRelations) => {
+        const walletName = payment.wallet?.name || (payment.wallet as any)?.wallets?.name;
+        return walletName || '-';
+      },
     },
     {
       key: 'amount',
@@ -956,9 +992,9 @@ export default function PersonnelPaymentsTab({
                 {getPersonnelName(payment)}
               </div>
             )}
-            {payment.wallet?.wallets?.name && (
+            {(payment.wallet?.name || (payment.wallet as any)?.wallets?.name) && (
               <div className="text-sm text-muted-foreground">
-                {payment.wallet.wallets.name}
+                {payment.wallet?.name || (payment.wallet as any)?.wallets?.name}
               </div>
             )}
             {payment.reference && (

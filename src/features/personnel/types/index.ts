@@ -73,6 +73,11 @@ export interface PersonnelPayment {
 }
 
 export interface PersonnelPaymentWithRelations extends PersonnelPayment {
+  payment_month?: string;
+  amount_in_base?: number;
+  org_wallet_id?: string;
+  is_deleted?: boolean;
+  deleted_at?: string | null;
   currency: {
     id: string;
     code: string;
@@ -80,7 +85,8 @@ export interface PersonnelPaymentWithRelations extends PersonnelPayment {
   } | null;
   wallet: {
     id: string;
-    wallets: {
+    name: string;
+    wallets?: {
       id: string;
       name: string;
     } | null;
@@ -88,15 +94,27 @@ export interface PersonnelPaymentWithRelations extends PersonnelPayment {
   project: {
     id: string;
     name: string;
-    color: string;
+    color?: string;
   } | null;
   personnel: {
     id: string;
+    status?: string;
+    labor_type_id?: string;
+    labor_type_name?: string;
     contact: {
       id: string;
       first_name: string;
       last_name: string;
       full_name: string;
+      national_id?: string;
+    } | null;
+  } | null;
+  creator?: {
+    id: string;
+    user: {
+      id: string;
+      full_name: string;
+      avatar_url?: string;
     } | null;
   } | null;
 }
