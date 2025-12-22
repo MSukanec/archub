@@ -109,8 +109,8 @@ interface CascadingOption {
   children?: CascadingOption[]
 }
 
-// Mapeo de tipos de movimiento a sus navegaciones
-const MOVEMENT_NAVIGATION: Record<MovementType, { label: string; path: (orgId: string) => string }> = {
+// Mapeo de tipos de movimiento a sus navegaciones (solo para tipos con navegación)
+const MOVEMENT_NAVIGATION: Partial<Record<MovementType, { label: string; path: (orgId: string) => string }>> = {
   client_payment: { label: 'Clientes', path: (orgId) => `/organization/${orgId}/clients?tab=payments` },
   material_payment: { label: 'Materiales', path: (orgId) => `/organization/${orgId}/materials?tab=payments` },
   personnel_payment: { label: 'Personal', path: (orgId) => `/organization/${orgId}/personnel?tab=payments` },
