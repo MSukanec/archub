@@ -150,6 +150,44 @@ export type UpdatePersonnelPaymentResult =
   | { success: true; data: PersonnelPayment }
   | { success: false; error: string };
 
+const PERSONNEL_PAYMENTS_VIEW_SELECT = `
+  id,
+  organization_id,
+  project_id,
+  personnel_id,
+  payment_date,
+  payment_month,
+  amount,
+  currency_id,
+  exchange_rate,
+  status,
+  wallet_id,
+  notes,
+  reference,
+  created_at,
+  updated_at,
+  created_by,
+  is_deleted,
+  deleted_at,
+  amount_in_base,
+  currency_code,
+  currency_symbol,
+  org_wallet_id,
+  wallet_name,
+  contact_id,
+  labor_type_id,
+  personnel_status,
+  contact_first_name,
+  contact_last_name,
+  contact_display_name,
+  contact_national_id,
+  labor_type_name,
+  project_name,
+  creator_member_id,
+  creator_name,
+  creator_avatar_url
+`;
+
 const PERSONNEL_PAYMENTS_SELECT = `
   *,
   currencies!currency_id (
@@ -212,6 +250,65 @@ function mapPaymentResponse(payment: any): PersonnelPayment {
   };
 }
 
+function mapViewPaymentResponse(payment: any): PersonnelPayment {
+  return {
+    id: payment.id,
+    project_id: payment.project_id,
+    organization_id: payment.organization_id,
+    personnel_id: payment.personnel_id,
+    amount: payment.amount,
+    currency_id: payment.currency_id,
+    exchange_rate: payment.exchange_rate,
+    payment_date: payment.payment_date,
+    payment_month: payment.payment_month,
+    amount_in_base: payment.amount_in_base,
+    notes: payment.notes,
+    reference: payment.reference,
+    wallet_id: payment.wallet_id,
+    org_wallet_id: payment.org_wallet_id,
+    status: payment.status,
+    is_deleted: payment.is_deleted,
+    deleted_at: payment.deleted_at,
+    created_by: payment.created_by,
+    created_at: payment.created_at,
+    updated_at: payment.updated_at,
+    currency: payment.currency_id ? {
+      id: payment.currency_id,
+      code: payment.currency_code,
+      symbol: payment.currency_symbol
+    } : null,
+    wallet: payment.wallet_id ? {
+      id: payment.wallet_id,
+      name: payment.wallet_name
+    } : null,
+    project: payment.project_id ? {
+      id: payment.project_id,
+      name: payment.project_name
+    } : null,
+    personnel: payment.personnel_id ? {
+      id: payment.personnel_id,
+      status: payment.personnel_status,
+      labor_type_id: payment.labor_type_id,
+      labor_type_name: payment.labor_type_name,
+      contact: payment.contact_id ? {
+        id: payment.contact_id,
+        full_name: payment.contact_display_name,
+        first_name: payment.contact_first_name,
+        last_name: payment.contact_last_name,
+        national_id: payment.contact_national_id
+      } : null
+    } : null,
+    creator: payment.created_by ? {
+      id: payment.creator_member_id,
+      user: {
+        id: payment.created_by,
+        full_name: payment.creator_name,
+        avatar_url: payment.creator_avatar_url
+      }
+    } : null,
+  };
+}
+
 export async function listPersonnelPayments(
   ctx: ProjectsContext,
   params: ListPersonnelPaymentsParams
@@ -243,8 +340,8 @@ export async function listPersonnelPayments(
     }
 
     const { data: payments, error } = await supabase
-      .from('personnel_payments')
-      .select(PERSONNEL_PAYMENTS_SELECT)
+      .from('personnel_payments_view')
+      .select(PERSONNEL_PAYMENTS_VIEW_SELECT)
       .eq('project_id', params.projectId)
       .eq('organization_id', params.organizationId)
       .or('is_deleted.is.null,is_deleted.eq.false')
@@ -292,7 +389,7 @@ export async function listPersonnelPayments(
     }
 
     const mappedPayments = (payments || []).map((payment: any) => ({
-      ...mapPaymentResponse(payment),
+      ...mapViewPaymentResponse(payment),
       attachments: attachmentsMap[payment.id] || [],
     }));
 
