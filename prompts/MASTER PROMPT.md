@@ -10,7 +10,8 @@ La idea de este prompt es ORDENAR tu cabeza y la mía, para que, cada vez que te
 ### 4. Si lo que estas haciendo involucra STORAGE, lee prompts/03-Uploads.md.
 ### 5. Si te pido que un modal este en modo REEMPALZO, lee prompts/04-Replacement.md.
 ### 6. Si te adjunto un prompt de GPT o GEMINI, lee prompts/10-Prompts.md.
-### 7. Entiendo que replit.md te da contexto histórico, asi que leelo si es su fin.
+### 7. Si te pido REFACTORIZAR una PÁGINA para hacerla agnóstica al layout, lee prompts/PAGE-REFACT.md.
+### 8. Entiendo que replit.md te da contexto histórico, asi que leelo si es su fin.
 ### 8. Por último, siempre que tengas que hacer algo con TABLAS de supabase, si bien tienes el schema, revisa prompts/tables. Ahí tienes un detalle que te armé yo de cada tabla, asi no confundes columnas o haces cosas extrañas.
 
 Nuestra página es SUPER compleja y tiene cientos de cosas en este momento. La idea es SIEMPRE antes de hacer algo NUEVO, intentar ASEGURARSE de cumplir TODAS LAS LOGICAS YA PREESTABLECIDAS, de manera tal que no hagas algo que funciona mal, o que no sigue lineamientos estandar, o que duplique lógicas, etc.
