@@ -844,11 +844,17 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
           }
         }
 
+        const fullName = [data.first_name, data.last_name]
+          .filter(Boolean)
+          .join(' ')
+          .trim() || null;
+
         const { data: updatedContact, error } = await supabase
           .from('contacts')
           .update({
             first_name: data.first_name,
             last_name: data.last_name || null,
+            full_name: fullName,
             email: data.email || null,
             phone: data.phone || null,
             company_name: data.company_name || null,
@@ -917,12 +923,18 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
           }
         }
 
+        const newFullName = [data.first_name, data.last_name]
+          .filter(Boolean)
+          .join(' ')
+          .trim() || null;
+
         const { data: newContact, error } = await supabase
           .from('contacts')
           .insert({
             organization_id: organizationId,
             first_name: data.first_name,
             last_name: data.last_name || null,
+            full_name: newFullName,
             email: data.email || null,
             phone: data.phone || null,
             company_name: data.company_name || null,
