@@ -82,6 +82,8 @@ body[data-scroll-locked] {
   --mobile-menu-item-active-fg: hsl(76, 100%, 40%);
   --mobile-menu-item-active-icon: hsl(76, 100%, 40%);
   --mobile-menu-overlay-bg: hsla(0, 0%, 0%, 0.5);
+  --mobile-menu-header-bg: hsl(0, 0%, 12%);
+  --mobile-menu-footer-bg: hsl(0, 0%, 10%);
 
   /* Cards */
   --card-bg: hsl(0, 0%, 97%);

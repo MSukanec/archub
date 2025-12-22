@@ -149,35 +149,35 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
   };
 
   const menuContent = (
-    <div className="fixed inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999 }} onClick={handleCloseMenu}>
+    <div className="fixed inset-0" style={{ backgroundColor: 'var(--mobile-menu-overlay-bg)', zIndex: 9999 }} onClick={handleCloseMenu}>
       <div 
         className="fixed inset-0 flex flex-row overflow-hidden"
         style={{ 
-          backgroundColor: 'var(--main-sidebar-bg)'
+          backgroundColor: 'var(--mobile-menu-bg)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex items-center h-14 px-4 border-b border-[var(--main-sidebar-border)] bg-[var(--main-sidebar-bg)]">
+          <div className="flex items-center h-14 px-4 border-b border-[var(--mobile-menu-border)] bg-[var(--mobile-menu-header-bg)]">
             {sidebarLevel !== 'general' ? (
               <>
                 <button
                   onClick={() => {
                     setSidebarLevel('general');
                   }}
-                  className="flex items-center gap-2 flex-1 p-2 -ml-2 hover:bg-[var(--main-sidebar-button-hover-bg)] rounded-lg transition-colors"
+                  className="flex items-center gap-2 flex-1 p-2 -ml-2 hover:bg-[var(--mobile-menu-item-active-bg)] rounded-lg transition-colors"
                   data-testid="button-mobile-back"
                 >
-                  <ChevronLeft className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
+                  <ChevronLeft className="h-5 w-5 text-[var(--mobile-menu-fg)]" />
                   <h1 className="text-lg font-semibold !text-white">
                     {getContextTitle(sidebarLevel as SidebarLevel)}
                   </h1>
                 </button>
                 <button
                   onClick={handleCloseMenu}
-                  className="p-2 -mr-2 hover:bg-[var(--main-sidebar-button-hover-bg)] rounded-lg transition-colors"
+                  className="p-2 -mr-2 hover:bg-[var(--mobile-menu-item-active-bg)] rounded-lg transition-colors"
                 >
-                  <X className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
+                  <X className="h-5 w-5 text-[var(--mobile-menu-item-fg)]" />
                 </button>
               </>
             ) : (
@@ -187,9 +187,9 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 </h1>
                 <button
                   onClick={handleCloseMenu}
-                  className="p-2 -mr-2 hover:bg-[var(--main-sidebar-button-hover-bg)] rounded-lg transition-colors"
+                  className="p-2 -mr-2 hover:bg-[var(--mobile-menu-item-active-bg)] rounded-lg transition-colors"
                 >
-                  <X className="h-5 w-5 text-[var(--main-sidebar-fg)]" />
+                  <X className="h-5 w-5 text-[var(--mobile-menu-item-fg)]" />
                 </button>
               </>
             )}
@@ -285,7 +285,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                       const section = entry as NavigationSection;
                       return (
                         <div key={`section-${index}`}>
-                          <div className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-[var(--main-sidebar-fg)] opacity-60">
+                          <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--mobile-menu-item-fg)] opacity-40">
                             {section.title}
                           </div>
                           {section.items.map((item) => {
@@ -333,7 +333,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                     
                     if ('type' in entry && entry.type === 'section-header') {
                       return (
-                        <div key={`header-${entry.id}`} className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-[var(--main-sidebar-fg)] opacity-60">
+                        <div key={`header-${entry.id}`} className="px-4 py-2 mt-4 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--mobile-menu-item-fg)] opacity-40">
                           {entry.label}
                         </div>
                       );
@@ -387,33 +387,33 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
             </nav>
           </div>
 
-          <div className="p-4 border-t border-[var(--main-sidebar-border)]">
+          <div className="p-4 border-t border-[var(--mobile-menu-border)] bg-[var(--mobile-menu-footer-bg)]">
             <div className="flex items-center gap-3">
               {sidebarLevel === 'organization' && (
                 <div className="flex-1 relative">
                   <button
                     onClick={() => setExpandedOrganizationSelector(!expandedOrganizationSelector)}
-                    className="w-full p-3 text-left border-0 rounded-lg text-[var(--main-sidebar-fg)] flex items-center hover:bg-[var(--main-sidebar-button-hover-bg)] transition-colors duration-150"
-                    style={{ backgroundColor: 'hsl(0, 0%, 20%)' }}
+                    className="w-full p-3 text-left border-0 rounded-xl text-[var(--mobile-menu-fg)] flex items-center hover:bg-[var(--mobile-menu-item-active-bg)] transition-colors duration-150"
+                    style={{ backgroundColor: 'var(--mobile-menu-item-active-bg)' }}
                   >
-                    <Building className="h-5 w-5 mr-3" />
-                    <span className="flex-1 truncate text-sm">
+                    <Building className="h-5 w-5 mr-3 text-[var(--accent)]" />
+                    <span className="flex-1 truncate text-sm font-medium">
                       {currentOrganization?.name || "Seleccionar organización"}
                     </span>
                     <ChevronDown className={cn(
-                      "h-5 w-5 transition-transform duration-200",
+                      "h-4 w-4 opacity-50 transition-transform duration-200",
                       expandedOrganizationSelector && "rotate-180"
                     )} />
                   </button>
                   
                   {expandedOrganizationSelector && (
-                    <div className="absolute bottom-full left-0 right-0 mb-1 border-0 rounded-lg shadow-lg max-h-40 overflow-y-auto z-10" style={{ backgroundColor: 'hsl(0, 0%, 20%)' }}>
+                    <div className="absolute bottom-full left-0 right-0 mb-2 border border-[var(--mobile-menu-border)] rounded-xl shadow-2xl max-h-40 overflow-y-auto z-10" style={{ backgroundColor: 'var(--mobile-menu-bg)' }}>
                       <button
-                        className="w-full p-3 text-left text-sm bg-[hsl(76,100%,40%)] text-white"
+                        className="w-full p-3 text-left text-sm bg-[var(--accent)] text-white"
                       >
                         {currentOrganization?.name || "Organización actual"}
                       </button>
-                      <div className="p-3 text-center text-xs text-[var(--main-sidebar-fg)] opacity-60">
+                      <div className="p-3 text-center text-xs text-[var(--mobile-menu-item-fg)] opacity-60">
                         Multi-organización próximamente
                       </div>
                     </div>
@@ -425,28 +425,28 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <div className="flex-1 relative">
                   <button
                     onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-                    className="w-full p-3 text-left border-0 rounded-lg text-[var(--main-sidebar-fg)] flex items-center hover:bg-[var(--main-sidebar-button-hover-bg)] transition-colors duration-150"
-                    style={{ backgroundColor: 'hsl(0, 0%, 20%)' }}
+                    className="w-full p-3 text-left border-0 rounded-xl text-[var(--mobile-menu-fg)] flex items-center hover:bg-[var(--mobile-menu-item-active-bg)] transition-colors duration-150"
+                    style={{ backgroundColor: 'var(--mobile-menu-item-active-bg)' }}
                   >
-                    <FolderOpen className="h-5 w-5 mr-3" />
-                    <span className="flex-1 truncate text-sm">
+                    <FolderOpen className="h-5 w-5 mr-3 text-[var(--accent)]" />
+                    <span className="flex-1 truncate text-sm font-medium">
                       {currentProjectName}
                     </span>
                     <ChevronDown className={cn(
-                      "h-5 w-5 transition-transform duration-200",
+                      "h-4 w-4 opacity-50 transition-transform duration-200",
                       expandedProjectSelector && "rotate-180"
                     )} />
                   </button>
                   
                   {expandedProjectSelector && (
-                    <div className="absolute bottom-full left-0 right-0 mb-1 border-0 rounded-lg shadow-lg max-h-40 overflow-y-auto z-10" style={{ backgroundColor: 'hsl(0, 0%, 20%)' }}>
+                    <div className="absolute bottom-full left-0 right-0 mb-2 border border-[var(--mobile-menu-border)] rounded-xl shadow-2xl max-h-60 overflow-y-auto z-10" style={{ backgroundColor: 'var(--mobile-menu-bg)' }}>
                       {projectsData?.map((project: any) => (
                         <button
                           key={project.id}
                           onClick={() => handleProjectSelect(project.id)}
                           className={cn(
-                            "w-full p-3 text-left text-sm hover:bg-[var(--main-sidebar-button-hover-bg)] transition-colors duration-150 text-[var(--main-sidebar-fg)]",
-                            project.id === selectedProjectId && "bg-[hsl(76,100%,40%)] text-white"
+                            "w-full p-3 text-left text-sm hover:bg-[var(--mobile-menu-item-active-bg)] transition-colors duration-150 text-[var(--mobile-menu-item-fg)]",
+                            project.id === selectedProjectId && "bg-[var(--accent)] text-white"
                           )}
                         >
                           {project.name}
@@ -463,20 +463,20 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
 
               <div className="relative">
                 <Avatar 
-                  className="h-12 w-12 cursor-pointer hover:opacity-80 transition-opacity border-0 ring-0"
+                  className="h-11 w-11 cursor-pointer hover:opacity-80 transition-opacity border-2 border-[var(--mobile-menu-border)]"
                   onClick={() => {
                     navigate('/user');
                     handleCloseMenu();
                   }}
                 >
                   <AvatarImage src={userData?.user?.avatar_url} />
-                  <AvatarFallback className="bg-[var(--accent)] text-white text-sm border-0">
+                  <AvatarFallback className="bg-[var(--accent)] text-white text-sm font-bold">
                     {userData?.user?.full_name?.substring(0, 2)?.toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
                 {unreadCount > 0 && (
                   <Badge 
-                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs border-2 border-[var(--card-bg)]"
+                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-[10px] font-bold border-2 border-[var(--mobile-menu-footer-bg)]"
                   >
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </Badge>
