@@ -6,7 +6,7 @@ import { apiRequest } from '@/lib/queryClient'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
-import { Table } from '@/components/shared/trees/Table'
+import { Table } from '@/components/shared/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard'
@@ -442,10 +442,10 @@ export default function ClientListTab({ projectId }: ClientListTabProps) {
             <ClientRow
               key={client.id}
               client={client}
-              onClick={handleView}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+              onClick={(client) => handleView(client as unknown as ProjectClientSummary)}
+              onView={(client) => handleView(client as unknown as ProjectClientSummary)}
+              onEdit={(client) => handleEdit(client as unknown as ProjectClientSummary)}
+              onDelete={(client) => handleDelete(client as unknown as ProjectClientSummary)}
               data-testid={`client-row-${client.id}`}
             />
           ))}
