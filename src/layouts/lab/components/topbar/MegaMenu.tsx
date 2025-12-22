@@ -340,6 +340,99 @@ export function PagesMegaMenu() {
   );
 }
 
+export interface PageTab {
+  id: string;
+  label: string;
+}
+
+interface TabsMegaMenuProps {
+  tabs: PageTab[];
+  activeTab: string;
+  onTabChange: (tabId: string) => void;
+}
+
+export function TabsMegaMenu({ tabs, activeTab, onTabChange }: TabsMegaMenuProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  if (tabs.length === 0) return null;
+
+  const currentTab = tabs.find(t => t.id === activeTab) || tabs[0];
+
+  const handleSelect = (tabId: string) => {
+    onTabChange(tabId);
+    setIsOpen(false);
+  };
+
+  return (
+    <div 
+      ref={containerRef}
+      className="relative h-full"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
+      <div
+        className={cn(
+          "h-full flex flex-col justify-center px-4 border-r cursor-pointer transition-colors",
+          "border-r-[var(--header-border)]",
+          isOpen 
+            ? "bg-[var(--card-hover-bg)] border-b-2 border-b-[var(--header-border)]" 
+            : "border-b border-b-transparent hover:bg-[var(--card-hover-bg)]"
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col items-start text-left">
+            <span className="text-[10px] uppercase tracking-wider text-[var(--text-subtle)] font-medium">
+              Vista
+            </span>
+            <span className="text-sm font-medium text-[var(--foreground)]">
+              {currentTab.label}
+            </span>
+          </div>
+          <ChevronDown className={cn(
+            "w-3 h-3 text-[var(--text-muted)] transition-transform",
+            isOpen && "rotate-180"
+          )} />
+        </div>
+      </div>
+      
+      {isOpen && (
+        <div 
+          className="absolute top-full left-0 bg-background border-b border-[var(--header-border)] shadow-lg z-50"
+          style={{ 
+            left: containerRef.current ? -containerRef.current.offsetLeft : 0,
+            width: '100vw',
+            marginTop: '-2px'
+          }}
+        >
+          <div className="max-w-7xl mx-auto px-6 py-6">
+            <div className="flex flex-wrap gap-3">
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleSelect(tab.id)}
+                    className={cn(
+                      "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                      "hover:bg-[var(--card-hover-bg)]",
+                      isActive && "bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20"
+                    )}
+                    data-testid={`megamenu-tab-${tab.id}`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function UserAvatarMenu() {
   const [, navigate] = useLocation();
   const { data: userData } = useCurrentUser();

@@ -1,5 +1,6 @@
 import { LabProvider } from './context/LabContext';
 import { LabToolbar } from './components/topbar/LabToolbar';
+import type { PageTab } from './components/topbar/MegaMenu';
 
 interface LabLayoutProps {
   children: React.ReactNode;
@@ -7,6 +8,9 @@ interface LabLayoutProps {
   showSearch?: boolean;
   organizationId?: string;
   showMembers?: boolean;
+  tabs?: PageTab[];
+  activeTab?: string;
+  onTabChange?: (tabId: string) => void;
   toolbarProps?: {
     searchPlaceholder?: string;
     searchValue?: string;
@@ -21,6 +25,9 @@ export function LabLayout({
   showSearch = false,
   organizationId,
   showMembers = true,
+  tabs = [],
+  activeTab = '',
+  onTabChange,
   toolbarProps = {},
 }: LabLayoutProps) {
   return (
@@ -31,6 +38,9 @@ export function LabLayout({
             showSearch={showSearch} 
             organizationId={organizationId}
             showMembers={showMembers}
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={onTabChange}
             {...toolbarProps} 
           />
         )}

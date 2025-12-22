@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -11,28 +10,28 @@ import ProjectListTab from '@/pages/projects/ProjectListTab';
 import ProjectSettingsTab from '@/pages/projects/ProjectSettingsTab';
 
 interface ProjectsViewProps {
+  activeTab: string;
   onTabChange?: (tabId: string) => void;
+  showInlineTabs?: boolean;
 }
 
-export function ProjectsView({ onTabChange }: ProjectsViewProps) {
+const TABS = [
+  { id: 'actives', label: 'Proyectos Activos' },
+  { id: 'list', label: 'Lista de Proyectos' },
+  { id: 'settings', label: 'Ajustes' },
+];
+
+export function ProjectsView({ activeTab, onTabChange, showInlineTabs = false }: ProjectsViewProps) {
   const { openModal } = useGlobalModalStore();
-  const [activeTab, setActiveTab] = useState('actives');
   
   const { data: userData, isLoading } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined);
   const { data: projectsCount = 0 } = useProjectsCount(organizationId || undefined);
 
-  const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId);
-    onTabChange?.(tabId);
-  };
-
-  const tabs = [
-    { id: 'actives', label: 'Proyectos Activos', isActive: activeTab === 'actives' },
-    { id: 'list', label: 'Lista de Proyectos', isActive: activeTab === 'list' },
-    { id: 'settings', label: 'Ajustes', isActive: activeTab === 'settings' },
-  ];
+  const layoutPreference = userData?.preferences?.layout || 'experimental';
+  const isLabLayout = layoutPreference === 'lab';
+  const shouldShowInlineTabs = showInlineTabs || (!isLabLayout && onTabChange);
 
   if (isLoading || projectsLoading) {
     return (
@@ -44,25 +43,29 @@ export function ProjectsView({ onTabChange }: ProjectsViewProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                tab.isActive
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-              }`}
-              data-testid={`tab-${tab.id}`}
-            >
-              {tab.label}
-            </button>
-          ))}
+      {shouldShowInlineTabs && onTabChange && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
+                data-testid={`tab-${tab.id}`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
-        
-        {activeTab !== 'settings' && (
+      )}
+      
+      {activeTab !== 'settings' && (
+        <div className="flex justify-end">
           <PlanRestricted 
             feature="max_projects" 
             current={projectsCount}
@@ -81,8 +84,8 @@ export function ProjectsView({ onTabChange }: ProjectsViewProps) {
               Nuevo Proyecto
             </Button>
           </PlanRestricted>
-        )}
-      </div>
+        </div>
+      )}
 
       {activeTab === 'actives' && <ProjectActivesTab />}
       {activeTab === 'list' && <ProjectListTab />}

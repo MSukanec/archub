@@ -1,5 +1,5 @@
 import { Search } from 'lucide-react';
-import { ContextMegaMenu, PagesMegaMenu, UserAvatarMenu } from './MegaMenu';
+import { ContextMegaMenu, PagesMegaMenu, TabsMegaMenu, UserAvatarMenu, type PageTab } from './MegaMenu';
 import { ExpandableAvatarGroup } from '@/components/shared/layout/ExpandableAvatarGroup';
 
 interface LabToolbarProps {
@@ -10,6 +10,9 @@ interface LabToolbarProps {
   rightSlot?: React.ReactNode;
   organizationId?: string;
   showMembers?: boolean;
+  tabs?: PageTab[];
+  activeTab?: string;
+  onTabChange?: (tabId: string) => void;
 }
 
 export function LabToolbar({
@@ -20,6 +23,9 @@ export function LabToolbar({
   rightSlot,
   organizationId,
   showMembers = true,
+  tabs = [],
+  activeTab = '',
+  onTabChange,
 }: LabToolbarProps) {
   return (
     <div className="w-full flex flex-col bg-background">
@@ -27,6 +33,14 @@ export function LabToolbar({
         <ContextMegaMenu />
         
         <PagesMegaMenu />
+        
+        {tabs.length > 0 && onTabChange && (
+          <TabsMegaMenu 
+            tabs={tabs} 
+            activeTab={activeTab} 
+            onTabChange={onTabChange} 
+          />
+        )}
         
         <div className="flex-1" />
         
