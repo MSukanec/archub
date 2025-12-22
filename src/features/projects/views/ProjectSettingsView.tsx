@@ -8,7 +8,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
 
-export default function ProjectSettingsTab() {
+export function ProjectSettingsView() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
@@ -22,12 +22,12 @@ export default function ProjectSettingsTab() {
   const deleteModalityMutation = useDeleteProjectModality();
   const replaceModalityMutation = useReplaceProjectModality();
 
-  // Ordenar tipos alfabéticamente (sin agrupar por sistema/personalizado)
+  // Ordenar tipos alfabéticamente
   const sortedTypes = [...projectTypes].sort((a, b) => 
     a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
   );
 
-  // Ordenar modalidades alfabéticamente (sin agrupar por sistema/personalizado)
+  // Ordenar modalidades alfabéticamente
   const sortedModalities = [...projectModalities].sort((a, b) => 
     a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
   );
@@ -57,7 +57,6 @@ export default function ProjectSettingsTab() {
       return;
     }
 
-    // Validar que no se intente editar una modalidad del sistema
     if (modality.organization_id === null) {
       toast({
         title: 'Operación no permitida',
@@ -76,11 +75,9 @@ export default function ProjectSettingsTab() {
   const handleDeleteType = (type: ProjectType) => {
     if (!organizationId) return;
 
-    // Find all other types (system or custom) that can be used as replacements
     const otherTypes = projectTypes.filter((t: ProjectType) => t.id !== type.id);
     const hasReplacements = otherTypes.length > 0;
     
-    // Determine mode: if there are other types, use 'replace', else use 'delete'
     const mode = hasReplacements ? 'replace' : 'delete';
     
     const replacementOptions = otherTypes
@@ -118,7 +115,6 @@ export default function ProjectSettingsTab() {
   const handleDeleteModality = (modality: ProjectModality) => {
     if (!organizationId) return;
 
-    // Validar que no se intente eliminar una modalidad del sistema
     if (modality.organization_id === null) {
       toast({
         title: 'Operación no permitida',
@@ -128,11 +124,9 @@ export default function ProjectSettingsTab() {
       return;
     }
 
-    // Find all other modalities (system or custom) that can be used as replacements
     const otherModalities = projectModalities.filter((m: ProjectModality) => m.id !== modality.id);
     const hasReplacements = otherModalities.length > 0;
     
-    // Determine mode: if there are other modalities, use 'replace', else use 'delete'
     const mode = hasReplacements ? 'replace' : 'delete';
     
     const replacementOptions = otherModalities
