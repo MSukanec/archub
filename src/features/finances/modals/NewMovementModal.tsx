@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from 'react'
-import { DollarSign, Users, Package, CreditCard, TrendingUp, TrendingDown, Briefcase, ExternalLink } from 'lucide-react'
+import { DollarSign, Users, Package, CreditCard, TrendingUp, TrendingDown, Briefcase, ArrowRightLeft, Wallet } from 'lucide-react'
 import { useLocation } from 'wouter'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Label } from '@/components/ui/label'
@@ -12,8 +12,10 @@ import { MaterialPaymentFormFields } from '@/features/materials/forms/MaterialPa
 import { PersonnelPaymentFormFields } from '@/features/personnel/forms/PersonnelPaymentFormFields'
 import { PartnerContributionFormFields, PartnerWithdrawalFormFields } from '@/features/capital'
 import { GeneralCostPaymentFormFields } from '@/features/general-costs/forms/GeneralCostPaymentFormFields'
+import { WalletTransferFormFields } from '../forms/WalletTransferFormFields'
+import { CurrencyExchangeFormFields } from '../forms/CurrencyExchangeFormFields'
 
-type MovementType = 'client_payment' | 'material_payment' | 'personnel_payment' | 'partner_contribution' | 'partner_withdrawal' | 'general_cost_payment'
+type MovementType = 'client_payment' | 'material_payment' | 'personnel_payment' | 'partner_contribution' | 'partner_withdrawal' | 'general_cost_payment' | 'wallet_transfer' | 'currency_exchange'
 
 const MOVEMENT_TYPES_REQUIRING_PROJECT: MovementType[] = [
   'client_payment',
@@ -28,6 +30,7 @@ interface MovementTypeConfig {
   icon: typeof CreditCard
   color: string
   submitLabel: string
+  hasNavigation?: boolean
 }
 
 const MOVEMENT_TYPES: MovementTypeConfig[] = [
@@ -78,6 +81,24 @@ const MOVEMENT_TYPES: MovementTypeConfig[] = [
     icon: TrendingDown,
     color: 'text-[var(--negative)]',
     submitLabel: 'Registrar Retiro',
+  },
+  {
+    id: 'wallet_transfer',
+    label: 'Transferencia entre Billeteras',
+    description: 'Mover dinero de una billetera a otra',
+    icon: Wallet,
+    color: 'text-[var(--neutral)]',
+    submitLabel: 'Registrar Transferencia',
+    hasNavigation: false,
+  },
+  {
+    id: 'currency_exchange',
+    label: 'Cambio de Moneda',
+    description: 'Convertir de una moneda a otra',
+    icon: ArrowRightLeft,
+    color: 'text-[var(--neutral)]',
+    submitLabel: 'Registrar Cambio',
+    hasNavigation: false,
   },
 ]
 
@@ -202,6 +223,10 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
         return <PartnerWithdrawalFormFields {...commonProps} />
       case 'general_cost_payment':
         return <GeneralCostPaymentFormFields {...commonProps} />
+      case 'wallet_transfer':
+        return <WalletTransferFormFields {...commonProps} />
+      case 'currency_exchange':
+        return <CurrencyExchangeFormFields {...commonProps} />
       default:
         return null
     }
@@ -240,8 +265,9 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
             </SelectTrigger>
             <SelectContent>
               {MOVEMENT_TYPES.map((type) => {
-                const nav = MOVEMENT_NAVIGATION[type.id];
-                const navigateUrl = organizationId ? nav.path(organizationId) : '#';
+                const nav = MOVEMENT_NAVIGATION[type.id as keyof typeof MOVEMENT_NAVIGATION];
+                const hasNavigation = type.hasNavigation !== false && nav;
+                const navigateUrl = hasNavigation && organizationId ? nav.path(organizationId) : '#';
                 const IconComponent = type.icon;
                 
                 return (
@@ -251,18 +277,20 @@ export function NewMovementModal({ modalData, onClose }: NewMovementModalProps) 
                         <IconComponent className={cn("w-4 h-4", type.color)} />
                         <span className={type.color}>{type.label}</span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          navigate(navigateUrl);
-                          onClose();
-                        }}
-                        className="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors"
-                      >
-                        Ir a {nav.label}
-                      </button>
+                      {hasNavigation && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            navigate(navigateUrl);
+                            onClose();
+                          }}
+                          className="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors"
+                        >
+                          Ir a {nav.label}
+                        </button>
+                      )}
                     </div>
                   </SelectItem>
                 );
