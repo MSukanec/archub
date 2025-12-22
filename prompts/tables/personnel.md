@@ -326,3 +326,165 @@ create index IF not exists idx_project_personnel_status on public.project_person
 create index IF not exists idx_project_personnel_is_deleted on public.project_personnel using btree (is_deleted) TABLESPACE pg_default
 where
   (is_deleted = false);
+
+## Vista PERSONNNEL_PAYMENTS_VIEW:
+
+  CREATE OR REPLACE VIEW public.personnel_payments_view AS
+  SELECT
+    pp.id,
+    pp.organization_id,
+    pp.project_id,
+    pp.personnel_id,
+    pp.payment_date,
+    date_trunc('month'::text, pp.payment_date::timestamp with time zone) AS payment_month,
+    pp.amount,
+    pp.currency_id,
+    pp.exchange_rate,
+    pp.status,
+    pp.wallet_id,
+    pp.notes,
+    pp.reference,
+    pp.created_at,
+    pp.updated_at,
+    pp.created_by,
+    pp.is_deleted,
+    pp.deleted_at,
+    -- Monto en moneda base
+    (pp.amount * pp.exchange_rate) AS amount_in_base,
+    -- Datos del personal
+    prj_p.contact_id,
+    prj_p.labor_type_id,
+    prj_p.status AS personnel_status,
+    -- Datos del contacto
+    ct.first_name AS contact_first_name,
+    ct.last_name AS contact_last_name,
+    COALESCE(ct.display_name_override, ct.full_name, CONCAT(ct.first_name, ' ', ct.last_name)) AS contact_display_name,
+    ct.national_id AS contact_national_id,
+    -- Datos del tipo de trabajo
+    lt.name AS labor_type_name,
+    -- Datos del proyecto
+    proj.name AS project_name
+  FROM
+    personnel_payments pp
+    LEFT JOIN project_personnel prj_p ON prj_p.id = pp.personnel_id
+    LEFT JOIN contacts ct ON ct.id = prj_p.contact_id
+    LEFT JOIN labor_types lt ON lt.id = prj_p.labor_type_id
+    LEFT JOIN projects proj ON proj.id = pp.project_id;
+
+
+## Vista PERSONNNEL_BY_LABOR_TYPE_VIEW:
+
+  CREATE OR REPLACE VIEW public.personnel_by_labor_type_view AS
+  SELECT
+    ppv.organization_id,
+    ppv.project_id,
+    ppv.payment_month,
+    ppv.labor_type_id,
+    ppv.labor_type_name,
+    SUM(ppv.amount_in_base) AS total_amount_base,
+    COUNT(*) AS payments_count
+  FROM
+    personnel_payments_view ppv
+  WHERE
+    ppv.status = 'confirmed'
+    AND (ppv.is_deleted IS NULL OR ppv.is_deleted = false)
+  GROUP BY
+    ppv.organization_id,
+    ppv.project_id,
+    ppv.payment_month,
+    ppv.labor_type_id,
+    ppv.labor_type_name;
+
+
+## Vista PERSONNEL_MONTHLY_SUMMARY_VIEW:
+
+  CREATE OR REPLACE VIEW public.personnel_monthly_summary_view AS
+  SELECT
+    ppv.organization_id,
+    ppv.project_id,
+    ppv.payment_month,
+    SUM(ppv.amount_in_base) AS total_amount_base,
+    COUNT(*) AS payments_count,
+    COUNT(DISTINCT ppv.personnel_id) AS unique_personnel_count
+  FROM
+    personnel_payments_view ppv
+  WHERE
+    ppv.status = 'confirmed'
+    AND (ppv.is_deleted IS NULL OR ppv.is_deleted = false)
+  GROUP BY
+    ppv.organization_id,
+    ppv.project_id,
+    ppv.payment_month;
+
+
+## Vista PROJECT_PERSONNEL_VIEW:
+
+  CREATE OR REPLACE VIEW public.project_personnel_view AS
+  SELECT
+    pp.id,
+    pp.organization_id,
+    pp.project_id,
+    pp.contact_id,
+    pp.labor_type_id,
+    pp.status,
+    pp.start_date,
+    pp.end_date,
+    pp.notes,
+    pp.created_by,
+    pp.created_at,
+    pp.updated_at,
+    pp.is_deleted,
+    pp.deleted_at,
+    -- Datos del contacto
+    c.first_name AS contact_first_name,
+    c.last_name AS contact_last_name,
+    COALESCE(c.display_name_override, c.full_name, CONCAT(c.first_name, ' ', c.last_name)) AS contact_display_name,
+    c.national_id AS contact_national_id,
+    c.phone AS contact_phone,
+    c.email AS contact_email,
+    c.image_bucket AS contact_image_bucket,
+    c.image_path AS contact_image_path,
+    -- Datos del tipo de trabajo
+    lt.name AS labor_type_name,
+    -- Datos del proyecto
+    proj.name AS project_name,
+    -- Métricas agregadas
+    (
+      SELECT COUNT(*)
+      FROM personnel_payments pay
+      WHERE pay.personnel_id = pp.id
+        AND pay.status = 'confirmed'
+        AND (pay.is_deleted IS NULL OR pay.is_deleted = false)
+    ) AS total_payments_count,
+    (
+      SELECT COALESCE(SUM(pay.amount * pay.exchange_rate), 0)
+      FROM personnel_payments pay
+      WHERE pay.personnel_id = pp.id
+        AND pay.status = 'confirmed'
+        AND (pay.is_deleted IS NULL OR pay.is_deleted = false)
+    ) AS total_paid_base,
+    (
+      SELECT COUNT(*)
+      FROM personnel_attendees pa
+      WHERE pa.personnel_id = pp.id
+        AND pa.status = 'present'
+    ) AS total_attendance_days,
+    -- Estado del seguro ART
+    (
+      SELECT 
+        CASE
+          WHEN CURRENT_DATE > pi.coverage_end THEN 'vencido'
+          WHEN (pi.coverage_end - CURRENT_DATE) <= 30 THEN 'por_vencer'
+          ELSE 'vigente'
+        END
+      FROM personnel_insurances pi
+      WHERE pi.personnel_id = pp.id
+        AND pi.insurance_type = 'ART'
+      ORDER BY pi.coverage_end DESC
+      LIMIT 1
+    ) AS art_insurance_status
+  FROM
+    project_personnel pp
+    LEFT JOIN contacts c ON c.id = pp.contact_id
+    LEFT JOIN labor_types lt ON lt.id = pp.labor_type_id
+    LEFT JOIN projects proj ON proj.id = pp.project_id;
