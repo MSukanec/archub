@@ -32,7 +32,12 @@ export function DataHealthAlertMulti({
   
   if (!issues || issues.length === 0) return null;
   
-  const visibleIssues = issues.filter(issue => {
+  // Deduplicate issues by ruleId (can happen with React StrictMode or data duplication)
+  const deduplicatedIssues = Array.from(
+    new Map(issues.map(issue => [issue.ruleId, issue])).values()
+  );
+  
+  const visibleIssues = deduplicatedIssues.filter(issue => {
     if (dismissedIssueIds.has(issue.id)) return false;
     
     if (filteredItemIds && filteredItemIds.size > 0) {
