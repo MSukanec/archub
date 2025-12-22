@@ -354,7 +354,11 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
 
   const updateLayoutMutation = useMutation({
     mutationFn: async (newLayout: string) => {
-      const res = await apiRequest('PATCH', '/api/user/profile', { layout: newLayout });
+      if (!currentUser?.user?.id) throw new Error('User not found');
+      const res = await apiRequest('PATCH', '/api/user/profile', { 
+        user_id: currentUser.user.id,
+        layout: newLayout 
+      });
       return res.json();
     },
     onSuccess: () => {
