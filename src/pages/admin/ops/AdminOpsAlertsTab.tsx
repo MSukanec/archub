@@ -4,7 +4,10 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,7 +28,8 @@ import {
   RefreshCw,
   Wrench,
   Loader2,
-  AlertTriangle
+  AlertTriangle,
+  Layers
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -83,28 +87,28 @@ interface OpsStats {
 function getSeverityBadge(severity: string) {
   switch (severity) {
     case 'critical':
-      return <Badge variant="destructive" className="bg-red-600">Crítico</Badge>;
+      return <Badge variant="error">Crítico</Badge>;
     case 'high':
-      return <Badge variant="destructive">Alto</Badge>;
+      return <Badge variant="error">Alto</Badge>;
     case 'medium':
-      return <Badge variant="outline" className="border-yellow-500 text-yellow-600">Medio</Badge>;
+      return <Badge variant="warning">Medio</Badge>;
     default:
-      return <Badge variant="secondary">Bajo</Badge>;
+      return <Badge variant="neutral">Bajo</Badge>;
   }
 }
 
 function getStatusBadge(status: string) {
   switch (status) {
     case 'open':
-      return <Badge variant="destructive">Abierta</Badge>;
+      return <Badge variant="error">Abierta</Badge>;
     case 'ack':
-      return <Badge variant="outline" className="border-blue-500 text-blue-600">Reconocida</Badge>;
+      return <Badge variant="info">Reconocida</Badge>;
     case 'resolved':
-      return <Badge variant="outline" className="border-green-500 text-green-600">Resuelta</Badge>;
+      return <Badge variant="success">Resuelta</Badge>;
     case 'dismissed':
-      return <Badge variant="secondary">Descartada</Badge>;
+      return <Badge variant="neutral">Descartada</Badge>;
     default:
-      return <Badge variant="secondary">{status}</Badge>;
+      return <Badge variant="neutral">{status}</Badge>;
   }
 }
 
@@ -343,6 +347,32 @@ interface AdminOpsAlertsTabProps {
 export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<string>('open');
+  const { data: currentUser } = useCurrentUser();
+  
+  const currentLayout = currentUser?.preferences?.layout || 'experimental';
+  const isLabLayout = currentLayout === 'lab';
+
+  const updateLayoutMutation = useMutation({
+    mutationFn: async (newLayout: string) => {
+      const res = await apiRequest('PATCH', '/api/user/profile', { layout: newLayout });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      toast({ 
+        title: 'Layout actualizado', 
+        description: `Ahora estás usando el layout "${isLabLayout ? 'experimental' : 'lab'}"` 
+      });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  const handleLayoutToggle = (checked: boolean) => {
+    const newLayout = checked ? 'lab' : 'experimental';
+    updateLayoutMutation.mutate(newLayout);
+  };
 
   const alertsUrl = statusFilter && statusFilter !== 'all' 
     ? `/api/admin/ops/alerts?status=${statusFilter}`
@@ -402,29 +432,59 @@ export default function AdminOpsAlertsTab({ stats }: AdminOpsAlertsTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-red-600">{stats?.critical || 0}</p>
-            <p className="text-xs text-muted-foreground">Críticas</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-orange-600">{stats?.high || 0}</p>
-            <p className="text-xs text-muted-foreground">Altas</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-blue-600">{stats?.ack || 0}</p>
-            <p className="text-xs text-muted-foreground">Reconocidas</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-green-600">{stats?.resolved || 0}</p>
-            <p className="text-xs text-muted-foreground">Resueltas</p>
+      <div className="flex items-center justify-between">
+        <div className="grid grid-cols-4 gap-4 flex-1">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-red-600">{stats?.critical || 0}</p>
+              <p className="text-xs text-muted-foreground">Críticas</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-orange-600">{stats?.high || 0}</p>
+              <p className="text-xs text-muted-foreground">Altas</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-blue-600">{stats?.ack || 0}</p>
+              <p className="text-xs text-muted-foreground">Reconocidas</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-green-600">{stats?.resolved || 0}</p>
+              <p className="text-xs text-muted-foreground">Resueltas</p>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <Card className="ml-4 shrink-0">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Layers className="h-4 w-4 text-muted-foreground" />
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="layout-switch" className="text-xs font-medium">
+                  Layout Mode
+                </Label>
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs ${!isLabLayout ? 'font-medium' : 'text-muted-foreground'}`}>
+                    Exp
+                  </span>
+                  <Switch
+                    id="layout-switch"
+                    checked={isLabLayout}
+                    onCheckedChange={handleLayoutToggle}
+                    disabled={updateLayoutMutation.isPending}
+                    data-testid="switch-layout-mode"
+                  />
+                  <span className={`text-xs ${isLabLayout ? 'font-medium' : 'text-muted-foreground'}`}>
+                    Lab
+                  </span>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
