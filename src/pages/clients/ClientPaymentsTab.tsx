@@ -1127,6 +1127,27 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
     });
   };
 
+  // Show full empty state if no payments
+  if (!isLoading && allPayments.length === 0) {
+    return (
+      <EmptyState
+        icon={<DollarSign />}
+        title="No hay pagos registrados"
+        description="Agrega pagos de clientes para llevar un registro de los ingresos del proyecto."
+        action={
+          <Button
+            onClick={handleAddPayment}
+            size="sm"
+            data-testid="button-add-payment-empty"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Pago
+          </Button>
+        }
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Drill-down filter banner */}
