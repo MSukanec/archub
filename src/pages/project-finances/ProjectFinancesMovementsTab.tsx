@@ -58,15 +58,32 @@ const MOVEMENT_TYPE_CONFIG: Record<string, {
 
 interface ProjectFinancesMovementsTabProps {
   projectId: string;
+  externalFilterIssueId?: string | null;
+  onClearExternalFilter?: () => void;
+  getAffectedIdsForIssue?: (issueId: string) => Set<string | number>;
 }
 
-export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMovementsTabProps) {
+export function ProjectFinancesMovementsTab({ 
+  projectId,
+  externalFilterIssueId,
+  onClearExternalFilter,
+  getAffectedIdsForIssue: externalGetAffectedIds,
+}: ProjectFinancesMovementsTabProps) {
   const { currentOrganizationId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
   
-  const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null);
+  const [internalFilterIssueId, setInternalFilterIssueId] = useState<string | null>(null);
   const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
+  
+  const activeFilterIssueId = externalFilterIssueId ?? internalFilterIssueId;
+  const setActiveFilterIssueId = (id: string | null) => {
+    if (externalFilterIssueId !== undefined && onClearExternalFilter) {
+      if (id === null) onClearExternalFilter();
+    } else {
+      setInternalFilterIssueId(id);
+    }
+  };
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined);
   const { isMultiCurrency } = useOrgCurrencyContext(currentOrganizationId || undefined);
