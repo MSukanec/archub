@@ -647,9 +647,9 @@ export default function OrganizationFinancesDashboardTab({
             balance: d.balance
           }))}
           series={[
-            { key: 'income', label: 'Ingresos', color: 'hsl(var(--positive))', type: 'bar' },
-            { key: 'expense', label: 'Egresos', color: 'hsl(var(--negative))', type: 'bar' },
-            { key: 'balance', label: 'Balance', color: 'hsl(var(--chart-1))', type: 'line' }
+            { key: 'income', label: 'Ingresos', color: 'hsl(80, 90%, 40%)', type: 'bar' },
+            { key: 'expense', label: 'Egresos', color: 'hsl(0, 75%, 60%)', type: 'bar' },
+            { key: 'balance', label: 'Balance', color: 'hsl(173, 58%, 39%)', type: 'line' }
           ]}
           height={280}
           emptyText="No hay movimientos registrados"
