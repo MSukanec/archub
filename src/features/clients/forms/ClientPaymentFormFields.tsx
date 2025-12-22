@@ -745,7 +745,7 @@ export function ClientPaymentFormFields({
     }
   }, [existingPayment, mode, form, currentMember?.id, projectId])
 
-  // Auto-populate created_by and default wallet for CREATE mode
+  // Auto-populate created_by, default wallet, and default currency for CREATE mode
   React.useEffect(() => {
     if (mode === 'create') {
       if (currentMember?.id) {
@@ -756,8 +756,13 @@ export function ClientPaymentFormFields({
       if (defaultWallet?.id) {
         form.setValue('wallet_id', defaultWallet.id)
       }
+      // Select default currency if available
+      const defaultCurrency = currencies?.find(c => c.is_default)
+      if (defaultCurrency?.id) {
+        form.setValue('currency_id', defaultCurrency.id)
+      }
     }
-  }, [mode, currentMember?.id, wallets, form])
+  }, [mode, currentMember?.id, wallets, currencies, form])
 
   React.useEffect(() => {
     const fetchAttachments = async () => {
