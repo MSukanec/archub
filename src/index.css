@@ -73,17 +73,17 @@ body[data-scroll-locked] {
   --main-sidebar-button-hover-text-fg: hsl(0, 0%, 20%);
 
   /* Menu Mobile */
-  --mobile-menu-bg: hsl(0, 0%, 10%);
-  --mobile-menu-fg: hsl(0, 0%, 90%);
+  --mobile-menu-bg: hsl(0, 0%, 90%);
+  --mobile-menu-fg: hsl(0, 0%, 40%);
   --mobile-menu-border: hsl(0, 0%, 20%);
   --mobile-menu-item-bg: transparent;
-  --mobile-menu-item-fg: hsl(0, 0%, 70%);
-  --mobile-menu-item-active-bg: hsl(0, 0%, 20%);
-  --mobile-menu-item-active-fg: hsl(76, 100%, 40%);
+  --mobile-menu-item-fg: hsl(0, 0%, 40%);
+  --mobile-menu-item-active-bg: transparent;
+  --mobile-menu-item-active-fg: hsl(0, 0%, 20%);
   --mobile-menu-item-active-icon: hsl(76, 100%, 40%);
   --mobile-menu-overlay-bg: hsla(0, 0%, 0%, 0.5);
-  --mobile-menu-header-bg: hsl(0, 0%, 12%);
-  --mobile-menu-footer-bg: hsl(0, 0%, 10%);
+  --mobile-menu-header-bg: hsl(0, 0%, 90%);
+  --mobile-menu-footer-bg: hsl(0, 0%, 90%);
 
   /* Cards */
   --card-bg: hsl(0, 0%, 97%);
