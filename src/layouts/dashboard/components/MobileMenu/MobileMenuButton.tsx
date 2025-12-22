@@ -30,23 +30,22 @@ export function MobileMenuButton({
       data-testid={testId}
       className={cn(
         "w-full flex items-center gap-3 px-4 py-3 text-left transition-colors relative",
-        "border-b border-[var(--main-sidebar-border)]",
+        "border-b border-[var(--mobile-menu-border)]",
         disabled && "opacity-50 cursor-not-allowed",
-        !disabled && !isActive && "hover:bg-[var(--main-sidebar-button-hover-bg)]",
-        isActive && "bg-[var(--main-sidebar-button-active-bg)]"
+        !disabled && !isActive && "hover:bg-[var(--mobile-menu-item-active-bg)]",
+        isActive && "bg-[var(--mobile-menu-item-active-bg)]"
       )}
     >
       <div className="relative flex-shrink-0">
         <Icon 
           className={cn(
             "h-5 w-5 transition-colors",
-            isActive ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]"
+            isActive ? "text-[var(--mobile-menu-item-active-icon)]" : "text-[var(--mobile-menu-item-fg)]"
           )} 
         />
         {badgeCount !== undefined && badgeCount > 0 && (
           <span 
-            className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white"
-            style={{ backgroundColor: 'var(--accent)' }}
+            className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold text-white bg-[var(--accent)]"
           >
             {badgeCount > 99 ? '99+' : badgeCount}
           </span>
@@ -55,7 +54,7 @@ export function MobileMenuButton({
       <span 
         className={cn(
           "flex-1 text-base transition-colors",
-          isActive ? "text-[var(--main-sidebar-button-active-fg)] font-medium" : "text-[var(--main-sidebar-fg)]"
+          isActive ? "text-[var(--mobile-menu-item-active-fg)] font-medium" : "text-[var(--mobile-menu-item-fg)]"
         )}
       >
         {label}
@@ -64,7 +63,7 @@ export function MobileMenuButton({
         <ChevronRight 
           className={cn(
             "h-5 w-5 flex-shrink-0 transition-colors",
-            isActive ? "text-[var(--accent)]" : "text-[var(--main-sidebar-fg)]"
+            isActive ? "text-[var(--mobile-menu-item-active-icon)]" : "text-[var(--mobile-menu-item-fg)]"
           )} 
         />
       )}
