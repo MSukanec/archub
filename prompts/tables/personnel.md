@@ -1,6 +1,6 @@
 # Detalle de las tablas de Supabase de PERSONAL DE OBRA:
 
----------- TABLA CONTACTS:
+## Tabla CONTACTS:
 
 create table public.contacts (
   id uuid not null default gen_random_uuid (),
@@ -43,53 +43,132 @@ or
 update OF email on contacts for EACH row
 execute FUNCTION handle_contact_link_user ();
 
----------- TABLA PROJECT_PERSONNEL:
+## Tabla PERSONNEL_ATTENDEES:
 
-create table public.project_personnel (
+create table public.personnel_attendees (
   id uuid not null default gen_random_uuid (),
-  project_id uuid not null,
-  contact_id uuid not null,
-  notes text null,
+  site_log_id uuid null,
+  attendance_type text null default 'full'::text,
+  hours_worked numeric(5, 2) null,
+  description text null,
   created_by uuid null,
   created_at timestamp with time zone null default now(),
   updated_at timestamp with time zone null default now(),
+  project_id uuid null,
+  personnel_id uuid null,
   organization_id uuid null,
-  labor_type_id uuid null,
-  start_date date null,
-  end_date date null,
-  status text not null,
-  is_deleted boolean not null default false,
-  deleted_at timestamp with time zone null,
-  constraint project_personnel_pkey primary key (id),
-  constraint project_personnel_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
-  constraint project_personnel_labor_type_id_fkey foreign KEY (labor_type_id) references labor_types (id) on delete set null,
-  constraint project_personnel_contact_id_fkey foreign KEY (contact_id) references contacts (id) on delete CASCADE,
-  constraint project_personnel_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
-  constraint project_personnel_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
-  constraint project_personnel_status_check check (
+  work_date date not null default CURRENT_DATE,
+  status text null,
+  constraint site_log_attendees_pkey primary key (id),
+  constraint attendees_personnel_id_fkey foreign KEY (personnel_id) references project_personnel (id) on delete set null,
+  constraint attendees_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
+  constraint attendees_site_log_id_fkey foreign KEY (site_log_id) references site_logs (id) on delete set null,
+  constraint personnel_attendees_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint attendees_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
+  constraint personnel_attendees_status_check check (
     (
-      status = any (
-        array['active'::text, 'absent'::text, 'inactive'::text]
+      (status is null)
+      or (
+        status = any (
+          array[
+            'present'::text,
+            'absent'::text,
+            'leave'::text,
+            'holiday'::text
+          ]
+        )
+      )
+    )
+  ),
+  constraint site_log_attendees_attendance_type_check check (
+    (
+      attendance_type = any (array['full'::text, 'half'::text])
+    )
+  ),
+  constraint personnel_attendees_hours_check check (
+    (
+      (hours_worked is null)
+      or (
+        (hours_worked >= (0)::numeric)
+        and (hours_worked <= (24)::numeric)
       )
     )
   )
 ) TABLESPACE pg_default;
 
-create index IF not exists idx_project_personnel_project_id on public.project_personnel using btree (project_id) TABLESPACE pg_default;
+## Vista PERSONNEL_INSURANCE_VIEW:
 
-create index IF not exists idx_project_personnel_contact_id on public.project_personnel using btree (contact_id) TABLESPACE pg_default;
+create view public.personnel_insurance_view as
+select
+  pi.id,
+  pi.organization_id,
+  pi.project_id,
+  pi.personnel_id,
+  pp.contact_id,
+  pi.insurance_type,
+  pi.policy_number,
+  pi.provider,
+  pi.coverage_start,
+  pi.coverage_end,
+  pi.reminder_days,
+  pi.certificate_attachment_id,
+  pi.notes,
+  pi.created_by,
+  pi.created_at,
+  pi.updated_at,
+  pi.coverage_end - CURRENT_DATE as days_to_expiry,
+  case
+    when CURRENT_DATE > pi.coverage_end then 'vencido'::text
+    when (pi.coverage_end - CURRENT_DATE) <= 30 then 'por_vencer'::text
+    else 'vigente'::text
+  end as status
+from
+  personnel_insurances pi
+  left join project_personnel pp on pp.id = pi.personnel_id;
 
-create index IF not exists idx_project_personnel_organization_id on public.project_personnel using btree (organization_id) TABLESPACE pg_default;
+## Tabla PERSONNEL_INSURANCES:
 
-create index IF not exists idx_project_personnel_labor_type_id on public.project_personnel using btree (labor_type_id) TABLESPACE pg_default;
+create table public.personnel_insurances (
+  id uuid not null default gen_random_uuid (),
+  organization_id uuid not null,
+  project_id uuid null,
+  personnel_id uuid not null,
+  insurance_type text not null,
+  policy_number text null,
+  provider text null,
+  coverage_start date not null,
+  coverage_end date not null,
+  reminder_days smallint[] null default array[30, 15, 7],
+  certificate_attachment_id uuid null,
+  notes text null,
+  created_by uuid null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  coverage_range daterange GENERATED ALWAYS as (
+    daterange (coverage_start, coverage_end, '[]'::text)
+  ) STORED null,
+  constraint personnel_insurances_pkey primary key (id),
+  constraint personnel_insurances_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
+  constraint personnel_insurances_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint personnel_insurances_personnel_id_fkey foreign KEY (personnel_id) references project_personnel (id) on delete CASCADE,
+  constraint personnel_insurances_project_id_fkey foreign KEY (project_id) references projects (id) on delete set null,
+  constraint personnel_insurances_insurance_type_check check (
+    (
+      insurance_type = any (
+        array[
+          'ART'::text,
+          'vida'::text,
+          'accidentes'::text,
+          'responsabilidad_civil'::text,
+          'salud'::text,
+          'otro'::text
+        ]
+      )
+    )
+  )
+) TABLESPACE pg_default;
 
-create index IF not exists idx_project_personnel_status on public.project_personnel using btree (status) TABLESPACE pg_default;
-
-create index IF not exists idx_project_personnel_is_deleted on public.project_personnel using btree (is_deleted) TABLESPACE pg_default
-where
-  (is_deleted = false);
-
----------- TABLA PERSONNEL_PAYMENTS:
+## Tabla PERSONNEL_PAYMENTS:
 
 create table public.personnel_payments (
   id uuid not null default gen_random_uuid (),
@@ -149,55 +228,101 @@ create index IF not exists idx_personnel_payments_org_project on public.personne
 
 create index IF not exists idx_personnel_payments_personnel on public.personnel_payments using btree (personnel_id) TABLESPACE pg_default;
 
----------- TABLA PERSONNEL_ATTENDEES:
+## Tabla PERSONNEL_RATES:
 
-create table public.personnel_attendees (
+create table public.personnel_rates (
   id uuid not null default gen_random_uuid (),
-  site_log_id uuid null,
-  attendance_type text null default 'full'::text,
-  hours_worked numeric(5, 2) null,
-  description text null,
-  created_by uuid null,
-  created_at timestamp with time zone null default now(),
-  updated_at timestamp with time zone null default now(),
-  project_id uuid null,
+  organization_id uuid not null,
   personnel_id uuid null,
-  organization_id uuid null,
-  work_date date not null default CURRENT_DATE,
-  status text null,
-  constraint site_log_attendees_pkey primary key (id),
-  constraint attendees_personnel_id_fkey foreign KEY (personnel_id) references project_personnel (id) on delete set null,
-  constraint attendees_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
-  constraint attendees_site_log_id_fkey foreign KEY (site_log_id) references site_logs (id) on delete set null,
-  constraint personnel_attendees_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
-  constraint attendees_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
-  constraint personnel_attendees_status_check check (
+  labor_type_id uuid null,
+  rate_hour numeric(12, 2) null,
+  rate_day numeric(12, 2) null,
+  rate_month numeric(12, 2) null,
+  currency_id uuid not null,
+  valid_from date not null,
+  valid_to date null,
+  is_active boolean not null default true,
+  created_by uuid null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  pay_type text not null default 'hour'::text,
+  constraint personnel_rates_pkey primary key (id),
+  constraint personnel_rates_currency_id_fkey foreign KEY (currency_id) references currencies (id),
+  constraint personnel_rates_labor_type_id_fkey foreign KEY (labor_type_id) references labor_types (id) on delete CASCADE,
+  constraint personnel_rates_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint personnel_rates_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
+  constraint personnel_rates_personnel_id_fkey foreign KEY (personnel_id) references project_personnel (id) on delete CASCADE,
+  constraint personnel_rates_owner_check check (
     (
-      (status is null)
+      (
+        (personnel_id is not null)
+        and (labor_type_id is null)
+      )
       or (
-        status = any (
-          array[
-            'present'::text,
-            'absent'::text,
-            'leave'::text,
-            'holiday'::text
-          ]
-        )
+        (personnel_id is null)
+        and (labor_type_id is not null)
       )
     )
   ),
-  constraint site_log_attendees_attendance_type_check check (
+  constraint personnel_rates_pay_type_check check (
     (
-      attendance_type = any (array['full'::text, 'half'::text])
+      pay_type = any (array['hour'::text, 'day'::text, 'month'::text])
     )
-  ),
-  constraint personnel_attendees_hours_check check (
+  )
+) TABLESPACE pg_default;
+
+create index IF not exists idx_personnel_rates_org on public.personnel_rates using btree (organization_id) TABLESPACE pg_default;
+
+create index IF not exists idx_personnel_rates_personnel on public.personnel_rates using btree (personnel_id) TABLESPACE pg_default;
+
+create index IF not exists idx_personnel_rates_labor_type on public.personnel_rates using btree (labor_type_id) TABLESPACE pg_default;
+
+create index IF not exists idx_personnel_rates_validity on public.personnel_rates using btree (valid_from, valid_to) TABLESPACE pg_default;
+
+create index IF not exists idx_personnel_rates_is_active on public.personnel_rates using btree (is_active) TABLESPACE pg_default;
+
+## Tabla PROJECT_PERSONNEL:
+
+create table public.project_personnel (
+  id uuid not null default gen_random_uuid (),
+  project_id uuid not null,
+  contact_id uuid not null,
+  notes text null,
+  created_by uuid null,
+  created_at timestamp with time zone null default now(),
+  updated_at timestamp with time zone null default now(),
+  organization_id uuid null,
+  labor_type_id uuid null,
+  start_date date null,
+  end_date date null,
+  status text not null,
+  is_deleted boolean not null default false,
+  deleted_at timestamp with time zone null,
+  constraint project_personnel_pkey primary key (id),
+  constraint project_personnel_created_by_fkey foreign KEY (created_by) references organization_members (id) on delete set null,
+  constraint project_personnel_labor_type_id_fkey foreign KEY (labor_type_id) references labor_types (id) on delete set null,
+  constraint project_personnel_contact_id_fkey foreign KEY (contact_id) references contacts (id) on delete CASCADE,
+  constraint project_personnel_project_id_fkey foreign KEY (project_id) references projects (id) on delete CASCADE,
+  constraint project_personnel_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE,
+  constraint project_personnel_status_check check (
     (
-      (hours_worked is null)
-      or (
-        (hours_worked >= (0)::numeric)
-        and (hours_worked <= (24)::numeric)
+      status = any (
+        array['active'::text, 'absent'::text, 'inactive'::text]
       )
     )
   )
 ) TABLESPACE pg_default;
+
+create index IF not exists idx_project_personnel_project_id on public.project_personnel using btree (project_id) TABLESPACE pg_default;
+
+create index IF not exists idx_project_personnel_contact_id on public.project_personnel using btree (contact_id) TABLESPACE pg_default;
+
+create index IF not exists idx_project_personnel_organization_id on public.project_personnel using btree (organization_id) TABLESPACE pg_default;
+
+create index IF not exists idx_project_personnel_labor_type_id on public.project_personnel using btree (labor_type_id) TABLESPACE pg_default;
+
+create index IF not exists idx_project_personnel_status on public.project_personnel using btree (status) TABLESPACE pg_default;
+
+create index IF not exists idx_project_personnel_is_deleted on public.project_personnel using btree (is_deleted) TABLESPACE pg_default
+where
+  (is_deleted = false);
