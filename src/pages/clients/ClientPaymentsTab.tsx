@@ -30,7 +30,7 @@ import { useProject } from '@/features/projects/hooks/use-project'
 import { useProjects } from '@/features/projects/hooks/use-projects'
 import { PaymentStatusBadge, type PaymentStatus } from '@/components/shared/PaymentStatusBadge'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization/hooks'
-import { useOrganizationCurrencies } from '@/hooks/use-currencies'
+import { useOrganizationCurrencies, useOrgCurrencyContext } from '@/hooks/use-currencies'
 import type { TargetField, ImportConfig, ProjectContext } from '@/features/imports/types'
 import { formatContactName } from '@/utils/contacts'
 import { PaymentReceiptPDF, type PaymentReceiptData } from '@/features/pdf'
@@ -88,6 +88,7 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
   
   // Get organization members to find current member for created_by FK
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
+  const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
 
   // Filter states - initialized with drill-down filters if provided
   const [filterWallet, setFilterWallet] = useState<string>('all');
@@ -1061,7 +1062,7 @@ export default function ClientPaymentsTab({ projectId, initialFilterMonth, initi
               {payment.wallet.wallets.name}
             </span>
           )}
-          {payment.exchange_rate && (
+          {isMultiCurrency && payment.exchange_rate != null && (
             <span className="text-xs text-muted-foreground">
               Cot. {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
             </span>

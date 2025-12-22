@@ -24,7 +24,7 @@ import { PaymentStatusBadge, type PaymentStatus } from '@/components/shared/Paym
 import { useProject } from '@/features/projects/hooks/use-project'
 import { useProjects } from '@/features/projects/hooks/use-projects'
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization/hooks'
-import { useOrganizationCurrencies } from '@/hooks/use-currencies'
+import { useOrganizationCurrencies, useOrgCurrencyContext } from '@/hooks/use-currencies'
 import type { TargetField, ImportConfig, ProjectContext } from '@/features/imports/types'
 
 interface MaterialPaymentsTabProps {
@@ -66,6 +66,7 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
   const { data: organizationWallets } = useOrganizationWallets(organizationId);
   const { data: organizationCurrencies } = useOrganizationCurrencies(organizationId);
   const { data: organizationMembers = [] } = useOrganizationMembers(organizationId);
+  const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
 
   const [filterWallet, setFilterWallet] = useState<string>('all');
   const [filterCurrency, setFilterCurrency] = useState<string>('all');
@@ -696,7 +697,7 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
       render: (payment: MaterialPaymentWithRelations) => (
         <div className="flex flex-col items-end">
           <span className="font-bold">{formatAmount(payment.amount, payment.currency?.symbol)}</span>
-          {payment.exchange_rate && (
+          {isMultiCurrency && payment.exchange_rate != null && (
             <span className="text-xs text-muted-foreground">
               Cot. {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
             </span>

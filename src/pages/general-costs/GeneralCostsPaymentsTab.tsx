@@ -18,7 +18,7 @@ import { useGeneralCostsPayments, useDeleteGeneralCostPayment, type GeneralCostP
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import GeneralCostPaymentRow from '@/features/finances/components/GeneralCostPaymentRow';
-import { useOrganizationDefaultCurrency, useOrganizationCurrencies } from '@/hooks/use-currencies';
+import { useOrganizationDefaultCurrency, useOrganizationCurrencies, useOrgCurrencyContext } from '@/hooks/use-currencies';
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { parseLocalDate } from '@/lib/date-utils';
@@ -73,6 +73,7 @@ export default function GeneralCostsPaymentsTab({
   const { data: members = [] } = useOrganizationMembers(organizationId);
   const createPaymentMutation = useCreateGeneralCostPayment();
   const { toast } = useToast();
+  const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
 
   // Obtener el member actual del usuario (igual que en el formulario de pagos)
   const currentMember = useMemo(() => {
@@ -936,7 +937,7 @@ export default function GeneralCostsPaymentsTab({
       render: (payment: GeneralCostPayment) => (
         <div className="flex flex-col items-end">
           <span className="font-bold">{formatAmount(payment.amount, payment.currency?.symbol)}</span>
-          {payment.exchange_rate != null && (
+          {isMultiCurrency && payment.exchange_rate != null && (
             <span className="text-xs text-muted-foreground" style={{ fontSize: '12px' }}>
               Cot. {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
             </span>

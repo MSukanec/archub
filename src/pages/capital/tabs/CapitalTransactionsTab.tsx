@@ -22,7 +22,7 @@ import { calculateMonetaryKPI, formatBreakdown as kpiFormatBreakdown } from '@/l
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
-import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
+import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 import {
   usePartners,
@@ -81,6 +81,7 @@ export function CapitalTransactionsTab({
   const { data: contributions = [], isLoading: loadingContributions } = usePartnerContributions(organizationId);
   const { data: withdrawals = [], isLoading: loadingWithdrawals } = usePartnerWithdrawals(organizationId);
   const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
+  const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
   const { data: partners = [], isLoading: loadingPartners } = usePartners(organizationId, { enabled: !!organizationId });
 
   const deleteContributionMutation = useDeletePartnerContribution();
@@ -329,7 +330,7 @@ export function CapitalTransactionsTab({
           <span className={`text-sm font-medium ${item.type === 'contribution' ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
             {item.type === 'contribution' ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
-          {item.exchange_rate && item.exchange_rate !== 1 && (
+          {isMultiCurrency && item.exchange_rate != null && (
             <span className="text-xs text-muted-foreground">
               Cot. {item.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
             </span>
@@ -487,7 +488,7 @@ export function CapitalTransactionsTab({
                 <span className={`text-lg font-bold ${item.type === 'contribution' ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}`}>
                   {item.type === 'contribution' ? '+' : '-'}{item.currency_symbol} {item.amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
-                {item.exchange_rate && item.exchange_rate !== 1 && (
+                {isMultiCurrency && item.exchange_rate != null && (
                   <span className="text-xs text-muted-foreground">
                     Cot. {item.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
                   </span>

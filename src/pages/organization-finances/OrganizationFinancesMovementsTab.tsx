@@ -405,7 +405,7 @@ export function OrganizationFinancesMovementsTab({
             >
               {isPositive ? '+' : '-'}{formatCurrency(movement.amount, movement.currency?.symbol)}
             </span>
-            {movement.exchange_rate && (
+            {isMultiCurrency && movement.exchange_rate != null && (
               <span className="text-[10px] text-muted-foreground">
                 Cot. {movement.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
               </span>
