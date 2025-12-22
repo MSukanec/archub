@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, Home, LogOut, User, BookOpen, Sparkles, HelpCircle, Mail, CreditCard } from "lucide-react";
+import { Menu, X, Home, LogOut, User, BookOpen, Sparkles, HelpCircle, Mail, CreditCard, ChevronRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthStore } from "@/stores/authStore";

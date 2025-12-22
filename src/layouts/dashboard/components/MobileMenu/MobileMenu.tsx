@@ -187,7 +187,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   onClick={handleCloseMenu}
                   className="absolute right-4 p-2 hover:bg-[var(--mobile-menu-item-active-bg)] rounded-lg transition-colors z-10"
                 >
-                  <X className="h-5 w-5 text-[var(--mobile-menu-item-fg)]" />
+                  <X className="h-5 w-5 text-[var(--mobile-menu-fg)]" />
                 </button>
               </>
             ) : (
@@ -199,7 +199,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                   onClick={handleCloseMenu}
                   className="absolute right-4 p-2 hover:bg-[var(--mobile-menu-item-active-bg)] rounded-lg transition-colors z-10"
                 >
-                  <X className="h-5 w-5 text-[var(--mobile-menu-item-fg)]" />
+                  <X className="h-5 w-5 text-[var(--mobile-menu-fg)]" />
                 </button>
               </>
             )}
@@ -399,7 +399,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <div className="flex-1 relative">
                   <button
                     onClick={() => setExpandedOrganizationSelector(!expandedOrganizationSelector)}
-                    className="w-full p-3 text-left border border-[var(--mobile-menu-border)] rounded-xl text-[var(--mobile-menu-fg)] flex items-center hover:bg-[var(--mobile-menu-item-active-bg)] transition-colors duration-150"
+                    className="w-full p-3 text-left border border-[var(--mobile-menu-item-active-bg)] rounded-xl text-[var(--mobile-menu-fg)] flex items-center hover:bg-[var(--mobile-menu-item-active-bg)] transition-colors duration-150"
                     style={{ backgroundColor: 'var(--mobile-menu-item-active-bg)' }}
                   >
                     <Building className="h-5 w-5 mr-3 text-[var(--accent)]" />
@@ -431,7 +431,7 @@ export function MobileMenu({ onClose }: MobileMenuProps): React.ReactPortal {
                 <div className="flex-1 relative">
                   <button
                     onClick={() => setExpandedProjectSelector(!expandedProjectSelector)}
-                    className="w-full p-3 text-left border border-[var(--mobile-menu-border)] rounded-xl text-[var(--mobile-menu-fg)] flex items-center hover:bg-[var(--mobile-menu-item-active-bg)] transition-colors duration-150"
+                    className="w-full p-3 text-left border border-[var(--mobile-menu-item-active-bg)] rounded-xl text-[var(--mobile-menu-fg)] flex items-center hover:bg-[var(--mobile-menu-item-active-bg)] transition-colors duration-150"
                     style={{ backgroundColor: 'var(--mobile-menu-item-active-bg)' }}
                   >
                     <FolderOpen className="h-5 w-5 mr-3 text-[var(--accent)]" />
