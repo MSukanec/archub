@@ -16,7 +16,7 @@ import { useDeleteGeneralCostPayment } from '@/hooks/use-general-costs-payments'
 import { useDeletePartnerContribution, useDeletePartnerWithdrawal } from '@/features/capital';
 import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useFinancesDataHealth, DataHealthAlertMulti } from '@/core/data-health';
+import { useFinancesDataHealth } from '@/core/data-health';
 import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { Badge } from '@/components/ui/badge';
@@ -77,15 +77,33 @@ const MOVEMENT_TYPE_CONFIG: Record<string, {
   },
 };
 
-export function OrganizationFinancesMovementsTab() {
+interface OrganizationFinancesMovementsTabProps {
+  externalFilterIssueId?: string | null;
+  onClearExternalFilter?: () => void;
+  getAffectedIdsForIssue?: (issueId: string) => Set<string | number>;
+}
+
+export function OrganizationFinancesMovementsTab({
+  externalFilterIssueId,
+  onClearExternalFilter,
+  getAffectedIdsForIssue: externalGetAffectedIds,
+}: OrganizationFinancesMovementsTabProps = {}) {
   const { currentOrganizationId } = useProjectContext();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();
   
-  const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null);
-  const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
+  const [internalFilterIssueId, setInternalFilterIssueId] = useState<string | null>(null);
   const [selectedMovements, setSelectedMovements] = useState<UnifiedMovementWithRelations[]>([]);
+  
+  const activeFilterIssueId = externalFilterIssueId ?? internalFilterIssueId;
+  
+  const setActiveFilterIssueId = useCallback((issueId: string | null) => {
+    if (externalFilterIssueId && onClearExternalFilter) {
+      onClearExternalFilter();
+    }
+    setInternalFilterIssueId(issueId);
+  }, [externalFilterIssueId, onClearExternalFilter]);
 
   const handleAddMovement = useCallback(() => {
     openModal('unified-payment', {
@@ -126,8 +144,9 @@ export function OrganizationFinancesMovementsTab() {
 
   const filteredMovementIds = useMemo(() => {
     if (!activeFilterIssueId) return null;
-    return dataHealth.getAffectedIdsForIssue(activeFilterIssueId);
-  }, [activeFilterIssueId, dataHealth]);
+    const getAffectedIds = externalGetAffectedIds || dataHealth.getAffectedIdsForIssue;
+    return getAffectedIds(activeFilterIssueId);
+  }, [activeFilterIssueId, dataHealth, externalGetAffectedIds]);
 
   const movements = useMemo(() => {
     if (!filteredMovementIds) return sortedMovements;
@@ -426,27 +445,6 @@ export function OrganizationFinancesMovementsTab() {
 
   return (
     <div className="space-y-6" data-testid="organization-finances-movements-tab">
-      <DataHealthAlertMulti
-        issues={dataHealth.issues}
-        entityLabel="movimiento"
-        activeFilterIssueId={activeFilterIssueId}
-        onToggleFilter={(issueId: string) => {
-          if (activeFilterIssueId === issueId) {
-            setActiveFilterIssueId(null);
-          } else {
-            setActiveFilterIssueId(issueId);
-          }
-        }}
-        dismissedIssueIds={dismissedIssueIds}
-        onDismissIssue={(issueId: string) => {
-          if (activeFilterIssueId === issueId) {
-            setActiveFilterIssueId(null);
-          }
-          setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
-        }}
-        filteredItemIds={filteredMovementIds || undefined}
-      />
-
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="kpi-ingresos">
           <StatCardTitle>

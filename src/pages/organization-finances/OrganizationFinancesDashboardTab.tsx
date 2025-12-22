@@ -4,7 +4,7 @@ import { type InsightAction } from '@/components/dashboard/insights/types';
 import { calculateMonetaryKPI, calculateCountKPI, formatBreakdown, hasMultipleCurrencies } from '@/lib/kpis';
 import { format as formatMoney, formatKPI, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';
+import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { 
   StatCard, 
   StatCardTitle, 
@@ -22,7 +22,6 @@ import {
 } from '@/components/dashboard';
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
-import { useFinancesDataHealth, DataHealthAlertMulti } from '@/core/data-health';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
@@ -161,7 +160,6 @@ export default function OrganizationFinancesDashboardTab({
   
   const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId);
   const defaultCurrencyId = userData?.organization?.preferences?.default_currency_id;
-  const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
 
   const handleInsightAction = useCallback((action: InsightAction) => {
     switch (action.type) {
@@ -219,13 +217,6 @@ export default function OrganizationFinancesDashboardTab({
       return movementDateAtMidnight >= dateFrom;
     });
   }, [allMovements, dateFrom]);
-
-  const dataHealth = useFinancesDataHealth(allMovements, {
-    organizationId: organizationId ?? '',
-    defaultCurrencyId: defaultCurrencyId ?? undefined,
-    isMultiCurrency,
-    enabled: !!organizationId && allMovements.length > 0,
-  });
 
   const previousPeriodMovements = useMemo(() => {
     const previousRange = getPreviousPeriodDateRange(selectedPeriod);
@@ -485,15 +476,6 @@ export default function OrganizationFinancesDashboardTab({
 
   return (
     <div className="space-y-6">
-      <DataHealthAlertMulti
-        issues={dataHealth.result?.issues || []}
-        entityLabel="movimiento"
-        dismissedIssueIds={dismissedIssueIds}
-        onDismissIssue={(issueId: string) => {
-          onDismissIssue?.(issueId);
-        }}
-      />
-
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="kpi-total-ingresos">
           <StatCardTitle>
