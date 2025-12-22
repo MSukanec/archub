@@ -88,7 +88,7 @@ function MarketingMenuContent({ onClose }: ContentProps) {
       <nav>
         {authUser ? (
           <>
-            <div onClick={() => { navigate('/home'); onClose(); }}>
+            <div onClick={() => { handleMarketingNavClick('/home'); }}>
               <MobileMenuButton
                 icon={Home}
                 label="Dashboard"
@@ -109,7 +109,7 @@ function MarketingMenuContent({ onClose }: ContentProps) {
           </>
         ) : (
           <>
-            <div onClick={() => { navigate('/login'); onClose(); }}>
+            <div onClick={() => { handleMarketingNavClick('/login'); }}>
               <MobileMenuButton
                 icon={User}
                 label="Iniciar Sesión"
@@ -119,7 +119,7 @@ function MarketingMenuContent({ onClose }: ContentProps) {
                 testId="button-mobile-login"
               />
             </div>
-            <div onClick={() => { navigate('/register'); onClose(); }}>
+            <div onClick={() => { handleMarketingNavClick('/register'); }}>
               <MobileMenuButton
                 icon={User}
                 label="Comenzar Gratis"
@@ -237,6 +237,14 @@ function DashboardMenuContent({ onClose }: ContentProps) {
     userFullName,
   });
 
+  const handleInternalNavigation = (href: string, newSidebarLevel?: SidebarLevel) => {
+    if (newSidebarLevel) {
+      setSidebarLevel(newSidebarLevel);
+    }
+    navigate(href);
+    // NO cerramos el menú aquí para evitar el parpadeo
+  };
+
   return (
     <>
       <div className="flex items-center h-14 px-4 bg-[var(--mobile-menu-header-bg)] relative">
@@ -297,10 +305,8 @@ function DashboardMenuContent({ onClose }: ContentProps) {
                       icon={contextButton.icon}
                       label={contextButton.label}
                       onClick={() => {
-                        setSidebarLevel('project');
-                        if (contextButton.href) {
-                          navigate(contextButton.href);
-                        }
+                        const href = contextButton.href || '/project/dashboard';
+                        handleInternalNavigation(href, 'project');
                       }}
                       isActive={isActive}
                       showChevron={true}
@@ -314,10 +320,8 @@ function DashboardMenuContent({ onClose }: ContentProps) {
 
                 const handleClick = () => {
                   if (contextButton.adminOnly && !isAdmin) return;
-                  setSidebarLevel(contextButton.id);
-                  if (contextButton.href) {
-                    navigate(contextButton.href);
-                  }
+                  const href = contextButton.href || `/${contextButton.id}/dashboard`;
+                  handleInternalNavigation(href, contextButton.id as SidebarLevel);
                 };
 
                 const button = (
@@ -372,13 +376,13 @@ function DashboardMenuContent({ onClose }: ContentProps) {
                           <MobileMenuButton
                             icon={item.icon}
                             label={item.label}
-                            onClick={() => {
-                              if (isExternal) {
-                                window.open(item.href, '_blank');
-                              } else {
-                                navigate(item.href);
-                              }
-                            }}
+                          onClick={() => {
+                            if (isExternal) {
+                              window.open(item.href, '_blank');
+                            } else {
+                              handleInternalNavigation(item.href);
+                            }
+                          }}
                             isActive={isActive}
                             showChevron={false}
                             testId={item.testId || `button-mobile-${item.id}`}
@@ -430,7 +434,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
                       if (isExternal) {
                         window.open(item.href, '_blank');
                       } else {
-                        navigate(item.href);
+                        handleInternalNavigation(item.href);
                       }
                     }}
                     isActive={isActive}
@@ -539,8 +543,7 @@ function DashboardMenuContent({ onClose }: ContentProps) {
             <Avatar 
               className="h-11 w-11 cursor-pointer hover:opacity-80 transition-opacity border-2 border-[var(--mobile-menu-border)]"
               onClick={() => {
-                navigate('/user');
-                onClose();
+                handleInternalNavigation('/user');
               }}
             >
               <AvatarImage src={userData?.user?.avatar_url} />
@@ -576,6 +579,19 @@ export function MobileMenu({ onClose }: MobileMenuProps = {}): React.ReactPortal
   }, [storeIsOpen]);
 
   if (!storeIsOpen) return null;
+
+  const handleInternalNavigation = (href: string, newSidebarLevel?: SidebarLevel) => {
+    // Primero cambiamos el estado interno si es necesario
+    if (newSidebarLevel) {
+      setSidebarLevel(newSidebarLevel);
+    }
+    
+    // Navegamos
+    navigate(href);
+    
+    // NO cerramos el menú aquí para evitar el parpadeo
+    // El menú se mantiene abierto y React simplemente re-renderiza el contenido
+  };
 
   const handleCloseMenu = (e?: React.MouseEvent) => {
     if (e) {
