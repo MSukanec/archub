@@ -1,5 +1,5 @@
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal'
@@ -10,6 +10,8 @@ import PersonnelDashboardTab, { calculateAvailablePeriods, type PeriodFilter } f
 import PersonnelListTab from './PersonnelListTab'
 import PersonnelAttendanceTab from './PersonnelAttendanceTab'
 import PersonnelPaymentsTab from './PersonnelPaymentsTab'
+import { DataHealthAlertMulti, type DataIssue } from '@/core/data-health'
+import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,13 +34,90 @@ export default function Personnel() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all')
   const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set())
+  const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null)
 
   const { data: insuranceData = [] } = useInsuranceList({
     project_id: selectedProjectId || undefined
   })
 
   const { data: allPayments = [] } = usePersonnelPayments(selectedProjectId || undefined, currentOrganizationId || undefined)
+  const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined)
   const availablePeriods = useMemo(() => calculateAvailablePeriods(allPayments), [allPayments])
+
+  const dataHealthIssues = useMemo((): DataIssue[] => {
+    const issues: DataIssue[] = []
+    
+    const paymentsWithoutPersonnel = allPayments.filter(p => !p.personnel_id)
+    if (paymentsWithoutPersonnel.length > 0) {
+      issues.push({
+        id: 'personnel-missing-personnel',
+        ruleId: 'personnel-missing-personnel',
+        severity: 'warning',
+        title: 'Pagos sin personal asignado',
+        description: `${paymentsWithoutPersonnel.length} pago(s) no tienen personal asignado`,
+        affectedCount: paymentsWithoutPersonnel.length,
+        affectedEntities: paymentsWithoutPersonnel.map(p => ({ id: p.id, label: p.notes || 'Pago' })),
+        recommendedAction: {
+          label: 'Asignar personal',
+          actionType: 'navigate',
+          targetPath: '/personnel/payments'
+        }
+      })
+    }
+    
+    const paymentsWithMissingExchangeRate = allPayments.filter(p => {
+      if (!p.currency?.code || !defaultCurrency?.code) return false
+      return p.currency.code !== defaultCurrency.code && !p.exchange_rate
+    })
+    if (paymentsWithMissingExchangeRate.length > 0) {
+      issues.push({
+        id: 'personnel-missing-exchange-rate',
+        ruleId: 'personnel-missing-exchange-rate',
+        severity: 'critical',
+        title: 'Pagos sin tipo de cambio',
+        description: `${paymentsWithMissingExchangeRate.length} pago(s) en moneda extranjera sin tipo de cambio`,
+        affectedCount: paymentsWithMissingExchangeRate.length,
+        affectedEntities: paymentsWithMissingExchangeRate.map(p => ({ id: p.id, label: p.notes || 'Pago' })),
+        recommendedAction: {
+          label: 'Agregar tipo de cambio',
+          actionType: 'navigate',
+          targetPath: '/personnel/payments'
+        }
+      })
+    }
+    
+    return issues
+  }, [allPayments, defaultCurrency])
+
+  const getAffectedIdsForIssue = useCallback((issueId: string): string[] => {
+    const issue = dataHealthIssues.find(i => i.id === issueId)
+    if (!issue?.affectedEntities) return []
+    return issue.affectedEntities.map(e => String(e.id))
+  }, [dataHealthIssues])
+
+  const handleDataHealthClick = useCallback((issueId: string) => {
+    if (activeTab !== 'payments') {
+      setActiveTab('payments')
+      setActiveFilterIssueId(issueId)
+    } else {
+      if (activeFilterIssueId === issueId) {
+        setActiveFilterIssueId(null)
+      } else {
+        setActiveFilterIssueId(issueId)
+      }
+    }
+  }, [activeTab, activeFilterIssueId])
+
+  useEffect(() => {
+    if (activeFilterIssueId && dataHealthIssues.length === 0) {
+      setActiveFilterIssueId(null)
+    }
+  }, [activeFilterIssueId, dataHealthIssues])
+
+  const filteredPaymentIds = useMemo(() => {
+    if (!activeFilterIssueId) return null
+    return getAffectedIdsForIssue(activeFilterIssueId)
+  }, [activeFilterIssueId, getAffectedIdsForIssue])
 
   const validSelectedPeriod = useMemo(() => {
     if (availablePeriods[selectedPeriod]) return selectedPeriod
@@ -158,6 +237,23 @@ export default function Personnel() {
   return (
     <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-6 max-w-full min-w-0 overflow-x-hidden">
+        {dataHealthIssues.length > 0 && (
+          <DataHealthAlertMulti
+            issues={dataHealthIssues}
+            entityLabel="pago"
+            activeFilterIssueId={activeFilterIssueId}
+            onToggleFilter={handleDataHealthClick}
+            dismissedIssueIds={dismissedIssueIds}
+            onDismissIssue={(issueId: string) => {
+              if (activeFilterIssueId === issueId) {
+                setActiveFilterIssueId(null)
+              }
+              setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]))
+            }}
+            filteredItemIds={filteredPaymentIds ? new Set(filteredPaymentIds) : undefined}
+          />
+        )}
+        
         {activeTab === 'dashboard' && (
           <PersonnelDashboardTab
             projectId={selectedProjectId || undefined}
@@ -190,6 +286,9 @@ export default function Personnel() {
         {activeTab === 'payments' && (
           <PersonnelPaymentsTab
             projectId={selectedProjectId || undefined}
+            externalFilterIssueId={activeFilterIssueId}
+            onClearExternalFilter={() => setActiveFilterIssueId(null)}
+            getAffectedIdsForIssue={getAffectedIdsForIssue}
           />
         )}
 

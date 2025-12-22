@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
@@ -11,6 +11,9 @@ import PurchaseOrdersTab from './PurchaseOrdersTab'
 import PurchasesTab from './PurchasesTab'
 import MaterialSettingsTab from './MaterialSettingsTab'
 import { useMaterialPayments } from '@/features/materials'
+import { DataHealthAlertMulti, type DataIssue } from '@/core/data-health'
+import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies'
+import { parseLocalDate } from '@/lib/date-utils'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,13 +33,96 @@ export default function Materials() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all')
   const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set())
+  const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null)
   const { data: userData, isLoading } = useCurrentUser()
   const { selectedProjectId, currentOrganizationId } = useProjectContext()
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
 
   const { data: allPayments = [] } = useMaterialPayments(selectedProjectId || undefined, currentOrganizationId || undefined)
+  const { data: defaultCurrency } = useOrganizationDefaultCurrency(currentOrganizationId || undefined)
   const availablePeriods = useMemo(() => calculateAvailablePeriods(allPayments), [allPayments])
+
+  const dataHealthIssues = useMemo((): DataIssue[] => {
+    const issues: DataIssue[] = []
+
+    const paymentsWithoutExchangeRate = allPayments.filter(p => {
+      if (!p.currency || !defaultCurrency) return false
+      return p.currency.code !== defaultCurrency.code && !p.exchange_rate
+    })
+
+    if (paymentsWithoutExchangeRate.length > 0) {
+      issues.push({
+        id: 'materials-missing-exchange-rate',
+        ruleId: 'materials-missing-exchange-rate',
+        severity: 'warning',
+        title: 'Pagos sin cotización',
+        description: `${paymentsWithoutExchangeRate.length} pago(s) en moneda extranjera no tienen cotización registrada`,
+        affectedCount: paymentsWithoutExchangeRate.length,
+        affectedEntities: paymentsWithoutExchangeRate.map(p => ({ id: p.id, label: p.notes || 'Pago' })),
+        recommendedAction: {
+          label: 'Editar pagos',
+          actionType: 'bulk_edit'
+        }
+      })
+    }
+
+    const futurePayments = allPayments.filter(p => {
+      const paymentDate = parseLocalDate(p.payment_date)
+      if (!paymentDate) return false
+      const today = new Date()
+      today.setHours(23, 59, 59, 999)
+      return paymentDate > today
+    })
+
+    if (futurePayments.length > 0) {
+      issues.push({
+        id: 'materials-future-date',
+        ruleId: 'materials-future-date',
+        severity: 'info',
+        title: 'Pagos con fecha futura',
+        description: `${futurePayments.length} pago(s) tienen fecha posterior a hoy`,
+        affectedCount: futurePayments.length,
+        affectedEntities: futurePayments.map(p => ({ id: p.id, label: p.notes || 'Pago' })),
+        recommendedAction: {
+          label: 'Revisar fechas',
+          actionType: 'manual'
+        }
+      })
+    }
+
+    return issues
+  }, [allPayments, defaultCurrency])
+
+  const getAffectedIdsForIssue = useCallback((issueId: string): string[] => {
+    const issue = dataHealthIssues.find(i => i.id === issueId)
+    if (!issue?.affectedEntities) return []
+    return issue.affectedEntities.map(e => String(e.id))
+  }, [dataHealthIssues])
+
+  const handleDataHealthClick = useCallback((issueId: string) => {
+    if (activeTab !== 'payments') {
+      setActiveTab('payments')
+      setActiveFilterIssueId(issueId)
+    } else {
+      if (activeFilterIssueId === issueId) {
+        setActiveFilterIssueId(null)
+      } else {
+        setActiveFilterIssueId(issueId)
+      }
+    }
+  }, [activeTab, activeFilterIssueId])
+
+  useEffect(() => {
+    if (activeFilterIssueId && dataHealthIssues.length === 0) {
+      setActiveFilterIssueId(null)
+    }
+  }, [activeFilterIssueId, dataHealthIssues])
+
+  const filteredPaymentIds = useMemo(() => {
+    if (!activeFilterIssueId) return null
+    return getAffectedIdsForIssue(activeFilterIssueId)
+  }, [activeFilterIssueId, getAffectedIdsForIssue])
 
   const validSelectedPeriod = useMemo(() => {
     if (availablePeriods[selectedPeriod]) return selectedPeriod
@@ -175,6 +261,23 @@ export default function Materials() {
   return (
     <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-4">
+        {dataHealthIssues.length > 0 && (
+          <DataHealthAlertMulti
+            issues={dataHealthIssues}
+            entityLabel="pago"
+            activeFilterIssueId={activeFilterIssueId}
+            onToggleFilter={handleDataHealthClick}
+            dismissedIssueIds={dismissedIssueIds}
+            onDismissIssue={(issueId: string) => {
+              if (activeFilterIssueId === issueId) {
+                setActiveFilterIssueId(null)
+              }
+              setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]))
+            }}
+            filteredItemIds={filteredPaymentIds ? new Set(filteredPaymentIds) : undefined}
+          />
+        )}
+        
         {activeTab === 'dashboard' && (
           <MaterialsDashboardTab
             projectId={selectedProjectId || undefined}
@@ -197,7 +300,12 @@ export default function Materials() {
         )}
 
         {activeTab === 'payments' && (
-          <MaterialPaymentsTab projectId={selectedProjectId || undefined} />
+          <MaterialPaymentsTab 
+            projectId={selectedProjectId || undefined}
+            externalFilterIssueId={activeFilterIssueId}
+            onClearExternalFilter={() => setActiveFilterIssueId(null)}
+            getAffectedIdsForIssue={getAffectedIdsForIssue}
+          />
         )}
 
         {activeTab === 'purchase-orders' && (

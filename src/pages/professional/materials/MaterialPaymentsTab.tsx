@@ -29,6 +29,9 @@ import type { TargetField, ImportConfig, ProjectContext } from '@/features/impor
 
 interface MaterialPaymentsTabProps {
   projectId?: string;
+  externalFilterIssueId?: string | null;
+  onClearExternalFilter?: () => void;
+  getAffectedIdsForIssue?: (issueId: string) => string[];
 }
 
 interface PaymentMetrics {
@@ -48,7 +51,12 @@ interface PaymentMetrics {
   pending_by_currency: Array<{ currency_symbol: string; amount: number }>;
 }
 
-export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabProps) {
+export default function MaterialPaymentsTab({ 
+  projectId, 
+  externalFilterIssueId, 
+  onClearExternalFilter, 
+  getAffectedIdsForIssue 
+}: MaterialPaymentsTabProps) {
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
@@ -71,6 +79,13 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
   const [filterWallet, setFilterWallet] = useState<string>('all');
   const [filterCurrency, setFilterCurrency] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  
+  const handleFilterChange = (setter: (value: string) => void) => (value: string) => {
+    setter(value);
+    if (externalFilterIssueId && onClearExternalFilter) {
+      onClearExternalFilter();
+    }
+  };
 
   const [selectedPayments, setSelectedPayments] = useState<MaterialPaymentWithRelations[]>([]);
 
@@ -185,15 +200,21 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
     };
   }, [allPayments]);
 
+  const externalFilterIds = useMemo(() => {
+    if (!externalFilterIssueId || !getAffectedIdsForIssue) return null;
+    return new Set(getAffectedIdsForIssue(externalFilterIssueId));
+  }, [externalFilterIssueId, getAffectedIdsForIssue]);
+
   const materialPayments = useMemo(() => {
     return allPayments.filter(payment => {
+      if (externalFilterIds && !externalFilterIds.has(payment.id)) return false;
       if (filterWallet !== 'all' && payment.wallet?.wallets?.name !== filterWallet) return false;
       if (filterCurrency !== 'all' && payment.currency?.code !== filterCurrency) return false;
       if (filterStatus !== 'all' && payment.status !== filterStatus) return false;
       
       return true;
     });
-  }, [allPayments, filterWallet, filterCurrency, filterStatus]);
+  }, [allPayments, filterWallet, filterCurrency, filterStatus, externalFilterIds]);
 
   const deletePaymentMutation = useDeleteMaterialPayment();
 
@@ -725,6 +746,9 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
     setFilterWallet('all');
     setFilterCurrency('all');
     setFilterStatus('all');
+    if (onClearExternalFilter) {
+      onClearExternalFilter();
+    }
   };
 
   const handleViewPayment = (payment: MaterialPaymentWithRelations) => {
@@ -821,7 +845,7 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
             <div className="space-y-3 p-2 min-w-[200px]">
               <div>
                 <Label className="text-xs font-medium mb-1 block">Billetera</Label>
-                <Select value={filterWallet} onValueChange={setFilterWallet}>
+                <Select value={filterWallet} onValueChange={handleFilterChange(setFilterWallet)}>
                   <SelectTrigger className="h-8 text-xs">
                     <SelectValue placeholder="Todas las billeteras" />
                   </SelectTrigger>
@@ -837,7 +861,7 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
               </div>
               <div>
                 <Label className="text-xs font-medium mb-1 block">Moneda</Label>
-                <Select value={filterCurrency} onValueChange={setFilterCurrency}>
+                <Select value={filterCurrency} onValueChange={handleFilterChange(setFilterCurrency)}>
                   <SelectTrigger className="h-8 text-xs">
                     <SelectValue placeholder="Todas las monedas" />
                   </SelectTrigger>
@@ -853,7 +877,7 @@ export default function MaterialPaymentsTab({ projectId }: MaterialPaymentsTabPr
               </div>
               <div>
                 <Label className="text-xs font-medium mb-1 block">Estado</Label>
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <Select value={filterStatus} onValueChange={handleFilterChange(setFilterStatus)}>
                   <SelectTrigger className="h-8 text-xs">
                     <SelectValue placeholder="Todos los estados" />
                   </SelectTrigger>
