@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { flushSync } from "react-dom";
 import {
   X,
   Building,
@@ -239,8 +240,11 @@ function DashboardMenuContent({ onClose }: ContentProps) {
   });
 
   const handleInternalNavigation = (href: string, newSidebarLevel?: SidebarLevel, shouldClose: boolean = true) => {
+    // Forzar React a actualizar el estado ANTES de navegar, evitando parpadeos
     if (newSidebarLevel) {
-      setSidebarLevel(newSidebarLevel as any);
+      flushSync(() => {
+        setSidebarLevel(newSidebarLevel as any);
+      });
     }
     navigate(href);
     if (shouldClose) {
