@@ -132,11 +132,11 @@ function HealthCheckRow({
     <div className="flex items-center justify-between py-2.5 border-b border-border/50 last:border-0">
       <div className="flex items-center gap-2 min-w-0 flex-1">
         {passed ? (
-          <CheckCircle2 className="h-4 w-4 text-chart-positive shrink-0" />
+          <CheckCircle2 className="h-4 w-4 text-positive shrink-0" />
         ) : warning ? (
-          <AlertTriangle className="h-4 w-4 text-chart-neutral shrink-0" />
+          <AlertTriangle className="h-4 w-4 text-neutral shrink-0" />
         ) : (
-          <XCircle className="h-4 w-4 text-chart-negative shrink-0" />
+          <XCircle className="h-4 w-4 text-negative shrink-0" />
         )}
         <span className="text-sm truncate">{label}</span>
       </div>
@@ -388,7 +388,7 @@ export default function AdminAuditTab({ onRefreshAction }: AdminAuditTabProps) {
               </Button>
               <Badge 
                 variant={health?.all_passed ? 'default' : 'destructive'}
-                className={health?.all_passed ? 'bg-chart-positive' : ''}
+                className={health?.all_passed ? 'bg-positive' : ''}
               >
                 {health?.all_passed ? 'OK' : 'Requiere Atención'}
               </Badge>

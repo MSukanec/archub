@@ -134,7 +134,7 @@ export default function AdminOpsFlagsTab() {
             disabled={updateMutation.isPending}
             data-testid={`switch-flag-${flag.key}`}
           />
-          <span className={`text-xs font-medium ${flag.value ? 'text-chart-positive' : 'text-chart-negative'}`}>
+          <span className={`text-xs font-medium ${flag.value ? 'text-positive' : 'text-negative'}`}>
             {flag.value ? 'ON' : 'OFF'}
           </span>
         </div>

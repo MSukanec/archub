@@ -84,9 +84,9 @@ export default {
           "3": "var(--chart-3)",
           "4": "var(--chart-4)",
           "5": "var(--chart-5)",
-          positive: "var(--chart-positive)",
-          negative: "var(--chart-negative)",
-          neutral: "var(--chart-neutral)",
+          positive: "var(--positive)",
+          negative: "var(--negative)",
+          neutral: "var(--neutral)",
         },
         sidebar: {
           DEFAULT: "var(--sidebar-background)",

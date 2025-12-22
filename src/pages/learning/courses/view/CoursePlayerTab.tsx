@@ -429,7 +429,7 @@ export default function CoursePlayerTab({ courseId, onNavigationStateChange, ini
                     onClick={handleMarkComplete}
                     disabled={markCompleteMutation.isPending}
                     data-testid="button-mark-complete-inline"
-                    className={currentProgress?.is_completed ? "text-chart-positive hover:text-chart-positive gap-2" : "gap-2"}
+                    className={currentProgress?.is_completed ? "text-positive hover:text-positive gap-2" : "gap-2"}
                   >
                     <CheckCircle className="w-4 h-4" />
                     <span>{currentProgress?.is_completed ? 'Completada' : 'Marcar completa'}</span>

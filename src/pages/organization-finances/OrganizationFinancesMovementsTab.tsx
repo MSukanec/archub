@@ -448,7 +448,7 @@ export function OrganizationFinancesMovementsTab({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="kpi-ingresos">
           <StatCardTitle>
-            <ArrowUpRight className="h-4 w-4 text-chart-positive" />
+            <ArrowUpRight className="h-4 w-4 text-positive" />
             Ingresos
           </StatCardTitle>
           <StatCardValue style={{ color: 'var(--positive)' }}>
@@ -464,7 +464,7 @@ export function OrganizationFinancesMovementsTab({
 
         <StatCard data-testid="kpi-egresos">
           <StatCardTitle>
-            <ArrowDownRight className="h-4 w-4 text-chart-negative" />
+            <ArrowDownRight className="h-4 w-4 text-negative" />
             Egresos
           </StatCardTitle>
           <StatCardValue style={{ color: 'var(--negative)' }}>

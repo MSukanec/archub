@@ -43,8 +43,8 @@ export function IncomeExpenseChart({
   incomeLabel = 'Ingresos',
   expenseLabel = 'Egresos',
   balanceLabel = 'Balance',
-  incomeColor = 'hsl(var(--chart-positive))',
-  expenseColor = 'hsl(var(--chart-negative))',
+  incomeColor = 'hsl(var(--positive))',
+  expenseColor = 'hsl(var(--negative))',
   balanceColor = 'hsl(var(--chart-1))'
 }: IncomeExpenseChartProps) {
   

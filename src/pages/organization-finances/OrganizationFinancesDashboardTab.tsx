@@ -539,15 +539,15 @@ export default function OrganizationFinancesDashboardTab({
           rightContent: (
             <span className={cn(
               "font-medium tabular-nums",
-              isIngreso ? "text-chart-positive" : "text-chart-negative"
+              isIngreso ? "text-positive" : "text-negative"
             )}>
               {isIngreso ? '+' : '-'}{formattedAmount}
             </span>
           ),
           leftIcon: isIngreso ? (
-            <ArrowUpRight className="h-4 w-4 text-chart-positive" />
+            <ArrowUpRight className="h-4 w-4 text-positive" />
           ) : (
-            <ArrowDownRight className="h-4 w-4 text-chart-negative" />
+            <ArrowDownRight className="h-4 w-4 text-negative" />
           ),
           badge: <PaymentStatusBadge status="confirmed" />
         };
@@ -572,10 +572,10 @@ export default function OrganizationFinancesDashboardTab({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="kpi-total-ingresos">
           <StatCardTitle>
-            <ArrowUpRight className="h-4 w-4 text-chart-positive" />
+            <ArrowUpRight className="h-4 w-4 text-positive" />
             Total Ingresos
           </StatCardTitle>
-          <StatCardValue className="text-chart-positive">
+          <StatCardValue className="text-positive">
             {currencySymbol} {kpis.totalIngresos.formatted}
           </StatCardValue>
           {kpis.ingresosTrendValue && (
@@ -588,10 +588,10 @@ export default function OrganizationFinancesDashboardTab({
 
         <StatCard data-testid="kpi-total-egresos">
           <StatCardTitle>
-            <ArrowDownRight className="h-4 w-4 text-chart-negative" />
+            <ArrowDownRight className="h-4 w-4 text-negative" />
             Total Egresos
           </StatCardTitle>
-          <StatCardValue className="text-chart-negative">
+          <StatCardValue className="text-negative">
             {currencySymbol} {kpis.totalEgresos.formatted}
           </StatCardValue>
           {kpis.egresosTrendValue && (
@@ -607,7 +607,7 @@ export default function OrganizationFinancesDashboardTab({
             <Scale className="h-4 w-4" />
             Balance
           </StatCardTitle>
-          <StatCardValue className={kpis.balance >= 0 ? "text-chart-positive" : "text-chart-negative"}>
+          <StatCardValue className={kpis.balance >= 0 ? "text-positive" : "text-negative"}>
             {kpis.balance >= 0 ? '+' : '-'}{currencySymbol} {formatKPI(Math.abs(kpis.balance))}
           </StatCardValue>
           {currentMonthComparison && (
@@ -647,8 +647,8 @@ export default function OrganizationFinancesDashboardTab({
             balance: d.balance
           }))}
           series={[
-            { key: 'income', label: 'Ingresos', color: 'hsl(var(--chart-positive))', type: 'bar' },
-            { key: 'expense', label: 'Egresos', color: 'hsl(var(--chart-negative))', type: 'bar' },
+            { key: 'income', label: 'Ingresos', color: 'hsl(var(--positive))', type: 'bar' },
+            { key: 'expense', label: 'Egresos', color: 'hsl(var(--negative))', type: 'bar' },
             { key: 'balance', label: 'Balance', color: 'hsl(var(--chart-1))', type: 'line' }
           ]}
           height={280}

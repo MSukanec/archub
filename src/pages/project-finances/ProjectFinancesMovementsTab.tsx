@@ -303,7 +303,7 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
         const isPositive = movement.signed_amount >= 0;
         return (
           <div className="flex flex-col items-end">
-            <span className={`text-sm font-bold ${isPositive ? 'text-chart-positive' : 'text-chart-negative'}`}>
+            <span className={`text-sm font-bold ${isPositive ? 'text-positive' : 'text-negative'}`}>
               {isPositive ? '+' : '-'}{formatCurrency(movement.amount, movement.currency?.symbol)}
             </span>
             {movement.exchange_rate && (
@@ -352,10 +352,10 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="kpi-ingresos">
           <StatCardTitle>
-            <ArrowUpRight className="h-4 w-4 text-chart-positive" />
+            <ArrowUpRight className="h-4 w-4 text-positive" />
             Ingresos
           </StatCardTitle>
-          <StatCardValue className="text-chart-positive">
+          <StatCardValue className="text-positive">
             {isCurrencyReady ? formatMoney(kpis.ingresos.value, currencySymbol) : '-'}
           </StatCardValue>
           {showIngresosBreakdown && (
@@ -368,10 +368,10 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
 
         <StatCard data-testid="kpi-egresos">
           <StatCardTitle>
-            <ArrowDownRight className="h-4 w-4 text-chart-negative" />
+            <ArrowDownRight className="h-4 w-4 text-negative" />
             Egresos
           </StatCardTitle>
-          <StatCardValue className="text-chart-negative">
+          <StatCardValue className="text-negative">
             {isCurrencyReady ? formatMoney(kpis.egresos.value, currencySymbol) : '-'}
           </StatCardValue>
           {showEgresosBreakdown && (
@@ -387,7 +387,7 @@ export function ProjectFinancesMovementsTab({ projectId }: ProjectFinancesMoveme
             <Scale className="h-4 w-4" />
             Balance
           </StatCardTitle>
-          <StatCardValue className={kpis.balance >= 0 ? 'text-chart-positive' : 'text-chart-negative'}>
+          <StatCardValue className={kpis.balance >= 0 ? 'text-positive' : 'text-negative'}>
             {isCurrencyReady 
               ? `${kpis.balance >= 0 ? '+' : ''}${formatMoney(kpis.balance, currencySymbol)}`
               : '-'

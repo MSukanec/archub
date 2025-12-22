@@ -42,7 +42,7 @@ export function LessonItem({
         "group relative flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200",
         "hover:bg-muted/50 cursor-pointer",
         isActive && "bg-primary/5 border border-primary/20",
-        isNextRecommended && !isActive && "bg-chart-positive/10"
+        isNextRecommended && !isActive && "bg-positive/10"
       )}
       onClick={() => onGoToLesson(lesson.id)}
       data-testid={`lesson-item-${lesson.id}`}
@@ -50,8 +50,8 @@ export function LessonItem({
       {/* Status Icon */}
       <div className="flex-shrink-0">
         {lesson.is_completed ? (
-          <div className="w-8 h-8 rounded-full bg-chart-positive/10 flex items-center justify-center">
-            <CheckCircle2 className="h-4 w-4 text-chart-positive" />
+          <div className="w-8 h-8 rounded-full bg-positive/10 flex items-center justify-center">
+            <CheckCircle2 className="h-4 w-4 text-positive" />
           </div>
         ) : isNextRecommended ? (
           <div className="w-8 h-8 rounded-full flex items-center justify-center border-2 border-accent/40 bg-accent/10">

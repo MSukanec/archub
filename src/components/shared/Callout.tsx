@@ -49,7 +49,7 @@ export function Callout({
           className
         )}
         style={{
-          backgroundColor: backgroundColor || 'var(--chart-neutral)'
+          backgroundColor: backgroundColor || 'var(--neutral)'
         }}
         onClick={onClick}
       >

@@ -109,7 +109,7 @@ export function ModuleSection({
           "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm",
           imageUrl ? "bg-white/20 text-white border border-white/40" : (
             isModuleComplete 
-              ? "bg-chart-positive/10 text-chart-positive" 
+              ? "bg-positive/10 text-positive" 
               : isActive 
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground"
@@ -145,7 +145,7 @@ export function ModuleSection({
             {completedCount > 0 && (
               <>
                 <span>·</span>
-                <span className={cn("font-medium", imageUrl ? "text-white" : "text-chart-positive")}>
+                <span className={cn("font-medium", imageUrl ? "text-white" : "text-positive")}>
                   {completedCount}/{totalCount}
                 </span>
               </>
@@ -159,7 +159,7 @@ export function ModuleSection({
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className={cn("h-full rounded-full", imageUrl ? "bg-white" : "bg-chart-positive")}
+                className={cn("h-full rounded-full", imageUrl ? "bg-white" : "bg-positive")}
               />
             </div>
           )}
@@ -188,7 +188,7 @@ export function ModuleSection({
                 "h-8 px-3 text-xs font-medium",
                 imageUrl 
                   ? "bg-white/20 hover:bg-white/30 text-white border border-white/30" 
-                  : "bg-chart-positive/10 hover:bg-chart-positive/20 text-chart-positive"
+                  : "bg-positive/10 hover:bg-positive/20 text-positive"
               )}
               data-testid={`button-mark-all-complete-${moduleId}`}
             >

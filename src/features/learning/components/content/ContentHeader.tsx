@@ -73,7 +73,7 @@ export function ContentHeader({
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="h-full rounded-full bg-chart-positive"
+                className="h-full rounded-full bg-positive"
               />
             </div>
           </div>
@@ -91,7 +91,7 @@ export function ContentHeader({
 
           <div className="space-y-3 pt-2 border-t">
             <div className="flex items-center gap-3 text-sm">
-              <Target className="h-4 w-4 text-chart-positive" />
+              <Target className="h-4 w-4 text-positive" />
               <span className="text-muted-foreground">Completadas:</span>
               <span className="font-medium ml-auto">{completedLessons} lecciones</span>
             </div>
