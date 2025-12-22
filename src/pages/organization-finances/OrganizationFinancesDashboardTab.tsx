@@ -25,7 +25,9 @@ import { generateFinancialInsights, buildInsightContext, toInsightItems } from '
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MultiSeriesTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
+import { BalanceBreakdownChart } from '@/components/charts/BalanceBreakdownChart';
 import { cn } from '@/lib/utils';
+import { Wallet, Coins } from 'lucide-react';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
 import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
 
@@ -493,6 +495,67 @@ export default function OrganizationFinancesDashboardTab({
       }));
   }, [confirmedMovements, defaultCurrency, ingresoTypes]);
 
+  const currencyBalances = useMemo(() => {
+    const balances = new Map<string, { name: string; symbol: string; balance: number }>();
+    
+    allMovements.forEach(m => {
+      if (m.status !== 'confirmed') return;
+      const currencyCode = m.currency?.code || 'ARS';
+      const currencySymbol = m.currency?.symbol || '$';
+      const amount = Math.abs(m.amount);
+      const isIngreso = ingresoTypes.includes(m.movement_type);
+      
+      const existing = balances.get(currencyCode) || { name: currencyCode, symbol: currencySymbol, balance: 0 };
+      if (isIngreso) {
+        existing.balance += amount;
+      } else {
+        existing.balance -= amount;
+      }
+      balances.set(currencyCode, existing);
+    });
+
+    return Array.from(balances.values())
+      .map(b => ({
+        name: `${b.symbol} ${b.name}`,
+        balance: b.balance
+      }))
+      .sort((a, b) => Math.abs(b.balance) - Math.abs(a.balance));
+  }, [allMovements, ingresoTypes]);
+
+  const walletBalances = useMemo(() => {
+    const balances = new Map<string, { name: string; balance: number }>();
+    
+    allMovements.forEach(m => {
+      if (m.status !== 'confirmed') return;
+      const walletName = m.wallet?.name || 'Sin billetera';
+      const amount = Math.abs(m.amount);
+      const isIngreso = ingresoTypes.includes(m.movement_type);
+      
+      const convertedAmount = convertToBaseCurrency(
+        m.currency?.code || 'ARS',
+        defaultCurrency?.code,
+        amount,
+        m.exchange_rate ?? null,
+        { quoteCurrency: 'USD' }
+      );
+      
+      const existing = balances.get(walletName) || { name: walletName, balance: 0 };
+      if (isIngreso) {
+        existing.balance += convertedAmount;
+      } else {
+        existing.balance -= convertedAmount;
+      }
+      balances.set(walletName, existing);
+    });
+
+    return Array.from(balances.values())
+      .map(b => ({
+        name: b.name,
+        balance: b.balance
+      }))
+      .sort((a, b) => Math.abs(b.balance) - Math.abs(a.balance));
+  }, [allMovements, ingresoTypes, defaultCurrency]);
+
   const autoInsights = useMemo(() => {
     const categoryData = categoryChartData.map(c => ({
       name: c.name,
@@ -660,21 +723,53 @@ export default function OrganizationFinancesDashboardTab({
         />
       </DashboardCard>
 
-      <DashboardCard 
-        id="categoryBreakdown"
-        title="Distribución por Tipo" 
-        icon={<PieChart />}
-        description="Hacé click en un tipo para ver sus movimientos"
-        data-testid="chart-category-breakdown"
-      >
-        <CategoryBreakdownChart 
-          data={categoryChartData} 
-          height={280}
-          emptyText="No hay movimientos registrados"
-          clickable
-          onSliceClick={(name) => handleCategoryDrillDown(name)}
-        />
-      </DashboardCard>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DashboardCard 
+          id="categoryBreakdown"
+          title="Distribución por Tipo" 
+          icon={<PieChart />}
+          description="Hacé click en un tipo para ver sus movimientos"
+          data-testid="chart-category-breakdown"
+        >
+          <CategoryBreakdownChart 
+            data={categoryChartData} 
+            height={280}
+            emptyText="No hay movimientos registrados"
+            clickable
+            onSliceClick={(name) => handleCategoryDrillDown(name)}
+          />
+        </DashboardCard>
+
+        <div className="grid grid-cols-1 gap-6">
+          <DashboardCard 
+            id="currencyBalances"
+            title="Balance por Moneda" 
+            icon={<Coins />}
+            description="Balance real en cada moneda"
+            data-testid="chart-currency-balances"
+          >
+            <BalanceBreakdownChart 
+              data={currencyBalances}
+              height={120}
+              emptyText="No hay movimientos registrados"
+            />
+          </DashboardCard>
+
+          <DashboardCard 
+            id="walletBalances"
+            title="Balance por Billetera" 
+            icon={<Wallet />}
+            description={`En ${defaultCurrency?.code || 'moneda base'}`}
+            data-testid="chart-wallet-balances"
+          >
+            <BalanceBreakdownChart 
+              data={walletBalances}
+              height={120}
+              emptyText="No hay movimientos registrados"
+            />
+          </DashboardCard>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <InsightCard
