@@ -92,15 +92,42 @@ src/features/projects/
 - [x] Index.ts barrel exports
 
 ### 3.2 Páginas (3 Capas) ✅
+
+**Nomenclatura:** `*Page.tsx` para páginas, `*View.tsx` para vistas (REGLA OBLIGATORIA)
+
 ```
-Page (Orchestration)
+Page (Orchestration) - src/pages/{feature}/*Page.tsx
   └─ Layout (Structure - DashboardLayout / LabLayout)
-      └─ View (Content - agnóstica al layout en src/features/{feature}/views/)
+      └─ View (Content) - src/features/{feature}/views/*View.tsx
 ```
 
-- [x] `src/pages/projects/Projects.tsx` → LabLayout/DashboardLayout → ProjectActivesView/ProjectListView/ProjectSettingsView
-- [x] `src/pages/project/Project.tsx` → LabLayout/DashboardLayout → ProjectVisionGeneralView
-- [x] `src/pages/professional/project-data/ProjectData.tsx` → DashboardLayout → ProjectBasicDataView/ProjectLocationView/ProjectSettingsView
+**Páginas:**
+```
+src/pages/projects/
+├── ProjectsPage.tsx      ← Orquesta: ProjectActivesView, ProjectListView, ProjectSettingsView
+└── ProjectDataPage.tsx   ← Orquesta: ProjectBasicDataView, ProjectLocationView, ProjectSettingsView
+
+src/pages/project/
+└── Project.tsx           ← Orquesta: ProjectVisionGeneralView
+```
+
+**Vistas:**
+```
+src/features/projects/views/
+├── ProjectActivesView.tsx       ✅ Grid de proyectos activos
+├── ProjectBasicDataView.tsx     ✅ Datos básicos del proyecto
+├── ProjectListView.tsx          ✅ Tabla de proyectos
+├── ProjectLocationView.tsx      ✅ Ubicación del proyecto
+├── ProjectSettingsView.tsx      ✅ Tipos y modalidades
+└── ProjectVisionGeneralView.tsx ✅ Dashboard del proyecto
+```
+
+**Legacy eliminado:**
+- ❌ `ProjectActivesTab.tsx` → Migrado a `ProjectActivesView.tsx`
+- ❌ `ProjectListTab.tsx` → Migrado a `ProjectListView.tsx`
+- ❌ `ProjectSettingsTab.tsx` → Migrado a `ProjectSettingsView.tsx`
+- ❌ `ProjectBasicDataTab.tsx` → Migrado a `ProjectBasicDataView.tsx`
+- ❌ `ProjectLocationTab.tsx` → Migrado a `ProjectLocationView.tsx`
 
 ### 3.3 Performance ✅
 - [x] Optimistic updates en create/update (setQueryData no invalidate)

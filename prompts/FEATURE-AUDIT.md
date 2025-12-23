@@ -369,16 +369,49 @@ LAYOUT (Estructura)    → DashboardLayout o LabLayout (ya existe)
 VIEW (Contenido)       → Tablas, KPIs, gráficos, formularios
 ```
 
+**NOMENCLATURA OBLIGATORIA:**
+
+| Tipo | Ubicación | Nombre | Ejemplo |
+|------|-----------|--------|---------|
+| **Page** | `src/pages/{feature}/` | `*Page.tsx` | `ProjectsPage.tsx`, `ProjectDataPage.tsx` |
+| **View** | `src/features/{feature}/views/` | `*View.tsx` | `ProjectActivesView.tsx`, `ProjectListView.tsx` |
+
+**REGLAS CRÍTICAS:**
+1. **Pages** terminan en `*Page.tsx` y viven ÚNICAMENTE en `src/pages/{feature}/`
+2. **Views** terminan en `*View.tsx` y viven ÚNICAMENTE en `src/features/{feature}/views/`
+3. **NO** deben existir archivos `*Tab.tsx` en pages/ - son legacy y deben migrarse a Views
+4. Las Pages son **orquestadores**: eligen layout, manejan tabs, renderizan views
+5. Las Views son **contenido agnóstico**: tablas, KPIs, gráficos, formularios
+
+**Ejemplo correcto (PROJECTS):**
+```
+src/pages/projects/
+├── ProjectsPage.tsx        ← Orquestador: LabLayout + renderiza Views
+└── ProjectDataPage.tsx     ← Orquestador: DashboardLayout + renderiza Views
+
+src/features/projects/views/
+├── ProjectActivesView.tsx       ← Contenido: grid de proyectos activos
+├── ProjectBasicDataView.tsx     ← Contenido: datos básicos del proyecto
+├── ProjectListView.tsx          ← Contenido: tabla de proyectos
+├── ProjectLocationView.tsx      ← Contenido: ubicación del proyecto
+├── ProjectSettingsView.tsx      ← Contenido: configuración (tipos, modalidades)
+└── ProjectVisionGeneralView.tsx ← Contenido: dashboard con KPIs
+```
+
 **Checklist de PAGE (Orquestador):**
+- [ ] ¿El archivo termina en `*Page.tsx`?
+- [ ] ¿Está en `src/pages/{feature}/`?
 - [ ] ¿La página solo orquesta (no contiene lógica de negocio)?
 - [ ] ¿Usa Layout con `headerProps` correctamente?
 - [ ] ¿Los botones de acción están en `headerProps.actions` (no en el contenido)?
 - [ ] ¿Soporta tanto DashboardLayout como LabLayout?
 - [ ] ¿Usa `renderView()` function pattern para tabs?
 - [ ] ¿Para LabLayout, los botones van en `toolbarProps.secondaryRightSlot`?
+- [ ] ¿NO existen archivos `*Tab.tsx` legacy en la misma carpeta?
 
 **Checklist de VIEW (Contenido):**
-- [ ] ¿Las Views están en `src/features/{feature}/views/`?
+- [ ] ¿El archivo termina en `*View.tsx`?
+- [ ] ¿Está en `src/features/{feature}/views/`?
 - [ ] ¿Cada View es independiente y agnóstica al layout?
 - [ ] ¿Las Views hacen su propio fetch de datos?
 - [ ] ¿Las Views NO importan layouts?

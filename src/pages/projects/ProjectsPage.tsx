@@ -15,7 +15,7 @@ const PROJECTS_TABS = [
   { id: 'settings', label: 'Ajustes' },
 ];
 
-export default function Projects() {
+export default function ProjectsPage() {
   const [activeTab, setActiveTab] = useState('actives');
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();

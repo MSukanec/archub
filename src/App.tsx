@@ -23,7 +23,7 @@ import PricingPlanPublic from "@/pages/public/PricingPlan";
 // Protected Pages
 
 
-import Projects from "@/pages/projects/Projects";
+import ProjectsPage from "@/pages/projects/ProjectsPage";
 
 
 
@@ -34,7 +34,7 @@ import FinancesCapitalMovements from "@/pages/professional/capital/Capital";
 import OrganizationMovements from "@/pages/professional/movements/Movements";
 import { Clients } from "@/pages/clients/Clients";
 import Project from "@/pages/project/Project";
-import ProjectData from "@/pages/professional/project-data/ProjectData";
+import ProjectDataPage from "@/pages/projects/ProjectDataPage";
 
 
 import ConstructionDashboard from "@/pages/professional/project/construction/ConstructionDashboard";
@@ -200,7 +200,7 @@ function Router() {
           </Suspense>
         </Route>
         <Route path="/contacts" component={Contacts} />
-        <Route path="/organization/projects" component={Projects} />
+        <Route path="/organization/projects" component={ProjectsPage} />
         
         {/* General Costs Route */}
         <Route path="/general-costs" component={GeneralCosts} />
@@ -215,11 +215,11 @@ function Router() {
 
 
         {/* Projects Routes */}
-        <Route path="/projects" component={Projects} />
+        <Route path="/projects" component={ProjectsPage} />
 
         {/* General Routes */}
         <Route path="/project/dashboard" component={Project} />
-        <Route path="/project" component={ProjectData} />
+        <Route path="/project" component={ProjectDataPage} />
         <Route path="/clients" component={Clients} />
         <Route path="/media" component={Media} />
         <Route path="/project/moodboard" component={Moodboard} />

@@ -14,10 +14,9 @@ import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
 import { useGlobalModalStore } from '@/components/modal';
-import { ProjectBasicDataView, ProjectLocationView } from '@/features/projects';
-import ProjectSettingsTab from '@/pages/projects/ProjectSettingsTab';
+import { ProjectBasicDataView, ProjectLocationView, ProjectSettingsView } from '@/features/projects';
 
-export default function ProjectData() {
+export default function ProjectDataPage() {
   const [activeTab, setActiveTab] = useState('basic');
   const [showShareBottomSheet, setShowShareBottomSheet] = useState(false);
   const { setSidebarContext } = useNavigationStore();
@@ -300,7 +299,7 @@ Generado desde Seencel`);
       case 'location':
         return <ProjectLocationView />;
       case 'settings':
-        return <ProjectSettingsTab />;
+        return <ProjectSettingsView />;
       default:
         return <ProjectBasicDataView />;
     }
