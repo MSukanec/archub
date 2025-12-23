@@ -300,7 +300,7 @@ export function PageLayout({
   }, [tabs, hasTabs]);
 
   return (
-    <div className="flex flex-col min-h-0">
+    <div className="flex-1 flex flex-col min-h-0">
       {/* Page Content - HEADER Y CONTENIDO juntos para que se muevan con scroll */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden">
         <div style={{ backgroundColor: "var(--header-bg)" }}>
@@ -650,7 +650,7 @@ export function PageLayout({
         {/* Page Content */}
         <div className={(() => {
           const mode = resolveWidthMode(wide);
-          return `${getContainerClasses(mode)} ${getContentPaddingClasses(mode)} pt-6 pb-6 min-h-0 overflow-x-hidden`;
+          return `${getContainerClasses(mode)} ${getContentPaddingClasses(mode)} pt-6 pb-6 flex-1 overflow-auto overflow-x-hidden`;
         })()}>
           <ReadOnlyBanner show={showReadOnlyBanner} projectName={readOnlyProjectName} />
           {children}
