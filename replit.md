@@ -31,7 +31,7 @@ Preferred communication style: Simple, everyday language.
 
 ### System Design Choices
 - **Module Architecture**: Feature-Sliced Design for core modules (PROJECTS, SUBCONTRACTS, PERSONNEL, CLIENTS, FINANCES, CAPITAL, LEARNING, MEDIA, SITELOG, MOODBOARD, etc.).
-- **Page Architecture (3-Layer Pattern)**: Clean separation between **Page** (orquestación + layout selection + tab state), **Layout** (estructura: header, sidebar, toolbar), and **View** (contenido: tablas, KPIs, gráficos). Documented in `prompts/PAGE-REFACT.md`. Examples:
+- **Page Architecture (3-Layer Pattern)**: Clean separation between **Page** (orquestación + layout selection + tab state), **Layout** (estructura: header, sidebar, toolbar), and **View** (contenido: tablas, KPIs, gráficos). Documented in `prompts/FEATURE-AUDIT.md`. Examples:
   - Projects page: `Projects.tsx` (Page) → `LabLayout`/`DashboardLayout` (Layout) → `ProjectActivesView`/`ProjectListView`/`ProjectSettingsView` (Views)
   - Project Dashboard: `Project.tsx` (Page) → `LabLayout`/`DashboardLayout` (Layout) → `ProjectVisionGeneralView` (View)
   - Learning Dashboard: `LearningDashboard.tsx` (Page) → `LabLayout`/`DashboardLayout` (Layout) → `LearningDashboardView` (View)
