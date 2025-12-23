@@ -2,14 +2,11 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Tag } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { createContactType, updateContactType } from '../services';
-import { CONTACT_TYPE_QUERY_KEYS } from '../constants';
+import { useCreateContactType, useUpdateContactType } from '../hooks';
 import { contactTypeSchema, type ContactTypeFormData } from '../schemas';
 import type { ContactType } from '../types';
 
@@ -60,10 +57,11 @@ export function ContactTypeForm({ modalData, onClose, mode: propMode }: ContactT
   const { contactType, isEditing = false } = modalData || {};
   const mode = propMode || (isEditing || contactType ? 'edit' : 'create');
   
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
+
+  const createMutation = useCreateContactType(organizationId || '');
+  const updateMutation = useUpdateContactType(organizationId || '');
 
   const form = useForm<ContactTypeFormData>({
     resolver: zodResolver(contactTypeSchema),
@@ -89,60 +87,15 @@ export function ContactTypeForm({ modalData, onClose, mode: propMode }: ContactT
     onClose();
   };
 
-  const createMutation = useMutation({
-    mutationFn: (input: { name: string }) => {
-      if (!organizationId) throw new Error('Organization ID is required');
-      return createContactType(organizationId, input);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CONTACT_TYPE_QUERY_KEYS.lists() });
-      toast({
-        title: 'Tipo creado',
-        description: 'El tipo de contacto se creó correctamente'
-      });
+  const onSubmit = async (data: ContactTypeFormData) => {
+    try {
+      if (mode === 'edit' && contactType) {
+        await updateMutation.mutateAsync({ typeId: contactType.id, input: { name: data.name } });
+      } else {
+        await createMutation.mutateAsync({ name: data.name });
+      }
       handleClose();
-    },
-    onError: (error) => {
-      console.error('Error creating contact type:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo crear el tipo de contacto',
-        variant: 'destructive'
-      });
-    }
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ typeId, input }: { typeId: string; input: { name: string } }) => {
-      if (!organizationId) throw new Error('Organization ID is required');
-      return updateContactType(typeId, organizationId, input);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CONTACT_TYPE_QUERY_KEYS.lists() });
-      toast({
-        title: 'Tipo actualizado',
-        description: 'El tipo de contacto se actualizó correctamente'
-      });
-      handleClose();
-    },
-    onError: (error) => {
-      console.error('Error updating contact type:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo actualizar el tipo de contacto',
-        variant: 'destructive'
-      });
-    }
-  });
-
-  const onSubmit = (data: ContactTypeFormData) => {
-    if (mode === 'edit' && contactType) {
-      updateMutation.mutate({
-        typeId: contactType.id,
-        input: { name: data.name }
-      });
-    } else {
-      createMutation.mutate({ name: data.name });
+    } catch {
     }
   };
 
