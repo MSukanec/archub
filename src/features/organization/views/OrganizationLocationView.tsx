@@ -64,12 +64,12 @@ export function OrganizationLocationView() {
       country: country,
       postal_code: postalCode,
       address_full: addressFull,
-      place_id: placeId,
-      lat: lat?.toString() || null,
-      lng: lng?.toString() || null,
-      timezone: timezone,
-      location_type: locationType || null,
-      accessibility_notes: accessibilityNotes,
+      place_id: placeId || null,
+      lat: lat,
+      lng: lng,
+      timezone: timezone || null,
+      location_type: locationType && locationType !== '' ? locationType : null,
+      accessibility_notes: accessibilityNotes || null,
     },
     queryKey: ['organization-data', organizationId],
     saveFn: async (dataToSave) => {
@@ -124,8 +124,8 @@ export function OrganizationLocationView() {
       setCountry(organizationData.country || '');
       setPostalCode(organizationData.postal_code || '');
       setPlaceId(organizationData.place_id || '');
-      setLat(organizationData.lat ? parseFloat(organizationData.lat) : null);
-      setLng(organizationData.lng ? parseFloat(organizationData.lng) : null);
+      setLat(organizationData.lat != null ? Number(organizationData.lat) : null);
+      setLng(organizationData.lng != null ? Number(organizationData.lng) : null);
       setTimezone(organizationData.timezone || '');
       setLocationType(organizationData.location_type || '');
       setAccessibilityNotes(organizationData.accessibility_notes || '');
