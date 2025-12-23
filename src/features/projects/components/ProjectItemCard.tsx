@@ -230,22 +230,43 @@ export default function ProjectItemCard({
             </p>
           )}
 
-          {/* 3 Badges inline: Tipo, Modalidad, Estado */}
+          {/* 3 Badges inline: Tipo, Modalidad, Estado - TODOS IDENTICOS con color del proyecto */}
           <div className="flex flex-wrap gap-2">
             {project.project_data?.project_type?.name && (
-              <Badge className="bg-white/15 backdrop-blur-sm text-white border-0 text-xs">
+              <Badge 
+                className="border-0 text-xs"
+                style={{ 
+                  borderColor: actualProjectColor,
+                  backgroundColor: actualProjectColor && !actualProjectColor.includes('var(')
+                    ? chroma(actualProjectColor).alpha(0.15).css()
+                    : 'rgba(139, 92, 246, 0.15)',
+                  color: 'white'
+                }}
+              >
                 {project.project_data.project_type.name}
               </Badge>
             )}
             {project.project_data?.project_modality?.name && (
-              <Badge className="bg-white/15 backdrop-blur-sm text-white border-0 text-xs">
+              <Badge 
+                className="border-0 text-xs"
+                style={{ 
+                  borderColor: actualProjectColor,
+                  backgroundColor: actualProjectColor && !actualProjectColor.includes('var(')
+                    ? chroma(actualProjectColor).alpha(0.15).css()
+                    : 'rgba(139, 92, 246, 0.15)',
+                  color: 'white'
+                }}
+              >
                 {project.project_data.project_modality.name}
               </Badge>
             )}
             <Badge 
               className="border-0 text-xs"
               style={{ 
-                backgroundColor: getSoftAccentColor(),
+                borderColor: actualProjectColor,
+                backgroundColor: actualProjectColor && !actualProjectColor.includes('var(')
+                  ? chroma(actualProjectColor).alpha(0.15).css()
+                  : 'rgba(139, 92, 246, 0.15)',
                 color: 'white'
               }}
             >
