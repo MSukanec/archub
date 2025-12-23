@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import { OrganizationSettingsFinancesTab } from '@/pages/organization-settings/tabs/OrganizationSettingsFinancesTab';
-import { OrganizationSettingsPdfTab } from '@/pages/organization-settings/tabs/OrganizationSettingsPdfTab';
+import { OrganizationSettingsFinancesView, OrganizationSettingsPdfView } from '@/features/organization';
 import { ComingSoonRestricted } from '@/components/shared/restrictions/guards/ComingSoonRestricted';
 import { Settings } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
-export default function OrganizationSettings() {
+export function OrganizationSettingsPage() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
   const [activeTab, setActiveTab] = useState('finances');
@@ -35,15 +34,15 @@ export default function OrganizationSettings() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'finances':
-        return <OrganizationSettingsFinancesTab />;
+        return <OrganizationSettingsFinancesView />;
       case 'pdf':
         return (
           <ComingSoonRestricted>
-            <OrganizationSettingsPdfTab onHasChanges={handlePdfHasChanges} />
+            <OrganizationSettingsPdfView onHasChanges={handlePdfHasChanges} />
           </ComingSoonRestricted>
         );
       default:
-        return <OrganizationSettingsFinancesTab />;
+        return <OrganizationSettingsFinancesView />;
     }
   };
 

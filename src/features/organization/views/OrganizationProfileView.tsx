@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getOrganizationInitials } from '@/utils/initials';
 import { uploadOrgLogo } from '@/lib/storage';
 
-export function OrganizationProfileTab() {
+export function OrganizationProfileView() {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   

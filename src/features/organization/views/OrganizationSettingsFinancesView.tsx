@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 
-export function OrganizationSettingsFinancesTab() {
+export function OrganizationSettingsFinancesView() {
   const { data: userData } = useCurrentUser();
   const { data: allCurrencies } = useCurrencies();
   const { data: organizationCurrencies } = useOrganizationCurrencies(userData?.organization?.id);

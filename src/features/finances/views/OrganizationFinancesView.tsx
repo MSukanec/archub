@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Plus, Calendar, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { OrganizationFinancesMovementsTab } from "@/pages/organization-finances/OrganizationFinancesMovementsTab";
-import OrganizationFinancesDashboardTab, { calculateAvailablePeriods, type PeriodFilter } from "@/pages/organization-finances/OrganizationFinancesDashboardTab";
+import { OrganizationFinancesMovementsView, OrganizationFinancesDashboardView, calculateAvailablePeriods, type PeriodFilter } from "@/features/organization";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from "@/components/modal/state/globalModalStore";
 import { useNavigationStore } from "@/stores/navigationStore";
@@ -120,7 +119,7 @@ export function OrganizationFinancesView({ activeTab, onTabChange }: Organizatio
       )}
       
       {activeTab === "dashboard" && (
-        <OrganizationFinancesDashboardTab
+        <OrganizationFinancesDashboardView
           movements={allMovements}
           onNavigateToMovements={() => onTabChange('movements')}
           onNavigateToTab={(tab) => {
@@ -143,7 +142,7 @@ export function OrganizationFinancesView({ activeTab, onTabChange }: Organizatio
         />
       )}
       {activeTab === "movements" && (
-        <OrganizationFinancesMovementsTab 
+        <OrganizationFinancesMovementsView 
           externalFilterIssueId={activeFilterIssueId}
           onClearExternalFilter={() => setActiveFilterIssueId(null)}
           getAffectedIdsForIssue={dataHealth.getAffectedIdsForIssue}

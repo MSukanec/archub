@@ -33,7 +33,7 @@ import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
 
 export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all';
 
-interface FinancesDashboardTabProps {
+interface FinancesDashboardViewProps {
   movements: any[];
   onNavigateToMovements?: () => void;
   onNavigateToTab?: (tab: string, filters?: Record<string, unknown>) => void;
@@ -148,7 +148,7 @@ export function calculateAvailablePeriods(allMovements: any[]): Record<PeriodFil
   return result;
 }
 
-export default function OrganizationFinancesDashboardTab({ 
+export function OrganizationFinancesDashboardView({ 
   movements: allMovements = [],
   onNavigateToMovements,
   onNavigateToTab,
@@ -156,7 +156,7 @@ export default function OrganizationFinancesDashboardTab({
   selectedPeriod = 'all',
   dismissedIssueIds = new Set(),
   onDismissIssue
-}: FinancesDashboardTabProps) {
+}: FinancesDashboardViewProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   
@@ -639,14 +639,20 @@ export default function OrganizationFinancesDashboardTab({
             Total Ingresos
           </StatCardTitle>
           <StatCardValue style={{ color: 'var(--positive)' }}>
-            {currencySymbol} {kpis.totalIngresos.formatted}
+            {formatMoney(kpis.totalIngresos.value, currencySymbol)}
           </StatCardValue>
-          {kpis.ingresosTrendValue && (
-            <StatCardTrend direction={kpis.ingresosTrend} value={kpis.ingresosTrendValue} />
+          {showMultiCurrencyBreakdown && hasMultipleCurrencies(kpis.totalIngresos) && (
+            <StatCardSubValue>{formatBreakdown(kpis.totalIngresos)}</StatCardSubValue>
           )}
-          {showMultiCurrencyBreakdown && (
-            <StatCardMeta>{formatBreakdown(kpis.totalIngresos)}</StatCardMeta>
-          )}
+          <StatCardMetaContainer>
+            {kpis.ingresosTrendValue && (
+              <StatCardTrend 
+                direction={kpis.ingresosTrend} 
+                value={kpis.ingresosTrendValue}
+                invertColors={false}
+              />
+            )}
+          </StatCardMetaContainer>
         </StatCard>
 
         <StatCard data-testid="kpi-total-egresos">
@@ -655,14 +661,20 @@ export default function OrganizationFinancesDashboardTab({
             Total Egresos
           </StatCardTitle>
           <StatCardValue style={{ color: 'var(--negative)' }}>
-            {currencySymbol} {kpis.totalEgresos.formatted}
+            {formatMoney(kpis.totalEgresos.value, currencySymbol)}
           </StatCardValue>
-          {kpis.egresosTrendValue && (
-            <StatCardTrend direction={kpis.egresosTrend} value={kpis.egresosTrendValue} />
+          {showMultiCurrencyBreakdown && hasMultipleCurrencies(kpis.totalEgresos) && (
+            <StatCardSubValue>{formatBreakdown(kpis.totalEgresos)}</StatCardSubValue>
           )}
-          {showMultiCurrencyBreakdown && (
-            <StatCardMeta>{formatBreakdown(kpis.totalEgresos)}</StatCardMeta>
-          )}
+          <StatCardMetaContainer>
+            {kpis.egresosTrendValue && (
+              <StatCardTrend 
+                direction={kpis.egresosTrend} 
+                value={kpis.egresosTrendValue}
+                invertColors={true}
+              />
+            )}
+          </StatCardMetaContainer>
         </StatCard>
 
         <StatCard data-testid="kpi-balance">
@@ -671,124 +683,131 @@ export default function OrganizationFinancesDashboardTab({
             Balance
           </StatCardTitle>
           <StatCardValue style={{ color: kpis.balance >= 0 ? 'var(--positive)' : 'var(--negative)' }}>
-            {kpis.balance >= 0 ? '+' : '-'}{currencySymbol} {formatKPI(Math.abs(kpis.balance))}
+            {kpis.balance >= 0 ? '+' : ''}{formatMoney(kpis.balance, currencySymbol)}
           </StatCardValue>
-          {currentMonthComparison && (
-            <StatCardHistoricalComparison comparison={currentMonthComparison} label="vs promedio mensual" />
-          )}
           <StatCardMeta>
-            {kpis.balance >= 0 ? 'Superávit' : 'Déficit'} del período
+            {kpis.balance >= 0 ? 'Superávit' : 'Déficit'} en el período
           </StatCardMeta>
         </StatCard>
 
-        <StatCard data-testid="kpi-total-movimientos">
+        <StatCard data-testid="kpi-movimientos">
           <StatCardTitle>
-            <DollarSign className="h-4 w-4" />
+            <BarChart3 className="h-4 w-4" />
             Movimientos
           </StatCardTitle>
-          <StatCardValue>
-            {kpis.totalMovements.formatted}
-          </StatCardValue>
+          <StatCardValue>{kpis.totalMovements.formatted}</StatCardValue>
           <StatCardMeta>
-            {kpis.monthCount} {kpis.monthCount === 1 ? 'mes' : 'meses'} con actividad
+            En {kpis.monthCount} {kpis.monthCount === 1 ? 'mes' : 'meses'}
           </StatCardMeta>
         </StatCard>
       </div>
 
-      <DashboardCard 
-        id="monthlyChart"
-        title="Evolución Financiera" 
-        icon={<BarChart3 />}
-        description="Ingresos, egresos y balance mensual"
-        data-testid="chart-monthly-trend"
-      >
-        <MultiSeriesTrendChart 
-          data={monthlyFinancialData.map(d => ({
-            month: d.month,
-            income: d.income,
-            expense: d.expense,
-            balance: d.balance
-          }))}
-          series={[
-            { key: 'income', label: 'Ingresos', color: 'hsl(80, 90%, 40%)', type: 'bar' },
-            { key: 'expense', label: 'Egresos', color: 'hsl(0, 75%, 60%)', type: 'bar' },
-            { key: 'balance', label: 'Balance', color: 'hsl(173, 58%, 39%)', type: 'line' }
-          ]}
-          height={280}
-          emptyText="No hay movimientos registrados"
-          showLegend
-          showZeroLine
-          clickable
-          onBarClick={(month) => handleMonthDrillDown(month)}
-        />
-      </DashboardCard>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <DashboardCard 
-          id="categoryBreakdown"
-          title="Distribución por Tipo" 
-          icon={<PieChart />}
-          description="Hacé click en un tipo para ver sus movimientos"
-          data-testid="chart-category-breakdown"
+          title="Ingresos vs Egresos"
+          subtitle={getPeriodLabel(selectedPeriod)}
+          icon={<BarChart3 className="h-4 w-4" />}
+          className="lg:col-span-2"
         >
-          <CategoryBreakdownChart 
-            data={categoryChartData} 
-            height={280}
-            emptyText="No hay movimientos registrados"
-            clickable
-            onSliceClick={(name) => handleCategoryDrillDown(name)}
-          />
+          {incomeExpenseChartData.length > 0 ? (
+            <MultiSeriesTrendChart
+              data={incomeExpenseChartData}
+              height={280}
+              currencySymbol={currencySymbol}
+              series={[
+                { key: 'income', name: 'Ingresos', color: 'var(--positive)' },
+                { key: 'expense', name: 'Egresos', color: 'var(--negative)' }
+              ]}
+              onBarClick={handleMonthDrillDown}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-[280px] text-muted-foreground">
+              Sin datos para mostrar
+            </div>
+          )}
+          {currentMonthComparison && (
+            <div className="mt-4 pt-4 border-t">
+              <StatCardHistoricalComparison comparison={currentMonthComparison} />
+            </div>
+          )}
         </DashboardCard>
 
-        <div className="grid grid-cols-1 gap-6">
-          <DashboardCard 
-            id="currencyBalances"
-            title="Balance por Moneda" 
-            icon={<Coins />}
-            description="Balance real en cada moneda"
-            data-testid="chart-currency-balances"
-          >
-            <BalanceBreakdownChart 
-              data={currencyBalances}
-              height={120}
-              emptyText="No hay movimientos registrados"
+        <DashboardCard 
+          title="Distribución por Tipo"
+          subtitle="Volumen por categoría"
+          icon={<PieChart className="h-4 w-4" />}
+        >
+          {categoryChartData.length > 0 ? (
+            <CategoryBreakdownChart
+              data={categoryChartData}
+              height={280}
+              currencySymbol={currencySymbol}
+              onCategoryClick={handleCategoryDrillDown}
             />
-          </DashboardCard>
-
-          <DashboardCard 
-            id="walletBalances"
-            title="Balance por Billetera" 
-            icon={<Wallet />}
-            description={`En ${defaultCurrency?.code || 'moneda base'}`}
-            data-testid="chart-wallet-balances"
-          >
-            <BalanceBreakdownChart 
-              data={walletBalances}
-              height={120}
-              emptyText="No hay movimientos registrados"
-            />
-          </DashboardCard>
-        </div>
+          ) : (
+            <div className="flex items-center justify-center h-[280px] text-muted-foreground">
+              Sin datos para mostrar
+            </div>
+          )}
+        </DashboardCard>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <InsightCard
-          title="Insights"
-          titleIcon={<Lightbulb />}
-          items={toInsightItems(autoInsights)}
-          emptyText="Sin insights en este período. Continuá registrando movimientos para obtener análisis."
-          onAction={handleInsightAction}
-          data-testid="insights-section"
-        />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <DashboardCard 
+          title="Balance por Moneda"
+          subtitle="Saldo en cada divisa"
+          icon={<Coins className="h-4 w-4" />}
+          id="currency-balances"
+        >
+          {currencyBalances.length > 0 ? (
+            <BalanceBreakdownChart
+              data={currencyBalances}
+              height={200}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
+              Sin datos de monedas
+            </div>
+          )}
+        </DashboardCard>
+
+        <DashboardCard 
+          title="Balance por Billetera"
+          subtitle="Saldo en cada cuenta"
+          icon={<Wallet className="h-4 w-4" />}
+          id="wallet-balances"
+        >
+          {walletBalances.length > 0 ? (
+            <BalanceBreakdownChart
+              data={walletBalances}
+              height={200}
+              currencySymbol={currencySymbol}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
+              Sin datos de billeteras
+            </div>
+          )}
+        </DashboardCard>
 
         <ActivityCard
           title="Actividad Reciente"
-          titleIcon={<Clock />}
           items={recentActivityItems}
-          emptyText="No hay movimientos registrados"
-          data-testid="activity-section"
+          onViewAll={onNavigateToMovements}
+          emptyMessage="Sin movimientos recientes"
         />
       </div>
+
+      {autoInsights.length > 0 && (
+        <InsightCard
+          title="Insights Financieros"
+          icon={<Lightbulb className="h-4 w-4" />}
+          insights={toInsightItems(autoInsights)}
+          onAction={handleInsightAction}
+          dismissedIds={dismissedIssueIds}
+          onDismiss={onDismissIssue}
+        />
+      )}
     </div>
   );
 }

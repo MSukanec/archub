@@ -356,11 +356,11 @@ function SignaturePreview({ formData }: { formData: Partial<PdfTemplate> }) {
   );
 }
 
-interface OrganizationSettingsPdfTabProps {
+interface OrganizationSettingsPdfViewProps {
   onHasChanges?: (hasChanges: boolean, actions?: React.ReactNode[]) => void;
 }
 
-export function OrganizationSettingsPdfTab({ onHasChanges }: OrganizationSettingsPdfTabProps) {
+export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettingsPdfViewProps) {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   

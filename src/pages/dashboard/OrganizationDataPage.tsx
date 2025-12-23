@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import { OrganizationProfileTab } from '@/pages/organization-data/tabs/OrganizationProfileTab';
-import { OrganizationLocationTab } from '@/pages/organization-data/tabs/OrganizationLocationTab';
+import { OrganizationProfileView, OrganizationLocationView } from '@/features/organization';
 import { Building2 } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
-export default function OrganizationData() {
+export function OrganizationDataPage() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
   const [activeTab, setActiveTab] = useState('profile');
@@ -25,11 +24,11 @@ export default function OrganizationData() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'profile':
-        return <OrganizationProfileTab />;
+        return <OrganizationProfileView />;
       case 'location':
-        return <OrganizationLocationTab />;
+        return <OrganizationLocationView />;
       default:
-        return <OrganizationProfileTab />;
+        return <OrganizationProfileView />;
     }
   };
 

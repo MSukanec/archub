@@ -11,7 +11,7 @@ import { MapPin, Building2, Navigation, CheckCircle2, AlertCircle } from 'lucide
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { GooglePlacesAutocomplete, GoogleMap } from '@/components/shared/integrations/google-maps'
 
-export function OrganizationLocationTab() {
+export function OrganizationLocationView() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();

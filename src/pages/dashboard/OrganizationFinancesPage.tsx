@@ -1,14 +1,17 @@
 import { useState, useMemo } from "react";
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import { LabLayout } from "@/layouts/lab/LabLayout";
 import { DollarSign, Plus, Calendar, ChevronDown } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import { useGlobalModalStore } from "@/components/modal";
 import { useUnifiedMovements } from "@/features/finances/hooks/use-unified-movements";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { OrganizationFinancesView } from "@/features/finances/views/OrganizationFinancesView";
-import { calculateAvailablePeriods, type PeriodFilter } from "@/pages/organization-finances/OrganizationFinancesDashboardTab";
+import {
+  OrganizationFinancesDashboardView,
+  OrganizationFinancesMovementsView,
+  calculateAvailablePeriods,
+  type PeriodFilter
+} from "@/features/organization";
 
 const FINANCES_TABS = [
   { id: "dashboard", label: "Visión General" },
@@ -23,16 +26,13 @@ const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
   { value: 'all', label: 'Histórico' },
 ];
 
-export default function OrganizationFinances() {
+export function OrganizationFinancesPage() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
   const [periodPopoverOpen, setPeriodPopoverOpen] = useState(false);
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const organizationId = userData?.organization?.id;
-
-  const layoutPreference = userData?.preferences?.layout || 'experimental';
-  const isLabLayout = layoutPreference === 'lab';
 
   const { data: allMovements = [] } = useUnifiedMovements(organizationId, null);
   const availablePeriods = useMemo(() => calculateAvailablePeriods(allMovements), [allMovements]);
@@ -91,7 +91,6 @@ export default function OrganizationFinances() {
                     data-testid={`option-period-${option.value}`}
                   >
                     <span>{option.label}</span>
-                    {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
                   </button>
                 );
               })}
@@ -99,47 +98,50 @@ export default function OrganizationFinances() {
           </PopoverContent>
         </Popover>
       )}
-      {activeTab === "movements" && (
-        <Button
-          size="sm"
-          onClick={() => openModal('unified-payment', {
-            organizationId,
-            projectId: undefined,
-            isProjectContext: false,
-          })}
-          data-testid="button-add-movement"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nuevo Movimiento
-        </Button>
-      )}
+      <Button
+        onClick={() => openModal('unified-payment', {})}
+        size="sm"
+        className="gap-2"
+        data-testid="button-add-movement"
+      >
+        <Plus className="h-4 w-4" />
+        Nuevo Movimiento
+      </Button>
     </div>
   );
 
-  if (isLabLayout) {
-    return (
-      <LabLayout 
-        showToolbar={true} 
-        organizationId={organizationId}
-        showMembers={true}
-        tabs={FINANCES_TABS}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        toolbarProps={{
-          secondaryRightSlot: secondaryRightContent,
-        }}
-      >
-        <OrganizationFinancesView 
-          activeTab={activeTab} 
-          onTabChange={setActiveTab}
-        />
-      </LabLayout>
-    );
-  }
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "dashboard":
+        return (
+          <OrganizationFinancesDashboardView
+            movements={allMovements}
+            selectedPeriod={validSelectedPeriod}
+            onNavigateToMovements={() => setActiveTab("movements")}
+          />
+        );
+      case "movements":
+        return <OrganizationFinancesMovementsView />;
+      default:
+        return (
+          <OrganizationFinancesDashboardView
+            movements={allMovements}
+            selectedPeriod={validSelectedPeriod}
+            onNavigateToMovements={() => setActiveTab("movements")}
+          />
+        );
+    }
+  };
 
   return (
-    <Layout wide={false} headerProps={headerProps}>
-      <OrganizationFinancesView activeTab={activeTab} onTabChange={setActiveTab} />
+    <Layout 
+      headerProps={{
+        ...headerProps,
+        actions: [secondaryRightContent]
+      }} 
+      wide={activeTab === "movements"}
+    >
+      {renderTabContent()}
     </Layout>
   );
 }

@@ -20,7 +20,7 @@ El feature ORGANIZATION está **100% migrado a Save Engine** según estándares 
 | Performance | ✅ | Optimistic updates + fire-and-forget mutations |
 | Modales | ✅ | Patrón 1:1 Form ↔ Modal (4 modales, 3 forms) |
 | Nomenclatura | ✅ | Forms: `*Form.tsx`, Modals: `*Modal.tsx` |
-| Vista | ✅ | Consolidada en `OrganizationDashboardView.tsx` con componentes internos |
+| Vistas | ✅ | 7 vistas en `views/` (Dashboard, Location, Profile, FinancesDashboard, FinancesMovements, SettingsFinances, SettingsPdf) |
 | Database | ✅ | RLS, multi-tenant filtering |
 | Security | ✅ | Organization filtering, soft delete |
 | Guards | ✅ | `if (!oldData) return oldData;` en TODOS los optimisticUpdate |
@@ -54,11 +54,14 @@ src/features/organization/
 │   ├── OrganizationRemovedModal.tsx        ✅ UI-only (sin form separado)
 │   ├── index.ts                             ✅ Exports centralizados
 │   └── /index.ts
-├── views/                                    ← CONSOLIDADA (NO panels/)
-│   └── OrganizationDashboardView.tsx       ✅ Vista completa con componentes internos:
-│                                              - WelcomePanel (interno)
-│                                              - StatsPanel (interno)
-│                                              - ProjectsPanel (interno)
+├── views/                                    ← 7 VIEWS (TABs eliminados)
+│   ├── OrganizationDashboardView.tsx       ✅ Vista principal con WelcomePanel, StatsPanel, ProjectsPanel
+│   ├── OrganizationLocationView.tsx        ✅ Vista de ubicación de organización
+│   ├── OrganizationProfileView.tsx         ✅ Vista de perfil de organización
+│   ├── OrganizationFinancesDashboardView.tsx ✅ Dashboard de finanzas org
+│   ├── OrganizationFinancesMovementsView.tsx ✅ Movimientos de finanzas org
+│   ├── OrganizationSettingsFinancesView.tsx  ✅ Configuración de finanzas
+│   └── OrganizationSettingsPdfView.tsx       ✅ Configuración de PDF
 ├── services/
 │   └── (servicios puros de API/DB)
 ├── types/
@@ -174,10 +177,12 @@ Los siguientes modales permanecen en legacy porque **NO pertenecen al feature OR
 - [x] Pages terminan en `*Page.tsx`
 
 ### 6.7 Estructura de Vistas ✅
-- [x] **NO HAY CARPETA PANELS** - eliminada completamente
+- [x] **7 VISTAS** - todas en `src/features/organization/views/`
+- [x] **3 PAGES** - thin orchestrators en `src/pages/dashboard/`
+- [x] **TABS ELIMINADOS** - convertidos a *View.tsx
 - [x] OrganizationDashboardView.tsx contiene componentes internos (WelcomePanel, StatsPanel, ProjectsPanel)
-- [x] Patrón alineado con PROJECTS y otros features refactorizados
-- [x] Vista es self-contained y fácil de mantener
+- [x] Patrón alineado con FEATURE-AUDIT.md estándar (Pages → Views → Components)
+- [x] Vistas son self-contained y fáciles de mantener
 
 ### 6.8 Validación de Datos ✅
 - [x] Zod schemas en lugar de validación manual
@@ -221,10 +226,18 @@ Los siguientes modales permanecen en legacy porque **NO pertenecen al feature OR
   - ✅ `InviteMemberModal.tsx` (1:1 con InviteMemberForm)
   - ✅ `MemberActionConfirmationModal.tsx` (1:1 con MemberActionConfirmationForm)
   - ✅ `OrganizationRemovedModal.tsx` (UI-only, sin form)
-- ✅ 1 Vista consolidada: `OrganizationDashboardView.tsx` (sin carpeta panels)
-  - ✅ WelcomePanel (componente interno)
-  - ✅ StatsPanel (componente interno)
-  - ✅ ProjectsPanel (componente interno)
+- ✅ 7 Vistas en organization/views/ (TABs eliminados, Pages en pages/dashboard/)
+  - ✅ OrganizationDashboardView.tsx (principal con panels internos)
+  - ✅ OrganizationLocationView.tsx
+  - ✅ OrganizationProfileView.tsx
+  - ✅ OrganizationFinancesDashboardView.tsx
+  - ✅ OrganizationFinancesMovementsView.tsx
+  - ✅ OrganizationSettingsFinancesView.tsx
+  - ✅ OrganizationSettingsPdfView.tsx
+- ✅ 3 Pages en pages/dashboard/ (thin orchestrators)
+  - ✅ OrganizationDataPage.tsx (orquesta Profile + Location)
+  - ✅ OrganizationFinancesPage.tsx (orquesta Dashboard + Movements)
+  - ✅ OrganizationSettingsPage.tsx (orquesta Finances + PDF settings)
 - ✅ 6 Modales legacy en `src/features/legacy/modals/`
 - ✅ TODOS los optimisticUpdate con guard `if (!oldData) return oldData;`
 - ✅ 0 instancias de `useMutation` legacy
@@ -245,9 +258,10 @@ No hay refactorización pendiente.
 **ESTRUCTURA DEFINITIVA:**
 - ✅ Forms en `forms/` (3 total)
 - ✅ Modals en `modals/` (4 total con 1:1 Form↔Modal)
-- ✅ Vista consolidada en `views/OrganizationDashboardView.tsx` (SIN panels/)
+- ✅ 7 Vistas en `views/` (TABs eliminados, convertidos a *View.tsx)
+- ✅ 3 Pages en `pages/dashboard/` (thin orchestrators)
 - ✅ Save Engine implementado (useOptimisticMutation + fire-and-forget)
-- ✅ Nomenclatura enterprise: *Form.tsx, *Modal.tsx, *View.tsx
+- ✅ Nomenclatura enterprise: *Form.tsx, *Modal.tsx, *View.tsx, *Page.tsx
 - ✅ TODOS los exports son NAMED EXPORTS (no default)
 
 **PRÓXIMO PASO:** Migrar siguiente feature (PROJECTS, LEARNING, etc.) usando este documento como template y aplicando el mismo estándar Save Engine.

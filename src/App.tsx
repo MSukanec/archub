@@ -56,8 +56,8 @@ import Media from "@/pages/media/Media";
 import Moodboard from "@/pages/moodboard/Moodboard";
 
 import OrganizationDashboardPage from "@/pages/organization/OrganizationDashboardPage";
-import OrganizationData from "@/pages/organization-data/OrganizationData";
-import OrganizationSettings from "@/pages/organization-settings/OrganizationSettings";
+import { OrganizationDataPage } from "@/pages/dashboard/OrganizationDataPage";
+import { OrganizationSettingsPage } from "@/pages/dashboard/OrganizationSettingsPage";
 
 import Profile from "@/pages/profile/Profile";
 
@@ -117,7 +117,7 @@ const MPSeatSubscriptionSuccess = lazy(() => import("@/pages/MPSeatSubscriptionS
 const SubscriptionCheckout = lazy(() => import("@/pages/checkout/SubscriptionCheckout"));
 
 // Finances Pages
-import OrganizationFinances from "@/pages/organization-finances/OrganizationFinances";
+import { OrganizationFinancesPage } from "@/pages/dashboard/OrganizationFinancesPage";
 import ProjectFinances from "@/pages/project-finances/ProjectFinances";
 
 // Settings Pages (legacy - keeping for backwards compatibility)
@@ -190,7 +190,7 @@ function Router() {
 
         {/* Organization Routes - ORDEN IMPORTANTE: rutas específicas primero */}
         <Route path="/organization/dashboard" component={OrganizationDashboardPage} />
-        <Route path="/organization/basic-data" component={OrganizationData} />
+        <Route path="/organization/basic-data" component={OrganizationDataPage} />
         <Route path="/organization/activity" component={Activity} />
         <Route path="/organization/founders-portal">
           <Suspense fallback={<LazyLoadFallback />}>
@@ -204,7 +204,7 @@ function Router() {
         <Route path="/general-costs" component={GeneralCosts} />
         
         {/* Finances Routes */}
-        <Route path="/finances" component={OrganizationFinances} />
+        <Route path="/finances" component={OrganizationFinancesPage} />
         <Route path="/project/finances" component={ProjectFinances} />
         
         <Route path="/organization" component={OrganizationDashboardPage} />
@@ -253,7 +253,7 @@ function Router() {
 
         {/* Organization Settings Routes */}
         <Route path="/organization/billing" component={Billing} />
-        <Route path="/organization/settings" component={OrganizationSettings} />
+        <Route path="/organization/settings" component={OrganizationSettingsPage} />
         <Route path="/organization/members" component={Members} />
         <Route path="/organization/capital" component={Capital} />
         <Route path="/settings/organization-activity" component={OrganizationActivity} />

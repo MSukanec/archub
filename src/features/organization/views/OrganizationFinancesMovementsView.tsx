@@ -1,5 +1,5 @@
 /**
- * OrganizationFinancesMovementsTab.tsx
+ * OrganizationFinancesMovementsView.tsx
  * 
  * Finanzas de ORGANIZACIÓN - muestra TODOS los movimientos de la organización
  * incluyendo los de proyectos. Incluye columna "Proyecto" para identificar origen.
@@ -77,17 +77,17 @@ const MOVEMENT_TYPE_CONFIG: Record<string, {
   },
 };
 
-interface OrganizationFinancesMovementsTabProps {
+interface OrganizationFinancesMovementsViewProps {
   externalFilterIssueId?: string | null;
   onClearExternalFilter?: () => void;
   getAffectedIdsForIssue?: (issueId: string) => Set<string | number>;
 }
 
-export function OrganizationFinancesMovementsTab({
+export function OrganizationFinancesMovementsView({
   externalFilterIssueId,
   onClearExternalFilter,
   getAffectedIdsForIssue: externalGetAffectedIds,
-}: OrganizationFinancesMovementsTabProps = {}) {
+}: OrganizationFinancesMovementsViewProps = {}) {
   const { currentOrganizationId } = useProjectContext();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();

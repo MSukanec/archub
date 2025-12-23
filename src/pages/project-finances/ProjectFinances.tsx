@@ -9,7 +9,7 @@ import { useGlobalModalStore } from "@/components/modal";
 import { useUnifiedMovements } from "@/features/finances/hooks/use-unified-movements";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ProjectFinancesView } from "@/features/finances/views/ProjectFinancesView";
-import { calculateAvailablePeriods, type PeriodFilter } from "@/pages/organization-finances/OrganizationFinancesDashboardTab";
+import { calculateAvailablePeriods, type PeriodFilter } from "@/features/organization";
 
 const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
   { value: '30d', label: 'Últimos 30 días' },

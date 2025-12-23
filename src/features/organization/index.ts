@@ -17,3 +17,10 @@ export { MemberActionConfirmationForm } from './forms/MemberActionConfirmationFo
 export { default as AdminOrganizationRow } from './components/admin/AdminOrganizationRow';
 
 export { OrganizationDashboardView } from './views/OrganizationDashboardView';
+export { OrganizationLocationView } from './views/OrganizationLocationView';
+export { OrganizationProfileView } from './views/OrganizationProfileView';
+export { OrganizationFinancesDashboardView, calculateAvailablePeriods } from './views/OrganizationFinancesDashboardView';
+export type { PeriodFilter } from './views/OrganizationFinancesDashboardView';
+export { OrganizationFinancesMovementsView } from './views/OrganizationFinancesMovementsView';
+export { OrganizationSettingsFinancesView } from './views/OrganizationSettingsFinancesView';
+export { OrganizationSettingsPdfView } from './views/OrganizationSettingsPdfView';
