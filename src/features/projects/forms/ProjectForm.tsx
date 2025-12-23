@@ -555,7 +555,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
 
     try {
       if (mode === 'edit' && project) {
-        await updateProjectMutation.mutateAsync({
+        const updatedProject = await updateProjectMutation.mutateAsync({
           projectId: project.id,
           data: {
             ...cleanedData,
@@ -563,24 +563,36 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
           }
         });
 
-        await queryClient.refetchQueries({
-          queryKey: [QUERY_KEYS.PROJECTS, organizationId]
-        });
+        // ⚡ OPTIMISTIC UPDATE: Actualiza el cache INMEDIATAMENTE (sin esperar refetch)
+        queryClient.setQueryData(
+          [QUERY_KEYS.PROJECTS, organizationId],
+          (oldData: any) => {
+            if (!Array.isArray(oldData)) return oldData;
+            return oldData.map((p: any) => 
+              p.id === project.id ? { ...p, ...cleanedData, ...updatedProject } : p
+            );
+          }
+        );
 
+        // ⚡ FIRE AND FORGET: Logging en background (no bloquea)
         const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
-        await logActivity({
+        logActivity({
           organization_id: organizationId,
           user_id: userData?.user?.id || '',
           action: ACTIVITY_ACTIONS.UPDATE_PROJECT,
           target_table: TARGET_TABLES.PROJECTS,
           target_id: project.id,
           metadata: { name: cleanedData.name, project_type: projectTypeName }
-        });
+        }).catch(err => console.error('Error logging activity:', err));
 
+        // ⚡ FIRE AND FORGET: Upload de imagen en background
         if (selectedImageFile) {
-          await handleImageUpload(project.id);
+          handleImageUpload(project.id).catch(err => 
+            console.error('Error uploading image:', err)
+          );
         }
 
+        // ✅ CALLBACK INMEDIATO: El usuario ve el cambio al instante
         callbacks?.onSubmitSuccess?.('edit');
       } else {
         const newProject = await createProjectMutation.mutateAsync({
@@ -589,13 +601,21 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
           ...cleanedData,
         });
 
-        await queryClient.refetchQueries({
-          queryKey: [QUERY_KEYS.PROJECTS, organizationId]
-        });
+        // ⚡ OPTIMISTIC UPDATE: Actualiza el cache INMEDIATAMENTE
+        queryClient.setQueryData(
+          [QUERY_KEYS.PROJECTS, organizationId],
+          (oldData: any) => {
+            if (!Array.isArray(oldData)) return [newProject];
+            return [...oldData, newProject];
+          }
+        );
 
+        // ⚡ FIRE AND FORGET: Preferencias del usuario en background
         if (newProject.id && userData?.user?.id) {
-          try {
-            await supabase
+          setSelectedProject(newProject.id, organizationId);
+          
+          Promise.resolve(
+            supabase
               .from('user_organization_preferences')
               .upsert({
                 user_id: userData.user.id,
@@ -604,42 +624,44 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
                 updated_at: new Date().toISOString()
               }, {
                 onConflict: 'user_id,organization_id'
+              })
+          )
+            .then(() => {
+              queryClient.invalidateQueries({
+                queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
               });
-            
-            setSelectedProject(newProject.id, organizationId);
-            updateProjectLastActive(newProject.id, organizationId).catch(err => 
-              console.error('Error updating project last_active_at:', err)
-            );
-
-            await queryClient.refetchQueries({
-              queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
-            });
-          } catch (error) {
-            console.error('Error setting project as active:', error);
-          }
+              return updateProjectLastActive(newProject.id, organizationId);
+            })
+            .catch((error: any) => console.error('Error setting project as active:', error));
         }
 
+        // ⚡ FIRE AND FORGET: Checklist update en background
         if (userData?.user?.id) {
-          await updateChecklist.mutateAsync({ 
+          updateChecklist.mutateAsync({ 
             key: 'create_project', 
             value: true 
-          });
+          }).catch(err => console.error('Error updating checklist:', err));
         }
 
+        // ⚡ FIRE AND FORGET: Upload de imagen en background
         if (selectedImageFile && newProject.id) {
-          await handleImageUpload(newProject.id);
+          handleImageUpload(newProject.id).catch(err => 
+            console.error('Error uploading image:', err)
+          );
         }
 
+        // ⚡ FIRE AND FORGET: Logging en background
         const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
-        await logActivity({
+        logActivity({
           organization_id: organizationId,
           user_id: userData?.user?.id || '',
           action: ACTIVITY_ACTIONS.CREATE_PROJECT,
           target_table: TARGET_TABLES.PROJECTS,
           target_id: newProject.id,
           metadata: { name: cleanedData.name, project_type: projectTypeName }
-        });
+        }).catch(err => console.error('Error logging activity:', err));
 
+        // ✅ CALLBACK INMEDIATO: El usuario ve el cambio al instante
         callbacks?.onSubmitSuccess?.('create');
       }
 
