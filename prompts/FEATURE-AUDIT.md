@@ -87,10 +87,18 @@ Tablas de Supabase:
 ├── src/features/{feature}/
 │   ├── services/        ← Funciones puras async de Supabase
 │   ├── hooks/           ← React hooks con useQuery/useMutation
+│   ├── forms/           ← FormFields agnósticos (REUTILIZABLES en modales, drawers, etc.)
+│   │   ├── FeatureFormFields.tsx
 │   ├── components/      ← Componentes específicos del feature
+│   │   ├── FeatureDetailContent.tsx  (si aplica, contenido agnóstico para drawers)
+│   │   └── ...
+│   ├── modals/          ← Modales (contenedores ENVASE para DashboardLayout)
+│   │   ├── FeatureModal.tsx
+│   │   └── ...
+│   ├── drawers/         ← Drawers (contenedores ENVASE para LabLayout, OPCIONAL)
+│   │   ├── FeatureDetailDrawer.tsx
+│   │   └── ...
 │   ├── views/           ← Views agnósticas al layout (si aplica)
-│   ├── modals/          ← Modales del feature
-│   │   └── forms/       ← FormFields agnósticos
 │   ├── constants/       ← Enums, configuraciones
 │   ├── types/           ← Tipos TypeScript
 │   ├── schemas/         ← Validaciones Zod
@@ -98,6 +106,8 @@ Tablas de Supabase:
 ├── src/pages/{feature}/ ← Páginas (orquestadores)
 └── prompts/tables/{feature}.md ← Documentación de tablas
 ```
+
+**Nota importante:** `forms/` es SEPARADO y AGNÓSTICO. Tanto MODALS como DRAWERS pueden usar el mismo FORM.
 
 ---
 
@@ -108,11 +118,13 @@ Tablas de Supabase:
 **Checklist de estructura:**
 - [ ] ¿Carpeta `services/` existe con funciones puras async?
 - [ ] ¿Carpeta `hooks/` existe y los hooks solo llaman a services?
+- [ ] ¿Carpeta `forms/` existe si hay formularios? (SEPARADA de modals/drawers)
 - [ ] ¿Carpeta `types/` tiene todos los tipos centralizados?
 - [ ] ¿Carpeta `schemas/` tiene validaciones Zod?
 - [ ] ¿Carpeta `constants/` tiene enums y configuraciones?
-- [ ] ¿Carpeta `components/` tiene componentes específicos?
-- [ ] ¿Carpeta `modals/` y `modals/forms/` si hay formularios?
+- [ ] ¿Carpeta `components/` tiene componentes específicos del feature?
+- [ ] ¿Carpeta `modals/` existe si hay modales? (contenedores ENVASE para DashboardLayout)
+- [ ] ¿Carpeta `drawers/` existe si hay drawers? (contenedores ENVASE para LabLayout, OPCIONAL)
 - [ ] ¿`index.ts` exporta todo lo necesario?
 
 **Checklist de calidad:**
@@ -293,28 +305,44 @@ VIEW (Contenido)       → Tablas, KPIs, gráficos, formularios
 
 ---
 
-### 5. AUDITORÍA DE MODALES
+### 5. AUDITORÍA DE FORMULARIOS (FORMS)
+
+**Referencia:** `prompts/02-Modals.md` + `prompts/03-Drawers.md`
+
+**IMPORTANTE:** FORMS es AGNÓSTICO y REUTILIZABLE. Puede usarse tanto en MODALES (DashboardLayout) como en DRAWERS (LabLayout).
+
+**Arquitectura esperada:**
+```
+forms/
+├── FeatureFormFields.tsx    → Campos del formulario (CEREBRO, agnóstico)
+```
+
+**Checklist de FormFields:**
+- [ ] ¿Archivo está en `src/features/{feature}/forms/` (NO en modals/)?
+- [ ] ¿Contiene `react-hook-form` con `zodResolver`?
+- [ ] ¿Contiene todos los hooks de datos (`useQuery`, `useMutation`)?
+- [ ] ¿Acepta props `hideActions` y `formRef` para control externo?
+- [ ] ¿NO importa componentes de modal O drawer (`ModalLayout`, `DrawerLayout`, etc.)?
+- [ ] ¿Usa `ref={formRef}` en el `<form>`?
+- [ ] ¿Condiciona botones con `{!hideActions && ...}`?
+- [ ] ¿El archivo es AGNÓSTICO y puede reutilizarse en múltiples contextos?
+
+---
+
+### 6. AUDITORÍA DE MODALES
 
 **Referencia:** `prompts/02-Modals.md`
 
 **Arquitectura esperada:**
 ```
-forms/
-├── FeatureFormFields.tsx    → Campos del formulario (CEREBRO)
-
 modals/
 ├── FeatureModal.tsx         → Contenedor del modal (ENVASE)
+                               Usa el FORM de src/features/{feature}/forms/
 ```
 
-**Checklist de FormFields (Cerebro):**
-- [ ] ¿Contiene `react-hook-form` con `zodResolver`?
-- [ ] ¿Contiene todos los hooks de datos (`useQuery`, `useMutation`)?
-- [ ] ¿Acepta props `hideActions` y `formRef` para control externo?
-- [ ] ¿NO importa componentes de modal (`ModalLayout`, etc.)?
-- [ ] ¿Usa `ref={formRef}` en el `<form>`?
-- [ ] ¿Condiciona botones con `{!hideActions && ...}`?
-
 **Checklist de Modal (Envase):**
+- [ ] ¿Archivo está en `src/features/{feature}/modals/`?
+- [ ] ¿Envuelve el FormFields del feature (CEREBRO)?
 - [ ] ¿Usa `headerContent` prop para ModalHeader?
 - [ ] ¿Usa `footerContent` prop para ModalFooter (footer fijo)?
 - [ ] ¿ModalBody va como children de ModalLayout?
@@ -327,27 +355,34 @@ modals/
 
 ---
 
-### 6. AUDITORÍA DE DRAWERS
+### 7. AUDITORÍA DE DRAWERS
 
 **Referencia:** `prompts/03-Drawers.md`
 
 **Arquitectura esperada:**
 ```
-components/
-├── FeatureDetailContent.tsx    → Contenido agnóstico (CEREBRO)
-├── FeatureDetailDrawer.tsx     → Contenedor del drawer (ENVASE)
+drawers/                            (OPCIONAL: solo si hay drawers específicos)
+├── FeatureDetailDrawer.tsx         → Contenedor del drawer (ENVASE)
+                                      Usa el FORM de src/features/{feature}/forms/
+
+O también en components/:
+├── FeatureDetailContent.tsx        → Contenido agnóstico (puede ser FORM + otras cosas)
+├── FeatureDetailDrawer.tsx         → Contenedor del drawer (ENVASE)
 ```
 
-**Checklist:**
+**Checklist del Drawer (Envase):**
+- [ ] ¿Archivo está en `src/features/{feature}/drawers/` o `components/`?
+- [ ] ¿Envuelve el FormFields del feature (CEREBRO)?
 - [ ] ¿Usa `headerContent` prop para DrawerHeader?
 - [ ] ¿DrawerBody va como children de DrawerLayout?
 - [ ] ¿Usa `DrawerSection` para organizar contenido?
 - [ ] ¿Content acepta `hideActions` opcional?
 - [ ] ¿Content NO importa `DrawerLayout`?
+- [ ] ¿Pasa `hideActions={true}` al FormFields?
 
 ---
 
-### 7. AUDITORÍA DE UPLOADS/STORAGE
+### 8. AUDITORÍA DE UPLOADS/STORAGE
 
 **Referencia:** `prompts/03-Uploads.md`
 
@@ -360,7 +395,7 @@ components/
 
 ---
 
-### 8. AUDITORÍA DE DELETE/REPLACE PATTERN
+### 9. AUDITORÍA DE DELETE/REPLACE PATTERN
 
 **Referencia:** `prompts/04-Replacement.md`
 
@@ -374,7 +409,7 @@ components/
 
 ---
 
-### 9. AUDITORÍA DE BASE DE DATOS (Supabase)
+### 10. AUDITORÍA DE BASE DE DATOS (Supabase)
 
 **Checklist de tablas:**
 - [ ] ¿Tipos de columnas correctos?
@@ -398,7 +433,7 @@ components/
 
 ---
 
-### 10. AUDITORÍA DE FRONTEND
+### 11. AUDITORÍA DE FRONTEND
 
 **Checklist de hooks:**
 - [ ] ¿No hay duplicados?
@@ -423,7 +458,7 @@ components/
 
 ---
 
-### 11. AUDITORÍA DE CALIDAD / ROBUSTEZ
+### 12. AUDITORÍA DE CALIDAD / ROBUSTEZ
 
 **Checklist:**
 - [ ] ¿Manejo de errores real? (logs, try/catch, mensajes al usuario)
@@ -449,8 +484,9 @@ components/
 | Estructura de Feature | ✅/⚠️/❌ | ... |
 | **Ubicación y Duplicados** | ✅/⚠️/❌ | Archivos fuera de lugar, duplicados en src/hooks, src/services |
 | Arquitectura 3 Capas | ✅/⚠️/❌ | ... |
-| Modales | ✅/⚠️/❌ | ... |
-| Drawers | ✅/⚠️/❌ | ... |
+| **Formularios (FORMS)** | ✅/⚠️/❌ | Agnósticos, reutilizables, separados de modals/drawers |
+| Modales | ✅/⚠️/❌ | Contenedores ENVASE para DashboardLayout |
+| Drawers | ✅/⚠️/❌ | Contenedores ENVASE para LabLayout |
 | Uploads | ✅/⚠️/❌ | ... |
 | Delete/Replace | ✅/⚠️/❌ | ... |
 | DB (Tablas/Views) | ✅/⚠️/❌ | ... |
@@ -472,6 +508,19 @@ components/
 - Archivos fuera de lugar: ...
 - Duplicados detectados: ...
 - Imports a actualizar: ...
+
+#### Formularios (FORMS) Findings
+- FormFields agnósticos: ✅ / ❌
+- Reutilización en múltiples contextos: ✅ / ❌
+- Separación correcta de modals/drawers: ✅ / ❌
+
+#### Modales Findings
+- Envases correctos: ✅ / ❌
+- Registro en registerModals.ts: ✅ / ❌
+
+#### Drawers Findings
+- Envases correctos: ✅ / ❌
+- Uso de FORM agnóstico: ✅ / ❌
 
 #### DB Findings
 - ...
