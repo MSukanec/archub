@@ -146,15 +146,28 @@ export function useProjectModalityForm({
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
       if (mode === 'edit' && projectModality) {
-        await updateMutation.mutateAsync({
+        // ⚡ STEP 1: OPTIMISTIC UPDATE PRIMERO
+        queryClient.setQueryData(
+          ['project-modalities', organizationId],
+          (oldData: any) => {
+            if (!Array.isArray(oldData)) return oldData;
+            return oldData.map((m: any) => 
+              m.id === projectModality.id ? { ...m, name: data.name } : m
+            );
+          }
+        );
+
+        // ⚡ STEP 2: FIRE AND FORGET - Mutation sin esperar
+        updateMutation.mutate({
           modalityId: projectModality.id,
           organizationId,
           data: { name: data.name }
         });
+
+        // ✅ CALLBACK INMEDIATO
+        callbacks.onSuccess?.('edit');
       } else {
         const currentMember = members.find((m: any) => m.user_id === userData?.user?.id);
         if (!currentMember) {
@@ -162,14 +175,46 @@ export function useProjectModalityForm({
           return;
         }
 
-        await createMutation.mutateAsync({
+        // ⚡ STEP 1: OPTIMISTIC UPDATE
+        const optimisticModality = {
+          id: 'temp-' + Date.now(),
+          name: data.name,
+          organization_id: organizationId,
+          created_by: currentMember.id,
+          created_at: new Date().toISOString(),
+        };
+
+        queryClient.setQueryData(
+          ['project-modalities', organizationId],
+          (oldData: any) => {
+            if (!Array.isArray(oldData)) return [optimisticModality];
+            return [...oldData, optimisticModality];
+          }
+        );
+
+        // ⚡ STEP 2: FIRE AND FORGET
+        createMutation.mutate({
           name: data.name,
           organizationId,
           createdBy: currentMember.id
+        }, {
+          onSuccess: (newModality) => {
+            // Reemplazar optimista con real
+            queryClient.setQueryData(
+              ['project-modalities', organizationId],
+              (oldData: any) => {
+                if (!Array.isArray(oldData)) return [newModality];
+                return oldData.map((m: any) => m.id === optimisticModality.id ? newModality : m);
+              }
+            );
+          }
         });
+
+        // ✅ CALLBACK INMEDIATO
+        callbacks.onSuccess?.('create');
       }
-    } finally {
-      setIsSubmitting(false);
+    } catch (error) {
+      callbacks.onError?.(error as Error);
     }
   };
 

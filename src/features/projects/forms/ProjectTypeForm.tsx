@@ -146,15 +146,28 @@ export function useProjectTypeForm({
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
       if (mode === 'edit' && projectType) {
-        await updateMutation.mutateAsync({
+        // ⚡ STEP 1: OPTIMISTIC UPDATE PRIMERO
+        queryClient.setQueryData(
+          ['project-types', organizationId],
+          (oldData: any) => {
+            if (!Array.isArray(oldData)) return oldData;
+            return oldData.map((t: any) => 
+              t.id === projectType.id ? { ...t, name: data.name } : t
+            );
+          }
+        );
+
+        // ⚡ STEP 2: FIRE AND FORGET - Mutation sin esperar
+        updateMutation.mutate({
           typeId: projectType.id,
           organizationId,
           data: { name: data.name }
         });
+
+        // ✅ CALLBACK INMEDIATO
+        callbacks.onSuccess?.('edit');
       } else {
         const currentMember = members.find((m: any) => m.user_id === userData?.user?.id);
         if (!currentMember) {
@@ -162,14 +175,46 @@ export function useProjectTypeForm({
           return;
         }
 
-        await createMutation.mutateAsync({
+        // ⚡ STEP 1: OPTIMISTIC UPDATE
+        const optimisticType = {
+          id: 'temp-' + Date.now(),
+          name: data.name,
+          organization_id: organizationId,
+          created_by: currentMember.id,
+          created_at: new Date().toISOString(),
+        };
+
+        queryClient.setQueryData(
+          ['project-types', organizationId],
+          (oldData: any) => {
+            if (!Array.isArray(oldData)) return [optimisticType];
+            return [...oldData, optimisticType];
+          }
+        );
+
+        // ⚡ STEP 2: FIRE AND FORGET
+        createMutation.mutate({
           name: data.name,
           organizationId,
           createdBy: currentMember.id
+        }, {
+          onSuccess: (newType) => {
+            // Reemplazar optimista con real
+            queryClient.setQueryData(
+              ['project-types', organizationId],
+              (oldData: any) => {
+                if (!Array.isArray(oldData)) return [newType];
+                return oldData.map((t: any) => t.id === optimisticType.id ? newType : t);
+              }
+            );
+          }
         });
+
+        // ✅ CALLBACK INMEDIATO
+        callbacks.onSuccess?.('create');
       }
-    } finally {
-      setIsSubmitting(false);
+    } catch (error) {
+      callbacks.onError?.(error as Error);
     }
   };
 

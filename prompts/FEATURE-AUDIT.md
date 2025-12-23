@@ -447,6 +447,66 @@ export type { Feature, FeatureFormData };
 - [ ] ¿El hook retorna estado neutral (`isSubmitting`, `isUploading`)?
 - [ ] ¿Es AGNÓSTICO y reutilizable en múltiples contextos?
 
+**PERFORMANCE PATTERNS (CRÍTICO - Verificar SIEMPRE):**
+
+Cada Form debe implementar estos patrones para ser INSTANTÁNEO:
+
+```typescript
+const onSubmit = async (data: FormData) => {
+  try {
+    if (mode === 'edit') {
+      // ⚡ PASO 1: OPTIMISTIC UPDATE PRIMERO
+      queryClient.setQueryData([QUERY_KEY, id], (oldData) => ({
+        ...oldData,
+        ...data
+      }));
+
+      // ⚡ PASO 2: FIRE AND FORGET - Mutation SIN await
+      updateMutation.mutate({ id, data });
+
+      // ✅ PASO 3: CALLBACK INMEDIATO (el modal cierra YA)
+      callbacks?.onSuccess?.('edit');
+    } else {
+      // Para CREATE: genera ID optimista
+      const optimisticItem = { 
+        id: 'temp-' + Date.now(), 
+        ...data 
+      };
+
+      // ⚡ PASO 1: OPTIMISTIC UPDATE
+      queryClient.setQueryData([QUERY_KEY], (oldData) => [
+        ...oldData, 
+        optimisticItem
+      ]);
+
+      // ⚡ PASO 2: FIRE AND FORGET
+      createMutation.mutate(data, {
+        onSuccess: (newItem) => {
+          // Reemplazar optimista con real
+          queryClient.setQueryData([QUERY_KEY], (oldData) =>
+            oldData.map(item => 
+              item.id === optimisticItem.id ? newItem : item
+            )
+          );
+        }
+      });
+
+      // ✅ PASO 3: CALLBACK INMEDIATO
+      callbacks?.onSuccess?.('create');
+    }
+  } catch (error) {
+    callbacks?.onError?.(error);
+  }
+};
+```
+
+**Checklist de Performance:**
+- [ ] ¿Usa `.mutate()` (NO `.mutateAsync()`)?
+- [ ] ¿Optimistic update ANTES de la mutation?
+- [ ] ¿Callback invocado INMEDIATAMENTE (no espera servidor)?
+- [ ] ¿Side-effects en background (logging, uploads)?
+- [ ] ¿No hay `await` bloqueante?
+
 ---
 
 ### 6. AUDITORÍA DE MODALES

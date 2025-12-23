@@ -313,10 +313,42 @@ NOTA: Los filtros y búsqueda son manejados por ActionBarMobile (componente comp
 - [x] Todos los modales registrados en registerModals.ts
 - [x] FEATURE-AUDIT.md actualizado con reglas claras
 
-### Fase 3: Validación
+### Fase 3: Optimización de Performance (2h) ✅ COMPLETADO
+- [x] ProjectForm.tsx: Cambio de mutateAsync a mutate (fire-and-forget)
+- [x] ProjectForm.tsx: Optimistic update antes de mutation
+- [x] ProjectForm.tsx: Callbacks inmediatos (sin esperar servidor)
+- [x] ProjectModalityForm.tsx: Aplicado el mismo patrón
+- [x] ProjectTypeForm.tsx: Aplicado el mismo patrón
+- [x] FEATURE-AUDIT.md: Agregada sección "PERFORMANCE PATTERNS"
+- [x] Imagen no se comprime hasta submit (compressOnDrop=false)
+
+### Fase 4: Validación
 - [ ] Test manual de flujos CREATE/EDIT/VIEW
-- [ ] Verificar que modales funcionan correctamente
+- [ ] Verificar que modales funcionan correctamente (instantáneo)
+- [ ] Cargar imagen + cancelar = no se guarda
+- [ ] Cargar imagen + submit = se guarda en background
 - [ ] Run QA con nuevos data-testid
+
+---
+
+## 11. PERFORMANCE OPTIMIZATION CHECKLIST
+
+✅ **ProjectForm.tsx:**
+- Optimistic update inmediatamente
+- Mutation fire-and-forget (sin await)
+- Callbacks sin bloqueo
+- Imagen solo se procesa en submit
+
+✅ **ProjectModalityForm.tsx:**
+- Mismo patrón que ProjectForm
+- Optimistic update + fire-and-forget
+
+✅ **ProjectTypeForm.tsx:**
+- Mismo patrón que ProjectForm
+- Optimistic update + fire-and-forget
+
+**REGLA PARA NUEVOS FORMS:** Todos los forms DEBEN seguir este patrón de performance.
+Ver `prompts/FEATURE-AUDIT.md` sección "PERFORMANCE PATTERNS".
 
 ---
 
