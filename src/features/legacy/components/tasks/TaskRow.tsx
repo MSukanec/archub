@@ -1,11 +1,10 @@
 import DataRowCard, { DataRowCardProps } from '@/components/shared/DataRowCard';
-import { TaskCostPopover } from '@/features/projects/components/TaskCostPopover';
-import TaskLaborCost from '@/components/construction/TaskLaborCost';
-import TaskMaterialsSubtotal from '@/components/construction/TaskMaterialsSubtotal';
+import { TaskCostPopover } from '@/features/legacy/components/tasks/TaskCostPopover';
+import TaskCostPerUnit from '@/components/construction/TaskCostPerUnit';
 import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
 
-// Interface para la tarea administrativa
-interface AdminTaskRowProps {
+// Interface para la tarea de construcción
+interface TaskRowProps {
   task: any;
   onClick?: () => void;
   selected?: boolean;
@@ -13,16 +12,16 @@ interface AdminTaskRowProps {
   className?: string;
 }
 
-export default function AdminTaskRow({
+export default function TaskRow({
   task,
   onClick,
   selected = false,
   density = 'normal',
   className
-}: AdminTaskRowProps) {
+}: TaskRowProps) {
   
   const rowProps: Omit<DataRowCardProps, 'children'> = {
-    columns: 2,
+    columns: 2, // Cambiado a 2 para cumplir con el tipo
     onClick,
     selected,
     density,
@@ -35,41 +34,41 @@ export default function AdminTaskRow({
       <div className="flex flex-col gap-2 w-full">
         {/* HEADER CON NOMBRE SOLAMENTE */}
         <div className="w-full">
-          {/* DIV SUPERIOR 1: Rubro (Unidad) */}
+          {/* DIV SUPERIOR 1: Fase - Rubro (Unidad) */}
           <div className="text-xs text-[var(--text-secondary)] font-bold">
-            {task.division || 'Sin categoría'}{task.unit && ` (${task.unit})`}
+            {task.phase_name && `${task.phase_name} - `}{task.division_name || 'Sin categoría'}{(task.unit || task.task?.unit_symbol) && ` (${task.unit || task.task?.unit_symbol})`}
           </div>
           
           {/* DIV SUPERIOR 2: Nombre completo de la tarea */}
           <div className="text-sm font-medium text-[var(--text-primary)]">
-            {task.custom_name || task.name_rendered || 'Sin nombre'}
+            {task.custom_name || task.task?.name || 'Sin nombre'}
           </div>
         </div>
         
         {/* LÍNEA DIVISORIA */}
         <div className="border-t border-[var(--border)] w-full"></div>
         
-        {/* DIV INFERIOR: 4 columnas M.O., MAT, TOTAL, Ojo */}
+        {/* DIV INFERIOR: 4 columnas Cantidad, Costo Unitario, Subtotal, Acción */}
         <div className="grid grid-cols-4 gap-2 w-full">
           <div className="flex flex-col text-center">
             <span className="text-xs font-medium text-[var(--text-primary)]">
-              M.O.
+              Cantidad
             </span>
-            <div className="text-xs text-[var(--text-secondary)]">
-              <TaskLaborCost task={task} />
-            </div>
+            <span className="text-xs text-[var(--text-secondary)]">
+              {(task.quantity || 0).toFixed(2)}
+            </span>
           </div>
           <div className="flex flex-col text-center">
             <span className="text-xs font-medium text-[var(--text-primary)]">
-              MAT
+              Costo Unitario
             </span>
             <div className="text-xs text-[var(--text-secondary)]">
-              <TaskMaterialsSubtotal task={task} />
+              <TaskCostPerUnit task={task} />
             </div>
           </div>
           <div className="flex flex-col text-center">
             <span className="text-xs font-bold text-[var(--text-primary)]">
-              TOTAL
+              Subtotal
             </span>
             <div className="text-xs text-[var(--text-secondary)]">
               <TaskTotalSubtotal task={task} />

@@ -308,6 +308,22 @@ export function useSiteLogs(projectId: string | undefined, organizationId: strin
 **Acción para archivos fuera de lugar:**
 1. Si el feature destino YA EXISTE → Mover al feature correcto
 2. Si el feature destino NO EXISTE → Mover a `src/features/legacy/`
+3. IMPORTANTE: Actualizar TODOS los imports que referencian los archivos movidos
+4. Actualizar los barrel exports (index.ts) de los features afectados
+
+**Ejemplo de componentes fuera de lugar (detectado en PROJECTS):**
+```
+src/features/projects/components/
+  ├── ProjectColorAdvanced.tsx  ✅ Correcto
+  ├── ProjectItemCard.tsx       ✅ Correcto
+  ├── ProjectRow.tsx            ✅ Correcto
+  ├── ProjectSelectorField.tsx  ✅ Correcto
+  ├── TaskRow.tsx               ❌ MOVER a legacy/components/tasks/
+  ├── AnalysisTaskRow.tsx       ❌ MOVER a legacy/components/tasks/
+  ├── TaskCostPopover.tsx       ❌ MOVER a legacy/components/tasks/
+  ├── admin/                    ❌ MOVER carpeta completa a legacy/components/admin/
+  └── gantt/                    ❌ MOVER carpeta completa a legacy/components/gantt/
+```
 
 #### 3.2 Hooks duplicados entre feature y carpetas globales
 

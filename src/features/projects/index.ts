@@ -69,9 +69,7 @@ export * from './utils/colorUtils';
 export { default as ProjectItemCard } from './components/ProjectItemCard';
 export { default as ProjectColorAdvanced } from './components/ProjectColorAdvanced';
 export { default as ProjectSelectorField } from './components/ProjectSelectorField';
-
-// Gantt Components
-export * from './components/gantt';
+export { default as ProjectRow } from './components/ProjectRow';
 
 // ============ FORMS ============
 export { ProjectForm } from './forms/ProjectForm';

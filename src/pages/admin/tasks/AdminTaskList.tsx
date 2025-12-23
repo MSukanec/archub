@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card'
 
 import { Table } from '@/components/shared/trees/Table'
-import AdminTaskRow from '@/features/projects/components/admin/AdminTaskRow'
+import AdminTaskRow from '@/features/legacy/components/admin/AdminTaskRow'
 import { useMobile } from '@/hooks/use-mobile'
 
 import { useGlobalModalStore } from '@/components/modal'
@@ -18,9 +18,9 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useTaskParametersAdmin } from '@/hooks/use-task-parameters-admin'
 
 import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronRight, ChevronDown, Eye, Copy } from 'lucide-react'
-import { EditableParametersTable } from '@/features/projects/components/admin/EditableParametersTable'
+import { EditableParametersTable } from '@/features/legacy/components/admin/EditableParametersTable'
 import { exportToExcel, createExportColumns } from '@/lib/export-utils'
-import { TaskCostPopover } from '@/features/projects/components/TaskCostPopover'
+import { TaskCostPopover } from '@/features/legacy/components/tasks/TaskCostPopover'
 import TaskLaborCost from '@/components/construction/TaskLaborCost'
 import { useLocation } from 'wouter'
 

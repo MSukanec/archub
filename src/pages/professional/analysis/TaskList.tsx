@@ -8,12 +8,12 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { useGlobalModalStore } from '@/components/modal'
 import { useDeleteGeneratedTask } from '@/hooks/use-generated-tasks'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import AnalysisTaskRow from '@/features/projects/components/AnalysisTaskRow'
+import AnalysisTaskRow from '@/features/legacy/components/tasks/AnalysisTaskRow'
 import { useActionBarMobile } from '@/layouts'
 import { useMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 import { useLocation } from 'wouter'
-import { TaskCostPopover } from '@/features/projects/components/TaskCostPopover'
+import { TaskCostPopover } from '@/features/legacy/components/tasks/TaskCostPopover'
 
 export default function TaskList() {
   const { data: tasks = [], isLoading: tasksLoading } = useGeneratedTasks()

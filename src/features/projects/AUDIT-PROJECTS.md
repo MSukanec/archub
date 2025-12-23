@@ -201,6 +201,34 @@ Archivo: src/features/projects/hooks/sedvvVJDr
 Acción: ELIMINADO
 ```
 
+### Issue #4: Componentes de otro feature en /components ✅ RESUELTO
+```
+Problema: src/features/projects/components/ contenía componentes de Tasks, Admin, Gantt
+
+MOVIDOS A src/features/legacy/components/:
+  - TaskRow.tsx → legacy/components/tasks/
+  - AnalysisTaskRow.tsx → legacy/components/tasks/
+  - TaskCostPopover.tsx → legacy/components/tasks/
+  - admin/* → legacy/components/admin/
+  - gantt/* → legacy/components/gantt/
+
+IMPORTS ACTUALIZADOS:
+  - src/pages/professional/analysis/TaskList.tsx
+  - src/pages/admin/tasks/AdminTaskList.tsx
+  - src/features/legacy/components/admin/AdminTaskRow.tsx
+  - src/features/legacy/components/tasks/TaskRow.tsx
+
+BARREL EXPORTS:
+  - Eliminado export de gantt de src/features/projects/index.ts
+  - Creado src/features/legacy/components/index.ts
+
+COMPONENTES QUE QUEDARON EN projects/components/ (correctos):
+  - ProjectColorAdvanced.tsx ✅
+  - ProjectItemCard.tsx ✅
+  - ProjectRow.tsx ✅
+  - ProjectSelectorField.tsx ✅
+```
+
 ### Issue #2: ProjectForm acoplado a ModalLayout ✅ RESUELTO
 ```
 Solución implementada con arquitectura de callbacks:
