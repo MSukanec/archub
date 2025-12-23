@@ -130,12 +130,18 @@ src/features/projects/views/
 ### 3.3 Performance ✅
 - [x] Optimistic updates en create/update (setQueryData no invalidate)
 - [x] Optimistic updates en project selection (activate) - INSTANTÁNEO al hacer click
-- [x] Fire-and-forget mutations (no await)
+- [x] Fire-and-forget mutations (no await) en auto-save de datos básicos y ubicación
 - [x] Callbacks inmediatos (modal cierra al instante, proyecto se mueve al primer lugar)
 - [x] Lazy loading con suspense donde aplica
 - [x] useQuery staleTime/refetchInterval optimizados
 - [x] `handleSelectProject()`: Optimistic update → Fire-and-forget mutation → Immediate callbacks
 - [x] `handleNavigateToProject()`: Optimistic update → Immediate navigation → Background DB sync
+- [x] **ProjectBasicDataView**: Auto-save con optimistic updates (sin invalidateQueries)
+  - [x] Datos básicos (nombre, código, estado, tipos, modalidad, descripción): Se guardan instantáneamente
+  - [x] Cambios de color: Optimistic state → fire-and-forget mutation (no delay)
+  - [x] Imagen principal: `setQueryData` en onSuccess → imagen se muestra INSTANTÁNEAMENTE
+- [x] **ProjectLocationView**: Auto-save con optimistic updates (sin invalidateQueries)
+  - [x] Ubicación, coordenadas, zona horaria: Se guardan instantáneamente sin esperar servidor
 
 ### 3.4 Data-Testid ✅
 - [x] ProjectActivesView: `container-project-actives`, `grid-projects`, `button-create-project-empty`

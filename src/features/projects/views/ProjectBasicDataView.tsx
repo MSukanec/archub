@@ -136,7 +136,14 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       const uploadResult = await uploadProjectImage(compressedFile, activeProjectId, organizationId);
       return uploadResult.file_url;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // ⚡ OPTIMISTIC UPDATE: Update project-data cache immediately with new image metadata
+      queryClient.setQueryData(['project-data', activeProjectId], (oldData: any) => ({
+        ...oldData,
+        image_bucket: 'social-assets', // hardcoded in uploadProjectImage function
+        image_path: data.file_path,
+      }));
+
       toast({
         title: "Éxito",
         description: "Imagen principal actualizada correctamente"
@@ -166,14 +173,17 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       }
     },
     onSuccess: () => {
+      // ⚡ OPTIMISTIC UPDATE: Clear image metadata from cache
+      queryClient.setQueryData(['project-data', activeProjectId], (oldData: any) => ({
+        ...oldData,
+        image_bucket: null,
+        image_path: null,
+      }));
+
       toast({
         title: "Éxito",
         description: "Imagen principal eliminada correctamente"
       });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['project-image-url', activeProjectId] });
     },
     onError: (error: any) => {
       console.error('Error deleting image:', error);
