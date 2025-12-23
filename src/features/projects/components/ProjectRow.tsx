@@ -134,8 +134,7 @@ export default function ProjectRow({
       {isActive && (
         <div className="flex items-center">
           <Badge 
-            variant="default"
-            className="bg-[var(--accent)] text-white"
+            variant="success"
             data-testid="badge-active-project"
           >
             Activo
