@@ -125,6 +125,7 @@ export function OrganizationFormFields({
     },
     queryKey: ['admin-organizations'],
     optimisticUpdate: (oldData: any, variables: OrganizationFormData) => {
+      if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;
       const optimisticOrg = {
         id: 'temp-' + Date.now(),
@@ -171,6 +172,7 @@ export function OrganizationFormFields({
     },
     queryKey: ['admin-organizations'],
     optimisticUpdate: (oldData: any, variables: OrganizationFormData) => {
+      if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;
       return oldData.map((org: any) => 
         org.id === organization?.id 

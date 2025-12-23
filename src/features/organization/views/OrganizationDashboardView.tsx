@@ -82,7 +82,10 @@ export function OrganizationDashboardView({
       return result;
     },
     queryKey: ['current-user'],
-    optimisticUpdate: (oldData) => oldData,
+    optimisticUpdate: (oldData) => {
+      if (!oldData) return oldData;
+      return oldData;
+    },
     onSuccessMessage: "Logo actualizado correctamente",
     onErrorMessage: "No se pudo subir el logo",
     additionalQueryKeys: [['organizations', organizationId]],
