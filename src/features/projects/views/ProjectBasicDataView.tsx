@@ -103,7 +103,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
   // Image upload state
   const [isUploadingImage, setIsUploadingImage] = useState(false)
 
-  // Mutation to upload project image
+  // Mutation to upload project image - OPTIMIZED with optimistic updates
   const uploadImageMutation = useMutation({
     mutationFn: async (file: File) => {
       if (!activeProjectId || !organizationId) {
@@ -141,10 +141,6 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
         title: "Éxito",
         description: "Imagen principal actualizada correctamente"
       });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['project-image-url', activeProjectId] });
       setIsUploadingImage(false);
     },
     onError: (error: any) => {
@@ -189,9 +185,10 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     }
   });
 
-  // Handler for image file selection
+  // Handler for image file selection - OPTIMIZED with optimistic update
   const handleImageFilesChange = useCallback((files: any[]) => {
     if (files.length > 0 && files[0].file) {
+      // ⚡ No optimistic update for images (already showing preview in FileUploader)
       uploadImageMutation.mutate(files[0].file);
     }
   }, [uploadImageMutation]);
@@ -201,7 +198,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     deleteImageMutation.mutate();
   }, [deleteImageMutation]);
 
-  // Mutation to save project color
+  // Mutation to save project color - OPTIMIZED with optimistic updates
   const saveProjectColorMutation = useMutation({
     mutationFn: async (colorData: { color?: string; use_custom_color?: boolean; custom_color_h?: number | null; custom_color_hex?: string | null }) => {
       if (!activeProjectId || !supabase) return;
@@ -216,11 +213,6 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
         throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      queryClient.invalidateQueries({ queryKey: ['project-color', activeProjectId] });
-    },
     onError: (error: any) => {
       console.error('Error in saveProjectColorMutation:', error);
       toast({
@@ -231,7 +223,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     }
   });
 
-  // Auto-save mutation for project data
+  // Auto-save mutation for project data - OPTIMIZED with optimistic updates
   const saveProjectDataMutation = useMutation({
     mutationFn: async (dataToSave: any) => {
       if (!activeProjectId || !supabase) return;
@@ -255,7 +247,6 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       }
 
       // Prepare project_data payload - exclude fields that belong to projects table
-      // project_type_id and project_modality_id go to project_data table
       const { name, code, status, ...projectDataPayload } = dataToSave;
 
       if (Object.keys(projectDataPayload).length === 0) return;
@@ -276,16 +267,6 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
         throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      queryClient.invalidateQueries({ queryKey: ['projects-lite'] });
-      toast({
-        title: "Cambios guardados",
-        description: "Los datos del proyecto se han guardado automáticamente"
-      });
-    },
     onError: (error: any) => {
       console.error('Error in saveProjectDataMutation:', error);
       toast({
@@ -296,7 +277,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     }
   });
 
-  // Auto-save hook - enabled ONLY after hydration is complete
+  // Auto-save hook - OPTIMIZED: Fire and forget (no await), optimistic updates via state
   const { isSaving } = useAutoSave({
     data: {
       name: projectName,
@@ -307,7 +288,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       description: description,
       internal_notes: internalNotes
     },
-    saveFn: (data) => saveProjectDataMutation.mutateAsync(data),
+    saveFn: async (data) => { saveProjectDataMutation.mutate(data); },
     delay: 3000,
     enabled: !!userData && isHydrated
   });
@@ -357,13 +338,15 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     staleTime: 25 * 60 * 1000,         // Consider stale after 25 minutes
   });
 
-  // Handlers for color changes (NO usar saveProjectColorMutation como dependencia para evitar loops)
+  // Handlers for color changes - OPTIMIZED with optimistic updates (fire-and-forget)
   const handlePaletteColorChange = useCallback((color: string) => {
+    // ⚡ PASO 1: Update state immediately (optimistic)
     setSelectedColor(color);
     setUseCustomColor(false);
     setCustomColorH(null);
     setCustomColorHex(null);
     
+    // ⚡ PASO 2: Fire and forget - update DB in background
     saveProjectColorMutation.mutate({
       color,
       use_custom_color: false,
@@ -373,6 +356,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
   }, []);
 
   const handleCustomColorChange = useCallback((params: { useCustom: boolean; hue: number | null; hex: string | null }) => {
+    // ⚡ PASO 1: Update state immediately (optimistic)
     setUseCustomColor(params.useCustom);
     setCustomColorH(params.hue);
     setCustomColorHex(params.hex);
@@ -381,6 +365,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       setSelectedColor(params.hex);
     }
     
+    // ⚡ PASO 2: Fire and forget - update DB in background
     saveProjectColorMutation.mutate({
       use_custom_color: params.useCustom,
       custom_color_h: params.hue,

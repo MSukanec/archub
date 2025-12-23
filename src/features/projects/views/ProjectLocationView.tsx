@@ -69,7 +69,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     enabled: !!activeProjectId && !!supabase
   });
 
-  // Auto-save mutation for project location
+  // Auto-save mutation for project location - OPTIMIZED (no invalidateQueries)
   const saveProjectLocationMutation = useMutation({
     mutationFn: async (dataToSave: any) => {
       if (!activeProjectId || !supabase) return;
@@ -90,14 +90,6 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
         throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      toast({
-        title: "Cambios guardados",
-        description: "La ubicación del proyecto se ha guardado automáticamente"
-      });
-    },
     onError: (error: any) => {
       console.error('Error in saveProjectLocationMutation:', error);
       toast({
@@ -108,7 +100,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     }
   });
 
-  // Auto-save hook - enabled ONLY after hydration is complete
+  // Auto-save hook - OPTIMIZED: Fire and forget (no await), instant state updates
   const { isSaving } = useAutoSave({
     data: {
       address_full: addressFull,
@@ -127,7 +119,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
         : {}),
       accessibility_notes: accessibilityNotes
     },
-    saveFn: (data) => saveProjectLocationMutation.mutateAsync(data),
+    saveFn: async (data) => { saveProjectLocationMutation.mutate(data); },
     delay: 3000,
     enabled: !!userData && isHydrated
   });
