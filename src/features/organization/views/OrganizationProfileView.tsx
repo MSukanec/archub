@@ -10,8 +10,8 @@ import { PhoneField } from '@/components/shared/fields/PhoneField';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
 
-import { useAutoSave } from '@/hooks/useAutoSave';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useSaveEngine } from '@/core/save-engine';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -77,8 +77,17 @@ export function OrganizationProfileView() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLogoUploading, setIsLogoUploading] = useState(false);
 
-  const saveOrganizationMutation = useMutation({
-    mutationFn: async (dataToSave: any) => {
+  const { isSaving, hasUnsavedChanges } = useSaveEngine({
+    data: {
+      name: organizationName,
+      description,
+      phone,
+      email,
+      website,
+      tax_id: taxId
+    },
+    queryKey: ['organization-data', organizationId],
+    saveFn: async (dataToSave) => {
       if (!organizationId || !supabase) return;
 
       if (dataToSave.name !== undefined) {
@@ -137,32 +146,16 @@ export function OrganizationProfileView() {
           if (error) throw error;
         }
       }
-    }
-  });
-
-  const { isSaving } = useAutoSave({
-    data: {
-      name: organizationName,
-      description,
-      phone,
-      email,
-      website,
-      tax_id: taxId
     },
-    saveFn: async (data) => {
-      await saveOrganizationMutation.mutateAsync(data);
-      
-      toast({
-        title: "Datos guardados",
-        description: "Los cambios se han guardado automáticamente",
-      });
-      
-      queryClient.invalidateQueries({ queryKey: ['organization-data', organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['organization-info', organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    },
-    delay: 750,
-    enabled: !!organizationId && isInitialized
+    delay: 1500,
+    enabled: !!organizationId && !!supabase && isInitialized,
+    additionalQueryKeys: [
+      ['organization-info', organizationId],
+      ['current-user']
+    ],
+    showSuccessToast: true,
+    successMessage: "Datos guardados",
+    errorMessage: "No se pudieron guardar los cambios",
   });
 
   useEffect(() => {

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { useAutoSave } from '@/hooks/useAutoSave'
+import { useSaveEngine } from '@/core/save-engine'
+import { useToast } from '@/hooks/use-toast'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -13,7 +13,6 @@ import { GooglePlacesAutocomplete, GoogleMap } from '@/components/shared/integra
 
 export function OrganizationLocationView() {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   
   const organizationId = userData?.organization?.id
@@ -57,8 +56,16 @@ export function OrganizationLocationView() {
     enabled: !!organizationId && !!supabase
   });
 
-  const saveOrganizationLocationMutation = useMutation({
-    mutationFn: async (dataToSave: any) => {
+  const { isSaving, hasUnsavedChanges } = useSaveEngine({
+    data: {
+      address: address,
+      city: city,
+      state: state,
+      country: country,
+      postal_code: postalCode,
+    },
+    queryKey: ['organization-data', organizationId],
+    saveFn: async (dataToSave) => {
       if (!organizationId || !supabase) return;
 
       const { data: existingData } = await supabase
@@ -73,10 +80,7 @@ export function OrganizationLocationView() {
           .update(dataToSave)
           .eq('organization_id', organizationId);
 
-        if (error) {
-          console.error('Error saving organization location:', error);
-          throw error;
-        }
+        if (error) throw error;
       } else {
         const { error } = await supabase
           .from('organization_data')
@@ -85,42 +89,15 @@ export function OrganizationLocationView() {
             ...dataToSave
           });
 
-        if (error) {
-          console.error('Error saving organization location:', error);
-          throw error;
-        }
+        if (error) throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization-data', organizationId] });
-      toast({
-        title: "Cambios guardados",
-        description: "La ubicación de la organización se ha guardado automáticamente"
-      });
-    },
-    onError: (error: any) => {
-      console.error('Error in saveOrganizationLocationMutation:', error);
-      toast({
-        title: "Error al guardar",
-        description: "No se pudieron guardar los cambios de ubicación",
-        variant: "destructive"
-      });
-    }
-  });
-
-  // Only save columns that exist in the organization_data table
-  // Core location fields (known to exist): address, city, state, country, postal_code
-  const { isSaving } = useAutoSave({
-    data: {
-      address: address,
-      city: city,
-      state: state,
-      country: country,
-      postal_code: postalCode,
-    },
-    saveFn: (data) => saveOrganizationLocationMutation.mutateAsync(data),
-    delay: 3000,
-    enabled: !!userData && isHydrated
+    delay: 2000,
+    enabled: !!organizationId && !!supabase && isHydrated,
+    additionalQueryKeys: [['current-user']],
+    showSuccessToast: true,
+    successMessage: "Ubicación guardada",
+    errorMessage: "No se pudo guardar la ubicación",
   });
 
   useEffect(() => {
