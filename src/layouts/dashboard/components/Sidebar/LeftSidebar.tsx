@@ -601,8 +601,8 @@ export function LeftSidebar() {
                   </div>
                 </PopoverTrigger>
                 <PopoverContent 
-                  side="bottom" 
-                  align="start"
+                  side="right" 
+                  align="end"
                   className="w-[200px] p-2"
                   sideOffset={8}
                 >
@@ -676,8 +676,8 @@ export function LeftSidebar() {
                   </div>
                 </PopoverTrigger>
                 <PopoverContent 
-                  side="bottom" 
-                  align="start"
+                  side="right" 
+                  align="end"
                   className="w-[380px] p-0"
                   sideOffset={8}
                 >
