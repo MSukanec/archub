@@ -68,8 +68,11 @@ src/features/projects/
 │   └── index.ts                     ✅ TypeScript types
 ├── views/
 │   ├── ProjectActivesView.tsx       ✅ Cards grid con filtros y data-testid
+│   ├── ProjectBasicDataView.tsx     ✅ Datos básicos del proyecto (imagen, info, color)
 │   ├── ProjectListView.tsx          ✅ Table con mobile responsiveness + data-testid
-│   └── ProjectSettingsView.tsx      ✅ Settings management
+│   ├── ProjectLocationView.tsx      ✅ Ubicación del proyecto (mapa, dirección)
+│   ├── ProjectSettingsView.tsx      ✅ Settings management
+│   └── ProjectVisionGeneralView.tsx ✅ Dashboard del proyecto con KPIs
 └── index.ts                         ✅ Barrel export
 ```
 
@@ -92,11 +95,12 @@ src/features/projects/
 ```
 Page (Orchestration)
   └─ Layout (Structure - DashboardLayout / LabLayout)
-      └─ View (Content - agnóstica al layout)
+      └─ View (Content - agnóstica al layout en src/features/{feature}/views/)
 ```
 
 - [x] `src/pages/projects/Projects.tsx` → LabLayout/DashboardLayout → ProjectActivesView/ProjectListView/ProjectSettingsView
 - [x] `src/pages/project/Project.tsx` → LabLayout/DashboardLayout → ProjectVisionGeneralView
+- [x] `src/pages/professional/project-data/ProjectData.tsx` → DashboardLayout → ProjectBasicDataView/ProjectLocationView/ProjectSettingsView
 
 ### 3.3 Performance ✅
 - [x] Optimistic updates en create/update (setQueryData no invalidate)
@@ -107,7 +111,9 @@ Page (Orchestration)
 
 ### 3.4 Data-Testid ✅
 - [x] ProjectActivesView: `container-project-actives`, `grid-projects`, `button-create-project-empty`
+- [x] ProjectBasicDataView: `input-project-name`, `input-project-code`, `textarea-description`, `textarea-internal-notes`
 - [x] ProjectListView: `container-project-list`, `list-projects-mobile`, `row-project-${id}`, `button-create-project-empty`
+- [x] ProjectLocationView: Location form inputs
 - [x] ProjectForm: Todos los inputs y buttons
 - [x] ProjectItemCard: Badges y botones
 - [x] ProjectVisionGeneralView: Hero section, badges, stats
