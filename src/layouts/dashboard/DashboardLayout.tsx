@@ -22,7 +22,7 @@ import { useContentBackground } from "@/hooks/use-content-background";
 import { FloatingAIChat } from "@/features/ai/components/FloatingAIChat";
 import { FloatingCourseLessons, CoursePlayerDrawerHost } from "@/features/learning";
 import { InvitationModal } from "@/features/users/modals/InvitationModal";
-import { OrganizationRemovedModal } from "@/features/organization/modals/OrganizationRemovedModal";
+import { OrganizationRemovedModal } from "@/features/legacy";
 import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 import { useProjectReadOnly } from "@/hooks/use-project-readonly";
 import { ProjectReadOnlyProvider } from "@/contexts/ProjectReadOnlyContext";
