@@ -69,7 +69,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     enabled: !!activeProjectId && !!supabase
   });
 
-  // Auto-save mutation for project location - OPTIMIZED (no invalidateQueries)
+  // Auto-save mutation for project location
   const saveProjectLocationMutation = useMutation({
     mutationFn: async (dataToSave: any) => {
       if (!activeProjectId || !supabase) return;
@@ -89,6 +89,10 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
         console.error('Error saving project location:', error);
         throw error;
       }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
     onError: (error: any) => {
       console.error('Error in saveProjectLocationMutation:', error);

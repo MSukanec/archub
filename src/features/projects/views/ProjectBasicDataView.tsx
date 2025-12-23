@@ -211,7 +211,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     deleteImageMutation.mutate();
   }, [deleteImageMutation]);
 
-  // Mutation to save project color - OPTIMIZED with optimistic updates
+  // Mutation to save project color
   const saveProjectColorMutation = useMutation({
     mutationFn: async (colorData: { color?: string; use_custom_color?: boolean; custom_color_h?: number | null; custom_color_hex?: string | null }) => {
       if (!activeProjectId || !supabase) return;
@@ -226,6 +226,10 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
         throw error;
       }
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
     onError: (error: any) => {
       console.error('Error in saveProjectColorMutation:', error);
       toast({
@@ -236,7 +240,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     }
   });
 
-  // Auto-save mutation for project data - OPTIMIZED with optimistic updates
+  // Auto-save mutation for project data
   const saveProjectDataMutation = useMutation({
     mutationFn: async (dataToSave: any) => {
       if (!activeProjectId || !supabase) return;
@@ -279,6 +283,11 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
         console.error('Error saving project data:', error);
         throw error;
       }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
+      queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
     onError: (error: any) => {
       console.error('Error in saveProjectDataMutation:', error);
