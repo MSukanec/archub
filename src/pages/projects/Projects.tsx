@@ -21,14 +21,6 @@ export default function Projects() {
   const layoutPreference = userData?.preferences?.layout || 'experimental';
   const isLabLayout = layoutPreference === 'lab';
 
-  const headerProps = {
-    title: "Gestión de Proyectos",
-    description: "Administra todos los proyectos de tu organización desde un solo lugar",
-    icon: Folder,
-    organizationId,
-    showMembers: true,
-  };
-
   const renderView = () => {
     switch (activeTab) {
       case 'actives':
@@ -57,27 +49,24 @@ export default function Projects() {
     );
   }
 
+  const headerTabs = PROJECTS_TABS.map(tab => ({
+    ...tab,
+    isActive: activeTab === tab.id
+  }));
+
+  const headerProps = {
+    title: "Gestión de Proyectos",
+    description: "Administra todos los proyectos de tu organización desde un solo lugar",
+    icon: Folder,
+    organizationId,
+    showMembers: true,
+    tabs: headerTabs,
+    onTabChange: (tabId: string) => setActiveTab(tabId),
+  };
+
   return (
     <Layout headerProps={headerProps} wide={false}>
-      <div className="space-y-6">
-        <div className="flex items-center gap-1">
-          {PROJECTS_TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-              }`}
-              data-testid={`tab-${tab.id}`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-        {renderView()}
-      </div>
+      {renderView()}
     </Layout>
   );
 }
