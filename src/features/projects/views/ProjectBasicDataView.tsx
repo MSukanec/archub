@@ -137,12 +137,15 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       return uploadResult.file_url;
     },
     onSuccess: (data) => {
-      // ⚡ OPTIMISTIC UPDATE: Update project-data cache immediately with new image metadata
+      // ⚡ OPTIMISTIC UPDATE: Update project-data cache AND image URL query cache
       queryClient.setQueryData(['project-data', activeProjectId], (oldData: any) => ({
         ...oldData,
         image_bucket: 'social-assets', // hardcoded in uploadProjectImage function
         image_path: data.file_path,
       }));
+
+      // ⚡ Also update the image URL query cache directly
+      queryClient.setQueryData(['project-image-url', activeProjectId, 'social-assets', data.file_path], data.file_url);
 
       toast({
         title: "Éxito",
@@ -287,7 +290,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     }
   });
 
-  // Auto-save hook - OPTIMIZED: Fire and forget (no await), optimistic updates via state
+  // Auto-save hook - Use mutateAsync to properly wait for mutation completion
   const { isSaving } = useAutoSave({
     data: {
       name: projectName,
@@ -298,7 +301,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       description: description,
       internal_notes: internalNotes
     },
-    saveFn: async (data) => { saveProjectDataMutation.mutate(data); },
+    saveFn: (data) => saveProjectDataMutation.mutateAsync(data),
     delay: 3000,
     enabled: !!userData && isHydrated
   });

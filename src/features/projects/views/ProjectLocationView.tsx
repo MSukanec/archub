@@ -100,7 +100,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     }
   });
 
-  // Auto-save hook - OPTIMIZED: Fire and forget (no await), instant state updates
+  // Auto-save hook - Use mutateAsync to properly wait for mutation completion
   const { isSaving } = useAutoSave({
     data: {
       address_full: addressFull,
@@ -119,7 +119,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
         : {}),
       accessibility_notes: accessibilityNotes
     },
-    saveFn: async (data) => { saveProjectLocationMutation.mutate(data); },
+    saveFn: (data) => saveProjectLocationMutation.mutateAsync(data),
     delay: 3000,
     enabled: !!userData && isHydrated
   });
