@@ -34,7 +34,7 @@ function LabLayoutInner({
   children, 
   showToolbar = true,
   showSecondaryToolbar = true,
-  showSearch = false,
+  showSearch = true,
   organizationId,
   showMembers = true,
   tabs = [],

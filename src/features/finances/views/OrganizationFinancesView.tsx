@@ -101,47 +101,6 @@ export function OrganizationFinancesView({ activeTab, onTabChange }: Organizatio
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between gap-4">
-        {activeTab === "dashboard" && (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              className="bg-accent text-white hover:bg-accent/90 rounded-lg px-3 py-1.5 gap-2 text-sm font-medium shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 inline-flex items-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
-              data-testid="select-period"
-            >
-              <Calendar className="h-4 w-4" />
-              <span>{PERIOD_OPTIONS.find(opt => opt.value === validSelectedPeriod)?.label || 'Período'}</span>
-              <ChevronDown className="h-4 w-4" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-[180px]">
-              {PERIOD_OPTIONS.map((option) => {
-                const isAvailable = availablePeriods[option.value];
-                return (
-                  <DropdownMenuItem 
-                    key={option.value}
-                    onClick={() => isAvailable && setSelectedPeriod(option.value)}
-                    disabled={!isAvailable}
-                    className={validSelectedPeriod === option.value ? "font-medium text-black dark:text-white" : ""}
-                    data-testid={`option-period-${option.value}`}
-                  >
-                    {option.label}
-                    {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-        {activeTab === "movements" && (
-          <Button
-            onClick={handleAddMovement}
-            className="h-8 px-3 text-xs"
-            data-testid="button-add-movement"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Nuevo Movimiento
-          </Button>
-        )}
-      </div>
 
       {dataHealth.result?.issues && dataHealth.result.issues.length > 0 && (
         <DataHealthAlertMulti
