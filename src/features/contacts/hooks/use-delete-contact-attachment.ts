@@ -1,29 +1,18 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { deleteContactAttachment } from '../services';
 import { CONTACT_ATTACHMENT_QUERY_KEYS, CONTACT_QUERY_KEYS } from '../constants';
-import { useToast } from '@/hooks/use-toast';
 
 export function useDeleteContactAttachment() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: (attachmentId: string) => deleteContactAttachment(attachmentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CONTACT_ATTACHMENT_QUERY_KEYS.all });
-      queryClient.invalidateQueries({ queryKey: CONTACT_QUERY_KEYS.all });
-      
-      toast({
-        title: "Éxito",
-        description: "Adjunto eliminado correctamente",
-      });
+    queryKey: CONTACT_ATTACHMENT_QUERY_KEYS.all,
+    optimisticUpdate: (oldData, attachmentId) => {
+      if (!oldData) return oldData;
+      if (!Array.isArray(oldData)) return oldData;
+      return oldData.filter((a: any) => a.id !== attachmentId);
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    additionalQueryKeys: [CONTACT_QUERY_KEYS.all],
+    onSuccessMessage: 'Adjunto eliminado correctamente',
+    onErrorMessage: 'No se pudo eliminar el adjunto',
   });
 }

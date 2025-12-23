@@ -1,6 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createContact } from '../services';
-import { upsertContactTypeLinks } from '../services';
+import { useOptimisticMutation } from '@/core/save-engine';
+import { createContact, upsertContactTypeLinks } from '../services';
 import { CONTACT_QUERY_KEYS } from '../constants';
 import type { ContactInput } from '../types';
 
@@ -8,10 +7,13 @@ interface CreateContactInput extends ContactInput {
   contact_type_ids?: string[];
 }
 
-export function useCreateContact(organizationId: string) {
-  const queryClient = useQueryClient();
+interface CreateContactParams {
+  organizationId: string;
+  input: CreateContactInput;
+}
 
-  return useMutation({
+export function useCreateContact(organizationId: string) {
+  return useOptimisticMutation({
     mutationFn: async (input: CreateContactInput) => {
       const { contact_type_ids, ...contactData } = input;
       const contact = await createContact(organizationId, contactData);
@@ -22,8 +24,12 @@ export function useCreateContact(organizationId: string) {
 
       return contact;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CONTACT_QUERY_KEYS.lists() });
+    queryKey: CONTACT_QUERY_KEYS.lists(),
+    optimisticUpdate: (oldData) => {
+      if (!oldData) return oldData;
+      return oldData;
     },
+    onSuccessMessage: 'Contacto creado',
+    onErrorMessage: 'No se pudo crear el contacto',
   });
 }

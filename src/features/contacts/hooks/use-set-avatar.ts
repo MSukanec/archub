@@ -1,17 +1,17 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { setContactAvatar } from '../services';
 import { CONTACT_QUERY_KEYS } from '../constants';
 
 export function useSetContactAvatar(organizationId: string, contactId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: (attachmentId: string) => setContactAvatar(contactId, attachmentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CONTACT_QUERY_KEYS.lists() });
-      queryClient.invalidateQueries({ 
-        queryKey: CONTACT_QUERY_KEYS.detail(organizationId, contactId) 
-      });
+    queryKey: CONTACT_QUERY_KEYS.lists(),
+    optimisticUpdate: (oldData) => {
+      if (!oldData) return oldData;
+      return oldData;
     },
+    additionalQueryKeys: [CONTACT_QUERY_KEYS.detail(organizationId, contactId)],
+    onSuccessMessage: 'Avatar actualizado',
+    onErrorMessage: 'No se pudo actualizar el avatar',
   });
 }

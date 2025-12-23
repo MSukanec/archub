@@ -1,15 +1,17 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { createContactType } from '../services';
 import { CONTACT_TYPE_QUERY_KEYS } from '../constants';
 import type { ContactTypeInput } from '../types';
 
 export function useCreateContactType(organizationId: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: (input: ContactTypeInput) => createContactType(organizationId, input),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CONTACT_TYPE_QUERY_KEYS.lists() });
+    queryKey: CONTACT_TYPE_QUERY_KEYS.lists(),
+    optimisticUpdate: (oldData) => {
+      if (!oldData) return oldData;
+      return oldData;
     },
+    onSuccessMessage: 'Tipo de contacto creado',
+    onErrorMessage: 'No se pudo crear el tipo de contacto',
   });
 }

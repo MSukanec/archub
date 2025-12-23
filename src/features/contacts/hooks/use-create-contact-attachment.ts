@@ -1,7 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { uploadContactAttachment } from '../services';
 import { CONTACT_ATTACHMENT_QUERY_KEYS, CONTACT_QUERY_KEYS } from '../constants';
-import { useToast } from '@/hooks/use-toast';
 import type { ContactAttachmentInput } from '../types';
 
 interface CreateAttachmentParams {
@@ -13,10 +12,7 @@ interface CreateAttachmentParams {
 }
 
 export function useCreateContactAttachment() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: async ({ contactId, file, category, createdBy, metadata }: CreateAttachmentParams) => {
       const input: ContactAttachmentInput = {
         file,
@@ -25,21 +21,13 @@ export function useCreateContactAttachment() {
       };
       return uploadContactAttachment(contactId, input, createdBy);
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: CONTACT_ATTACHMENT_QUERY_KEYS.list(data.contact_id) });
-      queryClient.invalidateQueries({ queryKey: CONTACT_QUERY_KEYS.all });
-      
-      toast({
-        title: "Éxito",
-        description: "Adjunto subido correctamente",
-      });
+    queryKey: CONTACT_ATTACHMENT_QUERY_KEYS.all,
+    optimisticUpdate: (oldData) => {
+      if (!oldData) return oldData;
+      return oldData;
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+    additionalQueryKeys: [CONTACT_QUERY_KEYS.all],
+    onSuccessMessage: 'Adjunto subido correctamente',
+    onErrorMessage: 'No se pudo subir el adjunto',
   });
 }
