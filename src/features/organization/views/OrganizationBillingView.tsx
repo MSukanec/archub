@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { useProjectContext } from '@/stores/projectContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
@@ -250,46 +251,32 @@ export function OrganizationBillingView() {
     enabled: !!currentOrganizationId && isTeamsPlan,
   });
 
-  const cancelSubscriptionMutation = useMutation({
+  const cancelSubscriptionMutation = useOptimisticMutation({
     mutationFn: async (subscriptionId: string) => {
       return await apiRequest('POST', `/api/subscriptions/${subscriptionId}/cancel`);
     },
-    onSuccess: () => {
-      toast({
-        title: 'Suscripción cancelada',
-        description: 'Tu suscripción ha sido cancelada. Mantendrás acceso hasta la fecha de expiración.',
-      });
-      queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
-      queryClient.invalidateQueries({ queryKey: ['subscription-payments', currentOrganizationId] });
+    queryKey: ['current-subscription', currentOrganizationId],
+    optimisticUpdate: (oldData, _subscriptionId) => {
+      if (!oldData) return oldData;
+      return { ...oldData, status: 'cancelled' };
     },
-    onError: (error: any) => {
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo cancelar la suscripción',
-        variant: 'destructive',
-      });
-    },
+    onSuccessMessage: 'Suscripción cancelada. Mantendrás acceso hasta la fecha de expiración.',
+    onErrorMessage: 'No se pudo cancelar la suscripción',
+    additionalQueryKeys: [['subscription-payments', currentOrganizationId]],
   });
 
-  const cancelScheduledDowngradeMutation = useMutation({
+  const cancelScheduledDowngradeMutation = useOptimisticMutation<unknown, void>({
     mutationFn: async () => {
       return await apiRequest('DELETE', '/api/subscriptions/cancel-scheduled-downgrade');
     },
-    onSuccess: () => {
-      toast({
-        title: 'Cambio cancelado',
-        description: 'El cambio de plan programado ha sido cancelado. Tu suscripción continuará como hasta ahora.',
-      });
-      queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
-      queryClient.invalidateQueries({ queryKey: ['/api/current-user'] });
+    queryKey: ['current-subscription', currentOrganizationId],
+    optimisticUpdate: (oldData) => {
+      if (!oldData) return oldData;
+      return { ...oldData, scheduled_downgrade_plan_id: null, scheduled_downgrade_plan: null };
     },
-    onError: (error: any) => {
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo cancelar el cambio programado',
-        variant: 'destructive',
-      });
-    },
+    onSuccessMessage: 'El cambio de plan programado ha sido cancelado.',
+    onErrorMessage: 'No se pudo cancelar el cambio programado',
+    additionalQueryKeys: [['/api/current-user']],
   });
 
   const planName = organization?.plans?.name || subscription?.plans?.name || 'Free';

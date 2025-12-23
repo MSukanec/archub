@@ -31,7 +31,7 @@ import MemberRow from "@/features/users/components/MemberRow";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
+import { useOptimisticMutation } from "@/core/save-engine";
 import { useGlobalModalStore } from "@/components/modal";
 import { useMobile } from "@/hooks/use-mobile";
 import { useLocation } from "wouter";
@@ -236,31 +236,22 @@ export function OrganizationMembersListView() {
 
   const formerMembers = formerMembersRaw;
 
-  const revokeInviteMutation = useMutation({
+  const revokeInviteMutation = useOptimisticMutation({
     mutationFn: async (invitationId: string) => {
       if (!supabase) throw new Error('Supabase not initialized');
-      
       const { error } = await supabase
         .from('organization_invitations')
         .delete()
         .eq('id', invitationId);
-      
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization-invitations', organizationId] });
-      toast({
-        title: 'Invitación revocada',
-        description: 'La invitación ha sido eliminada correctamente.',
-      });
+    queryKey: ['organization-invitations', organizationId],
+    optimisticUpdate: (oldData, invitationId) => {
+      if (!oldData) return oldData;
+      return oldData.filter((inv: any) => inv.id !== invitationId);
     },
-    onError: (error: any) => {
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo revocar la invitación',
-        variant: 'destructive',
-      });
-    },
+    onSuccessMessage: 'Invitación revocada correctamente',
+    onErrorMessage: 'No se pudo revocar la invitación',
   });
 
   const resendInviteMutation = useMutation({
@@ -272,10 +263,9 @@ export function OrganizationMembersListView() {
     },
   });
 
-  const removeMemberMutation = useMutation({
+  const removeMemberMutation = useOptimisticMutation({
     mutationFn: async (memberId: string) => {
       if (!organizationId) throw new Error('Organization not found');
-      
       const response = await fetch(`/api/organizations/${organizationId}/members/${memberId}`, {
         method: 'DELETE',
         headers: {
@@ -283,31 +273,20 @@ export function OrganizationMembersListView() {
           'Authorization': `Bearer ${(await supabase?.auth.getSession())?.data.session?.access_token}`,
         },
       });
-      
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Failed to remove member');
       }
-      
       return response.json();
     },
-    onSuccess: (data) => {
-      toast({
-        title: "Miembro eliminado",
-        description: data.enrollmentSuspended 
-          ? "El miembro ha sido eliminado y su acceso al curso bonus ha sido suspendido."
-          : "El miembro ha sido eliminado de la organización.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['organization-members-full'] });
-      queryClient.invalidateQueries({ queryKey: ['organization-members'] });
+    queryKey: ['organization-members-full', organizationId],
+    optimisticUpdate: (oldData, memberId) => {
+      if (!oldData) return oldData;
+      return oldData.filter((m: any) => m.id !== memberId);
     },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Error al eliminar el miembro",
-        variant: "destructive",
-      });
-    },
+    onSuccessMessage: 'Miembro eliminado correctamente',
+    onErrorMessage: 'Error al eliminar el miembro',
+    additionalQueryKeys: [['organization-members']],
   });
 
   const handleRemoveMember = (member: any) => {

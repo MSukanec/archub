@@ -1,9 +1,9 @@
 import { useState, useEffect, Fragment } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Shield, ShieldAlert, Loader2, Save, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useToast } from '@/hooks/use-toast';
-import { queryClient, apiRequest } from '@/lib/queryClient';
+import { apiRequest } from '@/lib/queryClient';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
@@ -194,7 +194,6 @@ function getPermissionInfo(key: string): { label: string; description: string } 
 }
 
 export function OrganizationPermissionsView() {
-  const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   
@@ -227,25 +226,24 @@ export function OrganizationPermissionsView() {
     }
   }, [data?.permissionsByCategory]);
 
-  const updatePermissionsMutation = useMutation({
+  const updatePermissionsMutation = useOptimisticMutation({
     mutationFn: async ({ roleId, permissionIds }: { roleId: string; permissionIds: string[] }) => {
       return apiRequest('PUT', `/api/roles/${roleId}/permissions`, { permissionIds, organizationId });
     },
-    onSuccess: () => {
-      toast({
-        title: 'Permisos actualizados',
-        description: 'Los cambios se han guardado correctamente.',
-      });
-      setHasChanges(false);
-      queryClient.invalidateQueries({ queryKey: [`/api/organizations/${organizationId}/roles-permissions`] });
+    queryKey: [`/api/organizations/${organizationId}/roles-permissions`],
+    optimisticUpdate: (oldData, { roleId, permissionIds }) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        roles: oldData.roles?.map((role: any) => 
+          role.id === roleId 
+            ? { ...role, permissionIds }
+            : role
+        ),
+      };
     },
-    onError: (error: any) => {
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudieron guardar los cambios.',
-        variant: 'destructive',
-      });
-    },
+    onSuccessMessage: 'Permisos actualizados correctamente',
+    onErrorMessage: 'No se pudieron guardar los cambios',
   });
 
   const handlePermissionToggle = (roleId: string, permissionId: string) => {
@@ -302,6 +300,8 @@ export function OrganizationPermissionsView() {
         });
       }
     }
+    
+    setHasChanges(false);
   };
 
   const toggleCategory = (category: string) => {

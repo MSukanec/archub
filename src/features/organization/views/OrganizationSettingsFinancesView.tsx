@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
 import { Coins, Wallet } from 'lucide-react';
 
 import { Label } from '@/components/ui/label';
@@ -10,9 +9,8 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies';
 import { useAllWallets } from '@/hooks/use-wallets';
 import { useOrganizationWallets } from '@/features/organization';
-import { useToast } from '@/hooks/use-toast';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { supabase } from '@/lib/supabase';
-import { queryClient } from '@/lib/queryClient';
 
 export function OrganizationSettingsFinancesView() {
   const { data: userData } = useCurrentUser();
@@ -20,7 +18,6 @@ export function OrganizationSettingsFinancesView() {
   const { data: organizationCurrencies } = useOrganizationCurrencies(userData?.organization?.id);
   const { data: allWallets } = useAllWallets();
   const { data: organizationWallets } = useOrganizationWallets(userData?.organization?.id);
-  const { toast } = useToast();
 
   const [defaultCurrency, setDefaultCurrency] = useState<string>('');
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
@@ -55,15 +52,13 @@ export function OrganizationSettingsFinancesView() {
   }, [organizationWallets]);
 
 
-  const saveDefaultCurrencyMutation = useMutation({
+  const saveDefaultCurrencyMutation = useOptimisticMutation({
     mutationFn: async (currencyId: string) => {
       const { error } = await supabase
         .from('organization_currencies')
         .update({ is_default: false })
         .eq('organization_id', userData?.organization?.id);
-      
       if (error) throw error;
-
       const { error: error2 } = await supabase
         .from('organization_currencies')
         .upsert({
@@ -71,44 +66,32 @@ export function OrganizationSettingsFinancesView() {
           currency_id: currencyId,
           is_default: true,
           is_active: true
-        }, {
-          onConflict: 'organization_id,currency_id'
-        });
-
+        }, { onConflict: 'organization_id,currency_id' });
       if (error2) throw error2;
     },
-    onSuccess: () => {
-      toast({ title: 'Moneda por defecto actualizada', description: 'La configuración se ha guardado exitosamente.' });
-      queryClient.invalidateQueries({ queryKey: ['organization-currencies', userData?.organization?.id] });
-      queryClient.invalidateQueries({ queryKey: ['organization-default-currency', userData?.organization?.id] });
+    queryKey: ['organization-currencies', userData?.organization?.id],
+    optimisticUpdate: (oldData, currencyId) => {
+      if (!oldData) return oldData;
+      return oldData.map((c: any) => ({
+        ...c,
+        is_default: c.currency_id === currencyId
+      }));
     },
-    onError: (error) => {
-      toast({ 
-        title: 'Error', 
-        description: 'No se pudo actualizar la moneda por defecto.',
-        variant: 'destructive'
-      });
-    }
+    onSuccessMessage: 'Moneda por defecto actualizada',
+    onErrorMessage: 'No se pudo actualizar la moneda por defecto',
+    additionalQueryKeys: [['organization-default-currency', userData?.organization?.id]],
   });
 
-  const saveDefaultWalletMutation = useMutation({
+  const saveDefaultWalletMutation = useOptimisticMutation({
     mutationFn: async (walletId: string) => {
-      if (!userData?.organization?.id) {
-        throw new Error('No se encontró la organización');
-      }
-
-      if (!walletId) {
-        throw new Error('Se debe seleccionar una billetera válida');
-      }
-
+      if (!userData?.organization?.id) throw new Error('No se encontró la organización');
+      if (!walletId) throw new Error('Se debe seleccionar una billetera válida');
       const { error: updateError } = await supabase
         .from('organization_wallets')
         .update({ is_default: false })
         .eq('organization_id', userData.organization.id)
         .eq('is_default', true);
-      
       if (updateError) throw updateError;
-
       const { error: upsertError } = await supabase
         .from('organization_wallets')
         .upsert({
@@ -118,24 +101,21 @@ export function OrganizationSettingsFinancesView() {
           is_default: true,
         }, { onConflict: 'organization_id,wallet_id' })
         .select();
-
       if (upsertError) throw upsertError;
     },
-    onSuccess: () => {
-      toast({ title: 'Billetera por defecto actualizada', description: 'La configuración se ha guardado exitosamente.' });
-      queryClient.invalidateQueries({ queryKey: ['organization-wallets', userData?.organization?.id] });
+    queryKey: ['organization-wallets', userData?.organization?.id],
+    optimisticUpdate: (oldData, walletId) => {
+      if (!oldData) return oldData;
+      return oldData.map((w: any) => ({
+        ...w,
+        is_default: w.wallet_id === walletId
+      }));
     },
-    onError: (error) => {
-      const errorMessage = error instanceof Error ? error.message : 'No se pudo actualizar la billetera por defecto.';
-      toast({ 
-        title: 'Error al actualizar billetera', 
-        description: errorMessage,
-        variant: 'destructive'
-      });
-    }
+    onSuccessMessage: 'Billetera por defecto actualizada',
+    onErrorMessage: 'No se pudo actualizar la billetera por defecto',
   });
 
-  const updateSecondaryCurrenciesMutation = useMutation({
+  const updateSecondaryCurrenciesMutation = useOptimisticMutation({
     mutationFn: async (currencyIds: string[]) => {
       const orgId = userData?.organization?.id;
       if (!orgId) throw new Error('Organización no encontrada');
@@ -146,7 +126,6 @@ export function OrganizationSettingsFinancesView() {
       const currenciesToRemove = currentSecondaryIds.filter(id => !currencyIds.includes(id));
       const currenciesToAdd = currencyIds.filter(id => !currentSecondaryIds.includes(id));
       
-      // Soft-delete currencies being removed
       if (currenciesToRemove.length > 0) {
         const { data: movementsUsingCurrency, error: checkError } = await supabase
           .from('movements')
@@ -176,9 +155,7 @@ export function OrganizationSettingsFinancesView() {
         if (softDeleteError) throw softDeleteError;
       }
 
-      // Add new currencies (or reactivate soft-deleted ones)
       for (const currencyId of currenciesToAdd) {
-        // Check if this currency was previously soft-deleted
         const { data: existingRecord } = await supabase
           .from('organization_currencies')
           .select('id, is_deleted')
@@ -187,7 +164,6 @@ export function OrganizationSettingsFinancesView() {
           .single();
         
         if (existingRecord) {
-          // Reactivate the soft-deleted record
           const { error: reactivateError } = await supabase
             .from('organization_currencies')
             .update({ 
@@ -199,7 +175,6 @@ export function OrganizationSettingsFinancesView() {
           
           if (reactivateError) throw reactivateError;
         } else {
-          // Insert new record
           const { error: insertError } = await supabase
             .from('organization_currencies')
             .insert({
@@ -214,23 +189,16 @@ export function OrganizationSettingsFinancesView() {
         }
       }
     },
-    onSuccess: () => {
-      toast({ 
-        title: 'Monedas secundarias actualizadas', 
-        description: 'La configuración de monedas se ha guardado exitosamente.' 
-      });
-      queryClient.invalidateQueries({ queryKey: ['organization-currencies', userData?.organization?.id] });
+    queryKey: ['organization-currencies', userData?.organization?.id],
+    optimisticUpdate: (oldData, currencyIds) => {
+      if (!oldData) return oldData;
+      return oldData;
     },
-    onError: (error: any) => {
-      toast({ 
-        title: 'No se puede eliminar', 
-        description: error.message || 'No se pudieron actualizar las monedas secundarias.',
-        variant: 'destructive'
-      });
-    }
+    onSuccessMessage: 'Monedas secundarias actualizadas',
+    onErrorMessage: 'No se pudieron actualizar las monedas secundarias',
   });
 
-  const updateSecondaryWalletsMutation = useMutation({
+  const updateSecondaryWalletsMutation = useOptimisticMutation({
     mutationFn: async (walletIds: string[]) => {
       const orgId = userData?.organization?.id;
       if (!orgId) throw new Error('Organización no encontrada');
@@ -241,7 +209,6 @@ export function OrganizationSettingsFinancesView() {
       const walletsToRemove = currentSecondary.filter(w => !walletIds.includes(w.wallet_id));
       const walletIdsToAdd = walletIds.filter(id => !currentSecondaryIds.includes(id));
       
-      // Soft-delete wallets being removed
       if (walletsToRemove.length > 0) {
         const walletIdsToCheck = walletsToRemove.map(w => w.id);
         
@@ -272,9 +239,7 @@ export function OrganizationSettingsFinancesView() {
         if (softDeleteError) throw softDeleteError;
       }
 
-      // Add new wallets (or reactivate soft-deleted ones)
       for (const walletId of walletIdsToAdd) {
-        // Check if this wallet was previously soft-deleted
         const { data: existingRecord } = await supabase
           .from('organization_wallets')
           .select('id, is_deleted')
@@ -283,7 +248,6 @@ export function OrganizationSettingsFinancesView() {
           .single();
         
         if (existingRecord) {
-          // Reactivate the soft-deleted record
           const { error: reactivateError } = await supabase
             .from('organization_wallets')
             .update({ 
@@ -295,7 +259,6 @@ export function OrganizationSettingsFinancesView() {
           
           if (reactivateError) throw reactivateError;
         } else {
-          // Insert new record
           const { error: insertError } = await supabase
             .from('organization_wallets')
             .insert({
@@ -310,20 +273,13 @@ export function OrganizationSettingsFinancesView() {
         }
       }
     },
-    onSuccess: () => {
-      toast({ 
-        title: 'Billeteras secundarias actualizadas', 
-        description: 'La configuración de billeteras se ha guardado exitosamente.' 
-      });
-      queryClient.invalidateQueries({ queryKey: ['organization-wallets', userData?.organization?.id] });
+    queryKey: ['organization-wallets', userData?.organization?.id],
+    optimisticUpdate: (oldData, walletIds) => {
+      if (!oldData) return oldData;
+      return oldData;
     },
-    onError: (error: any) => {
-      toast({ 
-        title: 'No se puede eliminar', 
-        description: error.message || 'No se pudieron actualizar las billeteras secundarias.',
-        variant: 'destructive'
-      });
-    }
+    onSuccessMessage: 'Billeteras secundarias actualizadas',
+    onErrorMessage: 'No se pudieron actualizar las billeteras secundarias',
   });
 
 
