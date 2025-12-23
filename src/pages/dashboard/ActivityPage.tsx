@@ -5,9 +5,9 @@ import { useLocation } from 'wouter';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
-import ActivityLogs from './ActivityLogs';
+import { OrganizationActivityLogsView } from '@/features/organization';
 
-export default function Activity() {
+export function ActivityPage() {
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const [location] = useLocation();
@@ -65,7 +65,7 @@ export default function Activity() {
 
   return (
     <Layout headerProps={headerProps} wide={false}>
-      {activeTab === 'Registro' && <ActivityLogs organizationId={organizationId} />}
+      {activeTab === 'Registro' && <OrganizationActivityLogsView organizationId={organizationId} />}
     </Layout>
   );
 }

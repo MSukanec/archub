@@ -64,7 +64,7 @@ import Profile from "@/pages/profile/Profile";
 import Onboarding from "@/pages/public/Onboarding";
 import SelectMode from "@/pages/public/SelectMode";
 import Home from "@/pages/Home";
-import Activity from "@/pages/activity/Activity";
+import { ActivityPage } from "@/pages/dashboard/ActivityPage";
 
 // Lab Pages (Lazy Loaded - experimental POCs)
 const FinancialLatticePage = lazy(() => import("@/pages/lab/FinancialLatticePage"));
@@ -125,7 +125,6 @@ import PricingPlan from "@/pages/settings/PricingPlan";
 import Billing from "@/pages/billing/Billing";
 import { OrganizationMembersPage } from "@/pages/dashboard/OrganizationMembersPage";
 import Capital from "@/pages/capital/Capital";
-import OrganizationActivity from "@/pages/settings/OrganizationActivity";
 
 // User Page
 import User from "@/pages/user/User";
@@ -191,7 +190,7 @@ function Router() {
         {/* Organization Routes - ORDEN IMPORTANTE: rutas específicas primero */}
         <Route path="/organization/dashboard" component={OrganizationDashboardPage} />
         <Route path="/organization/basic-data" component={OrganizationDataPage} />
-        <Route path="/organization/activity" component={Activity} />
+        <Route path="/organization/activity" component={ActivityPage} />
         <Route path="/organization/founders-portal">
           <Suspense fallback={<LazyLoadFallback />}>
             <FoundersPortalPage />
@@ -256,7 +255,6 @@ function Router() {
         <Route path="/organization/settings" component={OrganizationSettingsPage} />
         <Route path="/organization/members" component={OrganizationMembersPage} />
         <Route path="/organization/capital" component={Capital} />
-        <Route path="/settings/organization-activity" component={OrganizationActivity} />
         <Route path="/settings/pricing-plan" component={PricingPlan} />
         
         {/* User Page */}

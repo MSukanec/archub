@@ -26,3 +26,4 @@ export { OrganizationSettingsFinancesView } from './views/OrganizationSettingsFi
 export { OrganizationSettingsPdfView } from './views/OrganizationSettingsPdfView';
 export { OrganizationMembersListView } from './views/OrganizationMembersListView';
 export { OrganizationPermissionsView } from './views/OrganizationPermissionsView';
+export { OrganizationActivityLogsView } from './views/OrganizationActivityLogsView';

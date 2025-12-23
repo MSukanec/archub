@@ -14,11 +14,11 @@ import { getOrganizationActivityLogs } from '@/features/organization/services/ge
 import { getActivityDisplayInfo } from '@/features/organization/utils';
 import type { ActivityLog } from '@/features/organization/types';
 
-interface ActivityLogsProps {
+interface OrganizationActivityLogsViewProps {
   organizationId: string;
 }
 
-export default function ActivityLogs({ organizationId }: ActivityLogsProps) {
+export function OrganizationActivityLogsView({ organizationId }: OrganizationActivityLogsViewProps) {
   const [, navigate] = useLocation();
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
