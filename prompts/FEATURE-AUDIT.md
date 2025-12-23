@@ -8,30 +8,33 @@
 ## TABLA DE CONTENIDOS
 
 1. [Objetivo](#objetivo)
-2. [Cómo Usar Este Prompt](#cómo-usar-este-prompt)
-3. [Reglas de Seguridad](#reglas-de-seguridad-crítico)
-4. [Contexto Técnico](#contexto-técnico-asumido)
-5. [Auditoría Completa](#auditoría-completa-no-saltear-nada)
-   - 5.1 [Mapa del Feature](#1-mapa-del-feature)
-   - 5.2 [Arquitectura de Features](#2-auditoría-de-arquitectura-de-features)
-   - 5.3 [Ubicación y Duplicados](#3-auditoría-de-ubicación-de-archivos-y-duplicados-crítico)
-   - 5.4 [Páginas (3 Capas)](#4-auditoría-de-páginas-3-capas)
-   - 5.5 [Formularios (Forms)](#5-auditoría-de-formularios-forms)
-   - 5.6 [Modales](#6-auditoría-de-modales)
-   - 5.7 [Drawers](#7-auditoría-de-drawers)
-   - 5.8 [Uploads/Storage](#8-auditoría-de-uploadsstorage)
-   - 5.9 [Delete/Replace Pattern](#9-auditoría-de-deletereplace-pattern)
-   - 5.10 [Base de Datos](#10-auditoría-de-base-de-datos-supabase)
-   - 5.11 [Frontend](#11-auditoría-de-frontend)
-   - 5.12 [Calidad/Robustez](#12-auditoría-de-calidad--robustez)
-   - 5.13 [Refactorización (Tablas, Badges, Headers)](#13-auditoría-de-refactorización-tablas-badges-headers)
-   - 5.14 [Quality Gates (Testing)](#14-auditoría-de-quality-gates-testing)
-   - 5.15 [Accesibilidad e i18n](#15-auditoría-de-accesibilidad-e-i18n)
-   - 5.16 [Production Readiness](#16-auditoría-de-production-readiness)
-6. [Entregables Obligatorios](#entregables-obligatorios)
-7. [Condición Final](#condición-final-cerrado)
-8. [Guías de Sistemas Específicos](#guías-de-sistemas-específicos)
-9. [Reglas para Prompts Externos](#reglas-para-prompts-externos-gpt-otras-ias)
+2. [Fuera de Alcance](#fuera-de-alcance-de-esta-auditoría)
+3. [Cómo Usar Este Prompt](#cómo-usar-este-prompt)
+4. [Reglas de Seguridad](#reglas-de-seguridad-crítico)
+5. [Regla de STOP (Bloqueo)](#regla-de-stop-bloqueo-de-auditoría)
+6. [Contexto Técnico](#contexto-técnico-asumido)
+7. [Auditoría Completa](#auditoría-completa-no-saltear-nada)
+   - 7.1 [Mapa del Feature](#1-mapa-del-feature)
+   - 7.2 [Arquitectura de Features](#2-auditoría-de-arquitectura-de-features)
+   - 7.3 [Ubicación y Duplicados](#3-auditoría-de-ubicación-de-archivos-y-duplicados-crítico)
+   - 7.4 [Páginas (3 Capas)](#4-auditoría-de-páginas-3-capas)
+   - 7.5 [Formularios (Forms)](#5-auditoría-de-formularios-forms)
+   - 7.6 [Modales](#6-auditoría-de-modales)
+   - 7.7 [Drawers](#7-auditoría-de-drawers)
+   - 7.8 [Uploads/Storage](#8-auditoría-de-uploadsstorage)
+   - 7.9 [Delete/Replace Pattern](#9-auditoría-de-deletereplace-pattern)
+   - 7.10 [Base de Datos](#10-auditoría-de-base-de-datos-supabase)
+   - 7.11 [Frontend](#11-auditoría-de-frontend)
+   - 7.12 [Calidad/Robustez](#12-auditoría-de-calidad--robustez)
+   - 7.13 [Refactorización (Tablas, Badges, Headers)](#13-auditoría-de-refactorización-tablas-badges-headers)
+   - 7.14 [Quality Gates (Testing)](#14-auditoría-de-quality-gates-testing)
+   - 7.15 [Accesibilidad e i18n](#15-auditoría-de-accesibilidad-e-i18n)
+   - 7.16 [Production Readiness](#16-auditoría-de-production-readiness)
+8. [Entregables Obligatorios](#entregables-obligatorios)
+9. [Condición Final](#condición-final-cerrado)
+10. [Regla Post-Cierre](#regla-post-cierre-cerrado--no-se-toca)
+11. [Guías de Sistemas Específicos](#guías-de-sistemas-específicos)
+12. [Reglas para Prompts Externos](#reglas-para-prompts-externos-gpt-otras-ias)
 
 ---
 
@@ -46,6 +49,20 @@ Auditar y dejar **"cerrado"** un feature específico de Seencel, asegurando:
 - Documentación actualizada
 
 **NO quiero refactor masivo ni reescritura general: solo lo necesario para que este feature quede 100% sólido.**
+
+---
+
+## FUERA DE ALCANCE DE ESTA AUDITORÍA
+
+Esta auditoría **NO incluye**:
+- ❌ Rediseños visuales no críticos
+- ❌ Reescrituras completas de features legacy
+- ❌ Migraciones cross-feature
+- ❌ Optimización prematura sin impacto medible
+- ❌ Cambios estructurales del sistema que excedan el feature auditado
+- ❌ Agregar funcionalidades nuevas (solo auditar lo existente)
+
+> **Objetivo:** Evitar scope creep y auditorías infinitas. Si algo requiere cambios sistémicos, se documenta como "FUERA DE ALCANCE" y se propone como proyecto separado.
 
 ---
 
@@ -101,6 +118,32 @@ src/
   App.tsx            ← Router principal
   main.tsx           ← Entry point
 ```
+
+---
+
+## REGLA DE STOP (BLOQUEO DE AUDITORÍA)
+
+Si durante la auditoría se detecta **cualquiera** de los siguientes casos:
+
+| Bloqueador | Descripción |
+|------------|-------------|
+| 🚫 **Dependencias circulares** | El feature depende de otro feature que depende de este |
+| 🚫 **Tabla base faltante** | No existe la tabla principal del feature en Supabase |
+| 🚫 **Inconsistencias graves de RLS** | Políticas a nivel sistema que afectan múltiples features |
+| 🚫 **Datos corruptos** | Datos imposibles de validar con seguridad (nulls inesperados, FKs rotas) |
+| 🚫 **Arquitectura incompatible** | El feature usa patrones obsoletos que requieren reescritura total |
+
+👉 **La auditoría debe DETENERSE** y marcarse como:
+
+```
+ESTADO: 🔴 BLOQUEADO POR PROBLEMA DE SISTEMA
+```
+
+**Output requerido en caso de bloqueo:**
+1. Descripción clara del bloqueo
+2. Qué parte del sistema lo causa (tabla, RLS, feature, etc.)
+3. Recomendación de resolución previa
+4. NO proponer fixes locales sobre problemas sistémicos
 
 ---
 
@@ -879,6 +922,23 @@ Antes de considerar el feature "production ready":
 ```markdown
 ## AUDIT REPORT: {NOMBRE_DEL_FEATURE}
 
+### Estado del Feature (Resumen Ejecutivo)
+
+| Aspecto | Estado |
+|---------|--------|
+| **Nivel de madurez** | 🟢 Estable / 🟡 Parcial / 🔴 Incompleto |
+| **Riesgo en producción** | Bajo / Medio / Alto |
+| **Deuda técnica** | Mínima / Moderada / Significativa |
+
+**Recomendación final:**
+- [ ] ✅ Cerrar ahora (feature listo)
+- [ ] ⚠️ Cerrar con fixes menores (< 2 horas de trabajo)
+- [ ] ❌ No cerrar (bloqueado por problemas estructurales)
+
+**Resumen en 1 línea:** {Descripción breve del estado}
+
+---
+
 ### Estado General: 🟢 VERDE / 🟡 AMARILLO / 🔴 ROJO
 
 ### Checklist de Madurez
@@ -971,6 +1031,32 @@ El feature se considera **cerrado** cuando:
 - [ ] Performance dentro de budgets
 - [ ] Error boundaries implementados
 - [ ] Documentación del feature creada
+
+---
+
+## REGLA POST-CIERRE ("CERRADO = NO SE TOCA")
+
+Un feature marcado como **CERRADO**:
+
+| Regla | Descripción |
+|-------|-------------|
+| 🚫 **No experimental** | No se usa como base para experimentos o prototipos |
+| 🚫 **No hacks** | No recibe workarounds rápidos ni fixes temporales |
+| 🚫 **No modificaciones casuales** | Solo se modifica por razones documentadas |
+
+**Excepciones permitidas (requieren justificación):**
+| Caso | Acción requerida |
+|------|------------------|
+| Bug crítico en producción | Fix inmediato + documentar en changelog |
+| Cambio funcional aprobado | Reabrir auditoría parcial del área afectada |
+| Refactor sistémico | Reabrir auditoría completa |
+
+**Cualquier cambio a un feature cerrado debe:**
+1. Documentarse explícitamente
+2. Verificar que no rompe los checks de cierre
+3. Actualizar documentación si aplica
+
+> **Objetivo:** Proteger features cerrados de degradación futura. Un feature cerrado es un contrato de calidad.
 
 ---
 

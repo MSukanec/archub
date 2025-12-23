@@ -1,0 +1,94 @@
+Necesito que ajustes el archivo FEATURE-AUDIT.md incorporando CUATRO MEJORAS FINAS,
+sin reescribir el documento ni cambiar su espíritu.
+
+Objetivo: reforzar claridad ejecutiva, evitar scope creep y dejar reglas claras de cierre.
+
+IMPORTANTE:
+- No elimines secciones existentes
+- No cambies la arquitectura ni los checklists
+- Solo AGREGÁ secciones pequeñas y claras donde corresponda
+- El documento debe seguir siendo el ÚNICO estándar de auditoría de Seencel
+
+--------------------------------------------------
+1) AGREGAR “ESTADO DEL FEATURE” (VISIÓN EJECUTIVA)
+--------------------------------------------------
+
+Agregar, al inicio del ENTREGABLE 1: AUDIT REPORT, una subsección breve:
+
+### Estado del Feature (Resumen Ejecutivo)
+- Nivel de madurez: 🟢 Estable / 🟡 Parcial / 🔴 Incompleto
+- Riesgo en producción: Bajo / Medio / Alto
+- Recomendación final:
+  - [ ] Cerrar ahora
+  - [ ] Cerrar con fixes menores
+  - [ ] No cerrar (bloqueado por problemas estructurales)
+
+Objetivo: permitir entender el estado del feature en < 2 minutos sin leer todo el reporte.
+
+--------------------------------------------------
+2) AGREGAR SECCIÓN “FUERA DE ALCANCE DE ESTA AUDITORÍA”
+--------------------------------------------------
+
+Agregar una sección clara (idealmente después de OBJETIVO o antes de AUDITORÍA COMPLETA):
+
+### Fuera de alcance de esta auditoría
+Esta auditoría NO incluye:
+- Rediseños visuales no críticos
+- Reescrituras completas de features legacy
+- Migraciones cross-feature
+- Optimización prematura sin impacto medible
+- Cambios estructurales del sistema que excedan el feature auditado
+
+Objetivo: evitar scope creep y auditorías infinitas.
+
+--------------------------------------------------
+3) AGREGAR “REGLA DE STOP” (FRENO DURO)
+--------------------------------------------------
+
+Agregar una sección explícita llamada:
+
+### Regla de STOP (Bloqueo de Auditoría)
+
+Si durante la auditoría se detecta cualquiera de los siguientes casos:
+- Dependencias circulares entre features
+- Falta de una tabla base crítica para el feature
+- Inconsistencias graves de RLS a nivel sistema
+- Datos corruptos o imposibles de validar con seguridad
+
+👉 La auditoría del feature debe DETENERSE y marcarse como:
+“BLOQUEADO POR PROBLEMA DE SISTEMA”.
+
+En este caso, el output debe ser:
+- Descripción del bloqueo
+- Qué parte del sistema lo causa
+- Recomendación de resolución previa
+
+Objetivo: evitar parches locales sobre problemas sistémicos.
+
+--------------------------------------------------
+4) FORMALIZAR “CERRADO = NO SE TOCA”
+--------------------------------------------------
+
+Refinar la sección CONDICIÓN FINAL (“CERRADO”) agregando esta regla explícita:
+
+Un feature marcado como CERRADO:
+- No se usa como base experimental
+- No recibe hacks ni workarounds rápidos
+- No se modifica salvo por:
+  a) Bug crítico en producción
+  b) Cambio funcional explícitamente aprobado
+- Cualquier cambio posterior requiere reabrir auditoría (parcial o completa)
+
+Objetivo: proteger features cerrados de degradación futura.
+
+--------------------------------------------------
+ENTREGABLE FINAL
+--------------------------------------------------
+
+1) Devuelveme el FEATURE-AUDIT.md actualizado
+2) Enumerá explícitamente qué secciones nuevas agregaste
+3) Confirmá que el documento sigue siendo autosuficiente para auditar cualquier feature
+4) Confirmá que NO hay contradicciones internas nuevas
+
+No empieces a auditar ningún feature todavía.
+Este paso es SOLO para cerrar el estándar definitivo.
