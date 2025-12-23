@@ -607,11 +607,10 @@ export function LeftSidebar() {
                   </div>
                 </PopoverTrigger>
                 <PopoverContent 
-                  side="right" 
-                  align="end"
+                  side="bottom" 
+                  align="start"
                   className="w-[200px] p-2"
                   sideOffset={8}
-                  alignOffset={0}
                 >
                   <div className="flex flex-col gap-1">
                     {/* Botón Contacto */}
@@ -683,11 +682,10 @@ export function LeftSidebar() {
                   </div>
                 </PopoverTrigger>
                 <PopoverContent 
-                  side="right" 
-                  align="end"
+                  side="bottom" 
+                  align="start"
                   className="w-[380px] p-0"
                   sideOffset={8}
-                  alignOffset={0}
                 >
                   {userId && (
                     <NotificationDropdown
@@ -716,11 +714,10 @@ export function LeftSidebar() {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  side="right" 
-                  align="end"
+                  side="bottom" 
+                  align="start"
                   className="w-[200px]"
                   sideOffset={8}
-                  alignOffset={0}
                 >
                   {/* Mi Perfil */}
                   <DropdownMenuItem
