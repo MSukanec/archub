@@ -302,11 +302,11 @@ export function PageLayout({
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Page Content - HEADER Y CONTENIDO juntos para que se muevan con scroll */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden">
-        <div style={{ backgroundColor: "var(--header-bg)" }}>
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col min-h-full">
+        <div style={{ backgroundColor: "var(--header-bg)" }} className="flex-shrink-0">
           <div className={(() => {
             const mode = resolveWidthMode(wide);
-            return `${getContainerClasses(mode)} ${getHeaderPaddingClasses(mode)} pt-0`;
+            return `${getContainerClasses(mode)} ${getHeaderPaddingClasses(mode)} pt-0 pb-0`;
           })()}>
           {/* FILA 1: Icono + Título + Descripción a la izquierda + Selector a la derecha */}
           <div className={`min-h-[50px] flex items-center justify-between ${!showSecondRow ? 'border-b border-[var(--main-sidebar-border)]' : ''}`}>
@@ -650,10 +650,12 @@ export function PageLayout({
         {/* Page Content */}
         <div className={(() => {
           const mode = resolveWidthMode(wide);
-          return `${getContainerClasses(mode)} ${getContentPaddingClasses(mode)} pt-6 pb-6 flex-1 overflow-auto overflow-x-hidden`;
+          return `${getContainerClasses(mode)} ${getContentPaddingClasses(mode)} pt-6 pb-6 flex-1 min-h-0 overflow-hidden`;
         })()}>
-          <ReadOnlyBanner show={showReadOnlyBanner} projectName={readOnlyProjectName} />
-          {children}
+          <div className="h-full overflow-y-auto flex flex-col">
+            <ReadOnlyBanner show={showReadOnlyBanner} projectName={readOnlyProjectName} />
+            {children}
+          </div>
         </div>
       </div>
     </div>
