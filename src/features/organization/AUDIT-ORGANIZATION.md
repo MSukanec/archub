@@ -12,6 +12,14 @@
 
 El feature ORGANIZATION está **100% migrado a Save Engine** según estándares FEATURE-AUDIT.md sección 5.1.
 
+### Migración Completada (2025-12-23)
+- **OrganizationLocationView.tsx**: useAutoSave+useMutation → useSaveEngine ✅
+- **OrganizationProfileView.tsx**: useAutoSave+useMutation → useSaveEngine ✅
+- **OrganizationSettingsFinancesView.tsx**: 4x useMutation → 4x useOptimisticMutation ✅
+- **OrganizationMembersListView.tsx**: 2x useMutation → 2x useOptimisticMutation ✅ (resendInviteMutation kept as useMutation - placeholder only)
+- **OrganizationPermissionsView.tsx**: useMutation → useOptimisticMutation ✅
+- **OrganizationBillingView.tsx**: 2x useMutation → 2x useOptimisticMutation ✅
+
 | Tema | Status | Detalles |
 |------|--------|----------|
 | Arquitectura | ✅ | Services, hooks, forms, modales - todos correctos |
@@ -20,7 +28,7 @@ El feature ORGANIZATION está **100% migrado a Save Engine** según estándares 
 | Performance | ✅ | Optimistic updates + fire-and-forget mutations |
 | Modales | ✅ | Patrón 1:1 Form ↔ Modal (4 modales, 3 forms) |
 | Nomenclatura | ✅ | Forms: `*Form.tsx`, Modals: `*Modal.tsx` |
-| Vistas | ✅ | 9 vistas en `views/` (Dashboard, Location, Profile, FinancesDashboard, FinancesMovements, SettingsFinances, SettingsPdf, MembersList, Permissions) |
+| Vistas | ✅ | 11 vistas en `views/` (Dashboard, Location, Profile, FinancesDashboard, FinancesMovements, SettingsFinances, SettingsPdf, MembersList, Permissions, Billing, ActivityLogs) |
 | Database | ✅ | RLS, multi-tenant filtering |
 | Security | ✅ | Organization filtering, soft delete |
 | Guards | ✅ | `if (!oldData) return oldData;` en TODOS los optimisticUpdate |
@@ -54,16 +62,18 @@ src/features/organization/
 │   ├── OrganizationRemovedModal.tsx        ✅ UI-only (sin form separado)
 │   ├── index.ts                             ✅ Exports centralizados
 │   └── /index.ts
-├── views/                                    ← 9 VIEWS (TABs eliminados)
+├── views/                                    ← 11 VIEWS (TABs eliminados)
 │   ├── OrganizationDashboardView.tsx       ✅ Vista principal con WelcomePanel, StatsPanel, ProjectsPanel
-│   ├── OrganizationLocationView.tsx        ✅ Vista de ubicación de organización
-│   ├── OrganizationProfileView.tsx         ✅ Vista de perfil de organización
+│   ├── OrganizationLocationView.tsx        ✅ Vista de ubicación (useSaveEngine)
+│   ├── OrganizationProfileView.tsx         ✅ Vista de perfil (useSaveEngine)
 │   ├── OrganizationFinancesDashboardView.tsx ✅ Dashboard de finanzas org
 │   ├── OrganizationFinancesMovementsView.tsx ✅ Movimientos de finanzas org
-│   ├── OrganizationSettingsFinancesView.tsx  ✅ Configuración de finanzas
+│   ├── OrganizationSettingsFinancesView.tsx  ✅ Config finanzas (4x useOptimisticMutation)
 │   ├── OrganizationSettingsPdfView.tsx       ✅ Configuración de PDF
-│   ├── OrganizationMembersListView.tsx       ✅ Lista de miembros de organización
-│   └── OrganizationPermissionsView.tsx       ✅ Gestión de permisos por rol
+│   ├── OrganizationMembersListView.tsx       ✅ Lista miembros (2x useOptimisticMutation)
+│   ├── OrganizationPermissionsView.tsx       ✅ Permisos (useOptimisticMutation)
+│   ├── OrganizationBillingView.tsx           ✅ Facturación (2x useOptimisticMutation)
+│   └── OrganizationActivityLogsView.tsx      ✅ Logs de actividad
 ├── services/
 │   └── (servicios puros de API/DB)
 ├── types/
@@ -179,8 +189,8 @@ Los siguientes modales permanecen en legacy porque **NO pertenecen al feature OR
 - [x] Pages terminan en `*Page.tsx`
 
 ### 6.7 Estructura de Vistas ✅
-- [x] **9 VISTAS** - todas en `src/features/organization/views/`
-- [x] **4 PAGES** - thin orchestrators en `src/pages/dashboard/`
+- [x] **11 VISTAS** - todas en `src/features/organization/views/`
+- [x] **6 PAGES** - thin orchestrators en `src/pages/dashboard/`
 - [x] **TABS ELIMINADOS** - convertidos a *View.tsx
 - [x] OrganizationDashboardView.tsx contiene componentes internos (WelcomePanel, StatsPanel, ProjectsPanel)
 - [x] Patrón alineado con FEATURE-AUDIT.md estándar (Pages → Views → Components)
@@ -228,21 +238,25 @@ Los siguientes modales permanecen en legacy porque **NO pertenecen al feature OR
   - ✅ `InviteMemberModal.tsx` (1:1 con InviteMemberForm)
   - ✅ `MemberActionConfirmationModal.tsx` (1:1 con MemberActionConfirmationForm)
   - ✅ `OrganizationRemovedModal.tsx` (UI-only, sin form)
-- ✅ 9 Vistas en organization/views/ (TABs eliminados, Pages en pages/dashboard/)
+- ✅ 11 Vistas en organization/views/ (TABs eliminados, Pages en pages/dashboard/)
   - ✅ OrganizationDashboardView.tsx (principal con panels internos)
-  - ✅ OrganizationLocationView.tsx
-  - ✅ OrganizationProfileView.tsx
+  - ✅ OrganizationLocationView.tsx (useSaveEngine)
+  - ✅ OrganizationProfileView.tsx (useSaveEngine)
   - ✅ OrganizationFinancesDashboardView.tsx
   - ✅ OrganizationFinancesMovementsView.tsx
-  - ✅ OrganizationSettingsFinancesView.tsx
+  - ✅ OrganizationSettingsFinancesView.tsx (4x useOptimisticMutation)
   - ✅ OrganizationSettingsPdfView.tsx
-  - ✅ OrganizationMembersListView.tsx
-  - ✅ OrganizationPermissionsView.tsx
-- ✅ 4 Pages en pages/dashboard/ (thin orchestrators)
+  - ✅ OrganizationMembersListView.tsx (2x useOptimisticMutation)
+  - ✅ OrganizationPermissionsView.tsx (useOptimisticMutation)
+  - ✅ OrganizationBillingView.tsx (2x useOptimisticMutation)
+  - ✅ OrganizationActivityLogsView.tsx
+- ✅ 6 Pages en pages/dashboard/ (thin orchestrators)
   - ✅ OrganizationDataPage.tsx (orquesta Profile + Location)
   - ✅ OrganizationFinancesPage.tsx (orquesta Dashboard + Movements)
   - ✅ OrganizationSettingsPage.tsx (orquesta Finances + PDF settings)
   - ✅ OrganizationMembersPage.tsx (orquesta MembersList + Permissions)
+  - ✅ OrganizationBillingPage.tsx (orquesta Billing)
+  - ✅ OrganizationActivityPage.tsx (orquesta ActivityLogs)
 - ✅ 6 Modales legacy en `src/features/legacy/modals/`
 - ✅ TODOS los optimisticUpdate con guard `if (!oldData) return oldData;`
 - ✅ 0 instancias de `useMutation` legacy
