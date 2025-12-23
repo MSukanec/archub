@@ -254,7 +254,8 @@ export function FormPanel({
               }
             }}
             emptyStateDescription="Arrastra una imagen o haz clic para seleccionar"
-            maxSizeLabel="Formatos: JPG, PNG, WebP • Tamaño máximo: 2MB"
+            maxSize={5 * 1024 * 1024}
+            maxSizeLabel="Formatos: JPG, PNG, WebP • Tamaño máximo: 5MB"
             compressionPreset="project-cover"
             compressOnDrop={false}
           />
