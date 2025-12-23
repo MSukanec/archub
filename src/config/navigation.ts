@@ -156,20 +156,25 @@ export const PROJECT_NAVIGATION: NavigationEntry[] = [
   { id: 'clients', label: 'Clientes', icon: LuHandshake, href: '/clients', testId: 'nav-project-clients' },
 ];
 
-export const ADMIN_NAVIGATION: NavigationItem[] = [
+export const ADMIN_NAVIGATION: NavigationEntry[] = [
+  { type: 'section-header', id: 'section-operaciones', label: 'Operaciones' },
   { id: 'ops', label: 'Ops Center', icon: Activity, href: '/admin/ops', testId: 'nav-admin-ops' },
   { id: 'dashboard', label: 'Analytics', icon: BarChart3, href: '/admin/dashboard', testId: 'nav-admin-dashboard' },
+  { type: 'section-header', id: 'section-gestion', label: 'Gestión' },
   { id: 'administration', label: 'Administración', icon: Settings, href: '/admin/administration', testId: 'nav-admin-administration' },
   { id: 'support', label: 'Soporte', icon: Headphones, href: '/admin/support', testId: 'nav-admin-support' },
   { id: 'subscriptions', label: 'Suscripciones', icon: CreditCard, href: '/admin/subscriptions', testId: 'nav-admin-subscriptions' },
   { id: 'payments', label: 'Pagos', icon: Wallet, href: '/admin/payments', testId: 'nav-admin-payments' },
+  { type: 'section-header', id: 'section-contenido', label: 'Contenido' },
   { id: 'courses', label: 'Cursos', icon: BookOpen, href: '/admin/courses', testId: 'nav-admin-courses' },
   { id: 'email-templates', label: 'Plantillas de Email', icon: Mail, href: '/admin/email-templates', testId: 'nav-admin-email-templates' },
   { id: 'layout', label: 'Layout', icon: Layers, href: '/admin/layout', testId: 'nav-admin-layout' },
+  { type: 'section-header', id: 'section-construccion', label: 'Construcción' },
   { id: 'general', label: 'General', icon: Settings, href: '/admin/general', testId: 'nav-admin-general' },
   { id: 'tasks', label: 'Tareas', icon: ListTodo, href: '/admin/tasks', testId: 'nav-admin-tasks' },
   { id: 'costs', label: 'Costos', icon: DollarSign, href: '/admin/costs', testId: 'nav-admin-costs' },
   { id: 'products', label: 'Productos', icon: Package, href: '/providers/products', testId: 'nav-admin-products' },
+  { type: 'section-header', id: 'section-lab', label: 'Lab' },
   { id: 'lab-clients', label: 'Lab - Clientes', icon: FlaskConical, href: '/lab/financial-lattice', testId: 'nav-admin-lab-clients' },
   { id: 'lab-contacts', label: 'Lab - Contactos', icon: FlaskConical, href: '/lab/contacts', testId: 'nav-admin-lab-contacts' },
 ];

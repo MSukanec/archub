@@ -1,28 +1,41 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Package, Plus, RefreshCw } from 'lucide-react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
+import { LabLayout } from "@/layouts/lab/LabLayout";
 import { useGlobalModalStore } from '@/components/modal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { Button } from '@/components/ui/button';
 import AdminCostProducts from './AdminCostProducts';
 import AdminCostMaterials from './AdminCostMaterials';
 import AdminCostBrands from './AdminCostBrands';
 import AdminCostCategories from './AdminCostCategories';
 import AdminCostLabor from './AdminCostLabor';
 
+const COSTS_TABS = [
+  { id: 'productos', label: 'Productos' },
+  { id: 'materiales', label: 'Materiales' },
+  { id: 'marcas', label: 'Marcas' },
+  { id: 'categorias', label: 'Categorías' },
+  { id: 'labor', label: 'Mano de Obra' }
+];
+
 const AdminCosts = () => {
   const [activeTab, setActiveTab] = useState('productos');
   const { openModal } = useGlobalModalStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { data: userData } = useCurrentUser();
 
-  // Mutation para refrescar vistas materializadas
+  const layoutPreference = userData?.preferences?.layout || 'experimental';
+  const isLabLayout = layoutPreference === 'lab';
+
   const refreshPricesMutation = useMutation({
     mutationFn: async () => {
       try {
         console.log('Refrescando vista product_avg_prices...');
-        // Refrescar primera vista materializada (precios promedio de productos)
         const { error: productAvgError } = await supabase.rpc('refresh_product_avg_prices');
         if (productAvgError) {
           console.error('Error refreshing product_avg_prices:', productAvgError);
@@ -31,7 +44,6 @@ const AdminCosts = () => {
         console.log('Vista product_avg_prices refrescada exitosamente');
 
         console.log('Refrescando vista material_avg_prices...');
-        // Refrescar segunda vista materializada (precios promedio de materiales)
         const { error: materialAvgError } = await supabase.rpc('refresh_material_avg_prices');
         if (materialAvgError) {
           console.error('Error refreshing material_avg_prices:', materialAvgError);
@@ -40,7 +52,6 @@ const AdminCosts = () => {
         console.log('Vista material_avg_prices refrescada exitosamente');
 
         console.log('Refrescando vista labor_avg_prices...');
-        // Refrescar tercera vista materializada (precios promedio de mano de obra)
         const { error: laborAvgError } = await supabase.rpc('refresh_labor_avg_prices');
         if (laborAvgError) {
           console.error('Error refreshing labor_avg_prices:', laborAvgError);
@@ -53,20 +64,17 @@ const AdminCosts = () => {
       }
     },
     onSuccess: () => {
-      // Invalidar todas las queries de productos, materiales y mano de obra para actualizar las tablas
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['provider-products'] });
-      queryClient.invalidateQueries({ queryKey: ['labor-view'] }); // Actualizado para usar labor-view
+      queryClient.invalidateQueries({ queryKey: ['labor-view'] });
       queryClient.invalidateQueries({ queryKey: ['labor-price'] });
-      queryClient.invalidateQueries({ queryKey: ['task-labor'] }); // Invalidar cache de task-labor para que se actualicen los precios en popovers
-      
-      // CRITICAL: Invalidar queries de tareas para que reflejen los nuevos precios
-      queryClient.invalidateQueries({ queryKey: ['task-costs'] }); // Para TaskCostsView y popovers
-      queryClient.invalidateQueries({ queryKey: ['task-materials'] }); // Para materiales de tareas
-      queryClient.invalidateQueries({ queryKey: ['materials'] }); // Query general de materiales
-      queryClient.invalidateQueries({ queryKey: ['material-view'] }); // Vista de materiales
-      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] }); // Lista de tareas generadas
-      queryClient.invalidateQueries({ queryKey: ['task-library'] }); // Biblioteca de tareas
+      queryClient.invalidateQueries({ queryKey: ['task-labor'] });
+      queryClient.invalidateQueries({ queryKey: ['task-costs'] });
+      queryClient.invalidateQueries({ queryKey: ['task-materials'] });
+      queryClient.invalidateQueries({ queryKey: ['materials'] });
+      queryClient.invalidateQueries({ queryKey: ['material-view'] });
+      queryClient.invalidateQueries({ queryKey: ['generated-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['task-library'] });
       
       toast({
         title: "Datos actualizados",
@@ -83,13 +91,101 @@ const AdminCosts = () => {
     }
   });
 
-  const tabs = [
-    { id: 'productos', label: 'Productos', isActive: activeTab === 'productos' },
-    { id: 'materiales', label: 'Materiales', isActive: activeTab === 'materiales' },
-    { id: 'marcas', label: 'Marcas', isActive: activeTab === 'marcas' },
-    { id: 'categorias', label: 'Categorías', isActive: activeTab === 'categorias' },
-    { id: 'labor', label: 'Mano de Obra', isActive: activeTab === 'labor' }
-  ];
+  const renderView = () => {
+    switch (activeTab) {
+      case 'productos':
+        return <AdminCostProducts />;
+      case 'materiales':
+        return <AdminCostMaterials />;
+      case 'marcas':
+        return <AdminCostBrands />;
+      case 'categorias':
+        return <AdminCostCategories />;
+      case 'labor':
+        return <AdminCostLabor />;
+      default:
+        return <AdminCostProducts />;
+    }
+  };
+
+  const handleCreate = () => {
+    switch (activeTab) {
+      case 'productos':
+        openModal('product-form', { editingProduct: null });
+        break;
+      case 'materiales':
+        openModal('material-form', { editingMaterial: null });
+        break;
+      case 'marcas':
+        openModal('brand-form', { editingBrand: null });
+        break;
+      case 'categorias':
+        openModal('material-category-form', { editingMaterialCategory: null });
+        break;
+      case 'labor':
+        openModal('labor-type-form', { editingLaborType: null });
+        break;
+    }
+  };
+
+  const getCreateLabel = () => {
+    switch (activeTab) {
+      case 'productos': return 'Nuevo Producto';
+      case 'materiales': return 'Nuevo Material';
+      case 'marcas': return 'Nueva Marca';
+      case 'categorias': return 'Nueva Categoría';
+      case 'labor': return 'Nuevo Tipo de Mano de Obra';
+      default: return 'Nuevo';
+    }
+  };
+
+  const showRefreshButton = activeTab === 'productos' || activeTab === 'labor';
+
+  const secondaryRightContent = (
+    <div className="flex items-center gap-3">
+      {showRefreshButton && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => refreshPricesMutation.mutate()}
+          disabled={refreshPricesMutation.isPending}
+          data-testid="button-refresh-prices"
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${refreshPricesMutation.isPending ? 'animate-spin' : ''}`} />
+          Refrescar
+        </Button>
+      )}
+      <Button
+        size="sm"
+        onClick={handleCreate}
+        data-testid="button-create-cost-item"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        {getCreateLabel()}
+      </Button>
+    </div>
+  );
+
+  if (isLabLayout) {
+    return (
+      <LabLayout 
+        showToolbar={true}
+        tabs={COSTS_TABS}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        toolbarProps={{
+          secondaryRightSlot: secondaryRightContent,
+        }}
+      >
+        {renderView()}
+      </LabLayout>
+    );
+  }
+
+  const tabs = COSTS_TABS.map(tab => ({
+    ...tab,
+    isActive: activeTab === tab.id
+  }));
 
   const getActionButton = () => {
     switch (activeTab) {
@@ -102,7 +198,7 @@ const AdminCosts = () => {
             label: "Refrescar",
             icon: RefreshCw,
             onClick: () => refreshPricesMutation.mutate(),
-            variant: "ghost",
+            variant: "ghost" as const,
             isLoading: refreshPricesMutation.isPending
           }
         };
@@ -133,7 +229,7 @@ const AdminCosts = () => {
             label: "Refrescar",
             icon: RefreshCw,
             onClick: () => refreshPricesMutation.mutate(),
-            variant: "ghost",
+            variant: "ghost" as const,
             isLoading: refreshPricesMutation.isPending
           }
         };
@@ -152,26 +248,9 @@ const AdminCosts = () => {
     actionButton: getActionButton()
   };
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'productos':
-        return <AdminCostProducts />;
-      case 'materiales':
-        return <AdminCostMaterials />;
-      case 'marcas':
-        return <AdminCostBrands />;
-      case 'categorias':
-        return <AdminCostCategories />;
-      case 'labor':
-        return <AdminCostLabor />;
-      default:
-        return <AdminCostProducts />;
-    }
-  };
-
   return (
     <Layout wide headerProps={headerProps}>
-      {renderTabContent()}
+      {renderView()}
     </Layout>
   );
 };
