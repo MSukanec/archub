@@ -555,7 +555,19 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
 
     try {
       if (mode === 'edit' && project) {
-        const updatedProject = await updateProjectMutation.mutateAsync({
+        // ⚡ STEP 1: OPTIMISTIC UPDATE PRIMERO - Actualiza el cache INMEDIATAMENTE
+        queryClient.setQueryData(
+          [QUERY_KEYS.PROJECTS, organizationId],
+          (oldData: any) => {
+            if (!Array.isArray(oldData)) return oldData;
+            return oldData.map((p: any) => 
+              p.id === project.id ? { ...p, ...cleanedData } : p
+            );
+          }
+        );
+
+        // ⚡ STEP 2: FIRE AND FORGET - Mutation en background SIN ESPERAR
+        updateProjectMutation.mutate({
           projectId: project.id,
           data: {
             ...cleanedData,
@@ -563,18 +575,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
           }
         });
 
-        // ⚡ OPTIMISTIC UPDATE: Actualiza el cache INMEDIATAMENTE (sin esperar refetch)
-        queryClient.setQueryData(
-          [QUERY_KEYS.PROJECTS, organizationId],
-          (oldData: any) => {
-            if (!Array.isArray(oldData)) return oldData;
-            return oldData.map((p: any) => 
-              p.id === project.id ? { ...p, ...cleanedData, ...updatedProject } : p
-            );
-          }
-        );
-
-        // ⚡ FIRE AND FORGET: Logging en background (no bloquea)
+        // ⚡ STEP 3: FIRE AND FORGET - Logging en background
         const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
         logActivity({
           organization_id: organizationId,
@@ -585,83 +586,101 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
           metadata: { name: cleanedData.name, project_type: projectTypeName }
         }).catch(err => console.error('Error logging activity:', err));
 
-        // ⚡ FIRE AND FORGET: Upload de imagen en background
+        // ⚡ STEP 4: FIRE AND FORGET - Upload de imagen en background
         if (selectedImageFile) {
           handleImageUpload(project.id).catch(err => 
             console.error('Error uploading image:', err)
           );
         }
 
-        // ✅ CALLBACK INMEDIATO: El usuario ve el cambio al instante
+        // ✅ STEP 5: CALLBACK INMEDIATO - El modal cierra al instante
         callbacks?.onSubmitSuccess?.('edit');
       } else {
-        const newProject = await createProjectMutation.mutateAsync({
-          organization_id: organizationId,
-          created_by: currentUserMember!.id,
+        // ⚡ STEP 1: CREAR PROYECTO OPTIMISTA - Genera un ID temporal
+        const optimisticProject = {
+          id: 'temp-' + Date.now(),
           ...cleanedData,
-        });
+          created_at: new Date().toISOString(),
+          created_by: currentUserMember!.id,
+          organization_id: organizationId,
+        };
 
-        // ⚡ OPTIMISTIC UPDATE: Actualiza el cache INMEDIATAMENTE
+        // ⚡ STEP 2: ACTUALIZAR CACHE INMEDIATAMENTE con proyecto optimista
         queryClient.setQueryData(
           [QUERY_KEYS.PROJECTS, organizationId],
           (oldData: any) => {
-            if (!Array.isArray(oldData)) return [newProject];
-            return [...oldData, newProject];
+            if (!Array.isArray(oldData)) return [optimisticProject];
+            return [...oldData, optimisticProject];
           }
         );
 
-        // ⚡ FIRE AND FORGET: Preferencias del usuario en background
-        if (newProject.id && userData?.user?.id) {
-          setSelectedProject(newProject.id, organizationId);
-          
-          Promise.resolve(
-            supabase
-              .from('user_organization_preferences')
-              .upsert({
-                user_id: userData.user.id,
-                organization_id: organizationId,
-                last_project_id: newProject.id,
-                updated_at: new Date().toISOString()
-              }, {
-                onConflict: 'user_id,organization_id'
-              })
-          )
-            .then(() => {
-              queryClient.invalidateQueries({
-                queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
-              });
-              return updateProjectLastActive(newProject.id, organizationId);
-            })
-            .catch((error: any) => console.error('Error setting project as active:', error));
-        }
+        // ⚡ STEP 3: FIRE AND FORGET - Crear proyecto en el servidor
+        createProjectMutation.mutate({
+          organization_id: organizationId,
+          created_by: currentUserMember!.id,
+          ...cleanedData,
+        }, {
+          onSuccess: (newProject) => {
+            // Reemplazar proyecto optimista con el real
+            queryClient.setQueryData(
+              [QUERY_KEYS.PROJECTS, organizationId],
+              (oldData: any) => {
+                if (!Array.isArray(oldData)) return [newProject];
+                return oldData.map((p: any) => p.id === optimisticProject.id ? newProject : p);
+              }
+            );
+            
+            // Guardar como proyecto activo
+            if (userData?.user?.id) {
+              setSelectedProject(newProject.id, organizationId);
+              
+              Promise.resolve(
+                supabase.from('user_organization_preferences').upsert({
+                  user_id: userData.user.id,
+                  organization_id: organizationId,
+                  last_project_id: newProject.id,
+                  updated_at: new Date().toISOString()
+                }, { onConflict: 'user_id,organization_id' })
+              )
+                .then(() => {
+                  queryClient.invalidateQueries({
+                    queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
+                  });
+                  return updateProjectLastActive(newProject.id, organizationId);
+                })
+                .catch((error: any) => console.error('Error setting project as active:', error));
+            }
+          }
+        });
 
-        // ⚡ FIRE AND FORGET: Checklist update en background
+        // ⚡ STEP 4: FIRE AND FORGET - Preferencias del usuario
         if (userData?.user?.id) {
+          setSelectedProject(optimisticProject.id, organizationId);
           updateChecklist.mutateAsync({ 
             key: 'create_project', 
             value: true 
           }).catch(err => console.error('Error updating checklist:', err));
         }
 
-        // ⚡ FIRE AND FORGET: Upload de imagen en background
-        if (selectedImageFile && newProject.id) {
-          handleImageUpload(newProject.id).catch(err => 
+        // ⚡ STEP 5: FIRE AND FORGET - Upload de imagen
+        if (selectedImageFile && optimisticProject.id) {
+          handleImageUpload(optimisticProject.id).catch(err => 
             console.error('Error uploading image:', err)
           );
         }
 
-        // ⚡ FIRE AND FORGET: Logging en background
+        // ⚡ STEP 6: FIRE AND FORGET - Logging
         const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
         logActivity({
           organization_id: organizationId,
           user_id: userData?.user?.id || '',
           action: ACTIVITY_ACTIONS.CREATE_PROJECT,
           target_table: TARGET_TABLES.PROJECTS,
-          target_id: newProject.id,
+          target_id: optimisticProject.id,
           metadata: { name: cleanedData.name, project_type: projectTypeName }
         }).catch(err => console.error('Error logging activity:', err));
 
-        // ✅ CALLBACK INMEDIATO: El usuario ve el cambio al instante
+        // ✅ STEP 7: CALLBACK INMEDIATO - El modal cierra al instante
         callbacks?.onSubmitSuccess?.('create');
       }
 
