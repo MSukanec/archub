@@ -105,7 +105,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
         throw error;
       }
     },
-    delay: 2000,
+    delay: 1500,
     enabled: !!userData && !!activeProjectId,
     additionalQueryKeys: [['projects']],
     errorMessage: "No se pudieron guardar los cambios de ubicación"

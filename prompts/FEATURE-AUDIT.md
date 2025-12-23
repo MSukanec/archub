@@ -19,6 +19,7 @@
    - 7.3 [Ubicación y Duplicados](#3-auditoría-de-ubicación-de-archivos-y-duplicados-crítico)
    - 7.4 [Páginas (3 Capas)](#4-auditoría-de-páginas-3-capas)
    - 7.5 [Formularios (Forms)](#5-auditoría-de-formularios-forms)
+   - 7.5.1 [Sistema de Guardado (Save Engine)](#51-auditoría-de-sistema-de-guardado-save-engine)
    - 7.6 [Modales](#6-auditoría-de-modales)
    - 7.7 [Drawers](#7-auditoría-de-drawers)
    - 7.8 [Uploads/Storage](#8-auditoría-de-uploadsstorage)
@@ -539,6 +540,38 @@ const onSubmit = async (data: FormData) => {
 - [ ] ¿Callback invocado INMEDIATAMENTE (no espera servidor)?
 - [ ] ¿Side-effects en background (logging, uploads)?
 - [ ] ¿No hay `await` bloqueante?
+
+---
+
+### 5.1 AUDITORÍA DE SISTEMA DE GUARDADO (SAVE ENGINE)
+
+**Objetivo:** Asegurar que todos los formularios, modales y vistas con auto-save usen el sistema centralizado.
+
+**Checklist:**
+- [ ] ¿Usa `useSaveEngine` de `@/core/save-engine` para auto-save?
+- [ ] ¿Usa `useOptimisticMutation` para acciones puntuales (toggles, clicks)?
+- [ ] ¿NO hay llamadas directas a Supabase en componentes?
+- [ ] ¿NO hay `invalidateQueries` manuales sueltas?
+- [ ] ¿Tiene `additionalQueryKeys` para invalidar caches relacionados?
+
+**Patrón correcto de auto-save:**
+```typescript
+const { isSaving } = useSaveEngine({
+  data: formData,
+  queryKey: ['entity', entityId],
+  saveFn: async (data) => { /* guardar */ },
+  delay: 1500,
+  enabled: !!entityId,
+  additionalQueryKeys: [['related-data']],
+});
+```
+
+**Referencia:** Documentación completa en `/docs/save-architecture.md`
+
+**Prohibiciones:**
+- ❌ `supabase.from()` directamente en componentes
+- ❌ `queryClient.invalidateQueries()` sueltas sin patrón
+- ❌ `useAutoSave` legacy (migrar a `useSaveEngine`)
 
 ---
 

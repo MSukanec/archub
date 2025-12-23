@@ -288,9 +288,9 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
 
       if (error) throw error;
     },
-    delay: 2000,
+    delay: 1500,
     enabled: !!userData && !!activeProjectId,
-    additionalQueryKeys: [['project-info', activeProjectId], ['projects']],
+    additionalQueryKeys: [['project-info', activeProjectId], ['projects'], ['active-projects']],
   });
 
   // UNIFIED hydration effect - loads ALL data at once, then marks as hydrated

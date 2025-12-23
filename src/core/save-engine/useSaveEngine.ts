@@ -85,10 +85,8 @@ export function useSaveEngine<TData>({
           description: successMessage,
         });
       }
-      
-      console.log('[SaveEngine] Save completed successfully');
     } catch (error) {
-      console.error('[SaveEngine] Save error:', error);
+      console.error('[SaveEngine] Error:', error);
       
       if (optimisticUpdate && previousCacheData !== undefined) {
         queryClient.setQueryData(queryKey, previousCacheData);
@@ -116,36 +114,24 @@ export function useSaveEngine<TData>({
   }, [executeSave]);
 
   useEffect(() => {
-    console.log('[SaveEngine] Effect triggered - enabled:', enabled, 'isInitialLoad:', isInitialLoadRef.current);
-    
-    if (!enabled) {
-      console.log('[SaveEngine] Skipping: not enabled');
-      return;
-    }
+    if (!enabled) return;
 
     const dataString = JSON.stringify(data);
     const previousString = JSON.stringify(previousDataRef.current);
 
-    if (dataString === previousString) {
-      console.log('[SaveEngine] Skipping: data unchanged');
-      return;
-    }
+    if (dataString === previousString) return;
 
-    console.log('[SaveEngine] Data changed, checking if initial load...');
     const previousHadValues = hasNonEmptyValues(previousDataRef.current);
     const currentHasValues = hasNonEmptyValues(data);
 
     if (isInitialLoadRef.current && !previousHadValues && currentHasValues) {
-      console.log('[SaveEngine] Detected initial data load, skipping save');
       previousDataRef.current = data;
       setTimeout(() => {
         isInitialLoadRef.current = false;
-        console.log('[SaveEngine] Initial load flag cleared, ready for user edits');
-      }, 500);
+      }, 300);
       return;
     }
 
-    console.log('[SaveEngine] User edit detected, scheduling save in', delay, 'ms');
     isInitialLoadRef.current = false;
     previousDataRef.current = data;
     pendingDataRef.current = data;
@@ -156,7 +142,6 @@ export function useSaveEngine<TData>({
     }
 
     timeoutRef.current = setTimeout(() => {
-      console.log('[SaveEngine] Executing save now...');
       executeSave(data);
       pendingDataRef.current = null;
     }, delay);
