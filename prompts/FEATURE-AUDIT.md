@@ -129,7 +129,134 @@ Tablas de Supabase:
 
 ---
 
-### 3. AUDITORÍA DE PÁGINAS (3 CAPAS)
+### 3. AUDITORÍA DE UBICACIÓN DE ARCHIVOS Y DUPLICADOS (CRÍTICO)
+
+**Objetivo:** Asegurar que TODOS los archivos estén en su lugar correcto y NO existan duplicados.
+
+Esta auditoría es **fundamental** para mantener el codebase limpio y evitar confusión.
+
+#### 3.1 Archivos que NO pertenecen al feature
+
+**Problema común:** Encontrar carpetas/archivos de OTROS features dentro del feature auditado.
+
+**Ejemplos reales detectados:**
+- `src/features/projects/components/admin/` ← Pertenece a `src/features/admin/`
+- `src/features/projects/components/gantt/` ← Pertenece a `src/features/gantt/` (o legacy)
+- `src/features/projects/components/TaskRow.tsx` ← Pertenece a `src/features/tasks/`
+- `src/features/projects/components/AnalysisTaskRow.tsx` ← Pertenece a `src/features/analysis/`
+
+**Checklist:**
+- [ ] ¿TODOS los archivos en `components/` son específicos de ESTE feature?
+- [ ] ¿NO hay subcarpetas que pertenezcan a otros features?
+- [ ] ¿NO hay archivos "huérfanos" que deberían estar en otro lugar?
+
+**Acción para archivos fuera de lugar:**
+1. Si el feature destino YA EXISTE → Mover al feature correcto
+2. Si el feature destino NO EXISTE → Mover a `src/features/legacy/`
+
+**Regla de Legacy:**
+```
+src/features/legacy/
+├── components/     ← Componentes sin feature definido aún
+├── hooks/          ← Hooks sin feature definido aún
+├── services/       ← Services sin feature definido aún
+└── README.md       ← Documentar qué hay y por qué está ahí
+```
+
+#### 3.2 Hooks duplicados entre feature y carpetas globales
+
+**Problema:** Tener hooks en `src/hooks/` que ya fueron migrados a `src/features/{feature}/hooks/`.
+
+**Verificar cruzado obligatorio:**
+
+| Archivo en Feature | Verificar que NO exista en |
+|--------------------|---------------------------|
+| `src/features/{feature}/hooks/useX.ts` | `src/hooks/useX.ts` |
+| `src/features/{feature}/hooks/use{Feature}Y.ts` | `src/hooks/use{Feature}Y.ts` |
+
+**Checklist:**
+- [ ] ¿Listar TODOS los hooks en `src/features/{feature}/hooks/`?
+- [ ] ¿Para CADA hook, verificar que NO existe duplicado en `src/hooks/`?
+- [ ] ¿Si existe duplicado, determinar cuál es el correcto y eliminar el otro?
+- [ ] ¿Los imports en todo el proyecto apuntan al hook del feature (no al global)?
+
+**Acción para hooks duplicados:**
+1. Verificar cuál es el hook "oficial" (generalmente el del feature)
+2. Buscar todos los imports del hook duplicado
+3. Actualizar imports para usar el del feature
+4. Eliminar el hook global duplicado
+
+#### 3.3 Services duplicados entre feature y carpetas globales
+
+**Problema:** Tener services en `src/services/` que ya fueron migrados a `src/features/{feature}/services/`.
+
+**Verificar cruzado obligatorio:**
+
+| Archivo en Feature | Verificar que NO exista en |
+|--------------------|---------------------------|
+| `src/features/{feature}/services/featureService.ts` | `src/services/featureService.ts` |
+
+**Checklist:**
+- [ ] ¿Listar TODOS los services en `src/features/{feature}/services/`?
+- [ ] ¿Para CADA service, verificar que NO existe duplicado en `src/services/`?
+- [ ] ¿Si existe duplicado, determinar cuál es el correcto y eliminar el otro?
+
+#### 3.4 Types duplicados entre feature y carpetas globales
+
+**Problema:** Tener types en `src/types/` que ya fueron migrados a `src/features/{feature}/types/`.
+
+**Checklist:**
+- [ ] ¿Listar TODOS los types en `src/features/{feature}/types/`?
+- [ ] ¿Para CADA type, verificar que NO existe duplicado en `src/types/`?
+- [ ] ¿Los types en `src/types/` son SOLO types compartidos entre MÚLTIPLES features?
+
+**Regla de types globales:**
+- `src/types/` → SOLO types usados por 3+ features (ej: `User`, `Organization`)
+- `src/features/{feature}/types/` → Types específicos del feature
+
+#### 3.5 Stores duplicados
+
+**Problema:** Tener stores en múltiples lugares.
+
+**Verificar:**
+- [ ] ¿El store del feature está en `src/stores/{feature}Store.ts`?
+- [ ] ¿NO hay un store duplicado en `src/features/{feature}/stores/`?
+- [ ] ¿Los imports apuntan todos al mismo lugar?
+
+#### 3.6 Componentes duplicados
+
+**Problema:** Componentes que existen tanto en `src/components/` como en el feature.
+
+**Verificar:**
+- [ ] ¿Los componentes en `src/features/{feature}/components/` son ESPECÍFICOS del feature?
+- [ ] ¿NO hay duplicados en `src/components/` o `src/components/shared/`?
+- [ ] ¿Los componentes compartidos están en el lugar correcto (`src/components/shared/`)?
+
+---
+
+**Output esperado para esta sección:**
+
+```markdown
+### Archivos Fuera de Lugar
+| Archivo Actual | Destino Correcto | Acción |
+|----------------|------------------|--------|
+| `src/features/projects/components/admin/` | `src/features/admin/components/` | MOVER |
+| `src/features/projects/components/TaskRow.tsx` | `src/features/legacy/components/` | MOVER (feature tasks no existe) |
+
+### Duplicados Detectados
+| Ubicación 1 | Ubicación 2 | Acción |
+|-------------|-------------|--------|
+| `src/features/projects/hooks/useProjects.ts` | `src/hooks/useProjects.ts` | ELIMINAR global, MANTENER en feature |
+
+### Imports a Actualizar
+| Archivo | Import Actual | Import Correcto |
+|---------|---------------|-----------------|
+| `src/pages/projects/Projects.tsx` | `@/hooks/useProjects` | `@/features/projects/hooks/useProjects` |
+```
+
+---
+
+### 4. AUDITORÍA DE PÁGINAS (3 CAPAS)
 
 **Referencia:** `prompts/PAGE-REFACT.md` + `prompts/01-Pages.md`
 
@@ -166,7 +293,7 @@ VIEW (Contenido)       → Tablas, KPIs, gráficos, formularios
 
 ---
 
-### 4. AUDITORÍA DE MODALES
+### 5. AUDITORÍA DE MODALES
 
 **Referencia:** `prompts/02-Modals.md`
 
@@ -200,7 +327,7 @@ modals/
 
 ---
 
-### 5. AUDITORÍA DE DRAWERS
+### 6. AUDITORÍA DE DRAWERS
 
 **Referencia:** `prompts/03-Drawers.md`
 
@@ -220,7 +347,7 @@ components/
 
 ---
 
-### 6. AUDITORÍA DE UPLOADS/STORAGE
+### 7. AUDITORÍA DE UPLOADS/STORAGE
 
 **Referencia:** `prompts/03-Uploads.md`
 
@@ -233,7 +360,7 @@ components/
 
 ---
 
-### 7. AUDITORÍA DE DELETE/REPLACE PATTERN
+### 8. AUDITORÍA DE DELETE/REPLACE PATTERN
 
 **Referencia:** `prompts/04-Replacement.md`
 
@@ -247,7 +374,7 @@ components/
 
 ---
 
-### 8. AUDITORÍA DE BASE DE DATOS (Supabase)
+### 9. AUDITORÍA DE BASE DE DATOS (Supabase)
 
 **Checklist de tablas:**
 - [ ] ¿Tipos de columnas correctos?
@@ -271,7 +398,7 @@ components/
 
 ---
 
-### 9. AUDITORÍA DE FRONTEND
+### 10. AUDITORÍA DE FRONTEND
 
 **Checklist de hooks:**
 - [ ] ¿No hay duplicados?
@@ -296,7 +423,7 @@ components/
 
 ---
 
-### 10. AUDITORÍA DE CALIDAD / ROBUSTEZ
+### 11. AUDITORÍA DE CALIDAD / ROBUSTEZ
 
 **Checklist:**
 - [ ] ¿Manejo de errores real? (logs, try/catch, mensajes al usuario)
@@ -320,6 +447,7 @@ components/
 | Categoría | Estado | Notas |
 |-----------|--------|-------|
 | Estructura de Feature | ✅/⚠️/❌ | ... |
+| **Ubicación y Duplicados** | ✅/⚠️/❌ | Archivos fuera de lugar, duplicados en src/hooks, src/services |
 | Arquitectura 3 Capas | ✅/⚠️/❌ | ... |
 | Modales | ✅/⚠️/❌ | ... |
 | Drawers | ✅/⚠️/❌ | ... |
@@ -340,6 +468,11 @@ components/
 
 ### Hallazgos Detallados
 
+#### Ubicación y Duplicados Findings
+- Archivos fuera de lugar: ...
+- Duplicados detectados: ...
+- Imports a actualizar: ...
+
 #### DB Findings
 - ...
 
@@ -358,17 +491,23 @@ components/
 - [ ] Checkpoint creado
 - [ ] Identificar archivos que se van a modificar
 
-### Fase 1: DB (Migraciones Pequeñas)
+### Fase 1: Ubicación y Limpieza de Duplicados
+1. [ ] Mover archivos fuera de lugar a su destino correcto
+2. [ ] Eliminar hooks/services/types duplicados
+3. [ ] Actualizar imports afectados
+- Verificación: Compilación sin errores, no duplicados en `src/hooks/`, `src/services/`
+
+### Fase 2: DB (Migraciones Pequeñas)
 1. [ ] Migración 1: ...
 2. [ ] Migración 2: ...
 - Verificación: ...
 
-### Fase 2: Frontend (Refactors Mínimos)
+### Fase 3: Frontend (Refactors Mínimos)
 1. [ ] Archivo 1: ...
 2. [ ] Archivo 2: ...
 - Verificación: ...
 
-### Fase 3: Performance + Limpieza
+### Fase 4: Performance + Limpieza
 1. [ ] ...
 - Verificación: ...
 
@@ -417,6 +556,9 @@ components/
 El feature se considera **cerrado** cuando:
 
 - [ ] No hay errores en consola ni en runtime
+- [ ] **TODOS los archivos están en su ubicación correcta** (no hay archivos de otros features)
+- [ ] **NO hay duplicados** en `src/hooks/`, `src/services/`, `src/types/` que pertenezcan al feature
+- [ ] Archivos sin feature definido están en `src/features/legacy/`
 - [ ] DB tiene estructura correcta y lecturas principales por Views cuando corresponde
 - [ ] RLS consistente y segura
 - [ ] Arquitectura de feature sigue `prompts/00-Architecture.md`
