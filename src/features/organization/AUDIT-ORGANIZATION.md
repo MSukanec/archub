@@ -1,6 +1,7 @@
 # AUDIT REPORT: Feature ORGANIZATION
 
 **Fecha de auditoría:** 2025-12-23  
+**Última actualización:** 2025-12-23  
 **Auditor:** Replit Agent  
 **Estándar aplicado:** FEATURE-AUDIT.md v1.0  
 **Resultado:** ✅ PASA (100% MIGRADO A SAVE ENGINE - CERRADO)
@@ -17,7 +18,8 @@ El feature ORGANIZATION está **100% migrado a Save Engine** según estándares 
 | Save Engine | ✅ | useSaveEngine + useOptimisticMutation implementados |
 | Data-testid | ✅ | Completados en formularios y vistas |
 | Performance | ✅ | Optimistic updates + fire-and-forget mutations |
-| Modales | ✅ | Patrón organization forms refactorizado |
+| Modales | ✅ | Patrón 1:1 Form ↔ Modal (3 modales, 2 forms) |
+| Nomenclatura | ✅ | Forms: `*Form.tsx`, Modals: `*Modal.tsx` |
 | Database | ✅ | RLS, multi-tenant filtering |
 | Security | ✅ | Organization filtering, soft delete |
 | Guards | ✅ | `if (!oldData) return oldData;` en TODOS los optimisticUpdate |
@@ -31,80 +33,111 @@ El feature ORGANIZATION está **100% migrado a Save Engine** según estándares 
 ```
 src/features/organization/
 ├── components/
+│   ├── admin/
+│   │   └── AdminOrganizationRow.tsx
 │   └── (específicos del feature)
-├── forms/
-│   ├── OrganizationFormFields.tsx      ✅ Create/Edit organization
-│   ├── InviteMemberFormFields.tsx      ✅ Invite members (619 líneas)
-│   └── OrganizationMovementConceptForm.tsx ✅ Financial concepts
+├── forms/                              ← 2 FORMS
+│   ├── OrganizationForm.tsx           ✅ Create/Edit organization
+│   └── InviteMemberForm.tsx           ✅ Invite members (619 líneas)
 ├── hooks/
-│   ├── use-create-organization.ts      ✅ useOptimisticMutation
-│   ├── use-update-organization.ts      ✅ useOptimisticMutation
-│   ├── use-delete-member.ts            ✅ useOptimisticMutation
+│   ├── use-create-organization.ts     ✅ useOptimisticMutation
+│   ├── use-update-organization.ts     ✅ useOptimisticMutation
+│   ├── use-delete-member.ts           ✅ useOptimisticMutation
 │   ├── use-update-user-organization-preferences.ts ✅ useOptimisticMutation
 │   └── (otros hooks)
-├── modals/
-│   ├── MemberFormModal.tsx             ✅ Member CRUD (655 líneas)
-│   ├── ProfileOrganizationFormModal.tsx ✅ Organization settings
-│   └── (otros modales)
+├── modals/                             ← 3 MODALS (1:1 con Forms)
+│   ├── OrganizationModal.tsx          ✅ Usa OrganizationForm
+│   ├── InviteMemberModal.tsx          ✅ Usa InviteMemberForm
+│   └── MemberActionConfirmationModal.tsx ✅ Modal de confirmación
 ├── views/
-│   ├── OrganizationDashboardView.tsx   ✅ Dashboard principal
+│   ├── OrganizationDashboardView.tsx  ✅ Dashboard principal
 │   └── (otras vistas)
+├── panels/
+│   ├── WelcomePanel.tsx               ✅ Panel de bienvenida
+│   ├── StatsPanel.tsx                 ✅ Panel de estadísticas
+│   └── ProjectsPanel.tsx              ✅ Panel de proyectos
 ├── services/
 │   └── (servicios puros de API/DB)
 ├── types/
-│   └── index.ts                         ✅ TypeScript types
+│   └── index.ts                        ✅ TypeScript types
 ├── constants/
-│   └── index.ts                         ✅ Query keys, enums
-└── index.ts                             ✅ Barrel exports
+│   └── index.ts                        ✅ Query keys, enums
+├── utils/
+│   └── (utilidades)
+├── AUDIT-ORGANIZATION.md              ← Este documento
+└── index.ts                            ✅ Barrel exports
 ```
 
 ---
 
-## 3. CHECKLIST FINAL DE AUDITORÍA
+## 3. RELACIÓN FORM ↔ MODAL (1:1)
 
-### 3.1 Arquitectura Save Engine ✅
+| Form | Modal | Propósito |
+|------|-------|-----------|
+| `OrganizationForm.tsx` | `OrganizationModal.tsx` | CRUD de organizaciones |
+| `InviteMemberForm.tsx` | `InviteMemberModal.tsx` | Invitación de miembros |
+| (Sin form) | `MemberActionConfirmationModal.tsx` | Confirmación de acciones |
+
+**Nota:** `MemberActionConfirmationModal` es un modal de confirmación simple sin form separado (el modal ES el componente completo).
+
+---
+
+## 4. MODALES LEGACY (Movidos)
+
+Los siguientes modales fueron movidos a `src/features/legacy/modals/` porque **NO pertenecen al feature ORGANIZATION base**:
+
+| Modal | Razón del movimiento |
+|-------|---------------------|
+| `BoardFormModal.tsx` | Pertenece a KANBAN |
+| `CardFormModal.tsx` | Pertenece a KANBAN |
+| `ListFormModal.tsx` | Pertenece a KANBAN |
+| `OrganizationMovementConceptFormModal.tsx` | Pertenece a FINANCES |
+| `OrganizationRemovedModal.tsx` | Modal informativo, no form |
+| `ProfileOrganizationFormModal.tsx` | Duplicado de OrganizationModal |
+| `MemberFormModal.tsx` | Duplicado de InviteMemberModal |
+
+---
+
+## 5. CHECKLIST FINAL DE AUDITORÍA
+
+### 5.1 Arquitectura Save Engine ✅
 - [x] Todas las mutaciones usan `useOptimisticMutation`
 - [x] NO hay `useMutation` legacy en el feature
 - [x] `additionalQueryKeys` especificados correctamente
 - [x] `onSuccessMessage` y `onErrorMessage` implementados
 - [x] Fire-and-forget pattern con `.mutate()` (NO `.mutateAsync()`)
 
-### 3.2 Guards en optimisticUpdate ✅
-- [x] OrganizationFormFields.tsx: `if (!oldData) return oldData;` en createOrganization
-- [x] OrganizationFormFields.tsx: `if (!oldData) return oldData;` en updateOrganization
+### 5.2 Guards en optimisticUpdate ✅
+- [x] OrganizationForm.tsx: `if (!oldData) return oldData;` en createOrganization
+- [x] OrganizationForm.tsx: `if (!oldData) return oldData;` en updateOrganization
 - [x] OrganizationDashboardView.tsx: `if (!oldData) return oldData;` en uploadLogo
-- [x] MemberFormModal.tsx: Guard en createMember y updateMember
-- [x] InviteMemberFormFields.tsx: Guard en createMember y updateMember
+- [x] InviteMemberForm.tsx: Guard en createMember y updateMember
 - [x] Todos los optimisticUpdate tienen protección contra null/undefined
 
-### 3.3 Queries y Cache Invalidation ✅
+### 5.3 Queries y Cache Invalidation ✅
 - [x] queryKey usando array pattern para invalidación correcta
 - [x] additionalQueryKeys incluye queries relacionadas
 - [x] Headers/selectores invalidados al cambiar datos principales
 - [x] NO hay `queryClient.invalidateQueries()` manual sueltas
 
-### 3.4 Supabase Access ✅
+### 5.4 Supabase Access ✅
 - [x] NO hay `supabase.from()` directo en componentes
 - [x] Todas las llamadas están en `saveFn` o `mutationFn`
 - [x] Services puros encapsulan Supabase logic
 - [x] Componentes agnósticos de detalles de DB
 
-### 3.5 Archivos Migrados (8 Total) ✅
-- [x] OrganizationDashboardView.tsx - uploadLogo, selectProject
-- [x] OrganizationDashboard.tsx (página) - uploadLogo, selectProject
-- [x] OrganizationFormFields.tsx - createOrganization, updateOrganization
-- [x] ProfileOrganizationFormModal.tsx - updateOrganization
-- [x] OrganizationMovementConceptFormModal.tsx - createConcept, updateConcept
-- [x] MemberFormModal.tsx (655 líneas) - createMember, updateMember
-- [x] InviteMemberFormFields.tsx (619 líneas) - createMember, updateMember
-- [x] use-update-user-organization-preferences.ts - updatePreferences
+### 5.5 Nomenclatura ✅
+- [x] Forms terminan en `*Form.tsx` (NO `*FormFields.tsx`)
+- [x] Modals terminan en `*Modal.tsx` (NO `*FormModal.tsx`)
+- [x] Views terminan en `*View.tsx`
+- [x] Pages terminan en `*Page.tsx`
 
-### 3.6 Validación de Datos ✅
+### 5.6 Validación de Datos ✅
 - [x] Zod schemas en lugar de validación manual
 - [x] Schemas tipificados correctamente
 - [x] Frontend + Backend validation aligned
 
-### 3.7 Error Handling ✅
+### 5.7 Error Handling ✅
 - [x] `onErrorMessage` en TODAS las mutations
 - [x] Toast notifications para feedback del usuario
 - [x] Rollback automático si mutation falla
@@ -112,39 +145,24 @@ src/features/organization/
 
 ---
 
-## 4. ISSUES RESUELTOS
+## 6. ESTÁNDARES APLICADOS
 
-### Issue 1: Falta guard en optimisticUpdate ✅ RESUELTO
-**Status anterior:** 🔴 Crítico  
-**Cambio:** Agregado `if (!oldData) return oldData;` en TODOS los optimisticUpdate  
-**Beneficio:** Previene corrupción de cache si query aún no existe
-
-### Issue 2: Fire-and-forget pattern inconsistente ✅ RESUELTO
-**Status anterior:** 🟠 Medio  
-**Cambio:** TODOS los mutations usan `.mutate()` sin `await`  
-**Beneficio:** UI instantánea, sin bloqueos
-
-### Issue 3: Cache invalidation manual ✅ RESUELTO
-**Status anterior:** 🟡 Medio  
-**Cambio:** Migrado de `queryClient.invalidateQueries()` a `additionalQueryKeys`  
-**Beneficio:** Pattern centralizado, mantenible
-
----
-
-## 5. ESTÁNDARES APLICADOS
-
+✅ **FEATURE-AUDIT.md Sección 5** - Auditoría de Formularios (Forms)  
 ✅ **FEATURE-AUDIT.md Sección 5.1** - Sistema de Guardado (Save Engine)  
 ✅ **Patrón useOptimisticMutation** - Todas las acciones puntuales  
 ✅ **Guardia if (!oldData)** - Protección contra corrupción  
 ✅ **additionalQueryKeys** - Invalidación correcta de caches relacionados  
 ✅ **Fire-and-forget** - Performance instantáneo  
 ✅ **onSuccessMessage/onErrorMessage** - UX consistent  
+✅ **Nomenclatura *Form.tsx/*Modal.tsx** - Estándar enterprise  
 
 ---
 
-## 6. ENTREGABLES
+## 7. ENTREGABLES
 
-- ✅ 8 archivos migrados a useOptimisticMutation
+- ✅ 2 Forms migrados correctamente (`OrganizationForm`, `InviteMemberForm`)
+- ✅ 3 Modals con nomenclatura correcta (`OrganizationModal`, `InviteMemberModal`, `MemberActionConfirmationModal`)
+- ✅ 7 Modales legacy movidos a `src/features/legacy/modals/`
 - ✅ TODOS los optimisticUpdate con guard `if (!oldData) return oldData;`
 - ✅ 0 instancias de `useMutation` legacy
 - ✅ 0 errores LSP
@@ -153,9 +171,9 @@ src/features/organization/
 
 ---
 
-## 7. CONDICIÓN FINAL: CERRADO ✅
+## 8. CONDICIÓN FINAL: CERRADO ✅
 
-**El feature ORGANIZATION está 100% migrado a Save Engine y listo para producción.**
+**El feature ORGANIZATION está 100% migrado a Save Engine y cumple con FEATURE-AUDIT.md.**
 
 No hay issues pendientes.
 No hay deuda técnica.
@@ -165,7 +183,7 @@ No hay refactorización pendiente.
 
 ---
 
-## 8. Post-Cierre: NO SE TOCA
+## 9. Post-Cierre: NO SE TOCA
 
 Este feature está CERRADO. Cambios futuros:
 1. Crear ticket separado con auditoría completa
