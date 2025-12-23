@@ -274,19 +274,21 @@ export default function GeneralCosts() {
   }
 
   const getPeriodSelector = () => {
-    if (activeTab !== "dashboard") return []
+    if (activeTab !== "dashboard") return undefined
     
-    const selectedLabel = PERIOD_OPTIONS.find(opt => opt.value === validSelectedPeriod)?.label || 'Período'
-    
-    return [
-      <DropdownMenu key="period-selector">
-        <DropdownMenuTrigger
-          className="bg-accent text-white hover:bg-accent/90 rounded-lg px-3 py-1.5 gap-2 text-sm font-medium shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 inline-flex items-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
-          data-testid="select-period"
-        >
-          <Calendar className="h-4 w-4" />
-          <span>{selectedLabel}</span>
-          <ChevronDown className="h-4 w-4" />
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            data-testid="select-period"
+          >
+            <Calendar className="h-4 w-4" />
+            <span>{PERIOD_OPTIONS.find(opt => opt.value === validSelectedPeriod)?.label || 'Período'}</span>
+            <ChevronDown className="h-4 w-4" />
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-[180px]">
           {PERIOD_OPTIONS.map((option) => {
@@ -296,7 +298,7 @@ export default function GeneralCosts() {
                 key={option.value}
                 onClick={() => isAvailable && setSelectedPeriod(option.value)}
                 disabled={!isAvailable}
-                className={validSelectedPeriod === option.value ? "font-medium text-black dark:text-white" : ""}
+                className={validSelectedPeriod === option.value ? "font-medium" : ""}
                 data-testid={`option-period-${option.value}`}
               >
                 {option.label}
@@ -306,7 +308,7 @@ export default function GeneralCosts() {
           })}
         </DropdownMenuContent>
       </DropdownMenu>
-    ]
+    )
   }
 
   const headerProps = {
@@ -319,8 +321,8 @@ export default function GeneralCosts() {
     onTabChange: (tabId: string) => {
       setActiveTab(tabId)
     },
-    actionButton: getActionButton(),
-    actions: getPeriodSelector()
+    actionButton: activeTab === "dashboard" ? undefined : getActionButton(),
+    actions: getPeriodSelector() ? [getPeriodSelector()] : []
   }
 
   return (
