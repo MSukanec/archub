@@ -68,9 +68,9 @@ export function LabToolbar({
       </div>
       
       {showSecondaryToolbar && (
-        <div className="h-12 w-full flex items-center border-b border-[var(--header-border)] bg-background">
-          {showSearch ? (
-            <div className="flex items-center gap-3 px-4 w-full max-w-2xl">
+        <div className="h-12 w-full flex items-center border-b border-[var(--header-border)] bg-background px-4 gap-4">
+          {showSearch && (
+            <div className="flex items-center gap-3 min-w-0 flex-1">
               <Search className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
               <input
                 type="text"
@@ -81,20 +81,20 @@ export function LabToolbar({
                 data-testid="input-lab-search"
               />
             </div>
-          ) : (
-            <>
-              {secondaryLeftSlot && (
-                <div className="flex items-center px-4">
-                  {secondaryLeftSlot}
-                </div>
-              )}
-              <div className="flex-1" />
-              {secondaryRightSlot && (
-                <div className="flex items-center px-4">
-                  {secondaryRightSlot}
-                </div>
-              )}
-            </>
+          )}
+          
+          {!showSearch && secondaryLeftSlot && (
+            <div className="flex items-center">
+              {secondaryLeftSlot}
+            </div>
+          )}
+          
+          {!showSearch && <div className="flex-1" />}
+          
+          {secondaryRightSlot && (
+            <div className="flex items-center gap-2">
+              {secondaryRightSlot}
+            </div>
           )}
         </div>
       )}
