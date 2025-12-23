@@ -101,14 +101,12 @@ Page (Orchestration) - src/pages/{feature}/*Page.tsx
       └─ View (Content) - src/features/{feature}/views/*View.tsx
 ```
 
-**Páginas:**
+**Páginas (UBICACIÓN CONSOLIDADA: src/pages/dashboard/):**
 ```
-src/pages/projects/
-├── ProjectsPage.tsx      ← Orquesta: ProjectActivesView, ProjectListView, ProjectSettingsView
-└── ProjectDataPage.tsx   ← Orquesta: ProjectBasicDataView, ProjectLocationView, ProjectSettingsView
-
-src/pages/project/
-└── Project.tsx           ← Orquesta: ProjectVisionGeneralView
+src/pages/dashboard/
+├── ProjectsPage.tsx           ← Orquesta: ProjectActivesView, ProjectListView, ProjectSettingsView
+├── ProjectDataPage.tsx        ← Orquesta: ProjectBasicDataView, ProjectLocationView, ProjectSettingsView
+└── ProjectDashboardPage.tsx   ← Orquesta: ProjectVisionGeneralView
 ```
 
 **Vistas:**

@@ -311,8 +311,7 @@ function Router() {
 
         <Route path="/finances/capital" component={FinancesCapitalMovements} />
         
-        {/* Duplicate General Routes for compatibility */}
-        <Route path="/project/dashboard" component={Project} />
+        {/* Profile Routes - ORDEN IMPORTANTE: rutas específicas primero */}
         <Route path="/clients" component={Clients} />
 
 
