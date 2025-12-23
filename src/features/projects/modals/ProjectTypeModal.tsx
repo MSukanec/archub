@@ -11,20 +11,20 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationMembers } from '@/features/organization/hooks/use-organization-members';
-import { createProjectModality } from '../services/createProjectModality';
-import { updateProjectModality } from '../services/updateProjectModality';
-import { projectModalitySchema, type ProjectModalityFormData } from '../schemas';
-import type { ProjectModality } from '../types';
+import { createProjectType } from '../services/createProjectType';
+import { updateProjectType } from '../services/updateProjectType';
+import { projectTypeSchema, type ProjectTypeFormData } from '../schemas';
+import type { ProjectType } from '../types';
 
-interface ProjectModalityFormProps {
+interface ProjectTypeFormProps {
   modalData?: {
-    projectModality?: ProjectModality;
+    projectType?: ProjectType;
   };
   onClose: () => void;
   mode?: 'create' | 'edit' | 'view';
 }
 
-function ViewPanel({ data }: { data: ProjectModality }) {
+function ViewPanel({ data }: { data: ProjectType }) {
   return (
     <div className="space-y-4">
       <div>
@@ -33,7 +33,7 @@ function ViewPanel({ data }: { data: ProjectModality }) {
       </div>
       {data.organization_id === null && (
         <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded inline-block">
-          Modalidad del sistema
+          Tipo del sistema
         </div>
       )}
     </div>
@@ -44,8 +44,8 @@ function FormPanel({
   form,
   onSubmit,
 }: {
-  form: ReturnType<typeof useForm<ProjectModalityFormData>>;
-  onSubmit: (data: ProjectModalityFormData) => void;
+  form: ReturnType<typeof useForm<ProjectTypeFormData>>;
+  onSubmit: (data: ProjectTypeFormData) => void;
 }) {
   return (
     <Form {...form}>
@@ -58,9 +58,9 @@ function FormPanel({
               <FormLabel>Nombre</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Nombre de la modalidad"
+                  placeholder="Nombre del tipo"
                   {...field}
-                  data-testid="input-project-modality-name"
+                  data-testid="input-project-type-name"
                 />
               </FormControl>
               <FormMessage />
@@ -72,33 +72,33 @@ function FormPanel({
   );
 }
 
-export function ProjectModalityForm({ modalData, onClose, mode = 'create' }: ProjectModalityFormProps) {
+export function ProjectTypeModal({ modalData, onClose, mode = 'create' }: ProjectTypeFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { projectModality } = modalData || {};
+  const { projectType } = modalData || {};
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   const { data: members = [] } = useOrganizationMembers(organizationId);
 
-  const form = useForm<ProjectModalityFormData>({
-    resolver: zodResolver(projectModalitySchema),
+  const form = useForm<ProjectTypeFormData>({
+    resolver: zodResolver(projectTypeSchema),
     defaultValues: {
       name: '',
     }
   });
 
   useEffect(() => {
-    if (projectModality) {
+    if (projectType) {
       form.reset({
-        name: projectModality.name || '',
+        name: projectType.name || '',
       });
     } else {
       form.reset({
         name: '',
       });
     }
-  }, [projectModality, form]);
+  }, [projectType, form]);
 
   const handleClose = () => {
     form.reset();
@@ -106,52 +106,52 @@ export function ProjectModalityForm({ modalData, onClose, mode = 'create' }: Pro
   };
 
   const createMutation = useMutation({
-    mutationFn: createProjectModality,
+    mutationFn: createProjectType,
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project-modalities', variables.organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['project-modalities'] });
+      queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['project-types'] });
       toast({
-        title: 'Modalidad creada',
-        description: 'La modalidad de proyecto se creó correctamente'
+        title: 'Tipo creado',
+        description: 'El tipo de proyecto se creó correctamente'
       });
       handleClose();
     },
     onError: (error) => {
-      console.error('Error creating project modality:', error);
+      console.error('Error creating project type:', error);
       toast({
         title: 'Error',
-        description: 'No se pudo crear la modalidad de proyecto',
+        description: 'No se pudo crear el tipo de proyecto',
         variant: 'destructive'
       });
     }
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ modalityId, organizationId, data }: {
-      modalityId: string;
+    mutationFn: ({ typeId, organizationId, data }: {
+      typeId: string;
       organizationId: string;
       data: { name?: string };
-    }) => updateProjectModality(modalityId, organizationId, data),
+    }) => updateProjectType(typeId, organizationId, data),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project-modalities', variables.organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['project-modalities'] });
+      queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['project-types'] });
       toast({
-        title: 'Modalidad actualizada',
-        description: 'La modalidad de proyecto se actualizó correctamente'
+        title: 'Tipo actualizado',
+        description: 'El tipo de proyecto se actualizó correctamente'
       });
       handleClose();
     },
     onError: (error) => {
-      console.error('Error updating project modality:', error);
+      console.error('Error updating project type:', error);
       toast({
         title: 'Error',
-        description: 'No se pudo actualizar la modalidad de proyecto',
+        description: 'No se pudo actualizar el tipo de proyecto',
         variant: 'destructive'
       });
     }
   });
 
-  const onSubmit = async (data: ProjectModalityFormData) => {
+  const onSubmit = async (data: ProjectTypeFormData) => {
     if (!organizationId) {
       toast({
         title: 'Error',
@@ -164,9 +164,9 @@ export function ProjectModalityForm({ modalData, onClose, mode = 'create' }: Pro
     setIsSubmitting(true);
 
     try {
-      if (mode === 'edit' && projectModality) {
+      if (mode === 'edit' && projectType) {
         await updateMutation.mutateAsync({
-          modalityId: projectModality.id,
+          typeId: projectType.id,
           organizationId,
           data: { name: data.name }
         });
@@ -196,19 +196,19 @@ export function ProjectModalityForm({ modalData, onClose, mode = 'create' }: Pro
     switch (mode) {
       case 'view':
         return {
-          title: 'Detalle de Modalidad',
-          description: 'Información de la modalidad de proyecto'
+          title: 'Detalle de Tipo',
+          description: 'Información del tipo de proyecto'
         };
       case 'edit':
         return {
-          title: 'Editar Modalidad',
-          description: 'Modifica los datos de la modalidad de proyecto'
+          title: 'Editar Tipo',
+          description: 'Modifica los datos del tipo de proyecto'
         };
       case 'create':
       default:
         return {
-          title: 'Nueva Modalidad',
-          description: 'Crea una nueva modalidad de proyecto para tu organización'
+          title: 'Nuevo Tipo',
+          description: 'Crea un nuevo tipo de proyecto para tu organización'
         };
     }
   };
@@ -224,8 +224,8 @@ export function ProjectModalityForm({ modalData, onClose, mode = 'create' }: Pro
       />
       
       <ModalBody>
-        {mode === 'view' && projectModality ? (
-          <ViewPanel data={projectModality} />
+        {mode === 'view' && projectType ? (
+          <ViewPanel data={projectType} />
         ) : (
           <FormPanel form={form} onSubmit={onSubmit} />
         )}

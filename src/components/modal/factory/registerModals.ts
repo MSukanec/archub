@@ -2,7 +2,7 @@ import { registerModal, ModalConfig } from './registry';
 
 import { MemberFormModal, InviteMemberModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, OrganizationFormModal, ProfileOrganizationFormModal } from '@/features/organization';
 import { CapitalParticipantModal, PartnerContributionModal, PartnerWithdrawalModal, CapitalTransactionModal } from '@/features/capital';
-import { ProjectForm } from '@/features/projects';
+import { ProjectModal } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
 import ContactForm from '@/features/contacts/forms/ContactForm';
 import { ContactTypeForm } from '@/features/contacts/forms/ContactTypeForm';
@@ -20,8 +20,8 @@ import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPrese
 import { UserFormModal, ChangelogFormModal, NotificationFormModal, AnnouncementFormModal, SupportConversationStartModal, PlanFormModal, PlanPriceFormModal, DowngradeModal, UpgradeModal, ResetTestDataModal } from '@/features/users';
 import SiteLogForm from '@/features/sitelog/forms/SiteLogForm';
 import { SiteLogTypeForm } from '@/features/sitelog/forms/SiteLogTypeForm';
-import { ProjectTypeForm } from '@/features/projects/forms/ProjectTypeForm';
-import { ProjectModalityForm } from '@/features/projects/forms/ProjectModalityForm';
+import { ProjectTypeModal } from '@/features/projects/modals/ProjectTypeModal';
+import { ProjectModalityModal } from '@/features/projects/modals/ProjectModalityModal';
 import { PersonnelAttendanceModal, PersonnelAddModal, PersonnelDataModal, PersonnelRatesModal, AdminLaborModal, PersonnelPaymentModal } from '@/features/personnel';
 import { SubcontractFormModal, SubcontractBidFormModal, SubcontractAwardModal, SubcontractTaskFormModal } from '@/features/subcontracts';
 import { PDFExporterModal } from '@/features/pdf';
@@ -165,7 +165,7 @@ export function initializeModalRegistry(): void {
   registerModal('profile-organization', ProfileOrganizationFormModal as any, organizationConfig);
   registerModal('organization-movement-concept', OrganizationMovementConceptFormModal as any, organizationConfig);
   
-  registerModal('project', ProjectForm as any, { 
+  registerModal('project', ProjectModal as any, { 
     ...projectConfig, 
     size: 'lg',
     mapDataToProps: (data) => ({
@@ -207,7 +207,7 @@ export function initializeModalRegistry(): void {
   registerModal('renew-insurance', RenewInsuranceFormModal as any, projectConfig);
   registerModal('indirect', IndirectModal as any, projectConfig);
   registerModal('cost-modal', CostModal as any, projectConfig);
-  registerModal('projectType', ProjectTypeForm as any, { 
+  registerModal('projectType', ProjectTypeModal as any, { 
     ...projectConfig, 
     size: 'md',
     mapDataToProps: (data) => ({
@@ -215,7 +215,7 @@ export function initializeModalRegistry(): void {
       mode: data?.isEditing || data?.projectType ? 'edit' : 'create',
     }),
   });
-  registerModal('projectModality', ProjectModalityForm as any, { 
+  registerModal('projectModality', ProjectModalityModal as any, { 
     ...projectConfig, 
     size: 'md',
     mapDataToProps: (data) => ({

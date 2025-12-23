@@ -72,9 +72,12 @@ export { default as ProjectSelectorField } from './components/ProjectSelectorFie
 export { default as ProjectRow } from './components/ProjectRow';
 
 // ============ FORMS ============
-export { ProjectForm } from './forms/ProjectForm';
-export { ProjectModalityForm } from './forms/ProjectModalityForm';
-export { ProjectTypeForm } from './forms/ProjectTypeForm';
+export * from './forms/ProjectFormFields';
+
+// ============ MODALS ============
+export { ProjectModal } from './modals/ProjectModal';
+export { ProjectModalityModal } from './modals/ProjectModalityModal';
+export { ProjectTypeModal } from './modals/ProjectTypeModal';
 
 // ============ LEGACY MODALS (Re-exported for backward compatibility) ============
 // These modals are now in @/features/legacy and will be distributed to appropriate features

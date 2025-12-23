@@ -6,16 +6,16 @@ import {
   ViewPanel, 
   useProjectForm,
   type Project 
-} from './ProjectFormFields';
+} from '../forms/ProjectFormFields';
 
-interface ProjectFormProps {
+interface ProjectModalProps {
   modalData?: any;
   project?: Project;
   mode?: 'create' | 'edit' | 'view';
   onClose: () => void;
 }
 
-export function ProjectForm({ modalData, project: projectProp, mode: modeProp, onClose }: ProjectFormProps) {
+export function ProjectModal({ modalData, project: projectProp, mode: modeProp, onClose }: ProjectModalProps) {
   const project = projectProp || modalData?.project || modalData?.editingProject;
   const mode = modeProp || modalData?.mode || (project ? 'edit' : 'create');
   const { toast } = useToast();
@@ -157,4 +157,4 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
   );
 }
 
-export default ProjectForm;
+export default ProjectModal;

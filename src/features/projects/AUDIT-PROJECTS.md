@@ -240,7 +240,7 @@ TIER 1 - Form Core (ProjectFormFields.tsx):
   - projectSchema: Schema Zod para validación
   - ProjectFormData, Project: Tipos TypeScript
 
-TIER 2 - Experience Wrapper (ProjectForm.tsx):
+TIER 2 - Experience Wrapper (modals/ProjectModal.tsx):
   - Wrapper modal que consume useProjectForm
   - Maneja todos los toasts (UX específica del modal)
   - Bloquea cierre durante upload de imagen
@@ -259,6 +259,33 @@ Estado neutral retornado:
 
 Esta arquitectura permite reutilizar FormPanel/ViewPanel/useProjectForm
 en drawers, páginas u otros contextos con diferentes UX.
+```
+
+### Issue #5: Separación forms/modals incorrecta ✅ RESUELTO
+```
+Problema: Todos los modales estaban en forms/ con nombre *Form.tsx
+
+ESTRUCTURA ANTES (mal):
+  src/features/projects/forms/
+    ├── ProjectForm.tsx           ← ERA UN MODAL
+    ├── ProjectFormFields.tsx     ← CORRECTO
+    ├── ProjectModalityForm.tsx   ← ERA UN MODAL
+    └── ProjectTypeForm.tsx       ← ERA UN MODAL
+
+ESTRUCTURA DESPUÉS (correcto):
+  src/features/projects/forms/
+    └── ProjectFormFields.tsx     ← Único form agnóstico
+
+  src/features/projects/modals/
+    ├── ProjectModal.tsx          ← Renombrado y movido
+    ├── ProjectModalityModal.tsx  ← Renombrado y movido
+    └── ProjectTypeModal.tsx      ← Renombrado y movido
+
+IMPORTS ACTUALIZADOS:
+  - src/components/modal/factory/registerModals.ts
+  - src/features/projects/index.ts (barrel exports)
+
+REGLA: forms/ contiene *FormFields.tsx (agnósticos), modals/ contiene *Modal.tsx (envases)
 ```
 
 ### Issue #3: Faltan data-testid ✅ RESUELTO
