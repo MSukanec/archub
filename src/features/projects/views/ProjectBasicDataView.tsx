@@ -139,8 +139,8 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
   });
 
   // Mutation to delete project image using optimistic mutation
-  const { mutate: deleteImage, isPending: isDeletingImage } = useOptimisticMutation({
-    mutationFn: async () => {
+  const { mutate: deleteImage, isPending: isDeletingImage } = useOptimisticMutation<void, void>({
+    mutationFn: async (): Promise<void> => {
       if (!activeProjectId || !organizationId) {
         throw new Error('Project ID and Organization ID are required');
       }
@@ -252,7 +252,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     },
     delay: 1500,
     enabled: !!userData && !!activeProjectId,
-    additionalQueryKeys: [['project-info', activeProjectId], ['projects'], ['active-projects']],
+    additionalQueryKeys: [['project-info', activeProjectId], ['projects'], ['projects-lite', organizationId], ['active-projects']],
   });
 
   // UNIFIED hydration effect - loads ALL data at once, then marks as hydrated

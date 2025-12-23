@@ -545,33 +545,157 @@ const onSubmit = async (data: FormData) => {
 
 ### 5.1 AUDITORÍA DE SISTEMA DE GUARDADO (SAVE ENGINE)
 
-**Objetivo:** Asegurar que todos los formularios, modales y vistas con auto-save usen el sistema centralizado.
+**Objetivo:** Asegurar que TODOS los formularios, modales y vistas con auto-save o acciones puntuales usen el sistema centralizado de guardado.
+
+**REGLA DE ORO:** 
+- ✅ `useSaveEngine` → Auto-save con delay (campos de texto, descripciones, etc.)
+- ✅ `useOptimisticMutation` → Acciones puntuales (toggles, clicks, deletes)
+- ❌ `supabase.from()` NUNCA directo en componentes
+- ❌ `queryClient.invalidateQueries()` NUNCA sueltas sin patrón
 
 **Checklist:**
 - [ ] ¿Usa `useSaveEngine` de `@/core/save-engine` para auto-save?
 - [ ] ¿Usa `useOptimisticMutation` para acciones puntuales (toggles, clicks)?
+- [ ] ¿Tiene `additionalQueryKeys` para invalidar caches relacionados?
+- [ ] ¿Incluye guardia `if (!oldData) return oldData;` en optimisticUpdate?
 - [ ] ¿NO hay llamadas directas a Supabase en componentes?
 - [ ] ¿NO hay `invalidateQueries` manuales sueltas?
-- [ ] ¿Tiene `additionalQueryKeys` para invalidar caches relacionados?
 
-**Patrón correcto de auto-save:**
+---
+
+#### Patrón 1: AUTO-SAVE CON useSaveEngine
+
+Para campos que se guardan **automáticamente** tras cambios (RDBMS):
+
 ```typescript
-const { isSaving } = useSaveEngine({
-  data: formData,
-  queryKey: ['entity', entityId],
-  saveFn: async (data) => { /* guardar */ },
-  delay: 1500,
-  enabled: !!entityId,
-  additionalQueryKeys: [['related-data']],
+const { isSaving, hasUnsavedChanges } = useSaveEngine({
+  data: {
+    name: projectName,
+    description: description,
+    status: status
+  },
+  queryKey: ['project-data', projectId],
+  saveFn: async (dataToSave) => {
+    // Llamada única a Supabase con los campos que cambiaron
+    const { error } = await supabase
+      .from('projects')
+      .update(dataToSave)
+      .eq('id', projectId);
+    if (error) throw error;
+  },
+  delay: 1500,  // Espera 1.5s sin cambios antes de guardar
+  enabled: !!projectId,
+  additionalQueryKeys: [
+    ['project-info', projectId],  // Relacionados que dependan de estos datos
+    ['projects'],                  // Índices principales
+    ['projects-lite', organizationId]  // CRÍTICO: Headers, selectores
+  ],
 });
+
+// En el JSX:
+<Input 
+  value={projectName}
+  onChange={(e) => setProjectName(e.target.value)}
+  // ⚡ Automáticamente guarda tras 1.5s sin cambios
+/>
+
+{isSaving && <Spinner />}
+{hasUnsavedChanges && <UnsavedIndicator />}
 ```
 
-**Referencia:** Documentación completa en `/docs/save-architecture.md`
+**Configuración recomendada:**
+- `delay`: 1500ms (espera a que el usuario pare de escribir)
+- `initialLoadDelay`: 300ms (para datos en transición)
+- `additionalQueryKeys`: **CRÍTICO** - invalida selectores, headers, índices que usen estos datos
 
-**Prohibiciones:**
-- ❌ `supabase.from()` directamente en componentes
-- ❌ `queryClient.invalidateQueries()` sueltas sin patrón
-- ❌ `useAutoSave` legacy (migrar a `useSaveEngine`)
+---
+
+#### Patrón 2: ACCIONES PUNTUALES CON useOptimisticMutation
+
+Para acciones que ocurren por **click/toggle** (DELETE, TOGGLE, SELECT):
+
+```typescript
+const { mutate: deleteProject } = useOptimisticMutation({
+  mutationFn: async (projectId: string) => {
+    const { error } = await supabase
+      .from('projects')
+      .delete()
+      .eq('id', projectId);
+    if (error) throw error;
+  },
+  queryKey: ['projects', organizationId],
+  optimisticUpdate: (oldData: any, projectId: string) => {
+    // ⚠️ GUARDIA CRÍTICA: Evitar corrupción de cache
+    if (!Array.isArray(oldData)) return oldData;
+    return oldData.filter(p => p.id !== projectId);
+  },
+  onSuccessMessage: "Proyecto eliminado",
+  onErrorMessage: "No se pudo eliminar",
+  additionalQueryKeys: [['projects-lite'], ['active-projects']],
+});
+
+// En el JSX:
+<Button onClick={() => deleteProject(projectId)}>
+  Eliminar
+</Button>
+```
+
+**Guardia CRÍTICA en optimisticUpdate:**
+
+```typescript
+optimisticUpdate: (oldData: any, variables: any) => {
+  // ⚠️ Si oldData es undefined/null, retorna sin modificar
+  if (!oldData) return oldData;
+  
+  // ✅ Ahora es seguro hacer spread/map/filter
+  return {
+    ...oldData,
+    ...variables
+  };
+}
+```
+
+**Por qué:** Sin esta guardia, si la query aún no existe en cache (initial fetch en progreso), 
+la optimisticUpdate intenta spreadearlo y causa corrupción. Con la guardia, esperamos a que 
+cache esté listo.
+
+---
+
+#### Patterns de Invalidación de Cache
+
+**Regla:** Cada query principal tiene sus "dependientes" que deben invalidarse:
+
+| Query Principal | Dependientes a Invalidar |
+|-----------------|-------------------------|
+| `['project-data', id]` | `['project-info', id]`, `['projects']`, `['projects-lite']` |
+| `['projects']` | `['projects-lite']`, `['active-projects']` |
+| `['project-info', id]` | `['project-data', id]`, `['projects']` |
+| `['active-projects']` | (No suele tener dependientes, es un índice) |
+
+**Especialmente para HEADERS/SELECTORES:**
+```typescript
+// Al actualizar nombre de proyecto:
+additionalQueryKeys: [
+  ['projects-lite', organizationId]  // ← Selector del header
+]
+```
+
+---
+
+#### Referencia Completa
+
+**Archivo principal:** `/src/core/save-engine/`
+- `useSaveEngine.ts` → Hook para auto-save
+- `useOptimisticMutation.ts` → Hook para acciones puntuales
+
+**Documentación completa:** `/docs/save-architecture.md`
+
+**Prohibiciones ABSOLUTAS:**
+- ❌ `supabase.from()` directo en componentes (solo en `saveFn` de hooks)
+- ❌ `queryClient.invalidateQueries()` sueltas (usar `additionalQueryKeys`)
+- ❌ `await mutateAsync()` en handlers (usar `.mutate()` fire-and-forget)
+- ❌ `useAutoSave` legacy (migrar a `useSaveEngine` con delay)
+- ❌ Optimistic updates sin guardia `if (!oldData) return oldData;`
 
 ---
 
