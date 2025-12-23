@@ -104,14 +104,12 @@ import CommunityMap from "@/pages/community/CommunityMap";
 const ClientPortal = lazy(() => import("@/pages/client-portal/ClientPortal"));
 const PortalAuthCallback = lazy(() => import("@/pages/client-portal/PortalAuthCallback"));
 
-// Learning Dashboard (importado normalmente para evitar loader)
+// Learning Pages (importado normalmente para evitar loader)
 import LearningDashboard from "@/pages/learning/dashboard/LearningDashboard";
-
-// Learning Pages (Lazy Loaded - incluye reproductor Vimeo pesado)
+import CourseList from "@/pages/learning/courses/CourseList";
 
 // Founders Portal (Lazy Loaded - solo fundadores)
 const FoundersPortalPage = lazy(() => import("@/features/founders-portal").then(m => ({ default: m.FoundersPortalPage })));
-const CourseList = lazy(() => import("@/pages/learning/courses/CourseList"));
 const CourseInfo = lazy(() => import("@/pages/learning/courses/CourseInfo"));
 const CourseView = lazy(() => import("@/pages/learning/courses/CourseView"));
 const CourseLandingPrivate = lazy(() => import("@/pages/professional/learning/CourseLanding"));
@@ -271,11 +269,7 @@ function Router() {
         
         {/* Learning Routes */}
         <Route path="/learning/dashboard" component={LearningDashboard} />
-        <Route path="/learning/courses">
-          <Suspense fallback={<LazyLoadFallback />}>
-            <CourseList />
-          </Suspense>
-        </Route>
+        <Route path="/learning/courses" component={CourseList} />
         <Route path="/learning/courses/:slug/info">
           <Suspense fallback={<LazyLoadFallback />}>
             <CourseInfo />

@@ -1,32 +1,38 @@
-import { useEffect } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import { CoursesCatalogContent } from '@/features/shared-content/courses/CoursesCatalogContent';
+import { LabLayout } from "@/layouts/lab/LabLayout";
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { CourseListView } from '@/features/learning/views/CourseListView';
 import { BookOpen } from 'lucide-react';
-import { useNavigationStore } from '@/stores/navigationStore';
 
 export default function CourseList() {
-  const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore();
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
 
-  useEffect(() => {
-    setSidebarContext('learning');
-    if (sidebarLevel !== 'general') {
-      setSidebarLevel('learning');
-    }
-  }, [setSidebarContext, setSidebarLevel, sidebarLevel]);
+  const layoutPreference = userData?.preferences?.layout || 'experimental';
+  const isLabLayout = layoutPreference === 'lab';
 
   const headerProps = {
     title: "Cursos",
     icon: BookOpen,
-    tabs: [],
-    onTabChange: () => {},
-    actions: []
+    organizationId,
+    showMembers: false,
   };
+
+  if (isLabLayout) {
+    return (
+      <LabLayout 
+        showToolbar={true} 
+        organizationId={organizationId}
+        showMembers={false}
+      >
+        <CourseListView />
+      </LabLayout>
+    );
+  }
 
   return (
     <Layout headerProps={headerProps} wide>
-      <div className="space-y-6">
-        <CoursesCatalogContent mode="dashboard" showTabs={true} />
-      </div>
+      <CourseListView />
     </Layout>
   );
 }
