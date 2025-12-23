@@ -60,16 +60,18 @@ function LabLayoutInner({
   return (
     <div className="h-full w-full flex flex-col overflow-hidden bg-background">
       {showToolbar && (
-        <LabToolbar 
-          showSecondaryToolbar={showSecondaryToolbar}
-          showSearch={showSearch} 
-          organizationId={organizationId}
-          showMembers={showMembers}
-          tabs={tabs}
-          activeTab={activeTab}
-          onTabChange={onTabChange}
-          {...toolbarProps} 
-        />
+        <div className="flex-shrink-0">
+          <LabToolbar 
+            showSecondaryToolbar={showSecondaryToolbar}
+            showSearch={showSearch} 
+            organizationId={organizationId}
+            showMembers={showMembers}
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={onTabChange}
+            {...toolbarProps} 
+          />
+        </div>
       )}
       <div className="flex-1 flex overflow-hidden min-h-0">
         <div className="flex-1 overflow-auto p-6">
