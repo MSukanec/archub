@@ -123,7 +123,7 @@ import ProjectFinances from "@/pages/project-finances/ProjectFinances";
 // Settings Pages (legacy - keeping for backwards compatibility)
 import PricingPlan from "@/pages/settings/PricingPlan";
 import Billing from "@/pages/billing/Billing";
-import Members from "@/pages/members/Members";
+import { OrganizationMembersPage } from "@/pages/dashboard/OrganizationMembersPage";
 import Capital from "@/pages/capital/Capital";
 import OrganizationActivity from "@/pages/settings/OrganizationActivity";
 
@@ -254,7 +254,7 @@ function Router() {
         {/* Organization Settings Routes */}
         <Route path="/organization/billing" component={Billing} />
         <Route path="/organization/settings" component={OrganizationSettingsPage} />
-        <Route path="/organization/members" component={Members} />
+        <Route path="/organization/members" component={OrganizationMembersPage} />
         <Route path="/organization/capital" component={Capital} />
         <Route path="/settings/organization-activity" component={OrganizationActivity} />
         <Route path="/settings/pricing-plan" component={PricingPlan} />

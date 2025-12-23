@@ -1,19 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import { MembersListTab } from '@/pages/members/tabs/MembersListTab';
-import { PermissionsTab } from '@/pages/members/tabs/PermissionsTab';
-import { Users, UserPlus, Search, Filter, Bell, Shield } from 'lucide-react';
+import { OrganizationMembersListView, OrganizationPermissionsView, useOrganizationMembers } from '@/features/organization';
+import { Users, UserPlus, Search, Filter, Bell } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
 import { useMobile } from "@/hooks/use-mobile";
 import { PlanRestricted } from "@/features/users";
-import { useOrganizationMembers } from "@/features/organization";
 import { useActionBarMobile } from '@/layouts';
 import { FEATURE_IMAGES } from '@/constants/images';
 
-export default function Members() {
+export function OrganizationMembersPage() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
@@ -83,11 +81,11 @@ export default function Members() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'list':
-        return <MembersListTab />;
+        return <OrganizationMembersListView />;
       case 'permissions':
-        return <PermissionsTab />;
+        return <OrganizationPermissionsView />;
       default:
-        return <MembersListTab />;
+        return <OrganizationMembersListView />;
     }
   };
 

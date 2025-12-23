@@ -24,3 +24,5 @@ export type { PeriodFilter } from './views/OrganizationFinancesDashboardView';
 export { OrganizationFinancesMovementsView } from './views/OrganizationFinancesMovementsView';
 export { OrganizationSettingsFinancesView } from './views/OrganizationSettingsFinancesView';
 export { OrganizationSettingsPdfView } from './views/OrganizationSettingsPdfView';
+export { OrganizationMembersListView } from './views/OrganizationMembersListView';
+export { OrganizationPermissionsView } from './views/OrganizationPermissionsView';

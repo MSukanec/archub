@@ -60,7 +60,7 @@ function getRoleBadgeClassName(roleName: string) {
   return '';
 }
 
-export function MembersListTab() {
+export function OrganizationMembersListView() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
@@ -193,7 +193,6 @@ export function MembersListTab() {
     enabled: !!organizationId,
   });
 
-  // Query para miembros anteriores (inactivos)
   const { data: formerMembersRaw = [] } = useQuery({
     queryKey: ['organization-former-members', organizationId],
     queryFn: async () => {
@@ -648,7 +647,6 @@ export function MembersListTab() {
         </div>
       </div>
 
-      {/* Sección de Miembros Anteriores - Solo mostrar si hay miembros inactivos */}
       {formerMembers.length > 0 && (
         <>
           <hr className="border-t border-[var(--section-divider)] my-8" />

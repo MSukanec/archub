@@ -193,7 +193,7 @@ function getPermissionInfo(key: string): { label: string; description: string } 
   return { label, description: '' };
 }
 
-export function PermissionsTab() {
+export function OrganizationPermissionsView() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
