@@ -411,6 +411,82 @@ Antes de refactorizar una página:
 
 ---
 
+## Botones de Acción y Barra Secundaria (Lab Layout)
+
+### Regla Fundamental
+**Los botones de acción de la página (crear, agregar, filtrar por período, etc.) NUNCA van en el contenido de la View. SIEMPRE van en la barra secundaria del toolbar.**
+
+### Implementación
+
+En el **PAGE** (orquestador), definir los botones según el tab activo y pasarlos via `toolbarProps.secondaryRightSlot`:
+
+```typescript
+export default function MyPage() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const { openModal } = useGlobalModalStore();
+
+  // Botones de acción según tab activo
+  const actionButtons = (
+    <div className="flex items-center gap-3">
+      {activeTab === "dashboard" && (
+        <PeriodSelector ... />
+      )}
+      {activeTab === "list" && (
+        <Button size="sm" onClick={() => openModal('create-item', {})}>
+          <Plus className="w-4 h-4 mr-2" />
+          Agregar Item
+        </Button>
+      )}
+    </div>
+  );
+
+  if (isLabLayout) {
+    return (
+      <LabLayout 
+        tabs={TABS}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        toolbarProps={{
+          secondaryRightSlot: actionButtons, // <-- Botones aquí
+        }}
+      >
+        {renderView()}
+      </LabLayout>
+    );
+  }
+
+  return (
+    <Layout headerProps={{ ...headerProps, actionButton: ... }}>
+      {renderView()}
+    </Layout>
+  );
+}
+```
+
+### Ubicación Visual
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ CONTEXTO ▼ │ PÁGINA ▼ │ VISTA ▼ │         │ [Avatar] │ [User Menu] │
+├─────────────────────────────────────────────────────────────────────┤
+│ 🔍 Buscar...                              │ [Período ▼] [+ Agregar] │  <-- Barra secundaria
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│                        CONTENIDO (VIEW)                             │
+│                    (Sin botones de acción)                          │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Checklist de Botones
+
+- [ ] ¿Los botones de acción están en `toolbarProps.secondaryRightSlot`?
+- [ ] ¿La View NO contiene botones de crear/agregar en su contenido?
+- [ ] ¿El selector de período (si existe) está en la barra secundaria?
+- [ ] ¿Los botones cambian según el `activeTab`?
+
+---
+
 ## Próximos Pasos
 
 Cuando necesites refactorizar una página:

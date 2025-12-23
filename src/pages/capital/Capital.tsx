@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
+import { LabLayout } from "@/layouts/lab/LabLayout";
 import CapitalDashboardTab, { calculateAvailablePeriods, type PeriodFilter } from '@/pages/capital/tabs/CapitalDashboardTab';
 import { CapitalParticipantsListTab } from '@/pages/capital/tabs/CapitalParticipantsListTab';
 import { CapitalBalancesTab } from '@/pages/capital/tabs/CapitalBalancesTab';
 import { CapitalTransactionsTab } from '@/pages/capital/tabs/CapitalTransactionsTab';
-import { HandHeart, Plus, ChevronDown, Check } from 'lucide-react';
+import { HandHeart, Plus, ChevronDown, Calendar } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useGlobalModalStore } from '@/components/modal';
@@ -17,15 +18,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
 import { useCapitalDataHealth, DataHealthAlertMulti, type NormalizedCapitalTransaction } from '@/core/data-health';
 
-const periodOptions: { value: PeriodFilter; label: string }[] = [
+const PERIOD_OPTIONS: { value: PeriodFilter; label: string }[] = [
   { value: '30d', label: 'Últimos 30 días' },
   { value: '3m', label: 'Últimos 3 meses' },
   { value: '6m', label: 'Últimos 6 meses' },
   { value: '1y', label: 'Último año' },
   { value: 'all', label: 'Histórico' },
+];
+
+const CAPITAL_TABS = [
+  { id: 'dashboard', label: 'Visión General' },
+  { id: 'list', label: 'Participantes' },
+  { id: 'balances', label: 'Balances' },
+  { id: 'transactions', label: 'Transacciones' },
 ];
 
 export default function Capital() {
@@ -36,6 +43,9 @@ export default function Capital() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
   const [activeFilterIssueId, setActiveFilterIssueId] = useState<string | null>(null);
   const [dismissedIssueIds, setDismissedIssueIds] = useState<Set<string>>(new Set());
+
+  const layoutPreference = userData?.preferences?.layout || 'experimental';
+  const isLabLayout = layoutPreference === 'lab';
 
   useEffect(() => {
     setSidebarLevel('organization');
@@ -53,6 +63,17 @@ export default function Capital() {
   const availablePeriods = useMemo(() => {
     return calculateAvailablePeriods(contributions, withdrawals);
   }, [contributions, withdrawals]);
+
+  const validSelectedPeriod = useMemo(() => {
+    if (availablePeriods[selectedPeriod]) return selectedPeriod;
+    return 'all';
+  }, [selectedPeriod, availablePeriods]);
+
+  useEffect(() => {
+    if (validSelectedPeriod !== selectedPeriod) {
+      setSelectedPeriod(validSelectedPeriod);
+    }
+  }, [validSelectedPeriod, selectedPeriod]);
 
   const normalizedTransactions = useMemo<NormalizedCapitalTransaction[]>(() => {
     const contributionItems = contributions.map((c: any) => ({
@@ -125,19 +146,12 @@ export default function Capital() {
     setActiveTab(tab);
   }, []);
 
-  const tabs = [
-    { id: 'dashboard', label: 'Visión General', isActive: activeTab === 'dashboard' },
-    { id: 'list', label: 'Participantes', isActive: activeTab === 'list' },
-    { id: 'balances', label: 'Balances', isActive: activeTab === 'balances', disabled: !hasPartners },
-    { id: 'transactions', label: 'Transacciones', isActive: activeTab === 'transactions', disabled: !hasPartners }
-  ];
-
-  const renderTabContent = () => {
+  const renderView = () => {
     switch (activeTab) {
       case 'dashboard':
         return (
           <CapitalDashboardTab 
-            selectedPeriod={selectedPeriod}
+            selectedPeriod={validSelectedPeriod}
             onNavigateToList={() => setActiveTab('list')}
             onNavigateToBalances={() => setActiveTab('balances')}
             onNavigateToTransactions={() => setActiveTab('transactions')}
@@ -158,7 +172,7 @@ export default function Capital() {
       default:
         return (
           <CapitalDashboardTab 
-            selectedPeriod={selectedPeriod}
+            selectedPeriod={validSelectedPeriod}
             onNavigateToList={() => setActiveTab('list')}
             onNavigateToBalances={() => setActiveTab('balances')}
             onNavigateToTransactions={() => setActiveTab('transactions')}
@@ -168,24 +182,126 @@ export default function Capital() {
     }
   };
 
+  const dataHealthAlert = dataHealth.result?.issues && dataHealth.result.issues.length > 0 ? (
+    <DataHealthAlertMulti
+      issues={dataHealth.result.issues}
+      entityLabel="transacción"
+      activeFilterIssueId={activeFilterIssueId}
+      onToggleFilter={handleDataHealthClick}
+      dismissedIssueIds={dismissedIssueIds}
+      onDismissIssue={(issueId: string) => {
+        if (activeFilterIssueId === issueId) {
+          setActiveFilterIssueId(null);
+        }
+        setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
+      }}
+      filteredItemIds={filteredTransactionIds || undefined}
+    />
+  ) : null;
+
+  const secondaryRightContent = (
+    <div className="flex items-center gap-3">
+      {activeTab === 'dashboard' && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              data-testid="button-period-filter"
+            >
+              <Calendar className="h-4 w-4" />
+              <span>{PERIOD_OPTIONS.find(p => p.value === validSelectedPeriod)?.label}</span>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[180px]">
+            {PERIOD_OPTIONS.map((option) => {
+              const isAvailable = availablePeriods[option.value];
+              return (
+                <DropdownMenuItem
+                  key={option.value}
+                  onClick={() => isAvailable && setSelectedPeriod(option.value)}
+                  disabled={!isAvailable}
+                  className={validSelectedPeriod === option.value ? "font-medium" : ""}
+                  data-testid={`menu-item-period-${option.value}`}
+                >
+                  <span>{option.label}</span>
+                  {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+      {activeTab === 'list' && (
+        <Button
+          size="sm"
+          onClick={handleAddParticipant}
+          data-testid="button-add-participant"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Agregar Participante
+        </Button>
+      )}
+      {activeTab === 'transactions' && hasPartners && (
+        <Button
+          size="sm"
+          onClick={handleAddTransaction}
+          data-testid="button-add-transaction"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Nueva Transacción
+        </Button>
+      )}
+    </div>
+  );
+
+  const tabs = CAPITAL_TABS.map(tab => ({
+    ...tab,
+    isActive: activeTab === tab.id,
+    disabled: (tab.id === 'balances' || tab.id === 'transactions') && !hasPartners,
+  }));
+
+  if (isLabLayout) {
+    return (
+      <LabLayout 
+        showToolbar={true}
+        organizationId={organizationId}
+        showMembers={true}
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        toolbarProps={{
+          secondaryRightSlot: secondaryRightContent,
+        }}
+      >
+        <div className="space-y-6">
+          {dataHealthAlert}
+          {renderView()}
+        </div>
+      </LabLayout>
+    );
+  }
+
   const periodFilterComponent = activeTab === 'dashboard' ? (
     <DropdownMenu>
       <DropdownMenuTrigger
         className="bg-accent text-white hover:bg-accent/90 rounded-lg px-3 py-1.5 gap-2 text-sm font-medium shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 inline-flex items-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
         data-testid="button-period-filter"
       >
-        {periodOptions.find(p => p.value === selectedPeriod)?.label}
+        {PERIOD_OPTIONS.find(p => p.value === validSelectedPeriod)?.label}
         <ChevronDown className="h-4 w-4" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[180px]">
-        {periodOptions.map((option) => {
+        {PERIOD_OPTIONS.map((option) => {
           const isAvailable = availablePeriods[option.value];
           return (
             <DropdownMenuItem
               key={option.value}
               onClick={() => isAvailable && setSelectedPeriod(option.value)}
               disabled={!isAvailable}
-              className={selectedPeriod === option.value ? "font-medium text-black dark:text-white" : ""}
+              className={validSelectedPeriod === option.value ? "font-medium text-black dark:text-white" : ""}
               data-testid={`menu-item-period-${option.value}`}
             >
               <span>{option.label}</span>
@@ -215,7 +331,7 @@ export default function Capital() {
         onClick: handleAddParticipant
       }
     }),
-    ...(activeTab === 'transactions' && {
+    ...(activeTab === 'transactions' && hasPartners && {
       actionButton: {
         label: "Nueva Transacción",
         icon: Plus,
@@ -227,23 +343,8 @@ export default function Capital() {
   return (
     <Layout headerProps={headerProps} wide={false}>
       <div className="space-y-6">
-        {dataHealth.result?.issues && (
-          <DataHealthAlertMulti
-            issues={dataHealth.result.issues}
-            entityLabel="transacción"
-            activeFilterIssueId={activeFilterIssueId}
-            onToggleFilter={handleDataHealthClick}
-            dismissedIssueIds={dismissedIssueIds}
-            onDismissIssue={(issueId: string) => {
-              if (activeFilterIssueId === issueId) {
-                setActiveFilterIssueId(null);
-              }
-              setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
-            }}
-            filteredItemIds={filteredTransactionIds || undefined}
-          />
-        )}
-        {renderTabContent()}
+        {dataHealthAlert}
+        {renderView()}
       </div>
     </Layout>
   );

@@ -1,12 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Layout } from "@/layouts/dashboard/DashboardLayout"
+import { LabLayout } from "@/layouts/lab/LabLayout"
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { BarChart3, CheckSquare, Package2, Users, Plus } from 'lucide-react'
+import { BarChart3, Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import TaskList from './TaskList'
 import MaterialList from './material-costs/MaterialList'
 import LaborList from './LaborList'
+
+const ANALYSIS_TABS = [
+  { id: 'tasks', label: 'Tareas' },
+  { id: 'labor', label: 'Mano de Obra' },
+  { id: 'materials', label: 'Materiales' },
+]
 
 export default function Analysis() {
   const { setSidebarContext } = useNavigationStore()
@@ -15,17 +23,13 @@ export default function Analysis() {
   const organizationId = userData?.organization?.id
   const [activeTab, setActiveTab] = useState("tasks")
 
-  // Set sidebar context on mount
+  const layoutPreference = userData?.preferences?.layout || 'experimental'
+  const isLabLayout = layoutPreference === 'lab'
+
   useEffect(() => {
     setSidebarContext('organization')
   }, [setSidebarContext])
 
-  // Tab change handler
-  const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId)
-  }
-
-  // Tab handlers
   const handleNewTask = () => {
     openModal('analysis-task', {})
   }
@@ -35,11 +39,77 @@ export default function Analysis() {
   }
 
   const handleNewLabor = () => {
-    // TODO: Implementar modal para nuevo análisis de mano de obra
     console.log('Crear nuevo análisis de mano de obra')
   }
 
-  // Get action button based on active tab
+  const renderView = () => {
+    switch (activeTab) {
+      case 'tasks':
+        return <TaskList />
+      case 'labor':
+        return <LaborList onNewLabor={handleNewLabor} />
+      case 'materials':
+        return <MaterialList />
+      default:
+        return <TaskList />
+    }
+  }
+
+  const secondaryRightContent = (
+    <div className="flex items-center gap-3">
+      {activeTab === 'tasks' && (
+        <Button
+          size="sm"
+          onClick={handleNewTask}
+          data-testid="button-add-task"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Crear Tarea Personalizada
+        </Button>
+      )}
+      {activeTab === 'materials' && (
+        <Button
+          size="sm"
+          onClick={handleNewMaterial}
+          data-testid="button-add-material"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Nuevo Material
+        </Button>
+      )}
+      {activeTab === 'labor' && (
+        <Button
+          size="sm"
+          onClick={handleNewLabor}
+          data-testid="button-add-labor"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Nuevo Análisis de Mano de Obra
+        </Button>
+      )}
+    </div>
+  )
+
+  if (isLabLayout) {
+    return (
+      <LabLayout 
+        showToolbar={true}
+        organizationId={organizationId}
+        showMembers={true}
+        tabs={ANALYSIS_TABS}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        toolbarProps={{
+          secondaryRightSlot: secondaryRightContent,
+        }}
+      >
+        <div className="space-y-6">
+          {renderView()}
+        </div>
+      </LabLayout>
+    )
+  }
+
   const getActionButton = () => {
     switch (activeTab) {
       case 'tasks':
@@ -68,7 +138,6 @@ export default function Analysis() {
     }
   }
 
-  // Header configuration with dynamic tabs
   const headerProps = {
     title: "Análisis de Costos",
     description: "Crea y gestiona análisis de costos para tareas, materiales y mano de obra.",
@@ -76,32 +145,17 @@ export default function Analysis() {
     organizationId,
     showMembers: true,
     actionButton: getActionButton(),
-    tabs: [
-      {
-        id: 'tasks',
-        label: 'Tareas',
-        isActive: activeTab === 'tasks'
-      },
-      {
-        id: 'labor',
-        label: 'Mano de Obra',
-        isActive: activeTab === 'labor'
-      },
-      {
-        id: 'materials',
-        label: 'Materiales',
-        isActive: activeTab === 'materials'
-      }
-    ],
-    onTabChange: handleTabChange
+    tabs: ANALYSIS_TABS.map(tab => ({
+      ...tab,
+      isActive: activeTab === tab.id
+    })),
+    onTabChange: setActiveTab
   }
 
   return (
     <Layout headerProps={headerProps} wide>
       <div className="space-y-6">
-        {activeTab === 'tasks' && <TaskList />}
-        {activeTab === 'labor' && <LaborList onNewLabor={handleNewLabor} />}
-        {activeTab === 'materials' && <MaterialList />}
+        {renderView()}
       </div>
     </Layout>
   )
