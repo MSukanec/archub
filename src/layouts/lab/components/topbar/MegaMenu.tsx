@@ -294,7 +294,7 @@ export function PagesMegaMenu() {
           }}
         >
           <div className="max-w-7xl mx-auto px-6 py-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
               {groupedItems.map((group, groupIndex) => (
                 <div key={groupIndex}>
                   <h3 className="text-xs uppercase tracking-wider text-[var(--text-subtle)] font-semibold mb-3">

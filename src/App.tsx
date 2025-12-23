@@ -72,20 +72,20 @@ import Activity from "@/pages/activity/Activity";
 const FinancialLatticePage = lazy(() => import("@/pages/lab/FinancialLatticePage"));
 const ContactsLabPage = lazy(() => import("@/pages/lab/ContactsLabPage"));
 
-// Admin Pages (Lazy Loaded - solo admins las usan)
-const AdminAdmin = lazy(() => import("@/pages/admin/administration/AdminAdmin"));
-const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
-const AdminSupport = lazy(() => import("@/pages/admin/support/AdminSupport"));
-const AdminPayments = lazy(() => import("@/pages/admin/payments/AdminPayments"));
-const AdminSubscriptions = lazy(() => import("@/pages/admin/subscriptions/AdminSubscriptions"));
-const AdminCosts = lazy(() => import("@/pages/admin/costs/AdminCosts"));
-const AdminTasks = lazy(() => import("@/pages/admin/tasks/AdminTasks"));
-const AdminGeneral = lazy(() => import("@/pages/admin/general/AdminGeneral"));
-const AdminCourses = lazy(() => import("@/pages/admin/courses/AdminCourses"));
-const AdminCourseView = lazy(() => import("@/pages/admin/courses/AdminCourseView"));
-const AdminLayout = lazy(() => import("@/pages/admin/layout/AdminLayout"));
-const AdminEmailTemplates = lazy(() => import("@/pages/admin/email-templates/EmailTemplatesAdmin"));
-const AdminOps = lazy(() => import("@/pages/admin/ops/AdminOps"));
+// Admin Pages (importados normalmente para evitar loader)
+import AdminAdmin from "@/pages/admin/administration/AdminAdmin";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminSupport from "@/pages/admin/support/AdminSupport";
+import AdminPayments from "@/pages/admin/payments/AdminPayments";
+import AdminSubscriptions from "@/pages/admin/subscriptions/AdminSubscriptions";
+import AdminCosts from "@/pages/admin/costs/AdminCosts";
+import AdminTasks from "@/pages/admin/tasks/AdminTasks";
+import AdminGeneral from "@/pages/admin/general/AdminGeneral";
+import AdminCourses from "@/pages/admin/courses/AdminCourses";
+import AdminCourseView from "@/pages/admin/courses/AdminCourseView";
+import AdminLayout from "@/pages/admin/layout/AdminLayout";
+import AdminEmailTemplates from "@/pages/admin/email-templates/EmailTemplatesAdmin";
+import AdminOps from "@/pages/admin/ops/AdminOps";
 
 // Provider Pages (Lazy Loaded - solo admins las usan)
 const Products = lazy(() => import("@/pages/providers/products/Products"));
