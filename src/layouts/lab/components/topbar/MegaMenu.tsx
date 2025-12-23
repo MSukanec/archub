@@ -41,7 +41,7 @@ function MegaMenuTrigger({ label, sublabel, isOpen, className }: MegaMenuTrigger
         "border-r-[var(--header-border)]",
         isOpen 
           ? "border-t-2 border-t-[var(--accent)]" 
-          : "border-b border-b-transparent",
+          : "border-t border-t-[var(--header-border)]",
         className
       )}
     >
