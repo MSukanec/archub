@@ -1,338 +1,51 @@
+import { useState } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import { Button } from '@/components/ui/button';
+import { LabLayout } from "@/layouts/lab/LabLayout";
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { Search, Filter, UserPlus, Bell, Settings } from 'lucide-react';
 import { LuContact } from 'react-icons/lu';
-import { useState, useEffect, useMemo } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { EmptyState } from '@/components/shared/EmptyState';
-import { useActionBarMobile } from '@/layouts';
-import { useMobile } from '@/hooks/use-mobile';
-import { useGlobalModalStore } from '@/components/modal';
-import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
-import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
-import {
-  useContacts,
-  useContactTypes,
-  useDeleteContact,
-  ContactList,
-  ContactRow,
-  formatContactName,
-  groupContactsByLetter,
-} from '@/features/contacts';
-import ContactSettings from './ContactSettings';
+import { ContactsView } from '@/features/contacts/views/ContactsView';
+
+const CONTACTS_TABS = [
+  { id: 'contacts', label: 'Contactos' },
+  { id: 'settings', label: 'Ajustes' },
+];
 
 export default function Contacts() {
   const [activeTab, setActiveTab] = useState('contacts');
-  const [searchValue, setSearchValue] = useState('');
-  const [filterByType, setFilterByType] = useState('all');
-  const [showSearch, setShowSearch] = useState(false);
-  const { openModal } = useGlobalModalStore();
-  const { showDeleteConfirmation } = useDeleteConfirmation();
-
-  const { data: userData, isLoading } = useCurrentUser();
+  const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
-  const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId);
-  const { data: contactTypes = [] } = useContactTypes(organizationId);
-  const deleteContactMutation = useDeleteContact();
-  const { toast } = useToast();
-  const { setActions, setShowActionBar, clearActions, setFilterConfig } = useActionBarMobile();
-  const isMobile = useMobile();
 
-  useEffect(() => {
-    if (isMobile) {
-      if (activeTab === 'contacts') {
-        setActions({
-          search: {
-            id: 'search',
-            icon: Search,
-            label: 'Buscar',
-            onClick: () => {
-              setShowSearch(true);
-            },
-          },
-          create: {
-            id: 'create',
-            icon: UserPlus,
-            label: 'Crear Contacto',
-            onClick: () => openModal('contact', { isEditing: false }),
-            variant: 'primary',
-          },
-          filter: {
-            id: 'filter',
-            icon: Filter,
-            label: 'Filtros',
-            onClick: () => {},
-          },
-          notifications: {
-            id: 'notifications',
-            icon: Bell,
-            label: 'Notificaciones',
-            onClick: () => {},
-          },
-        });
-        setShowActionBar(true);
-      } else {
-        clearActions();
-        setShowActionBar(false);
-      }
-    }
+  const layoutPreference = userData?.preferences?.layout || 'experimental';
+  const isLabLayout = layoutPreference === 'lab';
 
-    return () => {
-      if (isMobile) {
-        clearActions();
-      }
-    };
-  }, [isMobile, activeTab, openModal, clearActions, setActions, setShowActionBar]);
-
-  useEffect(() => {
-    if (isMobile && contactTypes && contactTypes.length > 0 && activeTab === 'contacts') {
-      setFilterConfig({
-        filters: [
-          {
-            label: 'Filtrar por tipo de contacto',
-            value: filterByType,
-            onChange: setFilterByType,
-            placeholder: 'Todos los tipos',
-            allOptionLabel: 'Todos los tipos',
-            options: contactTypes.map((type) => ({
-              value: type.name.toLowerCase(),
-              label: type.name,
-            })),
-          },
-        ],
-        onClearFilters: () => {
-          setSearchValue('');
-          setFilterByType('all');
-          setShowSearch(false);
-        },
-      });
-    }
-  }, [isMobile, contactTypes, filterByType, setFilterConfig, activeTab]);
-
-  useEffect(() => {
-    setSearchValue('');
-    setFilterByType('all');
-  }, [userData?.preferences?.last_organization_id]);
-
-  const filteredContacts = useMemo(() => {
-    let filtered = [...contacts];
-
-    if (searchValue) {
-      filtered = filtered.filter(
-        (contact) =>
-          contact.full_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-          contact.first_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-          contact.last_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-          contact.email?.toLowerCase().includes(searchValue.toLowerCase()) ||
-          contact.company_name?.toLowerCase().includes(searchValue.toLowerCase())
-      );
-    }
-
-    if (filterByType !== 'all') {
-      filtered = filtered.filter(
-        (contact) =>
-          contact.contact_types &&
-          contact.contact_types.some((type) => type.name.toLowerCase() === filterByType)
-      );
-    }
-
-    return filtered;
-  }, [contacts, searchValue, filterByType]);
-
-  const groupedContacts = useMemo(() => {
-    return groupContactsByLetter(filteredContacts);
-  }, [filteredContacts]);
-
-  const handleViewContact = (contact: any) => {
-    openModal('contact', {
-      contactId: contact.id,
-      contact: contact,
-      mode: 'view',
-    });
+  const headerProps = {
+    icon: LuContact,
+    title: "Contactos",
+    description: "Gestiona los contactos de tu organización",
+    tabs: CONTACTS_TABS.map(tab => ({ ...tab, isActive: activeTab === tab.id })),
+    onTabChange: setActiveTab,
+    organizationId,
+    showMembers: false,
   };
 
-  const handleEditContact = (contact: any) => {
-    openModal('contact', {
-      contactId: contact.id,
-      contact: contact,
-      mode: 'edit',
-    });
-  };
-
-  const handleDeleteContact = (contact: any) => {
-    if (!organizationId) {
-      toast({
-        title: 'Error',
-        description: 'No se pudo eliminar el contacto. Intenta de nuevo.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const contactName = formatContactName(contact);
-
-    showDeleteConfirmation({
-      mode: 'dangerous',
-      title: 'Eliminar contacto',
-      description:
-        'El contacto dejará de aparecer en tus listas. Todos tus datos vinculados (proyectos, pagos, registros) permanecerán intactos y seguros.',
-      itemName: contactName,
-      destructiveActionText: 'Eliminar contacto',
-      onConfirm: () => {
-        deleteContactMutation.mutate(
-          { contactId: contact.id, organizationId },
-          {
-            onSuccess: () => {
-              toast({
-                title: 'Contacto eliminado',
-                description: 'El contacto ha sido eliminado correctamente',
-              });
-            },
-            onError: (error: Error) => {
-              toast({
-                title: 'Error',
-                description: error.message || 'No se pudo eliminar el contacto',
-                variant: 'destructive',
-              });
-            },
-          }
-        );
-      },
-      isLoading: deleteContactMutation.isPending,
-    });
-  };
-
-  const tabs = [
-    {
-      id: 'contacts',
-      label: 'Lista de Contactos',
-      isActive: activeTab === 'contacts',
-    },
-    {
-      id: 'settings',
-      label: 'Ajustes',
-      isActive: activeTab === 'settings',
-    },
-  ];
-
-  const getActionButton = () => {
-    if (activeTab === 'contacts') {
-      return {
-        label: 'Crear Contacto',
-        icon: UserPlus,
-        onClick: () => openModal('contact', { isEditing: false }),
-      };
-    }
-    return undefined;
-  };
-
-  if (isLoading || contactsLoading) {
-    return <LoadingSpinner fullScreen size="lg" />;
+  if (isLabLayout) {
+    return (
+      <LabLayout 
+        showToolbar={true} 
+        organizationId={organizationId}
+        showMembers={false}
+        tabs={CONTACTS_TABS}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      >
+        <ContactsView activeTab={activeTab} onTabChange={setActiveTab} />
+      </LabLayout>
+    );
   }
 
-  const renderContactsTab = () => {
-    if (contacts.length === 0 && !searchValue && filterByType === 'all') {
-      return (
-        <EmptyState
-          icon={<LuContact className="w-8 h-8 text-muted-foreground" />}
-          title="Los contactos son la base de tu organización"
-          description="Comienza construyendo tu red de contactos. Cada contacto que agregues puede convertirse en un cliente, socio, empleado, proveedor o subcontratista. Centraliza toda la información de las personas y empresas con las que trabajas en un solo lugar."
-          action={
-            <Button onClick={() => openModal('contact', { isEditing: false })}>
-              <UserPlus className="w-4 h-4 mr-2" />
-              Agregar Primer Contacto
-            </Button>
-          }
-        />
-      );
-    }
-
-    if (isMobile) {
-      return (
-        <div className="h-full overflow-y-auto scrollbar-hide">
-          {filteredContacts.length > 0 ? (
-            <div className="space-y-6">
-              {Object.entries(groupedContacts).map(([letter, letterContacts]) => (
-                <div key={letter} className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 bg-muted rounded-full">
-                      <span className="text-sm font-semibold text-muted-foreground">{letter}</span>
-                    </div>
-                    <div className="flex-1 h-px bg-border"></div>
-                  </div>
-                  <div className="space-y-2">
-                    {letterContacts.map((contact) => (
-                      <ContactRow
-                        key={contact.id}
-                        contact={contact as any}
-                        onEdit={handleEditContact}
-                        onDelete={handleDeleteContact}
-                        onClick={(c: any) =>
-                          openModal('contact', {
-                            contactId: c.id,
-                            contact: c,
-                            mode: 'view',
-                          })
-                        }
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <LuContact className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No hay contactos</h3>
-              <p className="text-muted-foreground">Comienza agregando tu primer contacto</p>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <ContactList
-        contacts={filteredContacts}
-        onEdit={handleEditContact}
-        onDelete={handleDeleteContact}
-        onRowClick={handleViewContact}
-      />
-    );
-  };
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'contacts':
-        return renderContactsTab();
-      case 'settings':
-        return <ContactSettings />;
-      default:
-        return renderContactsTab();
-    }
-  };
-
   return (
-    <Layout
-      wide={false}
-      headerProps={{
-        icon: LuContact,
-        title: 'Contactos',
-        description: 'Gestiona los contactos de tu organización',
-        pageTitle: 'Contactos',
-        organizationId,
-        showMembers: true,
-        breadcrumb: [
-          { name: 'Organización', href: '/organization/dashboard' },
-          { name: 'Contactos', href: '/contacts' },
-        ],
-        tabs,
-        onTabChange: (tabId: string) => setActiveTab(tabId),
-        actionButton: getActionButton(),
-      }}
-    >
-      {renderTabContent()}
+    <Layout headerProps={headerProps} wide>
+      <ContactsView activeTab={activeTab} onTabChange={setActiveTab} />
     </Layout>
   );
 }
