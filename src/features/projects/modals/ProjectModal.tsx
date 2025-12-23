@@ -6,7 +6,7 @@ import {
   ViewPanel, 
   useProjectForm,
   type Project 
-} from '../forms/ProjectFormFields';
+} from '../forms/ProjectForm';
 
 interface ProjectModalProps {
   modalData?: any;

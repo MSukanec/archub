@@ -72,7 +72,9 @@ export { default as ProjectSelectorField } from './components/ProjectSelectorFie
 export { default as ProjectRow } from './components/ProjectRow';
 
 // ============ FORMS ============
-export * from './forms/ProjectFormFields';
+export * from './forms/ProjectForm';
+export * from './forms/ProjectModalityForm';
+export * from './forms/ProjectTypeForm';
 
 // ============ MODALS ============
 export { ProjectModal } from './modals/ProjectModal';
