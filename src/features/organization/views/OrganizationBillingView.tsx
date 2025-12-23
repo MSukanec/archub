@@ -69,7 +69,7 @@ interface NextInvoice {
   nextBillingDate: string | null;
 }
 
-export function BillingListTab() {
+export function OrganizationBillingView() {
   const { currentOrganizationId } = useProjectContext();
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();

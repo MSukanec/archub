@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
-import { BillingListTab } from '@/pages/billing/tabs/BillingListTab';
+import { OrganizationBillingView } from '@/features/organization';
 import { CreditCard, Sparkles } from 'lucide-react';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useLocation } from 'wouter';
 
-export default function Billing() {
+export function BillingPage() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
   const [activeTab, setActiveTab] = useState('list');
@@ -25,9 +25,9 @@ export default function Billing() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'list':
-        return <BillingListTab />;
+        return <OrganizationBillingView />;
       default:
-        return <BillingListTab />;
+        return <OrganizationBillingView />;
     }
   };
 

@@ -19,6 +19,7 @@ export { default as AdminOrganizationRow } from './components/admin/AdminOrganiz
 export { OrganizationDashboardView } from './views/OrganizationDashboardView';
 export { OrganizationLocationView } from './views/OrganizationLocationView';
 export { OrganizationProfileView } from './views/OrganizationProfileView';
+export { OrganizationBillingView } from './views/OrganizationBillingView';
 export { OrganizationFinancesDashboardView, calculateAvailablePeriods } from './views/OrganizationFinancesDashboardView';
 export type { PeriodFilter } from './views/OrganizationFinancesDashboardView';
 export { OrganizationFinancesMovementsView } from './views/OrganizationFinancesMovementsView';
