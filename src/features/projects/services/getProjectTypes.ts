@@ -6,10 +6,10 @@ import type { ProjectType } from '../types';
  * 
  * Incluye tipos globales (organization_id = null) y tipos específicos de la organización.
  * Solo devuelve tipos que no han sido eliminados (is_deleted = false).
- * Los tipos se ordenan primero por is_default (descendente) y luego por nombre.
+ * Los tipos se ordenan alfabéticamente por nombre (sistema y custom mezclados).
  * 
  * @param organizationId - ID de la organización
- * @returns Array de tipos de proyecto ordenados, o array vacío
+ * @returns Array de tipos de proyecto ordenados alfabéticamente, o array vacío
  * @throws {Error} Si falla la query de Supabase
  */
 export async function getProjectTypes(organizationId: string): Promise<ProjectType[]> {
@@ -22,7 +22,6 @@ export async function getProjectTypes(organizationId: string): Promise<ProjectTy
     .select('*')
     .eq('is_deleted', false)
     .or(`organization_id.eq.${organizationId},organization_id.is.null`)
-    .order('is_default', { ascending: false })
     .order('name');
 
   if (error) throw error;

@@ -6,10 +6,10 @@ import type { ProjectModality } from '../types';
  * 
  * Incluye modalidades globales (organization_id = null) y modalidades específicas de la organización.
  * Solo devuelve modalidades que no han sido eliminadas (is_deleted = false).
- * Las modalidades se ordenan primero por is_default (descendente) y luego por nombre.
+ * Las modalidades se ordenan alfabéticamente por nombre (sistema y custom mezclados).
  * 
  * @param organizationId - ID de la organización
- * @returns Array de modalidades de proyecto ordenadas, o array vacío
+ * @returns Array de modalidades de proyecto ordenadas alfabéticamente, o array vacío
  * @throws {Error} Si falla la query de Supabase
  */
 export async function getProjectModalities(organizationId: string): Promise<ProjectModality[]> {
@@ -22,7 +22,6 @@ export async function getProjectModalities(organizationId: string): Promise<Proj
     .select('*')
     .eq('is_deleted', false)
     .or(`organization_id.eq.${organizationId},organization_id.is.null`)
-    .order('is_default', { ascending: false })
     .order('name');
 
   if (error) throw error;
