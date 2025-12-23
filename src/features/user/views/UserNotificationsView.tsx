@@ -11,15 +11,18 @@ import { es } from 'date-fns/locale';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { markAsRead, markAllAsRead, resolveNotificationHref, type UserNotificationRow } from '@/lib/notifications';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
+import { useCurrentUser } from '@/hooks/use-current-user';
 
-interface UserNotificationsTabProps {
-  userId: string;
-}
-
-export default function UserNotificationsTab({ userId }: UserNotificationsTabProps) {
+/**
+ * View: User Notifications
+ * Displays all user notifications with read/unread status management
+ */
+export function UserNotificationsView() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
+  const { data: userData } = useCurrentUser();
+  const userId = userData?.user?.id;
 
   const { data: notifications = [], isLoading: notificationsLoading } = useQuery({
     queryKey: ['notifications', userId],
@@ -107,7 +110,7 @@ export default function UserNotificationsTab({ userId }: UserNotificationsTabPro
   };
 
   const getTypeBadge = (type: string) => {
-    const typeMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+    const typeMap: Record<string, { label: string; variant: any }> = {
       'task_assigned': { label: 'Tarea', variant: 'default' },
       'task_completed': { label: 'Tarea', variant: 'secondary' },
       'comment_added': { label: 'Comentario', variant: 'outline' },
@@ -115,7 +118,7 @@ export default function UserNotificationsTab({ userId }: UserNotificationsTabPro
       'system': { label: 'Sistema', variant: 'secondary' },
     };
 
-    const config = typeMap[type] || { label: type, variant: 'outline' as const };
+    const config = typeMap[type] || { label: type, variant: 'outline' };
     
     return (
       <Badge variant={config.variant} className="text-xs">
