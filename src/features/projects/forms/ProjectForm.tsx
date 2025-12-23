@@ -256,7 +256,7 @@ export function FormPanel({
             emptyStateDescription="Arrastra una imagen o haz clic para seleccionar"
             maxSizeLabel="Formatos: JPG, PNG, WebP • Tamaño máximo: 2MB"
             compressionPreset="project-cover"
-            compressOnDrop={true}
+            compressOnDrop={false}
           />
         </div>
 
