@@ -25,6 +25,9 @@
    - 5.11 [Frontend](#11-auditoría-de-frontend)
    - 5.12 [Calidad/Robustez](#12-auditoría-de-calidad--robustez)
    - 5.13 [Refactorización (Tablas, Badges, Headers)](#13-auditoría-de-refactorización-tablas-badges-headers)
+   - 5.14 [Quality Gates (Testing)](#14-auditoría-de-quality-gates-testing)
+   - 5.15 [Accesibilidad e i18n](#15-auditoría-de-accesibilidad-e-i18n)
+   - 5.16 [Production Readiness](#16-auditoría-de-production-readiness)
 6. [Entregables Obligatorios](#entregables-obligatorios)
 7. [Condición Final](#condición-final-cerrado)
 8. [Guías de Sistemas Específicos](#guías-de-sistemas-específicos)
@@ -689,6 +692,182 @@ Para mostrar entidades con avatar:
 
 ---
 
+### 14. AUDITORÍA DE QUALITY GATES (Testing)
+
+**Objetivo:** Asegurar que el feature tiene cobertura de testing adecuada para prevenir regresiones.
+
+#### 14.1 Niveles de Testing Esperados
+
+| Nivel | Qué testea | Herramienta | Cuándo es obligatorio |
+|-------|------------|-------------|----------------------|
+| **Unit Tests** | Funciones puras, utils, helpers | Vitest | Siempre que haya lógica de negocio |
+| **Integration Tests** | Hooks, services con mocks | Vitest + MSW | Features con lógica compleja |
+| **Component Tests** | Componentes aislados | Vitest + Testing Library | Componentes reutilizables |
+| **E2E Tests** | Flujos críticos completos | Playwright (futuro) | Flujos de pago, auth, CRUD principal |
+
+#### 14.2 Checklist de Testing
+
+**Mínimo obligatorio (Quality Gate):**
+- [ ] ¿Los services tienen tests para casos happy path?
+- [ ] ¿Los services manejan errores correctamente (tests de error)?
+- [ ] ¿Las funciones de cálculo (KPIs, conversiones) tienen tests?
+- [ ] ¿Los schemas Zod validan correctamente (edge cases)?
+
+**Recomendado (features críticos):**
+- [ ] ¿Los hooks tienen tests con mocks de API?
+- [ ] ¿Los componentes de formulario validan correctamente?
+- [ ] ¿Los flujos CRUD principales tienen tests E2E?
+
+#### 14.3 Ubicación de Tests
+
+```
+src/features/{feature}/
+├── services/
+│   ├── getItems.ts
+│   └── __tests__/
+│       └── getItems.test.ts
+├── hooks/
+│   ├── use-items.ts
+│   └── __tests__/
+│       └── use-items.test.ts
+└── tests/               ← Tests de integración del feature
+    └── feature.test.ts
+```
+
+#### 14.4 Criterios de Bloqueo
+
+Un feature **NO puede marcarse como cerrado** si:
+- ❌ Tiene funciones de cálculo monetario sin tests
+- ❌ Tiene validaciones Zod sin tests de edge cases
+- ❌ Tiene lógica de permisos/RLS sin verificación
+
+---
+
+### 15. AUDITORÍA DE ACCESIBILIDAD E I18N
+
+**Objetivo:** Asegurar que el feature es accesible y está preparado para internacionalización.
+
+#### 15.1 Checklist de Accesibilidad (a11y)
+
+**Navegación por teclado:**
+- [ ] ¿Todos los elementos interactivos son focusables?
+- [ ] ¿El orden de focus es lógico (Tab order)?
+- [ ] ¿Los modales atrapan el focus correctamente?
+- [ ] ¿Escape cierra modales/drawers?
+
+**Screen readers:**
+- [ ] ¿Los botones tienen `aria-label` si solo tienen ícono?
+- [ ] ¿Las imágenes tienen `alt` descriptivo?
+- [ ] ¿Los formularios tienen labels asociados?
+- [ ] ¿Los errores de validación son anunciados?
+
+**Contraste y visuales:**
+- [ ] ¿El contraste de texto cumple WCAG AA (4.5:1)?
+- [ ] ¿Los estados focus son visibles?
+- [ ] ¿La información no depende solo del color?
+
+**Componentes shadcn/ui:**
+- [ ] ¿Usa componentes de Radix (ya accesibles)?
+- [ ] ¿NO hay divs clickeables (usar Button)?
+- [ ] ¿Los Select tienen placeholder descriptivo?
+
+#### 15.2 Checklist de Internacionalización (i18n)
+
+**Textos:**
+- [ ] ¿Los textos de UI usan `t()` de i18n?
+- [ ] ¿Los mensajes de error están traducidos?
+- [ ] ¿Los placeholders están traducidos?
+- [ ] ¿Las fechas usan `formatDate()` con locale?
+
+**Formatos:**
+- [ ] ¿Los números usan `formatNumber()` con locale?
+- [ ] ¿Las monedas usan el sistema de multimoneda?
+- [ ] ¿Las fechas respetan formato regional?
+
+**Fallbacks:**
+- [ ] ¿Hay fallback a español si falta traducción?
+- [ ] ¿Los textos largos no rompen el layout?
+
+#### 15.3 Herramientas de Verificación
+
+```typescript
+// En desarrollo, verificar con:
+// 1. Tab through toda la página
+// 2. axe DevTools extension (Chrome)
+// 3. VoiceOver (Mac) o NVDA (Windows)
+```
+
+---
+
+### 16. AUDITORÍA DE PRODUCTION READINESS
+
+**Objetivo:** Asegurar que el feature está listo para producción con observabilidad y resiliencia.
+
+#### 16.1 Performance Budgets
+
+| Métrica | Target | Cómo medir |
+|---------|--------|------------|
+| **LCP (Largest Contentful Paint)** | < 2.5s | Lighthouse |
+| **Bundle size (feature chunk)** | < 100KB gzip | Vite build |
+| **Queries por página** | < 5 queries iniciales | React Query DevTools |
+| **Re-renders innecesarios** | 0 | React DevTools Profiler |
+
+**Checklist de Performance:**
+- [ ] ¿Usa lazy loading para rutas secundarias?
+- [ ] ¿Las imágenes están comprimidas y optimizadas?
+- [ ] ¿Las queries usan `staleTime` apropiado?
+- [ ] ¿Los cálculos pesados están en `useMemo`?
+- [ ] ¿Las listas largas usan virtualización?
+
+#### 16.2 Error Handling & Resilience
+
+**Error Boundaries:**
+- [ ] ¿El feature tiene ErrorBoundary para errores de render?
+- [ ] ¿Los errores de API muestran mensaje amigable?
+- [ ] ¿Hay retry automático en queries críticas?
+
+**Fallbacks:**
+- [ ] ¿Los datos opcionales tienen fallback `?? []`?
+- [ ] ¿Las imágenes tienen fallback si fallan?
+- [ ] ¿Los componentes degradan gracefully?
+
+#### 16.3 Observabilidad
+
+**Logging:**
+- [ ] ¿Los errores se loguean con contexto suficiente?
+- [ ] ¿Los errores de API incluyen request/response info?
+- [ ] ¿NO se loguean datos sensibles (passwords, tokens)?
+
+**Métricas (cuando aplique):**
+- [ ] ¿Las acciones críticas tienen tracking?
+- [ ] ¿Los tiempos de carga se miden?
+
+#### 16.4 Feature Flags & Rollout
+
+**Para features nuevos o riesgosos:**
+- [ ] ¿El feature puede desactivarse sin deploy?
+- [ ] ¿Hay plan de rollback si falla?
+- [ ] ¿Se puede activar gradualmente (% de usuarios)?
+
+**Integración con Ops Center:**
+- [ ] ¿Los errores críticos generan alertas?
+- [ ] ¿Hay runbook de resolución si falla?
+
+#### 16.5 Checklist Pre-Deploy
+
+Antes de considerar el feature "production ready":
+
+- [ ] Tests pasan en CI
+- [ ] No hay errores en consola (dev y prod)
+- [ ] Performance dentro de budgets
+- [ ] Accesibilidad verificada
+- [ ] Textos traducidos (es/en)
+- [ ] Error boundaries implementados
+- [ ] Logging adecuado
+- [ ] Documentación actualizada
+
+---
+
 ## ENTREGABLES OBLIGATORIOS
 
 ### ENTREGABLE 1: AUDIT REPORT
@@ -713,8 +892,11 @@ Para mostrar entidades con avatar:
 | RLS | ✅/⚠️/❌ | ... |
 | Hooks | ✅/⚠️/❌ | ... |
 | UI/UX | ✅/⚠️/❌ | ... |
-| Performance | ✅/⚠️/❌ | ... |
 | Refactorización (Tablas, Badges) | ✅/⚠️/❌ | ... |
+| Quality Gates (Testing) | ✅/⚠️/❌ | ... |
+| Accesibilidad (a11y) | ✅/⚠️/❌ | ... |
+| Internacionalización (i18n) | ✅/⚠️/❌ | ... |
+| Production Readiness | ✅/⚠️/❌ | ... |
 
 ### Top 10 Riesgos/Bugs
 | # | Severidad | Descripción | Archivo/Línea |
@@ -759,18 +941,30 @@ Para mostrar entidades con avatar:
 
 El feature se considera **cerrado** cuando:
 
+**Arquitectura y Estructura:**
 - [ ] No hay errores en consola ni en runtime
 - [ ] **TODOS los archivos están en su ubicación correcta**
 - [ ] **NO hay duplicados** en `src/hooks/`, `src/services/`, `src/types/`
-- [ ] DB tiene estructura correcta y lecturas por Views cuando corresponde
-- [ ] RLS consistente y segura
 - [ ] Arquitectura de feature sigue este documento
 - [ ] Formularios son agnósticos y están en `forms/`
 - [ ] Modales y Drawers son envases que usan los forms
+
+**Base de Datos:**
+- [ ] DB tiene estructura correcta y lecturas por Views cuando corresponde
+- [ ] RLS consistente y segura
+
+**Frontend:**
 - [ ] Hooks consistentes, sin duplicados y sin lógica redundante
 - [ ] UI completa (loading/error/empty/permisos) y consistente
 - [ ] Tablas usan tipos semánticos
 - [ ] Badges usan variantes semánticas
+
+**Quality Gates (Enterprise):**
+- [ ] Tests mínimos implementados para lógica de negocio
+- [ ] Accesibilidad verificada (keyboard nav, aria-labels)
+- [ ] Textos traducibles via i18n
+- [ ] Performance dentro de budgets
+- [ ] Error boundaries implementados
 - [ ] Documentación del feature creada
 
 ---
