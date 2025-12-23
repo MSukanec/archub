@@ -51,18 +51,18 @@ export function LabToolbar({
         <div className="flex-1" />
         
         {rightSlot && (
-          <div className="flex items-center px-4 border-l border-[var(--header-border)]">
+          <div className="flex items-center px-4">
             {rightSlot}
           </div>
         )}
         
         {showMembers && organizationId && (
-          <div className="flex items-center px-4 border-l border-[var(--header-border)]">
+          <div className="flex items-center px-4">
             <ExpandableAvatarGroup organizationId={organizationId} />
           </div>
         )}
         
-        <div className="border-l border-[var(--header-border)]">
+        <div>
           <UserAvatarMenu />
         </div>
       </div>
