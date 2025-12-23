@@ -240,10 +240,12 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     }
   });
 
-  // Auto-save mutation for project data
+  // Auto-save mutation for project data - SAME PATTERN AS ProfileBasicData
   const saveProjectDataMutation = useMutation({
     mutationFn: async (dataToSave: any) => {
-      if (!activeProjectId || !supabase) return;
+      console.log('Saving project data:', dataToSave);
+      
+      if (!activeProjectId || !supabase) throw new Error('Project or Supabase not available');
 
       // Update fields in projects table (name, code, status)
       const projectsUpdate: any = {};
@@ -257,18 +259,13 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
           .update(projectsUpdate)
           .eq('id', activeProjectId);
 
-        if (projectError) {
-          console.error('Error updating project:', projectError);
-          throw projectError;
-        }
+        if (projectError) throw projectError;
       }
 
-      // Prepare project_data payload - exclude fields that belong to projects table
+      // Prepare project_data payload
       const { name, code, status, ...projectDataPayload } = dataToSave;
-
       if (Object.keys(projectDataPayload).length === 0) return;
 
-      // Use upsert to avoid race conditions
       const { error } = await supabase
         .from('project_data')
         .upsert({
@@ -279,28 +276,25 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
           onConflict: 'project_id'
         });
 
-      if (error) {
-        console.error('Error saving project data:', error);
-        throw error;
-      }
+      if (error) throw error;
     },
     onSuccess: () => {
-      // Refetch queries to ensure data consistency
+      console.log('Auto-save completed successfully');
       queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
       queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
     onError: (error: any) => {
-      console.error('Error in saveProjectDataMutation:', error);
+      console.error('Auto-save error:', error);
       toast({
-        title: "Error al guardar",
-        description: "No se pudieron guardar los cambios del proyecto",
-        variant: "destructive"
+        title: "Error",
+        description: "No se pudieron guardar los cambios automáticamente.",
+        variant: "destructive",
       });
     }
   });
 
-  // Auto-save hook - Use mutateAsync to properly wait for mutation completion
+  // Auto-save hook - SAME PATTERN AS ProfileBasicData
   const { isSaving } = useAutoSave({
     data: {
       name: projectName,
@@ -311,9 +305,9 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       description: description,
       internal_notes: internalNotes
     },
-    saveFn: (data) => saveProjectDataMutation.mutateAsync(data),
+    saveFn: async (data) => { await saveProjectDataMutation.mutateAsync(data); },
     delay: 3000,
-    enabled: !!userData && isHydrated
+    enabled: !!userData && !!activeProjectId && isHydrated
   });
 
   // UNIFIED hydration effect - loads ALL data at once, then marks as hydrated
