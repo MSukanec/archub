@@ -63,6 +63,13 @@ export function OrganizationLocationView() {
       state: state,
       country: country,
       postal_code: postalCode,
+      address_full: addressFull,
+      place_id: placeId,
+      lat: lat?.toString() || null,
+      lng: lng?.toString() || null,
+      timezone: timezone,
+      location_type: locationType || null,
+      accessibility_notes: accessibilityNotes,
     },
     queryKey: ['organization-data', organizationId],
     saveFn: async (dataToSave) => {
@@ -110,20 +117,18 @@ export function OrganizationLocationView() {
     }
 
     if (organizationData) {
-      // Load only existing columns from the database
       setAddress(organizationData.address || '');
-      setAddressFull(organizationData.address || ''); // Use address as addressFull since column may not exist
+      setAddressFull(organizationData.address_full || organizationData.address || '');
       setCity(organizationData.city || '');
       setState(organizationData.state || '');
       setCountry(organizationData.country || '');
       setPostalCode(organizationData.postal_code || '');
-      // Additional fields are UI-only for now (not persisted)
-      setPlaceId('');
-      setLat(null);
-      setLng(null);
-      setTimezone('');
-      setLocationType('');
-      setAccessibilityNotes('');
+      setPlaceId(organizationData.place_id || '');
+      setLat(organizationData.lat ? parseFloat(organizationData.lat) : null);
+      setLng(organizationData.lng ? parseFloat(organizationData.lng) : null);
+      setTimezone(organizationData.timezone || '');
+      setLocationType(organizationData.location_type || '');
+      setAccessibilityNotes(organizationData.accessibility_notes || '');
     }
 
     setTimeout(() => {

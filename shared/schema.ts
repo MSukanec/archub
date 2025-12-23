@@ -163,6 +163,43 @@ export const insertOrganizationSchema = createInsertSchema(organizations).omit({
 export type Organization = typeof organizations.$inferSelect;
 export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
 
+// Organization Data Table (extended information for organizations)
+export const organization_data = pgTable("organization_data", {
+  organization_id: uuid("organization_id").primaryKey().notNull(),
+  
+  // Profile fields (from OrganizationProfileView)
+  description: text("description"),
+  phone: text("phone"),
+  email: text("email"),
+  website: text("website"),
+  tax_id: text("tax_id"),
+  
+  // Location - Basic Fields
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  country: text("country"),
+  postal_code: text("postal_code"),
+  
+  // Location - Google Places Integration
+  address_full: text("address_full"),
+  place_id: text("place_id"),
+  lat: numeric("lat", { precision: 9, scale: 6 }),
+  lng: numeric("lng", { precision: 9, scale: 6 }),
+  
+  // Location - Additional Info
+  timezone: text("timezone"),
+  location_type: text("location_type", { enum: ["urban", "rural", "industrial", "other"] }),
+  accessibility_notes: text("accessibility_notes"),
+  
+  // Timestamps
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type OrganizationData = typeof organization_data.$inferSelect;
+export type InsertOrganizationData = typeof organization_data.$inferInsert;
+
 // Roles Table
 export const roles = pgTable("roles", {
   id: uuid("id").primaryKey().defaultRandom(),
