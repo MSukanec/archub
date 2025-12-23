@@ -11,6 +11,8 @@ import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGeneralCosts } from '@/features/general-costs/hooks/use-general-costs'
 import { useGeneralCostsPayments } from '@/hooks/use-general-costs-payments'
+import { useLabDrawerStore } from '@/layouts/lab/stores/useLabDrawerStore'
+import GeneralCostPaymentFormDrawerContent from '@/features/general-costs/forms/GeneralCostPaymentFormDrawerContent'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -45,6 +47,7 @@ export interface DrillDownFilters {
 export default function GeneralCosts() {
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
+  const { openDrawer, closeDrawer } = useLabDrawerStore()
   const { data: userData } = useCurrentUser()
   const organizationId = userData?.organization?.id
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -83,9 +86,23 @@ export default function GeneralCosts() {
   }
 
   const handleNewPayment = () => {
-    openModal('general-costs-payment', {
-      organizationId: userData?.organization?.id,
-    })
+    if (isLabLayout) {
+      openDrawer({
+        title: 'Nuevo Pago de Gastos Generales',
+        subtitle: 'Registra un nuevo pago de gastos generales',
+        content: (
+          <GeneralCostPaymentFormDrawerContent
+            organizationId={userData?.organization?.id}
+            onClose={closeDrawer}
+          />
+        ),
+        width: 'lg',
+      })
+    } else {
+      openModal('general-costs-payment', {
+        organizationId: userData?.organization?.id,
+      })
+    }
   }
 
   const renderView = () => {
