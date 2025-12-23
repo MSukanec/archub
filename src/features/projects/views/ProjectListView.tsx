@@ -502,10 +502,10 @@ export function ProjectListView() {
   })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="container-project-list">
       {sortedProjects.length > 0 ? (
         isMobile ? (
-          <div className="space-y-3 pb-20">
+          <div className="space-y-3 pb-20" data-testid="list-projects-mobile">
             {sortedProjects.map(project => (
               <ProjectRow
                 key={project.id}
@@ -514,7 +514,7 @@ export function ProjectListView() {
                 onEdit={handleEdit}
                 onDelete={handleDeleteClick}
                 isActive={project.is_active}
-                data-testid={`project-row-${project.id}`}
+                data-testid={`row-project-${project.id}`}
               />
             ))}
           </div>

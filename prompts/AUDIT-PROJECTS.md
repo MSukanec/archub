@@ -210,23 +210,34 @@ Impacto: No reutilizable fuera de modales
 Esfuerzo: ~2h (refactorización media)
 ```
 
-### Issue #3: Faltan data-testid
+### Issue #3: Faltan data-testid ✅ RESUELTO
 ```
 Archivos: 
-  - ProjectActivesView.tsx
-  - ProjectListView.tsx
-Impacto: QA automatizado bloqueado
-Esfuerzo: ~30min (cambios menores)
+  - ProjectActivesView.tsx → Agregados: container-project-actives, grid-projects
+  - ProjectListView.tsx → Agregados: container-project-list, list-projects-mobile
+  - ProjectItemCard.tsx → Ya tiene: card-project-${id} (interno)
+  - ProjectRow.tsx → Ya acepta data-testid como prop
+
+CONVENCIÓN APLICADA: {type}-{content} según estándar enterprise
+  - container-* para contenedores principales
+  - grid-* para grids
+  - list-* para listas
+  - card-* para cards (ya existente)
+  - row-* para filas
+
+NOTA: Los filtros y búsqueda son manejados por ActionBarMobile (componente compartido)
 ```
 
 ---
 
 ## 9. PLAN DE CORRECCIONES
 
-### Fase 1: Quick Wins (30 min)
-- [ ] Agregar data-testid a filtros en ProjectActivesView
-- [ ] Agregar data-testid a filtros en ProjectListView
-- [ ] Agregar data-testid a ProjectItemCard
+### Fase 1: Quick Wins (30 min) ✅ COMPLETADO
+- [x] Agregar data-testid a ProjectActivesView: `container-project-actives`, `grid-projects`
+- [x] Agregar data-testid a ProjectListView: `container-project-list`, `list-projects-mobile`
+- [x] ProjectItemCard ya tiene: `card-project-${id}` (interno)
+- [x] ProjectRow ya acepta data-testid como prop
+- [ ] FUTURO: Agregar data-testid a ActionBarMobile (componente compartido, fuera de scope)
 
 ### Fase 2: Refactorización Form (2h)
 - [ ] Crear ProjectFormFields.tsx (solo campos, sin modal)
