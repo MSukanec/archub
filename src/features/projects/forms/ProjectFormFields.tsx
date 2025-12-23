@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +16,6 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useOrganizationMembers } from "@/features/organization";
 import { useProjectTypes, useProjectModalities } from "@/features/projects";
 import { useProjectContext } from "@/stores/projectContext";
-import { useToast } from "@/hooks/use-toast";
 import { useOrganizationCurrencies } from "@/hooks/use-currencies";
 import { useUpdateChecklist } from "@/hooks/use-update-checklist";
 import { supabase } from "@/lib/supabase";
@@ -395,15 +394,22 @@ export function ViewPanel({ project, projectTypes, projectModalities }: ViewPane
   );
 }
 
+export interface UseProjectFormCallbacks {
+  onImageUploadStart?: () => void;
+  onImageUploadSuccess?: () => void;
+  onImageUploadError?: (error: Error) => void;
+  onSubmitSuccess?: (mode: 'create' | 'edit') => void;
+  onSubmitError?: (error: Error) => void;
+}
+
 export interface UseProjectFormOptions {
   project?: Project;
   mode?: 'create' | 'edit' | 'view';
   onSuccess?: () => void;
+  callbacks?: UseProjectFormCallbacks;
 }
 
-export function useProjectForm({ project, mode = 'create', onSuccess }: UseProjectFormOptions) {
-  const hasInitializedRef = useRef(false);
-  
+export function useProjectForm({ project, mode = 'create', onSuccess, callbacks }: UseProjectFormOptions) {
   const { data: userData } = useCurrentUser();
   const { currentOrganizationId, setSelectedProject } = useProjectContext();
   const organizationId = currentOrganizationId || project?.organization_id || userData?.organization?.id;
@@ -411,7 +417,6 @@ export function useProjectForm({ project, mode = 'create', onSuccess }: UseProje
   const { data: projectTypes = [] } = useProjectTypes(organizationId);
   const { data: projectModalities = [] } = useProjectModalities(organizationId);
   const { data: organizationCurrencies = [] } = useOrganizationCurrencies(organizationId);
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const defaultCurrencyId = useMemo(
@@ -499,31 +504,21 @@ export function useProjectForm({ project, mode = 'create', onSuccess }: UseProje
     if (!selectedImageFile || !organizationId) return;
 
     setIsUploadingImage(true);
+    callbacks?.onImageUploadStart?.();
+    
     try {
-      toast({
-        title: "Subiendo imagen...",
-        description: "Tu imagen se está procesando",
-      });
-
       await uploadProjectImage(selectedImageFile, projectId, organizationId);
       
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['project', projectId] });
       queryClient.invalidateQueries({ queryKey: ['project-data', projectId] });
       
-      toast({
-        title: "Imagen subida",
-        description: "La imagen principal se ha guardado correctamente"
-      });
+      callbacks?.onImageUploadSuccess?.();
       
       setSelectedImageFile(null);
       setImagePreviewUrl(null);
     } catch (error: any) {
-      toast({
-        title: "Error al subir imagen",
-        description: error.message || "No se pudo subir la imagen.",
-        variant: "destructive"
-      });
+      callbacks?.onImageUploadError?.(error);
     } finally {
       setIsUploadingImage(false);
     }
@@ -537,20 +532,12 @@ export function useProjectForm({ project, mode = 'create', onSuccess }: UseProje
 
   const onSubmit = async (data: ProjectFormData) => {
     if (!organizationId) {
-      toast({
-        title: "Error",
-        description: "No hay una organización activa seleccionada",
-        variant: "destructive"
-      });
+      callbacks?.onSubmitError?.(new Error("No hay una organización activa seleccionada"));
       return;
     }
 
     if (!currentUserMember && mode === 'create') {
-      toast({
-        title: "Error",
-        description: "Usuario no es miembro de la organización",
-        variant: "destructive"
-      });
+      callbacks?.onSubmitError?.(new Error("Usuario no es miembro de la organización"));
       return;
     }
 
@@ -594,10 +581,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess }: UseProje
           await handleImageUpload(project.id);
         }
 
-        toast({
-          title: "Proyecto actualizado",
-          description: "El proyecto ha sido actualizado exitosamente"
-        });
+        callbacks?.onSubmitSuccess?.('edit');
       } else {
         const newProject = await createProjectMutation.mutateAsync({
           organization_id: organizationId,
@@ -656,19 +640,12 @@ export function useProjectForm({ project, mode = 'create', onSuccess }: UseProje
           metadata: { name: cleanedData.name, project_type: projectTypeName }
         });
 
-        toast({
-          title: "Proyecto creado",
-          description: "El nuevo proyecto ha sido creado exitosamente y está activo"
-        });
+        callbacks?.onSubmitSuccess?.('create');
       }
 
       onSuccess?.();
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || error.details || "Hubo un error al procesar el proyecto",
-        variant: "destructive",
-      });
+      callbacks?.onSubmitError?.(error);
     }
   };
 

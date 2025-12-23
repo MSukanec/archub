@@ -40,6 +40,42 @@ export function ProjectForm({ modalData, project: projectProp, mode: modeProp, o
       reset();
       onClose();
     },
+    callbacks: {
+      onImageUploadStart: () => {
+        toast({
+          title: "Subiendo imagen...",
+          description: "Tu imagen se está procesando",
+        });
+      },
+      onImageUploadSuccess: () => {
+        toast({
+          title: "Imagen subida",
+          description: "La imagen principal se ha guardado correctamente"
+        });
+      },
+      onImageUploadError: (error) => {
+        toast({
+          title: "Error al subir imagen",
+          description: error.message || "No se pudo subir la imagen.",
+          variant: "destructive"
+        });
+      },
+      onSubmitSuccess: (submitMode) => {
+        toast({
+          title: submitMode === 'edit' ? "Proyecto actualizado" : "Proyecto creado",
+          description: submitMode === 'edit' 
+            ? "El proyecto ha sido actualizado exitosamente"
+            : "El nuevo proyecto ha sido creado exitosamente y está activo"
+        });
+      },
+      onSubmitError: (error) => {
+        toast({
+          title: "Error",
+          description: error.message || "Hubo un error al procesar el proyecto",
+          variant: "destructive",
+        });
+      },
+    },
   });
 
   const handleClose = () => {
