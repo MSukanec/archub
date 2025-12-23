@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Building } from 'lucide-react';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
-import { OrganizationFormFields } from '../../forms/OrganizationFormFields';
+import { OrganizationForm } from '../../forms/OrganizationForm';
 
 interface Organization {
   id: string;
@@ -79,7 +79,7 @@ export function OrganizationFormModal({ modalData, onClose }: OrganizationFormMo
       }
     >
       <ModalBody>
-        <OrganizationFormFields
+        <OrganizationForm
           organizationId={organization?.id}
           organization={organization}
           mode={mode}

@@ -85,7 +85,7 @@ function getPlanColor(planSlug: string | undefined): string {
   return planColors.free;
 }
 
-export interface InviteMemberFormFieldsProps {
+export interface InviteMemberFormProps {
   organizationId?: string;
   editingMember?: any;
   defaultEmail?: string;
@@ -98,7 +98,7 @@ export interface InviteMemberFormFieldsProps {
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
-export function InviteMemberFormFields({
+export function InviteMemberForm({
   organizationId,
   editingMember,
   defaultEmail,

@@ -13,8 +13,8 @@ export { OrganizationMovementConceptFormModal } from './modals/OrganizationMovem
 export { ProfileOrganizationFormModal } from './modals/ProfileOrganizationFormModal';
 
 export { OrganizationFormModal } from './modals/admin/OrganizationFormModal';
-export { OrganizationFormFields } from './forms/OrganizationFormFields';
-export { InviteMemberFormFields } from './forms/InviteMemberFormFields';
+export { OrganizationForm } from './forms/OrganizationForm';
+export { InviteMemberForm } from './forms/InviteMemberForm';
 
 export { default as AdminOrganizationRow } from './components/admin/AdminOrganizationRow';
 

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
-import { InviteMemberFormFields } from '../forms/InviteMemberFormFields';
+import { InviteMemberForm } from '../forms/InviteMemberForm';
 import { Users, UserPlus } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
@@ -94,7 +94,7 @@ export function InviteMemberModal({ modalData, onClose }: InviteMemberModalProps
       }
     >
       <ModalBody>
-        <InviteMemberFormFields
+        <InviteMemberForm
           organizationId={organizationId}
           editingMember={editingMember}
           defaultEmail={defaultEmail}

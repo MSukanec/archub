@@ -216,8 +216,8 @@ src/
 ├── src/features/{feature}/
 │   ├── services/        ← Funciones puras async de Supabase
 │   ├── hooks/           ← React hooks con useQuery/useMutation
-│   ├── forms/           ← FormFields agnósticos (REUTILIZABLES en modales, drawers, páginas)
-│   │   └── FeatureFormFields.tsx
+│   ├── forms/           ← Forms agnósticos (REUTILIZABLES en modales, drawers, páginas)
+│   │   └── FeatureForm.tsx
 │   ├── components/      ← Componentes específicos del feature
 │   ├── modals/          ← Modales (contenedores ENVASE)
 │   ├── views/           ← Views agnósticas al layout

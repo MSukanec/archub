@@ -33,7 +33,7 @@ interface Organization {
   } | null;
 }
 
-export interface OrganizationFormFieldsProps {
+export interface OrganizationFormProps {
   organizationId?: string;
   organization?: Organization;
   mode: 'create' | 'edit' | 'view';
@@ -43,7 +43,7 @@ export interface OrganizationFormFieldsProps {
   formRef?: React.RefObject<HTMLFormElement>;
 }
 
-export function OrganizationFormFields({
+export function OrganizationForm({
   organizationId,
   organization,
   mode,
