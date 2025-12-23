@@ -19,11 +19,12 @@ export function resolveWidthMode(wide?: WidthProp): WidthMode {
 
 /**
  * Gets container classes based on width mode
+ * Content always occupies 100% width - only padding varies
  * @param mode - Width mode
- * @returns Container class string
+ * @returns Container class string (always w-full)
  */
 export function getContainerClasses(mode: WidthMode): string {
-  return mode === "normal" ? "max-w-[1440px] mx-auto" : "";
+  return "w-full";
 }
 
 /**
