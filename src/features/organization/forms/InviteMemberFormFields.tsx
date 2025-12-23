@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -111,7 +112,6 @@ export function InviteMemberFormFields({
 }: InviteMemberFormFieldsProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [pricingData, setPricingData] = useState<SeatPricingData | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -209,7 +209,7 @@ export function InviteMemberFormFields({
     }
   }, [effectiveOrgId]);
 
-  const createMemberMutation = useMutation({
+  const createMemberMutation = useOptimisticMutation({
     mutationFn: async (memberData: MemberFormData) => {
       if (!effectiveOrgId) throw new Error('No organization selected');
 
@@ -221,30 +221,22 @@ export function InviteMemberFormFields({
 
       return response.json();
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['organization-members'] });
-      queryClient.invalidateQueries({ queryKey: ['organization-members-full'] });
-      queryClient.invalidateQueries({ queryKey: ['organization-invitations'] });
-      queryClient.invalidateQueries({ queryKey: ['organization-former-members'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
-      toast({
-        title: isReinvite ? 'Miembro reinvitado' : 'Miembro invitado',
-        description: data.isNewUser 
-          ? 'La invitación ha sido enviada por email' 
-          : 'El usuario recibirá una notificación para unirse nuevamente',
-      });
-      onSuccess();
+    queryKey: ['organization-members', effectiveOrgId],
+    optimisticUpdate: (oldData: any, variables: any) => {
+      if (!oldData) return oldData;
+      return oldData;
     },
-    onError: (error: any) => {
-      toast({
-        title: 'Error al invitar miembro',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
+    onSuccessMessage: isReinvite ? 'Miembro reinvitado exitosamente' : 'Invitación enviada exitosamente',
+    onErrorMessage: 'Error al invitar miembro',
+    additionalQueryKeys: [
+      ['organization-members-full'],
+      ['organization-invitations'],
+      ['organization-former-members'],
+      ['/api/contacts'],
+    ],
   });
 
-  const updateMemberMutation = useMutation({
+  const updateMemberMutation = useOptimisticMutation({
     mutationFn: async (memberData: MemberFormData) => {
       if (!editingMember?.id) throw new Error('No member to update');
 
@@ -259,31 +251,19 @@ export function InviteMemberFormFields({
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization-members'] });
-      toast({
-        title: 'Miembro actualizado',
-        description: 'El rol del miembro ha sido actualizado correctamente',
-      });
-      onSuccess();
+    queryKey: ['organization-members', effectiveOrgId],
+    optimisticUpdate: (oldData: any, variables: any) => {
+      if (!oldData) return oldData;
+      return oldData;
     },
-    onError: (error: any) => {
-      toast({
-        title: 'Error al actualizar miembro',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
+    onSuccessMessage: 'El rol del miembro ha sido actualizado correctamente',
+    onErrorMessage: 'Error al actualizar miembro',
   });
 
   const handleFormSubmit = async (data: MemberFormData) => {
     if (isEditing) {
-      setIsLoading(true);
-      try {
-        await updateMemberMutation.mutateAsync(data);
-      } finally {
-        setIsLoading(false);
-      }
+      updateMemberMutation.mutate(data);
+      onSuccess();
       return;
     }
 
@@ -312,12 +292,8 @@ export function InviteMemberFormFields({
     if (needsPayment) {
       await handleProceedToPayment(pricing);
     } else {
-      setIsLoading(true);
-      try {
-        await createMemberMutation.mutateAsync(data);
-      } finally {
-        setIsLoading(false);
-      }
+      createMemberMutation.mutate(data);
+      onSuccess();
     }
   };
 

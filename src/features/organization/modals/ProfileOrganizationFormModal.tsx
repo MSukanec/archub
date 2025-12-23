@@ -10,9 +10,8 @@ import { useModalPanelStore } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
 
 const organizationSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -39,9 +38,6 @@ interface ProfileOrganizationFormModalProps {
 export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrganizationFormModalProps) {
   const { organization, isEditing = false } = modalData || {};
   const { currentPanel, setPanel } = useModalPanelStore();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [isLoading, setIsLoading] = React.useState(false);
 
   const form = useForm<OrganizationFormData>({
     resolver: zodResolver(organizationSchema),
@@ -73,7 +69,7 @@ export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrga
     onClose();
   };
 
-  const updateOrganizationMutation = useMutation({
+  const { mutate: updateOrganization, isPending: isLoading } = useOptimisticMutation({
     mutationFn: async (data: OrganizationFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
@@ -86,33 +82,21 @@ export function ProfileOrganizationFormModal({ modalData, onClose }: ProfileOrga
         .eq('id', organization!.id);
       
       if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      queryClient.invalidateQueries({ queryKey: ['user-organizations'] });
-      toast({
-        title: 'Organización actualizada',
-        description: 'Los cambios se guardaron correctamente.'
-      });
+      
       handleClose();
     },
-    onError: (error) => {
-      console.error('Error updating organization:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo actualizar la organización. Inténtalo de nuevo.',
-        variant: 'destructive'
-      });
-    }
+    queryKey: ['current-user'],
+    optimisticUpdate: (oldData: any, data: OrganizationFormData) => {
+      if (!oldData) return oldData;
+      return oldData;
+    },
+    onSuccessMessage: "Organización actualizada",
+    onErrorMessage: "No se pudo actualizar la organización",
+    additionalQueryKeys: [['user-organizations'], ['organizations']],
   });
 
-  const onSubmit = async (data: OrganizationFormData) => {
-    setIsLoading(true);
-    try {
-      await updateOrganizationMutation.mutateAsync(data);
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = (data: OrganizationFormData) => {
+    updateOrganization(data);
   };
 
   const viewPanel = (

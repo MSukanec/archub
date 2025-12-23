@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { 
   Building, 
   Clock, 
@@ -14,7 +14,6 @@ import {
   Loader2
 } from "lucide-react";
 import { useLocation } from 'wouter';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,7 +29,6 @@ import { useSiteLogs } from '@/features/sitelog/hooks/use-site-logs';
 import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization';
 import { useProjectContext } from '@/stores/projectContext';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useToast } from '@/hooks/use-toast';
 import type { UserData } from "@/hooks/use-current-user";
 import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
@@ -42,11 +40,11 @@ import { uploadOrgLogo } from '@/lib/storage';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getOrganizationInitials } from '@/utils/initials';
 import { cn } from '@/lib/utils';
+import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
 
 export default function OrganizationDashboard() {
   const [, setLocation] = useLocation();
   const { openModal } = useGlobalModalStore();
-  const [isLogoUploading, setIsLogoUploading] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   
@@ -60,20 +58,19 @@ export default function OrganizationDashboard() {
   const { data: userOrgPrefs } = useUserOrganizationPreferences(userId, organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id;
   const { setSidebarLevel, sidebarLevel } = useNavigationStore();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { setShowActionBar } = useActionBarMobile();
   const isMobile = useMobile();
   
-  // Usar la organización actual del contexto, fallback a la del usuario
   const organization = userData?.organizations?.find(org => org.id === currentOrganizationId) || 
                       ((userData as UserData | undefined)?.organization ?? null);
   const currentTime = new Date();
 
-  // Sincronizar logoUrl con la organización cuando cambia
+  const preferencesQueryKey = userId && organizationId 
+    ? USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userId, organizationId)
+    : ['user-org-preferences-placeholder'];
+
   useEffect(() => {
     if (organization) {
-      // Generar URL del logo desde image_bucket + image_path
       if ((organization as any).image_bucket && (organization as any).image_path) {
         const { data } = supabase.storage
           .from((organization as any).image_bucket)
@@ -87,15 +84,10 @@ export default function OrganizationDashboard() {
     }
   }, [organization]);
 
-  // Handler para subir logo
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !organizationId) return;
-    
-    e.target.value = ''; // Reset input
-    setIsLogoUploading(true);
-    
-    try {
+  const { mutate: uploadLogo, isPending: isLogoUploading } = useOptimisticMutation({
+    mutationFn: async (file: File) => {
+      if (!organizationId) throw new Error('Organization ID required');
+      
       const result = await uploadOrgLogo(file, organizationId);
       
       const { error } = await supabase
@@ -112,37 +104,36 @@ export default function OrganizationDashboard() {
         setLogoUrl(result.file_url);
       }
       
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      
-      toast({
-        title: "Logo actualizado",
-        description: "El logo de la organización se ha actualizado correctamente",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo subir el logo",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLogoUploading(false);
-    }
-  };
+      return result;
+    },
+    queryKey: ['current-user'],
+    optimisticUpdate: (oldData) => {
+      if (!oldData) return oldData;
+      return oldData;
+    },
+    onSuccessMessage: "Logo actualizado correctamente",
+    onErrorMessage: "No se pudo subir el logo",
+    additionalQueryKeys: [['organizations', organizationId]],
+  });
+
+  const handleLogoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !organizationId) return;
+    e.target.value = '';
+    uploadLogo(file);
+  }, [organizationId, uploadLogo]);
   
-  // Prepare projects with active flag
   const projectsWithActive = projects.map(project => ({
     ...project,
     is_active: project.id === activeProjectId
   }));
   
-  // Put active project first
   const sortedProjects = activeProjectId ? [
     ...projectsWithActive.filter(project => project.id === activeProjectId),
     ...projectsWithActive.filter(project => project.id !== activeProjectId)
   ] : projectsWithActive;
 
-  // Mutation for selecting project
-  const selectProjectMutation = useMutation({
+  const { mutate: selectProject } = useOptimisticMutation({
     mutationFn: async (projectId: string) => {
       if (!supabase || !userData?.user?.id || !organizationId) {
         throw new Error('Required data not available');
@@ -157,50 +148,37 @@ export default function OrganizationDashboard() {
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id,organization_id'
-        })
+        });
       
-      if (error) throw error
-      return projectId;
-    },
-    onSuccess: (projectId) => {
-      // Update both stores: project context and navigation
+      if (error) throw error;
+      
       setSelectedProject(projectId, organizationId);
       setSidebarLevel('project');
       
-      // Update last_active_at via backend API (fire and forget)
       updateProjectLastActive(projectId, organizationId!).catch(err => 
         console.error('Error updating project last_active_at:', err)
       );
       
-      queryClient.invalidateQueries({ 
-        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!) 
-      });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      // Force immediate refetch to update UI
-      queryClient.refetchQueries({
-        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!)
-      });
-      
-      toast({
-        title: "Proyecto seleccionado",
-        description: "El proyecto se ha seleccionado correctamente"
-      });
-      
-      // Navigate to project dashboard
       setLocation('/project/dashboard');
+      return projectId;
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "No se pudo seleccionar el proyecto",
-        variant: "destructive"
-      })
-    }
+    queryKey: preferencesQueryKey,
+    optimisticUpdate: (oldData: any, projectId: string) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        last_project_id: projectId,
+        updated_at: new Date().toISOString()
+      };
+    },
+    onSuccessMessage: "Proyecto seleccionado",
+    onErrorMessage: "No se pudo seleccionar el proyecto",
+    additionalQueryKeys: [['current-user'], ['active-projects'], ['projects']],
   });
 
-  const handleSelectProject = (projectId: string) => {
-    selectProjectMutation.mutate(projectId);
-  };
+  const handleSelectProject = useCallback((projectId: string) => {
+    selectProject(projectId);
+  }, [selectProject]);
 
   const handleEditProject = (project: any) => {
     openModal('project', { editingProject: project, isEditing: true });

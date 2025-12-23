@@ -2,10 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { FormModalHeader } from '@/components/modal';
 import { FormModalFooter } from '@/components/modal';
@@ -97,7 +98,6 @@ function getPlanColor(planSlug: string | undefined): string {
 export function MemberFormModal({ editingMember, defaultEmail, onClose }: MemberModalProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  const queryClient = useQueryClient();
   const { setPanel } = useModalPanelStore();
   const [isLoading, setIsLoading] = useState(false);
   const [pricingData, setPricingData] = useState<SeatPricingData | null>(null);
@@ -199,7 +199,7 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
     }
   }, [organizationId]);
 
-  const createMemberMutation = useMutation({
+  const createMemberMutation = useOptimisticMutation<any, MemberFormData>({
     mutationFn: async (memberData: MemberFormData) => {
       if (!organizationId) throw new Error('No organization selected');
 
@@ -211,30 +211,25 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
 
       return response.json();
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['organization-members'] });
-      queryClient.invalidateQueries({ queryKey: ['organization-members-full'] });
-      queryClient.invalidateQueries({ queryKey: ['organization-invitations'] });
-      queryClient.invalidateQueries({ queryKey: ['organization-former-members'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
-      toast({
-        title: isReinvite ? 'Miembro reinvitado' : 'Miembro invitado',
-        description: data.isNewUser 
-          ? 'La invitación ha sido enviada por email' 
-          : 'El usuario recibirá una notificación para unirse nuevamente',
-      });
-      handleClose();
+    queryKey: ['organization-members', organizationId],
+    optimisticUpdate: (oldData: any, _variables: MemberFormData) => {
+      if (!oldData) return oldData;
+      return oldData;
     },
-    onError: (error: any) => {
-      toast({
-        title: 'Error al invitar miembro',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
+    onSuccessMessage: isReinvite ? 'Miembro reinvitado exitosamente' : 'Invitación enviada exitosamente',
+    onErrorMessage: 'Error al invitar miembro',
+    additionalQueryKeys: [
+      ['organization-members-full'],
+      ['organization-invitations'],
+      ['organization-former-members'],
+      ['/api/contacts'],
+      ['current-user'],
+      ['member-count'],
+      ['subscription-seats'],
+    ],
   });
 
-  const updateMemberMutation = useMutation({
+  const updateMemberMutation = useOptimisticMutation<any, MemberFormData>({
     mutationFn: async (memberData: MemberFormData) => {
       if (!editingMember?.id) throw new Error('No member to update');
 
@@ -249,22 +244,23 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization-members'] });
-      queryClient.invalidateQueries({ queryKey: ['organization-members-full'] });
-      toast({
-        title: 'Miembro actualizado',
-        description: 'El rol del miembro ha sido actualizado correctamente',
-      });
-      handleClose();
+    queryKey: ['organization-members', organizationId],
+    optimisticUpdate: (oldData: any, variables: MemberFormData) => {
+      if (!oldData) return oldData;
+      if (!Array.isArray(oldData)) return oldData;
+      return oldData.map((member: any) =>
+        member.id === editingMember?.id
+          ? { ...member, role_id: variables.roleId }
+          : member
+      );
     },
-    onError: (error: any) => {
-      toast({
-        title: 'Error al actualizar miembro',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
+    onSuccessMessage: 'Rol del miembro actualizado correctamente',
+    onErrorMessage: 'Error al actualizar miembro',
+    additionalQueryKeys: [
+      ['organization-members-full'],
+      ['current-user'],
+      ['member-count'],
+    ],
   });
 
   const handleClose = () => {
@@ -277,12 +273,8 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
 
   const handleFormSubmit = async (data: MemberFormData) => {
     if (editingMember) {
-      setIsLoading(true);
-      try {
-        await updateMemberMutation.mutateAsync(data);
-      } finally {
-        setIsLoading(false);
-      }
+      updateMemberMutation.mutate(data);
+      handleClose();
       return;
     }
 
@@ -311,12 +303,8 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
     if (needsPayment) {
       await handleProceedToPayment(pricing);
     } else {
-      setIsLoading(true);
-      try {
-        await createMemberMutation.mutateAsync(data);
-      } finally {
-        setIsLoading(false);
-      }
+      createMemberMutation.mutate(data);
+      handleClose();
     }
   };
 

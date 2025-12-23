@@ -7,11 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
+import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
 
 const organizationSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -52,8 +52,6 @@ export function OrganizationFormFields({
   hideActions = false,
   formRef,
 }: OrganizationFormFieldsProps) {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { data: currentUser } = useCurrentUser();
   const internalFormRef = useRef<HTMLFormElement>(null);
   const actualFormRef = formRef || internalFormRef;
@@ -94,7 +92,7 @@ export function OrganizationFormFields({
     }
   }, [organization, form]);
 
-  const createMutation = useMutation({
+  const { mutate: createOrganization, isPending: isCreating } = useOptimisticMutation({
     mutationFn: async (data: OrganizationFormData) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
@@ -122,28 +120,27 @@ export function OrganizationFormFields({
         }
       }
       
+      onSuccess();
       return orgId;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      toast({
-        title: 'Organización creada',
-        description: 'La organización se creó correctamente.'
-      });
-      onSuccess();
+    queryKey: ['admin-organizations'],
+    optimisticUpdate: (oldData: any, variables: OrganizationFormData) => {
+      if (!Array.isArray(oldData)) return oldData;
+      const optimisticOrg = {
+        id: 'temp-' + Date.now(),
+        name: variables.name,
+        is_active: variables.is_active,
+        plan_id: variables.plan_id,
+        settings: { is_founder: variables.is_founder }
+      };
+      return [...oldData, optimisticOrg];
     },
-    onError: (error) => {
-      console.error('Error creating organization:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo crear la organización. Inténtalo de nuevo.',
-        variant: 'destructive'
-      });
-    }
+    onSuccessMessage: "Organización creada",
+    onErrorMessage: "No se pudo crear la organización",
+    additionalQueryKeys: [['current-user']],
   });
 
-  const updateMutation = useMutation({
+  const { mutate: updateOrganization, isPending: isUpdating } = useOptimisticMutation({
     mutationFn: async (data: OrganizationFormData) => {
       if (!supabase || !organization) throw new Error('Supabase not initialized or no organization');
       
@@ -169,33 +166,30 @@ export function OrganizationFormFields({
         .eq('id', organization.id);
       
       if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-organizations'] });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      toast({
-        title: 'Organización actualizada',
-        description: 'Los cambios se guardaron correctamente.'
-      });
+      
       onSuccess();
     },
-    onError: (error) => {
-      console.error('Error updating organization:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo actualizar la organización. Inténtalo de nuevo.',
-        variant: 'destructive'
-      });
-    }
+    queryKey: ['admin-organizations'],
+    optimisticUpdate: (oldData: any, variables: OrganizationFormData) => {
+      if (!Array.isArray(oldData)) return oldData;
+      return oldData.map((org: any) => 
+        org.id === organization?.id 
+          ? { ...org, ...variables, settings: { ...org.settings, is_founder: variables.is_founder } }
+          : org
+      );
+    },
+    onSuccessMessage: "Organización actualizada",
+    onErrorMessage: "No se pudo actualizar la organización",
+    additionalQueryKeys: [['current-user']],
   });
 
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const isSubmitting = isCreating || isUpdating;
 
-  const onSubmit = async (data: OrganizationFormData) => {
+  const onSubmit = (data: OrganizationFormData) => {
     if (mode === 'edit' && organization) {
-      await updateMutation.mutateAsync(data);
+      updateOrganization(data);
     } else {
-      await createMutation.mutateAsync(data);
+      createOrganization(data);
     }
   };
 

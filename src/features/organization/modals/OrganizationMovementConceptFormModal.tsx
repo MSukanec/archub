@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
 import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { FormModalLayout } from '@/components/modal';
 import { FormModalHeader } from '@/components/modal';
@@ -44,9 +43,7 @@ interface OrganizationMovementConceptFormModalProps {
 export function OrganizationMovementConceptFormModal({ modalData, onClose }: OrganizationMovementConceptFormModalProps) {
   const editingConcept = modalData?.editingConcept;
   const parentConcept = modalData?.parentConcept;
-  const { toast } = useToast();
   const { data: userData } = useCurrentUser();
-  const queryClient = useQueryClient();
   const { currentPanel, setPanel } = useModalPanelStore();
   const { closeModal } = useGlobalModalStore();
 
@@ -85,7 +82,7 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
     }
   }, [editingConcept, parentConcept, form]);
 
-  const createMutation = useMutation({
+  const createMutation = useOptimisticMutation({
     mutationFn: async (data: ConceptFormData) => {
       if (!userData?.organization?.id) {
         throw new Error('No organization found');
@@ -105,26 +102,20 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       if (error) throw error;
       return result[0];
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization-movement-concepts'] });
-      queryClient.invalidateQueries({ queryKey: ['movement-concepts-admin'] });
-      queryClient.invalidateQueries({ queryKey: ['system-movement-concepts'] });
-      toast({
-        title: "Concepto creado",
-        description: "El nuevo concepto se ha creado correctamente"
-      });
-      closeModal();
+    queryKey: ['movement-concepts-admin'],
+    optimisticUpdate: (oldData: any[], variables: ConceptFormData) => {
+      if (!oldData) return oldData;
+      return [...oldData, { ...variables, id: 'temp-' + Date.now(), is_system: false }];
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Error al crear el concepto",
-        variant: "destructive"
-      });
-    }
+    onSuccessMessage: "El nuevo concepto se ha creado correctamente",
+    onErrorMessage: "Error al crear el concepto",
+    additionalQueryKeys: [
+      ['organization-movement-concepts'],
+      ['system-movement-concepts']
+    ]
   });
 
-  const updateMutation = useMutation({
+  const updateMutation = useOptimisticMutation({
     mutationFn: async (data: ConceptFormData) => {
       if (!editingConcept?.id) {
         throw new Error('No concept ID found');
@@ -143,33 +134,24 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
       if (error) throw error;
       return result[0];
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization-movement-concepts'] });
-      queryClient.invalidateQueries({ queryKey: ['movement-concepts-admin'] });
-      queryClient.invalidateQueries({ queryKey: ['system-movement-concepts'] });
-      toast({
-        title: "Concepto actualizado",
-        description: "El concepto se ha actualizado correctamente"
-      });
-      closeModal();
+    queryKey: ['movement-concepts-admin'],
+    optimisticUpdate: (oldData: any[], variables: ConceptFormData) => {
+      if (!oldData) return oldData;
+      return oldData.map(item => 
+        item.id === editingConcept.id ? { ...item, ...variables } : item
+      );
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Error al actualizar el concepto",
-        variant: "destructive"
-      });
-    }
+    onSuccessMessage: "El concepto se ha actualizado correctamente",
+    onErrorMessage: "Error al actualizar el concepto",
+    additionalQueryKeys: [
+      ['organization-movement-concepts'],
+      ['system-movement-concepts']
+    ]
   });
 
   const onSubmit = (data: ConceptFormData) => {
     // Prevent editing system concepts
     if (editingConcept?.is_system) {
-      toast({
-        title: "Edición no permitida",
-        description: "Los conceptos del sistema no pueden ser modificados",
-        variant: "destructive"
-      });
       return;
     }
 
@@ -184,6 +166,7 @@ export function OrganizationMovementConceptFormModal({ modalData, onClose }: Org
     } else {
       createMutation.mutate(formData);
     }
+    closeModal();
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;

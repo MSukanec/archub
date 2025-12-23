@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState, useCallback } from 'react';
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects, updateProjectLastActive } from '@/features/projects';
@@ -7,11 +6,11 @@ import { useContacts } from '@/features/contacts';
 import { useSiteLogs } from '@/features/sitelog/hooks/use-site-logs';
 import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization';
 import { useProjectContext } from '@/stores/projectContext';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { useGlobalModalStore } from '@/components/modal';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { uploadOrgLogo } from '@/lib/storage';
+import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
 import type { UserData } from "@/hooks/use-current-user";
 
 import { WelcomePanel } from '../panels/WelcomePanel';
@@ -28,7 +27,6 @@ export function OrganizationDashboardView({
   onNavigateToProjects 
 }: OrganizationDashboardViewProps) {
   const { openModal } = useGlobalModalStore();
-  const [isLogoUploading, setIsLogoUploading] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   
   const { data: userData, isLoading } = useCurrentUser();
@@ -40,11 +38,11 @@ export function OrganizationDashboardView({
   const { data: siteLogs = [], isLoading: siteLogsLoading } = useSiteLogs(undefined, organizationId);
   const { data: userOrgPrefs } = useUserOrganizationPreferences(userId, organizationId);
   const activeProjectId = userOrgPrefs?.last_project_id;
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   
   const organization = userData?.organizations?.find(org => org.id === currentOrganizationId) || 
                       ((userData as UserData | undefined)?.organization ?? null);
+
+  const preferencesQueryKey = USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userId!, organizationId!);
 
   useEffect(() => {
     if (organization) {
@@ -61,12 +59,10 @@ export function OrganizationDashboardView({
     }
   }, [organization]);
 
-  const handleLogoUpload = async (file: File) => {
-    if (!organizationId) return;
-    
-    setIsLogoUploading(true);
-    
-    try {
+  const { mutate: uploadLogo, isPending: isLogoUploading } = useOptimisticMutation({
+    mutationFn: async (file: File) => {
+      if (!organizationId) throw new Error('Organization ID required');
+      
       const result = await uploadOrgLogo(file, organizationId);
       
       const { error } = await supabase
@@ -83,24 +79,16 @@ export function OrganizationDashboardView({
         setLogoUrl(result.file_url);
       }
       
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      
-      toast({
-        title: "Logo actualizado",
-        description: "El logo de la organización se ha actualizado correctamente",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo subir el logo",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLogoUploading(false);
-    }
-  };
+      return result;
+    },
+    queryKey: ['current-user'],
+    optimisticUpdate: (oldData) => oldData,
+    onSuccessMessage: "Logo actualizado correctamente",
+    onErrorMessage: "No se pudo subir el logo",
+    additionalQueryKeys: [['organizations', organizationId]],
+  });
 
-  const selectProjectMutation = useMutation({
+  const { mutate: selectProject } = useOptimisticMutation({
     mutationFn: async (projectId: string) => {
       if (!supabase || !userData?.user?.id || !organizationId) {
         throw new Error('Required data not available');
@@ -115,45 +103,40 @@ export function OrganizationDashboardView({
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id,organization_id'
-        })
+        });
       
-      if (error) throw error
-      return projectId;
-    },
-    onSuccess: (projectId) => {
+      if (error) throw error;
+      
       setSelectedProject(projectId, organizationId);
       
       updateProjectLastActive(projectId, organizationId!).catch(err => 
         console.error('Error updating project last_active_at:', err)
       );
       
-      queryClient.invalidateQueries({ 
-        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!) 
-      });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      queryClient.refetchQueries({
-        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!)
-      });
-      
-      toast({
-        title: "Proyecto seleccionado",
-        description: "El proyecto se ha seleccionado correctamente"
-      });
-      
       onProjectSelected?.(projectId);
+      return projectId;
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "No se pudo seleccionar el proyecto",
-        variant: "destructive"
-      })
-    }
+    queryKey: preferencesQueryKey,
+    optimisticUpdate: (oldData: any, projectId: string) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        last_project_id: projectId,
+        updated_at: new Date().toISOString()
+      };
+    },
+    onSuccessMessage: "Proyecto seleccionado",
+    onErrorMessage: "No se pudo seleccionar el proyecto",
+    additionalQueryKeys: [['current-user'], ['active-projects'], ['projects']],
   });
 
-  const handleSelectProject = (projectId: string) => {
-    selectProjectMutation.mutate(projectId);
-  };
+  const handleLogoUpload = useCallback((file: File) => {
+    uploadLogo(file);
+  }, [uploadLogo]);
+
+  const handleSelectProject = useCallback((projectId: string) => {
+    selectProject(projectId);
+  }, [selectProject]);
 
   const handleEditProject = (project: any) => {
     openModal('project', { editingProject: project, isEditing: true });
