@@ -55,7 +55,7 @@ import Media from "@/pages/media/Media";
 // Moodboard Pages
 import Moodboard from "@/pages/moodboard/Moodboard";
 
-import OrganizationDashboardPage from "@/pages/organization/OrganizationDashboardPage";
+import { OrganizationDashboardPage } from "@/pages/dashboard/OrganizationDashboardPage";
 import { OrganizationDataPage } from "@/pages/dashboard/OrganizationDataPage";
 import { OrganizationSettingsPage } from "@/pages/dashboard/OrganizationSettingsPage";
 

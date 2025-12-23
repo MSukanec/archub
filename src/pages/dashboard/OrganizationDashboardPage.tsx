@@ -10,7 +10,7 @@ import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { OrganizationDashboardView } from '@/features/organization/views/OrganizationDashboardView';
 
-export default function OrganizationDashboardPage() {
+export function OrganizationDashboardPage() {
   const [, setLocation] = useLocation();
   const { data: userData } = useCurrentUser();
   const { currentOrganizationId } = useProjectContext();
