@@ -20,7 +20,7 @@ interface LabToolbarProps {
 
 export function LabToolbar({
   showSecondaryToolbar = true,
-  showSearch = false,
+  showSearch = true,
   searchPlaceholder = "Buscar...",
   searchValue = "",
   onSearchChange,
