@@ -1,5 +1,5 @@
 /**
- * ProjectFinancesMovementsTab.tsx
+ * ProjectFinancesMovementsView.tsx
  * 
  * Finanzas de PROYECTO - muestra solo movimientos del proyecto actual.
  * NO incluye columna "Proyecto" (ya estamos en contexto de proyecto).
@@ -56,19 +56,19 @@ const MOVEMENT_TYPE_CONFIG: Record<string, {
   },
 };
 
-interface ProjectFinancesMovementsTabProps {
+interface ProjectFinancesMovementsViewProps {
   projectId: string;
   externalFilterIssueId?: string | null;
   onClearExternalFilter?: () => void;
   getAffectedIdsForIssue?: (issueId: string) => Set<string | number>;
 }
 
-export function ProjectFinancesMovementsTab({ 
+export function ProjectFinancesMovementsView({ 
   projectId,
   externalFilterIssueId,
   onClearExternalFilter,
   getAffectedIdsForIssue: externalGetAffectedIds,
-}: ProjectFinancesMovementsTabProps) {
+}: ProjectFinancesMovementsViewProps) {
   const { currentOrganizationId } = useProjectContext();
   const { openModal } = useGlobalModalStore();
   const { showDeleteConfirmation } = useDeleteConfirmation();

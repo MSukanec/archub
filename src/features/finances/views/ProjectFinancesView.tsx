@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Plus, Calendar, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ProjectFinancesMovementsTab } from "@/pages/project-finances/ProjectFinancesMovementsTab";
-import ProjectFinancesDashboardTab, { calculateAvailablePeriods, type PeriodFilter } from "@/pages/project-finances/ProjectFinancesDashboardTab";
+import { ProjectFinancesMovementsView } from "./ProjectFinancesMovementsView";
+import { ProjectFinancesDashboardView, calculateAvailablePeriods, type PeriodFilter } from "./ProjectFinancesDashboardView";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useGlobalModalStore } from "@/components/modal/state/globalModalStore";
 import { useProjectContext } from "@/stores/projectContext";
@@ -115,7 +115,7 @@ export function ProjectFinancesView({ activeTab, onTabChange }: ProjectFinancesV
   return (
     <div className="space-y-6 p-6">
       {activeTab === "dashboard" && (
-        <ProjectFinancesDashboardTab
+        <ProjectFinancesDashboardView
           movements={allMovements}
           organizationId={organizationId}
           onNavigateToMovements={() => onTabChange('movements')}
@@ -139,7 +139,7 @@ export function ProjectFinancesView({ activeTab, onTabChange }: ProjectFinancesV
         />
       )}
       {activeTab === "movements" && (
-        <ProjectFinancesMovementsTab 
+        <ProjectFinancesMovementsView 
           projectId={selectedProjectId}
           externalFilterIssueId={activeFilterIssueId}
           onClearExternalFilter={() => setActiveFilterIssueId(null)}

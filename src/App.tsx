@@ -118,7 +118,7 @@ const SubscriptionCheckout = lazy(() => import("@/pages/checkout/SubscriptionChe
 
 // Finances Pages
 import { OrganizationFinancesPage } from "@/pages/dashboard/OrganizationFinancesPage";
-import ProjectFinances from "@/pages/project-finances/ProjectFinances";
+import { ProjectFinancesPage } from "@/pages/dashboard/ProjectFinancesPage";
 
 // Settings Pages (legacy - keeping for backwards compatibility)
 import PricingPlan from "@/pages/settings/PricingPlan";
@@ -205,7 +205,7 @@ function Router() {
         
         {/* Finances Routes */}
         <Route path="/finances" component={OrganizationFinancesPage} />
-        <Route path="/project/finances" component={ProjectFinances} />
+        <Route path="/project/finances" component={ProjectFinancesPage} />
         
         <Route path="/organization" component={OrganizationDashboardPage} />
 

@@ -24,7 +24,7 @@ const FINANCES_TABS = [
   { id: "movements", label: "Movimientos" },
 ];
 
-export default function ProjectFinances() {
+export function ProjectFinancesPage() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilter>('all');
   const [periodPopoverOpen, setPeriodPopoverOpen] = useState(false);

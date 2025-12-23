@@ -31,7 +31,7 @@ import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
 
 export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all';
 
-interface ProjectFinancesDashboardTabProps {
+interface ProjectFinancesDashboardViewProps {
   movements: any[];
   organizationId?: string;
   onNavigateToMovements?: () => void;
@@ -144,7 +144,7 @@ export function calculateAvailablePeriods(allMovements: any[]): Record<PeriodFil
   return result;
 }
 
-export default function ProjectFinancesDashboardTab({ 
+export function ProjectFinancesDashboardView({ 
   movements: allMovements = [],
   organizationId,
   onNavigateToMovements,
@@ -153,7 +153,7 @@ export default function ProjectFinancesDashboardTab({
   selectedPeriod = 'all',
   dismissedIssueIds = new Set(),
   onDismissIssue
-}: ProjectFinancesDashboardTabProps) {
+}: ProjectFinancesDashboardViewProps) {
   const { data: userData } = useCurrentUser();
   const orgId = organizationId || userData?.organization?.id;
   

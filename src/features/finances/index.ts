@@ -45,3 +45,8 @@ export { PaymentFormModal } from './modals/admin/PaymentFormModal';
 
 // Admin Components
 export { default as AdminPaymentTransferRow } from './components/admin/AdminPaymentTransferRow';
+
+// Views
+export { ProjectFinancesView } from './views/ProjectFinancesView';
+export { ProjectFinancesDashboardView, calculateAvailablePeriods, type PeriodFilter } from './views/ProjectFinancesDashboardView';
+export { ProjectFinancesMovementsView } from './views/ProjectFinancesMovementsView';
