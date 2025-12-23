@@ -11,3 +11,6 @@ export { ContactAttachmentsPanel } from './components/attachments/ContactAttachm
 export { default as ContactRow } from './components/ContactRow';
 export { default as ContactList } from './components/ContactList';
 export { ContactTypeForm } from './forms/ContactTypeForm';
+
+export { ContactsView } from './views/ContactsView';
+export { ContactSettingsView } from './views/ContactSettingsView';
