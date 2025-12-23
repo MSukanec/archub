@@ -1,511 +1,544 @@
-# Guía de Creación de Páginas en Archub
+# Guía de Creación de Páginas en Seencel
 
 ## IMPORTANTE: Lee esto ANTES de crear cualquier página
 
-Esta guía documenta cómo crear páginas correctamente en Archub, siguiendo los patrones establecidos y usando los componentes adecuados.
+Esta guía documenta cómo crear páginas correctamente en Seencel, siguiendo la **arquitectura 3-capas (PAGE → LAYOUT → VIEW)** y los patrones establecidos.
 
 ---
 
-## 1. Estructura Base de una Página
+## ARQUITECTURA 3-CAPAS (Fundamental)
 
-### ✅ CORRECTO: Usar Layout con headerProps
+### Objetivo
 
-```typescript
-import { Layout } from '@/components/layout/desktop/Layout';
-import { IconComponent } from 'lucide-react';
+Separar las páginas en 3 capas claras para que el **contenido sea completamente agnóstico del layout**, permitiendo que el mismo contenido se renderice en diferentes layouts (DashboardLayout, LabLayout, etc.) sin modificar el código del contenido.
 
-export default function MyPage() {
-  const headerProps = {
-    title: "Título de la Página",
-    icon: IconComponent,
-    description: "Descripción breve",
-    showSearch: false,
-    showFilters: false,
-  };
+### Estructura
 
-  return (
-    <Layout wide headerProps={headerProps}>
-      {/* Contenido de la página */}
-    </Layout>
-  );
-}
 ```
-
-### ❌ INCORRECTO: NO usar PageLayout directamente para páginas admin
-
-```typescript
-// ❌ NO HACER ESTO en páginas admin
-return (
-  <PageLayout title="..." icon={...}>
-    {/* contenido */}
-  </PageLayout>
-);
+┌─────────────────────────────────────────────────────────────┐
+│                        PAGE                                 │
+│ (Orquestador: elige layout, estado, renderiza view correcta)│
+├─────────────────────────────────────────────────────────────┤
+│                       LAYOUT                                │
+│  (Header, Sidebar, Toolbar - DashboardLayout o LabLayout)  │
+├─────────────────────────────────────────────────────────────┤
+│                        VIEW                                 │
+│  (El contenido real: tablas, KPIs, gráficos, formularios)  │
+└─────────────────────────────────────────────────────────────┘
 ```
-
-**Razón:** `PageLayout` es un componente interno usado por `Layout`. Las páginas deben usar `Layout` que incluye sidebar, header, y toda la estructura.
 
 ---
 
-## 1.1. Importación de Datos (Features Architecture)
+## 1. PAGE (Orquestador)
 
-**IMPORTANTE:** Las páginas deben importar hooks y components desde `features/`, NO hacer queries directas.
+### Responsabilidad
+- Elegir qué layout usar (dinámico por preferencia de usuario)
+- Manejar state simple: `activeTab`, `activeSection`
+- Renderizar la View correcta según el estado
+- Pasar props al layout
 
-### ✅ CORRECTO: Importar desde feature
+### Reglas
+- **NO** contiene lógica de negocio compleja
+- **NO** hace fetch de datos
+- **SOLO** orquestación: layout selection + state + View rendering
 
-```typescript
-import { Layout } from '@/components/layout/desktop/Layout';
-import { useSiteLogs } from '@/features/sitelog/hooks/use-site-logs';
-import { LogTimeline } from '@/features/sitelog/components/LogTimeline';
-import { SiteLogModal } from '@/features/sitelog';  // Desde barrel export
-
-export default function SitelogPage() {
-  const { data: siteLogs, isLoading } = useSiteLogs(projectId, orgId);
-  
-  const headerProps = {
-    title: "Bitácora",
-    icon: FileText,
-  };
-
-  return (
-    <Layout wide headerProps={headerProps}>
-      {isLoading ? <Skeleton /> : <LogTimeline logs={siteLogs} />}
-    </Layout>
-  );
-}
+### Ubicación
+```
+src/pages/<feature>/
+  <Feature>.tsx  (o <Feature>Page.tsx)
 ```
 
-### ❌ INCORRECTO: Query directa en página
+### Ejemplo Completo
 
 ```typescript
-// ❌ MAL - NO hacer queries directas
-export default function MyPage() {
-  const { data } = useQuery({
-    queryKey: ['site-logs'],
-    queryFn: async () => {
-      const { data } = await supabase.from('site_logs').select('*');  // ❌ MAL
-      return data;
-    }
-  });
-}
-```
-
-### ✅ Reglas:
-
-1. **Importa hooks** desde `features/<feature>/hooks/`
-2. **Importa components** desde `features/<feature>/components/`
-3. **Importa modales** desde `features/<feature>/modals/`
-4. **Usa barrel exports** cuando estén disponibles: `import { ... } from '@/features/sitelog';`
-5. **NO hagas queries** directas de Supabase en páginas
-
-### Referencias:
-- Ver `src/pages/sitelog/Sitelog.tsx` - Ejemplo correcto usando feature imports
-- Ver `src/ARCHITECTURE.MD` - Arquitectura completa de features
-
----
-
-## 2. Páginas con Tabs
-
-### ✅ CORRECTO: Usar el componente Tabs personalizado
-
-```typescript
-import { Layout } from '@/components/layout/desktop/Layout';
-import { Tabs } from '@/components/ui-custom/Tabs';
+// src/pages/projects/Projects.tsx
 import { useState } from 'react';
-
-export default function MyPageWithTabs() {
-  const [activeTab, setActiveTab] = useState('tab1');
-
-  const headerProps = {
-    title: "Título",
-    icon: IconComponent,
-    showSearch: false,
-    showFilters: false,
-  };
-
-  const tabs = [
-    { value: 'tab1', label: 'Primera Tab' },
-    { value: 'tab2', label: 'Segunda Tab' },
-    { value: 'tab3', label: 'Tercera Tab' },
-  ];
-
-  return (
-    <Layout wide headerProps={headerProps}>
-      <div className="space-y-6">
-        {/* Tabs personalizados de Archub */}
-        <Tabs 
-          tabs={tabs}
-          value={activeTab}
-          onValueChange={setActiveTab}
-        />
-        
-        {/* Contenido condicional según tab */}
-        {activeTab === 'tab1' && <TabContent1 />}
-        {activeTab === 'tab2' && <TabContent2 />}
-        {activeTab === 'tab3' && <TabContent3 />}
-      </div>
-    </Layout>
-  );
-}
-```
-
-### ❌ INCORRECTO: NO usar Button genérico para tabs/filtros
-
-```typescript
-// ❌ NO HACER ESTO
-<Button variant={active ? 'default' : 'outline'}>...</Button>
-```
-
-**Razón:** Archub tiene un componente Tabs personalizado (`src/components/ui-custom/Tabs.tsx`) con estilo específico que usa `var(--accent)` y sigue el design system.
-
----
-
-## 3. Páginas Admin con Tabs en Header
-
-Algunas páginas admin tienen tabs en el header (AdminAdmin, AdminSupport). Patrón:
-
-```typescript
-import { Layout } from '@/components/layout/desktop/Layout';
-import { useState } from 'react';
-
-export default function AdminPageWithHeaderTabs() {
-  const [activeTab, setActiveTab] = useState('tab1');
-
-  const tabs = [
-    { id: 'tab1', label: 'Tab 1', isActive: activeTab === 'tab1' },
-    { id: 'tab2', label: 'Tab 2', isActive: activeTab === 'tab2' },
-    { id: 'tab3', label: 'Tab 3', isActive: activeTab === 'tab3' },
-  ];
-
-  const headerProps = {
-    title: "Título",
-    icon: IconComponent,
-    showSearch: false,
-    showFilters: false,
-    tabs,  // ← Tabs en el header
-    onTabChange: setActiveTab,
-  };
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'tab1': return <Tab1Content />;
-      case 'tab2': return <Tab2Content />;
-      case 'tab3': return <Tab3Content />;
-      default: return <Tab1Content />;
-    }
-  };
-
-  return (
-    <Layout wide headerProps={headerProps}>
-      {renderTabContent()}
-    </Layout>
-  );
-}
-```
-
----
-
-## 4. Ejemplos de Páginas de Referencia
-
-### Páginas Admin
-
-1. **AdminAdmin.tsx** (`/admin/administration`)
-   - Tabs en header (Resumen, Organizaciones, Usuarios)
-   - Botón de acción dinámico según tab
-   - Layout wide
-
-2. **AdminSupport.tsx** (`/admin/support`)
-   - Tabs en header (Anuncios, Notificaciones, Cambios, Soporte)
-   - Layout wide
-
-3. **AdminDashboard.tsx** (`/admin/dashboard`)
-   - Tabs en contenido (Hoy, 7 días, 30 días) usando componente Tabs
-   - Sin tabs en header
-   - Layout wide
-
-### Referencia de archivos:
-```
-src/pages/admin/administration/AdminAdmin.tsx
-src/pages/admin/support/AdminSupport.tsx
-src/pages/admin/AdminDashboard.tsx
-```
-
----
-
-## 5. Props Comunes del headerProps
-
-```typescript
-interface HeaderProps {
-  title: string;                    // Título de la página
-  icon?: React.ComponentType<any>;  // Icono (de lucide-react)
-  description?: string;             // Descripción (opcional)
-  showSearch?: boolean;             // Mostrar buscador (default: false)
-  showFilters?: boolean;            // Mostrar filtros (default: false)
-  tabs?: Tab[];                     // Tabs en el header (opcional)
-  onTabChange?: (tabId: string) => void;  // Handler de cambio de tab
-  actions?: React.ReactElement[];   // Botones de acción en el header (opcional)
-  actionButton?: {                  // Botón de acción (DEPRECATED - usar actions)
-    label: string;
-    icon: React.ComponentType<any>;
-    onClick: () => void;
-  };
-}
-```
-
----
-
-## 6. Botones de Acción en el Header
-
-### ✅ CORRECTO: Usar la prop `actions` en headerProps
-
-Los botones de acción (crear, agregar, etc.) **SIEMPRE** deben ir en el header usando la prop `actions`, NO en el contenido de la página.
-
-```typescript
-import { Button } from '@/components/ui/button';
+import { Layout } from '@/layouts/dashboard/DashboardLayout';
+import { LabLayout } from '@/layouts/lab/LabLayout';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { ProjectActivesView } from '@/features/projects/views/ProjectActivesView';
+import { ProjectListView } from '@/features/projects/views/ProjectListView';
+import { ProjectSettingsView } from '@/features/projects/views/ProjectSettingsView';
 import { Plus } from 'lucide-react';
-import { useGlobalModalStore } from '@/components/modal/form/useGlobalModalStore';
+import { Button } from '@/components/ui/button';
 
-export default function MyPage() {
-  const [activeTab, setActiveTab] = useState('tab1');
+const PROJECTS_TABS = [
+  { id: 'actives', label: 'Proyectos Activos' },
+  { id: 'list', label: 'Lista de Proyectos' },
+  { id: 'settings', label: 'Ajustes' },
+];
+
+export default function Projects() {
+  const [activeTab, setActiveTab] = useState('actives');
+  const { data: userData } = useCurrentUser();
+  const organizationId = userData?.organization?.id;
   const { openModal } = useGlobalModalStore();
+  
+  const layoutPreference = userData?.preferences?.layout || 'experimental';
+  const isLabLayout = layoutPreference === 'lab';
 
-  const handleCreateItem = () => {
-    openModal('my-modal', {});
+  // Botones de acción según tab activo
+  const actionButtons = (
+    <div className="flex items-center gap-3">
+      {activeTab === 'list' && (
+        <Button 
+          size="sm" 
+          onClick={() => openModal('project', {})}
+          data-testid="button-create-project"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Nuevo Proyecto
+        </Button>
+      )}
+    </div>
+  );
+
+  // Orquestación: renderizar view según activeTab
+  const renderView = () => {
+    switch (activeTab) {
+      case 'actives':
+        return <ProjectActivesView organizationId={organizationId} />;
+      case 'list':
+        return <ProjectListView organizationId={organizationId} />;
+      case 'settings':
+        return <ProjectSettingsView organizationId={organizationId} />;
+      default:
+        return <ProjectActivesView organizationId={organizationId} />;
+    }
   };
 
   const headerProps = {
-    title: "Título",
-    icon: IconComponent,
-    tabs: [
-      { id: 'tab1', label: 'Tab 1', isActive: activeTab === 'tab1' },
-      { id: 'tab2', label: 'Tab 2', isActive: activeTab === 'tab2' },
-    ],
-    onTabChange: setActiveTab,
-    actions: [
-      // Botón condicional según tab activa
-      activeTab === 'tab1' && (
-        <Button
-          key="create-item"
-          onClick={handleCreateItem}
-          className="h-8 px-3 text-xs"
-          data-testid="button-create-item"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Crear Elemento
-        </Button>
-      ),
-      // Puedes agregar más botones
-      activeTab === 'tab2' && (
-        <Button
-          key="another-action"
-          onClick={() => console.log('Another action')}
-          className="h-8 px-3 text-xs"
-        >
-          Otra Acción
-        </Button>
-      ),
-    ].filter(Boolean) // Filtrar los elementos false/undefined
+    title: "Proyectos",
+    icon: Briefcase,
+    description: "Gestiona tus proyectos de construcción",
   };
 
-  return (
-    <Layout wide headerProps={headerProps}>
-      {/* Contenido de la página */}
-      {activeTab === 'tab1' && <Tab1Content />}
-      {activeTab === 'tab2' && <Tab2Content />}
-    </Layout>
-  );
-}
-```
+  // Lab Layout con tabs en toolbar
+  if (isLabLayout) {
+    return (
+      <LabLayout 
+        tabs={PROJECTS_TABS}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        toolbarProps={{
+          secondaryRightSlot: actionButtons,
+        }}
+      >
+        {renderView()}
+      </LabLayout>
+    );
+  }
 
-### ❌ INCORRECTO: Poner botones en el contenido de la página
-
-```typescript
-// ❌ NO HACER ESTO
-export default function MyPage() {
+  // Dashboard Layout con tabs inline
   return (
-    <Layout wide headerProps={headerProps}>
+    <Layout headerProps={{ ...headerProps, actions: [actionButtons] }}>
       <div className="space-y-6">
-        {/* ❌ MAL: Botón en el contenido */}
-        <div className="flex justify-end">
-          <Button onClick={handleCreate}>
-            <Plus className="w-4 h-4 mr-2" />
-            Crear Elemento
-          </Button>
+        <div className="flex gap-1 border-b">
+          {PROJECTS_TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-3 py-2 text-sm font-medium ${
+                activeTab === tab.id
+                  ? 'border-b-2 border-accent'
+                  : 'border-b-2 border-transparent'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
-        
-        {/* Contenido */}
+        {renderView()}
       </div>
     </Layout>
   );
 }
 ```
 
-### Ejemplos de Referencia:
+---
 
-- **AdminPayments.tsx** - Botones condicionales según tab (Crear Pago Manual, Nuevo Cupón)
-- **AdminCourseView.tsx** - Múltiples botones (Agregar Módulo, Agregar Lección)
-- **Projects.tsx** - Botón con PlanRestricted (Nuevo Proyecto)
+## 2. VIEW (Contenido Real)
 
-### Reglas importantes:
+### Responsabilidad
+- Renderizar el contenido visual (tablas, KPIs, gráficos, formularios)
+- Hacer fetch de datos si es necesario
+- Manejar filtros locales, búsqueda
+- Ejecutar acciones (abrir modales, drawers, navegar)
 
-1. ✅ **SIEMPRE** usa `actions` en headerProps para botones de acción
-2. ✅ Usa condicionales para mostrar botones según el tab activo
-3. ✅ Usa `.filter(Boolean)` para limpiar elementos undefined/false del array
-4. ✅ Cada botón debe tener una `key` única
-5. ✅ Usa `className="h-8 px-3 text-xs"` para el tamaño estándar de botones del header
-6. ✅ Agrega `data-testid` a cada botón para testing
-7. ❌ **NUNCA** pongas botones de acción dentro del contenido de la página/tab
+### Reglas
+- **NO** importa layouts
+- **NO** sabe qué layout la contiene
+- **NO** maneja tabs (el Page maneja eso)
+- **PUEDE** vivir en cualquier contenedor (Page, Modal, Drawer, etc.)
+- **AUTOCONTENDIDA**: fetch, render, lógica
+
+### Ubicación
+```
+src/features/<feature>/views/
+  <Feature>View.tsx
+  <OtherFeature>View.tsx
+```
+
+### Ejemplo Completo
+
+```typescript
+// src/features/projects/views/ProjectActivesView.tsx
+import { useState, useMemo } from 'react';
+import { useProjects } from '@/features/projects/hooks/useProjects';
+import { useGlobalModalStore } from '@/components/modal';
+import { ProjectItemCard } from '@/features/projects/components/ProjectItemCard';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+
+interface ProjectActivesViewProps {
+  organizationId: string;
+}
+
+export function ProjectActivesView({ organizationId }: ProjectActivesViewProps) {
+  // State local: filtros, búsqueda
+  const [searchValue, setSearchValue] = useState('');
+  
+  // Fetch datos
+  const { data: projects = [], isLoading } = useProjects(organizationId);
+  const { openDrawer } = useGlobalModalStore();
+
+  // Lógica: filtrado, sorting
+  const filteredProjects = useMemo(() => {
+    return projects.filter(p => 
+      p.name.toLowerCase().includes(searchValue.toLowerCase()) &&
+      !p.is_deleted
+    );
+  }, [projects, searchValue]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <input
+        value={searchValue}
+        onChange={e => setSearchValue(e.target.value)}
+        placeholder="Buscar proyectos..."
+        className="px-3 py-2 border rounded"
+        data-testid="input-search-projects"
+      />
+      
+      {filteredProjects.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProjects.map(project => (
+            <ProjectItemCard
+              key={project.id}
+              project={project}
+              onClick={() => openDrawer({
+                title: project.name,
+                content: <ProjectDetailContent projectId={project.id} />,
+                width: 'lg'
+              })}
+              data-testid={`card-project-${project.id}`}
+            />
+          ))}
+        </div>
+      ) : (
+        <EmptyState 
+          title="No hay proyectos activos" 
+          description="Crea un nuevo proyecto para comenzar"
+        />
+      )}
+    </div>
+  );
+}
+```
 
 ---
 
-## 6.1. Botones de Acción en Empty States
+## 3. LAYOUT (Ya Existe - NO Tocar)
 
-### 🔘 REGLA CRÍTICA: Consistencia entre Header y Empty State
+Los layouts ya existen y son el "contenedor" que envuelve las Views:
 
-**SIEMPRE** que una página tenga un botón de acción en el header (crear, agregar, nuevo), el empty state de la tabla DEBE tener el mismo botón de acción.
+### DashboardLayout
+- Layout principal con sidebar
+- Header con headerProps
+- Para usuarios con preferencia 'experimental' (default)
 
-### ✅ CORRECTO: actionButton en emptyStateConfig
+### LabLayout
+- Layout experimental con mega-menus
+- Toolbar con tabs
+- Para usuarios con preferencia 'lab'
+
+**NO modificar layouts existentes sin causa importante.**
+
+---
+
+## Estructura de Carpetas Final
+
+```
+src/
+  pages/
+    projects/
+      Projects.tsx                    ← Page (orquestador)
+    organization/
+      Organization.tsx               ← Page
+    project-finances/
+      ProjectFinances.tsx            ← Page
+
+  features/
+    projects/
+      views/
+        ProjectActivesView.tsx        ← View (contenido)
+        ProjectListView.tsx           ← View (contenido)
+        ProjectSettingsView.tsx       ← View (contenido)
+      components/
+        ProjectItemCard.tsx
+        ProjectRow.tsx
+      hooks/
+        useProjects.ts
+      services/
+        getProjects.ts
+      forms/
+        ProjectFormFields.tsx         ← FormFields agnóstico
+      modals/
+        ProjectModal.tsx              ← Envase (DashboardLayout)
+      drawers/
+        ProjectDetailDrawer.tsx       ← Envase (LabLayout)
+
+    finances/
+      views/
+        ProjectFinancesView.tsx       ← View
+        OrganizationFinancesView.tsx  ← View
+      components/
+        DashboardCard.tsx
+        MovementsTable.tsx
+      hooks/
+        useUnifiedMovements.ts
+      services/
+        getMovements.ts
+```
+
+---
+
+## Flujo de Datos
+
+```
+Page (estado + orquestación)
+  ├─ elige Layout (DashboardLayout o LabLayout)
+  ├─ define renderView()
+  └─ renderiza View según activeTab
+      │
+      View (contenido + lógica)
+        ├─ fetch datos
+        ├─ maneja filtros
+        └─ renderiza UI
+```
+
+### Regla de Oro: Top-Down Data Flow
+1. **Page** maneja: layout selection, tab state, View routing
+2. **View** maneja: data fetching, filtering, content rendering
+
+---
+
+## Botones de Acción (CRÍTICO)
+
+### Regla Fundamental
+**Los botones de acción de la página (crear, agregar, filtrar por período, etc.) NUNCA van en el contenido de la View. SIEMPRE van en el header (DashboardLayout) o en la barra secundaria del toolbar (LabLayout).**
+
+### Para DashboardLayout
 
 ```typescript
-const handleCreateItem = () => {
-  openModal('item', {});
-};
-
 const headerProps = {
-  title: "Items",
-  icon: Package,
+  title: "Proyectos",
+  icon: Plus,
   actions: [
-    <Button 
-      key="create-item"
-      onClick={handleCreateItem}
-      className="h-8 px-3 text-xs"
-    >
+    <Button key="create" onClick={handleCreate}>
       <Plus className="w-4 h-4 mr-1" />
-      Nuevo Item
+      Nuevo Proyecto
     </Button>
   ]
 };
 
-// En el componente Tab/Tabla
-<Table
-  columns={columns}
-  data={items}
-  onRowClick={handleRowClick}
-  emptyStateConfig={{
-    icon: <Inbox />,
-    title: 'No hay items',
-    description: 'No se han creado items todavía',
-    actionButton: {
-      label: 'Nuevo Item',
-      onClick: handleCreateItem  // ← MISMA función que el header
-    }
-  }}
-/>
+return <Layout headerProps={headerProps}>{renderView()}</Layout>;
 ```
 
-### ❌ INCORRECTO: Empty state sin actionButton
+### Para LabLayout
 
 ```typescript
-// ❌ MAL - Header tiene botón pero empty state no lo tiene
-const headerProps = {
-  actions: [
-    <Button onClick={handleCreateItem}>Nuevo Item</Button>
-  ]
-};
+const actionButtons = (
+  <div className="flex items-center gap-3">
+    {activeTab === 'list' && (
+      <Button size="sm" onClick={handleCreate}>
+        <Plus className="w-4 h-4 mr-2" />
+        Nuevo Proyecto
+      </Button>
+    )}
+  </div>
+);
 
-<Table
-  emptyStateConfig={{
-    icon: <Inbox />,
-    title: 'No hay items',
-    description: 'No se han creado items todavía'
-    // ❌ Falta actionButton!
-  }}
-/>
+return (
+  <LabLayout 
+    tabs={TABS}
+    activeTab={activeTab}
+    onTabChange={setActiveTab}
+    toolbarProps={{
+      secondaryRightSlot: actionButtons,
+    }}
+  >
+    {renderView()}
+  </LabLayout>
+);
 ```
 
-### Reglas importantes:
+### Ubicación Visual (LabLayout)
 
-1. ✅ **SIEMPRE** usa la **MISMA función** en el header y en el empty state
-2. ✅ El `label` del actionButton debe coincidir con el texto del botón del header
-3. ✅ Si el header tiene botón de acción, el empty state también debe tenerlo
-4. ❌ **NUNCA** dejes el empty state sin actionButton si existe un botón crear/agregar en el header
-
-### Ejemplos de Referencia:
-
-- **AdminPlanPricesTab.tsx** - Usa actionButton con la misma función que el header
-- **AdminPaymentsTab.tsx** - actionButton en empty state del tab de pagos
-
----
-
-## 7. Importaciones Comunes
-
-```typescript
-// Layout principal
-import { Layout } from '@/components/layout/desktop/Layout';
-
-// Tabs personalizado (para filtros/tabs en contenido)
-import { Tabs } from '@/components/ui-custom/Tabs';
-
-// Componentes de UI
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/ui/stat-card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-
-// Iconos
-import { IconName } from 'lucide-react';
-
-// React Query
-import { useQuery } from '@tanstack/react-query';
-
-// Estado
-import { useState } from 'react';
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ CONTEXTO ▼ │ PÁGINA ▼ │ VISTA ▼ │         │ [Avatar] │ [User Menu] │
+├─────────────────────────────────────────────────────────────────────┤
+│ 🔍 Buscar...                              │ [Período ▼] [+ Agregar] │  <-- Barra secundaria
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│                        CONTENIDO (VIEW)                             │
+│                    (Sin botones de acción)                          │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 8. Checklist de Creación de Página
+## Checklist de Creación de Página (3 Capas)
 
 Antes de crear una página, verifica:
 
-- [ ] ¿Usas `Layout` con `headerProps`?
-- [ ] ¿Usas `Tabs` de `@/components/ui-custom/Tabs` para filtros/tabs?
-- [ ] ¿Tienes `wide` prop en Layout si necesitas ancho completo?
-- [ ] ¿Defines `headerProps` con título, icono y descripción?
-- [ ] ¿Usas componentes de shadcn/ui existentes?
+### PAGE
+- [ ] ¿Solo orquesta? (NO lógica de negocio)
+- [ ] ¿Elige layout dinámicamente?
+- [ ] ¿Maneja tab state?
+- [ ] ¿Usa `renderView()` para renderizar Views?
+- [ ] ¿Para LabLayout, botones van en `toolbarProps.secondaryRightSlot`?
+- [ ] ¿Para DashboardLayout, botones van en `headerProps.actions`?
+
+### VIEW
+- [ ] ¿Es autocontendida? (fetch, filter, render)
+- [ ] ¿NO importa layouts?
+- [ ] ¿NO maneja tabs?
+- [ ] ¿Puede vivir en cualquier contexto?
+- [ ] ¿Tiene LoadingSpinner para estados de carga?
+- [ ] ¿Tiene EmptyState cuando no hay datos?
+
+### LAYOUT
+- [ ] ¿Usa DashboardLayout o LabLayout?
+- [ ] ¿NO está modificando el Layout?
+
+### General
 - [ ] ¿Agregaste `data-testid` a elementos interactivos?
-- [ ] ¿La página sigue el patrón de páginas existentes?
+- [ ] ¿Seguiste patrones de páginas existentes?
+- [ ] ¿Las Views están en `src/features/{feature}/views/`?
 
 ---
 
-## 9. Patrones de Diseño
+## Comparación: Antes vs Después
 
-### Grid Responsive
+### Antes (Sin separación clara)
 ```typescript
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-  {/* Cards o StatCards */}
-</div>
+// Una sola página que hace TODO
+export default function Projects() {
+  const [activeTab, setActiveTab] = useState('...');
+  const { data } = useProjects(...);
+  
+  return (
+    <Layout>
+      <Tabs ... />
+      {activeTab === 'actives' && (
+        // 500 líneas de componentes
+      )}
+      {activeTab === 'list' && (
+        // 300 líneas de tabla
+      )}
+    </Layout>
+  );
+}
 ```
 
-### Spacing Vertical
+### Después (3 Capas claras)
 ```typescript
-<div className="space-y-6">
-  {/* Secciones con espacio vertical */}
-</div>
+// PAGE: 30-50 líneas
+export default function Projects() {
+  const [activeTab, setActiveTab] = useState('actives');
+  
+  const renderView = () => {
+    switch (activeTab) {
+      case 'actives': return <ProjectActivesView />;
+      case 'list': return <ProjectListView />;
+      case 'settings': return <ProjectSettingsView />;
+    }
+  };
+
+  return isLabLayout 
+    ? <LabLayout tabs={TABS} {...props}>{renderView()}</LabLayout>
+    : <Layout {...props}>{renderView()}</Layout>;
+}
+
+// VIEWS: 100-200 líneas c/u
+export function ProjectActivesView() { 
+  // fetch, render, lógica
+}
 ```
 
-### Loading States
+---
 
-**REGLA CRÍTICA:** SIEMPRE usar el componente `LoadingSpinner` para estados de carga de páginas completas. NUNCA usar texto "Cargando..." ni spinners genéricos.
+## Beneficios de la Arquitectura 3-Capas
 
-#### ✅ CORRECTO: Usar LoadingSpinner con logo
+1. **Layouts intercambiables**: Cambiar layout sin tocar Views
+2. **Views reutilizables**: Misma View en múltiples contextos (Page, Modal, Drawer)
+3. **Archivos enfocados**: Cada archivo tiene una responsabilidad clara
+4. **Testing más fácil**: Testear Views sin layouts
+5. **Escalabilidad**: Agregar nuevos layouts o views es trivial
+
+---
+
+## Importaciones Comunes
+
+```typescript
+// Layouts
+import { Layout } from '@/layouts/dashboard/DashboardLayout';
+import { LabLayout } from '@/layouts/lab/LabLayout';
+
+// Componentes de UI
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Hooks
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useGlobalModalStore } from '@/components/modal';
+
+// Iconos
+import { Plus, Edit2, Trash2 } from 'lucide-react';
+
+// React
+import { useState, useMemo } from 'react';
+```
+
+---
+
+## Loading States (CRÍTICO)
+
+**REGLA:** SIEMPRE usar el componente `LoadingSpinner` para estados de carga de páginas completas. NUNCA usar texto "Cargando..." ni spinners genéricos.
+
+### ✅ CORRECTO
 
 ```typescript
 import { LoadingSpinner } from '@/components/ui-custom/LoadingSpinner';
 
-// Para páginas completas en estado de carga
+// Página completa cargando
 if (isLoading) {
   return (
-    <Layout wide headerProps={headerProps}>
+    <Layout headerProps={headerProps}>
       <div className="flex items-center justify-center h-64">
         <LoadingSpinner size="lg" />
       </div>
@@ -513,7 +546,7 @@ if (isLoading) {
   );
 }
 
-// Para secciones dentro de una página
+// Sección dentro de una página
 {isLoading ? (
   <div className="flex items-center justify-center h-32">
     <LoadingSpinner size="md" />
@@ -523,222 +556,169 @@ if (isLoading) {
 )}
 ```
 
-**Props de LoadingSpinner:**
-- `size`: 'sm' | 'md' | 'lg' | 'xl' (default: 'md')
-- `fullScreen`: boolean (default: false) - Para usar en páginas de loading completas
-
-#### ❌ INCORRECTO: Usar texto "Cargando..." o spinners genéricos
+### ❌ INCORRECTO
 
 ```typescript
 // ❌ MAL - Texto plano
 <div className="text-muted-foreground">Cargando datos...</div>
 
-// ❌ MAL - Spinner genérico sin logo
+// ❌ MAL - Spinner genérico
 <div className="animate-spin rounded-full h-12 w-12 border-b-2"></div>
 
 // ❌ MAL - Skeleton para páginas completas
 {isLoading && <Skeleton className="h-32" />}
 ```
 
-**Cuándo usar cada uno:**
+**Props de LoadingSpinner:**
+- `size`: 'sm' | 'md' | 'lg' | 'xl' (default: 'md')
+- `fullScreen`: boolean (default: false)
 
-| Caso | Componente |
-|------|-----------|
-| **Página completa cargando** | `<LoadingSpinner size="lg" />` |
-| **Sección/Tab cargando** | `<LoadingSpinner size="md" />` |
-| **Lista/Tabla con skeleton** | `<Skeleton />` (para items individuales) |
-| **Fullscreen loading** | `<LoadingSpinner fullScreen />` |
+---
 
-**Ejemplos:**
+## Empty States (CRÍTICO)
+
+**REGLA:** Si una View tiene un botón de crear/agregar en el Page, la View TAMBIÉN debe tener un `actionButton` en el empty state.
+
+### ✅ CORRECTO
 
 ```typescript
-// Página completa
-export default function MyPage() {
-  const { data, isLoading } = useMyData();
+// En la Page
+const actionButtons = (
+  <Button onClick={handleCreate}>
+    <Plus className="w-4 h-4 mr-2" />
+    Nuevo Item
+  </Button>
+);
 
-  if (isLoading) {
-    return (
-      <Layout wide headerProps={headerProps}>
-        <div className="flex items-center justify-center h-64">
-          <LoadingSpinner size="lg" />
-        </div>
-      </Layout>
-    );
-  }
-
-  return <Layout wide headerProps={headerProps}>...</Layout>;
-}
-
-// Tab/Sección
-{isLoading ? (
-  <div className="flex items-center justify-center h-32">
-    <LoadingSpinner size="md" />
-  </div>
+// En la View
+{items.length > 0 ? (
+  <ItemsList items={items} />
 ) : (
-  <TabContent data={data} />
+  <EmptyState 
+    title="No hay items"
+    description="Crea uno nuevo para comenzar"
+    actionButton={{
+      label: "Nuevo Item",
+      onClick: handleCreate  // ← MISMA función
+    }}
+  />
 )}
 ```
 
+### ❌ INCORRECTO
+
+```typescript
+// Page tiene botón pero View no lo ofrece en empty state
+<EmptyState 
+  title="No hay items"
+  description="Crea uno nuevo para comenzar"
+  // ❌ Falta actionButton!
+/>
+```
+
 ---
 
-## 10. ERRORES COMUNES A EVITAR
+## Errores Comunes a Evitar
 
-### ❌ ERROR 1: Usar PageLayout directamente
+### ❌ ERROR 1: Toda la lógica en la Page
 ```typescript
-// ❌ MAL
-return <PageLayout title="...">...</PageLayout>
+// ❌ MAL - Page está haciendo todo
+export default function Projects() {
+  const [projects, setProjects] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  // ... 500 líneas de lógica ...
+}
 ```
 
 ```typescript
-// ✅ BIEN
-return <Layout wide headerProps={...}>...</Layout>
+// ✅ BIEN - Page solo orquesta
+export default function Projects() {
+  const [activeTab, setActiveTab] = useState('actives');
+  return isLabLayout ? <LabLayout>{renderView()}</LabLayout> : <Layout>{renderView()}</Layout>;
+}
 ```
 
-### ❌ ERROR 2: Usar Button para tabs
+### ❌ ERROR 2: View que importa Layout
 ```typescript
-// ❌ MAL
-<Button variant={active ? 'default' : 'outline'}>Tab</Button>
-```
-
-```typescript
-// ✅ BIEN
-<Tabs tabs={...} value={...} onValueChange={...} />
-```
-
-### ❌ ERROR 3: Olvidar headerProps
-```typescript
-// ❌ MAL
-<Layout wide>...</Layout>
+// ❌ MAL - View no debería saber del layout
+export function ProjectListView() {
+  return <Layout>...</Layout>;
+}
 ```
 
 ```typescript
-// ✅ BIEN
-<Layout wide headerProps={{ title: "...", icon: ... }}>...</Layout>
+// ✅ BIEN - View es agnóstica
+export function ProjectListView() {
+  return <div>...</div>;
+}
 ```
 
-### ❌ ERROR 4: Poner botones de acción en el contenido de la página
+### ❌ ERROR 3: View que maneja tabs
+```typescript
+// ❌ MAL - View está manejando tabs
+export function ProjectListView() {
+  const [activeTab, setActiveTab] = useState('...');
+  return (
+    <Tabs value={activeTab} onValueChange={setActiveTab}>
+      ...
+    </Tabs>
+  );
+}
+```
+
+```typescript
+// ✅ BIEN - Page maneja tabs
+export default function Projects() {
+  const [activeTab, setActiveTab] = useState('...');
+  const renderView = () => { ... };
+  return <Layout>{renderView()}</Layout>;
+}
+```
+
+### ❌ ERROR 4: Botones de acción en el contenido de la View
 ```typescript
 // ❌ MAL - Botón en el contenido
-<Layout wide headerProps={headerProps}>
+<View>
   <div className="flex justify-end">
-    <Button onClick={...}>Crear</Button>
+    <Button onClick={handleCreate}>Crear</Button>
   </div>
-</Layout>
+</View>
 ```
 
 ```typescript
-// ✅ BIEN - Botón en headerProps.actions
-const headerProps = {
-  // ...
-  actions: [
-    <Button key="create" onClick={...}>Crear</Button>
-  ]
-};
-```
-
-### ❌ ERROR 5: No seguir el patrón de páginas existentes
-**SIEMPRE mira páginas similares existentes antes de crear una nueva**
-
-### ❌ ERROR 6: Wrapper extra en página principal
-Las páginas admin NO deben tener un wrapper `<div className="space-y-6">` adicional. Solo el componente tab debe tener el wrapper.
-
-```typescript
-// ❌ MAL - Wrapper extra
-<Layout wide headerProps={headerProps}>
-  <div className="space-y-6">
-    {activeTab === 'tab1' && <Tab1Component />}
-  </div>
-</Layout>
-
-// ✅ BIEN - Sin wrapper extra
-<Layout wide headerProps={headerProps}>
-  {activeTab === 'tab1' && <Tab1Component />}
-</Layout>
+// ✅ BIEN - Botón en el header o toolbar
+const actionButtons = <Button onClick={handleCreate}>Crear</Button>;
+return <LabLayout toolbarProps={{ secondaryRightSlot: actionButtons }}>...</LabLayout>;
 ```
 
 ---
 
-## 11. Proceso de Creación Recomendado
+## Autenticación en Endpoints (CRÍTICO)
 
-1. **Buscar página similar existente** para usarla como referencia
-2. **Copiar estructura base** de esa página
-3. **Definir headerProps** con título, icono, descripción
-4. **Decidir si necesitas tabs**:
-   - En header → usar `tabs` en headerProps
-   - En contenido → usar componente `<Tabs />`
-5. **Implementar contenido** siguiendo patrones de grid, cards, etc.
-6. **Verificar con checklist** antes de completar
-7. **Probar en navegador** que se vea correctamente
+### ⚠️ IMPORTANTE: auth.user.id vs userId
 
----
+**Hay DOS IDs de usuario diferentes:**
 
-## 12. Referencias Rápidas
-
-| Componente | Uso | Ubicación |
-|------------|-----|-----------|
-| Layout | Estructura de página | `@/components/layout/desktop/Layout` |
-| Tabs | Tabs/filtros personalizados | `@/components/ui-custom/Tabs` |
-| StatCard | Cards de KPIs | `@/components/ui/stat-card` |
-| Card | Cards genéricas | `@/components/ui/card` |
-| Skeleton | Loading states | `@/components/ui/skeleton` |
-
----
-
-## 13. Navegación Admin
-
-### Estructura de navegación de admin
-
-**Sidebar Principal:**
-- Home
-- Organización
-- Proyecto
-- Capacitaciones
-- **Administración** ← Solo este botón en sidebar principal (si es admin)
-
-**Sidebar Específico de Admin** (cuando haces click en "Administración"):
-- **Analytics** ← Primer botón del sidebar específico
-- Administración
-- Soporte
-
-### Reglas importantes:
-- ❌ NO agregar "Analytics" en el sidebar principal
-- ✅ "Analytics" solo aparece en el sidebar específico de admin
-- ✅ En el sidebar principal solo va "Administración" (con icono Crown)
-- ✅ Cuando entras a admin level, aparecen Analytics, Administración, Soporte
-
----
-
----
-
-## 14. Autenticación en Endpoints (CRÍTICO)
-
-### ⚠️ IMPORTANTE: Diferencia entre JWT auth.user.id y userId de la base de datos
-
-La aplicación tiene **DOS IDs de usuario diferentes** que pueden causar bugs graves si se confunden:
-
-1. **`auth.user.id`** - ID del JWT/Supabase Auth (en la tabla `auth.users`)
-2. **`userId`** - ID de la tabla `users` en la base de datos (referencia a `auth.users.id`)
+1. **`auth.user.id`** - ID del JWT/Supabase Auth (en `auth.users`)
+2. **`userId`** - ID de la tabla `users` en la DB (referencia a `auth.users.id`)
 
 **Las tablas como `organization_members` usan `user_id` que referencia la tabla `users`, NO `auth.users`.**
 
-### ✅ CORRECTO: Usar requireUser para obtener userId correcto
+### ✅ CORRECTO
 
 ```typescript
 import { extractToken, requireUser } from '../../lib/auth/helpers';
-import type { Request, Response } from "express";
 
 export async function handleMyEndpoint(req: Request, res: Response) {
   try {
-    // ✅ Usar extractToken + requireUser SIEMPRE
     const token = extractToken(req.headers.authorization);
     const { userId, supabase } = await requireUser(token);
     
-    // userId es el ID correcto de la tabla users
+    // userId es el ID correcto para queries
     const { data: member } = await supabase
       .from('organization_members')
       .select('*')
-      .eq('user_id', userId)  // ← Usar userId aquí, NO auth.user.id
-      .eq('organization_id', organizationId)
+      .eq('user_id', userId)  // ← Usar userId, NO auth.user.id
       .single();
 
     return res.json({ member });
@@ -751,133 +731,45 @@ export async function handleMyEndpoint(req: Request, res: Response) {
 }
 ```
 
-### ❌ INCORRECTO: Usar auth.user.id directamente
+### ❌ INCORRECTO
 
 ```typescript
-// ❌ MAL - Esto causará 403 Forbidden
-export async function handleMyEndpoint(req: Request, res: Response) {
-  try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.split(' ')[1];
-    const supabase = createAuthenticatedClient(token);
-    
-    // ❌ PROBLEMA: Obtenemos auth.user.id
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    // ❌ ERROR: user.id es del JWT, pero organization_members.user_id
-    // referencia la tabla users, NO auth.users
-    const { data: member } = await supabase
-      .from('organization_members')
-      .select('*')
-      .eq('user_id', user.id)  // ❌ INCORRECTO - Mismatched IDs!
-      .single();
-  }
-}
+// ❌ MAL - auth.user.id causará 403 Forbidden
+const { data: { user } } = await supabase.auth.getUser();
+const { data: member } = await supabase
+  .from('organization_members')
+  .eq('user_id', user.id)  // ❌ INCORRECTO - Mismatched IDs!
+  .single();
 ```
-
-### 🔍 ¿POR QUÉ OCURRE ESTO?
-
-La tabla `users` tiene esta estructura:
-```sql
-CREATE TABLE users (
-  id UUID PRIMARY KEY,
-  auth_id UUID REFERENCES auth.users(id),  -- ← Referencia a auth.users
-  email TEXT,
-  ...
-);
-
-CREATE TABLE organization_members (
-  id UUID PRIMARY KEY,
-  user_id UUID REFERENCES users(id),  -- ← Referencia a tabla users, NO auth.users!
-  ...
-);
-```
-
-Entonces:
-- `auth.user.id` → ID en `auth.users` (del JWT)
-- `userId` → ID en tabla `users` (obtenido por `requireUser`)
-- `organization_members.user_id` → Referencia a tabla `users`
-
-### 📋 Patrón de autenticación correcto en controladores
-
-```typescript
-import { extractToken, requireUser, HttpError } from '../../lib/auth/helpers';
-
-export async function handleGetData(req: Request, res: Response) {
-  try {
-    // PASO 1: Extraer token
-    const token = extractToken(req.headers.authorization);
-    
-    // PASO 2: Obtener userId y supabase autenticado
-    const { userId, supabase } = await requireUser(token);
-    
-    // PASO 3: Usar userId para queries a organization_members, etc.
-    const { data: membership } = await supabase
-      .from('organization_members')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('organization_id', req.params.organizationId)
-      .single();
-
-    if (!membership) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-
-    // PASO 4: Retornar datos
-    return res.json({ success: true });
-  } catch (error: any) {
-    if (error instanceof HttpError) {
-      return res.status(error.statusCode).json({ error: error.message });
-    }
-    return res.status(500).json({ error: error.message });
-  }
-}
-```
-
-### Helpers disponibles en `lib/auth/helpers.ts`
-
-```typescript
-// Extraer token del header Authorization
-const token = extractToken(req.headers.authorization);
-
-// Obtener userId y cliente Supabase autenticado
-const { userId, authId, supabase } = await requireUser(token);
-// - userId: ID de la tabla users (el que necesitas para queries)
-// - authId: ID de auth.users (para referencia)
-// - supabase: Cliente Supabase autenticado como ese usuario
-
-// Crear cliente autenticado manualmente (si necesitas)
-const supabase = createAuthenticatedClient(token);
-```
-
-### ✅ Checklist para endpoints
-
-- [ ] ¿Usas `extractToken` para obtener el token?
-- [ ] ¿Usas `requireUser` para autenticación (NO `auth.getUser`)?
-- [ ] ¿Usas `userId` para queries a `organization_members`?
-- [ ] ¿Verificas que el usuario pertenece a la organización?
-- [ ] ¿Usas `HttpError` para errors de autorización?
-- [ ] ¿El catch block maneja `HttpError` correctamente?
 
 ---
 
 ## Resumen
 
-**REGLA DE ORO:** Siempre mira una página similar existente antes de crear una nueva. Si es admin, usa AdminAdmin, AdminSupport o AdminDashboard como referencia. Usa `Layout` con `headerProps` y el componente `Tabs` personalizado.
+**ARQUITECTURA 3-CAPAS:**
+```
+PAGE       → Elige layout, maneja tabs, renderiza views
+   ↓
+LAYOUT     → DashboardLayout o LabLayout (contenedor)
+   ↓
+VIEW       → Contenido visual agnóstico (fetch, filter, render)
+```
 
-**NUNCA:**
-- ❌ Usar PageLayout directamente
-- ❌ Usar Button genérico para tabs/filtros
-- ❌ Crear página sin Layout correcto
-- ❌ Agregar "Analytics" en el sidebar principal
-- ❌ Poner botones de acción en el contenido de la página
-- ❌ Usar `auth.user.id` directamente en queries a `organization_members`
+**REGLA DE ORO:**
+- Page: Orquestación (layout selection, tab state)
+- View: Contenido (fetch, filter, render)
+- Layout: Contenedor (NO modificar)
 
 **SIEMPRE:**
-- ✅ Usar Layout con headerProps
-- ✅ Usar Tabs de ui-custom para filtros
-- ✅ Seguir patrones de páginas existentes
-- ✅ Analytics solo en sidebar específico de admin
-- ✅ Botones de acción en `headerProps.actions`, NO en el contenido
-- ✅ Usar `extractToken` + `requireUser` para autenticación en endpoints
-- ✅ Usar `userId` (de `requireUser`) para queries a `organization_members`
+- ✅ Separar en 3 capas claras
+- ✅ Views autocontendidas
+- ✅ Botones de acción en header/toolbar, NO en contenido
+- ✅ LoadingSpinner para carga, EmptyState para vacío
+- ✅ Usar `userId` (de `requireUser`), NO `auth.user.id`
+
+**NUNCA:**
+- ❌ Toda la lógica en Page
+- ❌ View que importa Layout
+- ❌ View que maneja tabs
+- ❌ Botones de acción en el contenido
+- ❌ Usar `auth.user.id` directamente en queries

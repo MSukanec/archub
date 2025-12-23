@@ -59,12 +59,11 @@ Tablas de Supabase:
 
 ### Referencias de Arquitectura
 - `prompts/00-Architecture.md` - Arquitectura base de features
-- `prompts/01-Pages.md` - Estándar de páginas
+- `prompts/01-Pages.md` - Estándar de páginas (arquitectura 3 capas: PAGE → LAYOUT → VIEW)
 - `prompts/02-Modals.md` - Estándar de modales con formularios
 - `prompts/03-Drawers.md` - Estándar de drawers
 - `prompts/03-Uploads.md` - Sistema de storage y uploads
 - `prompts/04-Replacement.md` - Patrón Delete/Replace
-- `prompts/PAGE-REFACT.md` - Arquitectura 3 capas (Page → Layout → View)
 - `prompts/tables/{feature}.md` - Documentación de tablas específicas
 
 ---
@@ -270,7 +269,7 @@ src/features/legacy/
 
 ### 4. AUDITORÍA DE PÁGINAS (3 CAPAS)
 
-**Referencia:** `prompts/PAGE-REFACT.md` + `prompts/01-Pages.md`
+**Referencia:** `prompts/01-Pages.md` (Arquitectura 3 Capas: PAGE → LAYOUT → VIEW)
 
 **Arquitectura esperada:**
 ```
