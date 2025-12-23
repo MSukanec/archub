@@ -27,7 +27,8 @@
    - 5.13 [Refactorización (Tablas, Badges, Headers)](#13-auditoría-de-refactorización-tablas-badges-headers)
 6. [Entregables Obligatorios](#entregables-obligatorios)
 7. [Condición Final](#condición-final-cerrado)
-8. [Reglas para Prompts Externos](#reglas-para-prompts-externos-gpt-otras-ias)
+8. [Guías de Sistemas Específicos](#guías-de-sistemas-específicos)
+9. [Reglas para Prompts Externos](#reglas-para-prompts-externos-gpt-otras-ias)
 
 ---
 
@@ -771,6 +772,32 @@ El feature se considera **cerrado** cuando:
 - [ ] Tablas usan tipos semánticos
 - [ ] Badges usan variantes semánticas
 - [ ] Documentación del feature creada
+
+---
+
+## GUÍAS DE SISTEMAS ESPECÍFICOS
+
+Los siguientes documentos contienen guías de implementación detalladas para sistemas específicos de Seencel. Consúltalos cuando trabajes con estos features:
+
+| Archivo | Sistema | Descripción |
+|---------|---------|-------------|
+| `prompts/documentation/DASHBOARD_SYSTEM.md` | Dashboards | Arquitectura de dashboards, KPIs headless, charts, insights automáticos, analytics |
+| `prompts/documentation/MULTICURRENCY_SYSTEM.md` | Multimoneda | Sistema de conversiones, `useOrgCurrencyContext`, formateo, visibilidad condicional |
+| `prompts/documentation/GET_USER_FUNCTION.md` | Autenticación | Función RPC `get_user()` de Supabase, estructura del JSON, CTEs |
+| `prompts/documentation/FORUM_SYSTEM.md` | Foro | Sistema de foro con categorías, threads, posts, reacciones, foros por curso |
+| `prompts/documentation/OPS-CENTER.md` | Ops Center | Centro de operaciones admin: health checks, alertas, flow blocking, repair actions |
+| `prompts/documentation/PDF_SYSTEM_AUDIT.md` | Sistema PDF | Estado actual del sistema PDF, bloques, templates, roadmap de implementación |
+| `prompts/documentation/SUBSCRIPTIONS_BILLING_SYSTEM.md` | Suscripciones | Sistema de planes, billing, proration, coupons, soft-locks, cron jobs |
+| `prompts/documentation/PAYMENT-SUBSCRIPTION-FLOW-AUDIT.md` | Flujo de Pagos | Auditoría del flujo de pagos y suscripciones |
+| `prompts/documentation/WEBHOOK-PAYMENT-FLOW.md` | Webhooks | Flujo de webhooks de pagos (MercadoPago, PayPal) |
+| `prompts/documentation/UNIFIED_MOVEMENTS_SYSTEM.md` | Movimientos | Sistema unificado de movimientos financieros |
+| `prompts/documentation/UNIVERSAL_IMPORT_SYSTEM.md` | Importación | Sistema universal de importación de datos (wizard 5 pasos) |
+| `prompts/documentation/RESEND.md` | Emails | Sistema de notificaciones por email con Resend y React Email |
+
+**Cuándo consultar estas guías:**
+- Al auditar un feature que **USE** alguno de estos sistemas
+- Al crear **nuevos features** que necesiten dashboards, multimoneda, PDFs, etc.
+- Cuando necesites entender la **arquitectura interna** de un sistema global
 
 ---
 
