@@ -20,12 +20,19 @@ export function useCreateProjectModality() {
 
   return useMutation({
     mutationFn: (data: CreateProjectModalityData) => createProjectModality(data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project-modalities', variables.organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['project-modalities'] });
+    onSuccess: (newModality, variables) => {
+      // ✅ ACTUALIZAR CACHE DIRECTAMENTE (NO invalidar para evitar flicker)
+      queryClient.setQueryData(
+        ['project-modalities', variables.organizationId],
+        (oldData: any) => {
+          if (!Array.isArray(oldData)) return [newModality];
+          return [...oldData, newModality];
+        }
+      );
     },
   });
 }
+
 
 export function useUpdateProjectModality() {
   const queryClient = useQueryClient();
@@ -36,9 +43,15 @@ export function useUpdateProjectModality() {
       organizationId: string; 
       data: UpdateProjectModalityData 
     }) => updateProjectModality(modalityId, organizationId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project-modalities', variables.organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['project-modalities'] });
+    onSuccess: (updatedModality, variables) => {
+      // ✅ ACTUALIZAR CACHE DIRECTAMENTE (NO invalidar para evitar flicker)
+      queryClient.setQueryData(
+        ['project-modalities', variables.organizationId],
+        (oldData: any) => {
+          if (!Array.isArray(oldData)) return oldData;
+          return oldData.map((m: any) => m.id === variables.modalityId ? updatedModality : m);
+        }
+      );
     },
   });
 }

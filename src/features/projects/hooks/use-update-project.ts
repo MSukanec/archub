@@ -18,13 +18,27 @@ export function useUpdateProject() {
     mutationFn: ({ projectId, data }: { projectId: string; data: UpdateProjectData }) => 
       updateProject(projectId, data),
     onSuccess: (updatedProject) => {
-      // Invalidate all project-related queries
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECTS], exact: false });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECTS_LITE], exact: false });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECTS_MAP], exact: false });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECT, updatedProject.id], exact: false });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECT_DATA, updatedProject.id], exact: false });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECT_COLOR, updatedProject.id], exact: false });
+      // ✅ ACTUALIZAR CACHE DIRECTAMENTE (NO invalidar para evitar flicker)
+      // Actualizar la lista de proyectos con los datos del servidor
+      queryClient.setQueryData(
+        [QUERY_KEYS.PROJECTS],
+        (oldData: any) => {
+          if (!Array.isArray(oldData)) return oldData;
+          return oldData.map((p: any) => p.id === updatedProject.id ? updatedProject : p);
+        }
+      );
+
+      // Actualizar el proyecto individual si existe en cache
+      queryClient.setQueryData(
+        [QUERY_KEYS.PROJECT, updatedProject.id],
+        updatedProject
+      );
+
+      // Actualizar project-data si existe en cache
+      queryClient.setQueryData(
+        [QUERY_KEYS.PROJECT_DATA, updatedProject.id],
+        updatedProject.project_data
+      );
     },
   });
 }

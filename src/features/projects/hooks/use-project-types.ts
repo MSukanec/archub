@@ -20,9 +20,15 @@ export function useCreateProjectType() {
 
   return useMutation({
     mutationFn: (data: CreateProjectTypeData) => createProjectType(data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['project-types'] });
+    onSuccess: (newType, variables) => {
+      // ✅ ACTUALIZAR CACHE DIRECTAMENTE (NO invalidar para evitar flicker)
+      queryClient.setQueryData(
+        ['project-types', variables.organizationId],
+        (oldData: any) => {
+          if (!Array.isArray(oldData)) return [newType];
+          return [...oldData, newType];
+        }
+      );
     },
   });
 }
@@ -36,9 +42,15 @@ export function useUpdateProjectType() {
       organizationId: string; 
       data: UpdateProjectTypeData 
     }) => updateProjectType(typeId, organizationId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['project-types'] });
+    onSuccess: (updatedType, variables) => {
+      // ✅ ACTUALIZAR CACHE DIRECTAMENTE (NO invalidar para evitar flicker)
+      queryClient.setQueryData(
+        ['project-types', variables.organizationId],
+        (oldData: any) => {
+          if (!Array.isArray(oldData)) return oldData;
+          return oldData.map((t: any) => t.id === variables.typeId ? updatedType : t);
+        }
+      );
     },
   });
 }
