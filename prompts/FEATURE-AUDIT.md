@@ -919,6 +919,8 @@ Antes de considerar el feature "production ready":
 
 ### ENTREGABLE 1: AUDIT REPORT
 
+**Ubicación:** `src/features/{feature}/AUDIT-{FEATURE}.md` (DENTRO del feature, no en prompts/)
+
 ```markdown
 ## AUDIT REPORT: {NOMBRE_DEL_FEATURE}
 
