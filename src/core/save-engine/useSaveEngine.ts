@@ -116,13 +116,22 @@ export function useSaveEngine<TData>({
   }, [executeSave]);
 
   useEffect(() => {
-    if (!enabled) return;
+    console.log('[SaveEngine] Effect triggered - enabled:', enabled, 'isInitialLoad:', isInitialLoadRef.current);
+    
+    if (!enabled) {
+      console.log('[SaveEngine] Skipping: not enabled');
+      return;
+    }
 
     const dataString = JSON.stringify(data);
     const previousString = JSON.stringify(previousDataRef.current);
 
-    if (dataString === previousString) return;
+    if (dataString === previousString) {
+      console.log('[SaveEngine] Skipping: data unchanged');
+      return;
+    }
 
+    console.log('[SaveEngine] Data changed, checking if initial load...');
     const previousHadValues = hasNonEmptyValues(previousDataRef.current);
     const currentHasValues = hasNonEmptyValues(data);
 
@@ -131,10 +140,12 @@ export function useSaveEngine<TData>({
       previousDataRef.current = data;
       setTimeout(() => {
         isInitialLoadRef.current = false;
+        console.log('[SaveEngine] Initial load flag cleared, ready for user edits');
       }, 500);
       return;
     }
 
+    console.log('[SaveEngine] User edit detected, scheduling save in', delay, 'ms');
     isInitialLoadRef.current = false;
     previousDataRef.current = data;
     pendingDataRef.current = data;
@@ -145,6 +156,7 @@ export function useSaveEngine<TData>({
     }
 
     timeoutRef.current = setTimeout(() => {
+      console.log('[SaveEngine] Executing save now...');
       executeSave(data);
       pendingDataRef.current = null;
     }, delay);
