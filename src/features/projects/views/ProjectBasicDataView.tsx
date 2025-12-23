@@ -227,17 +227,8 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       }
     },
     onSuccess: () => {
-      // ⚡ Update cache with the color data we just saved (no refetch, INSTANT)
-      queryClient.setQueryData(['project-info', activeProjectId], (oldData: any) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          color: selectedColor,
-          use_custom_color: useCustomColor,
-          custom_color_h: customColorH,
-          custom_color_hex: customColorHex,
-        };
-      });
+      queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
     onError: (error: any) => {
       console.error('Error in saveProjectColorMutation:', error);
@@ -294,27 +285,10 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       }
     },
     onSuccess: () => {
-      // ⚡ Update cache with the data we just saved (no refetch, INSTANT)
-      queryClient.setQueryData(['project-info', activeProjectId], (oldData: any) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          name: projectName,
-          code: projectCode,
-          status: status,
-        };
-      });
-
-      queryClient.setQueryData(['project-data', activeProjectId], (oldData: any) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          project_type_id: projectTypeId,
-          project_modality_id: projectModalityId,
-          description: description,
-          internal_notes: internalNotes,
-        };
-      });
+      // Refetch queries to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
+      queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
     onError: (error: any) => {
       console.error('Error in saveProjectDataMutation:', error);

@@ -91,25 +91,8 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
       }
     },
     onSuccess: () => {
-      // ⚡ Update cache with the location data we just saved (no refetch, INSTANT)
-      queryClient.setQueryData(['project-data', activeProjectId], (oldData: any) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          address_full: addressFull,
-          address: address,
-          city: city,
-          state: state,
-          country: country,
-          zip_code: zipCode,
-          place_id: placeId,
-          lat: lat,
-          lng: lng,
-          timezone: timezone,
-          location_type: locationType,
-          accessibility_notes: accessibilityNotes,
-        };
-      });
+      queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
     onError: (error: any) => {
       console.error('Error in saveProjectLocationMutation:', error);
