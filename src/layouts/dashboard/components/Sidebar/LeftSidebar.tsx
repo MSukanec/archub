@@ -708,8 +708,8 @@ export function LeftSidebar() {
                   </button>
                 </PopoverTrigger>
                 <PopoverContent 
-                  side="bottom" 
-                  align="start"
+                  side="right" 
+                  align="end"
                   className="w-[200px] p-2"
                   sideOffset={8}
                 >
