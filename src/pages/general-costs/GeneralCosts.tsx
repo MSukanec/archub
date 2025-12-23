@@ -168,8 +168,8 @@ export default function GeneralCosts() {
   const secondaryRightContent = (
     <div className="flex items-center gap-3">
       {activeTab === 'dashboard' && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+        <Popover open={periodPopoverOpen} onOpenChange={setPeriodPopoverOpen}>
+          <PopoverTrigger asChild>
             <Button
               variant="outline"
               size="sm"
@@ -180,25 +180,36 @@ export default function GeneralCosts() {
               <span>{PERIOD_OPTIONS.find(opt => opt.value === validSelectedPeriod)?.label || 'Período'}</span>
               <ChevronDown className="h-4 w-4" />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-[180px]">
-            {PERIOD_OPTIONS.map((option) => {
-              const isAvailable = availablePeriods[option.value];
-              return (
-                <DropdownMenuItem 
-                  key={option.value}
-                  onClick={() => isAvailable && setSelectedPeriod(option.value)}
-                  disabled={!isAvailable}
-                  className={validSelectedPeriod === option.value ? "font-medium" : ""}
-                  data-testid={`option-period-${option.value}`}
-                >
-                  {option.label}
-                  {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="min-w-[180px] p-2">
+            <div className="flex flex-col gap-1">
+              {PERIOD_OPTIONS.map((option) => {
+                const isAvailable = availablePeriods[option.value];
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      if (isAvailable) {
+                        setSelectedPeriod(option.value);
+                        setPeriodPopoverOpen(false);
+                      }
+                    }}
+                    disabled={!isAvailable}
+                    className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors text-left w-full ${
+                      validSelectedPeriod === option.value 
+                        ? "font-medium bg-accent/10" 
+                        : "hover:bg-accent/5"
+                    } ${!isAvailable ? "opacity-50 cursor-not-allowed" : ""}`}
+                    data-testid={`option-period-${option.value}`}
+                  >
+                    <span>{option.label}</span>
+                    {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </PopoverContent>
+        </Popover>
       )}
       {activeTab === 'conceptos' && (
         <Button
