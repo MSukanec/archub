@@ -33,6 +33,7 @@ export default function Project() {
     return (
       <LabLayout 
         showToolbar={true} 
+        showSecondaryToolbar={false}
         organizationId={organizationId}
         showMembers={true}
       >

@@ -57,6 +57,7 @@ export default function OrganizationDashboardPage() {
     return (
       <LabLayout 
         showToolbar={true} 
+        showSecondaryToolbar={false}
         organizationId={organizationId}
         showMembers={true}
       >

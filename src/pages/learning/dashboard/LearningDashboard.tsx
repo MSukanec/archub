@@ -14,6 +14,7 @@ export default function LearningDashboard() {
     return (
       <LabLayout 
         showToolbar={true} 
+        showSecondaryToolbar={false}
         organizationId={organizationId}
         showMembers={false}
       >

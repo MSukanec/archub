@@ -7,6 +7,7 @@ import type { PageTab } from './components/topbar/MegaMenu';
 interface LabLayoutProps {
   children: React.ReactNode;
   showToolbar?: boolean;
+  showSecondaryToolbar?: boolean;
   showSearch?: boolean;
   organizationId?: string;
   showMembers?: boolean;
@@ -18,6 +19,8 @@ interface LabLayoutProps {
     searchValue?: string;
     onSearchChange?: (value: string) => void;
     rightSlot?: React.ReactNode;
+    secondaryLeftSlot?: React.ReactNode;
+    secondaryRightSlot?: React.ReactNode;
   };
   drawerContent?: React.ReactNode;
   drawerTitle?: string;
@@ -30,6 +33,7 @@ interface LabLayoutProps {
 function LabLayoutInner({ 
   children, 
   showToolbar = true,
+  showSecondaryToolbar = true,
   showSearch = false,
   organizationId,
   showMembers = true,
@@ -57,6 +61,7 @@ function LabLayoutInner({
     <div className="h-full w-full flex flex-col overflow-hidden bg-background">
       {showToolbar && (
         <LabToolbar 
+          showSecondaryToolbar={showSecondaryToolbar}
           showSearch={showSearch} 
           organizationId={organizationId}
           showMembers={showMembers}

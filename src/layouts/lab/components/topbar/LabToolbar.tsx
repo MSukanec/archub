@@ -3,11 +3,14 @@ import { ContextMegaMenu, PagesMegaMenu, TabsMegaMenu, UserAvatarMenu, type Page
 import { ExpandableAvatarGroup } from '@/components/shared/layout/ExpandableAvatarGroup';
 
 interface LabToolbarProps {
+  showSecondaryToolbar?: boolean;
   showSearch?: boolean;
   searchPlaceholder?: string;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
   rightSlot?: React.ReactNode;
+  secondaryLeftSlot?: React.ReactNode;
+  secondaryRightSlot?: React.ReactNode;
   organizationId?: string;
   showMembers?: boolean;
   tabs?: PageTab[];
@@ -16,11 +19,14 @@ interface LabToolbarProps {
 }
 
 export function LabToolbar({
+  showSecondaryToolbar = true,
   showSearch = false,
   searchPlaceholder = "Buscar...",
   searchValue = "",
   onSearchChange,
   rightSlot,
+  secondaryLeftSlot,
+  secondaryRightSlot,
   organizationId,
   showMembers = true,
   tabs = [],
@@ -61,19 +67,35 @@ export function LabToolbar({
         </div>
       </div>
       
-      {showSearch && (
+      {showSecondaryToolbar && (
         <div className="h-12 w-full flex items-center border-b border-[var(--header-border)] bg-background">
-          <div className="flex items-center gap-3 px-4 w-full max-w-2xl">
-            <Search className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
-            <input
-              type="text"
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-              className="flex-1 bg-transparent text-[var(--foreground)] placeholder:text-[var(--text-subtle)] text-sm outline-none"
-              data-testid="input-lab-search"
-            />
-          </div>
+          {showSearch ? (
+            <div className="flex items-center gap-3 px-4 w-full max-w-2xl">
+              <Search className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
+              <input
+                type="text"
+                placeholder={searchPlaceholder}
+                value={searchValue}
+                onChange={(e) => onSearchChange?.(e.target.value)}
+                className="flex-1 bg-transparent text-[var(--foreground)] placeholder:text-[var(--text-subtle)] text-sm outline-none"
+                data-testid="input-lab-search"
+              />
+            </div>
+          ) : (
+            <>
+              {secondaryLeftSlot && (
+                <div className="flex items-center px-4">
+                  {secondaryLeftSlot}
+                </div>
+              )}
+              <div className="flex-1" />
+              {secondaryRightSlot && (
+                <div className="flex items-center px-4">
+                  {secondaryRightSlot}
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
     </div>
