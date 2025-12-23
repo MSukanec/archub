@@ -7,7 +7,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { OrganizationActivityLogsView } from '@/features/organization';
 
-export function ActivityPage() {
+export function OrganizationActivityPage() {
   const { data: userData } = useCurrentUser();
   const { setSidebarContext } = useNavigationStore();
   const [location] = useLocation();

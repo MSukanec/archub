@@ -6,7 +6,7 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useLocation } from 'wouter';
 
-export function BillingPage() {
+export function OrganizationBillingPage() {
   const { setSidebarLevel } = useNavigationStore();
   const { data: userData } = useCurrentUser();
   const [activeTab, setActiveTab] = useState('list');
