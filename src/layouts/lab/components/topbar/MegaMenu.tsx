@@ -156,7 +156,7 @@ export function ContextMegaMenu() {
         sublabel="Contexto"
         label={currentContext.label}
         isOpen={isOpen}
-        className="w-44"
+        className="w-[250px]"
       />
       
       {isOpen && (
@@ -282,7 +282,7 @@ export function PagesMegaMenu() {
         sublabel="Página"
         label={getCurrentPageLabel()}
         isOpen={isOpen}
-        className="w-52"
+        className="w-[250px]"
       />
       
       {isOpen && (
@@ -368,7 +368,7 @@ export function TabsMegaMenu({ tabs, activeTab, onTabChange }: TabsMegaMenuProps
   return (
     <div 
       ref={containerRef}
-      className="relative h-full"
+      className="relative h-full w-[250px]"
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
@@ -377,8 +377,8 @@ export function TabsMegaMenu({ tabs, activeTab, onTabChange }: TabsMegaMenuProps
           "h-full flex flex-col justify-center px-4 border-r cursor-pointer transition-colors",
           "border-r-[var(--header-border)]",
           isOpen 
-            ? "bg-[var(--card-hover-bg)] border-b-2 border-b-[var(--header-border)]" 
-            : "border-b border-b-transparent hover:bg-[var(--card-hover-bg)]"
+            ? "border-t-2 border-t-[var(--accent)]" 
+            : "border-t border-t-[var(--header-border)]"
         )}
       >
         <div className="flex items-center gap-2">

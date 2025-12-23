@@ -60,7 +60,7 @@ function LabLayoutInner({
   return (
     <div className="h-full w-full flex flex-col overflow-hidden bg-background">
       {showToolbar && (
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 sticky top-0 z-40">
           <LabToolbar 
             showSecondaryToolbar={showSecondaryToolbar}
             showSearch={showSearch} 
@@ -74,7 +74,7 @@ function LabLayoutInner({
         </div>
       )}
       <div className="flex-1 flex overflow-hidden min-h-0">
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-6">
           <div className="min-h-full">
             {children}
           </div>
