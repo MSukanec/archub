@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { LabLayout } from "@/layouts/lab/LabLayout";
-import { Folder } from 'lucide-react';
+import { Folder, Plus } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useGlobalModalStore } from '@/components/modal';
 import { ProjectActivesView } from '@/features/projects/views/ProjectActivesView';
 import { ProjectListView } from '@/features/projects/views/ProjectListView';
 import { ProjectSettingsView } from '@/features/projects/views/ProjectSettingsView';
+import { Button } from '@/components/ui/button';
 
 const PROJECTS_TABS = [
   { id: 'actives', label: 'Proyectos Activos' },
@@ -16,10 +18,15 @@ const PROJECTS_TABS = [
 export default function Projects() {
   const [activeTab, setActiveTab] = useState('actives');
   const { data: userData } = useCurrentUser();
+  const { openModal } = useGlobalModalStore();
   const organizationId = userData?.organization?.id;
   
   const layoutPreference = userData?.preferences?.layout || 'experimental';
   const isLabLayout = layoutPreference === 'lab';
+
+  const handleNewProject = () => {
+    openModal('projects', { organizationId });
+  };
 
   const renderView = () => {
     switch (activeTab) {
@@ -34,6 +41,21 @@ export default function Projects() {
     }
   };
 
+  const secondaryRightContent = (
+    <div className="flex items-center gap-3">
+      {(activeTab === 'actives' || activeTab === 'list') && (
+        <Button
+          size="sm"
+          onClick={handleNewProject}
+          data-testid="button-add-project"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Nuevo Proyecto
+        </Button>
+      )}
+    </div>
+  );
+
   if (isLabLayout) {
     return (
       <LabLayout 
@@ -43,6 +65,9 @@ export default function Projects() {
         tabs={PROJECTS_TABS}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        toolbarProps={{
+          secondaryRightSlot: secondaryRightContent,
+        }}
       >
         {renderView()}
       </LabLayout>
@@ -54,6 +79,17 @@ export default function Projects() {
     isActive: activeTab === tab.id
   }));
 
+  const getActionButton = () => {
+    if (activeTab === 'actives' || activeTab === 'list') {
+      return {
+        label: "Nuevo Proyecto",
+        icon: Plus,
+        onClick: handleNewProject
+      };
+    }
+    return undefined;
+  };
+
   const headerProps = {
     title: "Gestión de Proyectos",
     description: "Administra todos los proyectos de tu organización desde un solo lugar",
@@ -62,6 +98,7 @@ export default function Projects() {
     showMembers: true,
     tabs: headerTabs,
     onTabChange: (tabId: string) => setActiveTab(tabId),
+    actionButton: getActionButton(),
   };
 
   return (
