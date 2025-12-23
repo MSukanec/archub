@@ -128,20 +128,20 @@ src/features/projects/views/
 - ❌ `ProjectLocationTab.tsx` → Migrado a `ProjectLocationView.tsx`
 
 ### 3.3 Performance ✅
-- [x] Optimistic updates en create/update (setQueryData no invalidate)
+- [x] Optimistic updates via `setQueryData` (NO invalidateQueries = INSTANT)
 - [x] Optimistic updates en project selection (activate) - INSTANTÁNEO al hacer click
-- [x] Fire-and-forget mutations (no await) en auto-save de datos básicos y ubicación
-- [x] Callbacks inmediatos (modal cierra al instante, proyecto se mueve al primer lugar)
+- [x] Auto-save con `mutateAsync` que espera mutation + `setQueryData` en onSuccess
+- [x] Callbacks inmediatos (estado actualizado al instante, sin delay de servidor)
 - [x] Lazy loading con suspense donde aplica
 - [x] useQuery staleTime/refetchInterval optimizados
-- [x] `handleSelectProject()`: Optimistic update → Fire-and-forget mutation → Immediate callbacks
-- [x] `handleNavigateToProject()`: Optimistic update → Immediate navigation → Background DB sync
-- [x] **ProjectBasicDataView**: Auto-save con optimistic updates (sin invalidateQueries)
-  - [x] Datos básicos (nombre, código, estado, tipos, modalidad, descripción): Se guardan instantáneamente
-  - [x] Cambios de color: Optimistic state → fire-and-forget mutation (no delay)
-  - [x] Imagen principal: `setQueryData` en onSuccess → imagen se muestra INSTANTÁNEAMENTE
-- [x] **ProjectLocationView**: Auto-save con optimistic updates (sin invalidateQueries)
-  - [x] Ubicación, coordenadas, zona horaria: Se guardan instantáneamente sin esperar servidor
+- [x] `handleSelectProject()`: Cache update → mutation en background → Immediate state
+- [x] `handleNavigateToProject()`: Cache update → Immediate navigation → Background DB sync
+- [x] **ProjectBasicDataView**: Auto-save + setQueryData (INSTANTÁNEO, no refetch)
+  - [x] Datos básicos (nombre, código, estado, tipos, modalidad, descripción): Cache update en onSuccess
+  - [x] Cambios de color: State update → mutation → cache update INSTANT
+  - [x] Imagen principal: setQueryData dual (project-data + image-url) → INSTANTÁNEO
+- [x] **ProjectLocationView**: Auto-save + setQueryData (INSTANTÁNEO, no refetch)
+  - [x] Ubicación, coordenadas, zona horaria: Cache update en onSuccess sin refetch
 
 ### 3.4 Data-Testid ✅
 - [x] ProjectActivesView: `container-project-actives`, `grid-projects`, `button-create-project-empty`
