@@ -20,13 +20,15 @@ import { useOrganizationCurrencies } from "@/hooks/use-currencies";
 import { useUpdateChecklist } from "@/hooks/use-update-checklist";
 import { supabase } from "@/lib/supabase";
 
-import { useCreateProject } from '../hooks/use-create-project';
-import { useUpdateProject } from '../hooks/use-update-project';
+import { useOptimisticMutation } from '@/core/save-engine';
+import { createProject } from '../services/createProject';
+import { updateProject } from '../services/updateProject';
 import { uploadProjectImage, updateProjectLastActive } from '@/features/projects';
 import { QUERY_KEYS } from '../constants';
 import { USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization';
 import ProjectColorAdvanced from '../components/ProjectColorAdvanced';
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
+import type { CreateProjectData, UpdateProjectData, Project as ProjectType } from '../types';
 
 const PRESET_COLORS = [
   { hex: '#007aff', name: 'Ocean' },
@@ -425,9 +427,48 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     [organizationCurrencies]
   );
 
-  const createProjectMutation = useCreateProject();
-  const updateProjectMutation = useUpdateProject();
   const updateChecklist = useUpdateChecklist();
+
+  const { mutate: createProjectMutate, isPending: isCreating } = useOptimisticMutation<ProjectType, CreateProjectData>({
+    mutationFn: async (data) => createProject(data),
+    queryKey: [QUERY_KEYS.PROJECTS, organizationId],
+    optimisticUpdate: (oldData: any, variables: CreateProjectData) => {
+      const optimisticProject = {
+        id: 'temp-' + Date.now(),
+        ...variables,
+        created_at: new Date().toISOString(),
+        organization_id: organizationId,
+      };
+      if (!Array.isArray(oldData)) return [optimisticProject];
+      return [...oldData, optimisticProject];
+    },
+    onSuccessMessage: "Proyecto creado",
+    onErrorMessage: "Error al crear proyecto",
+    additionalQueryKeys: [
+      [QUERY_KEYS.PROJECTS_LITE, organizationId],
+      [QUERY_KEYS.PROJECTS_MAP, organizationId],
+      ['user-data'],
+      ['current-user'],
+    ],
+  });
+
+  const { mutate: updateProjectMutate, isPending: isUpdating } = useOptimisticMutation<ProjectType, { projectId: string; data: UpdateProjectData }>({
+    mutationFn: async ({ projectId, data }) => updateProject(projectId, data),
+    queryKey: [QUERY_KEYS.PROJECTS, organizationId],
+    optimisticUpdate: (oldData: any, variables: { projectId: string; data: UpdateProjectData }) => {
+      if (!Array.isArray(oldData)) return oldData;
+      return oldData.map((p: any) => 
+        p.id === variables.projectId ? { ...p, ...variables.data } : p
+      );
+    },
+    onSuccessMessage: "Proyecto actualizado",
+    onErrorMessage: "Error al actualizar proyecto",
+    additionalQueryKeys: [
+      [QUERY_KEYS.PROJECTS_LITE, organizationId],
+      [QUERY_KEYS.PROJECT, project?.id],
+      [QUERY_KEYS.PROJECT_DATA, project?.id],
+    ],
+  });
 
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -556,19 +597,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
 
     try {
       if (mode === 'edit' && project) {
-        // ⚡ STEP 1: OPTIMISTIC UPDATE PRIMERO - Actualiza el cache INMEDIATAMENTE
-        queryClient.setQueryData(
-          [QUERY_KEYS.PROJECTS, organizationId],
-          (oldData: any) => {
-            if (!Array.isArray(oldData)) return oldData;
-            return oldData.map((p: any) => 
-              p.id === project.id ? { ...p, ...cleanedData } : p
-            );
-          }
-        );
-
-        // ⚡ STEP 2: FIRE AND FORGET - Mutation en background SIN ESPERAR
-        updateProjectMutation.mutate({
+        updateProjectMutate({
           projectId: project.id,
           data: {
             ...cleanedData,
@@ -576,7 +605,6 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
           }
         });
 
-        // ⚡ STEP 3: FIRE AND FORGET - Logging en background
         const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
         logActivity({
           organization_id: organizationId,
@@ -587,101 +615,59 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
           metadata: { name: cleanedData.name, project_type: projectTypeName }
         }).catch(err => console.error('Error logging activity:', err));
 
-        // ⚡ STEP 4: FIRE AND FORGET - Upload de imagen en background
         if (selectedImageFile) {
           handleImageUpload(project.id).catch(err => 
             console.error('Error uploading image:', err)
           );
         }
 
-        // ✅ STEP 5: CALLBACK INMEDIATO - El modal cierra al instante
         callbacks?.onSubmitSuccess?.('edit');
       } else {
-        // ⚡ STEP 1: CREAR PROYECTO OPTIMISTA - Genera un ID temporal
-        const optimisticProject = {
-          id: 'temp-' + Date.now(),
-          ...cleanedData,
-          created_at: new Date().toISOString(),
-          created_by: currentUserMember!.id,
-          organization_id: organizationId,
-        };
+        const tempProjectId = 'temp-' + Date.now();
 
-        // ⚡ STEP 2: ACTUALIZAR CACHE INMEDIATAMENTE con proyecto optimista
-        queryClient.setQueryData(
-          [QUERY_KEYS.PROJECTS, organizationId],
-          (oldData: any) => {
-            if (!Array.isArray(oldData)) return [optimisticProject];
-            return [...oldData, optimisticProject];
-          }
-        );
-
-        // ⚡ STEP 3: FIRE AND FORGET - Crear proyecto en el servidor
-        createProjectMutation.mutate({
+        createProjectMutate({
           organization_id: organizationId,
           created_by: currentUserMember!.id,
           ...cleanedData,
-        }, {
-          onSuccess: (newProject) => {
-            // Reemplazar proyecto optimista con el real
-            queryClient.setQueryData(
-              [QUERY_KEYS.PROJECTS, organizationId],
-              (oldData: any) => {
-                if (!Array.isArray(oldData)) return [newProject];
-                return oldData.map((p: any) => p.id === optimisticProject.id ? newProject : p);
-              }
-            );
-            
-            // Guardar como proyecto activo
-            if (userData?.user?.id) {
-              setSelectedProject(newProject.id, organizationId);
-              
-              Promise.resolve(
-                supabase.from('user_organization_preferences').upsert({
-                  user_id: userData.user.id,
-                  organization_id: organizationId,
-                  last_project_id: newProject.id,
-                  updated_at: new Date().toISOString()
-                }, { onConflict: 'user_id,organization_id' })
-              )
-                .then(() => {
-                  queryClient.invalidateQueries({
-                    queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
-                  });
-                  return updateProjectLastActive(newProject.id, organizationId);
-                })
-                .catch((error: any) => console.error('Error setting project as active:', error));
-            }
-          }
-        });
+        } as CreateProjectData);
 
-        // ⚡ STEP 4: FIRE AND FORGET - Preferencias del usuario
         if (userData?.user?.id) {
-          setSelectedProject(optimisticProject.id, organizationId);
+          setSelectedProject(tempProjectId, organizationId);
           updateChecklist.mutateAsync({ 
             key: 'create_project', 
             value: true 
           }).catch(err => console.error('Error updating checklist:', err));
+          
+          supabase.from('user_organization_preferences').upsert({
+            user_id: userData.user.id,
+            organization_id: organizationId,
+            last_project_id: tempProjectId,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id,organization_id' })
+            .then(() => {
+              queryClient.invalidateQueries({
+                queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
+              });
+            })
+            .catch((error: any) => console.error('Error setting project as active:', error));
         }
 
-        // ⚡ STEP 5: FIRE AND FORGET - Upload de imagen
-        if (selectedImageFile && optimisticProject.id) {
-          handleImageUpload(optimisticProject.id).catch(err => 
+        if (selectedImageFile && tempProjectId) {
+          handleImageUpload(tempProjectId).catch(err => 
             console.error('Error uploading image:', err)
           );
         }
 
-        // ⚡ STEP 6: FIRE AND FORGET - Logging
         const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
         logActivity({
           organization_id: organizationId,
           user_id: userData?.user?.id || '',
           action: ACTIVITY_ACTIONS.CREATE_PROJECT,
           target_table: TARGET_TABLES.PROJECTS,
-          target_id: optimisticProject.id,
+          target_id: tempProjectId,
           metadata: { name: cleanedData.name, project_type: projectTypeName }
         }).catch(err => console.error('Error logging activity:', err));
 
-        // ✅ STEP 7: CALLBACK INMEDIATO - El modal cierra al instante
         callbacks?.onSubmitSuccess?.('create');
       }
 
@@ -702,7 +688,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     currentImageUrl,
     imagePreviewUrl,
     handleFileSelect,
-    isSubmitting: createProjectMutation.isPending || updateProjectMutation.isPending || isUploadingImage,
+    isSubmitting: isCreating || isUpdating || isUploadingImage,
     isUploadingImage,
   };
 }

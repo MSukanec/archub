@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
+import { useOptimisticMutation } from '@/core/save-engine';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationMembers } from '@/features/organization/hooks/use-organization-members';
 import { createProjectType } from '../services/createProjectType';
@@ -79,8 +79,6 @@ export function useProjectTypeForm({
   onSuccess,
   callbacks = {},
 }: UseProjectTypeFormOptions) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
   const { data: members = [] } = useOrganizationMembers(organizationId);
@@ -108,37 +106,47 @@ export function useProjectTypeForm({
     form.reset();
   };
 
-  const createMutation = useMutation({
-    mutationFn: createProjectType,
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['project-types'] });
-      callbacks.onSuccess?.('create');
-      onSuccess?.();
+  const { mutate: createType, isPending: isCreating } = useOptimisticMutation<
+    ProjectType,
+    { name: string; organizationId: string; createdBy: string }
+  >({
+    mutationFn: async (data) => createProjectType(data),
+    queryKey: ['project-types', organizationId],
+    optimisticUpdate: (oldData, variables) => {
+      const optimisticType = {
+        id: 'temp-' + Date.now(),
+        name: variables.name,
+        organization_id: variables.organizationId,
+        created_by: variables.createdBy,
+        created_at: new Date().toISOString(),
+      };
+      if (!Array.isArray(oldData)) return [optimisticType];
+      return [...oldData, optimisticType];
     },
-    onError: (error) => {
-      console.error('Error creating project type:', error);
-      callbacks.onError?.(error as Error);
-    }
+    onSuccessMessage: "Tipo creado",
+    onErrorMessage: "Error al crear tipo",
+    additionalQueryKeys: [['project-types']],
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({ typeId, organizationId, data }: {
-      typeId: string;
-      organizationId: string;
-      data: { name?: string };
-    }) => updateProjectType(typeId, organizationId, data),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['project-types'] });
-      callbacks.onSuccess?.('edit');
-      onSuccess?.();
+  const { mutate: updateType, isPending: isUpdating } = useOptimisticMutation<
+    ProjectType,
+    { typeId: string; organizationId: string; data: { name?: string } }
+  >({
+    mutationFn: async ({ typeId, organizationId, data }) => 
+      updateProjectType(typeId, organizationId, data),
+    queryKey: ['project-types', organizationId],
+    optimisticUpdate: (oldData, variables) => {
+      if (!Array.isArray(oldData)) return oldData;
+      return oldData.map((t: any) => 
+        t.id === variables.typeId ? { ...t, ...variables.data } : t
+      );
     },
-    onError: (error) => {
-      console.error('Error updating project type:', error);
-      callbacks.onError?.(error as Error);
-    }
+    onSuccessMessage: "Tipo actualizado",
+    onErrorMessage: "Error al actualizar tipo",
+    additionalQueryKeys: [['project-types']],
   });
+
+  const isSubmitting = isCreating || isUpdating;
 
   const onSubmit = async (data: ProjectTypeFormData) => {
     if (!organizationId) {
@@ -148,26 +156,13 @@ export function useProjectTypeForm({
 
     try {
       if (mode === 'edit' && projectType) {
-        // ⚡ STEP 1: OPTIMISTIC UPDATE PRIMERO
-        queryClient.setQueryData(
-          ['project-types', organizationId],
-          (oldData: any) => {
-            if (!Array.isArray(oldData)) return oldData;
-            return oldData.map((t: any) => 
-              t.id === projectType.id ? { ...t, name: data.name } : t
-            );
-          }
-        );
-
-        // ⚡ STEP 2: FIRE AND FORGET - Mutation sin esperar
-        updateMutation.mutate({
+        updateType({
           typeId: projectType.id,
           organizationId,
           data: { name: data.name }
         });
-
-        // ✅ CALLBACK INMEDIATO
         callbacks.onSuccess?.('edit');
+        onSuccess?.();
       } else {
         const currentMember = members.find((m: any) => m.user_id === userData?.user?.id);
         if (!currentMember) {
@@ -175,43 +170,13 @@ export function useProjectTypeForm({
           return;
         }
 
-        // ⚡ STEP 1: OPTIMISTIC UPDATE
-        const optimisticType = {
-          id: 'temp-' + Date.now(),
-          name: data.name,
-          organization_id: organizationId,
-          created_by: currentMember.id,
-          created_at: new Date().toISOString(),
-        };
-
-        queryClient.setQueryData(
-          ['project-types', organizationId],
-          (oldData: any) => {
-            if (!Array.isArray(oldData)) return [optimisticType];
-            return [...oldData, optimisticType];
-          }
-        );
-
-        // ⚡ STEP 2: FIRE AND FORGET
-        createMutation.mutate({
+        createType({
           name: data.name,
           organizationId,
           createdBy: currentMember.id
-        }, {
-          onSuccess: (newType) => {
-            // Reemplazar optimista con real
-            queryClient.setQueryData(
-              ['project-types', organizationId],
-              (oldData: any) => {
-                if (!Array.isArray(oldData)) return [newType];
-                return oldData.map((t: any) => t.id === optimisticType.id ? newType : t);
-              }
-            );
-          }
         });
-
-        // ✅ CALLBACK INMEDIATO
         callbacks.onSuccess?.('create');
+        onSuccess?.();
       }
     } catch (error) {
       callbacks.onError?.(error as Error);

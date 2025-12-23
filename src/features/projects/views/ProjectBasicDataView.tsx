@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useUserOrganizationPreferences } from '@/features/organization'
 import { supabase } from '@/lib/supabase'
-import { useSaveEngine } from '@/core/save-engine'
+import { useSaveEngine, useOptimisticMutation } from '@/core/save-engine'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -100,17 +100,12 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     enabled: !!activeProjectId && !!supabase
   });
 
-  // Image upload state
-  const [isUploadingImage, setIsUploadingImage] = useState(false)
-
-  // Mutation to upload project image - OPTIMIZED with optimistic updates
-  const uploadImageMutation = useMutation({
+  // Mutation to upload project image using optimistic mutation
+  const { mutate: uploadImage, isPending: isUploadingImage } = useOptimisticMutation({
     mutationFn: async (file: File) => {
       if (!activeProjectId || !organizationId) {
         throw new Error('Project ID and Organization ID are required');
       }
-      
-      setIsUploadingImage(true);
       
       // Compress image before uploading
       const originalSize = file.size;
@@ -134,38 +129,17 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       
       // Upload image to storage
       const uploadResult = await uploadProjectImage(compressedFile, activeProjectId, organizationId);
-      return uploadResult; // Return full result object with file_path and file_url
+      return uploadResult;
     },
-    onSuccess: (uploadResult) => {
-      // ⚡ OPTIMISTIC UPDATE: Update project-data cache AND image URL query cache
-      queryClient.setQueryData(['project-data', activeProjectId], (oldData: any) => ({
-        ...oldData,
-        image_bucket: 'social-assets',
-        image_path: uploadResult.file_path,
-      }));
-
-      // ⚡ Also update the image URL query cache directly
-      queryClient.setQueryData(['project-image-url', activeProjectId, 'social-assets', uploadResult.file_path], uploadResult.file_url);
-
-      toast({
-        title: "Éxito",
-        description: "Imagen principal actualizada correctamente"
-      });
-      setIsUploadingImage(false);
-    },
-    onError: (error: any) => {
-      console.error('Error uploading image:', error);
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo subir la imagen",
-        variant: "destructive"
-      });
-      setIsUploadingImage(false);
-    }
+    queryKey: ['project-data', activeProjectId],
+    optimisticUpdate: (oldData) => oldData,
+    onSuccessMessage: "Imagen principal actualizada correctamente",
+    onErrorMessage: "No se pudo subir la imagen",
+    additionalQueryKeys: [['project-info', activeProjectId], ['projects']],
   });
 
-  // Mutation to delete project image
-  const deleteImageMutation = useMutation({
+  // Mutation to delete project image using optimistic mutation
+  const { mutate: deleteImage, isPending: isDeletingImage } = useOptimisticMutation({
     mutationFn: async () => {
       if (!activeProjectId || !organizationId) {
         throw new Error('Project ID and Organization ID are required');
@@ -175,44 +149,34 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
         await deleteProjectImage(activeProjectId, organizationId, projectData.image_bucket, projectData.image_path);
       }
     },
-    onSuccess: () => {
-      // ⚡ OPTIMISTIC UPDATE: Clear image metadata from cache
-      queryClient.setQueryData(['project-data', activeProjectId], (oldData: any) => ({
+    queryKey: ['project-data', activeProjectId],
+    optimisticUpdate: (oldData) => {
+      if (!oldData) return oldData;
+      return {
         ...oldData,
         image_bucket: null,
         image_path: null,
-      }));
-
-      toast({
-        title: "Éxito",
-        description: "Imagen principal eliminada correctamente"
-      });
+      };
     },
-    onError: (error: any) => {
-      console.error('Error deleting image:', error);
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo eliminar la imagen",
-        variant: "destructive"
-      });
-    }
+    onSuccessMessage: "Imagen principal eliminada correctamente",
+    onErrorMessage: "No se pudo eliminar la imagen",
+    additionalQueryKeys: [['project-info', activeProjectId], ['projects']],
   });
 
-  // Handler for image file selection - OPTIMIZED with optimistic update
+  // Handler for image file selection
   const handleImageFilesChange = useCallback((files: any[]) => {
     if (files.length > 0 && files[0].file) {
-      // ⚡ No optimistic update for images (already showing preview in FileUploader)
-      uploadImageMutation.mutate(files[0].file);
+      uploadImage(files[0].file);
     }
-  }, [uploadImageMutation]);
+  }, [uploadImage]);
 
   // Handler for image removal
   const handleImageRemove = useCallback(() => {
-    deleteImageMutation.mutate();
-  }, [deleteImageMutation]);
+    deleteImage();
+  }, [deleteImage]);
 
-  // Mutation to save project color
-  const saveProjectColorMutation = useMutation({
+  // Mutation to save project color using optimistic mutation
+  const { mutate: saveProjectColor } = useOptimisticMutation({
     mutationFn: async (colorData: { color?: string; use_custom_color?: boolean; custom_color_h?: number | null; custom_color_hex?: string | null }) => {
       if (!activeProjectId || !supabase) return;
 
@@ -226,18 +190,16 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
         throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    queryKey: ['project-info', activeProjectId],
+    optimisticUpdate: (oldData, colorData) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        ...colorData,
+      };
     },
-    onError: (error: any) => {
-      console.error('Error in saveProjectColorMutation:', error);
-      toast({
-        title: "Error al guardar",
-        description: "No se pudo guardar el color del proyecto",
-        variant: "destructive"
-      });
-    }
+    onErrorMessage: "No se pudo guardar el color del proyecto",
+    additionalQueryKeys: [['projects']],
   });
 
   // Centralized auto-save using useSaveEngine
@@ -347,13 +309,13 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     setCustomColorHex(null);
     
     // ⚡ PASO 2: Fire and forget - update DB in background
-    saveProjectColorMutation.mutate({
+    saveProjectColor({
       color,
       use_custom_color: false,
       custom_color_h: null,
       custom_color_hex: null
     });
-  }, []);
+  }, [saveProjectColor]);
 
   const handleCustomColorChange = useCallback((params: { useCustom: boolean; hue: number | null; hex: string | null }) => {
     // ⚡ PASO 1: Update state immediately (optimistic)
@@ -366,13 +328,13 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     }
     
     // ⚡ PASO 2: Fire and forget - update DB in background
-    saveProjectColorMutation.mutate({
+    saveProjectColor({
       use_custom_color: params.useCustom,
       custom_color_h: params.hue,
       custom_color_hex: params.hex ?? undefined,
       color: params.useCustom ? (params.hex ?? '#84cc16') : '#84cc16'
     });
-  }, []);
+  }, [saveProjectColor]);
 
   if (!activeProjectId) {
     return (
@@ -413,7 +375,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
                 }
               }}
               isUploading={isUploadingImage}
-              disabled={isUploadingImage || deleteImageMutation.isPending}
+              disabled={isUploadingImage || isDeletingImage}
               emptyStateDescription="Arrastra una imagen o haz clic para seleccionar"
               maxSizeLabel="Formatos: JPG, PNG, WebP • Tamaño máximo: 2MB"
             />

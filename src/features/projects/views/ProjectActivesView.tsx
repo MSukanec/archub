@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects, useProjectsCount, ProjectItemCard, updateProjectLastActive } from '@/features/projects'
 import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization'
 import { Folder, Plus, Bell, Search, Filter } from 'lucide-react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import { useOptimisticMutation } from '@/core/save-engine'
 import { useToast } from '@/hooks/use-toast'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -121,8 +122,12 @@ export function ProjectActivesView() {
     return activeProject ? [activeProject, ...otherProjects] : otherProjects;
   }, [filteredProjects, activeProjectId])
 
-  // Select project mutation - OPTIMIZED with optimistic updates
-  const selectProjectMutation = useMutation({
+  // Select project mutation using save-engine optimistic pattern
+  const preferencesQueryKey = userId && organizationId 
+    ? USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userId, organizationId)
+    : ['user-preferences-placeholder'];
+
+  const { mutate: selectProject, isPending: isSelectingProject } = useOptimisticMutation({
     mutationFn: async (projectId: string) => {
       if (!supabase || !userData?.user?.id || !organizationId) {
         throw new Error('Required data not available');
@@ -137,50 +142,33 @@ export function ProjectActivesView() {
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id,organization_id'
-        })
+        });
       
-      if (error) throw error
+      if (error) throw error;
       return projectId;
-    }
-  })
+    },
+    queryKey: preferencesQueryKey,
+    optimisticUpdate: (oldData: any, projectId: string) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        last_project_id: projectId,
+        updated_at: new Date().toISOString()
+      };
+    },
+    onSuccessMessage: "Proyecto activado",
+    onErrorMessage: "No se pudo activar el proyecto",
+    additionalQueryKeys: [['active-projects'], ['projects']],
+  });
 
   const handleSelectProject = (projectId: string) => {
     if (projectId === activeProjectId) return;
 
-    // ⚡ PASO 1: OPTIMISTIC UPDATE - Update cache immediately
-    const queryKey = USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!);
-    const oldData = queryClient.getQueryData(queryKey);
-    
-    queryClient.setQueryData(queryKey, (old: any) => ({
-      ...old,
-      last_project_id: projectId,
-      updated_at: new Date().toISOString()
-    }));
+    selectProject(projectId);
 
-    // ⚡ PASO 2: FIRE AND FORGET - Mutation without await
-    selectProjectMutation.mutate(projectId, {
-      onError: () => {
-        // Rollback optimistic update on error
-        queryClient.setQueryData(queryKey, oldData);
-        toast({
-          title: "Error",
-          description: "No se pudo activar el proyecto",
-          variant: "destructive"
-        })
-      }
-    });
-
-    // ✅ PASO 3: IMMEDIATE CALLBACKS - No wait for server
     setSelectedProject(projectId, organizationId);
     setSidebarLevel('project');
-    
-    // Show instant toast
-    toast({
-      title: "Proyecto activado",
-      description: "El proyecto ahora está activo"
-    });
 
-    // Update last_active_at in background
     updateProjectLastActive(projectId, organizationId!).catch(err => 
       console.error('Error updating project last_active_at:', err)
     );

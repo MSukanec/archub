@@ -5,8 +5,7 @@ import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEY
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { Folder, Edit, Trash2, Plus, CheckCircle2, Search, Filter, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
+import { useOptimisticMutation } from '@/core/save-engine'
 import { useProjectContext } from '@/stores/projectContext'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { useLocation } from 'wouter'
@@ -30,14 +29,12 @@ export function ProjectListView() {
   const { data: projects = [], isLoading: projectsLoading } = useProjects(organizationId || undefined)
   const { data: projectsCount = 0 } = useProjectsCount(organizationId || undefined)
   const { data: organizationCurrencies = [] } = useOrganizationCurrencies(organizationId)
-  const { toast } = useToast()
   
   // Get default currency for organization
   const defaultCurrency = useMemo(
     () => organizationCurrencies.find(oc => oc.is_default)?.currency,
     [organizationCurrencies]
   )
-  const queryClient = useQueryClient()
   const { setSelectedProject } = useProjectContext()
   const { setSidebarLevel } = useNavigationStore()
   const [, navigate] = useLocation()
@@ -217,7 +214,7 @@ export function ProjectListView() {
   }, [filterByProjectType, filterByModality, filterByStatus, availableProjectTypes, availableModalities, availableStatuses, isMobile]);
 
   // Select project mutation
-  const selectProjectMutation = useMutation({
+  const { mutate: selectProject, isPending: isSelectingProject } = useOptimisticMutation({
     mutationFn: async (projectId: string) => {
       if (!supabase || !userData?.user?.id || !organizationId) {
         throw new Error('Required data not available');
@@ -236,9 +233,6 @@ export function ProjectListView() {
       
       if (error) throw error
       
-      return projectId;
-    },
-    onSuccess: (projectId) => {
       setSelectedProject(projectId, organizationId);
       setSidebarLevel('project');
       
@@ -246,32 +240,25 @@ export function ProjectListView() {
         console.error('Error updating project last_active_at:', err)
       );
       
-      queryClient.invalidateQueries({ 
-        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!) 
-      });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      queryClient.refetchQueries({
-        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!)
-      });
-      
       navigate('/project/dashboard');
       
-      toast({
-        title: "Proyecto seleccionado",
-        description: "El proyecto se ha seleccionado correctamente"
-      })
+      return projectId;
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "No se pudo seleccionar el proyecto",
-        variant: "destructive"
-      })
-    }
-  })
+    queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!),
+    optimisticUpdate: (oldData, projectId) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        last_project_id: projectId
+      };
+    },
+    onSuccessMessage: "Proyecto seleccionado",
+    onErrorMessage: "No se pudo seleccionar el proyecto",
+    additionalQueryKeys: [['current-user']],
+  });
 
   const handleSelectProject = (projectId: string) => {
-    selectProjectMutation.mutate(projectId)
+    selectProject(projectId)
   }
 
   const handleEdit = (project: any) => {
@@ -304,8 +291,8 @@ export function ProjectListView() {
       itemDetails: itemDetails,
       itemType: 'proyecto',
       destructiveActionText: 'Eliminar',
-      onConfirm: () => deleteProjectMutation.mutate(project.id),
-      isLoading: deleteProjectMutation.isPending
+      onConfirm: () => deleteProject(project.id),
+      isLoading: isDeleting
     });
   }
 
@@ -445,7 +432,7 @@ export function ProjectListView() {
   ]
 
   // Delete project mutation
-  const deleteProjectMutation = useMutation({
+  const { mutate: deleteProject, isPending: isDeleting } = useOptimisticMutation({
     mutationFn: async (projectId: string) => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.access_token) {
@@ -467,38 +454,14 @@ export function ProjectListView() {
       
       return await response.json()
     },
-    onMutate: async (projectId) => {
-      await queryClient.cancelQueries({ queryKey: ['projects', userData?.organization?.id] })
-      
-      const previousProjects = queryClient.getQueryData(['projects', userData?.organization?.id])
-      
-      queryClient.setQueryData(['projects', userData?.organization?.id], (old: any[]) => {
-        if (!old) return old
-        return old.filter(project => project.id !== projectId)
-      })
-      
-      return { previousProjects }
+    queryKey: ['projects', userData?.organization?.id],
+    optimisticUpdate: (oldData, projectId) => {
+      if (!oldData) return oldData;
+      return oldData.filter((project: any) => project.id !== projectId);
     },
-    onSuccess: () => {
-      toast({
-        title: "Proyecto eliminado",
-        description: "El proyecto se ha eliminado correctamente"
-      })
-      
-      queryClient.invalidateQueries({ queryKey: ['projects', userData?.organization?.id] })
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
-    },
-    onError: (error: any, projectId, context) => {
-      if (context?.previousProjects) {
-        queryClient.setQueryData(['projects', userData?.organization?.id], context.previousProjects)
-      }
-      
-      toast({
-        title: "Error",
-        description: error.message || "No se pudo eliminar el proyecto",
-        variant: "destructive"
-      })
-    }
+    onSuccessMessage: "El proyecto se ha eliminado correctamente",
+    onErrorMessage: "No se pudo eliminar el proyecto",
+    additionalQueryKeys: [['current-user']],
   })
 
   return (
