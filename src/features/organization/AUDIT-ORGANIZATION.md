@@ -18,7 +18,7 @@ El feature ORGANIZATION está **100% migrado a Save Engine** según estándares 
 | Save Engine | ✅ | useSaveEngine + useOptimisticMutation implementados |
 | Data-testid | ✅ | Completados en formularios y vistas |
 | Performance | ✅ | Optimistic updates + fire-and-forget mutations |
-| Modales | ✅ | Patrón 1:1 Form ↔ Modal (4 modales, 2 forms) |
+| Modales | ✅ | Patrón 1:1 Form ↔ Modal (4 modales, 3 forms) |
 | Nomenclatura | ✅ | Forms: `*Form.tsx`, Modals: `*Modal.tsx` |
 | Vista | ✅ | Consolidada en `OrganizationDashboardView.tsx` con componentes internos |
 | Database | ✅ | RLS, multi-tenant filtering |
@@ -37,49 +37,51 @@ src/features/organization/
 │   ├── admin/
 │   │   └── AdminOrganizationRow.tsx
 │   └── (específicos del feature)
-├── forms/                              ← 2 FORMS
-│   ├── OrganizationForm.tsx           ✅ Create/Edit organization
-│   └── InviteMemberForm.tsx           ✅ Invite members (619 líneas)
+├── forms/                                    ← 3 FORMS
+│   ├── OrganizationForm.tsx                ✅ Create/Edit organization
+│   ├── InviteMemberForm.tsx                ✅ Invite members (619 líneas)
+│   └── MemberActionConfirmationForm.tsx    ✅ Confirmation content (revoke/remove)
 ├── hooks/
-│   ├── use-create-organization.ts     ✅ useOptimisticMutation
-│   ├── use-update-organization.ts     ✅ useOptimisticMutation
-│   ├── use-delete-member.ts           ✅ useOptimisticMutation
+│   ├── use-create-organization.ts          ✅ useOptimisticMutation
+│   ├── use-update-organization.ts          ✅ useOptimisticMutation
+│   ├── use-delete-member.ts                ✅ useOptimisticMutation
 │   ├── use-update-user-organization-preferences.ts ✅ useOptimisticMutation
 │   └── (otros hooks)
-├── modals/                             ← 4 MODALS (1:1 con Forms + Confirmación)
-│   ├── OrganizationModal.tsx          ✅ Usa OrganizationForm
-│   ├── InviteMemberModal.tsx          ✅ Usa InviteMemberForm
-│   ├── MemberActionConfirmationModal.tsx ✅ Modal de confirmación
-│   ├── OrganizationRemovedModal.tsx   ✅ Cambiar org / logout (UI-only)
-│   └── index.ts                        ✅ Exports centralizados
-├── views/                              ← CONSOLIDADA (NO panels/)
-│   └── OrganizationDashboardView.tsx  ✅ Vista completa con componentes internos:
-│                                         - WelcomePanel (interno)
-│                                         - StatsPanel (interno)
-│                                         - ProjectsPanel (interno)
+├── modals/                                   ← 4 MODALS (1:1 con Forms + Extra)
+│   ├── OrganizationModal.tsx               ✅ Usa OrganizationForm
+│   ├── InviteMemberModal.tsx               ✅ Usa InviteMemberForm
+│   ├── MemberActionConfirmationModal.tsx   ✅ Usa MemberActionConfirmationForm
+│   ├── OrganizationRemovedModal.tsx        ✅ UI-only (sin form separado)
+│   ├── index.ts                             ✅ Exports centralizados
+│   └── /index.ts
+├── views/                                    ← CONSOLIDADA (NO panels/)
+│   └── OrganizationDashboardView.tsx       ✅ Vista completa con componentes internos:
+│                                              - WelcomePanel (interno)
+│                                              - StatsPanel (interno)
+│                                              - ProjectsPanel (interno)
 ├── services/
 │   └── (servicios puros de API/DB)
 ├── types/
-│   └── index.ts                        ✅ TypeScript types
+│   └── index.ts                             ✅ TypeScript types
 ├── constants/
-│   └── index.ts                        ✅ Query keys, enums
+│   └── index.ts                             ✅ Query keys, enums
 ├── utils/
 │   └── (utilidades)
-├── AUDIT-ORGANIZATION.md              ← Este documento
-└── index.ts                            ✅ Barrel exports (LIMPIO)
+├── AUDIT-ORGANIZATION.md                   ← Este documento
+└── index.ts                                 ✅ Barrel exports (LIMPIO)
 ```
 
 ---
 
-## 3. CAMBIOS PRINCIPALES DE ESTA SESIÓN
+## 3. CAMBIOS PRINCIPALES (TODAS LAS SESIONES)
 
-### Reorganización de Modales
+### Sesión 1: Reorganización de Modales
 1. ✅ Creado `src/features/organization/modals/index.ts` con exports centralizados
 2. ✅ Movido `OrganizationRemovedModal.tsx` desde `legacy/modals/` a `organization/modals/`
 3. ✅ Actualizado `src/features/legacy/modals/index.ts` (removido OrganizationRemovedModal)
 4. ✅ Actualizado import en `DashboardLayout.tsx`
 
-### Consolidación de la Vista
+### Sesión 2: Consolidación de la Vista
 1. ✅ **ELIMINADA carpeta `src/features/organization/panels/`**
 2. ✅ Movido contenido de panels DENTRO de `OrganizationDashboardView.tsx`:
    - WelcomePanel → componente interno
@@ -88,10 +90,16 @@ src/features/organization/
 3. ✅ Actualizado `organization/index.ts` (removidos exports de panels)
 4. ✅ Vista ahora es SELF-CONTAINED (patrón de PROJECTS y otros features refactorizados)
 
-### Correcciones de Tipificación
-1. ✅ Cambió `export default function` a `export function` en MemberActionConfirmationModal
-2. ✅ Removido `variant="secondary"` inválido en Badge de OrganizationRemovedModal
-3. ✅ 0 LSP diagnostics - todo limpio
+### Sesión 3: Separación Form ↔ Modal en MemberActionConfirmation
+1. ✅ **CREADO `MemberActionConfirmationForm.tsx` en forms/**
+   - Contiene `RevokeInvitationContent` y `RemoveMemberContent` (componentes internos)
+   - Exporta `MemberActionConfirmationForm` componente principal
+2. ✅ **REFACTORIZADO `MemberActionConfirmationModal.tsx` en modals/**
+   - Ahora USA `MemberActionConfirmationForm`
+   - Solo maneja lógica de modales (popModal, estado de loading, etc.)
+3. ✅ **ACTUALIZADO `organization/index.ts`**
+   - Cambió default export a named export para MemberActionConfirmationModal
+   - Agregó export para MemberActionConfirmationForm
 
 ---
 
@@ -101,7 +109,7 @@ src/features/organization/
 |------|-------|-----------|
 | `OrganizationForm.tsx` | `OrganizationModal.tsx` | CRUD de organizaciones |
 | `InviteMemberForm.tsx` | `InviteMemberModal.tsx` | Invitación de miembros |
-| (Sin form) | `MemberActionConfirmationModal.tsx` | Confirmación de acciones (revoke/remove) |
+| `MemberActionConfirmationForm.tsx` | `MemberActionConfirmationModal.tsx` | Confirmación (revoke/remove) |
 | (Sin form) | `OrganizationRemovedModal.tsx` | UI informativa: cambiar org o logout |
 
 ---
@@ -130,51 +138,59 @@ Los siguientes modales permanecen en legacy porque **NO pertenecen al feature OR
 - [x] `onSuccessMessage` y `onErrorMessage` implementados
 - [x] Fire-and-forget pattern con `.mutate()` (NO `.mutateAsync()`)
 
-### 6.2 Guards en optimisticUpdate ✅
+### 6.2 Separación Form ↔ Modal ✅
+- [x] OrganizationForm.tsx ↔ OrganizationModal.tsx (1:1)
+- [x] InviteMemberForm.tsx ↔ InviteMemberModal.tsx (1:1)
+- [x] MemberActionConfirmationForm.tsx ↔ MemberActionConfirmationModal.tsx (1:1)
+- [x] OrganizationRemovedModal.tsx sin form separado (UI-only)
+- [x] TODOS los modals usan NAMED EXPORTS (consistencia)
+- [x] Forms contienen UI + lógica de presentación
+- [x] Modals contienen header/footer + comportamiento modal
+
+### 6.3 Guards en optimisticUpdate ✅
 - [x] OrganizationForm.tsx: `if (!oldData) return oldData;` en createOrganization
 - [x] OrganizationForm.tsx: `if (!oldData) return oldData;` en updateOrganization
 - [x] OrganizationDashboardView.tsx: `if (!oldData) return oldData;` en uploadLogo
 - [x] InviteMemberForm.tsx: Guard en createMember y updateMember
 - [x] Todos los optimisticUpdate tienen protección contra null/undefined
 
-### 6.3 Queries y Cache Invalidation ✅
+### 6.4 Queries y Cache Invalidation ✅
 - [x] queryKey usando array pattern para invalidación correcta
 - [x] additionalQueryKeys incluye queries relacionadas
 - [x] Headers/selectores invalidados al cambiar datos principales
 - [x] NO hay `queryClient.invalidateQueries()` manual sueltas
 
-### 6.4 Supabase Access ✅
+### 6.5 Supabase Access ✅
 - [x] NO hay `supabase.from()` directo en componentes
 - [x] Todas las llamadas están en `saveFn` o `mutationFn`
 - [x] Services puros encapsulan Supabase logic
 - [x] Componentes agnósticos de detalles de DB
 
-### 6.5 Nomenclatura ✅
+### 6.6 Nomenclatura ✅
 - [x] Forms terminan en `*Form.tsx` (NO `*FormFields.tsx`)
 - [x] Modals terminan en `*Modal.tsx` (NO `*FormModal.tsx`)
-- [x] Modals UI-only con `*Modal.tsx` pattern (sin form separado)
+- [x] Todos los modals son **NAMED EXPORTS** (no default exports)
 - [x] Views terminan en `*View.tsx`
 - [x] Pages terminan en `*Page.tsx`
-- [x] Todos los modals son **named exports** (no default exports)
 
-### 6.6 Estructura de Vistas ✅
-- [x] ✅ **NO HAY CARPETA PANELS** - eliminada completamente
+### 6.7 Estructura de Vistas ✅
+- [x] **NO HAY CARPETA PANELS** - eliminada completamente
 - [x] OrganizationDashboardView.tsx contiene componentes internos (WelcomePanel, StatsPanel, ProjectsPanel)
 - [x] Patrón alineado con PROJECTS y otros features refactorizados
 - [x] Vista es self-contained y fácil de mantener
 
-### 6.7 Validación de Datos ✅
+### 6.8 Validación de Datos ✅
 - [x] Zod schemas en lugar de validación manual
 - [x] Schemas tipificados correctamente
 - [x] Frontend + Backend validation aligned
 
-### 6.8 Error Handling ✅
+### 6.9 Error Handling ✅
 - [x] `onErrorMessage` en TODAS las mutations
 - [x] Toast notifications para feedback del usuario
 - [x] Rollback automático si mutation falla
 - [x] Console logging mínimo (solo errores críticos)
 
-### 6.9 LSP y Tipificación ✅
+### 6.10 LSP y Tipificación ✅
 - [x] 0 LSP diagnostics
 - [x] Todos los exports/imports tipificados correctamente
 - [x] Workflow RUNNING sin errores
@@ -192,18 +208,19 @@ Los siguientes modales permanecen en legacy porque **NO pertenecen al feature OR
 ✅ **onSuccessMessage/onErrorMessage** - UX consistent  
 ✅ **Nomenclatura *Form.tsx/*Modal.tsx** - Estándar enterprise  
 ✅ **Named exports para modals** - Consistencia y tipificación segura  
+✅ **1:1 Form ↔ Modal separation** - FEATURE-AUDIT.md rule 5  
 ✅ **Vistas self-contained (NO panels/)** - Patrón refactorizado alineado con PROJECTS
 
 ---
 
 ## 8. ENTREGABLES FINALES
 
-- ✅ 2 Forms en organization/forms (`OrganizationForm`, `InviteMemberForm`)
+- ✅ 3 Forms en organization/forms (`OrganizationForm`, `InviteMemberForm`, `MemberActionConfirmationForm`)
 - ✅ 4 Modals en organization/modals con nomenclatura correcta
-  - ✅ `OrganizationModal.tsx`
-  - ✅ `InviteMemberModal.tsx`
-  - ✅ `MemberActionConfirmationModal.tsx`
-  - ✅ `OrganizationRemovedModal.tsx`
+  - ✅ `OrganizationModal.tsx` (1:1 con OrganizationForm)
+  - ✅ `InviteMemberModal.tsx` (1:1 con InviteMemberForm)
+  - ✅ `MemberActionConfirmationModal.tsx` (1:1 con MemberActionConfirmationForm)
+  - ✅ `OrganizationRemovedModal.tsx` (UI-only, sin form)
 - ✅ 1 Vista consolidada: `OrganizationDashboardView.tsx` (sin carpeta panels)
   - ✅ WelcomePanel (componente interno)
   - ✅ StatsPanel (componente interno)
@@ -226,11 +243,12 @@ No hay deuda técnica.
 No hay refactorización pendiente.
 
 **ESTRUCTURA DEFINITIVA:**
-- ✅ Forms en `forms/`
-- ✅ Modals en `modals/` (4 total)
+- ✅ Forms en `forms/` (3 total)
+- ✅ Modals en `modals/` (4 total con 1:1 Form↔Modal)
 - ✅ Vista consolidada en `views/OrganizationDashboardView.tsx` (SIN panels/)
 - ✅ Save Engine implementado (useOptimisticMutation + fire-and-forget)
 - ✅ Nomenclatura enterprise: *Form.tsx, *Modal.tsx, *View.tsx
+- ✅ TODOS los exports son NAMED EXPORTS (no default)
 
 **PRÓXIMO PASO:** Migrar siguiente feature (PROJECTS, LEARNING, etc.) usando este documento como template y aplicando el mismo estándar Save Engine.
 
