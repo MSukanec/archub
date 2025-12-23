@@ -1,9 +1,9 @@
 import { registerModal, ModalConfig } from './registry';
 
-import { MemberFormModal, InviteMemberModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, OrganizationFormModal, ProfileOrganizationFormModal } from '@/features/organization';
+import { InviteMemberModal, OrganizationModal, MemberActionConfirmationModal } from '@/features/organization';
 import { CapitalParticipantModal, PartnerContributionModal, PartnerWithdrawalModal, CapitalTransactionModal } from '@/features/capital';
 import { ProjectModal } from '@/features/projects';
-import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal } from '@/features/legacy';
+import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, ProfileOrganizationFormModal, MemberFormModal } from '@/features/legacy';
 import ContactForm from '@/features/contacts/forms/ContactForm';
 import { ContactTypeForm } from '@/features/contacts/forms/ContactTypeForm';
 import { ClientForm } from '@/features/clients/forms/ClientForm';
@@ -14,7 +14,6 @@ import { ClientScheduleItemForm } from '@/features/clients/forms/ClientScheduleI
 import { MovementModal, MovementModalView, MovementImportStepModal, MovementConceptFormModal, BankTransferReceiptModal, PaymentFormModal } from '@/features/finances';
 import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConfirmationForm';
 import { default as PaymentFeedbackModal } from '@/components/forms/PaymentFeedbackModal';
-import { default as MemberActionConfirmationForm } from '@/features/organization/forms/MemberActionConfirmationForm';
 import { UniversalImportForm } from '@/features/imports';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal, MaterialPaymentModal, PurchaseOrderForm, MaterialPurchaseForm } from '@/features/materials';
 import { UserFormModal, ChangelogFormModal, NotificationFormModal, AnnouncementFormModal, SupportConversationStartModal, PlanFormModal, PlanPriceFormModal, DowngradeModal, UpgradeModal, ResetTestDataModal } from '@/features/users';
@@ -161,7 +160,7 @@ export function initializeModalRegistry(): void {
   registerModal('board', BoardFormModal as any, organizationConfig);
   registerModal('card', CardFormModal as any, organizationConfig);
   registerModal('list', ListFormModal as any, organizationConfig);
-  registerModal('organization', OrganizationFormModal as any, { ...organizationConfig, size: 'lg' });
+  registerModal('organization', OrganizationModal as any, { ...organizationConfig, size: 'lg' });
   registerModal('profile-organization', ProfileOrganizationFormModal as any, organizationConfig);
   registerModal('organization-movement-concept', OrganizationMovementConceptFormModal as any, organizationConfig);
   
@@ -462,7 +461,7 @@ export function initializeModalRegistry(): void {
   });
   
   registerModal('admin-user', UserFormModal as any, adminConfig);
-  registerModal('admin-organization', OrganizationFormModal as any, { ...adminConfig, size: 'lg' });
+  registerModal('admin-organization', OrganizationModal as any, { ...adminConfig, size: 'lg' });
   registerModal('changelog-entry', ChangelogFormModal as any, adminConfig);
   registerModal('notification', NotificationFormModal as any, adminConfig);
   registerModal('announcement', AnnouncementFormModal as any, adminConfig);
@@ -481,7 +480,7 @@ export function initializeModalRegistry(): void {
     preventCloseOnBackdrop: true,
   });
   
-  registerModal('member-action-confirmation', MemberActionConfirmationForm as any, { 
+  registerModal('member-action-confirmation', MemberActionConfirmationModal as any, { 
     ...organizationConfig, 
     size: 'md',
     preventCloseOnBackdrop: true,

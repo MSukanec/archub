@@ -4,15 +4,12 @@ export * from './types';
 export * from './constants';
 export * from './utils';
 
-export { MemberFormModal } from './modals/MemberFormModal';
+// Modals (1:1 with Forms)
+export { OrganizationModal } from './modals/OrganizationModal';
 export { InviteMemberModal } from './modals/InviteMemberModal';
-export { BoardFormModal } from './modals/BoardFormModal';
-export { CardFormModal } from './modals/CardFormModal';
-export { ListFormModal } from './modals/ListFormModal';
-export { OrganizationMovementConceptFormModal } from './modals/OrganizationMovementConceptFormModal';
-export { ProfileOrganizationFormModal } from './modals/ProfileOrganizationFormModal';
+export { default as MemberActionConfirmationModal } from './modals/MemberActionConfirmationModal';
 
-export { OrganizationFormModal } from './modals/admin/OrganizationFormModal';
+// Forms
 export { OrganizationForm } from './forms/OrganizationForm';
 export { InviteMemberForm } from './forms/InviteMemberForm';
 

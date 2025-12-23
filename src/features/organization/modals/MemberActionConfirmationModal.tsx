@@ -16,7 +16,7 @@ interface BillingInfo {
   nextBillingDate?: string
 }
 
-interface MemberActionConfirmationFormProps {
+interface MemberActionConfirmationModalProps {
   modalData?: {
     actionType: ActionType
     memberName: string
@@ -243,9 +243,9 @@ function RemoveMemberContent({
   )
 }
 
-export default function MemberActionConfirmationForm({
+export default function MemberActionConfirmationModal({
   modalData,
-}: MemberActionConfirmationFormProps) {
+}: MemberActionConfirmationModalProps) {
   const { popModal } = useGlobalModalStore()
   const [isLoading, setIsLoading] = useState(false)
 

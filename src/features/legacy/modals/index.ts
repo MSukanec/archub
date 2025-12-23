@@ -24,3 +24,12 @@ export { TaskParameterOptionFormModal } from './admin/TaskParameterOptionFormMod
 export { ParameterVisibilityConfigModal } from './admin/ParameterVisibilityConfigModal';
 export { AddParameterToCanvasModal } from './admin/AddParameterToCanvasModal';
 export { TaskModal } from './admin/TaskModal';
+
+// Organization Legacy Modals (moved from organization feature)
+export { BoardFormModal } from './BoardFormModal';
+export { CardFormModal } from './CardFormModal';
+export { ListFormModal } from './ListFormModal';
+export { OrganizationMovementConceptFormModal } from './OrganizationMovementConceptFormModal';
+export { OrganizationRemovedModal } from './OrganizationRemovedModal';
+export { ProfileOrganizationFormModal } from './ProfileOrganizationFormModal';
+export { MemberFormModal } from './MemberFormModal';
