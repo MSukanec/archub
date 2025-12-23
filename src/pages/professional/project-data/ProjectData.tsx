@@ -14,8 +14,7 @@ import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
 import { useGlobalModalStore } from '@/components/modal';
-import ProjectBasicDataTab from './ProjectBasicDataTab';
-import ProjectLocationTab from './ProjectLocationTab';
+import { ProjectBasicDataView, ProjectLocationView } from '@/features/projects';
 import ProjectSettingsTab from '@/pages/projects/ProjectSettingsTab';
 
 export default function ProjectData() {
@@ -297,13 +296,13 @@ Generado desde Seencel`);
   const renderTabContent = () => {
     switch (activeTab) {
       case 'basic':
-        return <ProjectBasicDataTab />;
+        return <ProjectBasicDataView />;
       case 'location':
-        return <ProjectLocationTab />;
+        return <ProjectLocationView />;
       case 'settings':
         return <ProjectSettingsTab />;
       default:
-        return <ProjectBasicDataTab />;
+        return <ProjectBasicDataView />;
     }
   };
 

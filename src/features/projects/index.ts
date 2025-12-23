@@ -81,6 +81,14 @@ export { ProjectModal } from './modals/ProjectModal';
 export { ProjectModalityModal } from './modals/ProjectModalityModal';
 export { ProjectTypeModal } from './modals/ProjectTypeModal';
 
+// ============ VIEWS ============
+export { ProjectBasicDataView } from './views/ProjectBasicDataView';
+export { ProjectLocationView } from './views/ProjectLocationView';
+export { ProjectActivesView } from './views/ProjectActivesView';
+export { ProjectListView } from './views/ProjectListView';
+export { ProjectSettingsView } from './views/ProjectSettingsView';
+export { ProjectVisionGeneralView } from './views/ProjectVisionGeneralView';
+
 // ============ LEGACY MODALS (Re-exported for backward compatibility) ============
 // These modals are now in @/features/legacy and will be distributed to appropriate features
 export { GalleryFormModal, DocumentFolderFormModal, DocumentPreviewModal, DocumentUploadFormModal } from '@/features/legacy';
