@@ -330,7 +330,7 @@ VIEW (Contenido)       → Tablas, KPIs, gráficos, formularios
 - [ ] ¿Usa `Tabs` de `@/components/ui-custom/Tabs` para filtros?
 - [ ] ¿Usa `LoadingSpinner` (no texto "Cargando...")?
 - [ ] ¿Los empty states tienen `actionButton` si el header tiene botón crear?
-- [ ] ¿Tiene `data-testid` en elementos interactivos?
+- [ ] ¿Tiene `data-testid` en elementos interactivos? (para testing futuro)
 
 ---
 
@@ -557,12 +557,14 @@ queryClient.invalidateQueries({
 - [ ] ¿Las Views tienen los campos necesarios?
 
 **Checklist de RLS:**
-- [ ] ¿Políticas SELECT / INSERT / UPDATE / DELETE según necesidad?
+- [ ] ¿Políticas SELECT / INSERT / UPDATE / DELETE según necesidad? ⚠️ *VERIFICAR EN SUPABASE*
 - [ ] ¿Políticas en español con formato "SUJETO > ACCIÓN > OBJETO > CONDICIÓN"?
-- [ ] ¿No hay duplicaciones peligrosas ni huecos de seguridad?
+- [ ] ¿No hay duplicaciones peligrosas ni huecos de seguridad? ⚠️ *VERIFICAR EN SUPABASE*
 - [ ] ¿Filtrado por `organization_id` donde aplica?
 
 **Output esperado:** "DB Findings" + "DB Fixes" (SQL exacto, separado por migraciones pequeñas)
+
+> **Nota:** RLS debe verificarse directamente en Supabase Dashboard → Authentication → Policies.
 
 ---
 
@@ -575,11 +577,11 @@ queryClient.invalidateQueries({
 - [ ] ¿Tipado y validaciones donde aplica?
 - [ ] ¿Query keys usando array pattern para invalidación correcta?
 
-**Checklist de performance:**
-- [ ] ¿Evita re-fetch innecesario?
+**Checklist de performance (queries):**
 - [ ] ¿Cache y staleTime configurados en React Query?
-- [ ] ¿Evita renders innecesarios?
-- [ ] ¿Usa Views de Supabase para queries complejas?
+- [ ] ¿Usa Views de Supabase para queries complejas (evita joins en frontend)?
+
+> **Nota:** Performance de carga (LCP, bundle size, lazy loading) se audita en **Sección 16.1 Performance Budgets**.
 
 **Checklist de UI/UX:**
 - [ ] ¿Estados vacíos, errores, permisos implementados?
@@ -591,12 +593,13 @@ queryClient.invalidateQueries({
 
 ### 12. AUDITORÍA DE CALIDAD / ROBUSTEZ
 
-**Checklist:**
-- [ ] ¿Manejo de errores real? (logs, try/catch, mensajes al usuario)
-- [ ] ¿Validaciones en frontend Y DB (constraints)?
+**Checklist de Validaciones:**
+- [ ] ¿Validaciones en frontend (Zod schemas) Y DB (constraints)?
 - [ ] ¿Concurrencia manejada? (updates que pisan datos, optimistic updates)
 - [ ] ¿Seguridad? (nunca confiar en frontend para reglas críticas)
 - [ ] ¿Autenticación usa `requireUser()` con userId correcto (NO auth.user.id)?
+
+> **Nota:** El manejo de errores (try/catch, logging, mensajes) se audita en **Sección 16.2 Error Handling**.
 
 ---
 
@@ -762,7 +765,7 @@ Un feature **NO puede marcarse como cerrado** si:
 - [ ] ¿Los errores de validación son anunciados?
 
 **Contraste y visuales:**
-- [ ] ¿El contraste de texto cumple WCAG AA (4.5:1)?
+- [ ] ¿El contraste de texto cumple WCAG AA (4.5:1)? ⚠️ *VERIFICAR CON AXE DEVTOOLS*
 - [ ] ¿Los estados focus son visibles?
 - [ ] ¿La información no depende solo del color?
 
@@ -805,12 +808,12 @@ Un feature **NO puede marcarse como cerrado** si:
 
 #### 16.1 Performance Budgets
 
-| Métrica | Target | Cómo medir |
-|---------|--------|------------|
-| **LCP (Largest Contentful Paint)** | < 2.5s | Lighthouse |
-| **Bundle size (feature chunk)** | < 100KB gzip | Vite build |
-| **Queries por página** | < 5 queries iniciales | React Query DevTools |
-| **Re-renders innecesarios** | 0 | React DevTools Profiler |
+| Métrica | Target | Cómo medir | Verificación |
+|---------|--------|------------|--------------|
+| **LCP (Largest Contentful Paint)** | < 2.5s | Lighthouse | ⚠️ MANUAL |
+| **Bundle size (feature chunk)** | < 100KB gzip | `npm run build` | ✅ Automatizable |
+| **Queries por página** | < 5 queries iniciales | React Query DevTools | ⚠️ MANUAL |
+| **Re-renders innecesarios** | 0 | React DevTools Profiler | ⚠️ MANUAL |
 
 **Checklist de Performance:**
 - [ ] ¿Usa lazy loading para rutas secundarias?
@@ -857,14 +860,15 @@ Un feature **NO puede marcarse como cerrado** si:
 
 Antes de considerar el feature "production ready":
 
-- [ ] Tests pasan en CI
-- [ ] No hay errores en consola (dev y prod)
-- [ ] Performance dentro de budgets
-- [ ] Accesibilidad verificada
-- [ ] Textos traducidos (es/en)
-- [ ] Error boundaries implementados
-- [ ] Logging adecuado
-- [ ] Documentación actualizada
+- [ ] No hay errores en consola (dev y prod) ✅ *Automatizable*
+- [ ] Performance dentro de budgets ⚠️ *Verificar con Lighthouse*
+- [ ] Accesibilidad verificada ⚠️ *Verificar con axe DevTools*
+- [ ] Textos traducibles via i18n ✅ *Automatizable*
+- [ ] Error boundaries implementados ✅ *Automatizable*
+- [ ] Logging adecuado ✅ *Automatizable*
+- [ ] Documentación actualizada ✅ *Automatizable*
+
+> **Nota:** CI con tests automatizados es un objetivo futuro. Por ahora, verificar tests manualmente con `npm test`.
 
 ---
 
@@ -958,6 +962,7 @@ El feature se considera **cerrado** cuando:
 - [ ] UI completa (loading/error/empty/permisos) y consistente
 - [ ] Tablas usan tipos semánticos
 - [ ] Badges usan variantes semánticas
+- [ ] Elementos interactivos tienen `data-testid`
 
 **Quality Gates (Enterprise):**
 - [ ] Tests mínimos implementados para lógica de negocio
