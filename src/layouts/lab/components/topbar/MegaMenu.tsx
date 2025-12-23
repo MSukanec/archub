@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   CONTEXT_BUTTONS, 
   ORGANIZATION_NAVIGATION, 
@@ -436,6 +437,7 @@ export function TabsMegaMenu({ tabs, activeTab, onTabChange }: TabsMegaMenuProps
 export function UserAvatarMenu() {
   const [, navigate] = useLocation();
   const { data: userData } = useCurrentUser();
+  const [avatarPopoverOpen, setAvatarPopoverOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -447,8 +449,8 @@ export function UserAvatarMenu() {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <Popover open={avatarPopoverOpen} onOpenChange={setAvatarPopoverOpen}>
+      <PopoverTrigger asChild>
         <button
           className="group relative cursor-pointer transition-all duration-200 hover:scale-105 h-full flex items-center px-4"
           data-testid="button-user-menu"
@@ -461,62 +463,76 @@ export function UserAvatarMenu() {
             </AvatarFallback>
           </Avatar>
         </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
+      </PopoverTrigger>
+      <PopoverContent 
         side="bottom" 
         align="end"
-        className="w-[200px]"
+        className="w-[200px] p-2"
         sideOffset={8}
       >
-        <DropdownMenuItem
-          onClick={() => navigate('/user')}
-          className="flex items-center gap-2 text-sm cursor-pointer"
-          data-testid="button-profile"
-        >
-          <User className="h-4 w-4" />
-          Mi Perfil
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-sm cursor-pointer"
-          data-testid="button-home"
-        >
-          <Home className="h-4 w-4" />
-          Página de Inicio
-        </DropdownMenuItem>
+        <div className="flex flex-col gap-1">
+          <button
+            onClick={() => {
+              navigate('/user');
+              setAvatarPopoverOpen(false);
+            }}
+            className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
+            data-testid="button-profile"
+          >
+            <User className="h-4 w-4" />
+            <span>Mi Perfil</span>
+          </button>
+          
+          <div className="h-px bg-border my-1" />
+          
+          <button
+            onClick={() => {
+              navigate('/');
+              setAvatarPopoverOpen(false);
+            }}
+            className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
+            data-testid="button-home"
+          >
+            <Home className="h-4 w-4" />
+            <span>Página de Inicio</span>
+          </button>
 
-        <DropdownMenuItem
-          onClick={() => navigate('/contact')}
-          className="flex items-center gap-2 text-sm cursor-pointer"
-          data-testid="button-contact"
-        >
-          <Mail className="h-4 w-4" />
-          Contacto
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem
-          onClick={() => navigate('/select-mode')}
-          className="flex items-center gap-2 text-sm cursor-pointer"
-          data-testid="button-change-mode"
-        >
-          <Settings className="h-4 w-4" />
-          Cambiar Modo
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem
-          onClick={handleLogout}
-          className="flex items-center gap-2 text-sm cursor-pointer text-foreground hover:text-red-600 dark:hover:text-red-500"
-          data-testid="button-logout"
-        >
-          <LogOut className="h-4 w-4" />
-          Cerrar Sesión
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <button
+            onClick={() => {
+              navigate('/contact');
+              setAvatarPopoverOpen(false);
+            }}
+            className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
+            data-testid="button-contact"
+          >
+            <Mail className="h-4 w-4" />
+            <span>Contacto</span>
+          </button>
+          
+          <div className="h-px bg-border my-1" />
+          
+          <button
+            onClick={() => {
+              navigate('/select-mode');
+              setAvatarPopoverOpen(false);
+            }}
+            className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
+            data-testid="button-change-mode"
+          >
+            <Settings className="h-4 w-4" />
+            <span>Cambiar Modo</span>
+          </button>
+          
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left text-foreground hover:text-red-600 dark:hover:text-red-500"
+            data-testid="button-logout"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
