@@ -395,79 +395,104 @@ VIEW (Contenido)       → Tablas, KPIs, gráficos, formularios
 
 ### 5. AUDITORÍA DE FORMULARIOS (FORMS)
 
-**IMPORTANTE:** FORMS es AGNÓSTICO y REUTILIZABLE. Puede usarse tanto en MODALES (DashboardLayout) como en DRAWERS (LabLayout).
+**REGLA CRÍTICA:** 
+- **CADA FORM tiene su MODAL correspondiente** (1:1)
+- El FORM es **agnóstico** (puede usarse en modal, drawer, o página)
+- El MODAL es el **envase** que abre el usuario
 
-**Arquitectura esperada:**
+**Nomenclatura OBLIGATORIA:**
+| Tipo | Ubicación | Nombre | Contenido |
+|------|-----------|--------|-----------|
+| **Form** | `forms/` | `*Form.tsx` | FormPanel + ViewPanel + useFeatureForm hook |
+| **Modal** | `modals/` | `*Modal.tsx` | ModalLayout + consume el Form |
+
+**Ejemplo correcto (PROJECTS):**
 ```
-forms/
-├── FeatureFormFields.tsx    → Campos del formulario (CEREBRO, agnóstico)
+src/features/projects/
+├── forms/
+│   ├── ProjectForm.tsx           ← FormPanel, ViewPanel, useProjectForm
+│   ├── ProjectModalityForm.tsx   ← FormPanel, ViewPanel, useProjectModalityForm
+│   └── ProjectTypeForm.tsx       ← FormPanel, ViewPanel, useProjectTypeForm
+├── modals/
+│   ├── ProjectModal.tsx          ← Solo ModalLayout, usa ProjectForm
+│   ├── ProjectModalityModal.tsx  ← Solo ModalLayout, usa ProjectModalityForm
+│   └── ProjectTypeModal.tsx      ← Solo ModalLayout, usa ProjectTypeForm
 ```
 
-**Checklist de FormFields:**
-- [ ] ¿Archivo está en `src/features/{feature}/forms/` (NO en modals/)?
-- [ ] ¿Contiene `react-hook-form` con `zodResolver`?
-- [ ] ¿Contiene todos los hooks de datos (`useQuery`, `useMutation`)?
-- [ ] ¿Acepta props `hideActions` y `formRef` para control externo?
-- [ ] ¿NO importa componentes de modal O drawer (`ModalLayout`, `DrawerLayout`, etc.)?
-- [ ] ¿Usa `ref={formRef}` en el `<form>`?
-- [ ] ¿Condiciona botones con `{!hideActions && ...}`?
-- [ ] ¿El archivo es AGNÓSTICO y puede reutilizarse en múltiples contextos?
-
-**Interface de Props estándar:**
+**Estructura del Form (`*Form.tsx`):**
 ```typescript
-export interface FeatureFormFieldsProps {
-  // IDs de contexto
-  projectId?: string;
-  organizationId?: string;
-  itemId?: string;
+// 1. ViewPanel - Vista de solo lectura
+export function ViewPanel({ data }: { data: Feature }) { ... }
 
-  // Modo de operación
-  mode: 'create' | 'edit' | 'view';
+// 2. FormPanel - Campos del formulario (UI pura)
+export function FormPanel({ form, onSubmit, ...props }) { ... }
 
-  // Callbacks
-  onSuccess: () => void;
-  onCancel: () => void;
-
-  // Control externo (para uso en modales/drawers con footer propio)
-  hideActions?: boolean;  // Default: false - oculta botones internos
-  formRef?: React.RefObject<HTMLFormElement>;  // Para submit externo
+// 3. useFeatureForm - Hook de orquestación con callbacks
+export function useFeatureForm(options: UseFeatureFormOptions) {
+  // Estado: isSubmitting, etc.
+  // Mutations con callbacks
+  // Retorna: { form, onSubmit, reset, isSubmitting, ... }
 }
+
+// 4. Tipos exportados
+export type { Feature, FeatureFormData };
 ```
+
+**Checklist de Form:**
+- [ ] ¿Archivo termina en `*Form.tsx` (NO `*FormFields.tsx`)?
+- [ ] ¿Está en `src/features/{feature}/forms/`?
+- [ ] ¿Exporta `FormPanel`, `ViewPanel`, `useFeatureForm`?
+- [ ] ¿El hook acepta `callbacks` para UX (toasts manejados por el modal)?
+- [ ] ¿NO importa componentes de modal (`ModalLayout`, `ModalHeader`, etc.)?
+- [ ] ¿El hook retorna estado neutral (`isSubmitting`, `isUploading`)?
+- [ ] ¿Es AGNÓSTICO y reutilizable en múltiples contextos?
 
 ---
 
 ### 6. AUDITORÍA DE MODALES
 
-**Arquitectura esperada:**
-```
-modals/
-├── FeatureModal.tsx         → Contenedor del modal (ENVASE)
-                               Usa el FORM de src/features/{feature}/forms/
-```
+**REGLA:** El Modal es un ENVASE puro. Solo maneja:
+- ModalLayout, ModalHeader, ModalBody, ModalFooter
+- Toasts (UX específica del modal)
+- Lógica de cierre
 
-**Estructura del Modal:**
-```
-┌─────────────────────────────────┐
-│  HEADER (fijo)                  │  ← ModalHeader via headerContent prop
-├─────────────────────────────────┤
-│                                 │
-│  BODY (scrollable)              │  ← ModalBody como children
-│                                 │
-├─────────────────────────────────┤
-│  FOOTER (fijo)                  │  ← ModalFooter via footerContent prop
-└─────────────────────────────────┘
+**Estructura del Modal (`*Modal.tsx`):**
+```typescript
+import { FormPanel, ViewPanel, useFeatureForm } from '../forms/FeatureForm';
+
+export function FeatureModal({ modalData, onClose, mode }) {
+  const { toast } = useToast();
+  
+  // 1. Consume el hook del Form
+  const { form, onSubmit, reset, isSubmitting } = useFeatureForm({
+    feature: modalData?.feature,
+    mode,
+    onSuccess: () => { reset(); onClose(); },
+    callbacks: {
+      onSuccess: (m) => toast({ title: m === 'edit' ? 'Actualizado' : 'Creado' }),
+      onError: (e) => toast({ title: 'Error', variant: 'destructive' }),
+    },
+  });
+
+  // 2. Renderiza el envase con el Form adentro
+  return (
+    <ModalLayout onClose={onClose}>
+      <ModalHeader title="..." icon={...} />
+      <ModalBody>
+        {mode === 'view' ? <ViewPanel data={...} /> : <FormPanel form={form} onSubmit={onSubmit} />}
+      </ModalBody>
+      <ModalFooter onSubmit={form.handleSubmit(onSubmit)} isSubmitting={isSubmitting} />
+    </ModalLayout>
+  );
+}
 ```
 
 **Checklist de Modal (Envase):**
-- [ ] ¿Archivo está en `src/features/{feature}/modals/`?
-- [ ] ¿Envuelve el FormFields del feature (CEREBRO)?
-- [ ] ¿Usa `headerContent` prop para ModalHeader?
-- [ ] ¿Usa `footerContent` prop para ModalFooter (footer fijo)?
-- [ ] ¿ModalBody va como children de ModalLayout?
-- [ ] ¿Pasa `hideActions={true}` al FormFields?
-- [ ] ¿Usa `formRef.current.requestSubmit()` para submit?
-
-**Checklist de registro:**
+- [ ] ¿Archivo termina en `*Modal.tsx`?
+- [ ] ¿Está en `src/features/{feature}/modals/`?
+- [ ] ¿Importa FormPanel, ViewPanel, useFeatureForm del Form correspondiente?
+- [ ] ¿Maneja los toasts via callbacks del hook?
+- [ ] ¿NO tiene lógica de mutations directa (eso está en el Form)?
 - [ ] ¿Registrado en `registerModals.ts`?
 - [ ] ¿Exportado en `index.ts` del feature?
 

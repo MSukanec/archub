@@ -233,17 +233,14 @@ COMPONENTES QUE QUEDARON EN projects/components/ (correctos):
 ```
 Solución implementada con arquitectura de callbacks:
 
-TIER 1 - Form Core (ProjectFormFields.tsx):
-  - FormPanel: Componente de presentación puro (solo renderiza campos)
+TIER 1 - Form Agnóstico (forms/ProjectForm.tsx):
+  - FormPanel: Componente de campos del formulario (UI pura)
   - ViewPanel: Componente de vista solo lectura
   - useProjectForm: Hook de orquestación con callbacks opcionales
-  - projectSchema: Schema Zod para validación
-  - ProjectFormData, Project: Tipos TypeScript
 
-TIER 2 - Experience Wrapper (modals/ProjectModal.tsx):
+TIER 2 - Modal Envase (modals/ProjectModal.tsx):
   - Wrapper modal que consume useProjectForm
-  - Maneja todos los toasts (UX específica del modal)
-  - Bloquea cierre durante upload de imagen
+  - Maneja todos los toasts via callbacks
   - Layout con ModalLayout/ModalHeader/ModalFooter
 
 Callbacks disponibles en useProjectForm:
@@ -253,39 +250,30 @@ Callbacks disponibles en useProjectForm:
   - onSubmitSuccess(mode: 'create' | 'edit')
   - onSubmitError(error)
 
-Estado neutral retornado:
-  - isSubmitting: boolean (para loading del botón)
-  - isUploadingImage: boolean (para bloquear cierre)
-
 Esta arquitectura permite reutilizar FormPanel/ViewPanel/useProjectForm
 en drawers, páginas u otros contextos con diferentes UX.
 ```
 
-### Issue #5: Separación forms/modals incorrecta ✅ RESUELTO
+### Issue #5: Separación forms/modals COMPLETA ✅ RESUELTO
 ```
-Problema: Todos los modales estaban en forms/ con nombre *Form.tsx
+PROBLEMA ORIGINAL: Todo mezclado en forms/ con nombres inconsistentes
 
-ESTRUCTURA ANTES (mal):
+ESTRUCTURA FINAL CORRECTA:
   src/features/projects/forms/
-    ├── ProjectForm.tsx           ← ERA UN MODAL
-    ├── ProjectFormFields.tsx     ← CORRECTO
-    ├── ProjectModalityForm.tsx   ← ERA UN MODAL
-    └── ProjectTypeForm.tsx       ← ERA UN MODAL
-
-ESTRUCTURA DESPUÉS (correcto):
-  src/features/projects/forms/
-    └── ProjectFormFields.tsx     ← Único form agnóstico
+    ├── ProjectForm.tsx           ← FormPanel + ViewPanel + useProjectForm
+    ├── ProjectModalityForm.tsx   ← FormPanel + ViewPanel + useProjectModalityForm
+    └── ProjectTypeForm.tsx       ← FormPanel + ViewPanel + useProjectTypeForm
 
   src/features/projects/modals/
-    ├── ProjectModal.tsx          ← Renombrado y movido
-    ├── ProjectModalityModal.tsx  ← Renombrado y movido
-    └── ProjectTypeModal.tsx      ← Renombrado y movido
+    ├── ProjectModal.tsx          ← Envase: ModalLayout + consume ProjectForm
+    ├── ProjectModalityModal.tsx  ← Envase: ModalLayout + consume ProjectModalityForm
+    └── ProjectTypeModal.tsx      ← Envase: ModalLayout + consume ProjectTypeForm
 
-IMPORTS ACTUALIZADOS:
-  - src/components/modal/factory/registerModals.ts
-  - src/features/projects/index.ts (barrel exports)
+PATRÓN APLICADO (ver FEATURE-AUDIT.md sección 5 y 6):
+  - FORM (*Form.tsx): Agnóstico, exporta FormPanel + ViewPanel + useFeatureForm hook
+  - MODAL (*Modal.tsx): Envase puro, solo ModalLayout + toasts via callbacks
 
-REGLA: forms/ contiene *FormFields.tsx (agnósticos), modals/ contiene *Modal.tsx (envases)
+REGLA: Cada Form tiene su Modal correspondiente (1:1)
 ```
 
 ### Issue #3: Faltan data-testid ✅ RESUELTO
@@ -317,11 +305,13 @@ NOTA: Los filtros y búsqueda son manejados por ActionBarMobile (componente comp
 - [x] ProjectRow ya acepta data-testid como prop
 - [ ] FUTURO: Agregar data-testid a ActionBarMobile (componente compartido, fuera de scope)
 
-### Fase 2: Refactorización Form (2h) ✅ COMPLETADO
-- [x] Crear ProjectFormFields.tsx (solo campos, sin modal)
-- [x] Refactorizar ProjectForm.tsx como wrapper modal
-- [x] useProjectForm hook exportado para uso externo
-- [x] FormPanel y ViewPanel reutilizables
+### Fase 2: Refactorización Form/Modal (2h) ✅ COMPLETADO
+- [x] ProjectForm.tsx en forms/ con FormPanel + ViewPanel + useProjectForm
+- [x] ProjectModal.tsx en modals/ como envase que consume ProjectForm
+- [x] ProjectModalityForm.tsx + ProjectModalityModal.tsx (separados)
+- [x] ProjectTypeForm.tsx + ProjectTypeModal.tsx (separados)
+- [x] Todos los modales registrados en registerModals.ts
+- [x] FEATURE-AUDIT.md actualizado con reglas claras
 
 ### Fase 3: Validación
 - [ ] Test manual de flujos CREATE/EDIT/VIEW
