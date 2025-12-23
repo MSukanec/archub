@@ -123,9 +123,9 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
         : {}),
       accessibility_notes: accessibilityNotes
     },
-    saveFn: (data) => saveProjectLocationMutation.mutateAsync(data),
+    saveFn: async (data) => { await saveProjectLocationMutation.mutateAsync(data); },
     delay: 3000,
-    enabled: !!userData && isHydrated
+    enabled: !!userData && !!activeProjectId
   });
 
   // Reset hydration when project changes

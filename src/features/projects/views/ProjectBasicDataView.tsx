@@ -134,18 +134,18 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       
       // Upload image to storage
       const uploadResult = await uploadProjectImage(compressedFile, activeProjectId, organizationId);
-      return uploadResult.file_url;
+      return uploadResult; // Return full result object with file_path and file_url
     },
-    onSuccess: (data) => {
+    onSuccess: (uploadResult) => {
       // ⚡ OPTIMISTIC UPDATE: Update project-data cache AND image URL query cache
       queryClient.setQueryData(['project-data', activeProjectId], (oldData: any) => ({
         ...oldData,
-        image_bucket: 'social-assets', // hardcoded in uploadProjectImage function
-        image_path: data.file_path,
+        image_bucket: 'social-assets',
+        image_path: uploadResult.file_path,
       }));
 
       // ⚡ Also update the image URL query cache directly
-      queryClient.setQueryData(['project-image-url', activeProjectId, 'social-assets', data.file_path], data.file_url);
+      queryClient.setQueryData(['project-image-url', activeProjectId, 'social-assets', uploadResult.file_path], uploadResult.file_url);
 
       toast({
         title: "Éxito",
@@ -294,7 +294,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     }
   });
 
-  // Auto-save hook - SAME PATTERN AS ProfileBasicData
+  // Auto-save hook - EXACTLY like ProfileBasicData (NO isHydrated - hook handles initial load internally)
   const { isSaving } = useAutoSave({
     data: {
       name: projectName,
@@ -307,7 +307,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     },
     saveFn: async (data) => { await saveProjectDataMutation.mutateAsync(data); },
     delay: 3000,
-    enabled: !!userData && !!activeProjectId && isHydrated
+    enabled: !!userData && !!activeProjectId
   });
 
   // UNIFIED hydration effect - loads ALL data at once, then marks as hydrated
