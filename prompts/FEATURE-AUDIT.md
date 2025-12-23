@@ -1,7 +1,33 @@
 # FEATURE AUDIT - Prompt Oficial de Auditoría de Seencel
 
-> Este es el prompt de auditoría 360° oficial para cerrar features de Seencel.
-> Combina los estándares de arquitectura, páginas, modales, drawers, uploads, y más.
+> Este es el **ÚNICO archivo de referencia** para auditorías 360° de features de Seencel.
+> Consolida arquitectura, páginas, modales, drawers, uploads, refactorización, y más.
+
+---
+
+## TABLA DE CONTENIDOS
+
+1. [Objetivo](#objetivo)
+2. [Cómo Usar Este Prompt](#cómo-usar-este-prompt)
+3. [Reglas de Seguridad](#reglas-de-seguridad-crítico)
+4. [Contexto Técnico](#contexto-técnico-asumido)
+5. [Auditoría Completa](#auditoría-completa-no-saltear-nada)
+   - 5.1 [Mapa del Feature](#1-mapa-del-feature)
+   - 5.2 [Arquitectura de Features](#2-auditoría-de-arquitectura-de-features)
+   - 5.3 [Ubicación y Duplicados](#3-auditoría-de-ubicación-de-archivos-y-duplicados-crítico)
+   - 5.4 [Páginas (3 Capas)](#4-auditoría-de-páginas-3-capas)
+   - 5.5 [Formularios (Forms)](#5-auditoría-de-formularios-forms)
+   - 5.6 [Modales](#6-auditoría-de-modales)
+   - 5.7 [Drawers](#7-auditoría-de-drawers)
+   - 5.8 [Uploads/Storage](#8-auditoría-de-uploadsstorage)
+   - 5.9 [Delete/Replace Pattern](#9-auditoría-de-deletereplace-pattern)
+   - 5.10 [Base de Datos](#10-auditoría-de-base-de-datos-supabase)
+   - 5.11 [Frontend](#11-auditoría-de-frontend)
+   - 5.12 [Calidad/Robustez](#12-auditoría-de-calidad--robustez)
+   - 5.13 [Refactorización (Tablas, Badges, Headers)](#13-auditoría-de-refactorización-tablas-badges-headers)
+6. [Entregables Obligatorios](#entregables-obligatorios)
+7. [Condición Final](#condición-final-cerrado)
+8. [Reglas para Prompts Externos](#reglas-para-prompts-externos-gpt-otras-ias)
 
 ---
 
@@ -57,14 +83,20 @@ Tablas de Supabase:
 - **Backend**: Express.js (NO serverless, NO /api/)
 - **Base de datos**: Supabase (Postgres + Views + RLS + Functions/Triggers + Storage)
 
-### Referencias de Arquitectura
-- `prompts/00-Architecture.md` - Arquitectura base de features
-- `prompts/01-Pages.md` - Estándar de páginas (arquitectura 3 capas: PAGE → LAYOUT → VIEW)
-- `prompts/02-Modals.md` - Estándar de modales con formularios
-- `prompts/03-Drawers.md` - Estándar de drawers
-- `prompts/03-Uploads.md` - Sistema de storage y uploads
-- `prompts/04-Replacement.md` - Patrón Delete/Replace
-- `prompts/tables/{feature}.md` - Documentación de tablas específicas
+### Arquitectura Base del Front
+
+```
+src/
+  features/          ← Módulos de negocio
+  pages/             ← Páginas finales que ve el usuario
+  components/        ← Componentes globales reutilizables
+  hooks/             ← Hooks globales reutilizables (solo compartidos entre 3+ features)
+  stores/            ← Zustand stores globales
+  lib/               ← Librerías y configuraciones (supabase, queryClient, etc.)
+  styles/            ← Estilos globales
+  App.tsx            ← Router principal
+  main.tsx           ← Entry point
+```
 
 ---
 
@@ -86,8 +118,8 @@ Tablas de Supabase:
 ├── src/features/{feature}/
 │   ├── services/        ← Funciones puras async de Supabase
 │   ├── hooks/           ← React hooks con useQuery/useMutation
-│   ├── forms/           ← FormFields agnósticos (REUTILIZABLES en modales, drawers, etc.)
-│   │   ├── FeatureFormFields.tsx
+│   ├── forms/           ← FormFields agnósticos (REUTILIZABLES en modales, drawers, páginas)
+│   │   └── FeatureFormFields.tsx
 │   ├── components/      ← Componentes específicos del feature
 │   │   ├── FeatureDetailContent.tsx  (si aplica, contenido agnóstico para drawers)
 │   │   └── ...
@@ -101,18 +133,19 @@ Tablas de Supabase:
 │   ├── constants/       ← Enums, configuraciones
 │   ├── types/           ← Tipos TypeScript
 │   ├── schemas/         ← Validaciones Zod
+│   ├── mappers/         ← Transformaciones de datos
+│   ├── utils/           ← Funciones de utilidad puras
+│   ├── tests/           ← Tests (.gitkeep si vacía)
 │   └── index.ts         ← Barrel exports
 ├── src/pages/{feature}/ ← Páginas (orquestadores)
 └── prompts/tables/{feature}.md ← Documentación de tablas
 ```
 
-**Nota importante:** `forms/` es SEPARADO y AGNÓSTICO. Tanto MODALS como DRAWERS pueden usar el mismo FORM.
+**IMPORTANTE:** `forms/` es SEPARADO y AGNÓSTICO. Tanto MODALS como DRAWERS pueden usar el mismo FORM.
 
 ---
 
 ### 2. AUDITORÍA DE ARQUITECTURA DE FEATURES
-
-**Referencia:** `prompts/00-Architecture.md`
 
 **Checklist de estructura:**
 - [ ] ¿Carpeta `services/` existe con funciones puras async?
@@ -122,8 +155,9 @@ Tablas de Supabase:
 - [ ] ¿Carpeta `schemas/` tiene validaciones Zod?
 - [ ] ¿Carpeta `constants/` tiene enums y configuraciones?
 - [ ] ¿Carpeta `components/` tiene componentes específicos del feature?
-- [ ] ¿Carpeta `modals/` existe si hay modales? (contenedores ENVASE para DashboardLayout)
-- [ ] ¿Carpeta `drawers/` existe si hay drawers? (contenedores ENVASE para LabLayout, OPCIONAL)
+- [ ] ¿Carpeta `modals/` existe si hay modales? (contenedores ENVASE)
+- [ ] ¿Carpeta `drawers/` existe si hay drawers? (contenedores ENVASE, OPCIONAL)
+- [ ] ¿Carpeta `mappers/` existe si hay transformaciones de datos?
 - [ ] ¿`index.ts` exporta todo lo necesario?
 
 **Checklist de calidad:**
@@ -138,23 +172,86 @@ Tablas de Supabase:
 - [ ] ¿NO hay hooks de React en services?
 - [ ] ¿NO hay tipos/constantes duplicados?
 
+#### Services (Crítico)
+
+**¿Qué van en `services/`?** TODA la lógica de comunicación con Supabase.
+
+**Reglas:**
+- Son **funciones puras async/await**
+- NO usan hooks de React (`useState`, `useEffect`, `useQuery`, etc.)
+- Solo importan: `supabase`, `date-fns`, tipos
+- Reciben parámetros y retornan datos
+- Manejan errores con `try/catch` o lanzando excepciones
+
+**Ejemplo de service correcto:**
+```typescript
+// features/sitelog/services/getSiteLogs.ts
+import { supabase } from '@/lib/supabase';
+import type { SiteLog } from '../types';
+
+/**
+ * Obtiene todas las bitácoras de un proyecto.
+ * @param projectId - ID del proyecto
+ * @param organizationId - ID de la organización
+ * @returns Array de site logs o array vacío
+ * @throws {Error} Si falla la query principal
+ */
+export async function getSiteLogs(
+  projectId: string, 
+  organizationId: string
+): Promise<SiteLog[]> {
+  const { data, error } = await supabase
+    .from('site_logs')
+    .select('*')
+    .eq('project_id', projectId)
+    .eq('organization_id', organizationId);
+
+  if (error) throw error;
+  return data || [];
+}
+```
+
+**Error Handling en Services:**
+1. **Queries principales (datos críticos)** → `throw error`
+2. **Queries de relaciones (datos secundarios)** → `console.error()` y continuar
+3. **Datos faltantes** → retornar arrays vacíos `[]`
+
+#### Hooks (React Query)
+
+**¿Qué van en `hooks/`?** Hooks de React que usan React Query para llamar a services.
+
+**Reglas:**
+- Usan `useQuery`, `useMutation`, `useQueryClient`
+- Llaman a **services** para obtener datos
+- NO tienen lógica de Supabase directa
+- Manejan loading, error, y estados de React
+
+**Ejemplo de hook correcto:**
+```typescript
+// features/sitelog/hooks/use-site-logs.ts
+import { useQuery } from '@tanstack/react-query';
+import { getSiteLogs } from '../services/getSiteLogs';
+
+export function useSiteLogs(projectId: string | undefined, organizationId: string | undefined) {
+  return useQuery({
+    queryKey: ['site-logs', projectId, organizationId],
+    queryFn: () => getSiteLogs(projectId!, organizationId!),
+    enabled: !!projectId && !!organizationId
+  });
+}
+```
+
+**Regla de oro:** Si ves `supabase.from()` dentro de un hook, **está MAL**. Debe estar en un service.
+
 ---
 
 ### 3. AUDITORÍA DE UBICACIÓN DE ARCHIVOS Y DUPLICADOS (CRÍTICO)
 
 **Objetivo:** Asegurar que TODOS los archivos estén en su lugar correcto y NO existan duplicados.
 
-Esta auditoría es **fundamental** para mantener el codebase limpio y evitar confusión.
-
 #### 3.1 Archivos que NO pertenecen al feature
 
 **Problema común:** Encontrar carpetas/archivos de OTROS features dentro del feature auditado.
-
-**Ejemplos reales detectados:**
-- `src/features/projects/components/admin/` ← Pertenece a `src/features/admin/`
-- `src/features/projects/components/gantt/` ← Pertenece a `src/features/gantt/` (o legacy)
-- `src/features/projects/components/TaskRow.tsx` ← Pertenece a `src/features/tasks/`
-- `src/features/projects/components/AnalysisTaskRow.tsx` ← Pertenece a `src/features/analysis/`
 
 **Checklist:**
 - [ ] ¿TODOS los archivos en `components/` son específicos de ESTE feature?
@@ -165,111 +262,40 @@ Esta auditoría es **fundamental** para mantener el codebase limpio y evitar con
 1. Si el feature destino YA EXISTE → Mover al feature correcto
 2. Si el feature destino NO EXISTE → Mover a `src/features/legacy/`
 
-**Regla de Legacy:**
-```
-src/features/legacy/
-├── components/     ← Componentes sin feature definido aún
-├── hooks/          ← Hooks sin feature definido aún
-├── services/       ← Services sin feature definido aún
-└── README.md       ← Documentar qué hay y por qué está ahí
-```
-
 #### 3.2 Hooks duplicados entre feature y carpetas globales
-
-**Problema:** Tener hooks en `src/hooks/` que ya fueron migrados a `src/features/{feature}/hooks/`.
 
 **Verificar cruzado obligatorio:**
 
 | Archivo en Feature | Verificar que NO exista en |
 |--------------------|---------------------------|
 | `src/features/{feature}/hooks/useX.ts` | `src/hooks/useX.ts` |
-| `src/features/{feature}/hooks/use{Feature}Y.ts` | `src/hooks/use{Feature}Y.ts` |
 
 **Checklist:**
 - [ ] ¿Listar TODOS los hooks en `src/features/{feature}/hooks/`?
 - [ ] ¿Para CADA hook, verificar que NO existe duplicado en `src/hooks/`?
-- [ ] ¿Si existe duplicado, determinar cuál es el correcto y eliminar el otro?
 - [ ] ¿Los imports en todo el proyecto apuntan al hook del feature (no al global)?
 
-**Acción para hooks duplicados:**
-1. Verificar cuál es el hook "oficial" (generalmente el del feature)
-2. Buscar todos los imports del hook duplicado
-3. Actualizar imports para usar el del feature
-4. Eliminar el hook global duplicado
+#### 3.3 Services duplicados
 
-#### 3.3 Services duplicados entre feature y carpetas globales
-
-**Problema:** Tener services en `src/services/` que ya fueron migrados a `src/features/{feature}/services/`.
-
-**Verificar cruzado obligatorio:**
-
-| Archivo en Feature | Verificar que NO exista en |
-|--------------------|---------------------------|
-| `src/features/{feature}/services/featureService.ts` | `src/services/featureService.ts` |
-
-**Checklist:**
+**Verificar:**
 - [ ] ¿Listar TODOS los services en `src/features/{feature}/services/`?
 - [ ] ¿Para CADA service, verificar que NO existe duplicado en `src/services/`?
-- [ ] ¿Si existe duplicado, determinar cuál es el correcto y eliminar el otro?
 
-#### 3.4 Types duplicados entre feature y carpetas globales
+#### 3.4 Types duplicados
 
-**Problema:** Tener types en `src/types/` que ya fueron migrados a `src/features/{feature}/types/`.
-
-**Checklist:**
-- [ ] ¿Listar TODOS los types en `src/features/{feature}/types/`?
-- [ ] ¿Para CADA type, verificar que NO existe duplicado en `src/types/`?
-- [ ] ¿Los types en `src/types/` son SOLO types compartidos entre MÚLTIPLES features?
-
-**Regla de types globales:**
+**Regla:**
 - `src/types/` → SOLO types usados por 3+ features (ej: `User`, `Organization`)
 - `src/features/{feature}/types/` → Types específicos del feature
 
 #### 3.5 Stores duplicados
 
-**Problema:** Tener stores en múltiples lugares.
-
 **Verificar:**
 - [ ] ¿El store del feature está en `src/stores/{feature}Store.ts`?
 - [ ] ¿NO hay un store duplicado en `src/features/{feature}/stores/`?
-- [ ] ¿Los imports apuntan todos al mismo lugar?
-
-#### 3.6 Componentes duplicados
-
-**Problema:** Componentes que existen tanto en `src/components/` como en el feature.
-
-**Verificar:**
-- [ ] ¿Los componentes en `src/features/{feature}/components/` son ESPECÍFICOS del feature?
-- [ ] ¿NO hay duplicados en `src/components/` o `src/components/shared/`?
-- [ ] ¿Los componentes compartidos están en el lugar correcto (`src/components/shared/`)?
-
----
-
-**Output esperado para esta sección:**
-
-```markdown
-### Archivos Fuera de Lugar
-| Archivo Actual | Destino Correcto | Acción |
-|----------------|------------------|--------|
-| `src/features/projects/components/admin/` | `src/features/admin/components/` | MOVER |
-| `src/features/projects/components/TaskRow.tsx` | `src/features/legacy/components/` | MOVER (feature tasks no existe) |
-
-### Duplicados Detectados
-| Ubicación 1 | Ubicación 2 | Acción |
-|-------------|-------------|--------|
-| `src/features/projects/hooks/useProjects.ts` | `src/hooks/useProjects.ts` | ELIMINAR global, MANTENER en feature |
-
-### Imports a Actualizar
-| Archivo | Import Actual | Import Correcto |
-|---------|---------------|-----------------|
-| `src/pages/projects/Projects.tsx` | `@/hooks/useProjects` | `@/features/projects/hooks/useProjects` |
-```
 
 ---
 
 ### 4. AUDITORÍA DE PÁGINAS (3 CAPAS)
-
-**Referencia:** `prompts/01-Pages.md` (Arquitectura 3 Capas: PAGE → LAYOUT → VIEW)
 
 **Arquitectura esperada:**
 ```
@@ -306,8 +332,6 @@ VIEW (Contenido)       → Tablas, KPIs, gráficos, formularios
 
 ### 5. AUDITORÍA DE FORMULARIOS (FORMS)
 
-**Referencia:** `prompts/02-Modals.md` + `prompts/03-Drawers.md`
-
 **IMPORTANTE:** FORMS es AGNÓSTICO y REUTILIZABLE. Puede usarse tanto en MODALES (DashboardLayout) como en DRAWERS (LabLayout).
 
 **Arquitectura esperada:**
@@ -326,17 +350,49 @@ forms/
 - [ ] ¿Condiciona botones con `{!hideActions && ...}`?
 - [ ] ¿El archivo es AGNÓSTICO y puede reutilizarse en múltiples contextos?
 
+**Interface de Props estándar:**
+```typescript
+export interface FeatureFormFieldsProps {
+  // IDs de contexto
+  projectId?: string;
+  organizationId?: string;
+  itemId?: string;
+
+  // Modo de operación
+  mode: 'create' | 'edit' | 'view';
+
+  // Callbacks
+  onSuccess: () => void;
+  onCancel: () => void;
+
+  // Control externo (para uso en modales/drawers con footer propio)
+  hideActions?: boolean;  // Default: false - oculta botones internos
+  formRef?: React.RefObject<HTMLFormElement>;  // Para submit externo
+}
+```
+
 ---
 
 ### 6. AUDITORÍA DE MODALES
-
-**Referencia:** `prompts/02-Modals.md`
 
 **Arquitectura esperada:**
 ```
 modals/
 ├── FeatureModal.tsx         → Contenedor del modal (ENVASE)
                                Usa el FORM de src/features/{feature}/forms/
+```
+
+**Estructura del Modal:**
+```
+┌─────────────────────────────────┐
+│  HEADER (fijo)                  │  ← ModalHeader via headerContent prop
+├─────────────────────────────────┤
+│                                 │
+│  BODY (scrollable)              │  ← ModalBody como children
+│                                 │
+├─────────────────────────────────┤
+│  FOOTER (fijo)                  │  ← ModalFooter via footerContent prop
+└─────────────────────────────────┘
 ```
 
 **Checklist de Modal (Envase):**
@@ -352,11 +408,18 @@ modals/
 - [ ] ¿Registrado en `registerModals.ts`?
 - [ ] ¿Exportado en `index.ts` del feature?
 
+**Tamaños de Modal:**
+| Size | Ancho |
+|------|-------|
+| `sm` | 400px |
+| `md` | 550px |
+| `lg` | 750px (default) |
+| `xl` | 1000px |
+| `full` | 100% |
+
 ---
 
 ### 7. AUDITORÍA DE DRAWERS
-
-**Referencia:** `prompts/03-Drawers.md`
 
 **Arquitectura esperada:**
 ```
@@ -369,6 +432,19 @@ O también en components/:
 ├── FeatureDetailDrawer.tsx         → Contenedor del drawer (ENVASE)
 ```
 
+**Estructura del Drawer:**
+```
+┌─────────────────────────────────┐
+│  HEADER (fijo)                  │  ← DrawerHeader via headerContent prop
+├─────────────────────────────────┤
+│                                 │
+│  BODY (scrollable)              │  ← DrawerBody como children
+│                                 │
+├─────────────────────────────────┤
+│  FOOTER (fijo, opcional)        │  ← DrawerFooter via footerContent prop
+└─────────────────────────────────┘
+```
+
 **Checklist del Drawer (Envase):**
 - [ ] ¿Archivo está en `src/features/{feature}/drawers/` o `components/`?
 - [ ] ¿Envuelve el FormFields del feature (CEREBRO)?
@@ -379,11 +455,26 @@ O también en components/:
 - [ ] ¿Content NO importa `DrawerLayout`?
 - [ ] ¿Pasa `hideActions={true}` al FormFields?
 
+**Tamaños de Drawer:**
+| Size | Ancho |
+|------|-------|
+| `sm` | 400px |
+| `md` | 500px |
+| `lg` | 600px (default) |
+| `xl` | 800px |
+| `full` | 100% |
+
 ---
 
 ### 8. AUDITORÍA DE UPLOADS/STORAGE
 
-**Referencia:** `prompts/03-Uploads.md`
+**Arquitectura 3-Buckets:**
+
+| Bucket | Visibilidad | Propósito |
+|--------|------------|-----------|
+| **public-assets** | Público | Marketplace, branding, UI assets, avatares públicos |
+| **private-assets** | Privado | Documentos financieros, contratos, datos sensibles (org-scoped RLS) |
+| **social-assets** | Híbrido | Galerías de proyecto, fotos de bitácora (project-scoped RLS) |
 
 **Si el feature usa archivos/imágenes:**
 - [ ] ¿Usa `uploadFile()` de `@/lib/storage`?
@@ -392,19 +483,58 @@ O también en components/:
 - [ ] ¿Usa `created_by_member_id` (NO user.id)?
 - [ ] ¿Las categorías están en el constraint de PostgreSQL?
 
+**Presets de Compresión:**
+| Preset | Max Width | Quality | Use Case |
+|--------|-----------|---------|----------|
+| `avatar` | 512px | 90% | Avatares |
+| `course-cover` | 1920px | 90% | Covers de cursos |
+| `project-cover` | 1920px | 85% | Covers de proyectos |
+| `sitelog-photo` | 1280px | 80% | Fotos de bitácora |
+| `document` | 2048px | 85% | Documentos escaneados |
+| `default` | 1600px | 85% | Genérico |
+
 ---
 
 ### 9. AUDITORÍA DE DELETE/REPLACE PATTERN
 
-**Referencia:** `prompts/04-Replacement.md`
+**Arquitectura de 3 capas:**
 
-**Si el feature tiene eliminación de entidades con relaciones:**
+1. **MODAL (UI PURA):** `src/components/forms/DeleteConfirmationForm.tsx`
+   - Renderiza advertencias y consecuencias
+   - Muestra ComboBox si `mode === 'replace'`
+   - Llama callbacks (`onDelete`, `onReplace`)
+   - NO ejecuta mutaciones
+
+2. **FEATURE MUTATIONS (Lógica de DB):**
+   - `src/features/<feature>/services/deleteEntity.ts`
+   - `src/features/<feature>/services/replaceEntity.ts`
+   - `src/features/<feature>/hooks/use-delete-entity.ts`
+   - `src/features/<feature>/hooks/use-replace-entity.ts`
+
+3. **PAGE/COMPONENT (Orquestación):**
+   - Arma `consequences`, `mode`, `replacementOptions`
+   - Llama `openModal('delete-confirmation', {...})`
+
+**Checklist:**
 - [ ] ¿Existe `deleteEntity` service?
 - [ ] ¿Existe `replaceEntity` service (si tiene relaciones)?
 - [ ] ¿Los hooks reciben `organizationId` como parámetro?
 - [ ] ¿Los hooks invalidan AMBAS queries (entidad + relacionados)?
 - [ ] ¿El modal usa `DeleteConfirmationForm`?
 - [ ] ¿Se pasa `mode`, `consequences`, `replacementOptions` correctamente?
+
+**Cache Invalidation (CRÍTICO):**
+```typescript
+// ✅ CORRECTO - organizationId en ambos hooks
+const organizationId = userData?.organization?.id || null
+const deleteItem = useDeleteItem(organizationId)
+const replaceItem = useReplaceItem(organizationId)
+
+// Dentro del hook, invalidar con organizationId:
+queryClient.invalidateQueries({ 
+  queryKey: ['items', 'list', organizationId]  // ✅ CON ORG
+})
+```
 
 ---
 
@@ -453,8 +583,6 @@ O también en components/:
 - [ ] ¿Usa `var(--accent)` y CSS variables del theme?
 - [ ] ¿Indicadores financieros usan `text-chart-positive/negative/neutral`?
 
-**Output esperado:** "FE Findings" + "FE Fixes" (por archivo, con cambios propuestos)
-
 ---
 
 ### 12. AUDITORÍA DE CALIDAD / ROBUSTEZ
@@ -465,6 +593,98 @@ O también en components/:
 - [ ] ¿Concurrencia manejada? (updates que pisan datos, optimistic updates)
 - [ ] ¿Seguridad? (nunca confiar en frontend para reglas críticas)
 - [ ] ¿Autenticación usa `requireUser()` con userId correcto (NO auth.user.id)?
+
+---
+
+### 13. AUDITORÍA DE REFACTORIZACIÓN (Tablas, Badges, Headers)
+
+#### 13.1 Tablas (`Table`)
+
+**Componente a usar:** `src/components/shared/table` según `src/components/shared/table/AUDIT.md`.
+
+**Sistema de Anchos Semánticos:**
+| Tipo | Ancho | Uso |
+|------|-------|-----|
+| `date` | 110px | Fechas simples |
+| `datetime` | 150px | Fecha + hora |
+| `amount` | 120px | Montos monetarios |
+| `status` | 100px | Estados/badges pequeños |
+| `wallet` | 140px | Billeteras/cuentas |
+| `number` | 80px | Números simples |
+| `id` | 100px | Identificadores |
+| `actions` | 48px | Columna de acciones |
+| `name` | 200px | Nombres de entidades |
+| `email` | 200px | Emails |
+| `short-text` | 140px | Texto corto (DEFAULT) |
+| `medium-text` | 180px | Texto medio |
+| `long-text` | FLEXIBLE | Ocupa el ancho restante |
+| `badge` | 120px | Badges/etiquetas |
+| `avatar` | 48px | Avatares |
+| `checkbox` | 40px | Checkboxes |
+| `icon` | 40px | Iconos |
+
+**Reglas:**
+- [ ] Asignar un tipo semántico a TODAS las columnas
+- [ ] Solo UNA columna con `type: 'long-text'` por tabla (absorbe ancho restante)
+- [ ] NUNCA dejar columnas sin tipo semántico
+
+#### 13.2 Badges
+
+**Sistema Semántico:** Todas las variantes están en `src/components/ui/badge.tsx`.
+
+| Variante | Icono | Uso |
+|----------|-------|-----|
+| `success` | ✓ Check | Éxito, completado |
+| `error` | ✓ XCircle | Error, fallido |
+| `warning` | ✓ AlertTriangle | Advertencia |
+| `pending` | ✓ AlertCircle | Pendiente, en espera |
+| `info` | ✓ Info | Información |
+| `neutral` | ✓ AlertCircle | Neutral, sin categoría |
+| `status-active` | ✓ Play | En proceso |
+| `status-completed` | ✓ Check | Completado |
+| `status-paused` | ✓ Pause | Pausado |
+| `status-cancelled` | ✓ X | Cancelado |
+| `status-planning` | ✓ Calendar | Planificación |
+| `plan-pro` | ✓ Check | Plan Pro |
+| `plan-free` | ✓ Check | Plan Free |
+| `plan-teams` | ✓ Check | Plan Teams |
+| `plan-enterprise` | ✓ Check | Plan Enterprise |
+
+**Reglas:**
+- [ ] Usar variantes semánticas (NO colores hardcodeados)
+- [ ] NUNCA usar `style={{ backgroundColor, color: 'white' }}`
+- [ ] Siempre usar `<Badge variant="success">` y dejar que CSS maneje colores
+
+#### 13.3 Headers de Página
+
+**Reglas:**
+- [ ] Header tiene el **mismo ícono** que en sidebar
+- [ ] Header tiene `description` en su prop
+- [ ] Botones primarios van en `actionButton` prop
+- [ ] Múltiples acciones van en `actions` prop (array de JSX)
+- [ ] NUNCA hardcodear botones en el contenido del header
+
+#### 13.4 IdentityBadge
+
+Para mostrar entidades con avatar:
+```typescript
+<IdentityBadge
+  name={organization.name}
+  avatarUrl={organization.image_url}
+  size="sm"
+  showName={true}
+/>
+```
+
+#### 13.5 Checklist de Refactorización
+
+- [ ] Tabla usa `src/components/shared/table`
+- [ ] TODAS las columnas tienen un tipo semántico
+- [ ] Una columna tiene `type: 'long-text'` para ancho flexible
+- [ ] Badges usan variantes semánticas
+- [ ] Badges NO tienen colores hardcodeados
+- [ ] Header tiene ícono y descripción
+- [ ] Entidades con avatar usan `IdentityBadge`
 
 ---
 
@@ -481,11 +701,11 @@ O también en components/:
 | Categoría | Estado | Notas |
 |-----------|--------|-------|
 | Estructura de Feature | ✅/⚠️/❌ | ... |
-| **Ubicación y Duplicados** | ✅/⚠️/❌ | Archivos fuera de lugar, duplicados en src/hooks, src/services |
+| Ubicación y Duplicados | ✅/⚠️/❌ | ... |
 | Arquitectura 3 Capas | ✅/⚠️/❌ | ... |
-| **Formularios (FORMS)** | ✅/⚠️/❌ | Agnósticos, reutilizables, separados de modals/drawers |
-| Modales | ✅/⚠️/❌ | Contenedores ENVASE para DashboardLayout |
-| Drawers | ✅/⚠️/❌ | Contenedores ENVASE para LabLayout |
+| Formularios (FORMS) | ✅/⚠️/❌ | ... |
+| Modales | ✅/⚠️/❌ | ... |
+| Drawers | ✅/⚠️/❌ | ... |
 | Uploads | ✅/⚠️/❌ | ... |
 | Delete/Replace | ✅/⚠️/❌ | ... |
 | DB (Tablas/Views) | ✅/⚠️/❌ | ... |
@@ -493,42 +713,13 @@ O también en components/:
 | Hooks | ✅/⚠️/❌ | ... |
 | UI/UX | ✅/⚠️/❌ | ... |
 | Performance | ✅/⚠️/❌ | ... |
+| Refactorización (Tablas, Badges) | ✅/⚠️/❌ | ... |
 
 ### Top 10 Riesgos/Bugs
 | # | Severidad | Descripción | Archivo/Línea |
 |---|-----------|-------------|---------------|
 | 1 | 🔴 Crítica | ... | ... |
-| 2 | 🟠 Alta | ... | ... |
-| ... | ... | ... | ... |
-
-### Hallazgos Detallados
-
-#### Ubicación y Duplicados Findings
-- Archivos fuera de lugar: ...
-- Duplicados detectados: ...
-- Imports a actualizar: ...
-
-#### Formularios (FORMS) Findings
-- FormFields agnósticos: ✅ / ❌
-- Reutilización en múltiples contextos: ✅ / ❌
-- Separación correcta de modals/drawers: ✅ / ❌
-
-#### Modales Findings
-- Envases correctos: ✅ / ❌
-- Registro en registerModals.ts: ✅ / ❌
-
-#### Drawers Findings
-- Envases correctos: ✅ / ❌
-- Uso de FORM agnóstico: ✅ / ❌
-
-#### DB Findings
-- ...
-
-#### FE Findings
-- ...
 ```
-
----
 
 ### ENTREGABLE 2: PLAN DE EJECUCIÓN
 
@@ -536,39 +727,20 @@ O también en components/:
 ## PLAN DE EJECUCIÓN: {NOMBRE_DEL_FEATURE}
 
 ### Fase 0: Backups y Medidas Anti-Rotura
-- [ ] Checkpoint creado
-- [ ] Identificar archivos que se van a modificar
-
 ### Fase 1: Ubicación y Limpieza de Duplicados
-1. [ ] Mover archivos fuera de lugar a su destino correcto
-2. [ ] Eliminar hooks/services/types duplicados
-3. [ ] Actualizar imports afectados
-- Verificación: Compilación sin errores, no duplicados en `src/hooks/`, `src/services/`
-
 ### Fase 2: DB (Migraciones Pequeñas)
-1. [ ] Migración 1: ...
-2. [ ] Migración 2: ...
-- Verificación: ...
-
 ### Fase 3: Frontend (Refactors Mínimos)
-1. [ ] Archivo 1: ...
-2. [ ] Archivo 2: ...
-- Verificación: ...
-
 ### Fase 4: Performance + Limpieza
-1. [ ] ...
-- Verificación: ...
 
 ### Checklist Final "Definition of Done"
 - [ ] No hay errores en consola ni runtime
+- [ ] No hay archivos fuera de lugar ni duplicados
 - [ ] DB tiene estructura correcta
 - [ ] RLS consistente y segura
 - [ ] Hooks consistentes, sin duplicados
 - [ ] UI completa (loading/error/empty/permisos)
-- [ ] Documentación creada en `docs/features/{feature}.md`
+- [ ] Documentación creada
 ```
-
----
 
 ### ENTREGABLE 3: CAMBIOS CONCRETOS
 
@@ -576,25 +748,8 @@ O también en components/:
 ## CAMBIOS CONCRETOS: {NOMBRE_DEL_FEATURE}
 
 ### SQL Propuesto
-(Migraciones pequeñas, ordenadas)
-
-```sql
--- Migración 1: ...
-...
-
--- Migración 2: ...
-...
-```
-
 ### Cambios por Archivo
-| Archivo | Qué Cambia | Snippet |
-|---------|------------|---------|
-| ... | ... | ... |
-
 ### Decisiones Pendientes
-| ID | Descripción | Alternativa A | Alternativa B | Recomendación |
-|----|-------------|---------------|---------------|---------------|
-| D1 | ... | ... | ... | ... |
 ```
 
 ---
@@ -604,55 +759,35 @@ O también en components/:
 El feature se considera **cerrado** cuando:
 
 - [ ] No hay errores en consola ni en runtime
-- [ ] **TODOS los archivos están en su ubicación correcta** (no hay archivos de otros features)
-- [ ] **NO hay duplicados** en `src/hooks/`, `src/services/`, `src/types/` que pertenezcan al feature
-- [ ] Archivos sin feature definido están en `src/features/legacy/`
-- [ ] DB tiene estructura correcta y lecturas principales por Views cuando corresponde
+- [ ] **TODOS los archivos están en su ubicación correcta**
+- [ ] **NO hay duplicados** en `src/hooks/`, `src/services/`, `src/types/`
+- [ ] DB tiene estructura correcta y lecturas por Views cuando corresponde
 - [ ] RLS consistente y segura
-- [ ] Arquitectura de feature sigue `prompts/00-Architecture.md`
-- [ ] Páginas siguen `prompts/PAGE-REFACT.md` (3 capas)
-- [ ] Modales siguen `prompts/02-Modals.md`
-- [ ] Drawers siguen `prompts/03-Drawers.md`
-- [ ] Uploads siguen `prompts/03-Uploads.md`
-- [ ] Delete/Replace sigue `prompts/04-Replacement.md`
+- [ ] Arquitectura de feature sigue este documento
+- [ ] Formularios son agnósticos y están en `forms/`
+- [ ] Modales y Drawers son envases que usan los forms
 - [ ] Hooks consistentes, sin duplicados y sin lógica redundante
 - [ ] UI completa (loading/error/empty/permisos) y consistente
-- [ ] Documentación del feature creada: `docs/features/{feature}.md` con:
-  - Propósito del feature
-  - Tablas/Views usadas
-  - RLS resumen
-  - Hooks principales
-  - Flujo de datos
-  - Checklist de mantenimiento
+- [ ] Tablas usan tipos semánticos
+- [ ] Badges usan variantes semánticas
+- [ ] Documentación del feature creada
 
 ---
 
-## PROCESO DE AUDITORÍA
+## REGLAS PARA PROMPTS EXTERNOS (GPT, Otras IAs)
 
-1. **Primero**: Entregar ENTREGABLE 1 (AUDIT REPORT)
-2. **NO implementar nada todavía**
-3. **Usuario revisa y aprueba**
-4. **Después**: Entregar ENTREGABLE 2 (PLAN DE EJECUCIÓN)
-5. **Usuario revisa y aprueba**
-6. **Finalmente**: Implementar ENTREGABLE 3 (CAMBIOS CONCRETOS) paso a paso
+Cuando recibas prompts de GPT u otras IAs, ten en cuenta:
 
----
+1. **Pueden estar desactualizadas**: Verificar que lo que piden no exista ya (incluso con otro nombre) para evitar duplicados
+2. **Revisar archivos existentes**: Antes de crear nuevos archivos, verificar si ya existen lógicas similares que se puedan mejorar/optimizar
+3. **SQL es para el usuario**: Cuando una IA te dé SQL o pida modificar Supabase, recuerda que el usuario es quien ejecuta eso. Solo tenlo en cuenta como contexto.
+4. **Analizar antes de ejecutar**: ANALIZA el prompt → ANALIZA lo existente → PREGUNTA si tienes dudas → EJECUTA
 
-## REFERENCIAS RÁPIDAS
-
-| Documento | Descripción |
-|-----------|-------------|
-| `prompts/00-Architecture.md` | Arquitectura de features |
-| `prompts/01-Pages.md` | Estándar de páginas |
-| `prompts/02-Modals.md` | Estándar de modales |
-| `prompts/03-Drawers.md` | Estándar de drawers |
-| `prompts/03-Uploads.md` | Sistema de storage |
-| `prompts/04-Replacement.md` | Patrón Delete/Replace |
-| `prompts/PAGE-REFACT.md` | Arquitectura 3 capas |
-| `prompts/MASTER PROMPT.md` | Reglas maestras |
-| `prompts/tables/{feature}.md` | Documentación de tablas |
-| `replit.md` | Contexto del proyecto |
+**Objetivos:**
+1. No tener archivos ni lógicas duplicadas
+2. No romper lo existente, sino MEJORARLO u OPTIMIZARLO
+3. Utilizar siempre las carpetas que ya tenemos
 
 ---
 
-**Este es el prompt oficial de auditoría. Úsalo cada vez que necesites cerrar un feature de Seencel.** ✅
+**Este es el ÚNICO archivo de referencia para auditorías de features en Seencel.**
