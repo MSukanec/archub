@@ -159,7 +159,6 @@ export function OrganizationRemovedModal() {
                   </div>
                   
                   <Badge 
-                    variant="secondary"
                     className="ml-auto"
                   >
                     {org.plan?.name === 'free' ? 'Gratis' : org.plan?.name === 'pro' ? 'Pro' : 'Teams'}

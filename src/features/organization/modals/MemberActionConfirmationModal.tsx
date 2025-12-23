@@ -243,7 +243,7 @@ function RemoveMemberContent({
   )
 }
 
-export default function MemberActionConfirmationModal({
+export function MemberActionConfirmationModal({
   modalData,
 }: MemberActionConfirmationModalProps) {
   const { popModal } = useGlobalModalStore()

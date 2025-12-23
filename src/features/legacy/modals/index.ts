@@ -30,6 +30,5 @@ export { BoardFormModal } from './BoardFormModal';
 export { CardFormModal } from './CardFormModal';
 export { ListFormModal } from './ListFormModal';
 export { OrganizationMovementConceptFormModal } from './OrganizationMovementConceptFormModal';
-export { OrganizationRemovedModal } from './OrganizationRemovedModal';
 export { ProfileOrganizationFormModal } from './ProfileOrganizationFormModal';
 export { MemberFormModal } from './MemberFormModal';
