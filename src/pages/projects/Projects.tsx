@@ -25,7 +25,7 @@ export default function Projects() {
   const isLabLayout = layoutPreference === 'lab';
 
   const handleNewProject = () => {
-    openModal('projects', { organizationId });
+    openModal('project', { organizationId });
   };
 
   const renderView = () => {

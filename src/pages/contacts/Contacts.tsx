@@ -22,6 +22,10 @@ export default function Contacts() {
   const layoutPreference = userData?.preferences?.layout || 'experimental';
   const isLabLayout = layoutPreference === 'lab';
 
+  const handleNewContact = () => {
+    openModal('contact', { isEditing: false });
+  };
+
   const headerProps = {
     icon: LuContact,
     title: "Contactos",
@@ -30,12 +34,17 @@ export default function Contacts() {
     onTabChange: setActiveTab,
     organizationId,
     showMembers: false,
+    actionButton: activeTab === 'contacts' ? {
+      label: "Agregar Contacto",
+      icon: UserPlus,
+      onClick: handleNewContact
+    } : undefined,
   };
 
-  const actionButton = activeTab === 'contacts' ? (
+  const labActionButton = activeTab === 'contacts' ? (
     <Button
       size="sm"
-      onClick={() => openModal('contact', { isEditing: false })}
+      onClick={handleNewContact}
       data-testid="button-add-contact"
     >
       <UserPlus className="w-4 h-4 mr-2" />
@@ -53,7 +62,7 @@ export default function Contacts() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         toolbarProps={{
-          secondaryRightSlot: actionButton,
+          secondaryRightSlot: labActionButton,
         }}
       >
         <ContactsView activeTab={activeTab} onTabChange={setActiveTab} />
