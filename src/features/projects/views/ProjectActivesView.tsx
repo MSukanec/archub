@@ -121,7 +121,7 @@ export function ProjectActivesView() {
     return activeProject ? [activeProject, ...otherProjects] : otherProjects;
   }, [filteredProjects, activeProjectId])
 
-  // Select project mutation
+  // Select project mutation - OPTIMIZED with optimistic updates
   const selectProjectMutation = useMutation({
     mutationFn: async (projectId: string) => {
       if (!supabase || !userData?.user?.id || !organizationId) {
@@ -140,43 +140,50 @@ export function ProjectActivesView() {
         })
       
       if (error) throw error
-      
       return projectId;
-    },
-    onSuccess: (projectId) => {
-      setSelectedProject(projectId, organizationId);
-      setSidebarLevel('project');
-      
-      updateProjectLastActive(projectId, organizationId!).catch(err => 
-        console.error('Error updating project last_active_at:', err)
-      );
-      
-      queryClient.invalidateQueries({ 
-        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!) 
-      });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      queryClient.invalidateQueries({ queryKey: ['projects', organizationId] });
-      queryClient.refetchQueries({
-        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!)
-      });
-      
-      toast({
-        title: "Proyecto activado",
-        description: "El proyecto ahora está activo"
-      })
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "No se pudo activar el proyecto",
-        variant: "destructive"
-      })
     }
   })
 
   const handleSelectProject = (projectId: string) => {
     if (projectId === activeProjectId) return;
-    selectProjectMutation.mutate(projectId)
+
+    // ⚡ PASO 1: OPTIMISTIC UPDATE - Update cache immediately
+    const queryKey = USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!);
+    const oldData = queryClient.getQueryData(queryKey);
+    
+    queryClient.setQueryData(queryKey, (old: any) => ({
+      ...old,
+      last_project_id: projectId,
+      updated_at: new Date().toISOString()
+    }));
+
+    // ⚡ PASO 2: FIRE AND FORGET - Mutation without await
+    selectProjectMutation.mutate(projectId, {
+      onError: () => {
+        // Rollback optimistic update on error
+        queryClient.setQueryData(queryKey, oldData);
+        toast({
+          title: "Error",
+          description: "No se pudo activar el proyecto",
+          variant: "destructive"
+        })
+      }
+    });
+
+    // ✅ PASO 3: IMMEDIATE CALLBACKS - No wait for server
+    setSelectedProject(projectId, organizationId);
+    setSidebarLevel('project');
+    
+    // Show instant toast
+    toast({
+      title: "Proyecto activado",
+      description: "El proyecto ahora está activo"
+    });
+
+    // Update last_active_at in background
+    updateProjectLastActive(projectId, organizationId!).catch(err => 
+      console.error('Error updating project last_active_at:', err)
+    );
   }
 
   const handleNavigateToProject = async (projectId: string) => {
@@ -189,6 +196,28 @@ export function ProjectActivesView() {
       return;
     }
 
+    // ⚡ PASO 1: OPTIMISTIC UPDATE - Update cache immediately
+    const queryKey = USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id, organizationId);
+    const oldData = queryClient.getQueryData(queryKey);
+    
+    queryClient.setQueryData(queryKey, (old: any) => ({
+      ...old,
+      last_project_id: projectId,
+      updated_at: new Date().toISOString()
+    }));
+
+    // ✅ PASO 2: IMMEDIATE CALLBACKS - Navigate and show toast WITHOUT waiting
+    setSelectedProject(projectId, organizationId);
+    setSidebarLevel('project');
+    
+    navigate('/project/dashboard');
+    
+    toast({
+      title: "Proyecto abierto",
+      description: "Accediendo al proyecto..."
+    });
+
+    // ⚡ PASO 3: FIRE AND FORGET - Update DB in background
     try {
       if (projectId !== activeProjectId) {
         const { error } = await supabase
@@ -205,29 +234,13 @@ export function ProjectActivesView() {
         if (error) throw error;
       }
 
-      setSelectedProject(projectId, organizationId);
-      setSidebarLevel('project');
-      
+      // Update last_active_at in background
       updateProjectLastActive(projectId, organizationId!).catch(err => 
         console.error('Error updating project last_active_at:', err)
       );
-      
-      queryClient.invalidateQueries({ 
-        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!) 
-      });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-      queryClient.invalidateQueries({ queryKey: ['projects', organizationId] });
-      queryClient.refetchQueries({
-        queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!)
-      });
-      
-      navigate('/project/dashboard');
-      
-      toast({
-        title: "Proyecto abierto",
-        description: "Accediendo al proyecto..."
-      });
     } catch (error) {
+      // Rollback optimistic update on error
+      queryClient.setQueryData(queryKey, oldData);
       toast({
         title: "Error",
         description: "No se pudo acceder al proyecto",

@@ -129,10 +129,13 @@ src/features/projects/views/
 
 ### 3.3 Performance ✅
 - [x] Optimistic updates en create/update (setQueryData no invalidate)
+- [x] Optimistic updates en project selection (activate) - INSTANTÁNEO al hacer click
 - [x] Fire-and-forget mutations (no await)
-- [x] Callbacks inmediatos (modal cierra al instante)
+- [x] Callbacks inmediatos (modal cierra al instante, proyecto se mueve al primer lugar)
 - [x] Lazy loading con suspense donde aplica
 - [x] useQuery staleTime/refetchInterval optimizados
+- [x] `handleSelectProject()`: Optimistic update → Fire-and-forget mutation → Immediate callbacks
+- [x] `handleNavigateToProject()`: Optimistic update → Immediate navigation → Background DB sync
 
 ### 3.4 Data-Testid ✅
 - [x] ProjectActivesView: `container-project-actives`, `grid-projects`, `button-create-project-empty`
