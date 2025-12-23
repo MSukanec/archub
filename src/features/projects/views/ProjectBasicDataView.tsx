@@ -3,7 +3,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useUserOrganizationPreferences } from '@/features/organization'
 import { supabase } from '@/lib/supabase'
-import { useAutoSave } from '@/hooks/useAutoSave'
+import { useSaveEngine } from '@/core/save-engine'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -240,10 +240,20 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     }
   });
 
-  // Auto-save mutation for project data - SAME PATTERN AS ProfileBasicData
-  const saveProjectDataMutation = useMutation({
-    mutationFn: async (dataToSave: any) => {
-      console.log('Saving project data:', dataToSave);
+  // Centralized auto-save using useSaveEngine
+  const { isSaving, hasUnsavedChanges } = useSaveEngine({
+    data: {
+      name: projectName,
+      code: projectCode,
+      project_type_id: projectTypeId,
+      project_modality_id: projectModalityId,
+      status: status,
+      description: description,
+      internal_notes: internalNotes
+    },
+    queryKey: ['project-data', activeProjectId],
+    saveFn: async (dataToSave) => {
+      console.log('[SaveEngine] Saving project data:', dataToSave);
       
       if (!activeProjectId || !supabase) throw new Error('Project or Supabase not available');
 
@@ -278,36 +288,9 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
 
       if (error) throw error;
     },
-    onSuccess: () => {
-      console.log('Auto-save completed successfully');
-      queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['project-info', activeProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-    },
-    onError: (error: any) => {
-      console.error('Auto-save error:', error);
-      toast({
-        title: "Error",
-        description: "No se pudieron guardar los cambios automáticamente.",
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Auto-save hook - EXACTLY like ProfileBasicData (NO isHydrated - hook handles initial load internally)
-  const { isSaving } = useAutoSave({
-    data: {
-      name: projectName,
-      code: projectCode,
-      project_type_id: projectTypeId,
-      project_modality_id: projectModalityId,
-      status: status,
-      description: description,
-      internal_notes: internalNotes
-    },
-    saveFn: async (data) => { await saveProjectDataMutation.mutateAsync(data); },
-    delay: 3000,
-    enabled: !!userData && !!activeProjectId
+    delay: 2000,
+    enabled: !!userData && !!activeProjectId,
+    additionalQueryKeys: [['project-info', activeProjectId], ['projects']],
   });
 
   // UNIFIED hydration effect - loads ALL data at once, then marks as hydrated

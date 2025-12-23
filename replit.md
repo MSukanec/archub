@@ -59,6 +59,7 @@ Preferred communication style: Simple, everyday language.
 - **Operations Center (Admin Ops)**: Enterprise-grade monitoring and incident management at `/admin/ops`, featuring automated health checks, persistent alerts, preventive flow blocking, guided repair actions, and runbooks.
 - **Badge Semantic Architecture**: All badges use a semantic color system, mapping variants to CSS variables for consistent styling.
 - **Data Health Micro Rules Architecture**: Modular validation rule system in `src/core/data-health/rules/micro/` for atomic, reusable checks.
+- **Save Engine (Centralized Saving)**: Enterprise-grade saving system in `/core/save-engine/` with optimistic updates, automatic rollback, and debounced auto-save. Hooks: `useSaveEngine` for auto-save forms, `useOptimisticMutation` for point actions. Documentation at `/docs/save-architecture.md`.
 
 ## External Dependencies
 - **Supabase**: Authentication.

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase'
-import { useAutoSave } from '@/hooks/useAutoSave'
+import { useSaveEngine } from '@/core/save-engine'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -18,7 +18,6 @@ interface ProjectLocationViewProps {
 
 export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
   
@@ -69,12 +68,28 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     enabled: !!activeProjectId && !!supabase
   });
 
-  // Auto-save mutation for project location
-  const saveProjectLocationMutation = useMutation({
-    mutationFn: async (dataToSave: any) => {
-      if (!activeProjectId || !supabase) return;
+  // Centralized auto-save using useSaveEngine
+  const { isSaving, hasUnsavedChanges } = useSaveEngine({
+    data: {
+      address_full: addressFull,
+      address: address,
+      city: city,
+      state: state,
+      country: country,
+      zip_code: zipCode,
+      place_id: placeId,
+      lat: lat,
+      lng: lng,
+      timezone: timezone,
+      ...(locationType && ['urban', 'rural', 'industrial', 'other'].includes(locationType) 
+        ? { location_type: locationType } 
+        : {}),
+      accessibility_notes: accessibilityNotes
+    },
+    queryKey: ['project-data', activeProjectId],
+    saveFn: async (dataToSave) => {
+      if (!activeProjectId || !supabase) throw new Error('Project or Supabase not available');
 
-      // Use upsert to avoid race conditions
       const { error } = await supabase
         .from('project_data')
         .upsert({
@@ -90,42 +105,10 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
         throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project-data', activeProjectId] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-    },
-    onError: (error: any) => {
-      console.error('Error in saveProjectLocationMutation:', error);
-      toast({
-        title: "Error al guardar",
-        description: "No se pudieron guardar los cambios de ubicación",
-        variant: "destructive"
-      });
-    }
-  });
-
-  // Auto-save hook - Use mutateAsync to properly wait for mutation completion
-  const { isSaving } = useAutoSave({
-    data: {
-      address_full: addressFull,
-      address: address,
-      city: city,
-      state: state,
-      country: country,
-      zip_code: zipCode,
-      place_id: placeId,
-      lat: lat,
-      lng: lng,
-      timezone: timezone,
-      // Only include location_type if it's a valid enum value
-      ...(locationType && ['urban', 'rural', 'industrial', 'other'].includes(locationType) 
-        ? { location_type: locationType } 
-        : {}),
-      accessibility_notes: accessibilityNotes
-    },
-    saveFn: async (data) => { await saveProjectLocationMutation.mutateAsync(data); },
-    delay: 3000,
-    enabled: !!userData && !!activeProjectId
+    delay: 2000,
+    enabled: !!userData && !!activeProjectId,
+    additionalQueryKeys: [['projects']],
+    errorMessage: "No se pudieron guardar los cambios de ubicación"
   });
 
   // Reset hydration when project changes
