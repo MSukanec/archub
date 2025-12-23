@@ -758,7 +758,7 @@ queryClient.invalidateQueries({
 - [ ] ¿Cache y staleTime configurados en React Query?
 - [ ] ¿Usa Views de Supabase para queries complejas (evita joins en frontend)?
 
-> **Nota:** Performance de carga (LCP, bundle size, lazy loading) se audita en **Sección 16.1 Performance Budgets**.
+> **Nota:** Performance de carga (LCP, bundle size, lazy loading) se audita en **Sección 17.1 Performance Budgets**.
 
 **Checklist de UI/UX:**
 - [ ] ¿Estados vacíos, errores, permisos implementados?
@@ -768,7 +768,49 @@ queryClient.invalidateQueries({
 
 ---
 
-### 12. AUDITORÍA DE CALIDAD / ROBUSTEZ
+### 12. AUDITORÍA DE CÓDIGO LIMPIO
+
+**CRÍTICO: Eliminar TODO código de debug DURANTE la auditoría.**
+
+Durante la auditoría del feature, buscar y eliminar:
+
+```typescript
+// ❌ ELIMINAR TODOS ESTOS:
+console.log(...)       // Logs de debug
+console.warn(...)      // Advertencias de debug
+console.error(...)     // Errores de debug (excepto en error handlers reales)
+console.table(...)     // Logs de tablas
+debugger               // Breakpoints olvidados
+console.trace(...)     // Stack traces de debug
+```
+
+**Checklist de Código Limpio:**
+- [ ] ¿Se ejecutó `grep -r "console\." src/features/{feature}/` para encontrar logs?
+- [ ] ¿Se eliminaron TODOS los `console.log()`, `console.warn()`, `console.error()` de debug?
+- [ ] ¿Se eliminaron sentencias `debugger;` olvidadas?
+- [ ] ¿Se verificó que NO hay logs en hooks, components, services, forms, views?
+- [ ] ¿Se verificó que NO hay comentarios `// TODO: remove log`, `// debug`, `// temp`?
+- [ ] ¿Los únicos `console` restantes son error handlers en try/catch legítimos?
+
+**Ejemplo correcto:**
+```typescript
+// ✅ CORRECTO: Logs en error handlers reales
+} catch (error) {
+  console.error('Error fetching data:', error);  // Intentional, información para debugging en producción
+  toast({ title: 'Error', variant: 'destructive' });
+}
+```
+
+**Ejemplo INCORRECTO (ELIMINAR):**
+```typescript
+// ❌ ELIMINAR
+const data = await fetchProjects();
+console.log('Projects data:', data);  // DEBUG - ELIMINAR
+```
+
+---
+
+### 13. AUDITORÍA DE CALIDAD / ROBUSTEZ
 
 **Checklist de Validaciones:**
 - [ ] ¿Validaciones en frontend (Zod schemas) Y DB (constraints)?
@@ -776,13 +818,13 @@ queryClient.invalidateQueries({
 - [ ] ¿Seguridad? (nunca confiar en frontend para reglas críticas)
 - [ ] ¿Autenticación usa `requireUser()` con userId correcto (NO auth.user.id)?
 
-> **Nota:** El manejo de errores (try/catch, logging, mensajes) se audita en **Sección 16.2 Error Handling**.
+> **Nota:** El manejo de errores (try/catch, logging, mensajes) se audita en **Sección 17.2 Error Handling**.
 
 ---
 
-### 13. AUDITORÍA DE REFACTORIZACIÓN (Tablas, Badges, Headers)
+### 14. AUDITORÍA DE REFACTORIZACIÓN (Tablas, Badges, Headers)
 
-#### 13.1 Tablas (`Table`)
+#### 17.1 Tablas (`Table`)
 
 **Componente a usar:** `src/components/shared/table` según `src/components/shared/table/AUDIT.md`.
 
@@ -812,7 +854,7 @@ queryClient.invalidateQueries({
 - [ ] Solo UNA columna con `type: 'long-text'` por tabla (absorbe ancho restante)
 - [ ] NUNCA dejar columnas sin tipo semántico
 
-#### 13.2 Badges
+#### 14.2 Badges
 
 **Sistema Semántico:** Todas las variantes están en `src/components/ui/badge.tsx`.
 
@@ -839,7 +881,7 @@ queryClient.invalidateQueries({
 - [ ] NUNCA usar `style={{ backgroundColor, color: 'white' }}`
 - [ ] Siempre usar `<Badge variant="success">` y dejar que CSS maneje colores
 
-#### 13.3 Headers de Página
+#### 14.3 Headers de Página
 
 **Reglas:**
 - [ ] Header tiene el **mismo ícono** que en sidebar
@@ -848,7 +890,7 @@ queryClient.invalidateQueries({
 - [ ] Múltiples acciones van en `actions` prop (array de JSX)
 - [ ] NUNCA hardcodear botones en el contenido del header
 
-#### 13.4 IdentityBadge
+#### 14.4 IdentityBadge
 
 Para mostrar entidades con avatar:
 ```typescript
@@ -860,7 +902,7 @@ Para mostrar entidades con avatar:
 />
 ```
 
-#### 13.5 Checklist de Refactorización
+#### 14.5 Checklist de Refactorización
 
 - [ ] Tabla usa `src/components/shared/table`
 - [ ] TODAS las columnas tienen un tipo semántico
@@ -872,11 +914,11 @@ Para mostrar entidades con avatar:
 
 ---
 
-### 14. AUDITORÍA DE QUALITY GATES (Testing)
+### 15. AUDITORÍA DE QUALITY GATES (Testing)
 
 **Objetivo:** Asegurar que el feature tiene cobertura de testing adecuada para prevenir regresiones.
 
-#### 14.1 Niveles de Testing Esperados
+#### 17.1 Niveles de Testing Esperados
 
 | Nivel | Qué testea | Herramienta | Cuándo es obligatorio |
 |-------|------------|-------------|----------------------|
@@ -923,11 +965,11 @@ Un feature **NO puede marcarse como cerrado** si:
 
 ---
 
-### 15. AUDITORÍA DE ACCESIBILIDAD E I18N
+### 16. AUDITORÍA DE ACCESIBILIDAD E I18N
 
 **Objetivo:** Asegurar que el feature es accesible y está preparado para internacionalización.
 
-#### 15.1 Checklist de Accesibilidad (a11y)
+#### 17.1 Checklist de Accesibilidad (a11y)
 
 **Navegación por teclado:**
 - [ ] ¿Todos los elementos interactivos son focusables?
@@ -979,11 +1021,11 @@ Un feature **NO puede marcarse como cerrado** si:
 
 ---
 
-### 16. AUDITORÍA DE PRODUCTION READINESS
+### 17. AUDITORÍA DE PRODUCTION READINESS
 
 **Objetivo:** Asegurar que el feature está listo para producción con observabilidad y resiliencia.
 
-#### 16.1 Performance Budgets
+#### 17.1 Performance Budgets
 
 | Métrica | Target | Cómo medir | Verificación |
 |---------|--------|------------|--------------|
