@@ -23,9 +23,9 @@ import PricingPlanPublic from "@/pages/public/PricingPlan";
 // Protected Pages
 
 
-import ProjectsPage from "@/pages/projects/ProjectsPage";
-
-
+import ProjectsPage from "@/pages/dashboard/ProjectsPage";
+import ProjectDashboardPage from "@/pages/dashboard/ProjectDashboardPage";
+import ProjectDataPage from "@/pages/dashboard/ProjectDataPage";
 
 
 
@@ -33,8 +33,6 @@ import ProjectsPage from "@/pages/projects/ProjectsPage";
 import FinancesCapitalMovements from "@/pages/professional/capital/Capital";
 import OrganizationMovements from "@/pages/professional/movements/Movements";
 import { Clients } from "@/pages/clients/Clients";
-import Project from "@/pages/project/Project";
-import ProjectDataPage from "@/pages/projects/ProjectDataPage";
 
 
 import ConstructionDashboard from "@/pages/professional/project/construction/ConstructionDashboard";
@@ -218,7 +216,7 @@ function Router() {
         <Route path="/projects" component={ProjectsPage} />
 
         {/* General Routes */}
-        <Route path="/project/dashboard" component={Project} />
+        <Route path="/project/dashboard" component={ProjectDashboardPage} />
         <Route path="/project" component={ProjectDataPage} />
         <Route path="/clients" component={Clients} />
         <Route path="/media" component={Media} />

@@ -6,7 +6,7 @@ import { useProjectContext } from '@/stores/projectContext';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { ProjectVisionGeneralView } from "@/features/projects/views/ProjectVisionGeneralView";
 
-export default function Project() {
+export default function ProjectDashboardPage() {
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore();
   const { selectedProjectId, currentOrganizationId } = useProjectContext();
   const { data: userData } = useCurrentUser();
