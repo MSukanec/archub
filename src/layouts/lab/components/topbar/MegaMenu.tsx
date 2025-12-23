@@ -40,8 +40,8 @@ function MegaMenuTrigger({ label, sublabel, isOpen, className }: MegaMenuTrigger
         "h-full flex flex-col justify-center px-4 border-r cursor-pointer transition-colors",
         "border-r-[var(--header-border)]",
         isOpen 
-          ? "bg-[var(--card-hover-bg)] border-b-2 border-b-[var(--header-border)]" 
-          : "border-b border-b-transparent hover:bg-[var(--card-hover-bg)]",
+          ? "border-t-2 border-t-[var(--accent)]" 
+          : "border-b border-b-transparent",
         className
       )}
     >
