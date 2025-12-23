@@ -19,7 +19,6 @@ import {
   formatContactName,
   groupContactsByLetter,
 } from '@/features/contacts';
-import ContactSettings from '@/pages/contacts/ContactSettings';
 
 interface ContactsViewProps {
   activeTab: string;
@@ -287,10 +286,6 @@ export function ContactsView({ activeTab, onTabChange }: ContactsViewProps) {
         />
       </div>
     );
-  }
-
-  if (activeTab === 'settings') {
-    return <ContactSettings />;
   }
 
   return null;
