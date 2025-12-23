@@ -1,0 +1,114 @@
+Tenemos problemas graves de inconsistencias de guardado en toda la app:
+- cambios que no se reflejan
+- autosave poco confiable
+- modales que guardan distinto
+- inputs que guardan de formas diferentes
+
+Objetivo:
+Diseñar e implementar un SISTEMA DE GUARDADO CENTRALIZADO, OPTIMISTIC, CONFIABLE y ESCALABLE, estilo Notion / Linear / Stripe.
+
+IMPORTANTE:
+- Esto es una refactorización ARQUITECTÓNICA
+- No es arreglar bugs puntuales
+- No romper funcionalidades existentes
+- Hacerlo incremental
+
+---
+
+## PRINCIPIOS OBLIGATORIOS
+
+1) Single Source of Truth
+- El estado real vive en React Query
+- Los componentes NO guardan directamente
+
+2) Optimistic Updates
+- La UI se actualiza instantáneamente
+- El backend confirma después
+- Rollback automático si falla
+
+3) Centralización absoluta
+- Ningún componente puede:
+  - llamar Supabase
+  - hacer fetch
+  - invalidar queries manualmente
+
+4) Unificación de flujos
+- Inputs
+- Modales
+- Forms
+- Toggles
+- Todos usan el MISMO sistema
+
+---
+
+## ARQUITECTURA A IMPLEMENTAR
+
+Crear un módulo central:
+
+/core/save-engine/
+
+Debe incluir:
+- saveEngine.ts
+- useAutoSave.ts
+- useOptimisticMutation.ts
+- saveQueue.ts
+
+Responsabilidades:
+- debounce
+- batching
+- optimistic update
+- commit real
+- rollback
+- estado global de guardado
+
+---
+
+## COMPORTAMIENTO ESPERADO
+
+- onChange → optimistic update inmediato
+- debounce configurable
+- commit automático
+- error → rollback
+- cache sincroniza TODA la UI
+
+---
+
+## QUÉ REFACTORIZAR
+
+1) Auditar TODAS las mutaciones existentes
+2) Eliminar:
+   - supabase.from() en componentes
+   - saves directos
+   - invalidaciones manuales
+3) Reemplazar por:
+   - saveEngine.commit(...)
+4) Documentar el patrón
+
+---
+
+## DOCUMENTACIÓN OBLIGATORIA
+
+Crear:
+/docs/save-architecture.md
+
+Debe explicar:
+- Cómo se guarda algo en Seencel
+- Qué NUNCA hacer
+- Cómo agregar un nuevo input autosave
+- Cómo agregar un modal
+- Ejemplos correctos e incorrectos
+
+---
+
+## MIGRACIÓN
+
+NO migrar todo de golpe.
+
+1) Implementar engine
+2) Migrar UN feature de prueba (ej: admin)
+3) Validar consistencia
+4) Luego replicar
+
+Cuando termines:
+- Avisame
+- No sigas migrando sin confirmación
