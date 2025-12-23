@@ -116,6 +116,7 @@ export default function ProjectFinances() {
     organizationId,
     showMembers: true,
     showProjectSelector: true,
+    secondaryRightContent,
   };
 
   if (isLabLayout) {
