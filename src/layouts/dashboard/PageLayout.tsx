@@ -652,9 +652,11 @@ export function PageLayout({
           const mode = resolveWidthMode(wide);
           return `${getContainerClasses(mode)} ${getContentPaddingClasses(mode)} pt-6 pb-6 flex-1 min-h-0 overflow-hidden`;
         })()}>
-          <div className="h-full overflow-y-auto flex flex-col">
+          <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
             <ReadOnlyBanner show={showReadOnlyBanner} projectName={readOnlyProjectName} />
-            {children}
+            <div className="flex-1 min-h-0 overflow-auto">
+              {children}
+            </div>
           </div>
         </div>
       </div>
