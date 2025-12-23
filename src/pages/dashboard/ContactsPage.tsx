@@ -57,7 +57,7 @@ export function ContactsPage() {
     if (activeTab === 'settings') {
       return <ContactSettingsView />;
     }
-    return <ContactsView activeTab={activeTab} onTabChange={setActiveTab} />;
+    return <ContactsView />;
   };
 
   if (isLabLayout) {

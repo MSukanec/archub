@@ -108,9 +108,10 @@
 - [x] `index.ts` exporta todo lo necesario
 
 ### Páginas (3 Capas)
-- [x] Page en `src/pages/dashboard/ContactsPage.tsx`
-- [x] Views en `src/features/contacts/views/`
+- [x] Page en `src/pages/dashboard/ContactsPage.tsx` (orquestador puro)
+- [x] Views en `src/features/contacts/views/` (presentacionales)
 - [x] Nomenclatura `*Page.tsx` y `*View.tsx`
+- [x] ContactsView sin props de orquestación (puramente presentacional)
 
 ### Sistema de Guardado (Save Engine)
 - [x] 13 hooks migrados a `useOptimisticMutation`

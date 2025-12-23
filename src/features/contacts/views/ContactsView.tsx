@@ -20,12 +20,7 @@ import {
   groupContactsByLetter,
 } from '@/features/contacts';
 
-interface ContactsViewProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
-}
-
-export function ContactsView({ activeTab, onTabChange }: ContactsViewProps) {
+export function ContactsView() {
   const [searchValue, setSearchValue] = useState('');
   const [filterByType, setFilterByType] = useState('all');
   const [showSearch, setShowSearch] = useState(false);
@@ -43,41 +38,36 @@ export function ContactsView({ activeTab, onTabChange }: ContactsViewProps) {
 
   useEffect(() => {
     if (isMobile) {
-      if (activeTab === 'contacts') {
-        setActions({
-          search: {
-            id: 'search',
-            icon: Search,
-            label: 'Buscar',
-            onClick: () => {
-              setShowSearch(true);
-            },
+      setActions({
+        search: {
+          id: 'search',
+          icon: Search,
+          label: 'Buscar',
+          onClick: () => {
+            setShowSearch(true);
           },
-          create: {
-            id: 'create',
-            icon: UserPlus,
-            label: 'Crear Contacto',
-            onClick: () => openModal('contact', { isEditing: false }),
-            variant: 'primary',
-          },
-          filter: {
-            id: 'filter',
-            icon: Filter,
-            label: 'Filtros',
-            onClick: () => {},
-          },
-          notifications: {
-            id: 'notifications',
-            icon: Bell,
-            label: 'Notificaciones',
-            onClick: () => {},
-          },
-        });
-        setShowActionBar(true);
-      } else {
-        clearActions();
-        setShowActionBar(false);
-      }
+        },
+        create: {
+          id: 'create',
+          icon: UserPlus,
+          label: 'Crear Contacto',
+          onClick: () => openModal('contact', { isEditing: false }),
+          variant: 'primary',
+        },
+        filter: {
+          id: 'filter',
+          icon: Filter,
+          label: 'Filtros',
+          onClick: () => {},
+        },
+        notifications: {
+          id: 'notifications',
+          icon: Bell,
+          label: 'Notificaciones',
+          onClick: () => {},
+        },
+      });
+      setShowActionBar(true);
     }
 
     return () => {
@@ -85,10 +75,10 @@ export function ContactsView({ activeTab, onTabChange }: ContactsViewProps) {
         clearActions();
       }
     };
-  }, [isMobile, activeTab, openModal, clearActions, setActions, setShowActionBar]);
+  }, [isMobile, openModal, clearActions, setActions, setShowActionBar]);
 
   useEffect(() => {
-    if (isMobile && contactTypes && contactTypes.length > 0 && activeTab === 'contacts') {
+    if (isMobile && contactTypes && contactTypes.length > 0) {
       setFilterConfig({
         filters: [
           {
@@ -110,7 +100,7 @@ export function ContactsView({ activeTab, onTabChange }: ContactsViewProps) {
         },
       });
     }
-  }, [isMobile, contactTypes, filterByType, setFilterConfig, activeTab]);
+  }, [isMobile, contactTypes, filterByType, setFilterConfig]);
 
   useEffect(() => {
     setSearchValue('');
@@ -182,24 +172,7 @@ export function ContactsView({ activeTab, onTabChange }: ContactsViewProps) {
       itemName: contactName,
       destructiveActionText: 'Eliminar contacto',
       onConfirm: () => {
-        deleteContactMutation.mutate(
-          { contactId: contact.id, organizationId },
-          {
-            onSuccess: () => {
-              toast({
-                title: 'Contacto eliminado',
-                description: 'El contacto ha sido eliminado correctamente',
-              });
-            },
-            onError: (error: Error) => {
-              toast({
-                title: 'Error',
-                description: error.message || 'No se pudo eliminar el contacto',
-                variant: 'destructive',
-              });
-            },
-          }
-        );
+        deleteContactMutation.mutate({ contactId: contact.id, organizationId });
       },
       isLoading: deleteContactMutation.isPending,
     });
@@ -213,80 +186,76 @@ export function ContactsView({ activeTab, onTabChange }: ContactsViewProps) {
     );
   }
 
-  if (activeTab === 'contacts') {
-    if (contacts.length === 0 && !searchValue && filterByType === 'all') {
-      return (
-        <div className="p-6">
-          <EmptyState
-            icon={<LuContact className="w-8 h-8 text-muted-foreground" />}
-            title="Los contactos son la base de tu organización"
-            description="Comienza construyendo tu red de contactos. Cada contacto que agregues puede convertirse en un cliente, socio, empleado, proveedor o subcontratista. Centraliza toda la información de las personas y empresas con las que trabajas en un solo lugar."
-            action={
-              <Button onClick={() => openModal('contact', { isEditing: false })}>
-                <UserPlus className="w-4 h-4 mr-2" />
-                Agregar Primer Contacto
-              </Button>
-            }
-          />
-        </div>
-      );
-    }
-
-    if (isMobile) {
-      return (
-        <div className="h-full overflow-y-auto scrollbar-hide p-6">
-          {filteredContacts.length > 0 ? (
-            <div className="space-y-6">
-              {Object.entries(groupedContacts).map(([letter, letterContacts]) => (
-                <div key={letter} className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 bg-muted rounded-full">
-                      <span className="text-sm font-semibold text-muted-foreground">{letter}</span>
-                    </div>
-                    <div className="flex-1 h-px bg-border"></div>
-                  </div>
-                  <div className="space-y-2">
-                    {letterContacts.map((contact: any) => (
-                      <ContactRow
-                        key={contact.id}
-                        contact={contact}
-                        onEdit={() => handleEditContact(contact)}
-                        onDelete={() => handleDeleteContact(contact)}
-                        onClick={(c: any) =>
-                          openModal('contact', {
-                            contactId: c.id,
-                            contact: c,
-                            mode: 'view',
-                          })
-                        }
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <LuContact className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No hay contactos</h3>
-              <p className="text-muted-foreground">Comienza agregando tu primer contacto</p>
-            </div>
-          )}
-        </div>
-      );
-    }
-
+  if (contacts.length === 0 && !searchValue && filterByType === 'all') {
     return (
       <div className="p-6">
-        <ContactList
-          contacts={filteredContacts}
-          onEdit={handleEditContact}
-          onDelete={handleDeleteContact}
-          onRowClick={handleViewContact}
+        <EmptyState
+          icon={<LuContact className="w-8 h-8 text-muted-foreground" />}
+          title="Los contactos son la base de tu organización"
+          description="Comienza construyendo tu red de contactos. Cada contacto que agregues puede convertirse en un cliente, socio, empleado, proveedor o subcontratista. Centraliza toda la información de las personas y empresas con las que trabajas en un solo lugar."
+          action={
+            <Button onClick={() => openModal('contact', { isEditing: false })} data-testid="button-add-first-contact">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Agregar Primer Contacto
+            </Button>
+          }
         />
       </div>
     );
   }
 
-  return null;
+  if (isMobile) {
+    return (
+      <div className="h-full overflow-y-auto scrollbar-hide p-6">
+        {filteredContacts.length > 0 ? (
+          <div className="space-y-6">
+            {Object.entries(groupedContacts).map(([letter, letterContacts]) => (
+              <div key={letter} className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 bg-muted rounded-full">
+                    <span className="text-sm font-semibold text-muted-foreground">{letter}</span>
+                  </div>
+                  <div className="flex-1 h-px bg-border"></div>
+                </div>
+                <div className="space-y-2">
+                  {letterContacts.map((contact: any) => (
+                    <ContactRow
+                      key={contact.id}
+                      contact={contact}
+                      onEdit={() => handleEditContact(contact)}
+                      onDelete={() => handleDeleteContact(contact)}
+                      onClick={(c: any) =>
+                        openModal('contact', {
+                          contactId: c.id,
+                          contact: c,
+                          mode: 'view',
+                        })
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <LuContact className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No hay contactos</h3>
+            <p className="text-muted-foreground">Comienza agregando tu primer contacto</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6">
+      <ContactList
+        contacts={filteredContacts}
+        onEdit={handleEditContact}
+        onDelete={handleDeleteContact}
+        onRowClick={handleViewContact}
+      />
+    </div>
+  );
 }
