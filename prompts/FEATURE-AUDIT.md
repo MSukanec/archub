@@ -303,7 +303,7 @@ VIEW (Contenido)       → Tablas, KPIs, gráficos, formularios
 - ❌ `queryClient.invalidateQueries()` NUNCA sueltas sin patrón
 - ❌ **NUNCA guardar en onChange** - Solo actualiza estado local
 
-**Checklist:**
+**Checklist COMPLETO:**
 - [ ] ¿Usa `useAutosaveController` o `useSaveEngine` para auto-save?
 - [ ] ¿Usa `useOptimisticMutation` para acciones puntuales (toggles, clicks)?
 - [ ] ¿Tiene `additionalQueryKeys` para invalidar caches relacionados?
@@ -313,6 +313,11 @@ VIEW (Contenido)       → Tablas, KPIs, gráficos, formularios
 - [ ] ¿Valida campos requeridos ANTES de guardar?
 - [ ] ¿Normaliza valores vacíos ('' → null)?
 - [ ] ¿Hidrata `lastPersistedData` con datos iniciales?
+- [ ] ¿Usa `useRef` para evitar loops de re-hidratación? (hasHydratedRef)
+- [ ] ¿Selects y Google Places guardan INMEDIATAMENTE (no esperan blur)?
+- [ ] ¿Usa valores directos (no estado) al guardar después de setState?
+- [ ] ¿Eliminación de imágenes usa `setQueryData` para UI instantánea?
+- [ ] ¿NO guarda en onChange, solo en onBlur/Enter/select?
 
 ---
 
@@ -379,9 +384,22 @@ const handleKeyDown = (e: React.KeyboardEvent) => {
   }
 };
 
-// 6. Hidratación con datos del servidor
+// 6. Hidratación con datos del servidor (useRef para evitar re-hidratación)
+const hasHydratedRef = useRef(false);
+const lastHydratedIdRef = useRef<string | null>(null);
+
 useEffect(() => {
   if (!data) return;
+  
+  // ⚠️ CRÍTICO: Usar useRef para evitar loops de re-hidratación
+  // Sin esto, cada keystroke causa re-render → re-hidratación → reset del campo
+  if (hasHydratedRef.current && lastHydratedIdRef.current === projectId) {
+    return;
+  }
+  
+  hasHydratedRef.current = true;
+  lastHydratedIdRef.current = projectId;
+  
   setProjectName(data.name || '');
   setProjectCode(data.code || '');
   setTimeout(() => {
@@ -392,7 +410,7 @@ useEffect(() => {
       code: data.code || '',
     });
   }, 100);
-}, [data]);
+}, [data, projectId]);
 
 // 7. En el JSX
 <Input
@@ -473,6 +491,150 @@ optimisticUpdate: (oldData: any, variables: any) => {
     ...variables
   };
 }
+```
+
+---
+
+#### Patrón 3: GUARDADO INMEDIATO EN SELECTS Y GOOGLE PLACES
+
+Para **selects**, **toggles** y **Google Places** donde el valor se selecciona una vez y debe guardarse **inmediatamente** (sin esperar blur):
+
+```typescript
+// ✅ CORRECTO - Guardar inmediatamente al seleccionar
+const handlePlaceSelected = (place: GooglePlaceResult) => {
+  // 1. Actualizar estado local
+  setCity(place.city);
+  setState(place.state);
+  setCountry(place.country);
+  setLat(place.lat);
+  setLng(place.lng);
+  
+  // 2. GUARDAR INMEDIATO usando valores de `place`, NO del estado
+  // ⚠️ React no actualiza estado sincrónicamente, usar valores directos
+  if (isHydrated && validateCoordinates(place.lat, place.lng)) {
+    setTimeout(() => {
+      saveController.save({
+        city: place.city,       // ← Del objeto place
+        state: place.state,
+        country: place.country,
+        lat: place.lat,
+        lng: place.lng,
+        // Incluir otros campos del estado actual
+        location_type: locationType,
+        notes: accessibilityNotes,
+      });
+    }, 10);
+  }
+};
+
+// ✅ CORRECTO - Select con guardado inmediato
+const handleSelectChange = (value: string, fieldName: string) => {
+  setLocationType(value);
+  
+  if (isHydrated) {
+    setTimeout(() => {
+      saveController.save({
+        ...getCurrentFormData(),
+        [fieldName]: value,  // ← Valor nuevo capturado
+      });
+    }, 10);
+  }
+};
+```
+
+**⚠️ ERROR COMÚN:** Usar el estado después de `setState` - React no lo actualiza inmediatamente:
+```typescript
+// ❌ INCORRECTO - El estado aún tiene el valor anterior
+setCity(place.city);
+saveController.save({ city: city });  // ← city tiene valor ANTERIOR
+
+// ✅ CORRECTO - Usar el valor directamente
+setCity(place.city);
+saveController.save({ city: place.city });  // ← place.city es el valor NUEVO
+```
+
+---
+
+#### Patrón 4: ELIMINACIÓN DE IMÁGENES CON ACTUALIZACIÓN INSTANTÁNEA
+
+Para **eliminar imágenes** u otros campos, usar `queryClient.setQueryData()` para **actualización instantánea** en lugar de solo invalidar:
+
+```typescript
+const handleDeleteImage = async () => {
+  try {
+    // 1. Llamar al servicio de eliminación
+    await deleteProjectImageService(projectId, organizationId);
+    
+    // 2. ⚠️ CRÍTICO: Actualizar cache DIRECTAMENTE para UI instantánea
+    queryClient.setQueryData(
+      projectsKeys.data(projectId),
+      (oldData: Project | undefined) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          main_image: null,  // ← Campo eliminado inmediatamente en UI
+        };
+      }
+    );
+    
+    // 3. Opcionalmente invalidar para refetch en background
+    queryClient.invalidateQueries({ 
+      queryKey: projectsKeys.data(projectId) 
+    });
+    
+    toast({ title: "Imagen eliminada" });
+  } catch (error) {
+    toast({ title: "Error al eliminar", variant: "destructive" });
+  }
+};
+```
+
+**Por qué NO solo `invalidateQueries`:**
+- `invalidateQueries` marca la cache como stale → refetch → espera respuesta → actualiza UI
+- `setQueryData` actualiza la cache **inmediatamente** → UI instantánea
+- Combinar ambos: UI instantánea + datos frescos del servidor
+
+---
+
+#### Patrón 5: EVITAR CLOSURES OBSOLETOS EN HANDLERS
+
+**Problema:** `getCurrentFormData()` captura el estado en el momento de definir el handler, no al ejecutarlo:
+
+```typescript
+// ❌ INCORRECTO - Closure obsoleto
+const getCurrentFormData = useCallback(() => ({
+  name: projectName,  // ← Valor al momento de crear el callback
+  code: projectCode,
+}), [projectName, projectCode]);
+
+const handleBlur = () => {
+  const data = getCurrentFormData();  // ← Puede estar desactualizado
+  saveController.save(data);
+};
+```
+
+**Solución 1:** Capturar valores inline en el handler:
+```typescript
+// ✅ CORRECTO - Valores capturados al ejecutar
+const handleBlur = () => {
+  saveController.save({
+    name: projectName,  // ← Valor actual al ejecutar
+    code: projectCode,
+  });
+};
+```
+
+**Solución 2:** Si necesitas `getCurrentFormData`, no incluirlo en dependencias que causan re-renders:
+```typescript
+// ✅ CORRECTO - Ref estable
+const formDataRef = useRef({ name: '', code: '' });
+useEffect(() => {
+  formDataRef.current = { name: projectName, code: projectCode };
+}, [projectName, projectCode]);
+
+const handleBlur = () => {
+  saveController.save(formDataRef.current);  // ← Siempre actualizado
+};
 ```
 
 ---
