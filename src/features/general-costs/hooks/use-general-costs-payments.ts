@@ -1,81 +1,81 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import { toast } from '@/hooks/use-toast'
-import { GENERAL_COSTS_QUERY_KEYS } from '@/features/general-costs/constants'
+import { useQuery } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
+import { supabase } from '@/lib/supabase';
+import { generalCostsKeys } from '@/core/query-keys';
 
 export interface GeneralCostPayment {
-  id: string
-  organization_id: string
-  amount: number
-  currency_id: string
-  exchange_rate: number
-  payment_date: string
-  notes: string | null
-  reference: string | null
-  created_at: string
-  updated_at: string
-  wallet_id: string | null
-  general_cost_id: string | null
-  status: 'confirmed' | 'pending' | 'rejected' | 'void'
-  created_by: string | null
-  attachments_count?: number
+  id: string;
+  organization_id: string;
+  amount: number;
+  currency_id: string;
+  exchange_rate: number;
+  payment_date: string;
+  notes: string | null;
+  reference: string | null;
+  created_at: string;
+  updated_at: string;
+  wallet_id: string | null;
+  general_cost_id: string | null;
+  status: 'confirmed' | 'pending' | 'rejected' | 'void';
+  created_by: string | null;
+  attachments_count?: number;
   general_cost?: {
-    id: string
-    name: string
-    description: string | null
-    category_id?: string | null
+    id: string;
+    name: string;
+    description: string | null;
+    category_id?: string | null;
     category?: {
-      id: string
-      name: string
-    } | null
-  } | null
+      id: string;
+      name: string;
+    } | null;
+  } | null;
   currency?: {
-    id: string
-    code: string
-    symbol: string
-    name: string
-  } | null
+    id: string;
+    code: string;
+    symbol: string;
+    name: string;
+  } | null;
   wallet?: {
-    id: string
-    organization_id: string
-    wallet_id: string
-    is_active: boolean
-    is_default: boolean
+    id: string;
+    organization_id: string;
+    wallet_id: string;
+    is_active: boolean;
+    is_default: boolean;
     wallets: {
-      id: string
-      name: string
-      is_active: boolean
-    } | null
-  } | null
+      id: string;
+      name: string;
+      is_active: boolean;
+    } | null;
+  } | null;
   creator?: {
-    id: string
+    id: string;
     users?: {
-      id: string
-      full_name: string | null
-      avatar_url: string | null
-    } | null
-  } | null
+      id: string;
+      full_name: string | null;
+      avatar_url: string | null;
+    } | null;
+  } | null;
   media_links?: Array<{
-    id: string
-    media_file_id: string
+    id: string;
+    media_file_id: string;
     media_files: {
-      id: string
-      file_name: string
-      file_type: string
-      bucket: string
-      file_path: string
-    }
-  }>
+      id: string;
+      file_name: string;
+      file_type: string;
+      bucket: string;
+      file_path: string;
+    };
+  }>;
 }
 
 export function useGeneralCostsPayments(organizationId: string | undefined) {
   return useQuery({
-    queryKey: GENERAL_COSTS_QUERY_KEYS.paymentsList(organizationId || null),
+    queryKey: generalCostsKeys.paymentList(organizationId),
     queryFn: async () => {
-      if (!organizationId) return []
+      if (!organizationId) return [];
 
       if (!supabase) {
-        throw new Error('Supabase client not initialized')
+        throw new Error('Supabase client not initialized');
       }
 
       const { data, error } = await supabase
@@ -134,29 +134,24 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
         `)
         .eq('organization_id', organizationId)
         .eq('is_deleted', false)
-        .order('payment_date', { ascending: false })
+        .order('payment_date', { ascending: false });
 
       if (error) {
-        console.error('Error fetching general costs payments:', error)
-        throw error
+        throw error;
       }
 
-      // NOTE: media_links now has general_cost_payment_id column
-      // Attachments are loaded dynamically in ViewModal using useGeneralCostPaymentMedia hook
-      // getGeneralCostPaymentFiles handles signed URL generation for private-assets
       return (data || []).map(payment => {
-        // Supabase returns single relations as arrays, convert to single objects
-        const walletData = Array.isArray(payment.wallet) ? payment.wallet[0] : payment.wallet
-        const generalCost = Array.isArray(payment.general_cost) ? payment.general_cost[0] : payment.general_cost
+        const walletData = Array.isArray(payment.wallet) ? payment.wallet[0] : payment.wallet;
+        const generalCost = Array.isArray(payment.general_cost) ? payment.general_cost[0] : payment.general_cost;
         const processedGeneralCost = generalCost ? {
           ...generalCost,
           category: Array.isArray(generalCost.category) ? generalCost.category[0] : generalCost.category
-        } : null
-        const creatorData = Array.isArray(payment.creator) ? payment.creator[0] : payment.creator
+        } : null;
+        const creatorData = Array.isArray(payment.creator) ? payment.creator[0] : payment.creator;
         const processedCreator = creatorData ? {
           ...creatorData,
           users: Array.isArray(creatorData.users) ? creatorData.users[0] : creatorData.users
-        } : null
+        } : null;
         
         return {
           ...payment,
@@ -167,21 +162,20 @@ export function useGeneralCostsPayments(organizationId: string | undefined) {
             wallets: Array.isArray(walletData.wallets) ? walletData.wallets[0] : walletData.wallets
           } : null,
           creator: processedCreator,
-          attachments_count: 0 // TODO: Calculate from media_links count if needed for list view
-        }
-      }) as unknown as GeneralCostPayment[]
+          attachments_count: 0
+        };
+      }) as unknown as GeneralCostPayment[];
     },
     enabled: !!organizationId,
-  })
+    staleTime: 30000,
+  });
 }
 
-export function useDeleteGeneralCostPayment() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async ({ paymentId, organizationId }: { paymentId: string; organizationId: string }) => {
+export function useDeleteGeneralCostPaymentInline(organizationId: string | null) {
+  return useOptimisticMutation({
+    mutationFn: async ({ paymentId, organizationId: orgId }: { paymentId: string; organizationId: string }) => {
       if (!supabase) {
-        throw new Error('Supabase client not initialized')
+        throw new Error('Supabase client not initialized');
       }
 
       const { error } = await supabase
@@ -191,30 +185,25 @@ export function useDeleteGeneralCostPayment() {
           deleted_at: new Date().toISOString()
         })
         .eq('id', paymentId)
-        .eq('organization_id', organizationId)
+        .eq('organization_id', orgId);
 
       if (error) {
-        console.error('Error deleting general cost payment:', error)
-        throw error
+        throw error;
       }
 
-      return { paymentId }
+      return { paymentId };
     },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.payments() })
-      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.lists() })
-      toast({
-        title: "Pago eliminado",
-        description: "El pago se eliminó correctamente",
-      })
+    queryKey: generalCostsKeys.paymentList(organizationId),
+    optimisticUpdate: (oldData: GeneralCostPayment[] | undefined, { paymentId }: { paymentId: string; organizationId: string }) => {
+      if (!oldData) return oldData;
+      return oldData.filter((payment) => payment.id !== paymentId);
     },
-    onError: (error) => {
-      console.error('Error deleting general cost payment:', error)
-      toast({
-        title: "Error",
-        description: "No se pudo eliminar el pago",
-        variant: "destructive",
-      })
-    },
-  })
+    additionalQueryKeys: [
+      generalCostsKeys.list(organizationId),
+      generalCostsKeys.monthlySummaryList(organizationId),
+      generalCostsKeys.byCategoryList(organizationId),
+    ],
+    onSuccessMessage: 'Pago eliminado',
+    onErrorMessage: 'No se pudo eliminar el pago',
+  });
 }

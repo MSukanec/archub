@@ -1,30 +1,22 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { deleteGeneralCost } from '../services/deleteGeneralCost';
-import { GENERAL_COSTS_QUERY_KEYS } from '../constants';
-import { toast } from '@/hooks/use-toast';
+import { generalCostsKeys } from '@/core/query-keys';
+import type { GeneralCost } from '../types';
 
 export function useDeleteGeneralCost(organizationId: string | null) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: (generalCostId: string) => deleteGeneralCost(generalCostId),
-    onSuccess: () => {
-      // Invalidate both general costs and payments queries
-      queryClient.invalidateQueries({ queryKey: ['general-costs'] });
-      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.paymentsList(organizationId) });
-      
-      toast({
-        title: 'Gasto general eliminado',
-        description: 'El gasto general ha sido eliminado correctamente.',
-      });
+    queryKey: generalCostsKeys.list(organizationId),
+    optimisticUpdate: (oldData: GeneralCost[] | undefined, generalCostId: string) => {
+      if (!oldData) return oldData;
+      return oldData.filter((cost) => cost.id !== generalCostId);
     },
-    onError: (error: any) => {
-      console.error('Error deleting general cost:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo eliminar el gasto general',
-        variant: 'destructive',
-      });
-    },
+    additionalQueryKeys: [
+      generalCostsKeys.paymentList(organizationId),
+      generalCostsKeys.byCategoryList(organizationId),
+      generalCostsKeys.monthlySummaryList(organizationId),
+    ],
+    onSuccessMessage: 'Gasto general eliminado',
+    onErrorMessage: 'No se pudo eliminar el gasto general',
   });
 }

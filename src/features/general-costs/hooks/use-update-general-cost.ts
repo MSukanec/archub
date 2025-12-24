@@ -1,33 +1,31 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { updateGeneralCost } from '../services/updateGeneralCost';
-import { GENERAL_COSTS_QUERY_KEYS } from '../constants';
-import { toast } from '@/hooks/use-toast';
-import type { InsertGeneralCost } from '../types';
+import { generalCostsKeys } from '@/core/query-keys';
+import type { InsertGeneralCost, GeneralCost } from '../types';
 
-export function useUpdateGeneralCost() {
-  const queryClient = useQueryClient();
+interface UpdateParams {
+  generalCostId: string;
+  generalCost: Partial<InsertGeneralCost>;
+  organizationId: string;
+}
 
-  return useMutation({
-    mutationFn: ({ generalCostId, generalCost }: { 
-      generalCostId: string; 
-      generalCost: Partial<InsertGeneralCost> 
-    }) => updateGeneralCost(generalCostId, generalCost),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.lists() });
-      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.detail(data.id) });
-      
-      toast({
-        title: 'Gasto general actualizado',
-        description: `El gasto general "${data.name}" ha sido actualizado correctamente.`,
-      });
+export function useUpdateGeneralCost(organizationId: string | null) {
+  return useOptimisticMutation({
+    mutationFn: ({ generalCostId, generalCost }: UpdateParams) =>
+      updateGeneralCost(generalCostId, generalCost),
+    queryKey: generalCostsKeys.list(organizationId),
+    optimisticUpdate: (oldData: GeneralCost[] | undefined, { generalCostId, generalCost }: UpdateParams) => {
+      if (!oldData) return oldData;
+      return oldData.map((cost) =>
+        cost.id === generalCostId
+          ? { ...cost, ...generalCost, updated_at: new Date().toISOString() }
+          : cost
+      );
     },
-    onError: (error: any) => {
-      console.error('Error updating general cost:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo actualizar el gasto general',
-        variant: 'destructive',
-      });
-    },
+    additionalQueryKeys: [
+      generalCostsKeys.byCategoryList(organizationId),
+    ],
+    onSuccessMessage: 'Gasto general actualizado',
+    onErrorMessage: 'No se pudo actualizar el gasto general',
   });
 }

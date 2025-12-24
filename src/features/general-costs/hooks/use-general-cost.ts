@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { getGeneralCost } from '../services/getGeneralCost';
-import { GENERAL_COSTS_QUERY_KEYS } from '../constants';
+import { generalCostsKeys } from '@/core/query-keys';
 
 export function useGeneralCost(generalCostId: string | null) {
   return useQuery({
-    queryKey: GENERAL_COSTS_QUERY_KEYS.detail(generalCostId),
+    queryKey: generalCostsKeys.detail(generalCostId),
     queryFn: () => getGeneralCost(generalCostId!),
     enabled: !!generalCostId,
+    staleTime: 30000,
   });
 }

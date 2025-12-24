@@ -17,11 +17,13 @@ interface GeneralCostPaymentViewProps {
   onClose: () => void
 }
 
-const STATUS_MAP: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  confirmed: { label: 'Confirmado', variant: 'default' },
-  pending: { label: 'Pendiente', variant: 'secondary' },
-  rejected: { label: 'Rechazado', variant: 'destructive' },
-  void: { label: 'Anulado', variant: 'outline' },
+import type { BadgeVariant } from '@/components/ui/badge'
+
+const STATUS_MAP: Record<string, { label: string; variant: BadgeVariant }> = {
+  confirmed: { label: 'Confirmado', variant: 'success' },
+  pending: { label: 'Pendiente', variant: 'pending' },
+  rejected: { label: 'Rechazado', variant: 'error' },
+  void: { label: 'Anulado', variant: 'neutral' },
 }
 
 export default function GeneralCostPaymentView({ 

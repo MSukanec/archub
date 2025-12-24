@@ -1,7 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { updateGeneralCostPayment } from '../services/updateGeneralCostPayment';
-import { GENERAL_COSTS_QUERY_KEYS } from '../constants';
-import { toast } from '@/hooks/use-toast';
+import { generalCostsKeys } from '@/core/query-keys';
 import type { GeneralCostPayment } from '../types';
 
 interface UpdateGeneralCostPaymentParams {
@@ -10,32 +9,25 @@ interface UpdateGeneralCostPaymentParams {
   updates: Partial<GeneralCostPayment>;
 }
 
-export function useUpdateGeneralCostPayment() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, organizationId, updates }: UpdateGeneralCostPaymentParams) =>
-      updateGeneralCostPayment(id, organizationId, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.payments() });
-      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.lists() });
-      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.monthlySummary() });
-      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.byCategory() });
-      queryClient.invalidateQueries({ queryKey: ['unified-movements'] });
-      queryClient.invalidateQueries({ queryKey: ['unified-movements-stats'] });
-      
-      toast({
-        title: 'Pago actualizado',
-        description: 'El pago del gasto general ha sido actualizado correctamente.',
-      });
+export function useUpdateGeneralCostPayment(organizationId: string | null) {
+  return useOptimisticMutation({
+    mutationFn: ({ id, organizationId: orgId, updates }: UpdateGeneralCostPaymentParams) =>
+      updateGeneralCostPayment(id, orgId, updates),
+    queryKey: generalCostsKeys.paymentList(organizationId),
+    optimisticUpdate: (oldData: GeneralCostPayment[] | undefined, { id, updates }: UpdateGeneralCostPaymentParams) => {
+      if (!oldData) return oldData;
+      return oldData.map((payment) =>
+        payment.id === id
+          ? { ...payment, ...updates, updated_at: new Date().toISOString() }
+          : payment
+      );
     },
-    onError: (error: any) => {
-      console.error('Error updating general cost payment:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo actualizar el pago',
-        variant: 'destructive',
-      });
-    },
+    additionalQueryKeys: [
+      generalCostsKeys.list(organizationId),
+      generalCostsKeys.monthlySummaryList(organizationId),
+      generalCostsKeys.byCategoryList(organizationId),
+    ],
+    onSuccessMessage: 'Pago actualizado',
+    onErrorMessage: 'No se pudo actualizar el pago',
   });
 }

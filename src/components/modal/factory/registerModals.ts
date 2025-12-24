@@ -25,9 +25,9 @@ import { PersonnelAttendanceModal, PersonnelAddModal, PersonnelDataModal, Person
 import { SubcontractFormModal, SubcontractBidFormModal, SubcontractAwardModal, SubcontractTaskFormModal } from '@/features/subcontracts';
 import { PDFExporterModal } from '@/features/pdf';
 import GeneralCostForm from '@/features/general-costs/forms/GeneralCostForm';
-import GeneralCostView from '@/features/general-costs/forms/GeneralCostView';
+import GeneralCostDetailView from '@/features/general-costs/views/GeneralCostDetailView';
 import GeneralCostPaymentForm from '@/features/general-costs/forms/GeneralCostPaymentForm';
-import GeneralCostPaymentView from '@/features/general-costs/forms/GeneralCostPaymentView';
+import GeneralCostPaymentDetailView from '@/features/general-costs/views/GeneralCostPaymentDetailView';
 import GeneralCostCategoryForm from '@/features/general-costs/forms/GeneralCostCategoryForm';
 import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal, TestimonialForm } from '@/features/learning';
 import { HeroSectionForm } from '@/features/layout';
@@ -337,11 +337,13 @@ export function initializeModalRegistry(): void {
       mode: data?.generalCostId ? (data?.mode || 'edit') : (data?.mode || 'create')
     })
   });
-  registerModal('general-costs-view', GeneralCostView as any, {
+  registerModal('general-costs-view', GeneralCostDetailView as any, {
     ...financeConfig,
     size: 'md',
     mapDataToProps: (data) => ({
-      generalCostId: data?.generalCostId,
+      modalData: {
+        generalCostId: data?.generalCostId,
+      },
     })
   });
   
@@ -353,11 +355,13 @@ export function initializeModalRegistry(): void {
       mode: data?.paymentId ? 'edit' : 'create'
     })
   });
-  registerModal('general-costs-payment-view', GeneralCostPaymentView as any, {
+  registerModal('general-costs-payment-view', GeneralCostPaymentDetailView as any, {
     ...financeConfig,
     mapDataToProps: (data) => ({
-      organizationId: data?.organizationId,
-      paymentId: data?.paymentId,
+      modalData: {
+        organizationId: data?.organizationId,
+        paymentId: data?.paymentId,
+      },
     })
   });
   registerModal('generalCostCategory', GeneralCostCategoryForm as any, { 

@@ -1,31 +1,27 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { replaceGeneralCost } from '../services/replaceGeneralCost';
-import { GENERAL_COSTS_QUERY_KEYS } from '../constants';
-import { toast } from '@/hooks/use-toast';
+import { generalCostsKeys } from '@/core/query-keys';
+import type { GeneralCost } from '../types';
+
+interface ReplaceParams {
+  oldId: string;
+  newId: string;
+}
 
 export function useReplaceGeneralCost(organizationId: string | null) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ oldId, newId }: { oldId: string; newId: string }) => 
-      replaceGeneralCost(oldId, newId),
-    onSuccess: () => {
-      // Invalidate both general costs and payments queries with correct organizationId
-      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.lists() });
-      queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.paymentsList(organizationId) });
-      
-      toast({
-        title: 'Concepto reemplazado',
-        description: 'Los pagos fueron migrados al nuevo concepto y el anterior fue eliminado.',
-      });
+  return useOptimisticMutation({
+    mutationFn: ({ oldId, newId }: ReplaceParams) => replaceGeneralCost(oldId, newId),
+    queryKey: generalCostsKeys.list(organizationId),
+    optimisticUpdate: (oldData: GeneralCost[] | undefined, { oldId }: ReplaceParams) => {
+      if (!oldData) return oldData;
+      return oldData.filter((cost) => cost.id !== oldId);
     },
-    onError: (error: any) => {
-      console.error('Error replacing general cost:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo reemplazar el concepto de gasto',
-        variant: 'destructive',
-      });
-    },
+    additionalQueryKeys: [
+      generalCostsKeys.paymentList(organizationId),
+      generalCostsKeys.byCategoryList(organizationId),
+      generalCostsKeys.monthlySummaryList(organizationId),
+    ],
+    onSuccessMessage: 'Concepto reemplazado',
+    onErrorMessage: 'No se pudo reemplazar el concepto de gasto',
   });
 }

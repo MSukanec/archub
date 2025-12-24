@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
-import { GENERAL_COSTS_QUERY_KEYS } from '../constants';
+import { useQuery } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
+import { generalCostsKeys } from '@/core/query-keys';
 import {
   getGeneralCostCategories,
   getGeneralCostCategoryById,
@@ -12,123 +12,95 @@ import type { GeneralCostCategory } from '../types';
 
 export function useGeneralCostCategories(organizationId: string | undefined) {
   return useQuery({
-    queryKey: GENERAL_COSTS_QUERY_KEYS.categoriesList(organizationId ?? null),
+    queryKey: generalCostsKeys.categoryList(organizationId),
     queryFn: () => getGeneralCostCategories(organizationId!),
     enabled: !!organizationId,
+    staleTime: 30000,
   });
 }
 
 export function useGeneralCostCategory(categoryId: string | undefined, organizationId: string | undefined) {
   return useQuery({
-    queryKey: GENERAL_COSTS_QUERY_KEYS.category(categoryId ?? null),
+    queryKey: generalCostsKeys.category(categoryId),
     queryFn: () => getGeneralCostCategoryById(categoryId!, organizationId!),
     enabled: !!categoryId && !!organizationId,
+    staleTime: 30000,
   });
 }
 
-export function useCreateGeneralCostCategory() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
+interface CreateCategoryParams {
+  category: Pick<GeneralCostCategory, 'name' | 'description'>;
+  organizationId: string;
+}
 
-  return useMutation({
-    mutationFn: ({
-      category,
-      organizationId,
-    }: {
-      category: Pick<GeneralCostCategory, 'name' | 'description'>;
-      organizationId: string;
-    }) => createGeneralCostCategory(category, organizationId),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: GENERAL_COSTS_QUERY_KEYS.categoriesList(data.organization_id),
-      });
-      toast({
-        title: 'Categoría creada',
-        description: 'La categoría se creó correctamente',
-      });
+export function useCreateGeneralCostCategory(organizationId: string | null) {
+  return useOptimisticMutation({
+    mutationFn: ({ category, organizationId: orgId }: CreateCategoryParams) =>
+      createGeneralCostCategory(category, orgId),
+    queryKey: generalCostsKeys.categoryList(organizationId),
+    optimisticUpdate: (oldData: GeneralCostCategory[] | undefined, { category, organizationId: orgId }: CreateCategoryParams) => {
+      if (!oldData) return oldData;
+      const tempCategory: GeneralCostCategory = {
+        id: `temp-${Date.now()}`,
+        organization_id: orgId,
+        name: category.name,
+        description: category.description,
+        is_system: false,
+        is_deleted: false,
+        deleted_at: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      return [...oldData, tempCategory];
     },
-    onError: (error) => {
-      console.error('Error creating category:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo crear la categoría',
-        variant: 'destructive',
-      });
-    },
+    onSuccessMessage: 'Categoría creada',
+    onErrorMessage: 'No se pudo crear la categoría',
   });
 }
 
-export function useUpdateGeneralCostCategory() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
+interface UpdateCategoryParams {
+  categoryId: string;
+  updates: Pick<GeneralCostCategory, 'name' | 'description'>;
+  organizationId: string;
+}
 
-  return useMutation({
-    mutationFn: ({
-      categoryId,
-      updates,
-      organizationId,
-    }: {
-      categoryId: string;
-      updates: Pick<GeneralCostCategory, 'name' | 'description'>;
-      organizationId: string;
-    }) => updateGeneralCostCategory(categoryId, updates, organizationId),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: GENERAL_COSTS_QUERY_KEYS.categoriesList(data.organization_id),
-      });
-      queryClient.invalidateQueries({
-        queryKey: GENERAL_COSTS_QUERY_KEYS.category(data.id),
-      });
-      toast({
-        title: 'Categoría actualizada',
-        description: 'La categoría se actualizó correctamente',
-      });
+export function useUpdateGeneralCostCategory(organizationId: string | null) {
+  return useOptimisticMutation({
+    mutationFn: ({ categoryId, updates, organizationId: orgId }: UpdateCategoryParams) =>
+      updateGeneralCostCategory(categoryId, updates, orgId),
+    queryKey: generalCostsKeys.categoryList(organizationId),
+    optimisticUpdate: (oldData: GeneralCostCategory[] | undefined, { categoryId, updates }: UpdateCategoryParams) => {
+      if (!oldData) return oldData;
+      return oldData.map((cat) =>
+        cat.id === categoryId
+          ? { ...cat, ...updates, updated_at: new Date().toISOString() }
+          : cat
+      );
     },
-    onError: (error) => {
-      console.error('Error updating category:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo actualizar la categoría',
-        variant: 'destructive',
-      });
-    },
+    onSuccessMessage: 'Categoría actualizada',
+    onErrorMessage: 'No se pudo actualizar la categoría',
   });
 }
 
-export function useDeleteGeneralCostCategory() {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
+interface DeleteCategoryParams {
+  categoryId: string;
+  organizationId: string;
+}
 
-  return useMutation({
-    mutationFn: ({
-      categoryId,
-      organizationId,
-    }: {
-      categoryId: string;
-      organizationId: string;
-    }) => deleteGeneralCostCategory(categoryId, organizationId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: GENERAL_COSTS_QUERY_KEYS.categoriesList(variables.organizationId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: GENERAL_COSTS_QUERY_KEYS.list(variables.organizationId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: GENERAL_COSTS_QUERY_KEYS.byCategoryList(variables.organizationId),
-      });
-      toast({
-        title: 'Categoría eliminada',
-        description: 'La categoría se eliminó correctamente',
-      });
+export function useDeleteGeneralCostCategory(organizationId: string | null) {
+  return useOptimisticMutation({
+    mutationFn: ({ categoryId, organizationId: orgId }: DeleteCategoryParams) =>
+      deleteGeneralCostCategory(categoryId, orgId),
+    queryKey: generalCostsKeys.categoryList(organizationId),
+    optimisticUpdate: (oldData: GeneralCostCategory[] | undefined, { categoryId }: DeleteCategoryParams) => {
+      if (!oldData) return oldData;
+      return oldData.filter((cat) => cat.id !== categoryId);
     },
-    onError: (error) => {
-      console.error('Error deleting category:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo eliminar la categoría',
-        variant: 'destructive',
-      });
-    },
+    additionalQueryKeys: [
+      generalCostsKeys.list(organizationId),
+      generalCostsKeys.byCategoryList(organizationId),
+    ],
+    onSuccessMessage: 'Categoría eliminada',
+    onErrorMessage: 'No se pudo eliminar la categoría',
   });
 }

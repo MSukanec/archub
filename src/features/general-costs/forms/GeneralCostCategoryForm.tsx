@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FolderOpen, Pencil, Trash2 } from 'lucide-react';
-import { useQueryClient } from '@tanstack/react-query';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -21,7 +20,6 @@ import {
 } from '../hooks/use-general-cost-categories';
 import { useReplaceGeneralCostCategory } from '../hooks/use-replace-general-cost-category';
 import { getGeneralCostCategoryUsageCount } from '../services/generalCostCategories';
-import { GENERAL_COSTS_QUERY_KEYS } from '../constants';
 import type { GeneralCostCategory } from '../types';
 
 const categorySchema = z.object({
@@ -125,7 +123,7 @@ function ViewPanel({
 
       {category.is_system ? (
         <div className="pt-4 border-t border-border">
-          <Badge variant="default" data-testid="badge-system-category">
+          <Badge variant="neutral" data-testid="badge-system-category">
             Categoría del Sistema - No se puede modificar
           </Badge>
         </div>
@@ -166,14 +164,13 @@ interface GeneralCostCategoryFormProps {
 export function GeneralCostCategoryForm({ modalData, onClose, mode = 'create' }: GeneralCostCategoryFormProps) {
   const { category } = modalData || {};
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const { pushModal } = useGlobalModalStore();
   const organizationId = userData?.organization?.id ?? null;
   
-  const createMutation = useCreateGeneralCostCategory();
-  const updateMutation = useUpdateGeneralCostCategory();
-  const deleteMutation = useDeleteGeneralCostCategory();
+  const createMutation = useCreateGeneralCostCategory(organizationId);
+  const updateMutation = useUpdateGeneralCostCategory(organizationId);
+  const deleteMutation = useDeleteGeneralCostCategory(organizationId);
   const replaceMutation = useReplaceGeneralCostCategory(organizationId);
   const { data: allCategories = [] } = useGeneralCostCategories(organizationId ?? undefined);
   
@@ -271,8 +268,7 @@ export function GeneralCostCategoryForm({ modalData, onClose, mode = 'create' }:
           },
         });
       }
-    } catch (error) {
-      console.error('Error preparing delete:', error);
+    } catch {
       toast({
         title: 'Error',
         description: 'No se pudo preparar la eliminación',
@@ -299,9 +295,8 @@ export function GeneralCostCategoryForm({ modalData, onClose, mode = 'create' }:
           description: data.description ?? null,
         },
         organizationId,
-      }, {
-        onSuccess: () => handleClose(),
       });
+      handleClose();
     } else {
       createMutation.mutate({
         category: {
@@ -309,9 +304,8 @@ export function GeneralCostCategoryForm({ modalData, onClose, mode = 'create' }:
           description: data.description ?? null,
         },
         organizationId,
-      }, {
-        onSuccess: () => handleClose(),
       });
+      handleClose();
     }
   };
 
