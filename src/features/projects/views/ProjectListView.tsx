@@ -493,7 +493,12 @@ export function ProjectListView() {
     },
     onSuccessMessage: "El proyecto se ha eliminado correctamente",
     onErrorMessage: "No se pudo eliminar el proyecto",
-    additionalQueryKeys: [['current-user']],
+    additionalQueryKeys: [
+      ['current-user'],
+      userData?.user?.id && organizationId 
+        ? USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
+        : null
+    ].filter(Boolean),
   })
 
   return (
