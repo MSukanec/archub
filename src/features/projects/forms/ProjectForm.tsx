@@ -442,27 +442,24 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
 
   const updateChecklist = useUpdateChecklist();
 
-  const { mutate: createProjectMutate, isPending: isCreating } = useOptimisticMutation<ProjectType, CreateProjectData>({
+  const { mutate: createProjectMutate, mutateAsync: createProjectAsync, isPending: isCreating } = useOptimisticMutation<ProjectType, CreateProjectData>({
     mutationFn: async (data) => createProject(data),
-    queryKey: [QUERY_KEYS.PROJECTS, organizationId],
+    queryKey: projectsKeys.list(organizationId),
     optimisticUpdate: (oldData: any, variables: CreateProjectData) => {
       const optimisticProject = {
         id: 'temp-' + Date.now(),
         ...variables,
         created_at: new Date().toISOString(),
         organization_id: organizationId,
+        is_active: true,
+        is_deleted: false,
       };
       if (!Array.isArray(oldData)) return [optimisticProject];
       return [...oldData, optimisticProject];
     },
     onSuccessMessage: "Proyecto creado",
     onErrorMessage: "Error al crear proyecto",
-    additionalQueryKeys: [
-      [QUERY_KEYS.PROJECTS_LITE, organizationId],
-      [QUERY_KEYS.PROJECTS_MAP, organizationId],
-      ['user-data'],
-      ['current-user'],
-    ],
+    additionalQueryKeys: [projectsKeys.lists()],
   });
 
   const { mutate: updateProjectMutate, isPending: isUpdating } = useOptimisticMutation<ProjectType, { projectId: string; data: UpdateProjectData }>({
@@ -696,54 +693,64 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
 
         callbacks?.onSubmitSuccess?.('edit');
       } else {
-        const tempProjectId = 'temp-' + Date.now();
-
-        createProjectMutate({
-          organization_id: organizationId,
-          created_by: currentUserMember!.id,
-          ...cleanedData,
-        } as CreateProjectData);
-
-        if (userData?.user?.id) {
-          setSelectedProject(tempProjectId, organizationId);
-          updateChecklist.mutateAsync({ 
-            key: 'create_project', 
-            value: true 
-          }).catch(err => console.error('Error updating checklist:', err));
-          
-          supabase.from('user_organization_preferences').upsert({
-            user_id: userData.user.id,
+        try {
+          // Create project and wait for real UUID from backend
+          const createdProject = await createProjectAsync({
             organization_id: organizationId,
-            last_project_id: tempProjectId,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'user_id,organization_id' })
-            .then(() => {
-              queryClient.invalidateQueries({
-                queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
-              });
-            })
-            .catch((error: any) => console.error('Error setting project as active:', error));
+            created_by: currentUserMember!.id,
+            ...cleanedData,
+          } as CreateProjectData);
+
+          // Now we have the real UUID, update everything with it
+          if (createdProject?.id && userData?.user?.id) {
+            setSelectedProject(createdProject.id, organizationId);
+            
+            // Update preferences silently in background
+            updateChecklist.mutateAsync({ 
+              key: 'create_project', 
+              value: true 
+            }).catch(err => console.error('Error updating checklist:', err));
+            
+            supabase.from('user_organization_preferences').upsert({
+              user_id: userData.user.id,
+              organization_id: organizationId,
+              last_project_id: createdProject.id,
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id,organization_id' })
+              .then(() => {
+                queryClient.invalidateQueries({
+                  queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
+                });
+              })
+              .catch((error: any) => console.error('Error setting project as active:', error));
+
+            // Log activity with REAL UUID
+            const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
+            void logActivity({
+              organization_id: organizationId,
+              user_id: userData?.user?.id || '',
+              action: ACTIVITY_ACTIONS.CREATE_PROJECT,
+              target_table: TARGET_TABLES.PROJECTS,
+              target_id: createdProject.id,
+              metadata: { name: cleanedData.name, project_type: projectTypeName }
+            }).catch((err: any) => console.error('Error logging activity:', err));
+
+            // Upload image NOW if selected (project exists in DB with real UUID)
+            if (selectedImageFile) {
+              try {
+                await handleImageUpload(createdProject.id);
+              } catch (err) {
+                console.error('Error uploading image:', err);
+                callbacks?.onImageUploadError?.(err as Error);
+              }
+            }
+          }
+
+          callbacks?.onSubmitSuccess?.('create');
+        } catch (error: any) {
+          callbacks?.onSubmitError?.(error);
+          return;
         }
-
-        // NOTE: Image upload during create is NOT supported because the project 
-        // doesn't exist in the database yet. Images can be added after creation
-        // from the project edit view. Clear the selected file to avoid confusion.
-        if (selectedImageFile) {
-          setSelectedImageFile(null);
-          setImagePreviewUrl(null);
-        }
-
-        const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
-        void logActivity({
-          organization_id: organizationId,
-          user_id: userData?.user?.id || '',
-          action: ACTIVITY_ACTIONS.CREATE_PROJECT,
-          target_table: TARGET_TABLES.PROJECTS,
-          target_id: tempProjectId,
-          metadata: { name: cleanedData.name, project_type: projectTypeName }
-        }).catch((err: any) => console.error('Error logging activity:', err));
-
-        callbacks?.onSubmitSuccess?.('create');
       }
 
       onSuccess?.();

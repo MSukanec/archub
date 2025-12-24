@@ -1,25 +1,28 @@
 import { useOptimisticMutation } from '@/core/save-engine';
+import { useQueryClient } from '@tanstack/react-query';
 import { createProject } from '../services/createProject';
-import type { CreateProjectData } from '../types';
-import { QUERY_KEYS } from '../constants';
+import { projectsKeys } from '@/core/query-keys';
+import type { CreateProjectData, Project } from '../types';
 
-export function useCreateProject() {
-  return useOptimisticMutation({
+export function useCreateProject(organizationId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useOptimisticMutation<Project, CreateProjectData>({
     mutationFn: (data: CreateProjectData) => createProject(data),
-    queryKey: [QUERY_KEYS.PROJECTS],
-    optimisticUpdate: (oldData: any, newProject: CreateProjectData) => {
-      if (!oldData) return oldData;
-      if (!Array.isArray(oldData)) return oldData;
-      return [...oldData, { ...newProject, id: 'temp-' + Date.now() }];
+    queryKey: projectsKeys.list(organizationId),
+    optimisticUpdate: (oldData: any, variables: CreateProjectData) => {
+      const optimisticProject = {
+        id: 'temp-' + Date.now(),
+        ...variables,
+        created_at: new Date().toISOString(),
+        is_active: true,
+        is_deleted: false,
+      };
+      if (!Array.isArray(oldData)) return [optimisticProject];
+      return [...oldData, optimisticProject];
     },
     onSuccessMessage: 'Proyecto creado',
     onErrorMessage: 'No se pudo crear el proyecto',
-    additionalQueryKeys: [
-      [QUERY_KEYS.PROJECTS_LITE],
-      [QUERY_KEYS.PROJECTS_MAP],
-      ['user-data'],
-      ['user-organization-preferences'],
-      ['current-user'],
-    ],
+    additionalQueryKeys: [projectsKeys.lists()],
   });
 }
