@@ -1,6 +1,5 @@
 import { Tag } from 'lucide-react';
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
-import { useToast } from '@/hooks/use-toast';
 import { 
   FormPanel, 
   ViewPanel, 
@@ -18,7 +17,6 @@ interface ProjectModalityModalProps {
 
 export function ProjectModalityModal({ modalData, onClose, mode = 'create' }: ProjectModalityModalProps) {
   const { projectModality } = modalData || {};
-  const { toast } = useToast();
 
   const {
     form,
@@ -31,23 +29,6 @@ export function ProjectModalityModal({ modalData, onClose, mode = 'create' }: Pr
     onSuccess: () => {
       reset();
       onClose();
-    },
-    callbacks: {
-      onSuccess: (submitMode) => {
-        toast({
-          title: submitMode === 'edit' ? 'Modalidad actualizada' : 'Modalidad creada',
-          description: submitMode === 'edit' 
-            ? 'La modalidad de proyecto se actualizó correctamente'
-            : 'La modalidad de proyecto se creó correctamente'
-        });
-      },
-      onError: (error) => {
-        toast({
-          title: 'Error',
-          description: error.message || 'No se pudo procesar la modalidad',
-          variant: 'destructive'
-        });
-      },
     },
   });
 
