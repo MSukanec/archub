@@ -125,7 +125,7 @@ export function useProjectModalityForm({
     },
     onSuccessMessage: "Modalidad creada",
     onErrorMessage: "Error al crear modalidad",
-    additionalQueryKeys: [['project-modalities']],
+    additionalQueryKeys: [projectsKeys.modalities()],
   });
 
   const { mutate: updateModality, isPending: isUpdating } = useOptimisticMutation({
@@ -141,7 +141,7 @@ export function useProjectModalityForm({
     },
     onSuccessMessage: "Modalidad actualizada",
     onErrorMessage: "Error al actualizar modalidad",
-    additionalQueryKeys: [['project-modalities']],
+    additionalQueryKeys: [projectsKeys.modalities()],
   });
 
   const onSubmit = async (data: ProjectModalityFormData) => {

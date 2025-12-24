@@ -126,7 +126,7 @@ export function useProjectTypeForm({
     },
     onSuccessMessage: "Tipo creado",
     onErrorMessage: "Error al crear tipo",
-    additionalQueryKeys: [['project-types']],
+    additionalQueryKeys: [projectsKeys.types()],
   });
 
   const { mutate: updateType, isPending: isUpdating } = useOptimisticMutation<
@@ -144,7 +144,7 @@ export function useProjectTypeForm({
     },
     onSuccessMessage: "Tipo actualizado",
     onErrorMessage: "Error al actualizar tipo",
-    additionalQueryKeys: [['project-types']],
+    additionalQueryKeys: [projectsKeys.types()],
   });
 
   const isSubmitting = isCreating || isUpdating;

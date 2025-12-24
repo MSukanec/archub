@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects, useProjectsCount, ProjectItemCard, updateProjectLastActive } from '@/features/projects'
+import { projectsKeys } from '@/core/query-keys'
 import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization'
 import { Folder, Plus, Bell, Search, Filter } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -158,7 +159,7 @@ export function ProjectActivesView() {
     },
     onSuccessMessage: "Proyecto activado",
     onErrorMessage: "No se pudo activar el proyecto",
-    additionalQueryKeys: [['active-projects'], ['projects']],
+    additionalQueryKeys: [projectsKeys.lists()],
   });
 
   const handleSelectProject = (projectId: string) => {
