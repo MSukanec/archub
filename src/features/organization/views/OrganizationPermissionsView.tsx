@@ -1,13 +1,12 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useRef, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Shield, ShieldAlert, Loader2, Save, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
+import { Shield, ShieldAlert, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { apiRequest } from '@/lib/queryClient';
 import { organizationKeys } from '@/core/query-keys';
 import { useOptimisticMutation } from '@/core/save-engine';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -202,9 +201,8 @@ export function OrganizationPermissionsView() {
     (p: { key: string }) => p.key === 'roles.manage'
   ) || userData?.role?.name?.toLowerCase().includes('admin');
   
-  const [localPermissions, setLocalPermissions] = useState<Record<string, string[]>>({});
-  const [hasChanges, setHasChanges] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const pendingSavesRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const { data, isLoading, error } = useQuery<RolesPermissionsData>({
     queryKey: organizationKeys.rolesPermissions(organizationId),
@@ -214,17 +212,8 @@ export function OrganizationPermissionsView() {
       return response.json();
     },
     enabled: !!organizationId,
+    staleTime: 30000,
   });
-
-  useEffect(() => {
-    if (data?.roles) {
-      const permMap: Record<string, string[]> = {};
-      for (const role of data.roles) {
-        permMap[role.id] = [...role.permissionIds];
-      }
-      setLocalPermissions(permMap);
-    }
-  }, [data?.roles]);
 
   useEffect(() => {
     if (data?.permissionsByCategory) {
@@ -248,67 +237,53 @@ export function OrganizationPermissionsView() {
         ),
       };
     },
-    onSuccessMessage: 'Permisos actualizados correctamente',
     onErrorMessage: 'No se pudieron guardar los cambios',
+    invalidateOnSuccess: false,
   });
 
-  const handlePermissionToggle = (roleId: string, permissionId: string) => {
+  const scheduleAutoSave = useCallback((roleId: string, permissionIds: string[]) => {
+    const existingTimeout = pendingSavesRef.current.get(roleId);
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+    }
+    
+    const timeout = setTimeout(() => {
+      updatePermissionsMutation.mutate({ roleId, permissionIds });
+      pendingSavesRef.current.delete(roleId);
+    }, 300);
+    
+    pendingSavesRef.current.set(roleId, timeout);
+  }, [updatePermissionsMutation, organizationId]);
+
+  const handlePermissionToggle = useCallback((roleId: string, permissionId: string) => {
     const role = data?.roles.find(r => r.id === roleId);
     if (!role || isAdminRole(role.name) || !canManageRoles) return;
 
-    setLocalPermissions(prev => {
-      const current = prev[roleId] || [];
-      const updated = current.includes(permissionId)
-        ? current.filter(id => id !== permissionId)
-        : [...current, permissionId];
-      
-      return { ...prev, [roleId]: updated };
-    });
-    setHasChanges(true);
-  };
+    const currentPermissions = role.permissionIds || [];
+    const updatedPermissions = currentPermissions.includes(permissionId)
+      ? currentPermissions.filter(id => id !== permissionId)
+      : [...currentPermissions, permissionId];
+    
+    updatePermissionsMutation.mutate({ roleId, permissionIds: updatedPermissions });
+  }, [data?.roles, canManageRoles, updatePermissionsMutation]);
 
-  const handleCategoryToggle = (roleId: string, category: string, permissions: Permission[]) => {
+  const handleCategoryToggle = useCallback((roleId: string, category: string, permissions: Permission[]) => {
     const role = data?.roles.find(r => r.id === roleId);
     if (!role || isAdminRole(role.name) || !canManageRoles) return;
 
     const permissionIdsInCategory = permissions.map(p => p.id);
-    const currentPermissions = localPermissions[roleId] || [];
+    const currentPermissions = role.permissionIds || [];
     const allSelected = permissionIdsInCategory.every(id => currentPermissions.includes(id));
 
-    setLocalPermissions(prev => {
-      const current = prev[roleId] || [];
-      let updated: string[];
-
-      if (allSelected) {
-        updated = current.filter(id => !permissionIdsInCategory.includes(id));
-      } else {
-        updated = Array.from(new Set([...current, ...permissionIdsInCategory]));
-      }
-
-      return { ...prev, [roleId]: updated };
-    });
-    setHasChanges(true);
-  };
-
-  const handleSaveAll = async () => {
-    if (!data?.roles) return;
-    
-    const rolesToUpdate = data.roles.filter(role => !isAdminRole(role.name));
-    
-    for (const role of rolesToUpdate) {
-      const originalPerms = role.permissionIds.sort().join(',');
-      const currentPerms = (localPermissions[role.id] || []).sort().join(',');
-      
-      if (originalPerms !== currentPerms) {
-        await updatePermissionsMutation.mutateAsync({
-          roleId: role.id,
-          permissionIds: localPermissions[role.id] || [],
-        });
-      }
+    let updatedPermissions: string[];
+    if (allSelected) {
+      updatedPermissions = currentPermissions.filter(id => !permissionIdsInCategory.includes(id));
+    } else {
+      updatedPermissions = Array.from(new Set([...currentPermissions, ...permissionIdsInCategory]));
     }
-    
-    setHasChanges(false);
-  };
+
+    scheduleAutoSave(roleId, updatedPermissions);
+  }, [data?.roles, canManageRoles, scheduleAutoSave]);
 
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => {
@@ -347,23 +322,6 @@ export function OrganizationPermissionsView() {
     <Card data-testid="permissions-tab">
       <CardContent className="p-0">
         <div className="space-y-4">
-          {hasChanges && canManageRoles && (
-            <div className="flex justify-end p-4 border-b">
-              <Button
-                onClick={handleSaveAll}
-                disabled={updatePermissionsMutation.isPending}
-                data-testid="button-save-permissions"
-              >
-                {updatePermissionsMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4 mr-2" />
-                )}
-                Guardar cambios
-              </Button>
-            </div>
-          )}
-
           {!canManageRoles && (
             <div className="px-4 pt-4">
               <Alert>
@@ -438,7 +396,7 @@ export function OrganizationPermissionsView() {
                             </div>
                           </td>
                           {roles.map((role) => {
-                            const rolePerms = localPermissions[role.id] || [];
+                            const rolePerms = role.permissionIds || [];
                             const categoryPermIds = permissions.map(p => p.id);
                             const selectedCount = categoryPermIds.filter(id => 
                               isAdminRole(role.name) || rolePerms.includes(id)
@@ -494,7 +452,7 @@ export function OrganizationPermissionsView() {
                               </td>
                               {roles.map((role) => {
                                 const isAdmin = isAdminRole(role.name);
-                                const rolePerms = localPermissions[role.id] || [];
+                                const rolePerms = role.permissionIds || [];
                                 const isChecked = isAdmin || rolePerms.includes(permission.id);
 
                                 return (

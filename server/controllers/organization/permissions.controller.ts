@@ -178,14 +178,15 @@ export async function handleUpdateRolePermissions(req: Request, res: Response) {
     }
 
     if (permissionIds.length > 0) {
-      const insertData = permissionIds.map((permissionId: string) => ({
+      const uniquePermissionIds = Array.from(new Set(permissionIds as string[]));
+      const insertData = uniquePermissionIds.map((permissionId: string) => ({
         role_id: roleId,
         permission_id: permissionId,
       }));
 
       const { error: insertError } = await supabase
         .from('role_permissions')
-        .insert(insertData);
+        .upsert(insertData, { onConflict: 'role_id,permission_id' });
 
       if (insertError) {
         console.error('Error inserting role_permissions:', insertError);
