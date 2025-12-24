@@ -116,6 +116,27 @@ src/features/organization/
    - Cambió default export a named export para MemberActionConfirmationModal
    - Agregó export para MemberActionConfirmationForm
 
+### Sesión 4: Query Keys Centralizados (2025-12-24)
+1. ✅ **CREADO `src/core/query-keys/organization.keys.ts`**
+   - `organizationKeys`: members, stats, activity, activityLogs, wallets factories
+   - `userOrgPreferencesKeys`: list, detail factories with NullableId support
+2. ✅ **MIGRADOS todos los hooks a usar @/core/query-keys**
+   - use-organization-members.ts → organizationKeys.members()
+   - use-organization-stats.ts → organizationKeys.stats()
+   - use-organization-activity.ts → organizationKeys.activity()
+   - use-organization-activity-logs.ts → organizationKeys.activityLogs()
+   - use-organization-wallets.ts → organizationKeys.wallets()
+   - use-user-organization-preferences.ts → userOrgPreferencesKeys.detail()
+   - use-update-user-organization-preferences.ts → userOrgPreferencesKeys.detail()
+3. ✅ **ACTUALIZADOS cross-feature imports**
+   - OrganizationDashboardView.tsx → userOrgPreferencesKeys
+   - ProjectListView.tsx → userOrgPreferencesKeys
+   - ProjectActivesView.tsx → userOrgPreferencesKeys
+   - ProjectForm.tsx → userOrgPreferencesKeys
+4. ✅ **DEPRECATED old constants** in `constants/index.ts`
+   - Re-exports from centralized location for backwards compatibility
+   - Clear migration comments for future developers
+
 ---
 
 ## 4. RELACIÓN FORM ↔ MODAL (1:1)
@@ -170,10 +191,14 @@ Los siguientes modales permanecen en legacy porque **NO pertenecen al feature OR
 - [x] Todos los optimisticUpdate tienen protección contra null/undefined
 
 ### 6.4 Queries y Cache Invalidation ✅
-- [x] queryKey usando array pattern para invalidación correcta
+- [x] **Query keys CENTRALIZADOS** en `src/core/query-keys/organization.keys.ts`
+- [x] `organizationKeys` factory: members, stats, activity, activityLogs, wallets
+- [x] `userOrgPreferencesKeys` factory: list, detail (with NullableId support)
+- [x] queryKey usando array pattern para invalidación SCOPED
 - [x] additionalQueryKeys incluye queries relacionadas
 - [x] Headers/selectores invalidados al cambiar datos principales
 - [x] NO hay `queryClient.invalidateQueries()` manual sueltas
+- [x] Old constants deprecated in `constants/index.ts` with migration comments
 
 ### 6.5 Supabase Access ✅
 - [x] NO hay `supabase.from()` directo en componentes
