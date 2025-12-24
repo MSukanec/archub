@@ -21,6 +21,11 @@ export async function getProjectById(projectId: string): Promise<Project | null>
     return null;
   }
 
+  // Reject temporary IDs - they're not valid UUIDs for Supabase
+  if (projectId.startsWith('temp-')) {
+    return null;
+  }
+
   const { data, error } = await supabase
     .from('projects')
     .select(`
@@ -42,6 +47,10 @@ export async function getProjectById(projectId: string): Promise<Project | null>
   if (error) {
     // PGRST116 = no rows found, which is normal when project doesn't exist
     if (error.code === 'PGRST116') {
+      return null;
+    }
+    // 22P02 = invalid input syntax for UUID (usually from invalid ID format)
+    if (error.code === '22P02') {
       return null;
     }
     console.error('Error fetching project:', error);
