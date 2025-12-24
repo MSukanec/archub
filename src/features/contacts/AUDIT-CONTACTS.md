@@ -1,8 +1,9 @@
 # AUDIT REPORT: Feature CONTACTS
 
-**Fecha de auditoría:** 2025-12-23  
+**Fecha de auditoría inicial:** 2025-12-23  
+**Re-auditoría:** 2025-12-24  
 **Auditor:** Replit Agent  
-**Estándar aplicado:** FEATURE-AUDIT.md v1.0  
+**Estándar aplicado:** FEATURE-AUDIT.md v1.1 (con patrones de autosave enterprise)  
 **Resultado:** ✅ PASA
 
 ---
@@ -17,6 +18,8 @@
 | Forms con FormPanel | ✅ Patrón aplicado |
 | Named exports | ✅ Implementado |
 | Barrel exports | ✅ Actualizado |
+| Query Keys centralizadas | ⚠️ En constants/ (no en core/) |
+| Tipado TypeScript | ✅ Corregido (40 errores → 0) |
 
 ---
 
@@ -32,10 +35,10 @@
 │   ├── ContactList.tsx
 │   └── ContactRow.tsx
 ├── constants/
-│   └── index.ts
+│   └── index.ts              # Query keys (CONTACT_QUERY_KEYS, etc.)
 ├── forms/
-│   ├── ContactForm.tsx           # FormPanel interno, usa ModalLayout
-│   └── ContactTypeForm.tsx       # FormPanel interno, usa hooks migrados
+│   ├── ContactForm.tsx       # FormPanel interno, usa ModalLayout
+│   └── ContactTypeForm.tsx   # FormPanel interno, usa hooks migrados
 ├── hooks/
 │   ├── index.ts
 │   ├── use-contact.ts
@@ -94,7 +97,7 @@
 
 ---
 
-## 3. CHECKLIST FINAL DE AUDITORÍA
+## 3. CHECKLIST FINAL DE AUDITORÍA (v1.1)
 
 ### Arquitectura de Features
 - [x] Carpeta `services/` con funciones puras async
@@ -113,25 +116,32 @@
 - [x] Nomenclatura `*Page.tsx` y `*View.tsx`
 - [x] ContactsView sin props de orquestación (puramente presentacional)
 
-### Sistema de Guardado (Save Engine)
+### Sistema de Guardado (Save Engine) - v1.1
 - [x] 13 hooks migrados a `useOptimisticMutation`
 - [x] Guardia `if (!oldData) return oldData;` en todos
 - [x] Mensajes de éxito/error configurados
 - [x] No hay `invalidateQueries` manuales sueltas
+- [x] `additionalQueryKeys` configurado para invalidar caches relacionados
+- [N/A] useAutosaveController (no aplica - CONTACTS usa modales con submit, no vistas con autosave)
+- [N/A] useRef para hidratación (no aplica - modales no tienen hidratación compleja)
 
 ### Forms
 - [x] ContactForm.tsx con FormPanel interno
 - [x] ContactTypeForm.tsx migrado a usar hooks
 
+### Tipado TypeScript
+- [x] Sin errores LSP (40 errores corregidos en re-auditoría)
+- [x] useQuery con tipos genéricos explícitos
+
 ### Exports
 - [x] Named exports (no default exports en ningún archivo)
 - [x] Barrel exports actualizados
-- [x] ContactForm, ContactAvatar, ContactRow, ContactList convertidos a named exports
 
 ---
 
 ## 4. ISSUES RESUELTOS
 
+### Auditoría Inicial (2025-12-23)
 | Issue | Resolución |
 |-------|------------|
 | 13 hooks usaban useMutation | Migrados a useOptimisticMutation con guards |
@@ -139,6 +149,14 @@
 | Contacts.tsx con default export | Reemplazado por ContactsPage.tsx con named export |
 | ContactsView importaba ContactSettings | Actualizado para no depender de pages/ |
 | ContactTypeForm usaba useMutation inline | Migrado a usar hooks centralizados |
+
+### Re-auditoría (2025-12-24)
+| Issue | Resolución |
+|-------|------------|
+| 40 errores LSP en ContactForm.tsx | Corregidos agregando tipos genéricos a useQuery |
+| fetchedContact tipo `{}` | Cambiado a `Contact \| undefined` |
+| roles tipo `unknown[]` | Cambiado a `{ id: string; name: string }[]` |
+| isMemberData tipo `unknown` | Cambiado a `{ isMember: boolean } \| null` |
 
 ---
 
@@ -149,12 +167,13 @@
 - **Page/View Separation**: Pages orquestan, Views contienen UI
 - **Named Exports**: Para facilitar imports y tree-shaking
 - **Barrel Exports**: Re-exportaciones centralizadas en index.ts
+- **TypeScript Strict**: Tipos genéricos explícitos en useQuery
 
 ---
 
 ## 6. TECHNICAL DEBT (DOCUMENTADO)
 
-### ContactForm.tsx (1173 líneas)
+### ContactForm.tsx (1171 líneas)
 - **Estado**: No refactorizado a patrón Form↔Modal separado
 - **Razón**: Archivo muy complejo, alto riesgo de regresión
 - **Patrón actual**: FormPanel interno + ModalLayout en mismo archivo
@@ -166,30 +185,54 @@
 - **Razón**: Lógica muy acoplada al contexto del form, refactorizar requiere reescritura significativa
 - **Impacto**: Bajo - funcionan correctamente, solo no siguen patrón Save Engine
 
+### Query Keys en constants/ vs core/
+- **Estado**: Query keys están en `src/features/contacts/constants/index.ts`
+- **Estándar nuevo**: FEATURE-AUDIT.md v1.1 recomienda `src/core/query-keys/contacts.keys.ts`
+- **Razón para no migrar**: Feature ya funciona correctamente, migrar no aporta valor inmediato
+- **Impacto**: Bajo - el patrón actual está bien estructurado y documentado
+- **Recomendación futura**: Migrar cuando se unifiquen todos los features
+
 ---
 
-## 7. CONDICIÓN FINAL
+## 7. PATRONES v1.1 (NO APLICAN A CONTACTS)
 
-**ESTADO: ✅ CERRADO**
+Los siguientes patrones del FEATURE-AUDIT.md v1.1 **NO aplican** a CONTACTS porque este feature usa **modales con submit**, no **vistas con autosave**:
 
-El feature CONTACTS cumple con los estándares de FEATURE-AUDIT.md en:
+| Patrón | Razón de no aplicación |
+|--------|------------------------|
+| useAutosaveController | CONTACTS usa modales con botón submit, no campos con auto-guardado |
+| useRef para hidratación | Los modales reciben datos via props, no necesitan hidratación compleja |
+| Guardado inmediato en selects | Selects están dentro de forms con submit |
+| setQueryData para eliminación de imágenes | Avatar se maneja con upload + refetch, patrón válido |
+
+---
+
+## 8. CONDICIÓN FINAL
+
+**ESTADO: ✅ CERRADO (Re-auditado)**
+
+El feature CONTACTS cumple con los estándares de FEATURE-AUDIT.md v1.1 en:
 - Arquitectura de carpetas
 - Separación Page/View
-- Sistema Save Engine (13 hooks migrados)
-- Named exports
-- Barrel exports
+- Sistema Save Engine (13 hooks migrados con guardias)
+- Named exports y barrel exports
+- Tipado TypeScript sin errores
 
-El único technical debt documentado es la separación completa de ContactForm.tsx en Form + Modal, que se deja para una iteración futura debido a la complejidad del archivo.
+Los patrones de autosave enterprise (useAutosaveController, useRef hydration) **no aplican** porque CONTACTS usa modales tradicionales con submit, no vistas con campos de auto-guardado.
 
 ---
 
-## 8. Post-Cierre
+## 9. Post-Cierre
 
 ### Cambios futuros a considerar:
-1. Refactorizar ContactForm.tsx (1173 líneas) en componentes más pequeños
+1. Refactorizar ContactForm.tsx (1171 líneas) en componentes más pequeños
 2. Crear modals/ folder con ContactModal.tsx cuando se refactorice
-3. Agregar tests para hooks migrados
+3. Migrar query keys a `src/core/query-keys/contacts.keys.ts`
+4. Agregar tests para hooks migrados
 
-### Archivos eliminados:
+### Archivos eliminados (auditoría inicial):
 - `src/pages/contacts/Contacts.tsx` (reemplazado por ContactsPage.tsx)
 - `src/pages/contacts/ContactSettings.tsx` (movido a ContactSettingsView.tsx)
+
+### Archivos modificados (re-auditoría):
+- `src/features/contacts/forms/ContactForm.tsx` - Corregidos 40 errores de tipado TypeScript

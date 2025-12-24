@@ -628,7 +628,7 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
   }, [contactId, mode, organizationId, modalData]);
 
   // Fetch contact if editing - use REST API backend
-  const { data: fetchedContact, isLoading: contactLoading } = useQuery({
+  const { data: fetchedContact, isLoading: contactLoading } = useQuery<Contact | undefined>({
     queryKey: [`/api/contacts/${contactId}?organization_id=${organizationId}`],
     enabled: !!contactId && !!organizationId,
   });
@@ -698,12 +698,12 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
 
   const linkedUserId = editingContact?.linked_user_id || form.watch('linked_user_id');
 
-  const { data: roles = [] } = useQuery({
+  const { data: roles = [] } = useQuery<{ id: string; name: string }[]>({
     queryKey: ['/api/roles'],
     staleTime: 10 * 60 * 1000,
   });
 
-  const { data: isMemberData } = useQuery({
+  const { data: isMemberData } = useQuery<{ isMember: boolean } | null>({
     queryKey: ['/api/organization-members', linkedUserId, organizationId],
     enabled: !!linkedUserId && !!organizationId,
     staleTime: 5 * 60 * 1000,
