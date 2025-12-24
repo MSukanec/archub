@@ -749,6 +749,34 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
         } as CreateProjectData).then((createdProject) => {
           // Background operations after creation completes
           if (createdProject?.id && userData?.user?.id) {
+            // INSTANT PRECACHE: Update projects list with new project marked as active
+            const projectsList = queryClient.getQueryData<any[]>(projectsKeys.list(organizationId));
+            if (Array.isArray(projectsList)) {
+              const updatedList = projectsList
+                // Mark all projects as not active
+                .map(p => ({ ...p, is_active: false }))
+                // Add new project at the beginning with is_active: true
+                // (prepend so active project appears first)
+                ;
+              
+              const newProjectWithMeta = {
+                ...createdProject,
+                is_active: true,
+                project_data: {
+                  project_type_id: cleanedData.project_type_id || null,
+                  project_modality_id: cleanedData.project_modality_id || null,
+                  project_type: projectTypes.find(t => t.id === cleanedData.project_type_id) 
+                    ? { id: projectTypes.find(t => t.id === cleanedData.project_type_id)!.id, name: projectTypes.find(t => t.id === cleanedData.project_type_id)!.name }
+                    : null,
+                  project_modality: projectModalities.find(m => m.id === cleanedData.project_modality_id)
+                    ? { id: projectModalities.find(m => m.id === cleanedData.project_modality_id)!.id, name: projectModalities.find(m => m.id === cleanedData.project_modality_id)!.name }
+                    : null,
+                }
+              };
+              
+              queryClient.setQueryData(projectsKeys.list(organizationId), [newProjectWithMeta, ...updatedList]);
+            }
+            
             setSelectedProject(createdProject.id, organizationId);
             
             // Update checklist in background
