@@ -508,7 +508,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
   });
 
   // Mutation to upload project image using optimistic mutation
-  const { mutate: uploadImageMutate, isPending: isUploadingImage } = useOptimisticMutation({
+  const { mutateAsync: uploadImageAsync, isPending: isUploadingImage } = useOptimisticMutation({
     mutationFn: async (file: File) => {
       if (!project?.id || !organizationId) {
         throw new Error('Project ID and Organization ID are required');
@@ -523,7 +523,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
   });
 
   // Mutation to delete project image using optimistic mutation
-  const { mutate: deleteImageMutate, isPending: isDeletingImage } = useOptimisticMutation<void, void>({
+  const { mutateAsync: deleteImageAsync, isPending: isDeletingImage } = useOptimisticMutation<void, void>({
     mutationFn: async (): Promise<void> => {
       if (!project?.id || !organizationId) {
         throw new Error('Project ID and Organization ID are required');
@@ -607,7 +607,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     
     callbacks?.onImageUploadStart?.();
     try {
-      uploadImageMutate(selectedImageFile);
+      await uploadImageAsync(selectedImageFile);
       callbacks?.onImageUploadSuccess?.();
       setSelectedImageFile(null);
       setImagePreviewUrl(null);
@@ -616,8 +616,12 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     }
   };
 
-  const handleImageDelete = () => {
-    deleteImageMutate();
+  const handleImageDelete = async () => {
+    try {
+      await deleteImageAsync();
+    } catch (error: any) {
+      console.error('Error deleting image:', error);
+    }
   };
 
   const reset = () => {
