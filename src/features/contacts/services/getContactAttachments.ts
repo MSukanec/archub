@@ -21,6 +21,21 @@ export interface ContactMediaLink {
   media_file: ContactMediaFile;
 }
 
+async function generateSignedUrl(bucket: string, filePath: string): Promise<string | null> {
+  try {
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .createSignedUrl(filePath, 3600);
+    
+    if (error || !data?.signedUrl) {
+      return null;
+    }
+    return data.signedUrl;
+  } catch {
+    return null;
+  }
+}
+
 export async function getContactAttachments(
   contactId: string,
   organizationId: string
@@ -58,8 +73,32 @@ export async function getContactAttachments(
     throw error;
   }
 
-  return (data || []).map((link: any) => ({
+  const links = (data || []).map((link: any) => ({
     ...link,
     media_file: Array.isArray(link.media_file) ? link.media_file[0] : link.media_file,
   }));
+
+  const linksWithSignedUrls = await Promise.all(
+    links.map(async (link: ContactMediaLink) => {
+      if (!link.media_file) return link;
+      
+      const mediaFile = link.media_file;
+      
+      if (mediaFile.bucket === 'public-assets' && mediaFile.file_url) {
+        return link;
+      }
+      
+      const signedUrl = await generateSignedUrl(mediaFile.bucket, mediaFile.file_path);
+      
+      return {
+        ...link,
+        media_file: {
+          ...mediaFile,
+          file_url: signedUrl || mediaFile.file_url,
+        },
+      };
+    })
+  );
+
+  return linksWithSignedUrls;
 }

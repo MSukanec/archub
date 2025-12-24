@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Mail, Phone, Building, MapPin, Link2, Share2, Upload, User } from "lucide-react";
+import { Mail, Phone, Building, MapPin, Link2, Share2, Upload, User, Paperclip, FileText, Image as ImageIcon, Film } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -562,6 +562,52 @@ export function ViewPanel({
             <p className="text-sm text-foreground leading-relaxed">
               {contact.notes}
             </p>
+          </div>
+        </div>
+      )}
+
+      {existingFiles && existingFiles.length > 0 && (
+        <div>
+          <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+            <Paperclip className="h-4 w-4" />
+            Archivos adjuntos ({existingFiles.length})
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {existingFiles.map((file: any) => {
+              const isImage = file.file_type === 'image' || file.file_type?.startsWith('image/');
+              const isVideo = file.file_type === 'video' || file.file_type?.startsWith('video/');
+              
+              return (
+                <a
+                  key={file.id}
+                  href={file.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative aspect-square rounded-lg border bg-muted/30 overflow-hidden hover:border-accent transition-colors"
+                >
+                  {isImage && file.file_url ? (
+                    <img
+                      src={file.file_url}
+                      alt={file.file_name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : isVideo ? (
+                    <div className="w-full h-full flex items-center justify-center bg-muted">
+                      <Film className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted">
+                      <FileText className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                    <p className="text-xs text-white truncate font-medium">
+                      {file.file_name}
+                    </p>
+                  </div>
+                </a>
+              );
+            })}
           </div>
         </div>
       )}
