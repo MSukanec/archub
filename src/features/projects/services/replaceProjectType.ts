@@ -19,10 +19,9 @@ export async function replaceProjectType(
 
   // Update all projects that reference the old type to use the new type
   const { error: updateError } = await supabase
-    .from('projects')
+    .from('project_data')
     .update({ project_type_id: newTypeId })
-    .eq('project_type_id', oldTypeId)
-    .eq('organization_id', organizationId);
+    .eq('project_type_id', oldTypeId);
 
   if (updateError) {
     console.error('Error updating projects:', updateError);

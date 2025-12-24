@@ -19,10 +19,9 @@ export async function replaceProjectModality(
 
   // Update all projects that reference the old modality to use the new modality
   const { error: updateError } = await supabase
-    .from('projects')
+    .from('project_data')
     .update({ project_modality_id: newModalityId })
-    .eq('project_modality_id', oldModalityId)
-    .eq('organization_id', organizationId);
+    .eq('project_modality_id', oldModalityId);
 
   if (updateError) {
     console.error('Error updating projects:', updateError);
