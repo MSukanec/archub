@@ -23,7 +23,7 @@ import { supabase } from "@/lib/supabase";
 import { useOptimisticMutation } from '@/core/save-engine';
 import { createProject } from '../services/createProject';
 import { updateProject } from '../services/updateProject';
-import { uploadProjectImage, updateProjectLastActive } from '@/features/projects';
+import { uploadProjectImage, deleteProjectImage, updateProjectLastActive } from '@/features/projects';
 import { QUERY_KEYS } from '../constants';
 import { USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization';
 import { ProjectColorAdvanced } from '../components/ProjectColorAdvanced';
@@ -100,6 +100,10 @@ interface FormPanelProps {
   currentImageUrl: string | null | undefined;
   imagePreviewUrl: string | null;
   onFileSelect: (file: File | null) => void;
+  mode: 'create' | 'edit' | 'view';
+  handleImageDelete: () => void;
+  isUploadingImage: boolean;
+  isDeletingImage: boolean;
 }
 
 export function FormPanel({
@@ -112,6 +116,10 @@ export function FormPanel({
   currentImageUrl,
   imagePreviewUrl,
   onFileSelect,
+  mode,
+  handleImageDelete,
+  isUploadingImage,
+  isDeletingImage,
 }: FormPanelProps) {
   return (
     <Form {...form}>
@@ -251,10 +259,14 @@ export function FormPanel({
               }
             }}
             onHeroImageChange={(url) => {
-              if (!url) {
+              if (!url && mode === 'edit') {
+                handleImageDelete();
+              } else if (!url) {
                 onFileSelect(null);
               }
             }}
+            isUploading={isUploadingImage}
+            disabled={isUploadingImage || isDeletingImage}
             emptyStateDescription="Arrastra una imagen o haz clic para seleccionar"
             maxSize={5 * 1024 * 1024}
             maxSizeLabel="Formatos: JPG, PNG, WebP • Tamaño máximo: 5MB"
@@ -472,7 +484,6 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
 
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const { data: currentImageUrl } = useQuery({
     queryKey: ['project-edit-image', project?.id, project?.project_data?.image_bucket, project?.project_data?.image_path],
@@ -484,6 +495,53 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
       return await getProjectImageUrlFromData(project.project_data);
     },
     enabled: !!project && !!project?.project_data?.image_bucket && !!project?.project_data?.image_path,
+  });
+
+  // Mutation to upload project image using optimistic mutation
+  const { mutate: uploadImageMutate, isPending: isUploadingImage } = useOptimisticMutation({
+    mutationFn: async (file: File) => {
+      if (!project?.id || !organizationId) {
+        throw new Error('Project ID and Organization ID are required');
+      }
+      await uploadProjectImage(file, project.id, organizationId);
+    },
+    queryKey: [QUERY_KEYS.PROJECT_DATA, project?.id],
+    optimisticUpdate: (oldData) => oldData,
+    onSuccessMessage: "Imagen principal actualizada correctamente",
+    onErrorMessage: "No se pudo subir la imagen",
+    additionalQueryKeys: [
+      [QUERY_KEYS.PROJECTS, organizationId],
+      [QUERY_KEYS.PROJECT, project?.id],
+      ['project-edit-image', project?.id],
+    ],
+  });
+
+  // Mutation to delete project image using optimistic mutation
+  const { mutate: deleteImageMutate, isPending: isDeletingImage } = useOptimisticMutation<void, void>({
+    mutationFn: async (): Promise<void> => {
+      if (!project?.id || !organizationId) {
+        throw new Error('Project ID and Organization ID are required');
+      }
+      if (project?.project_data?.image_bucket && project?.project_data?.image_path) {
+        await deleteProjectImage(project.id, organizationId, project.project_data.image_bucket, project.project_data.image_path);
+      }
+    },
+    queryKey: [QUERY_KEYS.PROJECT_DATA, project?.id],
+    optimisticUpdate: (oldData) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        image_bucket: null,
+        image_path: null,
+      };
+    },
+    onSuccessMessage: "Imagen principal eliminada correctamente",
+    onErrorMessage: "No se pudo eliminar la imagen",
+    additionalQueryKeys: [
+      [QUERY_KEYS.PROJECTS, organizationId],
+      [QUERY_KEYS.PROJECT, project?.id],
+      ['project-edit-image', project?.id],
+    ],
   });
 
   const currentUserMember = organizationMembers.find(member => 
@@ -543,29 +601,21 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
   };
 
   const handleImageUpload = async (projectId: string) => {
-    if (!selectedImageFile || !organizationId) return;
-
-    setIsUploadingImage(true);
-    callbacks?.onImageUploadStart?.();
+    if (!selectedImageFile) return;
     
+    callbacks?.onImageUploadStart?.();
     try {
-      await uploadProjectImage(selectedImageFile, projectId, organizationId);
-      
-      // Invalidate all related project queries to refresh image data
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECTS, organizationId] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECT, projectId] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECT_DATA, projectId] });
-      queryClient.invalidateQueries({ queryKey: ['project-edit-image', projectId] });
-      
+      uploadImageMutate(selectedImageFile);
       callbacks?.onImageUploadSuccess?.();
-      
       setSelectedImageFile(null);
       setImagePreviewUrl(null);
     } catch (error: any) {
       callbacks?.onImageUploadError?.(error);
-    } finally {
-      setIsUploadingImage(false);
     }
+  };
+
+  const handleImageDelete = () => {
+    deleteImageMutate();
   };
 
   const reset = () => {
@@ -669,7 +719,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
         }
 
         const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
-        logActivity({
+        void logActivity({
           organization_id: organizationId,
           user_id: userData?.user?.id || '',
           action: ACTIVITY_ACTIONS.CREATE_PROJECT,
@@ -698,7 +748,10 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     currentImageUrl,
     imagePreviewUrl,
     handleFileSelect,
-    isSubmitting: isCreating || isUpdating || isUploadingImage,
+    handleImageDelete,
+    mode,
     isUploadingImage,
+    isDeletingImage,
+    isSubmitting: isCreating || isUpdating || isUploadingImage || isDeletingImage,
   };
 }

@@ -31,8 +31,11 @@ export function ProjectModal({ modalData, project: projectProp, mode: modeProp, 
     currentImageUrl,
     imagePreviewUrl,
     handleFileSelect,
+    handleImageDelete,
+    mode: formMode,
     isSubmitting,
     isUploadingImage,
+    isDeletingImage,
   } = useProjectForm({
     project,
     mode,
@@ -79,10 +82,10 @@ export function ProjectModal({ modalData, project: projectProp, mode: modeProp, 
   });
 
   const handleClose = () => {
-    if (isUploadingImage) {
+    if (isUploadingImage || isDeletingImage) {
       toast({
         title: "Espera un momento",
-        description: "La imagen se está subiendo, por favor espera...",
+        description: isUploadingImage ? "La imagen se está subiendo, por favor espera..." : "La imagen se está eliminando, por favor espera...",
         variant: "default"
       });
       return;
@@ -144,6 +147,10 @@ export function ProjectModal({ modalData, project: projectProp, mode: modeProp, 
           currentImageUrl={mode === 'edit' ? currentImageUrl : null}
           imagePreviewUrl={imagePreviewUrl}
           onFileSelect={handleFileSelect}
+          mode={mode}
+          handleImageDelete={handleImageDelete}
+          isUploadingImage={isUploadingImage}
+          isDeletingImage={isDeletingImage}
         />
       </ModalBody>
       <ModalFooter
