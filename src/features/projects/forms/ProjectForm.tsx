@@ -551,9 +551,11 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     try {
       await uploadProjectImage(selectedImageFile, projectId, organizationId);
       
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
-      queryClient.invalidateQueries({ queryKey: ['project-data', projectId] });
+      // Invalidate all related project queries to refresh image data
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECTS, organizationId] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECT, projectId] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECT_DATA, projectId] });
+      queryClient.invalidateQueries({ queryKey: ['project-edit-image', projectId] });
       
       callbacks?.onImageUploadSuccess?.();
       
@@ -613,12 +615,16 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
           target_table: TARGET_TABLES.PROJECTS,
           target_id: project.id,
           metadata: { name: cleanedData.name, project_type: projectTypeName }
-        }).catch(err => console.error('Error logging activity:', err));
+        }).catch((err: any) => console.error('Error logging activity:', err));
 
+        // Upload image AFTER project is updated (with await to ensure it completes before closing)
         if (selectedImageFile) {
-          handleImageUpload(project.id).catch(err => 
-            console.error('Error uploading image:', err)
-          );
+          try {
+            await handleImageUpload(project.id);
+          } catch (err) {
+            console.error('Error uploading image:', err);
+            callbacks?.onImageUploadError?.(err as Error);
+          }
         }
 
         callbacks?.onSubmitSuccess?.('edit');
@@ -652,10 +658,14 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
             .catch((error: any) => console.error('Error setting project as active:', error));
         }
 
+        // Upload image AFTER project is created (with await to ensure it completes before closing)
         if (selectedImageFile && tempProjectId) {
-          handleImageUpload(tempProjectId).catch(err => 
-            console.error('Error uploading image:', err)
-          );
+          try {
+            await handleImageUpload(tempProjectId);
+          } catch (err) {
+            console.error('Error uploading image:', err);
+            callbacks?.onImageUploadError?.(err as Error);
+          }
         }
 
         const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
@@ -666,7 +676,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
           target_table: TARGET_TABLES.PROJECTS,
           target_id: tempProjectId,
           metadata: { name: cleanedData.name, project_type: projectTypeName }
-        }).catch(err => console.error('Error logging activity:', err));
+        }).catch((err: any) => console.error('Error logging activity:', err));
 
         callbacks?.onSubmitSuccess?.('create');
       }
