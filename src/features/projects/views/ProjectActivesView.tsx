@@ -109,14 +109,18 @@ export function ProjectActivesView() {
     return searchMatch && matchesProjectType && matchesModality && matchesStatus;
   })
 
-  // Put active project first, then sort by last_active_at
+  // Put active project first, then sort by last_active_at, fallback to created_at
   const sortedProjects = useMemo(() => {
     const activeProject = filteredProjects.find(p => p.id === activeProjectId);
     const otherProjects = filteredProjects
       .filter(p => p.id !== activeProjectId)
       .sort((a, b) => {
-        const dateA = a.last_active_at ? new Date(a.last_active_at).getTime() : 0;
-        const dateB = b.last_active_at ? new Date(b.last_active_at).getTime() : 0;
+        const dateA = a.last_active_at 
+          ? new Date(a.last_active_at).getTime() 
+          : (a.created_at ? new Date(a.created_at).getTime() : 0);
+        const dateB = b.last_active_at 
+          ? new Date(b.last_active_at).getTime() 
+          : (b.created_at ? new Date(b.created_at).getTime() : 0);
         return dateB - dateA;
       });
     

@@ -435,13 +435,17 @@ export function ProjectListView() {
   // Delete project mutation
   const { mutate: deleteProject, isPending: isDeleting } = useOptimisticMutation({
     mutationFn: async (projectId: string) => {
-      // If deleting active project, find previous by last_active_at
+      // If deleting active project, find previous by last_active_at, fallback to created_at
       if (projectId === activeProjectId && projects.length > 1) {
         const otherProjects = projects
           .filter(p => p.id !== projectId)
           .sort((a, b) => {
-            const aTime = a.last_active_at ? new Date(a.last_active_at).getTime() : 0;
-            const bTime = b.last_active_at ? new Date(b.last_active_at).getTime() : 0;
+            const aTime = a.last_active_at 
+              ? new Date(a.last_active_at).getTime() 
+              : (a.created_at ? new Date(a.created_at).getTime() : 0);
+            const bTime = b.last_active_at 
+              ? new Date(b.last_active_at).getTime() 
+              : (b.created_at ? new Date(b.created_at).getTime() : 0);
             return bTime - aTime;
           });
         
