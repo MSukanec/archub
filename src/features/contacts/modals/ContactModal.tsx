@@ -11,7 +11,7 @@ import {
 interface ContactModalProps {
   modalData?: {
     contactId?: string;
-    contact?: Contact;
+    contact?: Contact | null;
   };
   onClose: () => void;
   mode?: "create" | "edit" | "view";
@@ -21,7 +21,7 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
   const { openModal } = useGlobalModalStore();
   
   const contactId = modalData?.contactId;
-  const contact = modalData?.contact;
+  const contact = modalData?.contact || undefined;
   const mode = modeProp || 'create';
 
   const {
@@ -123,7 +123,7 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
             form={form}
             onSubmit={onSubmit}
             isSubmitting={isSubmitting}
-            contact={editingContact}
+            contact={editingContact ?? undefined}
             contactTypes={contactTypes}
             foundUser={foundUser}
             isAlreadyMember={isAlreadyMember}

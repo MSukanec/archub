@@ -18,10 +18,10 @@ import { PhoneField } from "@/components/shared/fields/PhoneField";
 import { AvatarUploader } from "@/components/shared/fields/AvatarUploader";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useContactTypes } from "@/features/contacts/hooks";
+import { useContactTypes, useContact } from "@/features/contacts/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { CONTACT_QUERY_KEYS } from "@/features/contacts/constants";
+import { contactsKeys } from "@/core/query-keys";
 import { uploadContactAvatar, getContactAvatarUrl } from "@/lib/storage/uploadHelpers";
 import { supabase } from "@/lib/supabase";
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
@@ -48,31 +48,7 @@ const createContactSchema = z.object({
 
 export type CreateContactForm = z.infer<typeof createContactSchema>;
 
-export interface Contact {
-  id: string;
-  organization_id: string;
-  first_name: string;
-  last_name?: string;
-  full_name?: string;
-  email?: string;
-  phone?: string;
-  contact_types?: Array<{
-    id: string;
-    name: string;
-  }>;
-  company_name?: string;
-  location?: string;
-  notes?: string;
-  linked_user_id?: string;
-  contact_avatar_url?: string;
-  created_at: string;
-  linked_user?: {
-    id: string;
-    full_name: string;
-    email: string;
-    avatar_url?: string;
-  };
-}
+export type Contact = import('@/features/contacts/types').ContactWithRelations;
 
 function getDisplayName(contact: Contact | undefined | null): string {
   return contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre';
@@ -605,10 +581,7 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
   const [contactAvatarUrl, setContactAvatarUrl] = useState<string>('');
   const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
 
-  const { data: fetchedContact, isLoading: contactLoading } = useQuery<Contact | undefined>({
-    queryKey: [`/api/contacts/${contactId}?organization_id=${organizationId}`],
-    enabled: !!contactId && !!organizationId,
-  });
+  const { data: fetchedContact, isLoading: contactLoading } = useContact(organizationId, contactId);
 
   const { data: contactTypes } = useContactTypes(organizationId);
 
@@ -647,21 +620,19 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
 
   useEffect(() => {
     if (editingContact?.id) {
-      setTimeout(() => {
-        form.reset({
-          first_name: editingContact.first_name || '',
-          last_name: editingContact.last_name || '',
-          email: editingContact.email || '',
-          phone: editingContact.phone || '',
-          contact_type_ids: editingContact.contact_types?.map((ct: any) => ct.id) || [],
-          company_name: editingContact.company_name || '',
-          location: editingContact.location || '',
-          notes: editingContact.notes || '',
-          linked_user_id: editingContact.linked_user_id || '',
-        });
-      }, 0);
+      form.reset({
+        first_name: editingContact.first_name || '',
+        last_name: editingContact.last_name || '',
+        email: editingContact.email || '',
+        phone: editingContact.phone || '',
+        contact_type_ids: editingContact.contact_types?.map((ct: any) => ct.id) || [],
+        company_name: editingContact.company_name || '',
+        location: editingContact.location || '',
+        notes: editingContact.notes || '',
+        linked_user_id: editingContact.linked_user_id || '',
+      });
     }
-  }, [editingContact?.id]);
+  }, [editingContact?.id, form]);
 
   const linkedUserId = editingContact?.linked_user_id || form.watch('linked_user_id');
 
@@ -763,10 +734,10 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
       setContactAvatarUrl(result.url);
       
       await queryClient.refetchQueries({ 
-        queryKey: CONTACT_QUERY_KEYS.list(organizationId) 
+        queryKey: contactsKeys.list(organizationId) 
       });
       await queryClient.refetchQueries({ 
-        queryKey: CONTACT_QUERY_KEYS.detail(organizationId, editingContact.id) 
+        queryKey: contactsKeys.detail(organizationId, editingContact.id) 
       });
       
       toast({
@@ -949,7 +920,7 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
         }
       }
 
-      queryClient.invalidateQueries({ queryKey: CONTACT_QUERY_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: contactsKeys.all });
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey;
