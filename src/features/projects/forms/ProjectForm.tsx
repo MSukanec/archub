@@ -682,6 +682,10 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
         }
         
         // Also precache in the projects list for table instant update
+        // CRITICAL: Include full project_type and project_modality objects for table display
+        const selectedProjectType = projectTypes.find(t => t.id === cleanedData.project_type_id);
+        const selectedProjectModality = projectModalities.find(m => m.id === cleanedData.project_modality_id);
+        
         const projectsList = queryClient.getQueryData<any[]>(projectsKeys.list(organizationId));
         if (Array.isArray(projectsList)) {
           const updatedList = projectsList.map(p => {
@@ -693,6 +697,9 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
                   ...p.project_data,
                   project_type_id: cleanedData.project_type_id,
                   project_modality_id: cleanedData.project_modality_id,
+                  // Include full objects for instant table display
+                  project_type: selectedProjectType ? { id: selectedProjectType.id, name: selectedProjectType.name } : null,
+                  project_modality: selectedProjectModality ? { id: selectedProjectModality.id, name: selectedProjectModality.name } : null,
                 }
               };
             }

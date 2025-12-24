@@ -1,0 +1,153 @@
+Contexto (leer todo antes de tocar código):
+Tenemos problemas recurrentes de inconsistencias de estado en Seencel:
+cambios que se reflejan en algunos componentes pero no en otros (tablas, selectores, dashboards, headers, etc.).
+Esto NO es aceptable. Queremos un sistema enterprise, estable, escalable y definitivo, al nivel de Notion / Linear.
+
+El problema actual es que:
+
+Se usan múltiples queryKeys para el mismo dominio (projects, projects-lite, projects-map, project-info, etc.)
+
+Se mezclan invalidaciones parciales + setQueryData manual
+
+Cada feature decide por su cuenta qué invalidar
+
+Esto genera desincronización, bugs visuales y comportamientos no determinísticos
+
+Esto se tiene que terminar ahora.
+
+🎯 OBJETIVO (NO NEGOCIABLE)
+
+Implementar un sistema centralizado de data fetching y guardado con estas reglas:
+
+1️⃣ UNA SOLA FUENTE DE VERDAD POR DOMINIO
+
+Para projects:
+
+Existe UNA query base:
+
+projectsKeys.base(organizationId)
+
+
+Esta query devuelve el dataset completo y normalizado de proyectos.
+
+2️⃣ TODAS LAS VARIANTES SE DERIVAN (NO SE FETCHAN)
+
+Ejemplos de variantes PERMITIDAS:
+
+selector
+
+lite
+
+map
+
+dashboard
+
+current project
+
+👉 Todas deben usar:
+
+useQuery({
+  queryKey: projectsKeys.base(orgId),
+  queryFn: fetchProjects,
+  select: (data) => /* transformación */
+})
+
+
+❌ PROHIBIDO:
+
+Queries propias (projects-lite, projects-map, etc.)
+
+Fetchs independientes para la misma entidad
+
+Duplicar llamadas al backend
+
+3️⃣ SISTEMA DE MUTACIONES — REGLA DE ORO
+
+En TODAS las mutaciones de projects:
+
+❌ NO usar setQueryData
+
+❌ NO mutar listas manualmente
+
+❌ NO invalidar keys parciales
+
+✅ SIEMPRE hacer solo esto:
+
+queryClient.invalidateQueries({
+  queryKey: projectsKeys.base(orgId)
+})
+
+
+Esto garantiza:
+
+Refresco instantáneo
+
+Estado consistente en TODA la app
+
+Un solo punto de verdad
+
+4️⃣ PERFORMANCE (SIN PARANOIA)
+
+Usar staleTime razonable (ej: 30–60s)
+
+Usar keepPreviousData cuando corresponda
+
+NO optimizar prematuramente con cache manual
+
+La consistencia es prioridad absoluta.
+
+🧩 PLAN DE ACCIÓN OBLIGATORIO
+
+Crear / consolidar:
+
+src/core/query-keys/projects.keys.ts
+
+
+Eliminar:
+
+Queries duplicadas
+
+Keys inconsistentes
+
+Invalidaciones parciales
+
+Migrar TODOS los hooks de projects a:
+
+una query base
+
+variantes con select
+
+Refactorizar mutaciones existentes para cumplir la regla de oro
+
+Documentar el patrón en el archivo de AUDITORÍA
+
+Agregar una sección obligatoria:
+
+“Consistency & Cache Integrity”
+
+Cualquier feature auditada debe cumplir este patrón
+
+🚨 REGLA FINAL (IMPORTANTE)
+
+Si en una auditoría futura:
+
+Un cambio no se refleja instantáneamente en toda la UI
+→ la auditoría falla.
+
+Este patrón NO es opcional, es arquitectura base del sistema.
+
+✅ RESULTADO ESPERADO
+
+Cambiar nombre / color / estado de un proyecto:
+
+Dashboard → OK
+
+Tabla → OK
+
+Selector → OK
+
+Header → OK
+
+Sidebar → OK
+
+Siempre. Sin excepciones.
