@@ -17,10 +17,10 @@ export function ProjectSettingsView() {
   const { data: projectTypes = [], isLoading: typesLoading } = useProjectTypes(organizationId);
   const { data: projectModalities = [], isLoading: modalitiesLoading } = useProjectModalities(organizationId);
   
-  const deleteTypeMutation = useDeleteProjectType();
-  const replaceTypeMutation = useReplaceProjectType();
-  const deleteModalityMutation = useDeleteProjectModality();
-  const replaceModalityMutation = useReplaceProjectModality();
+  const deleteTypeMutation = useDeleteProjectType(organizationId);
+  const replaceTypeMutation = useReplaceProjectType(organizationId);
+  const deleteModalityMutation = useDeleteProjectModality(organizationId);
+  const replaceModalityMutation = useReplaceProjectModality(organizationId);
 
   // Ordenar tipos alfabéticamente
   const sortedTypes = [...projectTypes].sort((a, b) => 
