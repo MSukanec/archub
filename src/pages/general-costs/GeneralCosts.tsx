@@ -10,7 +10,7 @@ import GeneralCostsSettingsTab from './GeneralCostsSettingsTab'
 import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGeneralCosts } from '@/features/general-costs/hooks/use-general-costs'
-import { useGeneralCostsPayments } from '@/hooks/use-general-costs-payments'
+import { useGeneralCostsPayments } from '@/features/general-costs/hooks/use-general-costs-payments'
 import { useLabDrawerStore } from '@/layouts/lab/stores/useLabDrawerStore'
 import GeneralCostPaymentFormDrawerContent from '@/features/general-costs/forms/GeneralCostPaymentFormDrawerContent'
 import { Button } from '@/components/ui/button'
@@ -225,7 +225,7 @@ export default function GeneralCosts() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         toolbarProps={{
-          secondaryRightSlot: secondaryRightContent,
+          secondaryRightSlot: periodContent,
         }}
       >
         {renderView()}
