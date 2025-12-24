@@ -79,12 +79,14 @@ const variantStyles: Record<InsightVariant, { borderVar: string; icon: LucideIco
 export function InsightCard({
   title,
   titleIcon,
-  items,
+  items = [],
   emptyText,
   className,
   onAction,
   'data-testid': testId,
 }: InsightCardProps) {
+  const safeItems = items || [];
+  
   return (
     <Card className={cn('p-4', className)} data-testid={testId}>
       {title && (
@@ -93,7 +95,7 @@ export function InsightCard({
           title={title}
         />
       )}
-      {items.length === 0 ? (
+      {safeItems.length === 0 ? (
         <div className="flex items-center justify-center py-8 text-center">
           <p className="text-sm text-muted-foreground">
             {emptyText || 'No hay insights disponibles en este momento'}
@@ -101,7 +103,7 @@ export function InsightCard({
         </div>
       ) : (
         <ul className="space-y-3">
-          {items.map((item, index) => {
+          {safeItems.map((item, index) => {
             const variant = item.variant || 'info';
             const styles = variantStyles[variant];
             const IconComponent = styles.icon;
