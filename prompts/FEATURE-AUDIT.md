@@ -513,18 +513,108 @@ useQuery({
 
 ---
 
+### 5.4 AUDITORÍA DE SISTEMA DE NOTIFICACIONES (TOASTS) - CRÍTICO
+
+**REGLA DE ORO:** 
+- ✅ **Toasts CENTRALIZADOS en hooks** (`onSuccessMessage`, `onErrorMessage`)
+- ❌ **NUNCA toasts manuales en modals/forms** (causa duplicación)
+- ❌ **NUNCA callbacks `onSuccess`/`onError` que disparen toasts en modals**
+
+**POR QUÉ:** Si el hook tiene `onSuccessMessage` y el modal TAMBIÉN muestra toast en callback, salen **DOS toasts idénticos**.
+
+**Checklist de Toasts:**
+- [ ] ¿Los hooks (`useCreateEntity`, `useUpdateEntity`) tienen `onSuccessMessage`?
+- [ ] ¿Los hooks tienen `onErrorMessage`?
+- [ ] ¿Los modals/forms NUNCA llaman a `toast()` en callbacks?
+- [ ] ¿Callbacks en modals SOLO manejan cierre (reset, onClose)?
+- [ ] ¿NO hay `useToast()` importado en modals?
+
+**Patrón INCORRECTO (PROHIBIDO):**
+
+```typescript
+// ❌ ProjectModal.tsx
+const { toast } = useToast();
+
+const { mutate } = useOptimisticMutation({
+  onSuccessMessage: 'Proyecto actualizado',  // ← TOAST 1
+});
+
+// Luego en el modal:
+callbacks: {
+  onSubmitSuccess: () => {
+    toast({ title: 'Proyecto actualizado' });  // ← TOAST 2 (DUPLICADO)
+  }
+}
+```
+
+**Patrón CORRECTO:**
+
+```typescript
+// ❌ NO importar useToast
+// ❌ NO tener callbacks con toast
+
+// ✅ ProjectForm.tsx (el hook)
+export function useProjectForm() {
+  return useOptimisticMutation({
+    onSuccessMessage: 'Proyecto actualizado',  // ← UN ÚNICO TOAST AQUÍ
+    onErrorMessage: 'Error al actualizar',
+  });
+}
+
+// ✅ ProjectModal.tsx (solo cierre)
+const { form, onSubmit, reset } = useProjectForm({
+  onSuccess: () => {
+    reset();      // ← Solo limpiar
+    onClose();    // ← Solo cerrar
+  },
+  callbacks: {
+    // ✅ SOLO callbacks específicos, NO toasts
+    onImageUploadStart: () => {},  // ← Si se necesita
+    onImageUploadSuccess: () => {},
+  }
+});
+```
+
+**Excepción permitida:** Solo toasts para UX específica del modal (subida de imagen, carga, etc.), NO para success/error de submit.
+
+```typescript
+// ✅ PERMITIDO - Toast para UX específica del modal
+callbacks: {
+  onImageUploadStart: () => {
+    toast({ title: "Subiendo imagen..." });  // ← OK, es específico del modal
+  }
+}
+
+// ❌ PROHIBIDO - Toast para success/error del formulario
+callbacks: {
+  onSubmitSuccess: () => {
+    toast({ title: "Guardado" });  // ← NO, el hook ya lo hace
+  }
+}
+```
+
+**Verificación POST-IMPLEMENTACIÓN:**
+1. Crea/edita una entidad
+2. Debe aparecer **1 ÚNICO toast** de éxito
+3. Si ves 2 toasts, busca callbacks `onSubmitSuccess`/`onSubmitError` en el modal y remover
+
+---
+
 ### 6. AUDITORÍA DE MODALES
 
 **REGLA:** El Modal es un ENVASE puro. Solo maneja:
 - ModalLayout, ModalHeader, ModalBody, ModalFooter
-- Toasts (UX específica del modal)
 - Lógica de cierre
+- Toasts SOLO para UX específica del modal (image upload, loading, etc)
+- **NUNCA toasts para success/error del formulario** (ver sección 5.4)
 
 **Checklist:**
 - [ ] ¿Archivo termina en `*Modal.tsx`?
 - [ ] ¿Está en `src/features/{feature}/modals/`?
 - [ ] ¿Importa FormPanel, ViewPanel, useFeatureForm del Form?
-- [ ] ¿Maneja los toasts via callbacks del hook?
+- [ ] ¿Callback `onSuccess` SOLO hace `reset()` y `onClose()`?
+- [ ] ¿NO tiene callbacks `onSubmitSuccess` o `onSubmitError` con toasts?
+- [ ] ¿NO tiene `useToast()` importado (excepto para UX específica)?
 - [ ] ¿NO tiene lógica de mutations directa?
 - [ ] ¿Registrado en `registerModals.ts`?
 
