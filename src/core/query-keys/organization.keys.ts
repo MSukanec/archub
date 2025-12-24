@@ -111,6 +111,17 @@ export const organizationKeys = {
   /** Wallets por organización */
   wallets: (organizationId: NullableId) => 
     [...organizationKeys.walletsBase(), organizationId ?? undefined] as const,
+
+  // ═══════════════════════════════════════════════════════════════
+  // ROLES & PERMISSIONS
+  // ═══════════════════════════════════════════════════════════════
+  
+  /** Base para roles y permisos */
+  rolesPermissionsBase: () => [...organizationKeys.all, 'roles-permissions'] as const,
+  
+  /** Roles y permisos por organización */
+  rolesPermissions: (organizationId: NullableId) => 
+    [...organizationKeys.rolesPermissionsBase(), organizationId ?? undefined] as const,
 } as const;
 
 export const userOrgPreferencesKeys = {

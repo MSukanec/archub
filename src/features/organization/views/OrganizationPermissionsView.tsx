@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Shield, ShieldAlert, Loader2, Save, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { apiRequest } from '@/lib/queryClient';
+import { organizationKeys } from '@/core/query-keys';
 import { useOptimisticMutation } from '@/core/save-engine';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -206,7 +207,12 @@ export function OrganizationPermissionsView() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const { data, isLoading, error } = useQuery<RolesPermissionsData>({
-    queryKey: [`/api/organizations/${organizationId}/roles-permissions`],
+    queryKey: organizationKeys.rolesPermissions(organizationId),
+    queryFn: async () => {
+      const response = await fetch(`/api/organizations/${organizationId}/roles-permissions`);
+      if (!response.ok) throw new Error('Failed to fetch roles-permissions');
+      return response.json();
+    },
     enabled: !!organizationId,
   });
 
@@ -230,7 +236,7 @@ export function OrganizationPermissionsView() {
     mutationFn: async ({ roleId, permissionIds }: { roleId: string; permissionIds: string[] }) => {
       return apiRequest('PUT', `/api/roles/${roleId}/permissions`, { permissionIds, organizationId });
     },
-    queryKey: [`/api/organizations/${organizationId}/roles-permissions`],
+    queryKey: organizationKeys.rolesPermissions(organizationId),
     optimisticUpdate: (oldData, { roleId, permissionIds }) => {
       if (!oldData) return oldData;
       return {
