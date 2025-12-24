@@ -1,13 +1,13 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { updateProject } from '../services/updateProject';
+import { projectsKeys } from '@/core/query-keys';
 import type { UpdateProjectData } from '../types';
-import { QUERY_KEYS } from '../constants';
 
-export function useUpdateProject() {
+export function useUpdateProject(organizationId: string | undefined) {
   return useOptimisticMutation({
     mutationFn: ({ projectId, data }: { projectId: string; data: UpdateProjectData }) => 
       updateProject(projectId, data),
-    queryKey: [QUERY_KEYS.PROJECTS],
+    queryKey: projectsKeys.list(organizationId),
     optimisticUpdate: (oldData: any, variables: { projectId: string; data: UpdateProjectData }) => {
       if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;
@@ -15,8 +15,6 @@ export function useUpdateProject() {
     },
     onSuccessMessage: 'Proyecto actualizado',
     onErrorMessage: 'No se pudo actualizar el proyecto',
-    additionalQueryKeys: [
-      [QUERY_KEYS.PROJECTS_LITE],
-    ],
+    additionalQueryKeys: [projectsKeys.lists()],
   });
 }

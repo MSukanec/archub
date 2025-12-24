@@ -464,7 +464,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
 
   const { mutate: updateProjectMutate, isPending: isUpdating } = useOptimisticMutation<ProjectType, { projectId: string; data: UpdateProjectData }>({
     mutationFn: async ({ projectId, data }) => updateProject(projectId, data),
-    queryKey: [QUERY_KEYS.PROJECTS, organizationId],
+    queryKey: projectsKeys.list(organizationId),
     optimisticUpdate: (oldData: any, variables: { projectId: string; data: UpdateProjectData }) => {
       if (!Array.isArray(oldData)) return oldData;
       return oldData.map((p: any) => 
@@ -473,11 +473,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     },
     onSuccessMessage: "Proyecto actualizado",
     onErrorMessage: "Error al actualizar proyecto",
-    additionalQueryKeys: [
-      [QUERY_KEYS.PROJECTS_LITE, organizationId],
-      [QUERY_KEYS.PROJECT, project?.id],
-      [QUERY_KEYS.PROJECT_DATA, project?.id],
-    ],
+    additionalQueryKeys: [projectsKeys.lists()],
   });
 
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -485,7 +481,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
 
   // Query to fetch project_data - updates when mutation invalidates
   const { data: editingProjectData } = useQuery({
-    queryKey: [QUERY_KEYS.PROJECT_DATA, project?.id],
+    queryKey: projectsKeys.data(project?.id),
     queryFn: async () => {
       if (!project?.id || mode !== 'edit') return null;
       const { data } = await supabase
@@ -519,15 +515,11 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
       }
       await uploadProjectImage(file, project.id, organizationId);
     },
-    queryKey: [QUERY_KEYS.PROJECT_DATA, project?.id],
+    queryKey: projectsKeys.data(project?.id),
     optimisticUpdate: (oldData) => oldData,
     onSuccessMessage: "Imagen principal actualizada correctamente",
     onErrorMessage: "No se pudo subir la imagen",
-    additionalQueryKeys: [
-      [QUERY_KEYS.PROJECTS, organizationId],
-      [QUERY_KEYS.PROJECT, project?.id],
-      ['project-edit-image', project?.id],
-    ],
+    additionalQueryKeys: [projectsKeys.lists()],
   });
 
   // Mutation to delete project image using optimistic mutation
@@ -540,7 +532,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
         await deleteProjectImage(project.id, organizationId, project.project_data.image_bucket, project.project_data.image_path);
       }
     },
-    queryKey: [QUERY_KEYS.PROJECT_DATA, project?.id],
+    queryKey: projectsKeys.data(project?.id),
     optimisticUpdate: (oldData) => {
       if (!oldData) return oldData;
       return {
@@ -551,11 +543,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     },
     onSuccessMessage: "Imagen principal eliminada correctamente",
     onErrorMessage: "No se pudo eliminar la imagen",
-    additionalQueryKeys: [
-      [QUERY_KEYS.PROJECTS, organizationId],
-      [QUERY_KEYS.PROJECT, project?.id],
-      ['project-edit-image', project?.id],
-    ],
+    additionalQueryKeys: [projectsKeys.lists()],
   });
 
   const currentUserMember = organizationMembers.find(member => 
