@@ -10,6 +10,7 @@ import { useCurrencies, useOrganizationCurrencies } from '@/hooks/use-currencies
 import { useAllWallets } from '@/hooks/use-wallets';
 import { useOrganizationWallets } from '@/features/organization';
 import { useOptimisticMutation } from '@/core/save-engine';
+import { organizationKeys } from '@/core/query-keys';
 import { supabase } from '@/lib/supabase';
 
 export function OrganizationSettingsFinancesView() {
@@ -69,7 +70,7 @@ export function OrganizationSettingsFinancesView() {
         }, { onConflict: 'organization_id,currency_id' });
       if (error2) throw error2;
     },
-    queryKey: ['organization-currencies', userData?.organization?.id],
+    queryKey: organizationKeys.currencies(userData?.organization?.id),
     optimisticUpdate: (oldData, currencyId) => {
       if (!oldData) return oldData;
       return oldData.map((c: any) => ({
@@ -79,7 +80,6 @@ export function OrganizationSettingsFinancesView() {
     },
     onSuccessMessage: 'Moneda por defecto actualizada',
     onErrorMessage: 'No se pudo actualizar la moneda por defecto',
-    additionalQueryKeys: [['organization-default-currency', userData?.organization?.id]],
   });
 
   const saveDefaultWalletMutation = useOptimisticMutation({
@@ -103,7 +103,7 @@ export function OrganizationSettingsFinancesView() {
         .select();
       if (upsertError) throw upsertError;
     },
-    queryKey: ['organization-wallets', userData?.organization?.id],
+    queryKey: organizationKeys.wallets(userData?.organization?.id),
     optimisticUpdate: (oldData, walletId) => {
       if (!oldData) return oldData;
       return oldData.map((w: any) => ({
@@ -189,7 +189,7 @@ export function OrganizationSettingsFinancesView() {
         }
       }
     },
-    queryKey: ['organization-currencies', userData?.organization?.id],
+    queryKey: organizationKeys.currencies(userData?.organization?.id),
     optimisticUpdate: (oldData, currencyIds) => {
       if (!oldData) return oldData;
       return oldData;
@@ -273,7 +273,7 @@ export function OrganizationSettingsFinancesView() {
         }
       }
     },
-    queryKey: ['organization-wallets', userData?.organization?.id],
+    queryKey: organizationKeys.wallets(userData?.organization?.id),
     optimisticUpdate: (oldData, walletIds) => {
       if (!oldData) return oldData;
       return oldData;

@@ -135,6 +135,21 @@ export const organizationKeys = {
     [...organizationKeys.walletsBase(), organizationId ?? undefined] as const,
 
   // ═══════════════════════════════════════════════════════════════
+  // CURRENCIES
+  // ═══════════════════════════════════════════════════════════════
+  
+  /** Base para monedas */
+  currenciesBase: () => [...organizationKeys.all, 'currencies'] as const,
+  
+  /** Monedas por organización */
+  currencies: (organizationId: NullableId) => 
+    [...organizationKeys.currenciesBase(), organizationId ?? undefined] as const,
+  
+  /** Moneda por defecto por organización */
+  defaultCurrency: (organizationId: NullableId) => 
+    [...organizationKeys.currenciesBase(), 'default', organizationId ?? undefined] as const,
+
+  // ═══════════════════════════════════════════════════════════════
   // ROLES & PERMISSIONS
   // ═══════════════════════════════════════════════════════════════
   
