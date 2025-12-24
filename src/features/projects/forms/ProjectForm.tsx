@@ -673,14 +673,13 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
           metadata: { name: cleanedData.name, project_type: projectTypeName }
         }).catch((err: any) => console.error('Error logging activity:', err));
 
-        // Upload image AFTER project is updated (with await to ensure it completes before closing)
+        // Upload image in background if selected (non-blocking)
         if (selectedImageFile) {
-          try {
-            await handleImageUpload(project.id);
-          } catch (err) {
-            console.error('Error uploading image:', err);
-            callbacks?.onImageUploadError?.(err as Error);
-          }
+          handleImageUpload(project.id)
+            .catch(err => {
+              console.error('Error uploading image:', err);
+              callbacks?.onImageUploadError?.(err as Error);
+            });
         }
 
         callbacks?.onSubmitSuccess?.('edit');
@@ -727,14 +726,13 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
               metadata: { name: cleanedData.name, project_type: projectTypeName }
             }).catch((err: any) => console.error('Error logging activity:', err));
 
-            // Upload image NOW if selected (project exists in DB with real UUID)
+            // Upload image in background if selected (non-blocking)
             if (selectedImageFile) {
-              try {
-                await handleImageUpload(createdProject.id);
-              } catch (err) {
-                console.error('Error uploading image:', err);
-                callbacks?.onImageUploadError?.(err as Error);
-              }
+              handleImageUpload(createdProject.id)
+                .catch(err => {
+                  console.error('Error uploading image:', err);
+                  callbacks?.onImageUploadError?.(err as Error);
+                });
             }
           }
 

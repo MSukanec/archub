@@ -405,8 +405,8 @@ body[data-scroll-locked] {
   --plan-enterprise: hsl(215, 16%, 47%);
 
   /* Status Badge Colors */
-  --status-active: hsl(80, 90%, 40%);
-  --status-completed: hsl(197, 37%, 24%);
+  --status-active: hsl(197, 37%, 24%);
+  --status-completed: hsl(80, 90%, 40%);
   --status-paused: hsl(45, 90%, 50%);
   --status-cancelled: hsl(0, 75%, 60%);
   --status-planning: hsl(200, 30%, 40%);
