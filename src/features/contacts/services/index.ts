@@ -15,3 +15,4 @@ export * from './listContactAttachments';
 export * from './uploadContactAttachment';
 export * from './deleteContactAttachment';
 export * from './setContactAvatar';
+export * from './getContactAttachments';

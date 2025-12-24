@@ -36,6 +36,8 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
     avatarUploading,
     filesToUpload,
     setFilesToUpload,
+    existingFiles,
+    handleExistingFileDelete,
     currentAvatarUrl,
     handleShare,
     isSubmitting,
@@ -113,7 +115,7 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
           <ViewPanel
             contact={editingContact}
             contactAvatarUrl={currentAvatarUrl}
-            existingFiles={[]}
+            existingFiles={existingFiles}
             handleShare={handleShare}
             inviteMemberMutation={inviteMemberMutation}
             isAlreadyMember={isAlreadyMember}
@@ -132,6 +134,8 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
             avatarUploading={avatarUploading}
             filesToUpload={filesToUpload}
             setFilesToUpload={setFilesToUpload}
+            existingFiles={existingFiles}
+            onExistingFileDelete={handleExistingFileDelete}
             currentAvatarUrl={currentAvatarUrl}
           />
         )}

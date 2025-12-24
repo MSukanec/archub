@@ -18,13 +18,15 @@ import { PhoneField } from "@/components/shared/fields/PhoneField";
 import { AvatarUploader } from "@/components/shared/fields/AvatarUploader";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useContactTypes, useContact } from "@/features/contacts/hooks";
+import { useContactTypes, useContact, useContactAttachments } from "@/features/contacts/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { contactsKeys } from "@/core/query-keys";
-import { uploadContactAvatar, getContactAvatarUrl } from "@/lib/storage/uploadHelpers";
+import { uploadContactAvatar, getContactAvatarUrl, uploadContactDocument } from "@/lib/storage/uploadHelpers";
+import { deleteFile } from "@/lib/storage";
 import { supabase } from "@/lib/supabase";
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
+import type { ContactMediaLink } from '../services/getContactAttachments';
 
 const createContactSchema = z.object({
   first_name: z.string().min(1, "El nombre es requerido"),
@@ -77,6 +79,8 @@ interface FormPanelProps {
   avatarUploading: boolean;
   filesToUpload: any[];
   setFilesToUpload: (files: any[]) => void;
+  existingFiles: any[];
+  onExistingFileDelete: (fileId: string) => Promise<void>;
   currentAvatarUrl?: string;
 }
 
@@ -93,6 +97,8 @@ export function FormPanel({
   avatarUploading,
   filesToUpload,
   setFilesToUpload,
+  existingFiles,
+  onExistingFileDelete,
   currentAvatarUrl,
 }: FormPanelProps) {
   const linkedUser = contact?.linked_user || foundUser;
@@ -327,9 +333,10 @@ export function FormPanel({
           </p>
           <FileUploader
             mode="multiple"
-            existingFiles={[]}
+            existingFiles={existingFiles}
             filesToUpload={filesToUpload}
             onFilesChange={setFilesToUpload}
+            onExistingFileDelete={onExistingFileDelete}
             emptyStateDescription="Arrastra archivos o haz clic para seleccionar"
             newFileBadgeText="Nuevo"
             maxSize={10 * 1024 * 1024}
@@ -585,7 +592,35 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
 
   const { data: contactTypes } = useContactTypes(organizationId);
 
+  const { data: attachmentsData = [], refetch: refetchAttachments } = useContactAttachments(contactId, organizationId);
+
   const editingContact = contact || fetchedContact;
+
+  const existingFiles = (attachmentsData || []).map((link: ContactMediaLink) => ({
+    id: link.media_file?.id || link.id,
+    file_name: link.media_file?.file_name || 'Archivo adjunto',
+    file_type: link.media_file?.file_type || 'document',
+    file_size: link.media_file?.file_size || 0,
+    file_url: link.media_file?.file_url || '',
+    isExisting: true,
+  }));
+
+  const handleExistingFileDelete = async (fileId: string) => {
+    try {
+      await deleteFile(fileId, false);
+      await refetchAttachments();
+      toast({
+        title: 'Archivo eliminado',
+        description: 'El archivo ha sido eliminado correctamente',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error al eliminar archivo',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
 
   useEffect(() => {
     if (!editingContact?.id) {
@@ -894,12 +929,37 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
       }
     },
     onSuccess: async (result, variables) => {
+      const createdContactId = result?.id || editingContact?.id;
+      
+      if (filesToUpload.length > 0 && createdContactId && organizationId) {
+        for (const fileInput of filesToUpload) {
+          try {
+            if (!fileInput.file) continue;
+            
+            await uploadContactDocument(
+              fileInput.file,
+              createdContactId,
+              organizationId,
+              'document'
+            );
+          } catch (uploadError: any) {
+            console.error('Error uploading contact file:', uploadError);
+            toast({
+              variant: 'destructive',
+              title: 'Error al subir archivo',
+              description: uploadError?.message || 'Error desconocido',
+            });
+          }
+        }
+        setFilesToUpload([]);
+      }
+      
       await logActivity({
         organization_id: organizationId || '',
         user_id: userData?.user?.id || '',
         action: mode === 'edit' ? ACTIVITY_ACTIONS.UPDATE_CONTACT : ACTIVITY_ACTIONS.ADD_CONTACT,
         target_table: TARGET_TABLES.CONTACTS,
-        target_id: result?.id || editingContact?.id || '',
+        target_id: createdContactId || '',
         metadata: { 
           first_name: variables.first_name || '',
           last_name: variables.last_name || '',
@@ -921,6 +981,7 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
       }
 
       queryClient.invalidateQueries({ queryKey: contactsKeys.all });
+      queryClient.invalidateQueries({ queryKey: contactsKeys.attachmentList(organizationId, createdContactId) });
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey;
@@ -989,6 +1050,8 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
     avatarUploading,
     filesToUpload,
     setFilesToUpload,
+    existingFiles,
+    handleExistingFileDelete,
     currentAvatarUrl,
     handleShare,
     isSubmitting: createContactMutation.isPending,

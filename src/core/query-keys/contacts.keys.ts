@@ -65,9 +65,9 @@ export const contactsKeys = {
   /** Base para todos los adjuntos */
   attachments: () => [...contactsKeys.all, 'attachments'] as const,
   
-  /** Lista de adjuntos por contacto */
-  attachmentList: (contactId: NullableId) => 
-    [...contactsKeys.attachments(), contactId ?? undefined] as const,
+  /** Lista de adjuntos por contacto y organización */
+  attachmentList: (organizationId: NullableId, contactId: NullableId) => 
+    [...contactsKeys.attachments(), organizationId ?? undefined, contactId ?? undefined] as const,
 } as const;
 
 export const contactTypesKeys = {
