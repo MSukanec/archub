@@ -139,18 +139,18 @@ export function InviteMemberForm({
   const watchedRoleId = form.watch('roleId');
 
   useEffect(() => {
-    if (editingMember) {
+    if (editingMember && roles.length > 0) {
       form.reset({
         email: editingMember.users?.email || '',
         roleId: editingMember.role_id || '',
       });
-    } else {
+    } else if (!editingMember) {
       form.reset({
         email: defaultEmail || '',
         roleId: '',
       });
     }
-  }, [editingMember, defaultEmail, form]);
+  }, [editingMember, defaultEmail, form, roles]);
 
   useEffect(() => {
     if (!isEditing && watchedEmail && watchedRoleId && !hasCalculated) {
