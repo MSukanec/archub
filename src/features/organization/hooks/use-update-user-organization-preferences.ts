@@ -1,11 +1,11 @@
 import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
 import { updateUserOrganizationPreferences } from '../services';
-import { USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '../constants';
+import { userOrgPreferencesKeys } from '@/core/query-keys';
 import type { UpdateUserOrganizationPreferencesInput } from '../types';
 
 export function useUpdateUserOrganizationPreferences(userId: string | undefined, organizationId?: string) {
   const queryKey = userId && organizationId 
-    ? USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userId, organizationId)
+    ? userOrgPreferencesKeys.detail(userId, organizationId)
     : ['user-org-preferences-placeholder'];
 
   return useOptimisticMutation({

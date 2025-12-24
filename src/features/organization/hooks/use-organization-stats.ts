@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { getOrganizationStats } from '../services';
-import { ORGANIZATION_QUERY_KEYS } from '../constants';
+import { organizationKeys } from '@/core/query-keys';
 
 export function useOrganizationStats(organizationId: string | undefined) {
   return useQuery({
-    queryKey: ORGANIZATION_QUERY_KEYS.stats(organizationId!),
+    queryKey: organizationKeys.stats(organizationId),
     queryFn: () => getOrganizationStats(organizationId!),
     enabled: !!organizationId,
     retry: 0,

@@ -1,8 +1,10 @@
 export * from './services';
 export * from './hooks';
 export * from './types';
-export * from './constants';
 export * from './utils';
+
+// Re-export centralized query keys for convenience
+export { organizationKeys, userOrgPreferencesKeys } from '@/core/query-keys';
 
 // Modals (1:1 with Forms)
 export { OrganizationModal } from './modals/OrganizationModal';

@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects, useProjectsCount, updateProjectLastActive } from '@/features/projects'
 import { projectsKeys } from '@/core/query-keys'
-import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization'
+import { useUserOrganizationPreferences } from '@/features/organization'
+import { userOrgPreferencesKeys } from '@/core/query-keys'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { Folder, Edit, Trash2, Plus, CheckCircle2, Search, Filter, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -245,7 +246,7 @@ export function ProjectListView() {
       
       return projectId;
     },
-    queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id!, organizationId!),
+    queryKey: userOrgPreferencesKeys.detail(userData?.user?.id!, organizationId!),
     optimisticUpdate: (oldData, projectId) => {
       if (!oldData) return oldData;
       return {
@@ -455,13 +456,13 @@ export function ProjectListView() {
           setSelectedProject(newActiveId, organizationId);
           
           // Update DB preference in background (don't wait)
-          void supabase.from('user_organization_preferences').upsert({
+          supabase.from('user_organization_preferences').upsert({
             user_id: userData?.user?.id,
             organization_id: organizationId,
             last_project_id: newActiveId,
             updated_at: new Date().toISOString()
-          }, { onConflict: 'user_id,organization_id' }).then(() => {}).catch((err: any) => {
-            console.error('Error updating preferences:', err);
+          }, { onConflict: 'user_id,organization_id' }).then(() => {
+            // Success - no action needed
           });
         }
       }
@@ -495,10 +496,10 @@ export function ProjectListView() {
     onErrorMessage: "No se pudo eliminar el proyecto",
     additionalQueryKeys: [
       ['current-user'],
-      userData?.user?.id && organizationId 
-        ? USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
-        : null
-    ].filter(Boolean),
+      ...(userData?.user?.id && organizationId 
+        ? [userOrgPreferencesKeys.detail(userData.user.id, organizationId)]
+        : [])
+    ],
   })
 
   return (

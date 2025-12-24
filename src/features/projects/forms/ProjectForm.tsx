@@ -26,7 +26,7 @@ import { createProject } from '../services/createProject';
 import { updateProject } from '../services/updateProject';
 import { uploadProjectImage, deleteProjectImage, updateProjectLastActive } from '@/features/projects';
 import { QUERY_KEYS } from '../constants';
-import { USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization';
+import { userOrgPreferencesKeys } from '@/core/query-keys';
 import { ProjectColorAdvanced } from '../components/ProjectColorAdvanced';
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 import type { CreateProjectData, UpdateProjectData, Project as ProjectType } from '../types';
@@ -788,7 +788,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
               updated_at: new Date().toISOString()
             }, { onConflict: 'user_id,organization_id' })).then(() => {
               queryClient.invalidateQueries({
-                queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
+                queryKey: userOrgPreferencesKeys.detail(userData.user.id, organizationId)
               });
             }).catch((error: any) => {
               console.error('Error setting project as active:', error);

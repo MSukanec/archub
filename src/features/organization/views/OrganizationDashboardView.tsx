@@ -3,7 +3,8 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useProjects, updateProjectLastActive } from '@/features/projects';
 import { useContacts } from '@/features/contacts';
 import { useSiteLogs } from '@/features/sitelog/hooks/use-site-logs';
-import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization';
+import { useUserOrganizationPreferences } from '@/features/organization';
+import { userOrgPreferencesKeys } from '@/core/query-keys';
 import { useProjectContext } from '@/stores/projectContext';
 import { supabase } from '@/lib/supabase';
 import { useGlobalModalStore } from '@/components/modal';
@@ -286,7 +287,7 @@ export function OrganizationDashboardView({
   const organization = userData?.organizations?.find(org => org.id === currentOrganizationId) || 
                       ((userData as UserData | undefined)?.organization ?? null);
 
-  const preferencesQueryKey = USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userId!, organizationId!);
+  const preferencesQueryKey = userOrgPreferencesKeys.detail(userId!, organizationId!);
 
   useEffect(() => {
     if (organization) {

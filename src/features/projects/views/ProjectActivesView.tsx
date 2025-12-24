@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects, useProjectsCount, ProjectItemCard, updateProjectLastActive } from '@/features/projects'
 import { projectsKeys } from '@/core/query-keys'
-import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization'
+import { useUserOrganizationPreferences } from '@/features/organization'
+import { userOrgPreferencesKeys } from '@/core/query-keys'
 import { Folder, Plus, Bell, Search, Filter } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useOptimisticMutation } from '@/core/save-engine'
@@ -129,7 +130,7 @@ export function ProjectActivesView() {
 
   // Select project mutation using save-engine optimistic pattern
   const preferencesQueryKey = userId && organizationId 
-    ? USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userId, organizationId)
+    ? userOrgPreferencesKeys.detail(userId, organizationId)
     : ['user-preferences-placeholder'];
 
   const { mutate: selectProject, isPending: isSelectingProject } = useOptimisticMutation({
@@ -190,7 +191,7 @@ export function ProjectActivesView() {
     }
 
     // ⚡ PASO 1: OPTIMISTIC UPDATE - Update cache immediately
-    const queryKey = USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData?.user?.id, organizationId);
+    const queryKey = userOrgPreferencesKeys.detail(userData?.user?.id, organizationId);
     const oldData = queryClient.getQueryData(queryKey);
     
     queryClient.setQueryData(queryKey, (old: any) => ({
