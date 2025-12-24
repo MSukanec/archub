@@ -1,17 +1,73 @@
-import { Fragment, ReactNode, ComponentType } from "react";
+import { Fragment, ReactNode, ComponentType, useState } from "react";
 import { ArrowRight, MoreHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Column, RowAction, PrimaryRowAction, LeadingRowAction } from "./types";
 import { getColumnAlignment, getJustifyClass } from "./utils";
+
+function RowActionsPopover({ rowActions }: { rowActions: RowAction[] }) {
+  const [open, setOpen] = useState(false);
+  
+  const defaultActions = rowActions.filter((a) => a.variant !== "destructive");
+  const destructiveActions = rowActions.filter((a) => a.variant === "destructive");
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="h-6 w-6"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent 
+        side="bottom" 
+        align="end"
+        className="w-48 p-2 z-[70]"
+        sideOffset={4}
+      >
+        <div className="flex flex-col gap-1">
+          {defaultActions.map((action, idx) => (
+            <button
+              key={idx}
+              onClick={(e) => {
+                e.stopPropagation();
+                action.onClick();
+                setOpen(false);
+              }}
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left"
+            >
+              <action.icon className="h-4 w-4" />
+              {action.label}
+            </button>
+          ))}
+          {destructiveActions.length > 0 && (
+            <div className="h-px bg-border my-1" />
+          )}
+          {destructiveActions.map((action, idx) => (
+            <button
+              key={idx}
+              onClick={(e) => {
+                e.stopPropagation();
+                action.onClick();
+                setOpen(false);
+              }}
+              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent/10 transition-colors text-left text-foreground hover:text-red-600 dark:hover:text-red-500"
+            >
+              <action.icon className="h-4 w-4" />
+              {action.label}
+            </button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 interface TableRowProps<T> {
   item: T;
@@ -129,62 +185,7 @@ export function TableRow<T>({
           )}
 
           {rowActions && !hideActions && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  className="h-6 w-6"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 z-[70]">
-                {(() => {
-                  const defaultActions = rowActions.filter(
-                    (a) => a.variant !== "destructive"
-                  );
-                  const destructiveActions = rowActions.filter(
-                    (a) => a.variant === "destructive"
-                  );
-
-                  return (
-                    <>
-                      {defaultActions.map((action, idx) => (
-                        <DropdownMenuItem
-                          key={idx}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            action.onClick();
-                          }}
-                          className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent hover:text-black dark:hover:text-white transition-colors"
-                        >
-                          <action.icon className="h-4 w-4" />
-                          {action.label}
-                        </DropdownMenuItem>
-                      ))}
-                      {destructiveActions.length > 0 && (
-                        <DropdownMenuSeparator className="bg-border" />
-                      )}
-                      {destructiveActions.map((action, idx) => (
-                        <DropdownMenuItem
-                          key={idx}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            action.onClick();
-                          }}
-                          className="flex items-center gap-2 text-sm cursor-pointer hover:bg-transparent focus:bg-transparent text-foreground hover:text-red-600 dark:hover:text-red-500 transition-colors"
-                        >
-                          <action.icon className="h-4 w-4" />
-                          {action.label}
-                        </DropdownMenuItem>
-                      ))}
-                    </>
-                  );
-                })()}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <RowActionsPopover rowActions={rowActions} />
           )}
         </div>
       )}
