@@ -671,7 +671,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
 
     try {
       if (mode === 'edit' && project) {
-        // Precache project_data immediately for instant UI update
+        // INSTANT PRECACHING: Update both project_data and projects list simultaneously
         if (editingProjectData) {
           const updatedProjectData = {
             ...editingProjectData,
@@ -679,6 +679,26 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
             project_modality_id: cleanedData.project_modality_id,
           };
           queryClient.setQueryData(projectsKeys.data(project.id), updatedProjectData);
+        }
+        
+        // Also precache in the projects list for table instant update
+        const projectsList = queryClient.getQueryData<any[]>(projectsKeys.list(organizationId));
+        if (Array.isArray(projectsList)) {
+          const updatedList = projectsList.map(p => {
+            if (p.id === project.id) {
+              return {
+                ...p,
+                ...cleanedData,
+                project_data: {
+                  ...p.project_data,
+                  project_type_id: cleanedData.project_type_id,
+                  project_modality_id: cleanedData.project_modality_id,
+                }
+              };
+            }
+            return p;
+          });
+          queryClient.setQueryData(projectsKeys.list(organizationId), updatedList);
         }
         
         updateProjectMutate({
