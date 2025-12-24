@@ -28,3 +28,6 @@ export type { ProjectsQueryKey } from './projects.keys';
 
 export { contactsKeys, contactTypesKeys } from './contacts.keys';
 export type { ContactsQueryKey, ContactTypesQueryKey } from './contacts.keys';
+
+export { organizationKeys, userOrgPreferencesKeys } from './organization.keys';
+export type { OrganizationQueryKey, UserOrgPreferencesQueryKey } from './organization.keys';
