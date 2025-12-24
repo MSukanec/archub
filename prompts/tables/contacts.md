@@ -119,3 +119,93 @@ create trigger trigger_sync_contact_on_user_update
 after
 update on users for EACH row
 execute FUNCTION sync_contact_on_user_update ();
+
+---
+
+# VISTAS SQL
+
+## Vista CONTACTS_WITH_RELATIONS_VIEW
+
+```sql
+CREATE OR REPLACE VIEW contacts_with_relations_view AS
+SELECT 
+  c.*,
+  u.full_name AS linked_user_full_name,
+  u.email AS linked_user_email,
+  u.avatar_url AS linked_user_avatar_url,
+  COALESCE(
+    (
+      SELECT json_agg(json_build_object('id', ct.id, 'name', ct.name))
+      FROM contact_type_links ctl
+      JOIN contact_types ct ON ct.id = ctl.contact_type_id
+      WHERE ctl.contact_id = c.id
+        AND ct.is_deleted = false
+    ),
+    '[]'::json
+  ) AS contact_types,
+  EXISTS (
+    SELECT 1 FROM organization_members om
+    WHERE om.user_id = c.linked_user_id
+      AND om.organization_id = c.organization_id
+  ) AS is_organization_member
+FROM contacts c
+LEFT JOIN users u ON u.id = c.linked_user_id
+WHERE c.is_deleted = false;
+```
+
+**Propósito:** Vista principal para obtener contactos con todas sus relaciones:
+- Datos del usuario vinculado (linked_user_*)
+- Tipos de contacto como JSON array
+- Estado de membresía en la organización
+
+**Uso:** `getContacts.ts`, `getContactById.ts`
+
+---
+
+## Vista CONTACTS_BY_TYPE_VIEW
+
+```sql
+CREATE OR REPLACE VIEW contacts_by_type_view AS
+SELECT 
+  c.organization_id,
+  ct.id AS contact_type_id,
+  ct.name AS contact_type_name,
+  COUNT(DISTINCT c.id) AS total_contacts
+FROM contacts c
+JOIN contact_type_links ctl ON ctl.contact_id = c.id
+JOIN contact_types ct ON ct.id = ctl.contact_type_id
+WHERE c.is_deleted = false
+  AND ct.is_deleted = false
+GROUP BY c.organization_id, ct.id, ct.name;
+```
+
+**Propósito:** Recuento de contactos agrupados por tipo de contacto.
+
+**Uso:** `getContactsByType.ts`, `useContactsByType` hook
+
+---
+
+## Vista CONTACTS_SUMMARY_VIEW
+
+```sql
+CREATE OR REPLACE VIEW contacts_summary_view AS
+SELECT 
+  c.organization_id,
+  COUNT(*) AS total_contacts,
+  COUNT(c.linked_user_id) AS linked_contacts,
+  COUNT(CASE WHEN EXISTS (
+    SELECT 1 FROM organization_members om
+    WHERE om.user_id = c.linked_user_id
+      AND om.organization_id = c.organization_id
+  ) THEN 1 END) AS member_contacts
+FROM contacts c
+WHERE c.is_deleted = false
+GROUP BY c.organization_id;
+```
+
+**Propósito:** Resumen estadístico de contactos por organización:
+- Total de contactos activos
+- Contactos vinculados a usuarios
+- Contactos que son miembros de la organización
+
+**Uso:** `getContactsSummary.ts`, `useContactsSummary` hook
