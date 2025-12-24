@@ -31,3 +31,6 @@ export type { ContactsQueryKey, ContactTypesQueryKey } from './contacts.keys';
 
 export { organizationKeys, userOrgPreferencesKeys } from './organization.keys';
 export type { OrganizationQueryKey, UserOrgPreferencesQueryKey } from './organization.keys';
+
+export { generalCostsKeys } from './general-costs.keys';
+export type { GeneralCostsQueryKey } from './general-costs.keys';
