@@ -517,11 +517,11 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
       }
       await uploadProjectImage(file, projectId, organizationId);
     },
-    queryKey: projectsKeys.lists(),
+    queryKey: projectsKeys.data(project?.id),
     optimisticUpdate: (oldData) => oldData,
     onSuccessMessage: "Imagen principal actualizada correctamente",
     onErrorMessage: "No se pudo subir la imagen",
-    additionalQueryKeys: [],
+    additionalQueryKeys: [projectsKeys.list(organizationId)],
   });
 
   // Mutation to delete project image using optimistic mutation

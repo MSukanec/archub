@@ -261,7 +261,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
 
       if (error) throw error;
     },
-    delay: 1500,
+    delay: 500,
     enabled: !!userData && !!activeProjectId,
     additionalQueryKeys: [projectsKeys.info(activeProjectId), projectsKeys.list(organizationId)],
   });

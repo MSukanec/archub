@@ -159,7 +159,7 @@ export function ProjectActivesView() {
     },
     onSuccessMessage: "Proyecto activado",
     onErrorMessage: "No se pudo activar el proyecto",
-    additionalQueryKeys: [projectsKeys.lists()],
+    additionalQueryKeys: [projectsKeys.list(organizationId)],
   });
 
   const handleSelectProject = (projectId: string) => {
