@@ -10,7 +10,7 @@ import {
   useOrganizationMembers
 } from '@/features/organization';
 import { ComingSoonRestricted } from '@/components/shared/restrictions/guards/ComingSoonRestricted';
-import { Settings, UserPlus, Sparkles } from 'lucide-react';
+import { Settings, UserPlus, Sparkles, Building } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -65,7 +65,16 @@ export function OrganizationSettingsPage() {
       case 'permissions':
         return <OrganizationPermissionsView />;
       case 'activity':
-        return <OrganizationActivityLogsView organizationId={organizationId ?? ''} />;
+        if (!organizationId) {
+          return (
+            <div className="text-center py-12 text-muted-foreground">
+              <Building className="h-12 w-12 mx-auto mb-4 opacity-20" />
+              <p className="text-sm">No hay organización seleccionada.</p>
+              <p className="text-xs">Selecciona una organización para ver la actividad.</p>
+            </div>
+          );
+        }
+        return <OrganizationActivityLogsView organizationId={organizationId} />;
       case 'billing':
         return <OrganizationBillingView />;
       case 'finances':
