@@ -79,7 +79,7 @@ export function MonthlyTrendChart({
     )
   }
 
-  const sortedData = [...data].sort((a, b) => a.month.localeCompare(b.month))
+  const sortedData = [...data].sort((a, b) => (a.month || '').localeCompare(b.month || ''))
 
   const formatMonth = (month: string) => {
     if (!month) return ''
@@ -217,7 +217,7 @@ export function MultiSeriesTrendChart({
     )
   }
 
-  const sortedData = [...data].sort((a, b) => a.month.localeCompare(b.month))
+  const sortedData = [...data].sort((a, b) => (a.month || '').localeCompare(b.month || ''))
 
   const formatMonth = (month: string) => {
     if (!month) return ''
