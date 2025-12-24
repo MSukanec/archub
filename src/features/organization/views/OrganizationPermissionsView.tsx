@@ -209,7 +209,7 @@ export function OrganizationPermissionsView() {
   const { data, isLoading, error } = useQuery<RolesPermissionsData>({
     queryKey: organizationKeys.rolesPermissions(organizationId),
     queryFn: async () => {
-      const response = await fetch(`/api/organizations/${organizationId}/roles-permissions`);
+      const response = await apiRequest('GET', `/api/organizations/${organizationId}/roles-permissions`);
       if (!response.ok) throw new Error('Failed to fetch roles-permissions');
       return response.json();
     },

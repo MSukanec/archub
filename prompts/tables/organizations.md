@@ -441,6 +441,56 @@ create trigger organizations_set_updated_at BEFORE
 update on organizations for EACH row when (old.updated_at is distinct from new.updated_at)
 execute FUNCTION update_updated_at_column ();
 
+## Tabla PERMISSIONS:
+
+create table public.permissions (
+  id uuid not null default gen_random_uuid (),
+  key text not null,
+  description text not null,
+  category text not null,
+  is_system boolean not null default true,
+  created_at timestamp with time zone not null default now(),
+  constraint permissions_pkey primary key (id),
+  constraint permissions_key_key unique (key)
+) TABLESPACE pg_default;
+
+## Tabla ROLE_PERMISSIONS:
+
+create table public.role_permissions (
+  id uuid not null default gen_random_uuid (),
+  role_id uuid not null,
+  permission_id uuid not null,
+  created_at timestamp with time zone not null default now(),
+  constraint role_permissions_pkey primary key (id),
+  constraint role_permissions_role_id_permission_id_key unique (role_id, permission_id),
+  constraint role_permissions_permission_id_fkey foreign KEY (permission_id) references permissions (id) on delete CASCADE,
+  constraint role_permissions_role_id_fkey foreign KEY (role_id) references roles (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists idx_role_permissions_role_id on public.role_permissions using btree (role_id) TABLESPACE pg_default;
+
+create index IF not exists idx_role_permissions_permission_id on public.role_permissions using btree (permission_id) TABLESPACE pg_default;
+
+## Tabla ROLES:
+
+create table public.roles (
+  id uuid not null default gen_random_uuid (),
+  name text not null,
+  description text null,
+  type text null,
+  organization_id uuid null,
+  is_system boolean not null default false,
+  constraint roles_pkey primary key (id),
+  constraint roles_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create unique INDEX IF not exists roles_unique_name_per_org on public.roles using btree (organization_id, name) TABLESPACE pg_default
+where
+  (is_system = false);
+
+create index IF not exists idx_roles_organization_id on public.roles using btree (organization_id) TABLESPACE pg_default;
+
+
 ## Tabla USERS:
 
 create table public.users (
