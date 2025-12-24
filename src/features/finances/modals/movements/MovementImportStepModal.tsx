@@ -1318,7 +1318,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
           Mapear columnas del archivo
         </Label>
         <p className="text-sm text-muted-foreground">
-          Vincula las columnas de tu archivo Excel con los campos de Archub. Solo mapeo de columnas, el mapeo de valores será en el siguiente paso.
+          Vincula las columnas de tu archivo Excel con los campos de Seencel. Solo mapeo de columnas, el mapeo de valores será en el siguiente paso.
         </p>
       </div>
 
@@ -1333,7 +1333,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
             </div>
             <div className="col-span-1"></div>
             <div className="col-span-4">
-              <div className="text-sm font-medium text-primary">CAMPOS DE ARCHUB</div>
+              <div className="text-sm font-medium text-primary">CAMPOS DE SEENCEL</div>
               <div className="text-xs text-muted-foreground">Selecciona el campo correspondiente</div>
             </div>
             <div className="col-span-2"></div>
@@ -1365,7 +1365,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                         onValueChange={(value) => setColumnMapping(prev => ({ ...prev, [index]: value }))}
                       >
                         <SelectTrigger className="h-9">
-                          <SelectValue placeholder="Seleccionar campo de Archub" />
+                          <SelectValue placeholder="Seleccionar campo de Seencel" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="">No mapear esta columna</SelectItem>
