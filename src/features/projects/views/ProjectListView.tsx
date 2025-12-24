@@ -446,9 +446,19 @@ export function ProjectListView() {
           });
         
         if (otherProjects.length > 0) {
-          setTimeout(() => {
-            selectProject(otherProjects[0].id);
-          }, 0);
+          const newActiveId = otherProjects[0].id;
+          // Just update context and preferences WITHOUT navigation
+          setSelectedProject(newActiveId, organizationId);
+          
+          // Update DB preference in background (don't wait)
+          void supabase.from('user_organization_preferences').upsert({
+            user_id: userData?.user?.id,
+            organization_id: organizationId,
+            last_project_id: newActiveId,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id,organization_id' }).then(() => {}).catch((err: any) => {
+            console.error('Error updating preferences:', err);
+          });
         }
       }
       
