@@ -416,7 +416,7 @@ export function FileUploader({
                   {file.file_name}
                 </p>
                 {!file.isExisting && (
-                  <Badge variant="secondary" className="text-xs px-1.5 py-0">
+                  <Badge variant="info" className="text-xs px-1.5 py-0">
                     {newFileBadgeText}
                   </Badge>
                 )}
@@ -522,7 +522,7 @@ export function FileUploader({
                       {file.file_name}
                     </p>
                     {!file.isExisting && (
-                      <Badge variant="secondary" className="text-xs shrink-0">
+                      <Badge variant="info" className="text-xs shrink-0">
                         {newFileBadgeText}
                       </Badge>
                     )}

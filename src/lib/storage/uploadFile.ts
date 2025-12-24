@@ -9,22 +9,11 @@ export async function uploadFile(
   context: UploadContext
 ): Promise<UploadResult> {
   try {
-    console.log('[uploadFile] Starting upload:', {
-      fileName: file?.name,
-      fileSize: file?.size,
-      fileType: file?.type,
-      entity: context.entity,
-      organization_id: context.organization_id,
-      project_id: context.project_id,
-    });
-    
     // Verify active session before upload
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !session) {
-      console.error('[uploadFile] No active session:', sessionError);
       throw new Error('No hay sesión activa - por favor inicia sesión nuevamente');
     }
-    console.log('[uploadFile] Session verified, user:', session.user.id);
     
     if (!file || !(file instanceof File)) {
       throw new Error(`Invalid file object: ${typeof file}`);
@@ -34,8 +23,6 @@ export async function uploadFile(
 
     const config = getEntityConfig(context.entity);
     const compressionPreset = getCompressionPreset(context.entity);
-    
-    console.log('[uploadFile] Entity config:', { bucket: config.bucket, basePath: config.basePath });
     
     // Guardar tamaño original para stats de compresión
     const originalSize = file.size;
@@ -47,12 +34,6 @@ export async function uploadFile(
 
     const storagePath = buildStoragePath(processedFile, context);
 
-    console.log('[uploadFile] Uploading to storage:', {
-      bucket: storagePath.bucket,
-      path: storagePath.path,
-      fileSize: processedFile.size,
-    });
-
     const uploadResponse = await supabase.storage
       .from(storagePath.bucket)
       .upload(storagePath.path, processedFile, {
@@ -60,21 +41,9 @@ export async function uploadFile(
         upsert: true
       });
 
-    console.log('[uploadFile] Raw storage response:', JSON.stringify(uploadResponse));
-
     if (uploadResponse.error) {
-      console.error('[uploadFile] Storage upload error:', {
-        error: uploadResponse.error,
-        message: uploadResponse.error.message,
-        name: uploadResponse.error.name,
-        cause: uploadResponse.error.cause,
-        statusCode: (uploadResponse.error as any).statusCode,
-        status: (uploadResponse.error as any).status,
-      });
       throw new Error(`Error al subir archivo al storage: ${uploadResponse.error.message || 'Verifica los permisos del bucket'}`);
     }
-    
-    console.log('[uploadFile] Storage upload successful, path:', uploadResponse.data?.path);
 
     const isPublicBucket = storagePath.bucket === 'public-assets';
     let fileUrl: string | null = null;
@@ -88,19 +57,7 @@ export async function uploadFile(
     const fileType = getFileType(file.type);
     
     // Usar created_by_member_id si se proporciona (organization_member.id), sino usar auth user_id
-    // Nota: session ya fue verificada al inicio de la función
     const createdById = context.created_by_member_id || session?.user?.id || context.user_id;
-
-    console.log('[uploadFile] Attempting to create media_files record:', {
-      bucket: storagePath.bucket,
-      file_path: storagePath.path,
-      file_name: file.name,
-      file_type: fileType,
-      file_size: processedFile.size,
-      is_public: isPublic,
-      organization_id: context.organization_id,
-      created_by: createdById
-    });
 
     const { data: mediaFile, error: mediaFileError } = await supabase
       .from('media_files')
@@ -118,14 +75,6 @@ export async function uploadFile(
       })
       .select()
       .single();
-
-    console.log('[uploadFile] Media files insert response:', {
-      hasData: !!mediaFile,
-      hasError: !!mediaFileError,
-      mediaFileId: mediaFile?.id,
-      errorMessage: mediaFileError?.message,
-      errorDetails: mediaFileError
-    });
 
     if (mediaFileError || !mediaFile) {
       await supabase.storage.from(storagePath.bucket).remove([storagePath.path]);
@@ -181,11 +130,6 @@ export async function uploadFile(
         .single();
 
       if (mediaLinkError) {
-        console.error('Error creating media link:', mediaLinkError, {
-          mediaLinkData,
-          organization_id: context.organization_id,
-          entity: context.entity
-        });
         throw new Error(`Error al vincular archivo: ${mediaLinkError.message}`);
       }
       

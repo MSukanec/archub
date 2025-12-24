@@ -10,7 +10,7 @@ import {
 
 interface IdentityBadgeBadge {
   label: string;
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline';
+  variant?: 'success' | 'error' | 'warning' | 'pending' | 'info' | 'neutral';
 }
 
 interface IdentityBadgeProps {
@@ -185,7 +185,7 @@ export function IdentityBadge({
           {badges.map((badge, idx) => (
             <Badge
               key={idx}
-              variant={badge.variant || 'default'}
+              variant={badge.variant || 'neutral'}
               className={badgeSizeMap[size]}
             >
               {badge.label}
