@@ -725,14 +725,12 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
             .catch((error: any) => console.error('Error setting project as active:', error));
         }
 
-        // Upload image AFTER project is created (with await to ensure it completes before closing)
-        if (selectedImageFile && tempProjectId) {
-          try {
-            await handleImageUpload(tempProjectId);
-          } catch (err) {
-            console.error('Error uploading image:', err);
-            callbacks?.onImageUploadError?.(err as Error);
-          }
+        // NOTE: Image upload during create is NOT supported because the project 
+        // doesn't exist in the database yet. Images can be added after creation
+        // from the project edit view. Clear the selected file to avoid confusion.
+        if (selectedImageFile) {
+          setSelectedImageFile(null);
+          setImagePreviewUrl(null);
         }
 
         const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
