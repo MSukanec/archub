@@ -244,7 +244,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     }, 100);
   }, [projectData, projectDataSuccess, saveController]);
 
-  // Handle Google Places selection - save immediately after setting state
+  // Handle Google Places selection
   const handlePlaceSelected = (place: any) => {
     setAddressFull(place.address_full);
     setAddress(place.address_full); // Also set main address field
@@ -257,29 +257,8 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     setLng(place.lng);
     setTimezone(place.timezone || '');
     
-    // Save immediately after Google Places selection
-    if (isHydrated) {
-      setTimeout(() => {
-        const formData = {
-          address_full: place.address_full,
-          address: place.address_full,
-          city: place.city,
-          state: place.state,
-          country: place.country,
-          zip_code: place.postal_code,
-          place_id: place.place_id,
-          lat: place.lat,
-          lng: place.lng,
-          timezone: place.timezone || '',
-          location_type: locationType,
-          accessibility_notes: accessibilityNotes
-        };
-        
-        if (isFormValid(formData)) {
-          saveController.save(formData);
-        }
-      }, 0);
-    }
+    // Trigger save after state updates - let the blur handler save the changes
+    // The blur handler will pick up the updated state automatically
   };
 
   // Handle manual latitude/longitude input with reverse geocoding
@@ -292,28 +271,6 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     if (newLat !== null && lng !== null && googleMapsApiKey && (window as any).google) {
       await performReverseGeocoding(newLat, lng);
     }
-    
-    // Save immediately when coordinates change
-    if (isHydrated && newLat !== null && lng !== null) {
-      const formData = {
-        address_full: addressFull,
-        address: address,
-        city: city,
-        state: state,
-        country: country,
-        zip_code: zipCode,
-        place_id: placeId,
-        lat: newLat,
-        lng: lng,
-        timezone: timezone,
-        location_type: locationType,
-        accessibility_notes: accessibilityNotes
-      };
-      
-      if (isFormValid(formData)) {
-        saveController.save(formData);
-      }
-    }
   };
 
   const handleLngChange = async (value: string) => {
@@ -324,28 +281,6 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     // If both lat and lng are valid, do reverse geocoding
     if (lat !== null && newLng !== null && googleMapsApiKey && (window as any).google) {
       await performReverseGeocoding(lat, newLng);
-    }
-    
-    // Save immediately when coordinates change
-    if (isHydrated && lat !== null && newLng !== null) {
-      const formData = {
-        address_full: addressFull,
-        address: address,
-        city: city,
-        state: state,
-        country: country,
-        zip_code: zipCode,
-        place_id: placeId,
-        lat: lat,
-        lng: newLng,
-        timezone: timezone,
-        location_type: locationType,
-        accessibility_notes: accessibilityNotes
-      };
-      
-      if (isFormValid(formData)) {
-        saveController.save(formData);
-      }
     }
   };
 
@@ -407,30 +342,6 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
         title: "Ubicación actualizada",
         description: "La dirección se actualizó al mover el pin"
       });
-    }
-    
-    // Save immediately after marker drag
-    if (isHydrated) {
-      setTimeout(() => {
-        const formData = {
-          address_full: addressFull,
-          address: address,
-          city: city,
-          state: state,
-          country: country,
-          zip_code: zipCode,
-          place_id: placeId,
-          lat: newLat,
-          lng: newLng,
-          timezone: timezone,
-          location_type: locationType,
-          accessibility_notes: accessibilityNotes
-        };
-        
-        if (isFormValid(formData)) {
-          saveController.save(formData);
-        }
-      }, 100);
     }
   };
 
