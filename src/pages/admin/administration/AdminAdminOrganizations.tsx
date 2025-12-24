@@ -94,7 +94,7 @@ function LastActivityCell({ lastSeen }: { lastSeen: string | null }) {
   return (
     <div title={tooltip}>
       {isOnline ? (
-        <Badge variant="default">
+        <Badge variant="status-active">
           {label}
         </Badge>
       ) : (
@@ -328,18 +328,16 @@ const AdminAdminOrganizations = () => {
           planColorVar = '--plan-teams-bg';
         }
         
-        return (
-          <Badge 
-            variant="default"
-            style={{
-              borderColor: `hsl(from var(${planColorVar}) h s l / 0.3)`,
-              color: `var(${planColorVar})`,
-              backgroundColor: `hsl(from var(${planColorVar}) h s l / 0.1)`
-            }}
-          >
-            {planName}
-          </Badge>
-        );
+        if (planName === 'Free') {
+          return <Badge variant="plan-free">{planName}</Badge>;
+        } else if (planName === 'Pro') {
+          return <Badge variant="plan-pro">{planName}</Badge>;
+        } else if (planName === 'Teams') {
+          return <Badge variant="plan-teams">{planName}</Badge>;
+        } else if (planName === 'Enterprise') {
+          return <Badge variant="plan-enterprise">{planName}</Badge>;
+        }
+        return <Badge variant="neutral">{planName}</Badge>;
       },
     },
     {
@@ -355,7 +353,7 @@ const AdminAdminOrganizations = () => {
       label: 'Estado',
       type: 'status' as const,
       render: (org: Organization) => (
-        <Badge variant="default">
+        <Badge variant={org.is_active ? 'status-active' : 'error'}>
           {org.is_active ? 'Activa' : 'Inactiva'}
         </Badge>
       ),

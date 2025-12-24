@@ -576,7 +576,7 @@ export default function AdminDashboard() {
                         {formatDurationHHMM(user.total_seconds)}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Badge variant="secondary">
+                        <Badge variant="info">
                           {user.views_count}
                         </Badge>
                       </TableCell>
@@ -615,7 +615,7 @@ export default function AdminDashboard() {
                     data-testid={`dropoff-item-${index}`}
                   >
                     <span className="font-medium">{item.view}</span>
-                    <Badge variant="secondary" className="ml-2">
+                    <Badge variant="info" className="ml-2">
                       {item.count} sesiones
                     </Badge>
                   </div>
