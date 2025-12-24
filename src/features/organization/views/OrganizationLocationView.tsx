@@ -244,25 +244,39 @@ export function OrganizationLocationView() {
     }
   };
 
-  const handleLatChange = async (value: string) => {
+  const handleLatChange = useCallback(async (value: string) => {
     const parsed = parseFloat(value);
     const newLat = isNaN(parsed) ? null : parsed;
     setLat(newLat);
 
-    if (newLat !== null && lng !== null && googleMapsApiKey && (window as any).google) {
+    if (newLat !== null && lng !== null && googleMapsApiKey && (window as any).google && isHydrated) {
       await performReverseGeocoding(newLat, lng);
+      setTimeout(() => {
+        saveController.save({
+          ...getCurrentFormData(),
+          lat: newLat,
+          lng: lng
+        });
+      }, 50);
     }
-  };
+  }, [isHydrated, lng, googleMapsApiKey, saveController, getCurrentFormData]);
 
-  const handleLngChange = async (value: string) => {
+  const handleLngChange = useCallback(async (value: string) => {
     const parsed = parseFloat(value);
     const newLng = isNaN(parsed) ? null : parsed;
     setLng(newLng);
 
-    if (lat !== null && newLng !== null && googleMapsApiKey && (window as any).google) {
+    if (lat !== null && newLng !== null && googleMapsApiKey && (window as any).google && isHydrated) {
       await performReverseGeocoding(lat, newLng);
+      setTimeout(() => {
+        saveController.save({
+          ...getCurrentFormData(),
+          lat: lat,
+          lng: newLng
+        });
+      }, 50);
     }
-  };
+  }, [isHydrated, lat, googleMapsApiKey, saveController, getCurrentFormData]);
 
   const performReverseGeocoding = async (latitude: number, longitude: number) => {
     try {
@@ -308,18 +322,25 @@ export function OrganizationLocationView() {
     }
   };
 
-  const handleMarkerDragEnd = async (newLat: number, newLng: number) => {
+  const handleMarkerDragEnd = useCallback(async (newLat: number, newLng: number) => {
     setLat(newLat);
     setLng(newLng);
 
-    if (googleMapsApiKey && (window as any).google) {
+    if (googleMapsApiKey && (window as any).google && isHydrated) {
       await performReverseGeocoding(newLat, newLng);
+      setTimeout(() => {
+        saveController.save({
+          ...getCurrentFormData(),
+          lat: newLat,
+          lng: newLng
+        });
+      }, 50);
       toast({
         title: "Ubicación actualizada",
         description: "La dirección se actualizó al mover el pin"
       });
     }
-  };
+  }, [googleMapsApiKey, isHydrated, saveController, getCurrentFormData, toast]);
 
   if (!organizationId) {
     return (
