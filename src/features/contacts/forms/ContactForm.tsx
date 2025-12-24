@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,7 +18,7 @@ import { PhoneField } from "@/components/shared/fields/PhoneField";
 import { AvatarUploader } from "@/components/shared/fields/AvatarUploader";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useContactTypes, useContact, useContactAttachments } from "@/features/contacts/hooks";
+import { useContactTypes, useContact, useContactAttachments, useCreateContact, useUpdateContact } from "@/features/contacts/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { contactsKeys } from "@/core/query-keys";
@@ -812,262 +812,117 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
     setAvatarPreviewUrl(previewUrl);
   };
 
-  const createContactMutation = useMutation({
-    mutationFn: async (data: CreateContactForm) => {
-      if (!userData?.organization?.id) throw new Error('Organization ID not found');
+  const createMutation = useCreateContact(organizationId || '');
+  const updateMutation = useUpdateContact(organizationId || '', editingContact?.id || '');
 
-      const orgId = userData.organization.id;
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-      if (mode === 'edit' && editingContact) {
-        if (data.email && data.email.trim().length > 0 && data.email !== editingContact.email) {
-          const { data: existingContact, error: checkError } = await supabase
-            .from('contacts')
-            .select('id, first_name, last_name, email')
-            .eq('organization_id', orgId)
-            .ilike('email', data.email.trim())
-            .neq('id', editingContact.id)
-            .maybeSingle();
-
-          if (checkError) throw checkError;
-          if (existingContact) {
-            const contactName = `${existingContact.first_name} ${existingContact.last_name || ''}`.trim();
-            throw new Error(`Ya existe otro contacto con el email "${data.email}" (${contactName}). No se pueden tener contactos duplicados con el mismo email.`);
-          }
-        }
-
-        const fullName = [data.first_name, data.last_name]
-          .filter(Boolean)
-          .join(' ')
-          .trim() || null;
-
-        const { data: updatedContact, error } = await supabase
+  const onSubmit = async (data: CreateContactForm) => {
+    if (!organizationId) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Email uniqueness validation
+      if (data.email && data.email.trim().length > 0) {
+        const emailQuery = supabase
           .from('contacts')
-          .update({
-            first_name: data.first_name,
-            last_name: data.last_name || null,
-            full_name: fullName,
-            email: data.email || null,
-            phone: data.phone || null,
-            company_name: data.company_name || null,
-            location: data.location || null,
-            notes: data.notes || null,
-            linked_user_id: data.linked_user_id || null,
-          })
-          .eq('id', editingContact.id)
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        const newTypeIds = data.contact_type_ids || [];
+          .select('id, first_name, last_name, email')
+          .eq('organization_id', organizationId)
+          .ilike('email', data.email.trim());
         
-        const { data: currentLinks } = await supabase
-          .from('contact_type_links')
-          .select('id, contact_type_id')
-          .eq('contact_id', editingContact.id);
-        
-        const currentTypeIds = (currentLinks || []).map(link => link.contact_type_id);
-        
-        const typesToAdd = newTypeIds.filter(id => !currentTypeIds.includes(id));
-        const linksToRemove = (currentLinks || []).filter(link => !newTypeIds.includes(link.contact_type_id));
-        
-        for (const link of linksToRemove) {
-          await supabase
-            .from('contact_type_links')
-            .delete()
-            .eq('id', link.id);
+        if (mode === 'edit' && editingContact) {
+          emailQuery.neq('id', editingContact.id);
         }
         
-        if (typesToAdd.length > 0) {
-          const typeLinks = typesToAdd.map(typeId => ({
-            contact_id: editingContact.id,
-            contact_type_id: typeId,
-            organization_id: orgId,
-          }));
-
-          const { error: linksError } = await supabase
-            .from('contact_type_links')
-            .insert(typeLinks);
-
-          if (linksError) throw linksError;
+        const { data: existingContact, error: checkError } = await emailQuery.maybeSingle();
+        if (checkError) throw checkError;
+        if (existingContact) {
+          const contactName = `${existingContact.first_name} ${existingContact.last_name || ''}`.trim();
+          throw new Error(`Ya existe un contacto con el email "${data.email}" (${contactName}). No se pueden tener contactos duplicados con el mismo email.`);
         }
-
-        return updatedContact;
-      } else {
-        if (data.email && data.email.trim().length > 0) {
-          const { data: existingContact, error: checkError } = await supabase
-            .from('contacts')
-            .select('id, first_name, last_name, email')
-            .eq('organization_id', orgId)
-            .ilike('email', data.email.trim())
-            .maybeSingle();
-
-          if (checkError) throw checkError;
-          if (existingContact) {
-            const contactName = `${existingContact.first_name} ${existingContact.last_name || ''}`.trim();
-            throw new Error(`Ya existe un contacto con el email "${data.email}" (${contactName}). No se pueden crear contactos duplicados con el mismo email.`);
-          }
-        }
-
-        const newFullName = [data.first_name, data.last_name]
-          .filter(Boolean)
-          .join(' ')
-          .trim() || null;
-
-        const { data: newContact, error } = await supabase
-          .from('contacts')
-          .insert({
-            organization_id: orgId,
-            first_name: data.first_name,
-            last_name: data.last_name || null,
-            full_name: newFullName,
-            email: data.email || null,
-            phone: data.phone || null,
-            company_name: data.company_name || null,
-            location: data.location || null,
-            notes: data.notes || null,
-            linked_user_id: data.linked_user_id || null,
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        if (data.contact_type_ids && data.contact_type_ids.length > 0) {
-          const typeLinks = data.contact_type_ids.map(typeId => ({
-            contact_id: newContact.id,
-            contact_type_id: typeId,
-            organization_id: orgId,
-          }));
-
-          const { error: linksError } = await supabase
-            .from('contact_type_links')
-            .insert(typeLinks);
-
-          if (linksError) throw linksError;
-        }
-
-        return newContact;
       }
-    },
-    onSuccess: async (result, variables) => {
-      const createdContactId = result?.id || editingContact?.id;
+
+      let contactId: string;
       
-      if (filesToUpload.length > 0 && createdContactId && organizationId) {
+      if (mode === 'edit' && editingContact) {
+        await updateMutation.mutateAsync({
+          first_name: data.first_name,
+          last_name: data.last_name || undefined,
+          email: data.email || undefined,
+          phone: data.phone || undefined,
+          company_name: data.company_name || undefined,
+          location: data.location || undefined,
+          notes: data.notes || undefined,
+          linked_user_id: data.linked_user_id || undefined,
+          contact_type_ids: data.contact_type_ids || [],
+        });
+        contactId = editingContact.id;
+      } else {
+        const result = await createMutation.mutateAsync({
+          first_name: data.first_name,
+          last_name: data.last_name || undefined,
+          email: data.email || undefined,
+          phone: data.phone || undefined,
+          company_name: data.company_name || undefined,
+          location: data.location || undefined,
+          notes: data.notes || undefined,
+          linked_user_id: data.linked_user_id || undefined,
+          contact_type_ids: data.contact_type_ids || [],
+        });
+        contactId = result.id;
+      }
+
+      if (filesToUpload.length > 0) {
         for (const fileInput of filesToUpload) {
+          if (!fileInput.file) continue;
           try {
-            if (!fileInput.file) continue;
-            
-            await uploadContactDocument(
-              fileInput.file,
-              createdContactId,
-              organizationId,
-              'document'
-            );
+            await uploadContactDocument(fileInput.file, contactId, organizationId, 'document');
           } catch (uploadError: any) {
-            console.error('Error uploading contact file:', uploadError);
-            toast({
-              variant: 'destructive',
-              title: 'Error al subir archivo',
-              description: uploadError?.message || 'Error desconocido',
-            });
+            toast({ variant: 'destructive', title: 'Error al subir archivo', description: uploadError?.message || 'Error desconocido' });
           }
         }
         setFilesToUpload([]);
       }
 
-      if (pendingAvatarFile && createdContactId && organizationId) {
+      if (pendingAvatarFile) {
         try {
           setAvatarUploading(true);
-          const result = await uploadContactAvatar(pendingAvatarFile, createdContactId, organizationId);
-          setContactAvatarUrl(result.url);
+          const avatarResult = await uploadContactAvatar(pendingAvatarFile, contactId, organizationId);
+          setContactAvatarUrl(avatarResult.url);
           setPendingAvatarFile(null);
           setAvatarPreviewUrl(null);
         } catch (avatarError: any) {
-          console.error('Error uploading avatar:', avatarError);
-          toast({
-            variant: 'destructive',
-            title: 'Error al subir avatar',
-            description: avatarError?.message || 'No se pudo subir la foto de perfil',
-          });
+          toast({ variant: 'destructive', title: 'Error al subir avatar', description: avatarError?.message || 'No se pudo subir la foto de perfil' });
         } finally {
           setAvatarUploading(false);
         }
       }
-      
+
       await logActivity({
-        organization_id: organizationId || '',
+        organization_id: organizationId,
         user_id: userData?.user?.id || '',
         action: mode === 'edit' ? ACTIVITY_ACTIONS.UPDATE_CONTACT : ACTIVITY_ACTIONS.ADD_CONTACT,
         target_table: TARGET_TABLES.CONTACTS,
-        target_id: createdContactId || '',
-        metadata: { 
-          first_name: variables.first_name || '',
-          last_name: variables.last_name || '',
-          company_name: variables.company_name || ''
-        }
+        target_id: contactId,
+        metadata: { first_name: data.first_name || '', last_name: data.last_name || '', company_name: data.company_name || '' }
       });
 
       if (mode === 'create') {
         try {
-          const { error: checklistError } = await supabase.rpc('tick_home_checklist', {
-            p_key: 'create_contact',
-            p_value: true
-          });
-          if (checklistError) console.error('Error updating home checklist:', checklistError);
+          await supabase.rpc('tick_home_checklist', { p_key: 'create_contact', p_value: true });
           queryClient.invalidateQueries({ queryKey: ['current-user'] });
-        } catch (error) {
-          console.error('Error calling tick_home_checklist:', error);
-        }
+        } catch {}
       }
 
-      queryClient.invalidateQueries({ queryKey: contactsKeys.all });
-      queryClient.invalidateQueries({ queryKey: contactsKeys.attachmentList(organizationId, createdContactId) });
-      queryClient.invalidateQueries({ 
-        predicate: (query) => {
-          const key = query.queryKey;
-          return Array.isArray(key) && typeof key[0] === 'string' && key[0].includes('/clients');
-        }
-      });
-      queryClient.invalidateQueries({ 
-        predicate: (query) => {
-          const key = query.queryKey;
-          return Array.isArray(key) && key[0] === 'clients';
-        }
-      });
-      queryClient.invalidateQueries({ 
-        predicate: (query) => {
-          const key = query.queryKey;
-          return Array.isArray(key) && typeof key[0] === 'string' && key[0].includes('/api/contacts');
-        }
-      });
-      queryClient.invalidateQueries({ 
-        predicate: (query) => {
-          const key = query.queryKey;
-          return Array.isArray(key) && key[0] === 'personnel';
-        }
-      });
-      
-      toast({
-        title: mode === 'edit' ? "Contacto actualizado" : "Contacto creado",
-        description: mode === 'edit' 
-          ? "El contacto ha sido actualizado exitosamente" 
-          : "El nuevo contacto ha sido agregado a tu organización",
-      });
-      
-      onSuccess?.();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Hubo un error al procesar el contacto",
-        variant: "destructive",
-      });
-    }
-  });
+      queryClient.invalidateQueries({ queryKey: contactsKeys.attachmentList(organizationId, contactId) });
 
-  const onSubmit = async (data: CreateContactForm) => {
-    createContactMutation.mutate(data);
+      onSuccess?.();
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message || "Hubo un error al procesar el contacto", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleShare = () => {
@@ -1103,7 +958,7 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
     handleExistingFileDelete,
     currentAvatarUrl,
     handleShare,
-    isSubmitting: createContactMutation.isPending,
+    isSubmitting: isSubmitting || createMutation.isPending || updateMutation.isPending,
     contactLoading,
     organizationId,
     resetPendingAvatar,
