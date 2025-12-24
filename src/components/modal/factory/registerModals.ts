@@ -4,7 +4,7 @@ import { InviteMemberModal, OrganizationModal, MemberActionConfirmationModal } f
 import { CapitalParticipantModal, PartnerContributionModal, PartnerWithdrawalModal, CapitalTransactionModal } from '@/features/capital';
 import { ProjectModal } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, ProfileOrganizationFormModal, MemberFormModal } from '@/features/legacy';
-import { ContactForm } from '@/features/contacts/forms/ContactForm';
+import { ContactModal } from '@/features/contacts/modals/ContactModal';
 import { ContactTypeForm } from '@/features/contacts/forms/ContactTypeForm';
 import { ClientForm } from '@/features/clients/forms/ClientForm';
 import { ClientPaymentModal } from '@/features/clients/modals/ClientPaymentModal';
@@ -223,7 +223,7 @@ export function initializeModalRegistry(): void {
     }),
   });
   
-  registerModal('contact', ContactForm as any, { 
+  registerModal('contact', ContactModal as any, { 
     ...generalConfig, 
     size: 'xl',
     mapDataToProps: (data) => {

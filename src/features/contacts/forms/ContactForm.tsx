@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { UserPlus, Mail, Phone, Building2, MapPin, FileText, Link2, Share2, Building, Upload, Eye, Edit, Trash2, User, Camera } from "lucide-react";
+import { Mail, Phone, Building, MapPin, Link2, Share2, Upload, User } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
-import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from "@/components/modal";
-import { useGlobalModalStore } from "@/components/modal";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,7 +23,6 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { CONTACT_QUERY_KEYS } from "@/features/contacts/constants";
 import { uploadContactAvatar, getContactAvatarUrl } from "@/lib/storage/uploadHelpers";
-import { compressImage } from "@/lib/imageCompression";
 import { supabase } from "@/lib/supabase";
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 
@@ -49,9 +46,9 @@ const createContactSchema = z.object({
   path: ["first_name"],
 });
 
-type CreateContactForm = z.infer<typeof createContactSchema>;
+export type CreateContactForm = z.infer<typeof createContactSchema>;
 
-interface Contact {
+export interface Contact {
   id: string;
   organization_id: string;
   first_name: string;
@@ -77,17 +74,6 @@ interface Contact {
   };
 }
 
-interface ContactFormProps {
-  modalData?: {
-    contactId?: string;
-    contact?: Contact;
-  };
-  onClose: () => void;
-  mode?: "create" | "edit" | "view";
-  onAvatarUpload?: (url: string) => void;
-}
-
-// Helper functions
 function getDisplayName(contact: Contact | undefined | null): string {
   return contact?.full_name || `${contact?.first_name || ''} ${contact?.last_name || ''}`.trim() || 'Sin nombre';
 }
@@ -102,22 +88,7 @@ function getInitials(contact: Contact | undefined | null): string {
     .slice(0, 2);
 }
 
-// Subcomponente: Formulario para CREATE/EDIT
-function FormPanel({
-  form,
-  onSubmit,
-  isSubmitting,
-  contact,
-  contactTypes,
-  foundUser,
-  isAlreadyMember,
-  inviteMemberMutation,
-  onAvatarChange,
-  avatarUploading,
-  filesToUpload,
-  setFilesToUpload,
-  currentAvatarUrl,
-}: {
+interface FormPanelProps {
   form: ReturnType<typeof useForm<CreateContactForm>>;
   onSubmit: (data: CreateContactForm) => void;
   isSubmitting: boolean;
@@ -131,14 +102,28 @@ function FormPanel({
   filesToUpload: any[];
   setFilesToUpload: (files: any[]) => void;
   currentAvatarUrl?: string;
-}) {
+}
+
+export function FormPanel({
+  form,
+  onSubmit,
+  isSubmitting,
+  contact,
+  contactTypes,
+  foundUser,
+  isAlreadyMember,
+  inviteMemberMutation,
+  onAvatarChange,
+  avatarUploading,
+  filesToUpload,
+  setFilesToUpload,
+  currentAvatarUrl,
+}: FormPanelProps) {
   const linkedUser = contact?.linked_user || foundUser;
   
-  // Observar cambios en los campos nombre y apellido
   const firstName = form.watch('first_name');
   const lastName = form.watch('last_name');
   
-  // Actualizar el nombre en tiempo real (letra por letra)
   const displayNameLive = `${firstName || ''} ${lastName || ''}`.trim() || 'Sin nombre';
   
   const initials = displayNameLive
@@ -151,7 +136,6 @@ function FormPanel({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Avatar uploader */}
         <AvatarUploader
           avatarUrl={currentAvatarUrl}
           initials={initials}
@@ -356,7 +340,6 @@ function FormPanel({
           )}
         />
 
-        {/* File Upload */}
         <Separator />
         <div className="space-y-2">
           <FormLabel className="flex items-center gap-2">
@@ -386,17 +369,7 @@ function FormPanel({
   );
 }
 
-// Subcomponente: Vista de lectura
-function ViewPanel({
-  contact,
-  contactAvatarUrl,
-  onEdit,
-  onDelete,
-  existingFiles,
-  handleShare,
-  inviteMemberMutation,
-  isAlreadyMember,
-}: {
+interface ViewPanelProps {
   contact: Contact;
   contactAvatarUrl?: string;
   onEdit?: () => void;
@@ -405,7 +378,18 @@ function ViewPanel({
   handleShare: () => void;
   inviteMemberMutation?: any;
   isAlreadyMember?: boolean;
-}) {
+}
+
+export function ViewPanel({
+  contact,
+  contactAvatarUrl,
+  onEdit,
+  onDelete,
+  existingFiles,
+  handleShare,
+  inviteMemberMutation,
+  isAlreadyMember,
+}: ViewPanelProps) {
   const displayName = getDisplayName(contact);
   const linkedUserAvatarUrl = contact.linked_user?.avatar_url || "";
 
@@ -603,47 +587,33 @@ function ViewPanel({
   );
 }
 
-export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormProps) {
-  const { openModal, popModal } = useGlobalModalStore();
+interface UseContactFormProps {
+  contactId?: string;
+  contact?: Contact;
+  mode: "create" | "edit" | "view";
+  onSuccess?: () => void;
+}
+
+export function useContactForm({ contactId, contact, mode, onSuccess }: UseContactFormProps) {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
   
-  const contactId = modalData?.contactId;
-  const contact = modalData?.contact;
   const organizationId = userData?.organization?.id;
 
-  // Use mode directly from prop
-  const mode = modeProp || 'create';
-
-  // State
   const [foundUser, setFoundUser] = useState<any>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [contactAvatarUrl, setContactAvatarUrl] = useState<string>('');
   const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
 
-  // Debug logging
-  useEffect(() => {
-    console.log('[ContactForm] Props:', { contactId, mode, modalData });
-    console.log('[ContactForm] organizationId:', organizationId);
-  }, [contactId, mode, organizationId, modalData]);
-
-  // Fetch contact if editing - use REST API backend
   const { data: fetchedContact, isLoading: contactLoading } = useQuery<Contact | undefined>({
     queryKey: [`/api/contacts/${contactId}?organization_id=${organizationId}`],
     enabled: !!contactId && !!organizationId,
   });
 
-  useEffect(() => {
-    console.log('[ContactForm] fetchedContact:', fetchedContact);
-    console.log('[ContactForm] contactLoading:', contactLoading);
-  }, [fetchedContact, contactLoading]);
-
-  // Get contact types after organizationId is available
   const { data: contactTypes } = useContactTypes(organizationId);
 
   const editingContact = contact || fetchedContact;
 
-  // Load avatar URL from storage
   useEffect(() => {
     if (!editingContact?.id) {
       setContactAvatarUrl('');
@@ -660,7 +630,6 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
 
   const currentAvatarUrl = contactAvatarUrl;
 
-  // Form setup
   const form = useForm<CreateContactForm>({
     resolver: zodResolver(createContactSchema),
     defaultValues: {
@@ -676,10 +645,8 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
     }
   });
 
-  // Update form when editingContact data arrives
   useEffect(() => {
     if (editingContact?.id) {
-      console.log('[ContactForm] Updating form with editingContact:', editingContact);
       setTimeout(() => {
         form.reset({
           first_name: editingContact.first_name || '',
@@ -726,7 +693,6 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
     }
 
     const timeoutId = setTimeout(() => {
-      // Skip user search if email doesn't look valid
       setFoundUser(null);
     }, 300);
 
@@ -792,13 +758,10 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
     try {
       setAvatarUploading(true);
       
-      // Upload to storage (already updates DB and returns signed URL)
       const result = await uploadContactAvatar(file, editingContact.id, organizationId);
       
-      // Update local state with new avatar URL
       setContactAvatarUrl(result.url);
       
-      // Force refetch of contact data to ensure avatar updates everywhere
       await queryClient.refetchQueries({ 
         queryKey: CONTACT_QUERY_KEYS.list(organizationId) 
       });
@@ -825,14 +788,14 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
     mutationFn: async (data: CreateContactForm) => {
       if (!userData?.organization?.id) throw new Error('Organization ID not found');
 
-      const organizationId = userData.organization.id;
+      const orgId = userData.organization.id;
 
       if (mode === 'edit' && editingContact) {
         if (data.email && data.email.trim().length > 0 && data.email !== editingContact.email) {
           const { data: existingContact, error: checkError } = await supabase
             .from('contacts')
             .select('id, first_name, last_name, email')
-            .eq('organization_id', organizationId)
+            .eq('organization_id', orgId)
             .ilike('email', data.email.trim())
             .neq('id', editingContact.id)
             .maybeSingle();
@@ -868,10 +831,8 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
 
         if (error) throw error;
 
-        // Actualizar tipos de contacto usando lógica inteligente (solo agregar nuevos, eliminar los que ya no están)
         const newTypeIds = data.contact_type_ids || [];
         
-        // Obtener tipos actuales
         const { data: currentLinks } = await supabase
           .from('contact_type_links')
           .select('id, contact_type_id')
@@ -879,11 +840,9 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
         
         const currentTypeIds = (currentLinks || []).map(link => link.contact_type_id);
         
-        // Calcular qué agregar y qué eliminar
         const typesToAdd = newTypeIds.filter(id => !currentTypeIds.includes(id));
         const linksToRemove = (currentLinks || []).filter(link => !newTypeIds.includes(link.contact_type_id));
         
-        // Eliminar los que ya no están (si falla, continuar)
         for (const link of linksToRemove) {
           await supabase
             .from('contact_type_links')
@@ -891,12 +850,11 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
             .eq('id', link.id);
         }
         
-        // Solo insertar los nuevos
         if (typesToAdd.length > 0) {
           const typeLinks = typesToAdd.map(typeId => ({
             contact_id: editingContact.id,
             contact_type_id: typeId,
-            organization_id: organizationId,
+            organization_id: orgId,
           }));
 
           const { error: linksError } = await supabase
@@ -912,7 +870,7 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
           const { data: existingContact, error: checkError } = await supabase
             .from('contacts')
             .select('id, first_name, last_name, email')
-            .eq('organization_id', organizationId)
+            .eq('organization_id', orgId)
             .ilike('email', data.email.trim())
             .maybeSingle();
 
@@ -931,7 +889,7 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
         const { data: newContact, error } = await supabase
           .from('contacts')
           .insert({
-            organization_id: organizationId,
+            organization_id: orgId,
             first_name: data.first_name,
             last_name: data.last_name || null,
             full_name: newFullName,
@@ -951,7 +909,7 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
           const typeLinks = data.contact_type_ids.map(typeId => ({
             contact_id: newContact.id,
             contact_type_id: typeId,
-            organization_id: organizationId,
+            organization_id: orgId,
           }));
 
           const { error: linksError } = await supabase
@@ -965,7 +923,6 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
       }
     },
     onSuccess: async (result, variables) => {
-      // Registrar actividad
       await logActivity({
         organization_id: organizationId || '',
         user_id: userData?.user?.id || '',
@@ -977,7 +934,7 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
           last_name: variables.last_name || '',
           company_name: variables.company_name || ''
         }
-      })
+      });
 
       if (mode === 'create') {
         try {
@@ -993,28 +950,24 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
       }
 
       queryClient.invalidateQueries({ queryKey: CONTACT_QUERY_KEYS.all });
-      // Invalidate client queries (API routes like /api/projects/.../clients)
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey;
           return Array.isArray(key) && typeof key[0] === 'string' && key[0].includes('/clients');
         }
       });
-      // Invalidate CLIENT_QUERY_KEYS (array-based keys like ['clients', 'dashboard', ...])
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey;
           return Array.isArray(key) && key[0] === 'clients';
         }
       });
-      // Also invalidate the contacts query used by ClientForm selector
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey;
           return Array.isArray(key) && typeof key[0] === 'string' && key[0].includes('/api/contacts');
         }
       });
-      // Invalidate personnel queries since contacts are linked to personnel
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey;
@@ -1029,7 +982,7 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
           : "El nuevo contacto ha sido agregado a tu organización",
       });
       
-      popModal();
+      onSuccess?.();
     },
     onError: (error: any) => {
       toast({
@@ -1049,122 +1002,26 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
       navigator.share({
         title: `Contacto: ${getDisplayName(editingContact)}`,
         text: `${getDisplayName(editingContact)}${editingContact.email ? `\nEmail: ${editingContact.email}` : ''}${editingContact.phone ? `\nTeléfono: ${editingContact.phone}` : ''}`,
-      })
-    }
-  }
-
-  const getHeader = () => {
-    switch (mode) {
-      case "view":
-        return { 
-          title: getDisplayName(editingContact),
-          description: "Información del contacto"
-        };
-      case "edit":
-        return { 
-          title: "Editar Contacto", 
-          description: "Actualiza la información del contacto" 
-        };
-      case "create":
-      default:
-        return { 
-          title: "Nuevo Contacto", 
-          description: "Agrega un nuevo contacto a tu organización" 
-        };
+      });
     }
   };
 
-  const header = getHeader();
-
-
-  // Show loading while fetching contact data
-  if ((mode === "edit" || mode === "view") && contactLoading) {
-    return (
-      <ModalLayout onClose={onClose} size="lg">
-        <ModalHeader title="Cargando contacto..." />
-        <ModalBody>
-          <div className="space-y-4">
-            <div className="h-8 bg-muted rounded animate-pulse" />
-            <div className="h-8 bg-muted rounded animate-pulse" />
-            <div className="h-8 bg-muted rounded animate-pulse" />
-          </div>
-        </ModalBody>
-      </ModalLayout>
-    );
-  }
-
-  if (mode === "view" && !editingContact) {
-    return (
-      <ModalLayout onClose={onClose} size="lg">
-        <ModalHeader title="Contacto no encontrado" />
-        <ModalBody>
-          <p className="text-muted-foreground">No se pudo cargar el contacto.</p>
-        </ModalBody>
-        <ModalFooter
-          leftLabel="Cerrar"
-          onLeftClick={onClose}
-        />
-      </ModalLayout>
-    );
-  }
-
-  return (
-    <ModalLayout onClose={onClose} size="xl">
-      <ModalHeader 
-        title={header.title}
-        description={header.description}
-        icon={mode === "view" ? Eye : mode === "edit" ? Edit : UserPlus}
-      />
-      
-      <ModalBody>
-        {mode === "view" && editingContact && contactId && !contactLoading ? (
-          <ViewPanel
-            contact={editingContact}
-            contactAvatarUrl={currentAvatarUrl}
-            existingFiles={[]}
-            handleShare={handleShare}
-            inviteMemberMutation={inviteMemberMutation}
-            isAlreadyMember={isAlreadyMember}
-          />
-        ) : (
-          <FormPanel
-            form={form}
-            onSubmit={onSubmit}
-            isSubmitting={createContactMutation.isPending}
-            contact={editingContact}
-            contactTypes={contactTypes}
-            foundUser={foundUser}
-            isAlreadyMember={isAlreadyMember}
-            inviteMemberMutation={inviteMemberMutation}
-            onAvatarChange={handleAvatarUpload}
-            avatarUploading={avatarUploading}
-            filesToUpload={filesToUpload}
-            setFilesToUpload={setFilesToUpload}
-            currentAvatarUrl={currentAvatarUrl}
-          />
-        )}
-      </ModalBody>
-
-      {mode !== "view" && (
-        <ModalFooter
-          leftLabel="Cancelar"
-          onLeftClick={onClose}
-          submitText={mode === "create" ? "Crear Contacto" : "Actualizar Contacto"}
-          onSubmit={form.handleSubmit(onSubmit)}
-          isSubmitting={createContactMutation.isPending}
-          data-testid="button-submit-contact"
-        />
-      )}
-
-      {mode === "view" && (
-        <ModalFooter
-          leftLabel="Cerrar"
-          onLeftClick={onClose}
-          submitText="Editar"
-          onSubmit={() => openModal('contact', { contactId: editingContact?.id, mode: 'edit' })}
-          data-testid="button-edit-from-view"
-        />
-      )}
-    </ModalLayout>
-  );
+  return {
+    form,
+    onSubmit,
+    editingContact,
+    contactTypes,
+    foundUser,
+    isAlreadyMember,
+    inviteMemberMutation,
+    handleAvatarUpload,
+    avatarUploading,
+    filesToUpload,
+    setFilesToUpload,
+    currentAvatarUrl,
+    handleShare,
+    isSubmitting: createContactMutation.isPending,
+    contactLoading,
+    organizationId,
+  };
 }

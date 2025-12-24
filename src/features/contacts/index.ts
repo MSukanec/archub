@@ -11,8 +11,12 @@ export { ContactAttachmentsPanel } from './components/attachments/ContactAttachm
 export { ContactAvatar } from './components/ContactAvatar';
 export { ContactRow } from './components/ContactRow';
 export { ContactList } from './components/ContactList';
-export { ContactForm } from './forms/ContactForm';
+
+export { FormPanel, ViewPanel, useContactForm } from './forms/ContactForm';
+export type { Contact, CreateContactForm } from './forms/ContactForm';
 export { ContactTypeForm } from './forms/ContactTypeForm';
+
+export { ContactModal } from './modals/ContactModal';
 
 export { ContactsView } from './views/ContactsView';
 export { ContactSettingsView } from './views/ContactSettingsView';
