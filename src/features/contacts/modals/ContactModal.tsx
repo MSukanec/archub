@@ -42,6 +42,7 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
     handleShare,
     isSubmitting,
     contactLoading,
+    resetPendingAvatar,
   } = useContactForm({
     contactId,
     contact,
@@ -144,7 +145,10 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
       {mode !== "view" && (
         <ModalFooter
           leftLabel="Cancelar"
-          onLeftClick={onClose}
+          onLeftClick={() => {
+            resetPendingAvatar();
+            onClose();
+          }}
           submitText={mode === "create" ? "Crear Contacto" : "Actualizar Contacto"}
           onSubmit={form.handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}

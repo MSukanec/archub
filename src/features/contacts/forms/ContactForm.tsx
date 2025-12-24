@@ -75,7 +75,7 @@ interface FormPanelProps {
   foundUser?: any;
   isAlreadyMember?: boolean;
   inviteMemberMutation?: any;
-  onAvatarChange: (file: File) => Promise<void>;
+  onAvatarChange: (file: File) => void;
   avatarUploading: boolean;
   filesToUpload: any[];
   setFilesToUpload: (files: any[]) => void;
@@ -633,6 +633,8 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [contactAvatarUrl, setContactAvatarUrl] = useState<string>('');
   const [filesToUpload, setFilesToUpload] = useState<any[]>([]);
+  const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null);
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
 
   const { data: fetchedContact, isLoading: contactLoading } = useContact(organizationId, contactId);
 
@@ -682,7 +684,7 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
     loadAvatarUrl();
   }, [editingContact?.id]);
 
-  const currentAvatarUrl = contactAvatarUrl;
+  const currentAvatarUrl = avatarPreviewUrl || contactAvatarUrl;
 
   const form = useForm<CreateContactForm>({
     resolver: zodResolver(createContactSchema),
@@ -804,36 +806,10 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
     },
   });
 
-  const handleAvatarUpload = async (file: File) => {
-    if (!editingContact?.id || !organizationId) return;
-    
-    try {
-      setAvatarUploading(true);
-      
-      const result = await uploadContactAvatar(file, editingContact.id, organizationId);
-      
-      setContactAvatarUrl(result.url);
-      
-      await queryClient.refetchQueries({ 
-        queryKey: contactsKeys.list(organizationId) 
-      });
-      await queryClient.refetchQueries({ 
-        queryKey: contactsKeys.detail(organizationId, editingContact.id) 
-      });
-      
-      toast({
-        title: 'Avatar actualizado',
-        description: 'La foto de perfil ha sido actualizada exitosamente'
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'No se pudo subir el avatar',
-        variant: 'destructive'
-      });
-    } finally {
-      setAvatarUploading(false);
-    }
+  const handleAvatarUpload = (file: File) => {
+    setPendingAvatarFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreviewUrl(previewUrl);
   };
 
   const createContactMutation = useMutation({
@@ -999,6 +975,25 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
         }
         setFilesToUpload([]);
       }
+
+      if (pendingAvatarFile && createdContactId && organizationId) {
+        try {
+          setAvatarUploading(true);
+          const result = await uploadContactAvatar(pendingAvatarFile, createdContactId, organizationId);
+          setContactAvatarUrl(result.url);
+          setPendingAvatarFile(null);
+          setAvatarPreviewUrl(null);
+        } catch (avatarError: any) {
+          console.error('Error uploading avatar:', avatarError);
+          toast({
+            variant: 'destructive',
+            title: 'Error al subir avatar',
+            description: avatarError?.message || 'No se pudo subir la foto de perfil',
+          });
+        } finally {
+          setAvatarUploading(false);
+        }
+      }
       
       await logActivity({
         organization_id: organizationId || '',
@@ -1084,6 +1079,14 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
     }
   };
 
+  const resetPendingAvatar = () => {
+    if (avatarPreviewUrl) {
+      URL.revokeObjectURL(avatarPreviewUrl);
+    }
+    setPendingAvatarFile(null);
+    setAvatarPreviewUrl(null);
+  };
+
   return {
     form,
     onSubmit,
@@ -1103,5 +1106,6 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
     isSubmitting: createContactMutation.isPending,
     contactLoading,
     organizationId,
+    resetPendingAvatar,
   };
 }
