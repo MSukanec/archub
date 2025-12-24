@@ -63,21 +63,6 @@ export function ProjectModal({ modalData, project: projectProp, mode: modeProp, 
           variant: "destructive"
         });
       },
-      onSubmitSuccess: (submitMode) => {
-        toast({
-          title: submitMode === 'edit' ? "Proyecto actualizado" : "Proyecto creado",
-          description: submitMode === 'edit' 
-            ? "El proyecto ha sido actualizado exitosamente"
-            : "El nuevo proyecto ha sido creado exitosamente y está activo"
-        });
-      },
-      onSubmitError: (error) => {
-        toast({
-          title: "Error",
-          description: error.message || "Hubo un error al procesar el proyecto",
-          variant: "destructive",
-        });
-      },
     },
   });
 

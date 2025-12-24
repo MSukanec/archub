@@ -1,6 +1,6 @@
 # Detalle de las tablas de Supabase relacionados a PROYECTOS:
 
----------- TABLA PROJECTS:
+## Tabla PROJECTS:
 
 create table public.projects (
   created_at timestamp with time zone not null default now(),
@@ -61,7 +61,7 @@ create trigger projects_set_updated_at BEFORE
 update on projects for EACH row
 execute FUNCTION set_timestamp ();
 
----------- TABLA PROJECT_TYPES:
+## Tabla TABLA PROJECT_TYPES:
 
 create table public.project_types (
   id uuid not null default gen_random_uuid (),
@@ -90,7 +90,7 @@ create trigger project_types_set_updated_at BEFORE
 update on project_types for EACH row
 execute FUNCTION set_timestamp ();
 
----------- TABLA PROJECT_MODALITIES:
+## Tabla TABLA PROJECT_MODALITIES:
 
 create table public.project_modalities (
   id uuid not null default gen_random_uuid (),
@@ -119,7 +119,7 @@ create trigger project_modalities_set_updated_at BEFORE
 update on project_modalities for EACH row
 execute FUNCTION set_timestamp ();
 
----------- TABLA PROJECT_DATA:
+## Tabla TABLA PROJECT_DATA:
 
 create table public.project_data (
   project_id uuid not null,
@@ -184,7 +184,7 @@ create trigger project_data_set_updated_at BEFORE
 update on project_data for EACH row
 execute FUNCTION set_timestamp ();
 
----------- VISTA PROJECT_SUMMARY_VIEW:
+## Vista PROJECT_SUMMARY_VIEW:
 
 create view public.project_summary_view as
 select
@@ -228,7 +228,7 @@ from
   left join project_types pt on pt.id = pd.project_type_id
   left join project_modalities pm on pm.id = pd.project_modality_id;
 
----------- VISTA PROJECT_ACTIVE_VIEW:
+## Vista PROJECT_ACTIVE_VIEW:
 
 create view public.projects_active_view as
 select
@@ -251,7 +251,7 @@ where
   p.is_deleted = false
   and p.is_active = true;
 
----------- VISTA PROJECTS_VIEW:
+## Vista PROJECTS_VIEW:
 
 create view public.projects_view as
 select
