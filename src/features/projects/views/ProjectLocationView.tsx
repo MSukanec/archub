@@ -266,8 +266,26 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     setLng(place.lng);
     setTimezone(place.timezone || '');
     
-    // Trigger save after state updates - let the blur handler save the changes
-    // The blur handler will pick up the updated state automatically
+    // IMMEDIATELY save the selected place data (don't wait for state updates)
+    // Use the values from place directly, not from state
+    if (isHydrated && validateCoordinates(place.lat, place.lng)) {
+      setTimeout(() => {
+        saveController.save({
+          address_full: place.address_full,
+          address: place.address_full,
+          city: place.city,
+          state: place.state,
+          country: place.country,
+          zip_code: place.postal_code,
+          place_id: place.place_id,
+          lat: place.lat,
+          lng: place.lng,
+          timezone: place.timezone || '',
+          location_type: locationType,
+          accessibility_notes: accessibilityNotes
+        });
+      }, 10);
+    }
   };
 
   // Handle manual latitude/longitude input with reverse geocoding
