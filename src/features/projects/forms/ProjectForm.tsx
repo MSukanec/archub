@@ -613,7 +613,17 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     
     callbacks?.onImageUploadStart?.();
     try {
-      await uploadImageAsync({ file: selectedImageFile, projectId });
+      const result = await uploadImageAsync({ file: selectedImageFile, projectId });
+      
+      // Precache the image URL immediately after upload
+      // This prevents the image query from needing to call getProjectImageUrlFromData
+      if (result && (result as any).file_url) {
+        queryClient.setQueryData(
+          projectsKeys.image(projectId),
+          (result as any).file_url
+        );
+      }
+      
       callbacks?.onImageUploadSuccess?.();
       setSelectedImageFile(null);
       setImagePreviewUrl(null);
