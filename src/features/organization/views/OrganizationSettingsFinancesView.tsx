@@ -190,9 +190,24 @@ export function OrganizationSettingsFinancesView() {
       }
     },
     queryKey: organizationKeys.currencies(userData?.organization?.id),
-    optimisticUpdate: (oldData, currencyIds) => {
+    optimisticUpdate: (oldData: any[], currencyIds: string[]) => {
       if (!oldData) return oldData;
-      return oldData;
+      const defaultCurrencyData = oldData.find((c: any) => c.is_default);
+      const newSecondaries = currencyIds.map(currencyId => {
+        const existing = oldData.find((c: any) => c.currency_id === currencyId);
+        if (existing) return { ...existing, is_active: true, is_deleted: false };
+        const currency = allCurrencies?.find(c => c.id === currencyId);
+        return {
+          id: `temp-${currencyId}`,
+          organization_id: userData?.organization?.id,
+          currency_id: currencyId,
+          is_default: false,
+          is_active: true,
+          is_deleted: false,
+          currency: currency || { id: currencyId, name: '', symbol: '', code: '' },
+        };
+      });
+      return defaultCurrencyData ? [defaultCurrencyData, ...newSecondaries] : newSecondaries;
     },
     onSuccessMessage: 'Monedas secundarias actualizadas',
     onErrorMessage: 'No se pudieron actualizar las monedas secundarias',
@@ -274,9 +289,24 @@ export function OrganizationSettingsFinancesView() {
       }
     },
     queryKey: organizationKeys.wallets(userData?.organization?.id),
-    optimisticUpdate: (oldData, walletIds) => {
+    optimisticUpdate: (oldData: any[], walletIds: string[]) => {
       if (!oldData) return oldData;
-      return oldData;
+      const defaultWalletData = oldData.find((w: any) => w.is_default);
+      const newSecondaries = walletIds.map(walletId => {
+        const existing = oldData.find((w: any) => w.wallet_id === walletId);
+        if (existing) return { ...existing, is_active: true, is_deleted: false };
+        const wallet = allWallets?.find(w => w.id === walletId);
+        return {
+          id: `temp-${walletId}`,
+          organization_id: userData?.organization?.id,
+          wallet_id: walletId,
+          is_default: false,
+          is_active: true,
+          is_deleted: false,
+          wallets: wallet || { id: walletId, name: '', is_active: true },
+        };
+      });
+      return defaultWalletData ? [defaultWalletData, ...newSecondaries] : newSecondaries;
     },
     onSuccessMessage: 'Billeteras secundarias actualizadas',
     onErrorMessage: 'No se pudieron actualizar las billeteras secundarias',

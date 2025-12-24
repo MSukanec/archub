@@ -222,15 +222,32 @@ export function InviteMemberForm({
 
       return response.json();
     },
-    queryKey: organizationKeys.members(effectiveOrgId),
-    optimisticUpdate: (oldData: any, variables: any) => {
-      if (!oldData) return oldData;
-      return oldData;
+    queryKey: organizationKeys.invitations(effectiveOrgId),
+    optimisticUpdate: (oldData: any, variables: MemberFormData) => {
+      if (!oldData) oldData = [];
+      
+      const selectedRole = roles.find(r => r.id === variables.roleId);
+      
+      const optimisticInvitation = {
+        id: `temp-${Date.now()}`,
+        email: variables.email,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        organization_id: effectiveOrgId,
+        role_id: variables.roleId,
+        role_data: selectedRole ? {
+          id: selectedRole.id,
+          name: selectedRole.name,
+          type: selectedRole.type,
+        } : null,
+      };
+      
+      return [optimisticInvitation, ...oldData];
     },
     onSuccessMessage: isReinvite ? 'Miembro reinvitado exitosamente' : 'Invitación enviada exitosamente',
     onErrorMessage: 'Error al invitar miembro',
     additionalQueryKeys: [
-      organizationKeys.invitations(effectiveOrgId),
+      organizationKeys.members(effectiveOrgId),
       organizationKeys.formerMembers(effectiveOrgId),
     ],
   });
@@ -251,9 +268,25 @@ export function InviteMemberForm({
       return data;
     },
     queryKey: organizationKeys.members(effectiveOrgId),
-    optimisticUpdate: (oldData: any, variables: any) => {
-      if (!oldData) return oldData;
-      return oldData;
+    optimisticUpdate: (oldData: any, variables: MemberFormData) => {
+      if (!oldData || !Array.isArray(oldData)) return oldData;
+      
+      const selectedRole = roles.find(r => r.id === variables.roleId);
+      
+      return oldData.map((member: any) => {
+        if (member.id === editingMember?.id) {
+          return {
+            ...member,
+            role_id: variables.roleId,
+            roles: selectedRole ? {
+              id: selectedRole.id,
+              name: selectedRole.name,
+              type: selectedRole.type,
+            } : member.roles,
+          };
+        }
+        return member;
+      });
     },
     onSuccessMessage: 'El rol del miembro ha sido actualizado correctamente',
     onErrorMessage: 'Error al actualizar miembro',
