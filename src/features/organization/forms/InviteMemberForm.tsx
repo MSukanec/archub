@@ -8,6 +8,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
+import { organizationKeys } from '@/core/query-keys';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -109,7 +110,7 @@ export function InviteMemberForm({
   formRef,
   onPricingChange,
   onLoadingChange,
-}: InviteMemberFormFieldsProps) {
+}: InviteMemberFormProps) {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const [isLoading, setIsLoading] = useState(false);
@@ -221,7 +222,7 @@ export function InviteMemberForm({
 
       return response.json();
     },
-    queryKey: ['organization-members', effectiveOrgId],
+    queryKey: organizationKeys.members(effectiveOrgId),
     optimisticUpdate: (oldData: any, variables: any) => {
       if (!oldData) return oldData;
       return oldData;
@@ -229,10 +230,8 @@ export function InviteMemberForm({
     onSuccessMessage: isReinvite ? 'Miembro reinvitado exitosamente' : 'Invitación enviada exitosamente',
     onErrorMessage: 'Error al invitar miembro',
     additionalQueryKeys: [
-      ['organization-members-full'],
-      ['organization-invitations'],
-      ['organization-former-members'],
-      ['/api/contacts'],
+      organizationKeys.invitations(effectiveOrgId),
+      organizationKeys.formerMembers(effectiveOrgId),
     ],
   });
 
@@ -251,7 +250,7 @@ export function InviteMemberForm({
       if (error) throw error;
       return data;
     },
-    queryKey: ['organization-members', effectiveOrgId],
+    queryKey: organizationKeys.members(effectiveOrgId),
     optimisticUpdate: (oldData: any, variables: any) => {
       if (!oldData) return oldData;
       return oldData;
@@ -484,7 +483,7 @@ export function InviteMemberForm({
                   
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Rol:</span>
-                    <Badge variant="secondary" className="text-xs">{selectedRole?.name || pricingData.invitation.roleName}</Badge>
+                    <Badge variant="neutral" className="text-xs">{selectedRole?.name || pricingData.invitation.roleName}</Badge>
                   </div>
 
                   <Separator className="my-2" />
