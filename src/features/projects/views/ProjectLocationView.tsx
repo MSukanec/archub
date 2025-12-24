@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase'
 import { useSaveEngine } from '@/core/save-engine'
+import { projectsKeys } from '@/core/query-keys';
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -48,7 +49,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
 
   // Get project data for location fields
   const { data: projectData, isSuccess: projectDataSuccess } = useQuery({
-    queryKey: ['project-data', activeProjectId],
+    queryKey: projectsKeys.data(activeProjectId),
     queryFn: async () => {
       if (!activeProjectId || !supabase) return null;
 
@@ -86,7 +87,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
         : {}),
       accessibility_notes: accessibilityNotes
     },
-    queryKey: ['project-data', activeProjectId],
+    queryKey: projectsKeys.data(activeProjectId),
     saveFn: async (dataToSave) => {
       if (!activeProjectId || !supabase) throw new Error('Project or Supabase not available');
 

@@ -21,6 +21,7 @@ import { useUpdateChecklist } from "@/hooks/use-update-checklist";
 import { supabase } from "@/lib/supabase";
 
 import { useOptimisticMutation } from '@/core/save-engine';
+import { projectsKeys } from '@/core/query-keys';
 import { createProject } from '../services/createProject';
 import { updateProject } from '../services/updateProject';
 import { uploadProjectImage, deleteProjectImage, updateProjectLastActive } from '@/features/projects';
@@ -502,7 +503,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
 
   // Query to get image URL - depends on editingProjectData so it updates when image is deleted
   const { data: currentImageUrl } = useQuery({
-    queryKey: ['project-edit-image', project?.id],
+    queryKey: projectsKeys.image(project?.id),
     queryFn: async () => {
       if (!editingProjectData?.image_bucket || !editingProjectData?.image_path) {
         return null;

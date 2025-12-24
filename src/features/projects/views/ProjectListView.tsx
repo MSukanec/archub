@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjects, useProjectsCount, updateProjectLastActive } from '@/features/projects'
+import { projectsKeys } from '@/core/query-keys'
 import { useUserOrganizationPreferences, USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization'
 import { useOrganizationCurrencies } from '@/hooks/use-currencies'
 import { Folder, Edit, Trash2, Plus, CheckCircle2, Search, Filter, Bell } from 'lucide-react'
@@ -454,7 +455,7 @@ export function ProjectListView() {
       
       return await response.json()
     },
-    queryKey: ['projects', userData?.organization?.id],
+    queryKey: projectsKeys.list(userData?.organization?.id),
     optimisticUpdate: (oldData, projectId) => {
       if (!oldData) return oldData;
       return oldData.filter((project: any) => project.id !== projectId);

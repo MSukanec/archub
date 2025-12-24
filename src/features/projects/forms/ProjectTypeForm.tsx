@@ -6,6 +6,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 
 import { useOptimisticMutation } from '@/core/save-engine';
+import { projectsKeys } from '@/core/query-keys';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationMembers } from '@/features/organization/hooks/use-organization-members';
 import { createProjectType } from '../services/createProjectType';
@@ -107,11 +108,11 @@ export function useProjectTypeForm({
   };
 
   const { mutate: createType, isPending: isCreating } = useOptimisticMutation<
-    ProjectType,
+    void,
     { name: string; organizationId: string; createdBy: string }
   >({
     mutationFn: async (data) => createProjectType(data),
-    queryKey: ['project-types', organizationId],
+    queryKey: projectsKeys.typeList(organizationId),
     optimisticUpdate: (oldData, variables) => {
       const optimisticType = {
         id: 'temp-' + Date.now(),
@@ -129,12 +130,12 @@ export function useProjectTypeForm({
   });
 
   const { mutate: updateType, isPending: isUpdating } = useOptimisticMutation<
-    ProjectType,
+    void,
     { typeId: string; organizationId: string; data: { name?: string } }
   >({
-    mutationFn: async ({ typeId, organizationId, data }) => 
-      updateProjectType(typeId, organizationId, data),
-    queryKey: ['project-types', organizationId],
+    mutationFn: async ({ typeId, organizationId: orgId, data }) => 
+      updateProjectType(typeId, orgId, data),
+    queryKey: projectsKeys.typeList(organizationId),
     optimisticUpdate: (oldData, variables) => {
       if (!Array.isArray(oldData)) return oldData;
       return oldData.map((t: any) => 

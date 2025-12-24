@@ -29,6 +29,9 @@
  * }
  */
 
+/** Type alias para IDs que pueden ser null o undefined */
+type NullableId = string | null | undefined;
+
 export const projectsKeys = {
   /** Base key para todos los datos de projects */
   all: ['projects'] as const,
@@ -41,12 +44,12 @@ export const projectsKeys = {
   lists: () => [...projectsKeys.all, 'list'] as const,
   
   /** Lista de proyectos por organización (FUENTE ÚNICA DE VERDAD) */
-  list: (organizationId: string | undefined) => 
-    [...projectsKeys.lists(), organizationId] as const,
+  list: (organizationId: NullableId) => 
+    [...projectsKeys.lists(), organizationId ?? undefined] as const,
   
   /** Conteo de proyectos */
-  count: (organizationId: string | undefined) => 
-    [...projectsKeys.all, 'count', organizationId] as const,
+  count: (organizationId: NullableId) => 
+    [...projectsKeys.all, 'count', organizationId ?? undefined] as const,
 
   // ═══════════════════════════════════════════════════════════════
   // DETALLES DE PROYECTO INDIVIDUAL
@@ -56,16 +59,16 @@ export const projectsKeys = {
   details: () => [...projectsKeys.all, 'detail'] as const,
   
   /** Detalle completo de un proyecto (incluye project_data) */
-  detail: (projectId: string | undefined) => 
-    [...projectsKeys.details(), projectId] as const,
+  detail: (projectId: NullableId) => 
+    [...projectsKeys.details(), projectId ?? undefined] as const,
   
   /** Datos básicos del proyecto (tabla projects) */
-  info: (projectId: string | undefined) => 
-    [...projectsKeys.details(), projectId, 'info'] as const,
+  info: (projectId: NullableId) => 
+    [...projectsKeys.details(), projectId ?? undefined, 'info'] as const,
   
   /** Datos extendidos del proyecto (tabla project_data) */
-  data: (projectId: string | undefined) => 
-    [...projectsKeys.details(), projectId, 'data'] as const,
+  data: (projectId: NullableId) => 
+    [...projectsKeys.details(), projectId ?? undefined, 'data'] as const,
 
   // ═══════════════════════════════════════════════════════════════
   // ASSETS DEL PROYECTO (IMÁGENES)
@@ -75,20 +78,20 @@ export const projectsKeys = {
   assets: () => [...projectsKeys.all, 'assets'] as const,
   
   /** URL de imagen del proyecto */
-  image: (projectId: string | undefined) => 
-    [...projectsKeys.assets(), projectId, 'image'] as const,
+  image: (projectId: NullableId) => 
+    [...projectsKeys.assets(), projectId ?? undefined, 'image'] as const,
 
   // ═══════════════════════════════════════════════════════════════
   // ESTADÍSTICAS Y ACTIVIDAD
   // ═══════════════════════════════════════════════════════════════
   
   /** Estadísticas del proyecto */
-  stats: (organizationId: string | undefined, projectId: string | undefined) => 
-    [...projectsKeys.all, 'stats', organizationId, projectId] as const,
+  stats: (organizationId: NullableId, projectId: NullableId) => 
+    [...projectsKeys.all, 'stats', organizationId ?? undefined, projectId ?? undefined] as const,
   
   /** Historial de actividad */
-  activity: (organizationId: string | undefined, projectId: string | undefined) => 
-    [...projectsKeys.all, 'activity', organizationId, projectId] as const,
+  activity: (organizationId: NullableId, projectId: NullableId) => 
+    [...projectsKeys.all, 'activity', organizationId ?? undefined, projectId ?? undefined] as const,
 
   // ═══════════════════════════════════════════════════════════════
   // CONFIGURACIÓN (TIPOS Y MODALIDADES)
@@ -98,15 +101,15 @@ export const projectsKeys = {
   types: () => [...projectsKeys.all, 'types'] as const,
   
   /** Lista de tipos por organización */
-  typeList: (organizationId: string | undefined) => 
-    [...projectsKeys.types(), organizationId] as const,
+  typeList: (organizationId: NullableId) => 
+    [...projectsKeys.types(), organizationId ?? undefined] as const,
   
   /** Base para modalidades */
   modalities: () => [...projectsKeys.all, 'modalities'] as const,
   
   /** Lista de modalidades por organización */
-  modalityList: (organizationId: string | undefined) => 
-    [...projectsKeys.modalities(), organizationId] as const,
+  modalityList: (organizationId: NullableId) => 
+    [...projectsKeys.modalities(), organizationId ?? undefined] as const,
 } as const;
 
 /** Tipo de las query keys de projects */

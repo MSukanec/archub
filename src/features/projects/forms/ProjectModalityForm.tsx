@@ -6,6 +6,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 
 import { useOptimisticMutation } from '@/core/save-engine';
+import { projectsKeys } from '@/core/query-keys';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationMembers } from '@/features/organization/hooks/use-organization-members';
 import { createProjectModality } from '../services/createProjectModality';
@@ -110,7 +111,7 @@ export function useProjectModalityForm({
     mutationFn: async (data: { name: string; organizationId: string; createdBy: string }) => {
       return createProjectModality(data);
     },
-    queryKey: ['project-modalities', organizationId],
+    queryKey: projectsKeys.modalityList(organizationId),
     optimisticUpdate: (oldData: ProjectModality[] | undefined, variables) => {
       const optimisticModality = {
         id: 'temp-' + Date.now(),
@@ -131,7 +132,7 @@ export function useProjectModalityForm({
     mutationFn: async (data: { modalityId: string; organizationId: string; name: string }) => {
       return updateProjectModality(data.modalityId, data.organizationId, { name: data.name });
     },
-    queryKey: ['project-modalities', organizationId],
+    queryKey: projectsKeys.modalityList(organizationId),
     optimisticUpdate: (oldData: ProjectModality[] | undefined, variables) => {
       if (!Array.isArray(oldData)) return oldData;
       return oldData.map((m) => 

@@ -1,11 +1,12 @@
 import { useOptimisticMutation } from '@/core/save-engine';
+import { projectsKeys } from '@/core/query-keys';
 import { updateProjectLastActive } from '../services/updateProjectLastActive';
 
 export function useUpdateProjectLastActive() {
   return useOptimisticMutation({
     mutationFn: ({ projectId, organizationId }: { projectId: string; organizationId: string }) =>
       updateProjectLastActive(projectId, organizationId),
-    queryKey: ['projects'],
+    queryKey: projectsKeys.all,
     optimisticUpdate: (oldData: any, variables: { projectId: string }) => {
       if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;

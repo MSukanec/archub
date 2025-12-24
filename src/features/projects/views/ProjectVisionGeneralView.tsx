@@ -6,6 +6,7 @@ import { useSiteLogs } from '@/features/sitelog/hooks/use-site-logs';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useQuery } from '@tanstack/react-query';
 import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
+import { projectsKeys } from '@/core/query-keys';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -22,7 +23,7 @@ export function ProjectVisionGeneralView() {
   const { data: siteLogs = [] } = useSiteLogs(selectedProjectId || undefined, organizationId || undefined);
 
   const { data: projectImageUrl } = useQuery({
-    queryKey: ['project-image', currentProject?.id, currentProject?.project_data?.image_bucket, currentProject?.project_data?.image_path],
+    queryKey: projectsKeys.image(currentProject?.id),
     queryFn: () => getProjectImageUrlFromData(currentProject!.project_data!),
     enabled: !!currentProject?.project_data?.image_bucket && !!currentProject?.project_data?.image_path,
     refetchInterval: 30 * 60 * 1000,

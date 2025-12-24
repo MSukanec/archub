@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useUserOrganizationPreferences } from '@/features/organization'
 import { supabase } from '@/lib/supabase'
 import { useSaveEngine, useOptimisticMutation } from '@/core/save-engine'
+import { projectsKeys } from '@/core/query-keys'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -57,7 +58,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
 
   // Get project data for BasicData tab
   const { data: projectData, isSuccess: projectDataSuccess } = useQuery({
-    queryKey: ['project-data', activeProjectId],
+    queryKey: projectsKeys.data(activeProjectId),
     queryFn: async () => {
       if (!activeProjectId || !supabase) return null;
       
@@ -79,7 +80,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
 
   // Get actual project info for BasicData tab
   const { data: projectInfo, isSuccess: projectInfoSuccess } = useQuery({
-    queryKey: ['project-info', activeProjectId],
+    queryKey: projectsKeys.info(activeProjectId),
     queryFn: async () => {
       if (!activeProjectId || !supabase) return null;
       
@@ -131,16 +132,14 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       const uploadResult = await uploadProjectImage(compressedFile, activeProjectId, organizationId);
       return uploadResult;
     },
-    queryKey: ['project-data', activeProjectId],
+    queryKey: projectsKeys.data(activeProjectId),
     optimisticUpdate: (oldData) => oldData,
     onSuccessMessage: "Imagen principal actualizada correctamente",
     onErrorMessage: "No se pudo subir la imagen",
     additionalQueryKeys: [
-      ['project-info', activeProjectId], 
-      ['projects', organizationId],
-      ['projects-lite', organizationId],
-      ['projects-map', organizationId],
-      ['project-image-url', activeProjectId],
+      projectsKeys.info(activeProjectId),
+      projectsKeys.list(organizationId),
+      projectsKeys.image(activeProjectId),
     ],
   });
 
@@ -155,7 +154,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
         await deleteProjectImage(activeProjectId, organizationId, projectData.image_bucket, projectData.image_path);
       }
     },
-    queryKey: ['project-data', activeProjectId],
+    queryKey: projectsKeys.data(activeProjectId),
     optimisticUpdate: (oldData) => {
       if (!oldData) return oldData;
       return {
@@ -167,11 +166,9 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     onSuccessMessage: "Imagen principal eliminada correctamente",
     onErrorMessage: "No se pudo eliminar la imagen",
     additionalQueryKeys: [
-      ['project-info', activeProjectId], 
-      ['projects', organizationId],
-      ['projects-lite', organizationId],
-      ['projects-map', organizationId],
-      ['project-image-url', activeProjectId],
+      projectsKeys.info(activeProjectId),
+      projectsKeys.list(organizationId),
+      projectsKeys.image(activeProjectId),
     ],
   });
 
@@ -202,7 +199,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
         throw error;
       }
     },
-    queryKey: ['project-info', activeProjectId],
+    queryKey: projectsKeys.info(activeProjectId),
     optimisticUpdate: (oldData, colorData) => {
       if (!oldData) return oldData;
       return {
@@ -212,8 +209,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     },
     onErrorMessage: "No se pudo guardar el color del proyecto",
     additionalQueryKeys: [
-      ['projects', organizationId],
-      ['projects-lite', organizationId],
+      projectsKeys.list(organizationId),
     ],
   });
 
@@ -228,7 +224,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       description: description,
       internal_notes: internalNotes
     },
-    queryKey: ['project-data', activeProjectId],
+    queryKey: projectsKeys.data(activeProjectId),
     saveFn: async (dataToSave) => {
       console.log('[SaveEngine] Saving project data:', dataToSave);
       
@@ -267,7 +263,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     },
     delay: 1500,
     enabled: !!userData && !!activeProjectId,
-    additionalQueryKeys: [['project-info', activeProjectId], ['projects', organizationId], ['projects-lite', organizationId], ['projects-map', organizationId], ['active-projects']],
+    additionalQueryKeys: [projectsKeys.info(activeProjectId), projectsKeys.list(organizationId)],
   });
 
   // UNIFIED hydration effect - loads ALL data at once, then marks as hydrated
@@ -305,7 +301,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
 
   // Generate project image URL with auto-refresh (React Query)
   const { data: projectImageUrl } = useQuery({
-    queryKey: ['project-image-url', activeProjectId, projectData?.image_bucket, projectData?.image_path],
+    queryKey: projectsKeys.image(activeProjectId),
     queryFn: async () => {
       if (!projectData?.image_bucket || !projectData?.image_path) return null;
       return await getProjectImageUrlFromData(projectData);

@@ -5,6 +5,7 @@ import { CheckCircle2, Lock } from 'lucide-react';
 import chroma from 'chroma-js';
 import { useQuery } from '@tanstack/react-query';
 import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
+import { projectsKeys } from '@/core/query-keys';
 
 interface Project {
   id: string;
@@ -83,7 +84,7 @@ export function ProjectItemCard({
   // Generate image URL on-demand from bucket+path with React Query
   // Data comes from projects_view which includes image_bucket, image_path, is_public
   const { data: imageUrl } = useQuery({
-    queryKey: ['project-image', project.id, project.project_data?.image_bucket, project.project_data?.image_path],
+    queryKey: projectsKeys.image(project.id),
     queryFn: () => getProjectImageUrlFromData(project.project_data || {}),
     enabled: !!project.project_data?.image_bucket && !!project.project_data?.image_path,
     refetchInterval: 30 * 60 * 1000,  // Refresh every 30 min

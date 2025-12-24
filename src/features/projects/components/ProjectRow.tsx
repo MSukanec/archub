@@ -4,6 +4,7 @@ import { Edit, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { getProjectImageUrlFromData } from '@/lib/storage/uploadProjectImage';
+import { projectsKeys } from '@/core/query-keys';
 
 // Interface para el proyecto (usando la estructura real de la app)
 interface Project {
@@ -91,7 +92,7 @@ export function ProjectRow({
 
   // Generate image URL on-demand from bucket+path with React Query
   const { data: avatarUrl } = useQuery({
-    queryKey: ['project-image', project.id, project.project_data?.image_bucket, project.project_data?.image_path],
+    queryKey: projectsKeys.image(project.id),
     queryFn: () => getProjectImageUrlFromData(project.project_data!),
     enabled: !!project.project_data?.image_bucket && !!project.project_data?.image_path,
     refetchInterval: 30 * 60 * 1000,  // Refresh every 30 min
