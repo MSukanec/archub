@@ -136,15 +136,6 @@ export function HierarchicalTree({
             shouldBeBefore = mouseY < beforeThreshold;
           }
           
-            mouseY,
-            elementTop,
-            elementHeight,
-            targetIndex,
-            draggedIndex,
-            isDraggingFromBelow,
-            shouldBeBefore
-          });
-          
           if (shouldBeBefore) {
             setDropPosition('before');
           } else {
@@ -200,14 +191,6 @@ export function HierarchicalTree({
       
       // Clamp to valid range
       newIndex = Math.max(0, Math.min(newIndex, categories.length));
-      
-        oldIndex, 
-        targetIndex, 
-        newIndex, 
-        dropPosition: currentDropPosition,
-        draggedItem: categories[oldIndex]?.name,
-        targetItem: categories[targetIndex]?.name 
-      });
       
       // Only reorder if positions are actually different
       if (oldIndex !== newIndex && oldIndex >= 0 && targetIndex >= 0) {
