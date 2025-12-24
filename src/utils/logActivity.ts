@@ -36,6 +36,12 @@ export async function logActivity({
   metadata = {}
 }: LogActivityParams): Promise<void> {
   try {
+    // Reject temporary IDs - they're not valid UUIDs for the database
+    if (target_id?.startsWith('temp-')) {
+      console.debug(`Skipping activity log for temporary ID: ${target_id}`);
+      return;
+    }
+
     // Insertar directamente en organization_activity_logs para evitar problemas con la función de Supabase
     const { data, error } = await supabase
       .from('organization_activity_logs')
