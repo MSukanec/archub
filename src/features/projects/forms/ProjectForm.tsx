@@ -475,7 +475,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     },
     onSuccessMessage: "Proyecto actualizado",
     onErrorMessage: "Error al actualizar proyecto",
-    additionalQueryKeys: [],
+    additionalQueryKeys: [projectsKeys.data(project?.id)],
   });
 
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -671,6 +671,16 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
 
     try {
       if (mode === 'edit' && project) {
+        // Precache project_data immediately for instant UI update
+        if (editingProjectData) {
+          const updatedProjectData = {
+            ...editingProjectData,
+            project_type_id: cleanedData.project_type_id,
+            project_modality_id: cleanedData.project_modality_id,
+          };
+          queryClient.setQueryData(projectsKeys.data(project.id), updatedProjectData);
+        }
+        
         updateProjectMutate({
           projectId: project.id,
           data: {

@@ -81,8 +81,9 @@ export async function uploadProjectImage(
       throw new Error(`Error al registrar archivo: ${dbError.message}`);
     }
 
-    // Generate URL for immediate display (public URL for social-assets)
-    const imageUrl = await getFileUrl(bucket, filePath, 3600, supabase);
+    // Generate public URL synchronously for social-assets (avoids async overhead)
+    // social-assets is a public bucket, so getPublicUrl is instantaneous
+    const imageUrl = supabase.storage.from(bucket).getPublicUrl(filePath).data.publicUrl;
 
     return {
       file_url: imageUrl,
@@ -118,6 +119,7 @@ export async function getProjectImageUrl(projectId: string): Promise<string | nu
 
 /**
  * Get project image URL from existing project data (avoids DB query)
+ * For public buckets (social-assets), returns URL synchronously without async overhead
  * Returns null silently if the file doesn't exist in storage
  */
 export async function getProjectImageUrlFromData(
@@ -128,6 +130,15 @@ export async function getProjectImageUrlFromData(
   }
   
   try {
+    // For public buckets, getPublicUrl is synchronous and instantaneous
+    if (project.image_bucket === 'social-assets' || project.image_bucket === 'public-assets') {
+      return supabase.storage
+        .from(project.image_bucket as BucketName)
+        .getPublicUrl(project.image_path)
+        .data.publicUrl;
+    }
+    
+    // For private buckets, use async signed URL generation
     return await getFileUrl(project.image_bucket as BucketName, project.image_path, 3600, supabase);
   } catch (error) {
     // File might have been deleted from storage - return null silently
