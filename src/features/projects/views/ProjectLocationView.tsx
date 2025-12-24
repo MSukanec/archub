@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useState, useEffect, useCallback } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase'
-import { useSaveEngine } from '@/core/save-engine'
+import { useAutosaveController, normalizeStringValue } from '@/core/autosave'
 import { projectsKeys } from '@/core/query-keys';
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -19,6 +19,7 @@ interface ProjectLocationViewProps {
 
 export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   const { selectedProjectId } = useProjectContext();
   
@@ -69,34 +70,70 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     enabled: !!activeProjectId && !!supabase
   });
 
-  // Centralized auto-save using useSaveEngine
-  const { isSaving, hasUnsavedChanges } = useSaveEngine({
-    data: {
-      address_full: addressFull,
-      address: address,
-      city: city,
-      state: state,
-      country: country,
-      zip_code: zipCode,
-      place_id: placeId,
-      lat: lat,
-      lng: lng,
-      timezone: timezone,
-      ...(locationType && ['urban', 'rural', 'industrial', 'other'].includes(locationType) 
-        ? { location_type: locationType } 
-        : {}),
-      accessibility_notes: accessibilityNotes
-    },
+  // Build current form data for saving
+  const getCurrentFormData = useCallback(() => ({
+    address_full: addressFull,
+    address: address,
+    city: city,
+    state: state,
+    country: country,
+    zip_code: zipCode,
+    place_id: placeId,
+    lat: lat,
+    lng: lng,
+    timezone: timezone,
+    ...(locationType && ['urban', 'rural', 'industrial', 'other'].includes(locationType) 
+      ? { location_type: locationType } 
+      : {}),
+    accessibility_notes: accessibilityNotes
+  }), [addressFull, address, city, state, country, zipCode, placeId, lat, lng, timezone, locationType, accessibilityNotes]);
+
+  // Validate form data before saving - all location fields are optional
+  const isFormValid = useCallback((formData: any): boolean => {
+    // Location is fully optional - no required fields
+    // Only validate if coordinates are provided (both must be valid numbers)
+    if (formData.lat !== null || formData.lng !== null) {
+      if (formData.lat === null || formData.lng === null) {
+        return false; // Both or neither must be provided
+      }
+      // Validate coordinate ranges
+      if (typeof formData.lat !== 'number' || typeof formData.lng !== 'number') {
+        return false;
+      }
+      if (formData.lat < -90 || formData.lat > 90) return false;
+      if (formData.lng < -180 || formData.lng > 180) return false;
+    }
+    return true;
+  }, []);
+
+  // ENTERPRISE AUTOSAVE: Controller for coordinated saves
+  const saveController = useAutosaveController({
     queryKey: projectsKeys.data(activeProjectId),
-    saveFn: async (dataToSave) => {
+    saveFn: async (dataToSave: any) => {
       if (!activeProjectId || !supabase) throw new Error('Project or Supabase not available');
+
+      // Normalize empty strings to null
+      const normalizedData = {
+        address_full: normalizeStringValue(dataToSave.address_full),
+        address: normalizeStringValue(dataToSave.address),
+        city: normalizeStringValue(dataToSave.city),
+        state: normalizeStringValue(dataToSave.state),
+        country: normalizeStringValue(dataToSave.country),
+        zip_code: normalizeStringValue(dataToSave.zip_code),
+        place_id: normalizeStringValue(dataToSave.place_id),
+        lat: dataToSave.lat,
+        lng: dataToSave.lng,
+        timezone: normalizeStringValue(dataToSave.timezone),
+        ...(dataToSave.location_type ? { location_type: dataToSave.location_type } : {}),
+        accessibility_notes: normalizeStringValue(dataToSave.accessibility_notes)
+      };
 
       const { error } = await supabase
         .from('project_data')
         .upsert({
           project_id: activeProjectId,
           organization_id: organizationId,
-          ...dataToSave
+          ...normalizedData
         }, {
           onConflict: 'project_id'
         });
@@ -106,11 +143,56 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
         throw error;
       }
     },
-    delay: 500,
-    enabled: !!userData && !!activeProjectId,
     additionalQueryKeys: [projectsKeys.info(activeProjectId), projectsKeys.list(organizationId)],
-    errorMessage: "No se pudieron guardar los cambios de ubicación"
   });
+
+  // Handler for text fields: save on blur
+  const handleTextFieldBlur = useCallback(() => {
+    if (!isHydrated) return;
+    
+    const formData = getCurrentFormData();
+    
+    if (!isFormValid(formData)) {
+      return;
+    }
+    
+    saveController.save(formData);
+  }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+
+  // Handler for text fields: save on Enter key
+  const handleTextFieldKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!isHydrated) return;
+      
+      const formData = getCurrentFormData();
+      
+      if (!isFormValid(formData)) {
+        return;
+      }
+      
+      saveController.save(formData);
+    }
+  }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+
+  // Handler for select fields: save immediately on change
+  const handleSelectChange = useCallback((field: string, value: string) => {
+    if (!isHydrated) return;
+    
+    // Update state first
+    if (field === 'location_type') {
+      setLocationType(value);
+    }
+    
+    // Build form data with updated value
+    const formData = { ...getCurrentFormData(), [field]: value || null };
+    
+    if (!isFormValid(formData)) {
+      return;
+    }
+    
+    saveController.save(formData);
+  }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
 
   // Reset hydration when project changes
   useEffect(() => {
@@ -143,10 +225,26 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     // Mark as hydrated AFTER all state updates are queued
     setTimeout(() => {
       setIsHydrated(true);
+      
+      // Seed lastPersistedData to prevent redundant saves on first blur
+      saveController.setLastPersistedData({
+        address_full: projectData?.address_full || '',
+        address: projectData?.address || '',
+        city: projectData?.city || '',
+        state: projectData?.state || '',
+        country: projectData?.country || '',
+        zip_code: projectData?.zip_code || '',
+        place_id: projectData?.place_id || '',
+        lat: projectData?.lat ? Number(projectData.lat) : null,
+        lng: projectData?.lng ? Number(projectData.lng) : null,
+        timezone: projectData?.timezone || '',
+        location_type: projectData?.location_type || '',
+        accessibility_notes: projectData?.accessibility_notes || '',
+      });
     }, 100);
-  }, [projectData, projectDataSuccess]);
+  }, [projectData, projectDataSuccess, saveController]);
 
-  // Handle Google Places selection
+  // Handle Google Places selection - save immediately after setting state
   const handlePlaceSelected = (place: any) => {
     setAddressFull(place.address_full);
     setAddress(place.address_full); // Also set main address field
@@ -158,6 +256,30 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     setLat(place.lat);
     setLng(place.lng);
     setTimezone(place.timezone || '');
+    
+    // Save immediately after Google Places selection
+    if (isHydrated) {
+      setTimeout(() => {
+        const formData = {
+          address_full: place.address_full,
+          address: place.address_full,
+          city: place.city,
+          state: place.state,
+          country: place.country,
+          zip_code: place.postal_code,
+          place_id: place.place_id,
+          lat: place.lat,
+          lng: place.lng,
+          timezone: place.timezone || '',
+          location_type: locationType,
+          accessibility_notes: accessibilityNotes
+        };
+        
+        if (isFormValid(formData)) {
+          saveController.save(formData);
+        }
+      }, 0);
+    }
   };
 
   // Handle manual latitude/longitude input with reverse geocoding
@@ -170,6 +292,28 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     if (newLat !== null && lng !== null && googleMapsApiKey && (window as any).google) {
       await performReverseGeocoding(newLat, lng);
     }
+    
+    // Save immediately when coordinates change
+    if (isHydrated && newLat !== null && lng !== null) {
+      const formData = {
+        address_full: addressFull,
+        address: address,
+        city: city,
+        state: state,
+        country: country,
+        zip_code: zipCode,
+        place_id: placeId,
+        lat: newLat,
+        lng: lng,
+        timezone: timezone,
+        location_type: locationType,
+        accessibility_notes: accessibilityNotes
+      };
+      
+      if (isFormValid(formData)) {
+        saveController.save(formData);
+      }
+    }
   };
 
   const handleLngChange = async (value: string) => {
@@ -180,6 +324,28 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     // If both lat and lng are valid, do reverse geocoding
     if (lat !== null && newLng !== null && googleMapsApiKey && (window as any).google) {
       await performReverseGeocoding(lat, newLng);
+    }
+    
+    // Save immediately when coordinates change
+    if (isHydrated && lat !== null && newLng !== null) {
+      const formData = {
+        address_full: addressFull,
+        address: address,
+        city: city,
+        state: state,
+        country: country,
+        zip_code: zipCode,
+        place_id: placeId,
+        lat: lat,
+        lng: newLng,
+        timezone: timezone,
+        location_type: locationType,
+        accessibility_notes: accessibilityNotes
+      };
+      
+      if (isFormValid(formData)) {
+        saveController.save(formData);
+      }
     }
   };
 
@@ -241,6 +407,30 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
         title: "Ubicación actualizada",
         description: "La dirección se actualizó al mover el pin"
       });
+    }
+    
+    // Save immediately after marker drag
+    if (isHydrated) {
+      setTimeout(() => {
+        const formData = {
+          address_full: addressFull,
+          address: address,
+          city: city,
+          state: state,
+          country: country,
+          zip_code: zipCode,
+          place_id: placeId,
+          lat: newLat,
+          lng: newLng,
+          timezone: timezone,
+          location_type: locationType,
+          accessibility_notes: accessibilityNotes
+        };
+        
+        if (isFormValid(formData)) {
+          saveController.save(formData);
+        }
+      }, 100);
     }
   };
 
@@ -384,6 +574,8 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
               placeholder="Ej: Buenos Aires"
               value={city}
               onChange={(e) => setCity(e.target.value)}
+              onBlur={handleTextFieldBlur}
+              onKeyDown={handleTextFieldKeyDown}
               data-testid="input-city"
             />
           </div>
@@ -395,6 +587,8 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
               placeholder="Ej: C1043AAX"
               value={zipCode}
               onChange={(e) => setZipCode(e.target.value)}
+              onBlur={handleTextFieldBlur}
+              onKeyDown={handleTextFieldKeyDown}
               data-testid="input-zip-code"
             />
           </div>
@@ -408,6 +602,8 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
               placeholder="Ej: Buenos Aires"
               value={state}
               onChange={(e) => setState(e.target.value)}
+              onBlur={handleTextFieldBlur}
+              onKeyDown={handleTextFieldKeyDown}
               data-testid="input-state"
             />
           </div>
@@ -419,6 +615,8 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
               placeholder="Ej: Argentina"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
+              onBlur={handleTextFieldBlur}
+              onKeyDown={handleTextFieldKeyDown}
               data-testid="input-country"
             />
           </div>
@@ -426,7 +624,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
 
         <div className="space-y-2">
           <Label htmlFor="location-type">Tipo de Ubicación</Label>
-          <Select value={locationType} onValueChange={setLocationType}>
+          <Select value={locationType} onValueChange={(value) => handleSelectChange('location_type', value)}>
             <SelectTrigger id="location-type" data-testid="select-location-type">
               <SelectValue placeholder="Seleccionar tipo de ubicación" />
             </SelectTrigger>
@@ -451,6 +649,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
             placeholder="Ej: Acceso por calle lateral, estacionamiento disponible en la esquina, horario de entregas de 8 a 18hs"
             value={accessibilityNotes}
             onChange={(e) => setAccessibilityNotes(e.target.value)}
+            onBlur={handleTextFieldBlur}
             rows={3}
             data-testid="textarea-accessibility-notes"
           />
