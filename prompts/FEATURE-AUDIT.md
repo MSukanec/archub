@@ -296,22 +296,123 @@ VIEW (Contenido)       → Tablas, KPIs, gráficos, formularios
 **Objetivo:** Asegurar que TODOS los formularios, modales y vistas con auto-save o acciones puntuales usen el sistema centralizado de guardado.
 
 **REGLA DE ORO:** 
-- ✅ `useSaveEngine` → Auto-save con delay (campos de texto, descripciones, etc.)
+- ✅ `useAutosaveController` → **PREFERIDO** - Autosave enterprise (blur/Enter trigger, validación, normalización)
+- ✅ `useSaveEngine` → Auto-save con delay (legacy, solo si no requiere validación)
 - ✅ `useOptimisticMutation` → Acciones puntuales (toggles, clicks, deletes)
 - ❌ `supabase.from()` NUNCA directo en componentes
 - ❌ `queryClient.invalidateQueries()` NUNCA sueltas sin patrón
+- ❌ **NUNCA guardar en onChange** - Solo actualiza estado local
 
 **Checklist:**
-- [ ] ¿Usa `useSaveEngine` de `@/core/save-engine` para auto-save?
+- [ ] ¿Usa `useAutosaveController` o `useSaveEngine` para auto-save?
 - [ ] ¿Usa `useOptimisticMutation` para acciones puntuales (toggles, clicks)?
 - [ ] ¿Tiene `additionalQueryKeys` para invalidar caches relacionados?
 - [ ] ¿Incluye guardia `if (!oldData) return oldData;` en optimisticUpdate?
 - [ ] ¿NO hay llamadas directas a Supabase en componentes?
 - [ ] ¿NO hay `invalidateQueries` manuales sueltas?
+- [ ] ¿Valida campos requeridos ANTES de guardar?
+- [ ] ¿Normaliza valores vacíos ('' → null)?
+- [ ] ¿Hidrata `lastPersistedData` con datos iniciales?
 
-#### Patrón 1: AUTO-SAVE CON useSaveEngine
+---
 
-Para campos que se guardan **automáticamente** tras cambios:
+#### Patrón 0: AUTOSAVE ENTERPRISE (PREFERIDO) con useAutosaveController
+
+**USAR ESTE PATRÓN** para vistas con campos editables que siguen el estilo Notion/Linear:
+- Guarda solo en `onBlur`, `Enter` o cambio de select
+- **NUNCA guarda en onChange** - Solo actualiza estado local
+- Valida campos requeridos antes de guardar
+- Normaliza datos (empty string → null, trim)
+- Dirty check para evitar guardados redundantes
+
+**Ubicación:** `src/core/autosave/`
+
+```typescript
+import { useAutosaveController, normalizeStringValue } from '@/core/autosave';
+
+// 1. Estado local para el formulario
+const [projectName, setProjectName] = useState('');
+const [projectCode, setProjectCode] = useState('');
+const [isHydrated, setIsHydrated] = useState(false);
+
+// 2. Controller de autosave
+const saveController = useAutosaveController({
+  queryKey: projectsKeys.data(projectId),
+  saveFn: async (dataToSave: any) => {
+    // Normalizar empty strings → null
+    const normalized = {
+      name: normalizeStringValue(dataToSave.name),
+      code: normalizeStringValue(dataToSave.code), // '' → null
+    };
+    const { error } = await supabase
+      .from('projects')
+      .update(normalized)
+      .eq('id', projectId);
+    if (error) throw error;
+  },
+  additionalQueryKeys: [
+    projectsKeys.list(organizationId),
+    projectsKeys.info(projectId),
+  ],
+  enabled: !!projectId && isHydrated,
+});
+
+// 3. Validación antes de guardar
+const isFormValid = (data: any): boolean => {
+  if (!data.name?.trim()) return false; // Required field
+  return true;
+};
+
+// 4. Handler para blur (guarda solo si válido)
+const handleBlur = () => {
+  if (!isHydrated) return;
+  const formData = { name: projectName, code: projectCode };
+  if (!isFormValid(formData)) return; // No guardar si inválido
+  saveController.save(formData);
+};
+
+// 5. Handler para Enter key
+const handleKeyDown = (e: React.KeyboardEvent) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    handleBlur();
+  }
+};
+
+// 6. Hidratación con datos del servidor
+useEffect(() => {
+  if (!data) return;
+  setProjectName(data.name || '');
+  setProjectCode(data.code || '');
+  setTimeout(() => {
+    setIsHydrated(true);
+    // ⚠️ CRÍTICO: Seed lastPersistedData para evitar guardados redundantes
+    saveController.setLastPersistedData({
+      name: data.name || '',
+      code: data.code || '',
+    });
+  }, 100);
+}, [data]);
+
+// 7. En el JSX
+<Input
+  value={projectName}
+  onChange={(e) => setProjectName(e.target.value)} // Solo estado local
+  onBlur={handleBlur}                               // Guarda aquí
+  onKeyDown={handleKeyDown}                         // O con Enter
+/>
+```
+
+**Cuándo usar:**
+- Vistas con campos de texto editables (datos básicos, configuración)
+- Formularios embebidos en páginas (no modales)
+- Cualquier UI estilo Notion/Linear
+
+---
+
+#### Patrón 1: AUTO-SAVE CON useSaveEngine (Legacy)
+
+Para campos que se guardan **automáticamente** tras delay (usar solo si no requiere validación):
 
 ```typescript
 const { isSaving, hasUnsavedChanges } = useSaveEngine({
@@ -327,7 +428,7 @@ const { isSaving, hasUnsavedChanges } = useSaveEngine({
       .eq('id', projectId);
     if (error) throw error;
   },
-  delay: 1500,
+  delay: 500, // ⚠️ MÁXIMO 500ms, nunca 1500ms
   enabled: !!projectId,
   additionalQueryKeys: [
     ['project-info', projectId],

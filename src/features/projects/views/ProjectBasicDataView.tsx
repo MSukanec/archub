@@ -219,7 +219,6 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
   const saveController = useAutosaveController({
     queryKey: projectsKeys.data(activeProjectId),
     saveFn: async (dataToSave: any) => {
-      console.log('[AutosaveController] Saving project data:', dataToSave);
       
       if (!activeProjectId || !supabase) throw new Error('Project or Supabase not available');
 
