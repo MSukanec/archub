@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
-import { CheckCircle2, AlertCircle, AlertTriangle, Clock, Info, XCircle, Play, Check, Pause, X, Calendar } from 'lucide-react'
+import { CheckCircle2, AlertCircle, AlertTriangle, Clock, Info, XCircle, Play, Check, Pause, X, Calendar, Award } from 'lucide-react'
 
 /**
  * SEMANTIC BADGE VARIANTS
@@ -24,6 +24,7 @@ export type BadgeVariant =
   | 'status-paused'
   | 'status-cancelled'
   | 'status-planning'
+  | 'organization-founder'
 
 /**
  * Mapping of variants to their semantic color variables
@@ -45,6 +46,7 @@ const BADGE_VARIANT_MAP: Record<BadgeVariant, string> = {
   'status-paused': 'var(--status-paused)',
   'status-cancelled': 'var(--status-cancelled)',
   'status-planning': 'var(--status-planning)',
+  'organization-founder': 'var(--plan-teams)',
 }
 
 /**
@@ -68,6 +70,7 @@ const variantIcons: Record<BadgeVariant, React.ReactNode | null> = {
   'status-paused': <Pause className="w-3.5 h-3.5" />,
   'status-cancelled': <X className="w-3.5 h-3.5" />,
   'status-planning': <Calendar className="w-3.5 h-3.5" />,
+  'organization-founder': <Award className="w-3.5 h-3.5" />,
 }
 
 const badgeVariants = cva(
@@ -90,6 +93,7 @@ const badgeVariants = cva(
         "status-paused": "",
         "status-cancelled": "",
         "status-planning": "",
+        "organization-founder": "",
       }
     },
     defaultVariants: {
@@ -173,6 +177,11 @@ const variantStyles: Record<BadgeVariant, React.CSSProperties> = {
     borderColor: 'var(--status-planning)',
     backgroundColor: 'color-mix(in srgb, var(--status-planning) 10%, transparent)',
     color: 'var(--status-planning)',
+  },
+  'organization-founder': {
+    borderColor: 'var(--plan-teams)',
+    backgroundColor: 'color-mix(in srgb, var(--plan-teams) 10%, transparent)',
+    color: 'var(--plan-teams)',
   },
 }
 

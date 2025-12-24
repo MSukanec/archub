@@ -304,6 +304,17 @@ const AdminAdminOrganizations = () => {
       },
     },
     {
+      key: 'founder',
+      label: 'Estatus',
+      type: 'badge' as const,
+      render: (org: Organization) => {
+        if (org.settings?.is_founder) {
+          return <Badge variant="organization-founder">Fundador</Badge>;
+        }
+        return null;
+      },
+    },
+    {
       key: 'plan',
       label: 'Plan',
       type: 'badge' as const,

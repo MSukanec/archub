@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Building2, FileText, Users, Globe } from 'lucide-react';
 
 import { AvatarUploader } from '@/components/shared/fields/AvatarUploader';
-import { FounderBadge } from '@/components/shared/FounderBadge';
+import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -269,7 +269,9 @@ export function OrganizationProfileView() {
           <div className="flex items-center gap-2 mb-6">
             <Building2 className="h-5 w-5 text-[var(--accent)]" />
             <h2 className="text-lg font-semibold">Logo de la Organización</h2>
-            <FounderBadge isFounder={organizationInfo?.settings?.is_founder} size="md" />
+            {organizationInfo?.settings?.is_founder && (
+              <Badge variant="organization-founder">Fundador</Badge>
+            )}
           </div>
           <p className="text-sm text-muted-foreground">
             Sube el logo oficial de tu organización. Este logo se mostrará en documentos, reportes y comunicaciones oficiales.
