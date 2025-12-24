@@ -485,16 +485,32 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 
-  const { data: currentImageUrl } = useQuery({
-    queryKey: ['project-edit-image', project?.id, project?.project_data?.image_bucket, project?.project_data?.image_path],
+  // Query to fetch project_data - updates when mutation invalidates
+  const { data: editingProjectData } = useQuery({
+    queryKey: [QUERY_KEYS.PROJECT_DATA, project?.id],
     queryFn: async () => {
-      if (!project?.project_data?.image_bucket || !project?.project_data?.image_path) {
+      if (!project?.id || mode !== 'edit') return null;
+      const { data } = await supabase
+        .from('project_data')
+        .select('*')
+        .eq('project_id', project.id)
+        .single();
+      return data;
+    },
+    enabled: !!project?.id && mode === 'edit',
+  });
+
+  // Query to get image URL - depends on editingProjectData so it updates when image is deleted
+  const { data: currentImageUrl } = useQuery({
+    queryKey: ['project-edit-image', project?.id],
+    queryFn: async () => {
+      if (!editingProjectData?.image_bucket || !editingProjectData?.image_path) {
         return null;
       }
       const { getProjectImageUrlFromData } = await import('@/features/projects');
-      return await getProjectImageUrlFromData(project.project_data);
+      return await getProjectImageUrlFromData(editingProjectData);
     },
-    enabled: !!project && !!project?.project_data?.image_bucket && !!project?.project_data?.image_path,
+    enabled: !!editingProjectData?.image_bucket && !!editingProjectData?.image_path,
   });
 
   // Mutation to upload project image using optimistic mutation
