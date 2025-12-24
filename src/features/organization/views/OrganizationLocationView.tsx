@@ -70,13 +70,6 @@ export function OrganizationLocationView() {
         state: normalizeStringValue(dataToSave.state),
         country: normalizeStringValue(dataToSave.country),
         postal_code: normalizeStringValue(dataToSave.postal_code),
-        address_full: normalizeStringValue(dataToSave.address_full),
-        place_id: normalizeStringValue(dataToSave.place_id),
-        lat: dataToSave.lat,
-        lng: dataToSave.lng,
-        timezone: normalizeStringValue(dataToSave.timezone),
-        ...(dataToSave.location_type ? { location_type: dataToSave.location_type } : {}),
-        accessibility_notes: normalizeStringValue(dataToSave.accessibility_notes),
       };
 
       const { data: existingData } = await supabase
@@ -124,14 +117,7 @@ export function OrganizationLocationView() {
     state: state,
     country: country,
     postal_code: postalCode,
-    address_full: addressFull,
-    place_id: placeId,
-    lat: lat,
-    lng: lng,
-    timezone: timezone,
-    location_type: locationType || null,
-    accessibility_notes: accessibilityNotes,
-  }), [address, city, state, country, postalCode, addressFull, placeId, lat, lng, timezone, locationType, accessibilityNotes]);
+  }), [address, city, state, country, postalCode]);
 
   const handleTextFieldBlur = useCallback(() => {
     if (!isHydrated) return;
@@ -152,18 +138,8 @@ export function OrganizationLocationView() {
 
   const handleSelectChange = useCallback((value: string) => {
     if (!isHydrated) return;
-    
     setLocationType(value);
-    
-    setTimeout(() => {
-      if (!validateCoordinates(lat, lng)) return;
-      
-      saveController.save({
-        ...getCurrentFormData(),
-        location_type: value || null
-      });
-    }, 0);
-  }, [isHydrated, saveController, getCurrentFormData, lat, lng]);
+  }, [isHydrated]);
 
   useEffect(() => {
     setIsHydrated(false);
@@ -197,17 +173,10 @@ export function OrganizationLocationView() {
       
       saveController.setLastPersistedData({
         address: organizationData?.address || '',
-        address_full: organizationData?.address_full || organizationData?.address || '',
         city: organizationData?.city || '',
         state: organizationData?.state || '',
         country: organizationData?.country || '',
         postal_code: organizationData?.postal_code || '',
-        place_id: organizationData?.place_id || '',
-        lat: organizationData?.lat != null ? Number(organizationData.lat) : null,
-        lng: organizationData?.lng != null ? Number(organizationData.lng) : null,
-        timezone: organizationData?.timezone || '',
-        location_type: organizationData?.location_type || '',
-        accessibility_notes: organizationData?.accessibility_notes || '',
       });
     }, 100);
   }, [organizationData, organizationDataSuccess, saveController]);
@@ -228,17 +197,10 @@ export function OrganizationLocationView() {
       setTimeout(() => {
         saveController.save({
           address: place.address_full,
-          address_full: place.address_full,
           city: place.city,
           state: place.state,
           country: place.country,
           postal_code: place.postal_code,
-          place_id: place.place_id,
-          lat: place.lat,
-          lng: place.lng,
-          timezone: place.timezone || '',
-          location_type: locationType || null,
-          accessibility_notes: accessibilityNotes
         });
       }, 10);
     }
@@ -252,11 +214,7 @@ export function OrganizationLocationView() {
     if (newLat !== null && lng !== null && googleMapsApiKey && (window as any).google && isHydrated) {
       await performReverseGeocoding(newLat, lng);
       setTimeout(() => {
-        saveController.save({
-          ...getCurrentFormData(),
-          lat: newLat,
-          lng: lng
-        });
+        saveController.save(getCurrentFormData());
       }, 50);
     }
   }, [isHydrated, lng, googleMapsApiKey, saveController, getCurrentFormData]);
@@ -269,11 +227,7 @@ export function OrganizationLocationView() {
     if (lat !== null && newLng !== null && googleMapsApiKey && (window as any).google && isHydrated) {
       await performReverseGeocoding(lat, newLng);
       setTimeout(() => {
-        saveController.save({
-          ...getCurrentFormData(),
-          lat: lat,
-          lng: newLng
-        });
+        saveController.save(getCurrentFormData());
       }, 50);
     }
   }, [isHydrated, lat, googleMapsApiKey, saveController, getCurrentFormData]);
@@ -329,11 +283,7 @@ export function OrganizationLocationView() {
     if (googleMapsApiKey && (window as any).google && isHydrated) {
       await performReverseGeocoding(newLat, newLng);
       setTimeout(() => {
-        saveController.save({
-          ...getCurrentFormData(),
-          lat: newLat,
-          lng: newLng
-        });
+        saveController.save(getCurrentFormData());
       }, 50);
       toast({
         title: "Ubicación actualizada",
