@@ -219,30 +219,32 @@ export function FormPanel({
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="currency_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Moneda del Proyecto</FormLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <FormControl>
-                  <SelectTrigger data-testid="select-currency">
-                    <SelectValue placeholder="Seleccionar moneda" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {organizationCurrencies.filter(oc => oc.is_active).map((oc) => (
-                    <SelectItem key={oc.currency_id} value={oc.currency_id}>
-                      {oc.currency?.name} ({oc.currency?.symbol})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {organizationCurrencies.length > 1 && (
+          <FormField
+            control={form.control}
+            name="currency_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Moneda del Proyecto</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger data-testid="select-currency">
+                      <SelectValue placeholder="Seleccionar moneda" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {organizationCurrencies.filter(oc => oc.is_active).map((oc) => (
+                      <SelectItem key={oc.currency_id} value={oc.currency_id}>
+                        {oc.currency?.name} ({oc.currency?.symbol})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="space-y-2">
           <FormLabel>Imagen Principal (opcional)</FormLabel>
