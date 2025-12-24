@@ -70,42 +70,6 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     enabled: !!activeProjectId && !!supabase
   });
 
-  // Build current form data for saving
-  const getCurrentFormData = useCallback(() => ({
-    address_full: addressFull,
-    address: address,
-    city: city,
-    state: state,
-    country: country,
-    zip_code: zipCode,
-    place_id: placeId,
-    lat: lat,
-    lng: lng,
-    timezone: timezone,
-    ...(locationType && ['urban', 'rural', 'industrial', 'other'].includes(locationType) 
-      ? { location_type: locationType } 
-      : {}),
-    accessibility_notes: accessibilityNotes
-  }), [addressFull, address, city, state, country, zipCode, placeId, lat, lng, timezone, locationType, accessibilityNotes]);
-
-  // Validate form data before saving - all location fields are optional
-  const isFormValid = useCallback((formData: any): boolean => {
-    // Location is fully optional - no required fields
-    // Only validate if coordinates are provided (both must be valid numbers)
-    if (formData.lat !== null || formData.lng !== null) {
-      if (formData.lat === null || formData.lng === null) {
-        return false; // Both or neither must be provided
-      }
-      // Validate coordinate ranges
-      if (typeof formData.lat !== 'number' || typeof formData.lng !== 'number') {
-        return false;
-      }
-      if (formData.lat < -90 || formData.lat > 90) return false;
-      if (formData.lng < -180 || formData.lng > 180) return false;
-    }
-    return true;
-  }, []);
-
   // ENTERPRISE AUTOSAVE: Controller for coordinated saves
   const saveController = useAutosaveController({
     queryKey: projectsKeys.data(activeProjectId),
@@ -146,18 +110,39 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
     additionalQueryKeys: [projectsKeys.info(activeProjectId), projectsKeys.list(organizationId)],
   });
 
+  // Validate coordinates (if both present, must be valid)
+  const validateCoordinates = (lat: number | null, lng: number | null) => {
+    if (lat !== null || lng !== null) {
+      if (lat === null || lng === null) return false; // Both or neither
+      if (typeof lat !== 'number' || typeof lng !== 'number') return false;
+      if (lat < -90 || lat > 90) return false;
+      if (lng < -180 || lng > 180) return false;
+    }
+    return true;
+  };
+
   // Handler for text fields: save on blur
   const handleTextFieldBlur = useCallback(() => {
     if (!isHydrated) return;
     
-    const formData = getCurrentFormData();
+    // Validate coordinates before saving
+    if (!validateCoordinates(lat, lng)) return;
     
-    if (!isFormValid(formData)) {
-      return;
-    }
-    
-    saveController.save(formData);
-  }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+    saveController.save({
+      address_full: addressFull,
+      address: address,
+      city: city,
+      state: state,
+      country: country,
+      zip_code: zipCode,
+      place_id: placeId,
+      lat: lat,
+      lng: lng,
+      timezone: timezone,
+      ...(locationType ? { location_type: locationType } : {}),
+      accessibility_notes: accessibilityNotes
+    });
+  }, [isHydrated, saveController, addressFull, address, city, state, country, zipCode, placeId, lat, lng, timezone, locationType, accessibilityNotes]);
 
   // Handler for text fields: save on Enter key
   const handleTextFieldKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -165,34 +150,52 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
       e.preventDefault();
       if (!isHydrated) return;
       
-      const formData = getCurrentFormData();
+      // Validate coordinates before saving
+      if (!validateCoordinates(lat, lng)) return;
       
-      if (!isFormValid(formData)) {
-        return;
-      }
-      
-      saveController.save(formData);
+      saveController.save({
+        address_full: addressFull,
+        address: address,
+        city: city,
+        state: state,
+        country: country,
+        zip_code: zipCode,
+        place_id: placeId,
+        lat: lat,
+        lng: lng,
+        timezone: timezone,
+        ...(locationType ? { location_type: locationType } : {}),
+        accessibility_notes: accessibilityNotes
+      });
     }
-  }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+  }, [isHydrated, saveController, addressFull, address, city, state, country, zipCode, placeId, lat, lng, timezone, locationType, accessibilityNotes]);
 
   // Handler for select fields: save immediately on change
-  const handleSelectChange = useCallback((field: string, value: string) => {
+  const handleSelectChange = useCallback((value: string) => {
     if (!isHydrated) return;
     
-    // Update state first
-    if (field === 'location_type') {
-      setLocationType(value);
-    }
+    setLocationType(value);
     
-    // Build form data with updated value
-    const formData = { ...getCurrentFormData(), [field]: value || null };
-    
-    if (!isFormValid(formData)) {
-      return;
-    }
-    
-    saveController.save(formData);
-  }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+    // Trigger save after state update via setTimeout
+    setTimeout(() => {
+      if (!validateCoordinates(lat, lng)) return;
+      
+      saveController.save({
+        address_full: addressFull,
+        address: address,
+        city: city,
+        state: state,
+        country: country,
+        zip_code: zipCode,
+        place_id: placeId,
+        lat: lat,
+        lng: lng,
+        timezone: timezone,
+        location_type: value,
+        accessibility_notes: accessibilityNotes
+      });
+    }, 0);
+  }, [isHydrated, saveController, addressFull, address, city, state, country, zipCode, placeId, lat, lng, timezone, accessibilityNotes]);
 
   // Reset hydration when project changes
   useEffect(() => {
@@ -535,7 +538,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
 
         <div className="space-y-2">
           <Label htmlFor="location-type">Tipo de Ubicación</Label>
-          <Select value={locationType} onValueChange={(value) => handleSelectChange('location_type', value)}>
+          <Select value={locationType} onValueChange={handleSelectChange}>
             <SelectTrigger id="location-type" data-testid="select-location-type">
               <SelectValue placeholder="Seleccionar tipo de ubicación" />
             </SelectTrigger>
