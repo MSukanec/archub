@@ -23,6 +23,6 @@ export function useCreateProject(organizationId: string | undefined) {
     },
     onSuccessMessage: 'Proyecto creado',
     onErrorMessage: 'No se pudo crear el proyecto',
-    additionalQueryKeys: [projectsKeys.lists()],
+    additionalQueryKeys: [],
   });
 }

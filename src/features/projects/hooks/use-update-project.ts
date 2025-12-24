@@ -15,6 +15,6 @@ export function useUpdateProject(organizationId: string | undefined) {
     },
     onSuccessMessage: 'Proyecto actualizado',
     onErrorMessage: 'No se pudo actualizar el proyecto',
-    additionalQueryKeys: [projectsKeys.lists()],
+    additionalQueryKeys: [],
   });
 }

@@ -459,7 +459,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     },
     onSuccessMessage: "Proyecto creado",
     onErrorMessage: "Error al crear proyecto",
-    additionalQueryKeys: [projectsKeys.lists()],
+    additionalQueryKeys: [],
   });
 
   const { mutate: updateProjectMutate, isPending: isUpdating } = useOptimisticMutation<ProjectType, { projectId: string; data: UpdateProjectData }>({
@@ -473,7 +473,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     },
     onSuccessMessage: "Proyecto actualizado",
     onErrorMessage: "Error al actualizar proyecto",
-    additionalQueryKeys: [projectsKeys.lists()],
+    additionalQueryKeys: [],
   });
 
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -519,7 +519,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     optimisticUpdate: (oldData) => oldData,
     onSuccessMessage: "Imagen principal actualizada correctamente",
     onErrorMessage: "No se pudo subir la imagen",
-    additionalQueryKeys: [projectsKeys.lists()],
+    additionalQueryKeys: [],
   });
 
   // Mutation to delete project image using optimistic mutation
@@ -543,7 +543,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     },
     onSuccessMessage: "Imagen principal eliminada correctamente",
     onErrorMessage: "No se pudo eliminar la imagen",
-    additionalQueryKeys: [projectsKeys.lists()],
+    additionalQueryKeys: [],
   });
 
   const currentUserMember = organizationMembers.find(member => 

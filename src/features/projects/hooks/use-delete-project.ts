@@ -14,6 +14,6 @@ export function useDeleteProject(organizationId: string | undefined) {
     },
     onSuccessMessage: 'Proyecto eliminado',
     onErrorMessage: 'No se pudo eliminar el proyecto',
-    additionalQueryKeys: [projectsKeys.lists()],
+    additionalQueryKeys: [],
   });
 }
