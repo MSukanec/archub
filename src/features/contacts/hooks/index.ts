@@ -15,3 +15,4 @@ export * from './use-upload-attachment';
 export * from './use-create-contact-attachment';
 export * from './use-delete-contact-attachment';
 export * from './use-set-contact-avatar';
+export * from './use-invite-member';

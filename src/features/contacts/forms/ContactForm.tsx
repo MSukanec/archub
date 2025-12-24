@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,7 +18,7 @@ import { PhoneField } from "@/components/shared/fields/PhoneField";
 import { AvatarUploader } from "@/components/shared/fields/AvatarUploader";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useContactTypes, useContact, useContactAttachments, useCreateContact, useUpdateContact } from "@/features/contacts/hooks";
+import { useContactTypes, useContact, useContactAttachments, useCreateContact, useUpdateContact, useInviteMember } from "@/features/contacts/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { contactsKeys } from "@/core/query-keys";
@@ -771,41 +771,28 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
     }
   }, [foundUser, form, editingContact]);
 
-  const inviteMemberMutation = useMutation({
-    mutationFn: async () => {
+  const inviteMemberHook = useInviteMember(organizationId || '', linkedUserId);
+  
+  const inviteMemberMutation = {
+    mutate: () => {
       if (!organizationId || !editingContact?.linked_user?.email) {
-        throw new Error('Faltan datos para invitar al usuario');
+        toast({ title: 'Error', description: 'Faltan datos para invitar al usuario', variant: 'destructive' });
+        return;
       }
-
       const defaultRole = roles.find(r => !r.name.toLowerCase().includes('admin'));
       if (!defaultRole) {
-        throw new Error('No se encontró un rol válido');
+        toast({ title: 'Error', description: 'No se encontró un rol válido', variant: 'destructive' });
+        return;
       }
-
-      const response = await apiRequest('POST', '/api/invite-member', {
+      inviteMemberHook.mutate({
         email: editingContact.linked_user.email,
         roleId: defaultRole.id,
         organizationId: organizationId,
-      });
-
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization-members'] });
-      queryClient.invalidateQueries({ queryKey: ['is-member', linkedUserId, organizationId] });
-      toast({
-        title: 'Usuario invitado',
-        description: 'La invitación ha sido enviada',
+        linkedUserId: linkedUserId,
       });
     },
-    onError: (error: any) => {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
+    isPending: inviteMemberHook.isPending,
+  };
 
   const handleAvatarUpload = (file: File) => {
     setPendingAvatarFile(file);

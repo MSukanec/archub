@@ -1,10 +1,17 @@
 # AUDIT REPORT: Feature CONTACTS
 
 **Fecha de auditoría inicial:** 2025-12-23  
-**Re-auditoría:** 2025-12-24  
+**Re-auditoría:** 2025-12-24 (actualizado)  
 **Auditor:** Replit Agent  
 **Estándar aplicado:** FEATURE-AUDIT.md v1.1 (con patrones de autosave enterprise)  
 **Resultado:** ✅ PASA
+
+### Cambios 2025-12-24 (tarde):
+- Refactorizado `useContactForm` para usar hooks optimizados (`useCreateContact`, `useUpdateContact`)
+- Eliminado uso directo de `useMutation` - ahora usa `useInviteMember` hook
+- Agregado `use-invite-member.ts` con query keys scoped (`organizationId`, `linkedUserId`)
+- Corregida validación de email con query chaining correcto en Supabase
+- Agregado `enabled: !!organizationId` a query de roles para evitar error 400
 
 ---
 
@@ -57,7 +64,8 @@
 │   ├── use-set-contact-avatar.ts      # ✅ useOptimisticMutation
 │   ├── use-update-contact.ts          # ✅ useOptimisticMutation
 │   ├── use-update-contact-type.ts     # ✅ useOptimisticMutation
-│   └── use-upload-attachment.ts       # ✅ useOptimisticMutation
+│   ├── use-upload-attachment.ts       # ✅ useOptimisticMutation
+│   └── use-invite-member.ts           # ✅ useOptimisticMutation (nuevo)
 ├── mappers/
 │   └── index.ts
 ├── schemas/
