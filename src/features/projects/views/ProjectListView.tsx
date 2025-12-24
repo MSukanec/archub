@@ -435,6 +435,23 @@ export function ProjectListView() {
   // Delete project mutation
   const { mutate: deleteProject, isPending: isDeleting } = useOptimisticMutation({
     mutationFn: async (projectId: string) => {
+      // If deleting active project, find previous by last_active_at
+      if (projectId === activeProjectId && projects.length > 1) {
+        const otherProjects = projects
+          .filter(p => p.id !== projectId)
+          .sort((a, b) => {
+            const aTime = a.last_active_at ? new Date(a.last_active_at).getTime() : 0;
+            const bTime = b.last_active_at ? new Date(b.last_active_at).getTime() : 0;
+            return bTime - aTime;
+          });
+        
+        if (otherProjects.length > 0) {
+          setTimeout(() => {
+            selectProject(otherProjects[0].id);
+          }, 0);
+        }
+      }
+      
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.access_token) {
         throw new Error('No authentication token available')
