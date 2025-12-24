@@ -249,13 +249,11 @@ export function ContactsView() {
   }
 
   return (
-    <div className="p-6">
-      <ContactList
-        contacts={filteredContacts}
-        onEdit={handleEditContact}
-        onDelete={handleDeleteContact}
-        onRowClick={handleViewContact}
-      />
-    </div>
+    <ContactList
+      contacts={filteredContacts}
+      onEdit={handleEditContact}
+      onDelete={handleDeleteContact}
+      onRowClick={handleViewContact}
+    />
   );
 }

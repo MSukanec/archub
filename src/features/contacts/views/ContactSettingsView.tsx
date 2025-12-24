@@ -79,7 +79,7 @@ export function ContactSettingsView() {
   }
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
           <div className="flex items-center justify-between gap-2 mb-6">
