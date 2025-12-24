@@ -545,7 +545,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
     },
     onSuccessMessage: "Imagen principal eliminada correctamente",
     onErrorMessage: "No se pudo eliminar la imagen",
-    additionalQueryKeys: [],
+    additionalQueryKeys: [projectsKeys.image(project?.id)],
   });
 
   const currentUserMember = organizationMembers.find(member => 
