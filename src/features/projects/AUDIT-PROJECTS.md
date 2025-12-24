@@ -127,7 +127,19 @@ src/features/projects/views/
 - ❌ `ProjectBasicDataTab.tsx` → Migrado a `ProjectBasicDataView.tsx`
 - ❌ `ProjectLocationTab.tsx` → Migrado a `ProjectLocationView.tsx`
 
-### 3.3 Performance ✅
+### 3.3 Save Engine (Migrado 2025-12-24) ✅
+- [x] 11 hooks migrados a `useOptimisticMutation` con guardias
+- [x] use-project-types.ts: 4 hooks (create, update, delete, replace)
+- [x] use-project-modalities.ts: 4 hooks (create, update, delete, replace)
+- [x] use-create-project.ts: 1 hook
+- [x] use-update-project.ts: 1 hook
+- [x] use-delete-project.ts: 1 hook
+- [x] use-update-project-last-active.ts: 1 hook (silent, no success message)
+- [x] Guardia `if (!oldData) return oldData;` en todos
+- [x] `additionalQueryKeys` para invalidar caches relacionados
+- [x] Mensajes de éxito/error en español
+
+### 3.4 Performance ✅
 - [x] Optimistic updates via `setQueryData` (NO invalidateQueries = INSTANT)
 - [x] Optimistic updates en project selection (activate) - INSTANTÁNEO al hacer click
 - [x] Auto-save con `mutateAsync` que espera mutation + `setQueryData` en onSuccess
@@ -143,7 +155,7 @@ src/features/projects/views/
 - [x] **ProjectLocationView**: Auto-save + setQueryData (INSTANTÁNEO, no refetch)
   - [x] Ubicación, coordenadas, zona horaria: Cache update en onSuccess sin refetch
 
-### 3.4 Data-Testid ✅
+### 3.5 Data-Testid ✅
 - [x] ProjectActivesView: `container-project-actives`, `grid-projects`, `button-create-project-empty`
 - [x] ProjectBasicDataView: `input-project-name`, `input-project-code`, `textarea-description`, `textarea-internal-notes`
 - [x] ProjectListView: `container-project-list`, `list-projects-mobile`, `row-project-${id}`, `button-create-project-empty`
@@ -152,13 +164,13 @@ src/features/projects/views/
 - [x] ProjectItemCard: Badges y botones
 - [x] ProjectVisionGeneralView: Hero section, badges, stats
 
-### 3.5 Modales ✅
+### 3.6 Modales ✅
 - [x] ProjectForm registrada con patrón correcto
 - [x] Delete confirmation modal con patrón
 - [x] Manejo de mode (create/edit/view)
 - [x] data-testid en botones de acción
 
-### 3.6 Database ✅
+### 3.7 Database ✅
 - [x] Tabla `projects` con todas las columnas necesarias
 - [x] Vista `projects_view` para query optimizada
 - [x] RLS policies por organization_id
@@ -167,14 +179,14 @@ src/features/projects/views/
 - [x] Foreign keys: organization_id, created_by
 - [x] Índices en queries frecuentes
 
-### 3.7 Seguridad ✅
+### 3.8 Seguridad ✅
 - [x] RLS filtering por organization_id
 - [x] User authentication verificado
 - [x] Soft delete (nunca hard delete)
 - [x] Activity logging en create/update/delete
 - [x] Plan limits enforcement (PlanRestricted)
 
-### 3.8 UI/UX ✅
+### 3.9 UI/UX ✅
 - [x] Badges de proyecto con color consistente (15% opacity)
 - [x] Estados de carga (loading skeleton)
 - [x] Estados vacíos (EmptyState con acción)
@@ -182,7 +194,7 @@ src/features/projects/views/
 - [x] Toast notifications
 - [x] Sorteo por last_active_at
 
-### 3.9 Layout ✅
+### 3.10 Layout ✅
 - [x] PageLayout.tsx: Contenido expande completamente (no fondo gris)
 - [x] Flex properties: `flex-1 min-h-0` en contenedores
 - [x] Overflow handling correcto

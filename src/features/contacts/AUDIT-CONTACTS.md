@@ -124,8 +124,9 @@
 - [x] ContactTypeForm.tsx migrado a usar hooks
 
 ### Exports
-- [x] Named exports (no default exports en views/pages nuevas)
+- [x] Named exports (no default exports en ningún archivo)
 - [x] Barrel exports actualizados
+- [x] ContactForm, ContactAvatar, ContactRow, ContactList convertidos a named exports
 
 ---
 
@@ -158,6 +159,12 @@
 - **Razón**: Archivo muy complejo, alto riesgo de regresión
 - **Patrón actual**: FormPanel interno + ModalLayout en mismo archivo
 - **Recomendación futura**: Separar en ContactFormFields.tsx + ContactModal.tsx
+
+### Inline useMutation en ContactForm.tsx
+- **inviteMemberMutation** (línea 753): Invita usuarios a la organización
+- **createContactMutation** (línea 824): Crea/actualiza contacto
+- **Razón**: Lógica muy acoplada al contexto del form, refactorizar requiere reescritura significativa
+- **Impacto**: Bajo - funcionan correctamente, solo no siguen patrón Save Engine
 
 ---
 

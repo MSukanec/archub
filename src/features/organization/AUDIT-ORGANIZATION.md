@@ -16,7 +16,7 @@ El feature ORGANIZATION está **100% migrado a Save Engine** según estándares 
 - **OrganizationLocationView.tsx**: useAutoSave+useMutation → useSaveEngine ✅ (12 campos de ubicación: address, city, state, country, postal_code, address_full, place_id, lat, lng, timezone, location_type, accessibility_notes)
 - **OrganizationProfileView.tsx**: useAutoSave+useMutation → useSaveEngine ✅
 - **OrganizationSettingsFinancesView.tsx**: 4x useMutation → 4x useOptimisticMutation ✅
-- **OrganizationMembersListView.tsx**: 2x useMutation → 2x useOptimisticMutation ✅ (resendInviteMutation kept as useMutation - placeholder only)
+- **OrganizationMembersListView.tsx**: 3x useMutation → 3x useOptimisticMutation ✅ (incluye resendInviteMutation placeholder)
 - **OrganizationPermissionsView.tsx**: useMutation → useOptimisticMutation ✅
 - **OrganizationBillingView.tsx**: 2x useMutation → 2x useOptimisticMutation ✅
 
