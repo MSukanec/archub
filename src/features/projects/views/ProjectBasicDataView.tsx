@@ -135,7 +135,13 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     optimisticUpdate: (oldData) => oldData,
     onSuccessMessage: "Imagen principal actualizada correctamente",
     onErrorMessage: "No se pudo subir la imagen",
-    additionalQueryKeys: [['project-info', activeProjectId], ['projects']],
+    additionalQueryKeys: [
+      ['project-info', activeProjectId], 
+      ['projects', organizationId],
+      ['projects-lite', organizationId],
+      ['projects-map', organizationId],
+      ['project-image-url', activeProjectId],
+    ],
   });
 
   // Mutation to delete project image using optimistic mutation
@@ -160,7 +166,13 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     },
     onSuccessMessage: "Imagen principal eliminada correctamente",
     onErrorMessage: "No se pudo eliminar la imagen",
-    additionalQueryKeys: [['project-info', activeProjectId], ['projects']],
+    additionalQueryKeys: [
+      ['project-info', activeProjectId], 
+      ['projects', organizationId],
+      ['projects-lite', organizationId],
+      ['projects-map', organizationId],
+      ['project-image-url', activeProjectId],
+    ],
   });
 
   // Handler for image file selection
