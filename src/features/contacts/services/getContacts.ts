@@ -1,18 +1,18 @@
 import { supabase } from '@/lib/supabase';
 import type { ContactWithRelations } from '../types';
+import { mapViewToContacts } from '../mappers';
 
 /**
- * Obtiene todos los contactos activos (no eliminados) de una organización
- * con sus relaciones: tipos de contacto, usuario vinculado y recuento de adjuntos.
+ * Obtiene todos los contactos activos de una organización
+ * usando la vista contacts_with_relations_view.
  * 
- * Relaciones incluidas:
- * - contact_types (vía contact_type_links)
- * - linked_user (si existe)
- * - attachments_count (número de archivos adjuntos)
+ * La vista ya incluye:
+ * - Datos del usuario vinculado (linked_user_*)
+ * - Tipos de contacto como JSON array
+ * - Estado de membresía (is_organization_member)
  * 
  * @param organizationId - ID de la organización
- * @returns Array de contactos con relaciones, o array vacío si no hay datos
- * @throws {Error} Si falla la query principal de contactos
+ * @returns Array de contactos con relaciones
  */
 export async function getContacts(
   organizationId: string
@@ -21,31 +21,15 @@ export async function getContacts(
     return [];
   }
 
-  const { data: contacts, error } = await supabase
-    .from('contacts')
-    .select(`
-      *,
-      linked_user:users!linked_user_id(id, full_name, email, avatar_url),
-      contact_type_links(
-        contact_types(id, name, is_deleted)
-      )
-    `)
+  const { data, error } = await supabase
+    .from('contacts_with_relations_view')
+    .select('*')
     .eq('organization_id', organizationId)
-    .eq('is_deleted', false)
     .order('created_at', { ascending: false });
 
   if (error) {
     throw error;
   }
 
-  if (!contacts || contacts.length === 0) {
-    return [];
-  }
-
-  return contacts.map(contact => ({
-    ...contact,
-    contact_types: contact.contact_type_links
-      ?.map((link: any) => link.contact_types)
-      .filter((type: any) => type && !type.is_deleted) || [],
-  }));
+  return mapViewToContacts(data || []);
 }

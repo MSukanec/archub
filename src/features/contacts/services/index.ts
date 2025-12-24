@@ -1,5 +1,7 @@
 export * from './getContacts';
 export * from './getContactById';
+export * from './getContactsByType';
+export * from './getContactsSummary';
 export * from './createContact';
 export * from './updateContact';
 export * from './softDeleteContact';

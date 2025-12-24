@@ -1,5 +1,7 @@
 export * from './use-contacts';
 export * from './use-contact';
+export * from './use-contacts-by-type';
+export * from './use-contacts-summary';
 export * from './use-create-contact';
 export * from './use-update-contact';
 export * from './use-delete-contact';
