@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getProjectStats } from '../services/getProjectStats';
-import { QUERY_KEYS } from '../constants';
+import { projectsKeys } from '@/core/query-keys';
 import { useCurrentUser } from '@/hooks/use-current-user';
 
 /**
@@ -17,7 +17,7 @@ export function useProjectStats(projectId: string | null) {
   const organizationId = userData?.preferences?.last_organization_id;
 
   return useQuery({
-    queryKey: [QUERY_KEYS.PROJECT_STATS, organizationId, projectId],
+    queryKey: projectsKeys.stats(organizationId, projectId ?? undefined),
     queryFn: () => getProjectStats(projectId!, organizationId!),
     enabled: !!organizationId && !!projectId,
   });

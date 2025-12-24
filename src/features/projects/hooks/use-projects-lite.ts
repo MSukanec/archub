@@ -1,13 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
-import { getProjectsLite } from '../services/getProjectsLite';
-import { QUERY_KEYS } from '../constants';
+import { getProjects } from '../services/getProjects';
+import { projectsKeys } from '@/core/query-keys';
 import { useProjectContext } from '@/stores/projectContext';
+
+interface ProjectLite {
+  id: string;
+  name: string;
+  color: string | null;
+  status: string | null;
+}
 
 /**
  * Hook para obtener una lista ligera de proyectos (solo campos esenciales).
  * 
- * Versión optimizada para selectores y listas simples.
- * Usa ProjectContext como fuente principal de organizationId.
+ * IMPORTANTE: Deriva del mismo cache base que useProjects usando `select`.
+ * Esto garantiza sincronización automática cuando cualquier mutación actualiza el cache.
  * 
  * @param organizationId - ID de la organización (opcional, usa ProjectContext si no se proporciona)
  * @returns Query con array de proyectos lite
@@ -15,15 +22,19 @@ import { useProjectContext } from '@/stores/projectContext';
 export function useProjectsLite(organizationId?: string | undefined) {
   const { currentOrganizationId } = useProjectContext();
   
-  // Use ProjectContext organizationId as primary source, fallback to parameter
-  const effectiveOrganizationId = organizationId || currentOrganizationId;
+  const effectiveOrganizationId = organizationId || currentOrganizationId || undefined;
   
   return useQuery({
-    queryKey: [QUERY_KEYS.PROJECTS_LITE, effectiveOrganizationId],
-    queryFn: () => getProjectsLite(effectiveOrganizationId!),
+    queryKey: projectsKeys.list(effectiveOrganizationId),
+    queryFn: () => getProjects(effectiveOrganizationId!),
     enabled: !!effectiveOrganizationId,
-    staleTime: 30 * 60 * 1000, // 30 minutes
-    gcTime: 60 * 60 * 1000, // 60 minutes
+    staleTime: 5 * 60 * 1000,
+    select: (projects): ProjectLite[] => projects.map(p => ({
+      id: p.id,
+      name: p.name || '',
+      color: p.color ?? null,
+      status: p.status ?? null,
+    })),
     placeholderData: (prev) => prev ?? [],
   });
 }

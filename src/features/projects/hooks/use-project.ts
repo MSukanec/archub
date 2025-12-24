@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getProjectById } from '../services/getProjectById';
-import { QUERY_KEYS } from '../constants';
+import { projectsKeys } from '@/core/query-keys';
 
 /**
  * Hook para obtener un proyecto específico por ID.
@@ -13,7 +13,7 @@ import { QUERY_KEYS } from '../constants';
  */
 export function useProject(projectId: string | undefined) {
   return useQuery({
-    queryKey: [QUERY_KEYS.PROJECT, projectId],
+    queryKey: projectsKeys.detail(projectId),
     queryFn: () => getProjectById(projectId!),
     enabled: !!projectId,
     staleTime: 5 * 60 * 1000, // 5 minutes

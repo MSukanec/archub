@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useOptimisticMutation } from '@/core/save-engine';
+import { projectsKeys } from '@/core/query-keys';
 import { getProjectTypes } from '../services/getProjectTypes';
 import { createProjectType, type CreateProjectTypeData } from '../services/createProjectType';
 import { updateProjectType, type UpdateProjectTypeData } from '../services/updateProjectType';
@@ -8,7 +9,7 @@ import { replaceProjectType } from '../services/replaceProjectType';
 
 export function useProjectTypes(organizationId?: string) {
   return useQuery({
-    queryKey: ['project-types', organizationId],
+    queryKey: projectsKeys.typeList(organizationId),
     queryFn: () => getProjectTypes(organizationId!),
     enabled: !!organizationId,
     staleTime: 5 * 60 * 1000,
@@ -16,10 +17,10 @@ export function useProjectTypes(organizationId?: string) {
   });
 }
 
-export function useCreateProjectType() {
+export function useCreateProjectType(organizationId?: string) {
   return useOptimisticMutation({
     mutationFn: (data: CreateProjectTypeData) => createProjectType(data),
-    queryKey: ['project-types'],
+    queryKey: projectsKeys.typeList(organizationId),
     optimisticUpdate: (oldData: any, newType: CreateProjectTypeData) => {
       if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return [{ ...newType, id: 'temp-' + Date.now() }];
@@ -30,14 +31,14 @@ export function useCreateProjectType() {
   });
 }
 
-export function useUpdateProjectType() {
+export function useUpdateProjectType(organizationId?: string) {
   return useOptimisticMutation({
-    mutationFn: ({ typeId, organizationId, data }: { 
+    mutationFn: ({ typeId, organizationId: orgId, data }: { 
       typeId: string; 
       organizationId: string; 
       data: UpdateProjectTypeData 
-    }) => updateProjectType(typeId, organizationId, data),
-    queryKey: ['project-types'],
+    }) => updateProjectType(typeId, orgId, data),
+    queryKey: projectsKeys.typeList(organizationId),
     optimisticUpdate: (oldData: any, variables: { typeId: string; data: UpdateProjectTypeData }) => {
       if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;
@@ -48,11 +49,11 @@ export function useUpdateProjectType() {
   });
 }
 
-export function useDeleteProjectType() {
+export function useDeleteProjectType(organizationId?: string) {
   return useOptimisticMutation({
-    mutationFn: ({ typeId, organizationId }: { typeId: string; organizationId: string }) => 
-      deleteProjectType(typeId, organizationId),
-    queryKey: ['project-types'],
+    mutationFn: ({ typeId, organizationId: orgId }: { typeId: string; organizationId: string }) => 
+      deleteProjectType(typeId, orgId),
+    queryKey: projectsKeys.typeList(organizationId),
     optimisticUpdate: (oldData: any, variables: { typeId: string }) => {
       if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;
@@ -63,11 +64,11 @@ export function useDeleteProjectType() {
   });
 }
 
-export function useReplaceProjectType() {
+export function useReplaceProjectType(organizationId?: string) {
   return useOptimisticMutation({
-    mutationFn: ({ oldTypeId, newTypeId, organizationId }: { oldTypeId: string; newTypeId: string; organizationId: string }) => 
-      replaceProjectType(oldTypeId, newTypeId, organizationId),
-    queryKey: ['project-types'],
+    mutationFn: ({ oldTypeId, newTypeId, organizationId: orgId }: { oldTypeId: string; newTypeId: string; organizationId: string }) => 
+      replaceProjectType(oldTypeId, newTypeId, orgId),
+    queryKey: projectsKeys.typeList(organizationId),
     optimisticUpdate: (oldData: any, variables: { oldTypeId: string }) => {
       if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;
@@ -75,6 +76,6 @@ export function useReplaceProjectType() {
     },
     onSuccessMessage: 'Tipo de proyecto reemplazado',
     onErrorMessage: 'No se pudo reemplazar el tipo de proyecto',
-    additionalQueryKeys: [['projects']],
+    additionalQueryKeys: [projectsKeys.lists()],
   });
 }

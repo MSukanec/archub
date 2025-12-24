@@ -1,47 +1,40 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { QUERY_KEYS } from '../constants/index';
+import { getProjects } from '../services/getProjects';
+import { projectsKeys } from '@/core/query-keys';
+import type { Project } from '../types';
+
+type ProjectsMap = Record<string, { id: string; name: string; color: string | null }>;
 
 /**
  * Hook para obtener un mapa de proyectos con colores.
  * Usado en la tabla de movimientos en modo GENERAL.
  * 
+ * IMPORTANTE: Deriva del mismo cache base que useProjects usando `select`.
+ * Esto garantiza sincronización automática cuando cualquier mutación actualiza el cache.
+ * 
  * @param organizationId - ID de la organización
  * @returns Query con mapa de proyectos (id -> {id, name, color})
  */
 export function useProjectsMap(organizationId: string | undefined) {
-  return useQuery<Record<string, { id: string; name: string; color: string | null }>>({
-    queryKey: [QUERY_KEYS.PROJECTS_MAP, organizationId],
-    queryFn: async () => {
-      if (!supabase || !organizationId) {
-        throw new Error('Organization ID required');
-      }
-
-      const { data, error } = await supabase
-        .from('projects')
-        .select('id, name, color')
-        .eq('organization_id', organizationId)
-        .eq('is_active', true)
-        .eq('is_deleted', false);
+  return useQuery({
+    queryKey: projectsKeys.list(organizationId),
+    queryFn: () => getProjects(organizationId!),
+    enabled: !!organizationId,
+    staleTime: 5 * 60 * 1000,
+    select: (projects: Project[]): ProjectsMap => {
+      const projectsMap: ProjectsMap = {};
       
-      if (error) {
-        throw error;
-      }
-      
-      // Transform to a map for easy lookup
-      const projectsMap: Record<string, { id: string; name: string; color: string | null }> = {};
-      
-      data?.forEach((project: any) => {
-        projectsMap[project.id] = {
-          id: project.id,
-          name: project.name,
-          color: project.color
-        };
-      });
+      projects
+        .filter((p: Project) => p.is_active && !p.is_deleted)
+        .forEach((project: Project) => {
+          projectsMap[project.id] = {
+            id: project.id,
+            name: project.name || '',
+            color: project.color ?? null
+          };
+        });
       
       return projectsMap;
     },
-    enabled: !!organizationId && !!supabase,
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }

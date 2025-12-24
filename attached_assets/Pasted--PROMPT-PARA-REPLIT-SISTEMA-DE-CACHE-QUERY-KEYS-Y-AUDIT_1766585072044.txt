@@ -1,0 +1,202 @@
+🧠 PROMPT PARA REPLIT — SISTEMA DE CACHE, QUERY KEYS Y AUDITORÍA ENTERPRISE
+
+Contexto importante (leé todo antes de actuar):
+Tenemos inconsistencias graves y recurrentes en Seencel donde los cambios (editar nombre, color, imagen, etc.) se reflejan en algunos componentes pero no en otros.
+Esto NO es un bug puntual, es un problema estructural de arquitectura de cache y query keys.
+
+El problema actual es que:
+
+Se usan múltiples query keys distintas para representar la misma entidad lógica
+
+Se invalida ['projects'] mientras componentes consumen ['projects', organizationId], ['projects-lite', orgId], ['project-info', id], etc.
+
+Esto provoca desincronización visual, parches de invalidación y bugs intermitentes
+
+Esto NO es aceptable a nivel profesional / enterprise.
+
+🎯 OBJETIVO (NO NEGOCIABLE)
+
+Implementar un sistema único, centralizado y escalable de cache y sincronización, al nivel de apps como Notion, Linear o Supabase Dashboard, y hacer que esto forme parte obligatoria de la auditoría de features.
+
+🧱 PRINCIPIO ARQUITECTÓNICO OBLIGATORIO
+
+Una entidad = una familia única y centralizada de query keys
+Las mutaciones actualizan el cache, no dependen de invalidaciones sueltas
+
+Esto aplica a TODAS las entidades:
+
+projects
+
+organizations
+
+users
+
+wallets
+
+movements
+
+cualquier feature futuro
+
+🔑 REGLAS ESTRICTAS DE QUERY KEYS
+1️⃣ Centralización total de query keys
+
+Para cada entidad debe existir UN SOLO ARCHIVO tipo:
+
+// src/core/query-keys/projects.keys.ts
+
+
+Ejemplo obligatorio:
+
+export const projectsKeys = {
+  all: ['projects'] as const,
+
+  lists: () => [...projectsKeys.all, 'list'] as const,
+  list: (organizationId: string) =>
+    [...projectsKeys.lists(), organizationId] as const,
+
+  details: () => [...projectsKeys.all, 'detail'] as const,
+  detail: (projectId: string) =>
+    [...projectsKeys.details(), projectId] as const,
+}
+
+
+❌ Prohibido:
+
+query keys inline en componentes
+
+['projects'] suelto
+
+['projects-lite'], ['projects-map'], ['project-info'], etc.
+
+Si hay optimizaciones (lite, map, selector), se derivan del MISMO cache, no de keys nuevas.
+
+2️⃣ Uso obligatorio del mismo source of truth
+
+Todos estos DEBEN leer del mismo cache base:
+
+dashboard
+
+selector de proyecto
+
+mapas
+
+sidebars
+
+headers
+
+cards
+
+dropdowns
+
+No se aceptan caches paralelos para “optimizar”.
+
+🔁 REGLAS DE MUTACIONES (MUY IMPORTANTE)
+❌ Lo que NO se debe hacer
+
+invalidar ['projects'] a ciegas
+
+invalidar múltiples keys para “que funcione”
+
+depender de refetch para sincronizar UI
+
+✅ Lo que SE DEBE hacer
+
+Cada mutación debe:
+
+Actualizar el cache directamente con queryClient.setQueryData
+
+Actualizar:
+
+projectsKeys.detail(projectId)
+
+projectsKeys.list(organizationId)
+
+Opcional: rollback en onError
+
+❌ CERO invalidaciones masivas
+
+Ejemplo conceptual:
+
+onSuccess(updatedProject) {
+  queryClient.setQueryData(
+    projectsKeys.detail(updatedProject.id),
+    updatedProject
+  )
+
+  queryClient.setQueryData(
+    projectsKeys.list(updatedProject.organization_id),
+    (old) => old?.map(p => p.id === updatedProject.id ? updatedProject : p)
+  )
+}
+
+🧪 CRITERIO DE CALIDAD OBLIGATORIO (PARTE DE LA AUDITORÍA)
+
+A partir de ahora, cada feature auditado DEBE cumplir esto:
+
+🔍 Test obligatorio de auditoría
+“Al editar cualquier campo de una entidad (nombre, color, imagen, estado),
+el cambio debe reflejarse INMEDIATAMENTE y SIN REFRESH en:
+
+dashboard
+
+selectores
+
+vistas activas
+
+sidebars
+
+headers
+usando UNA SOLA mutación”
+
+Si esto no se cumple:
+
+❌ la auditoría falla
+
+❌ el feature no está aprobado
+
+📋 TAREAS CONCRETAS A REALIZAR AHORA
+
+Auditar el feature Projects completo:
+
+detectar todas las query keys existentes
+
+eliminar keys paralelas
+
+unificarlas bajo projectsKeys
+
+Refactorizar mutaciones para que:
+
+actualicen cache
+
+no dependan de invalidaciones múltiples
+
+Documentar este sistema en el archivo de auditoría general:
+
+como regla obligatoria
+
+como estándar global de Seencel
+
+Preparar el sistema para replicarse en otros features
+
+🚨 IMPORTANTE
+
+Esto no es un refactor visual,
+esto es una decisión de arquitectura base que debe mantenerse en el tiempo.
+
+Cualquier feature nuevo que no respete este sistema:
+
+debe considerarse incorrecto
+
+debe corregirse antes de avanzar
+
+🏁 RESULTADO ESPERADO
+
+Cambiar color / nombre / imagen:
+
+se refleja instantáneamente en TODA la app
+
+Cero bugs de “acá sí, acá no”
+
+Cero invalidaciones descontroladas
+
+Arquitectura profesional, escalable y mantenible
