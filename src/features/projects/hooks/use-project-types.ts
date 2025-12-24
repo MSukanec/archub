@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { getProjectTypes } from '../services/getProjectTypes';
 import { createProjectType, type CreateProjectTypeData } from '../services/createProjectType';
 import { updateProjectType, type UpdateProjectTypeData } from '../services/updateProjectType';
@@ -16,68 +17,64 @@ export function useProjectTypes(organizationId?: string) {
 }
 
 export function useCreateProjectType() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: (data: CreateProjectTypeData) => createProjectType(data),
-    onSuccess: (newType, variables) => {
-      // ✅ ACTUALIZAR CACHE DIRECTAMENTE (NO invalidar para evitar flicker)
-      queryClient.setQueryData(
-        ['project-types', variables.organizationId],
-        (oldData: any) => {
-          if (!Array.isArray(oldData)) return [newType];
-          return [...oldData, newType];
-        }
-      );
+    queryKey: ['project-types'],
+    optimisticUpdate: (oldData: any, newType: CreateProjectTypeData) => {
+      if (!oldData) return oldData;
+      if (!Array.isArray(oldData)) return [{ ...newType, id: 'temp-' + Date.now() }];
+      return [...oldData, { ...newType, id: 'temp-' + Date.now() }];
     },
+    onSuccessMessage: 'Tipo de proyecto creado',
+    onErrorMessage: 'No se pudo crear el tipo de proyecto',
   });
 }
 
 export function useUpdateProjectType() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: ({ typeId, organizationId, data }: { 
       typeId: string; 
       organizationId: string; 
       data: UpdateProjectTypeData 
     }) => updateProjectType(typeId, organizationId, data),
-    onSuccess: (updatedType, variables) => {
-      // ✅ ACTUALIZAR CACHE DIRECTAMENTE (NO invalidar para evitar flicker)
-      queryClient.setQueryData(
-        ['project-types', variables.organizationId],
-        (oldData: any) => {
-          if (!Array.isArray(oldData)) return oldData;
-          return oldData.map((t: any) => t.id === variables.typeId ? updatedType : t);
-        }
-      );
+    queryKey: ['project-types'],
+    optimisticUpdate: (oldData: any, variables: { typeId: string; data: UpdateProjectTypeData }) => {
+      if (!oldData) return oldData;
+      if (!Array.isArray(oldData)) return oldData;
+      return oldData.map((t: any) => t.id === variables.typeId ? { ...t, ...variables.data } : t);
     },
+    onSuccessMessage: 'Tipo de proyecto actualizado',
+    onErrorMessage: 'No se pudo actualizar el tipo de proyecto',
   });
 }
 
 export function useDeleteProjectType() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: ({ typeId, organizationId }: { typeId: string; organizationId: string }) => 
       deleteProjectType(typeId, organizationId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['project-types'] });
+    queryKey: ['project-types'],
+    optimisticUpdate: (oldData: any, variables: { typeId: string }) => {
+      if (!oldData) return oldData;
+      if (!Array.isArray(oldData)) return oldData;
+      return oldData.filter((t: any) => t.id !== variables.typeId);
     },
+    onSuccessMessage: 'Tipo de proyecto eliminado',
+    onErrorMessage: 'No se pudo eliminar el tipo de proyecto',
   });
 }
 
 export function useReplaceProjectType() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: ({ oldTypeId, newTypeId, organizationId }: { oldTypeId: string; newTypeId: string; organizationId: string }) => 
       replaceProjectType(oldTypeId, newTypeId, organizationId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project-types', variables.organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['project-types'] });
-      queryClient.invalidateQueries({ queryKey: ['projects', variables.organizationId] });
+    queryKey: ['project-types'],
+    optimisticUpdate: (oldData: any, variables: { oldTypeId: string }) => {
+      if (!oldData) return oldData;
+      if (!Array.isArray(oldData)) return oldData;
+      return oldData.filter((t: any) => t.id !== variables.oldTypeId);
     },
+    onSuccessMessage: 'Tipo de proyecto reemplazado',
+    onErrorMessage: 'No se pudo reemplazar el tipo de proyecto',
+    additionalQueryKeys: [['projects']],
   });
 }

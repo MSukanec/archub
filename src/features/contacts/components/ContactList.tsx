@@ -15,7 +15,7 @@ interface ContactListProps {
   onRowClick?: (contact: ContactWithRelations) => void;
 }
 
-export default function ContactList({ 
+export function ContactList({ 
   contacts, 
   onEdit, 
   onDelete,

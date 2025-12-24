@@ -63,7 +63,7 @@ const getStatusText = (status: string): string => {
   return statusMap[status] || status;
 };
 
-export default function ProjectItemCard({ 
+export function ProjectItemCard({ 
   project, 
   onClick, 
   onNavigateToProject,

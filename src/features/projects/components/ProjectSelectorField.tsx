@@ -31,7 +31,7 @@ interface ProjectSelectorFieldProps {
 
 
 
-export default function ProjectSelectorField({
+export function ProjectSelectorField({
   projects,
   organization,
   value,

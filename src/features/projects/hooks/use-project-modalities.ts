@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { getProjectModalities } from '../services/getProjectModalities';
 import { createProjectModality, type CreateProjectModalityData } from '../services/createProjectModality';
 import { updateProjectModality, type UpdateProjectModalityData } from '../services/updateProjectModality';
@@ -16,69 +17,64 @@ export function useProjectModalities(organizationId?: string) {
 }
 
 export function useCreateProjectModality() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: (data: CreateProjectModalityData) => createProjectModality(data),
-    onSuccess: (newModality, variables) => {
-      // ✅ ACTUALIZAR CACHE DIRECTAMENTE (NO invalidar para evitar flicker)
-      queryClient.setQueryData(
-        ['project-modalities', variables.organizationId],
-        (oldData: any) => {
-          if (!Array.isArray(oldData)) return [newModality];
-          return [...oldData, newModality];
-        }
-      );
+    queryKey: ['project-modalities'],
+    optimisticUpdate: (oldData: any, newModality: CreateProjectModalityData) => {
+      if (!oldData) return oldData;
+      if (!Array.isArray(oldData)) return [{ ...newModality, id: 'temp-' + Date.now() }];
+      return [...oldData, { ...newModality, id: 'temp-' + Date.now() }];
     },
+    onSuccessMessage: 'Modalidad de proyecto creada',
+    onErrorMessage: 'No se pudo crear la modalidad de proyecto',
   });
 }
 
-
 export function useUpdateProjectModality() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: ({ modalityId, organizationId, data }: { 
       modalityId: string; 
       organizationId: string; 
       data: UpdateProjectModalityData 
     }) => updateProjectModality(modalityId, organizationId, data),
-    onSuccess: (updatedModality, variables) => {
-      // ✅ ACTUALIZAR CACHE DIRECTAMENTE (NO invalidar para evitar flicker)
-      queryClient.setQueryData(
-        ['project-modalities', variables.organizationId],
-        (oldData: any) => {
-          if (!Array.isArray(oldData)) return oldData;
-          return oldData.map((m: any) => m.id === variables.modalityId ? updatedModality : m);
-        }
-      );
+    queryKey: ['project-modalities'],
+    optimisticUpdate: (oldData: any, variables: { modalityId: string; data: UpdateProjectModalityData }) => {
+      if (!oldData) return oldData;
+      if (!Array.isArray(oldData)) return oldData;
+      return oldData.map((m: any) => m.id === variables.modalityId ? { ...m, ...variables.data } : m);
     },
+    onSuccessMessage: 'Modalidad de proyecto actualizada',
+    onErrorMessage: 'No se pudo actualizar la modalidad de proyecto',
   });
 }
 
 export function useDeleteProjectModality() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: ({ modalityId, organizationId }: { modalityId: string; organizationId: string }) => 
       deleteProjectModality(modalityId, organizationId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project-modalities', variables.organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['project-modalities'] });
+    queryKey: ['project-modalities'],
+    optimisticUpdate: (oldData: any, variables: { modalityId: string }) => {
+      if (!oldData) return oldData;
+      if (!Array.isArray(oldData)) return oldData;
+      return oldData.filter((m: any) => m.id !== variables.modalityId);
     },
+    onSuccessMessage: 'Modalidad de proyecto eliminada',
+    onErrorMessage: 'No se pudo eliminar la modalidad de proyecto',
   });
 }
 
 export function useReplaceProjectModality() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: ({ oldModalityId, newModalityId, organizationId }: { oldModalityId: string; newModalityId: string; organizationId: string }) => 
       replaceProjectModality(oldModalityId, newModalityId, organizationId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project-modalities', variables.organizationId] });
-      queryClient.invalidateQueries({ queryKey: ['project-modalities'] });
-      queryClient.invalidateQueries({ queryKey: ['projects', variables.organizationId] });
+    queryKey: ['project-modalities'],
+    optimisticUpdate: (oldData: any, variables: { oldModalityId: string }) => {
+      if (!oldData) return oldData;
+      if (!Array.isArray(oldData)) return oldData;
+      return oldData.filter((m: any) => m.id !== variables.oldModalityId);
     },
+    onSuccessMessage: 'Modalidad de proyecto reemplazada',
+    onErrorMessage: 'No se pudo reemplazar la modalidad de proyecto',
+    additionalQueryKeys: [['projects']],
   });
 }

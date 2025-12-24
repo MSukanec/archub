@@ -75,7 +75,7 @@ const getStatusText = (status: string): string => {
   return statusMap[status] || status;
 };
 
-export default function ProjectRow({ 
+export function ProjectRow({ 
   project, 
   onClick, 
   onEdit,

@@ -156,5 +156,3 @@ export function ProjectModal({ modalData, project: projectProp, mode: modeProp, 
     </ModalLayout>
   );
 }
-
-export default ProjectModal;

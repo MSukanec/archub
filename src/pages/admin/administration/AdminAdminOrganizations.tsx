@@ -13,7 +13,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
 
 import { useToast } from '@/hooks/use-toast';
-import AdminOrganizationRow from '@/features/organization/components/admin/AdminOrganizationRow';
+import { AdminOrganizationRow } from '@/features/organization/components/admin/AdminOrganizationRow';
 import { OrganizationDetailDrawer } from '@/features/admin';
 
 interface Organization {

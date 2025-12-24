@@ -14,7 +14,7 @@ const sizeClasses = {
   lg: "h-24 w-24"
 };
 
-export default function ContactAvatar({ 
+export function ContactAvatar({ 
   contact, 
   className = "",
   size = "md"

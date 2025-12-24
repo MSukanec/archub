@@ -1168,5 +1168,3 @@ export function ContactForm({ modalData, onClose, mode: modeProp }: ContactFormP
     </ModalLayout>
   );
 }
-
-export default ContactForm;

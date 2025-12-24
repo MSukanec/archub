@@ -66,10 +66,10 @@ export * from './mappers/projectMapper';
 export * from './utils/colorUtils';
 
 // ============ COMPONENTS ============
-export { default as ProjectItemCard } from './components/ProjectItemCard';
-export { default as ProjectColorAdvanced } from './components/ProjectColorAdvanced';
-export { default as ProjectSelectorField } from './components/ProjectSelectorField';
-export { default as ProjectRow } from './components/ProjectRow';
+export { ProjectItemCard } from './components/ProjectItemCard';
+export { ProjectColorAdvanced } from './components/ProjectColorAdvanced';
+export { ProjectSelectorField } from './components/ProjectSelectorField';
+export { ProjectRow } from './components/ProjectRow';
 
 // ============ FORMS ============
 export * from './forms/ProjectForm';

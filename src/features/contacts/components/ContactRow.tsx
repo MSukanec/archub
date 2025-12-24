@@ -49,7 +49,7 @@ const getInitials = (name: string): string => {
     .slice(0, 2);
 };
 
-export default function ContactRow({ 
+export function ContactRow({ 
   contact, 
   onClick, 
   onEdit,

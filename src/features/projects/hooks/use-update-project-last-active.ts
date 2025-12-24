@@ -1,24 +1,21 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { updateProjectLastActive } from '../services/updateProjectLastActive';
 
-/**
- * Hook to update a project's last_active_at timestamp.
- * Call this when a user selects or interacts with a project.
- * 
- * Usage:
- *   const mutation = useUpdateProjectLastActive();
- *   await mutation.mutateAsync({ projectId: 'xxx', organizationId: 'yyy' });
- */
 export function useUpdateProjectLastActive() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: ({ projectId, organizationId }: { projectId: string; organizationId: string }) =>
       updateProjectLastActive(projectId, organizationId),
-    onSuccess: (_data, variables) => {
-      // Invalidate relevant queries to refetch updated project data
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/projects', variables.organizationId] });
+    queryKey: ['projects'],
+    optimisticUpdate: (oldData: any, variables: { projectId: string }) => {
+      if (!oldData) return oldData;
+      if (!Array.isArray(oldData)) return oldData;
+      return oldData.map((p: any) => 
+        p.id === variables.projectId 
+          ? { ...p, last_active_at: new Date().toISOString() } 
+          : p
+      );
     },
+    onSuccessMessage: undefined,
+    onErrorMessage: 'No se pudo actualizar la actividad del proyecto',
   });
 }

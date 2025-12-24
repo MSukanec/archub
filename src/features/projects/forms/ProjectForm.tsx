@@ -26,7 +26,7 @@ import { updateProject } from '../services/updateProject';
 import { uploadProjectImage, updateProjectLastActive } from '@/features/projects';
 import { QUERY_KEYS } from '../constants';
 import { USER_ORGANIZATION_PREFERENCES_QUERY_KEYS } from '@/features/organization';
-import ProjectColorAdvanced from '../components/ProjectColorAdvanced';
+import { ProjectColorAdvanced } from '../components/ProjectColorAdvanced';
 import { logActivity, ACTIVITY_ACTIONS, TARGET_TABLES } from '@/utils/logActivity';
 import type { CreateProjectData, UpdateProjectData, Project as ProjectType } from '../types';
 

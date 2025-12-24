@@ -1,29 +1,25 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOptimisticMutation } from '@/core/save-engine';
 import { createProject } from '../services/createProject';
 import type { CreateProjectData } from '../types';
 import { QUERY_KEYS } from '../constants';
 
-/**
- * Hook para crear un nuevo proyecto.
- * 
- * Usa useMutation de React Query para gestionar la creación.
- * Invalida las queries de proyectos después de crear.
- * 
- * @returns Mutation para crear proyecto
- */
 export function useCreateProject() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: (data: CreateProjectData) => createProject(data),
-    onSuccess: (_, variables) => {
-      // Invalidate all project-related queries
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECTS], exact: false });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECTS_LITE], exact: false });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECTS_MAP], exact: false });
-      queryClient.invalidateQueries({ queryKey: ['user-data'], exact: false });
-      queryClient.invalidateQueries({ queryKey: ['user-organization-preferences'], exact: false });
-      queryClient.invalidateQueries({ queryKey: ['current-user'], exact: false });
+    queryKey: [QUERY_KEYS.PROJECTS],
+    optimisticUpdate: (oldData: any, newProject: CreateProjectData) => {
+      if (!oldData) return oldData;
+      if (!Array.isArray(oldData)) return oldData;
+      return [...oldData, { ...newProject, id: 'temp-' + Date.now() }];
     },
+    onSuccessMessage: 'Proyecto creado',
+    onErrorMessage: 'No se pudo crear el proyecto',
+    additionalQueryKeys: [
+      [QUERY_KEYS.PROJECTS_LITE],
+      [QUERY_KEYS.PROJECTS_MAP],
+      ['user-data'],
+      ['user-organization-preferences'],
+      ['current-user'],
+    ],
   });
 }

@@ -8,8 +8,10 @@ export * from './utils';
 
 export { ContactAvatarUploader } from './components/ContactAvatarUploader';
 export { ContactAttachmentsPanel } from './components/attachments/ContactAttachmentsPanel';
-export { default as ContactRow } from './components/ContactRow';
-export { default as ContactList } from './components/ContactList';
+export { ContactAvatar } from './components/ContactAvatar';
+export { ContactRow } from './components/ContactRow';
+export { ContactList } from './components/ContactList';
+export { ContactForm } from './forms/ContactForm';
 export { ContactTypeForm } from './forms/ContactTypeForm';
 
 export { ContactsView } from './views/ContactsView';

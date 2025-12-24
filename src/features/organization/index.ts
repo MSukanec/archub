@@ -14,7 +14,7 @@ export { OrganizationForm } from './forms/OrganizationForm';
 export { InviteMemberForm } from './forms/InviteMemberForm';
 export { MemberActionConfirmationForm } from './forms/MemberActionConfirmationForm';
 
-export { default as AdminOrganizationRow } from './components/admin/AdminOrganizationRow';
+export { AdminOrganizationRow } from './components/admin/AdminOrganizationRow';
 
 export { OrganizationDashboardView } from './views/OrganizationDashboardView';
 export { OrganizationLocationView } from './views/OrganizationLocationView';

@@ -69,7 +69,7 @@ const OrganizationMetrics = ({ membersCount, projectsCount }: { membersCount?: n
   );
 };
 
-export default function OrganizationRow({ 
+export function AdminOrganizationRow({ 
   organization, 
   onClick, 
   selected, 

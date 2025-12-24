@@ -11,7 +11,7 @@ type Props = {
   onChange: (params: { useCustom: boolean; hue: number | null; hex: string | null }) => void;
 };
 
-export default function ProjectColorAdvanced({
+export function ProjectColorAdvanced({
   initialHue = null,
   initialEnabled = false,
   onChange
