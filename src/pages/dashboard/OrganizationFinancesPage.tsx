@@ -42,17 +42,6 @@ export function OrganizationFinancesPage() {
     return 'all';
   }, [selectedPeriod, availablePeriods]);
 
-  const headerProps = {
-    icon: DollarSign,
-    title: "Finanzas",
-    description: "Gestión financiera de toda la organización",
-    tabs: FINANCES_TABS.map(tab => ({ ...tab, isActive: activeTab === tab.id })),
-    onTabChange: setActiveTab,
-    organizationId,
-    showMembers: true,
-    showProjectSelector: false,
-  };
-
   const secondaryRightContent = (
     <div className="flex items-center gap-3">
       {activeTab === "dashboard" && (
@@ -98,17 +87,31 @@ export function OrganizationFinancesPage() {
           </PopoverContent>
         </Popover>
       )}
-      <Button
-        onClick={() => openModal('unified-payment', {})}
-        size="sm"
-        className="gap-2"
-        data-testid="button-add-movement"
-      >
-        <Plus className="h-4 w-4" />
-        Nuevo Movimiento
-      </Button>
+      {activeTab === "movements" && (
+        <Button
+          onClick={() => openModal('unified-payment', {})}
+          size="sm"
+          className="gap-2"
+          data-testid="button-add-movement"
+        >
+          <Plus className="h-4 w-4" />
+          Nuevo Movimiento
+        </Button>
+      )}
     </div>
   );
+
+  const headerProps = {
+    icon: DollarSign,
+    title: "Finanzas",
+    description: "Gestión financiera de toda la organización",
+    tabs: FINANCES_TABS.map(tab => ({ ...tab, isActive: activeTab === tab.id })),
+    onTabChange: setActiveTab,
+    organizationId,
+    showMembers: true,
+    showProjectSelector: false,
+    actions: [secondaryRightContent],
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -135,10 +138,7 @@ export function OrganizationFinancesPage() {
 
   return (
     <Layout 
-      headerProps={{
-        ...headerProps,
-        actions: [secondaryRightContent]
-      }} 
+      headerProps={headerProps}
       wide={activeTab === "movements"}
     >
       {renderTabContent()}
