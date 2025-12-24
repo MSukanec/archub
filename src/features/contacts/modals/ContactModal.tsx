@@ -72,7 +72,7 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
 
   if ((mode === "edit" || mode === "view") && contactLoading) {
     return (
-      <ModalLayout onClose={onClose} size="lg">
+      <ModalLayout onClose={onClose} size="md">
         <ModalHeader title="Cargando contacto..." />
         <ModalBody>
           <div className="space-y-4">
@@ -87,7 +87,7 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
 
   if (mode === "view" && !editingContact) {
     return (
-      <ModalLayout onClose={onClose} size="lg">
+      <ModalLayout onClose={onClose} size="md">
         <ModalHeader title="Contacto no encontrado" />
         <ModalBody>
           <p className="text-muted-foreground">No se pudo cargar el contacto.</p>
@@ -101,7 +101,7 @@ export function ContactModal({ modalData, onClose, mode: modeProp }: ContactModa
   }
 
   return (
-    <ModalLayout onClose={onClose} size="xl">
+    <ModalLayout onClose={onClose} size="lg">
       <ModalHeader 
         title={header.title}
         description={header.description}
