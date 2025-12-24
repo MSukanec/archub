@@ -5,7 +5,7 @@ import { CapitalParticipantModal, PartnerContributionModal, PartnerWithdrawalMod
 import { ProjectModal } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, ProfileOrganizationFormModal, MemberFormModal } from '@/features/legacy';
 import { ContactModal } from '@/features/contacts/modals/ContactModal';
-import { ContactTypeForm } from '@/features/contacts/forms/ContactTypeForm';
+import { ContactTypeModal } from '@/features/contacts/modals/ContactTypeModal';
 import { ClientForm } from '@/features/clients/forms/ClientForm';
 import { ClientPaymentModal } from '@/features/clients/modals/ClientPaymentModal';
 import ClientRoleForm from '@/features/clients/forms/ClientRoleForm';
@@ -237,11 +237,14 @@ export function initializeModalRegistry(): void {
       return mapped;
     },
   });
-  registerModal('contactType', ContactTypeForm as any, { 
+  registerModal('contactType', ContactTypeModal as any, { 
     ...generalConfig, 
     size: 'sm',
     mapDataToProps: (data) => ({
-      contactType: data?.contactType,
+      modalData: {
+        contactType: data?.contactType,
+        isEditing: data?.isEditing,
+      },
       mode: data?.isEditing || data?.contactType ? 'edit' : 'create',
     }),
   });

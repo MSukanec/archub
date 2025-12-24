@@ -1,8 +1,6 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Tag } from 'lucide-react';
-import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -10,7 +8,7 @@ import { useCreateContactType, useUpdateContactType } from '../hooks';
 import { contactTypeSchema, type ContactTypeFormData } from '../schemas';
 import type { ContactType } from '../types';
 
-function FormPanel({
+export function FormPanel({
   form,
   onSubmit,
 }: {
@@ -44,19 +42,13 @@ function FormPanel({
   );
 }
 
-interface ContactTypeFormProps {
-  modalData?: {
-    contactType?: ContactType;
-    isEditing?: boolean;
-  };
+interface UseContactTypeFormProps {
+  contactType?: ContactType;
+  mode: 'create' | 'edit';
   onClose: () => void;
-  mode?: 'create' | 'edit';
 }
 
-export function ContactTypeForm({ modalData, onClose, mode: propMode }: ContactTypeFormProps) {
-  const { contactType, isEditing = false } = modalData || {};
-  const mode = propMode || (isEditing || contactType ? 'edit' : 'create');
-  
+export function useContactTypeForm({ contactType, mode, onClose }: UseContactTypeFormProps) {
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id;
 
@@ -100,46 +92,15 @@ export function ContactTypeForm({ modalData, onClose, mode: propMode }: ContactT
   };
 
   const canSubmit = !!organizationId;
-
-  const getHeader = () => {
-    switch (mode) {
-      case 'edit':
-        return { 
-          title: 'Editar Tipo de Contacto', 
-          description: 'Modifica el nombre del tipo de contacto' 
-        };
-      case 'create':
-      default:
-        return { 
-          title: 'Nuevo Tipo de Contacto', 
-          description: 'Crea un nuevo tipo de contacto personalizado para tu organización' 
-        };
-    }
-  };
-
-  const header = getHeader();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  return (
-    <ModalLayout onClose={handleClose} size="sm">
-      <ModalHeader 
-        title={header.title}
-        description={header.description}
-        icon={Tag}
-      />
-      
-      <ModalBody>
-        <FormPanel form={form} onSubmit={onSubmit} />
-      </ModalBody>
-
-      <ModalFooter
-        leftLabel="Cancelar"
-        onLeftClick={handleClose}
-        rightLabel={mode === 'create' ? 'Crear Tipo' : 'Guardar Cambios'}
-        onRightClick={form.handleSubmit(onSubmit)}
-        isSubmitting={isSubmitting}
-        canSubmit={() => canSubmit}
-      />
-    </ModalLayout>
-  );
+  return {
+    form,
+    onSubmit,
+    isSubmitting,
+    canSubmit,
+    handleClose,
+  };
 }
+
+export { ContactTypeFormData };

@@ -14,6 +14,7 @@
 |------|--------|
 | Arquitectura de carpetas | ✅ Correcto |
 | Separación Page/View | ✅ Migrado |
+| Separación Form/Modal | ✅ Patrón 1:1 aplicado |
 | Hooks Save Engine | ✅ 13/13 migrados |
 | Forms con FormPanel | ✅ Patrón aplicado |
 | Named exports | ✅ Implementado |
@@ -37,8 +38,11 @@
 ├── constants/
 │   └── index.ts              # Query keys (CONTACT_QUERY_KEYS, etc.)
 ├── forms/
-│   ├── ContactForm.tsx       # FormPanel interno, usa ModalLayout
-│   └── ContactTypeForm.tsx   # FormPanel interno, usa hooks migrados
+│   ├── ContactForm.tsx       # FormPanel, ViewPanel, useContactForm (agnóstico)
+│   └── ContactTypeForm.tsx   # FormPanel, useContactTypeForm (agnóstico)
+├── modals/
+│   ├── ContactModal.tsx      # Orquestador modal (ModalLayout + imports de forms/)
+│   └── ContactTypeModal.tsx  # Orquestador modal (ModalLayout + imports de forms/)
 ├── hooks/
 │   ├── index.ts
 │   ├── use-contact.ts
@@ -102,13 +106,15 @@
 ### Arquitectura de Features
 - [x] Carpeta `services/` con funciones puras async
 - [x] Carpeta `hooks/` con hooks que llaman a services
-- [x] Carpeta `forms/` con formularios
+- [x] Carpeta `forms/` con formularios agnósticos (FormPanel + hook)
+- [x] Carpeta `modals/` con orquestadores modal (ModalLayout + forms/)
 - [x] Carpeta `types/` con tipos centralizados
 - [x] Carpeta `schemas/` con validaciones Zod
 - [x] Carpeta `constants/` con enums y configuraciones
 - [x] Carpeta `components/` con componentes específicos
 - [x] Carpeta `views/` con vistas agnósticas
 - [x] `index.ts` exporta todo lo necesario
+- [x] Patrón Form/Modal 1:1 cumplido (2 forms → 2 modals)
 
 ### Páginas (3 Capas)
 - [x] Page en `src/pages/dashboard/ContactsPage.tsx` (orquestador puro)
