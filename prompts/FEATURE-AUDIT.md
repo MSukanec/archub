@@ -376,6 +376,66 @@ optimisticUpdate: (oldData: any, variables: any) => {
 
 ---
 
+### 5.2 AUDITORÍA DE QUERY KEYS CENTRALIZADAS (OBLIGATORIO)
+
+**Objetivo:** Asegurar que TODAS las query keys estén centralizadas en una factory por feature para evitar fragmentación de cache.
+
+**REGLA DE ORO:**
+- ✅ `featureKeys.list()`, `featureKeys.detail(id)` → Factory centralizada
+- ❌ `['feature-lite']`, `['feature-map']` → Keys fragmentadas que causan bugs de cache
+- ✅ Usar `select` para derivar versiones ligeras de la misma query
+- ✅ `queryClient.setQueryData(featureKeys.list())` → Cache updates atómicos
+
+**Ubicación obligatoria:**
+```
+src/core/query-keys/{feature}.keys.ts  ← Factory de keys
+src/core/query-keys/index.ts           ← Barrel exports
+```
+
+**Estructura estándar:**
+```typescript
+type NullableId = string | null | undefined;
+
+export const featureKeys = {
+  all: ['feature'] as const,
+  lists: () => [...featureKeys.all, 'list'] as const,
+  list: (organizationId: NullableId) => 
+    [...featureKeys.lists(), organizationId ?? undefined] as const,
+  details: () => [...featureKeys.all, 'detail'] as const,
+  detail: (id: NullableId) => 
+    [...featureKeys.details(), id ?? undefined] as const,
+} as const;
+```
+
+**Patrón de derivación con `select`:**
+```typescript
+// ✅ CORRECTO - Deriva versión ligera de la misma cache
+export function useFeatureLite(organizationId: NullableId) {
+  return useQuery({
+    queryKey: featureKeys.list(organizationId),
+    select: (data) => data?.map(item => ({ id: item.id, name: item.name })),
+  });
+}
+
+// ❌ INCORRECTO - Cache fragmentada
+export function useFeatureLite(organizationId: NullableId) {
+  return useQuery({
+    queryKey: ['feature-lite', organizationId], // ← Cache separada
+    queryFn: fetchFeatureLite,
+  });
+}
+```
+
+**Checklist:**
+- [ ] ¿Existe `src/core/query-keys/{feature}.keys.ts`?
+- [ ] ¿NO hay strings literales de query keys en hooks/views?
+- [ ] ¿Usa `select` para derivar versiones ligeras?
+- [ ] ¿Cache updates usan `setQueryData(featureKeys.xxx())`?
+- [ ] ¿Invalidaciones usan la factory centralizada?
+- [ ] ¿NullableId soporta `string | null | undefined`?
+
+---
+
 ### 6. AUDITORÍA DE MODALES
 
 **REGLA:** El Modal es un ENVASE puro. Solo maneja:

@@ -127,7 +127,57 @@ src/features/projects/views/
 - ❌ `ProjectBasicDataTab.tsx` → Migrado a `ProjectBasicDataView.tsx`
 - ❌ `ProjectLocationTab.tsx` → Migrado a `ProjectLocationView.tsx`
 
-### 3.3 Save Engine (Migrado 2025-12-24) ✅
+### 3.3 Query Keys Centralizadas (Migrado 2025-12-24) ✅
+
+**Arquitectura:** Una entidad = una familia de query keys (NO más `['projects']`, `['projects-lite']`, `['projects-map']` fragmentados)
+
+**Ubicación:** `src/core/query-keys/projects.keys.ts`
+
+**Estructura:**
+```typescript
+export const projectsKeys = {
+  all: ['projects'] as const,
+  lists: () => [...projectsKeys.all, 'list'] as const,
+  list: (organizationId: NullableId) => [...projectsKeys.lists(), organizationId ?? undefined] as const,
+  details: () => [...projectsKeys.all, 'detail'] as const,
+  detail: (projectId: NullableId) => [...projectsKeys.details(), projectId ?? undefined] as const,
+  image: (projectId: NullableId) => [...projectsKeys.assets(), projectId ?? undefined, 'image'] as const,
+  typeList: (organizationId: NullableId) => [...projectsKeys.types(), organizationId ?? undefined] as const,
+  modalityList: (organizationId: NullableId) => [...projectsKeys.modalities(), organizationId ?? undefined] as const,
+  // ... más métodos
+}
+```
+
+**Patrón de uso:**
+```typescript
+// ✅ CORRECTO - usa factory centralizada
+import { projectsKeys } from '@/core/query-keys';
+const { data } = useQuery({ queryKey: projectsKeys.list(organizationId) });
+
+// ❌ INCORRECTO - keys fragmentadas
+const { data } = useQuery({ queryKey: ['projects-lite', organizationId] });
+```
+
+**Derivaciones con `select`:**
+```typescript
+// use-projects-lite.ts - deriva de la misma cache
+const { data } = useQuery({
+  queryKey: projectsKeys.list(organizationId),
+  select: (data) => data?.map(p => ({ id: p.id, name: p.name })), // Versión ligera
+});
+```
+
+- [x] Migrado `use-projects.ts` a `projectsKeys.list()`
+- [x] Migrado `use-projects-lite.ts` a derivar con `select`
+- [x] Migrado `use-projects-map.ts` a derivar con `select`
+- [x] Migrado `use-project.ts` a `projectsKeys.detail()`
+- [x] Migrado `use-projects-count.ts` a `projectsKeys.count()`
+- [x] Migrado `use-project-types.ts` a `projectsKeys.typeList()`
+- [x] Migrado `use-project-modalities.ts` a `projectsKeys.modalityList()`
+- [x] Migrado todas las views y forms a usar `projectsKeys`
+- [x] Eliminados `['project-image']`, `['project-types']`, `['project-modalities']` fragmentados
+
+### 3.4 Save Engine (Migrado 2025-12-24) ✅
 - [x] 11 hooks migrados a `useOptimisticMutation` con guardias
 - [x] use-project-types.ts: 4 hooks (create, update, delete, replace)
 - [x] use-project-modalities.ts: 4 hooks (create, update, delete, replace)
@@ -139,7 +189,7 @@ src/features/projects/views/
 - [x] `additionalQueryKeys` para invalidar caches relacionados
 - [x] Mensajes de éxito/error en español
 
-### 3.4 Performance ✅
+### 3.5 Performance ✅
 - [x] Optimistic updates via `setQueryData` (NO invalidateQueries = INSTANT)
 - [x] Optimistic updates en project selection (activate) - INSTANTÁNEO al hacer click
 - [x] Auto-save con `mutateAsync` que espera mutation + `setQueryData` en onSuccess
@@ -155,7 +205,7 @@ src/features/projects/views/
 - [x] **ProjectLocationView**: Auto-save + setQueryData (INSTANTÁNEO, no refetch)
   - [x] Ubicación, coordenadas, zona horaria: Cache update en onSuccess sin refetch
 
-### 3.5 Data-Testid ✅
+### 3.6 Data-Testid ✅
 - [x] ProjectActivesView: `container-project-actives`, `grid-projects`, `button-create-project-empty`
 - [x] ProjectBasicDataView: `input-project-name`, `input-project-code`, `textarea-description`, `textarea-internal-notes`
 - [x] ProjectListView: `container-project-list`, `list-projects-mobile`, `row-project-${id}`, `button-create-project-empty`
@@ -164,13 +214,13 @@ src/features/projects/views/
 - [x] ProjectItemCard: Badges y botones
 - [x] ProjectVisionGeneralView: Hero section, badges, stats
 
-### 3.6 Modales ✅
+### 3.7 Modales ✅
 - [x] ProjectForm registrada con patrón correcto
 - [x] Delete confirmation modal con patrón
 - [x] Manejo de mode (create/edit/view)
 - [x] data-testid en botones de acción
 
-### 3.7 Database ✅
+### 3.8 Database ✅
 - [x] Tabla `projects` con todas las columnas necesarias
 - [x] Vista `projects_view` para query optimizada
 - [x] RLS policies por organization_id
@@ -179,14 +229,14 @@ src/features/projects/views/
 - [x] Foreign keys: organization_id, created_by
 - [x] Índices en queries frecuentes
 
-### 3.8 Seguridad ✅
+### 3.9 Seguridad ✅
 - [x] RLS filtering por organization_id
 - [x] User authentication verificado
 - [x] Soft delete (nunca hard delete)
 - [x] Activity logging en create/update/delete
 - [x] Plan limits enforcement (PlanRestricted)
 
-### 3.9 UI/UX ✅
+### 3.10 UI/UX ✅
 - [x] Badges de proyecto con color consistente (15% opacity)
 - [x] Estados de carga (loading skeleton)
 - [x] Estados vacíos (EmptyState con acción)
@@ -194,7 +244,7 @@ src/features/projects/views/
 - [x] Toast notifications
 - [x] Sorteo por last_active_at
 
-### 3.10 Layout ✅
+### 3.11 Layout ✅
 - [x] PageLayout.tsx: Contenido expande completamente (no fondo gris)
 - [x] Flex properties: `flex-1 min-h-0` en contenedores
 - [x] Overflow handling correcto
