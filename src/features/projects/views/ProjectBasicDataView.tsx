@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { useUserOrganizationPreferences } from '@/features/organization'
 import { supabase } from '@/lib/supabase'
-import { useSaveEngine, useOptimisticMutation } from '@/core/save-engine'
+import { useOptimisticMutation } from '@/core/save-engine'
+import { useAutosaveController, normalizeStringValue } from '@/core/autosave'
 import { projectsKeys } from '@/core/query-keys'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -213,28 +214,31 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     ],
   });
 
-  // Centralized auto-save using useSaveEngine
-  const { isSaving, hasUnsavedChanges } = useSaveEngine({
-    data: {
-      name: projectName,
-      code: projectCode,
-      project_type_id: projectTypeId,
-      project_modality_id: projectModalityId,
-      status: status,
-      description: description,
-      internal_notes: internalNotes
-    },
+  // ENTERPRISE AUTOSAVE: Controller for coordinated saves
+  // NEVER saves on onChange - only on onBlur, Enter, or select change
+  const saveController = useAutosaveController({
     queryKey: projectsKeys.data(activeProjectId),
-    saveFn: async (dataToSave) => {
-      console.log('[SaveEngine] Saving project data:', dataToSave);
+    saveFn: async (dataToSave: any) => {
+      console.log('[AutosaveController] Saving project data:', dataToSave);
       
       if (!activeProjectId || !supabase) throw new Error('Project or Supabase not available');
 
+      // Normalize empty strings to null
+      const normalizedData = {
+        name: normalizeStringValue(dataToSave.name),
+        code: normalizeStringValue(dataToSave.code),
+        status: dataToSave.status,
+        project_type_id: dataToSave.project_type_id || null,
+        project_modality_id: dataToSave.project_modality_id || null,
+        description: normalizeStringValue(dataToSave.description),
+        internal_notes: normalizeStringValue(dataToSave.internal_notes),
+      };
+
       // Update fields in projects table (name, code, status)
       const projectsUpdate: any = {};
-      if (dataToSave.name !== undefined) projectsUpdate.name = dataToSave.name;
-      if (dataToSave.code !== undefined) projectsUpdate.code = dataToSave.code;
-      if (dataToSave.status !== undefined) projectsUpdate.status = dataToSave.status;
+      if (normalizedData.name !== undefined) projectsUpdate.name = normalizedData.name;
+      if (normalizedData.code !== undefined) projectsUpdate.code = normalizedData.code;
+      if (normalizedData.status !== undefined) projectsUpdate.status = normalizedData.status;
       
       if (Object.keys(projectsUpdate).length > 0) {
         const { error: projectError } = await supabase
@@ -246,8 +250,12 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       }
 
       // Prepare project_data payload
-      const { name, code, status, ...projectDataPayload } = dataToSave;
-      if (Object.keys(projectDataPayload).length === 0) return;
+      const projectDataPayload = {
+        project_type_id: normalizedData.project_type_id,
+        project_modality_id: normalizedData.project_modality_id,
+        description: normalizedData.description,
+        internal_notes: normalizedData.internal_notes,
+      };
 
       const { error } = await supabase
         .from('project_data')
@@ -261,10 +269,91 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
 
       if (error) throw error;
     },
-    delay: 500,
-    enabled: !!userData && !!activeProjectId,
     additionalQueryKeys: [projectsKeys.info(activeProjectId), projectsKeys.list(organizationId)],
+    debounceMs: 800,
   });
+  
+  const { isSaving, hasUnsavedChanges } = saveController;
+
+  // Build current form data for saving
+  const getCurrentFormData = useCallback(() => ({
+    name: projectName,
+    code: projectCode,
+    project_type_id: projectTypeId || null,
+    project_modality_id: projectModalityId || null,
+    status: status,
+    description: description,
+    internal_notes: internalNotes,
+  }), [projectName, projectCode, projectTypeId, projectModalityId, status, description, internalNotes]);
+
+  // Validate form data before saving - REQUIRED fields must have values
+  const isFormValid = useCallback((formData: any): boolean => {
+    // Project name is REQUIRED - don't save if empty
+    const nameValue = formData.name?.trim();
+    if (!nameValue) {
+      return false;
+    }
+    return true;
+  }, []);
+
+  // Handler for text fields: save on blur (with validation)
+  const handleTextFieldBlur = useCallback(() => {
+    if (!isHydrated) return;
+    
+    const formData = getCurrentFormData();
+    
+    // Validate before saving - skip if invalid
+    if (!isFormValid(formData)) {
+      return;
+    }
+    
+    saveController.save(formData);
+  }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+
+  // Handler for text fields: save on Enter key (with validation)
+  const handleTextFieldKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!isHydrated) return;
+      
+      const formData = getCurrentFormData();
+      
+      // Validate before saving - skip if invalid
+      if (!isFormValid(formData)) {
+        return;
+      }
+      
+      saveController.save(formData);
+    }
+  }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+
+  // Handler for select fields: save immediately on change (with validation)
+  const handleSelectChange = useCallback((field: string, value: string) => {
+    if (!isHydrated) return;
+    
+    // Update state first
+    switch (field) {
+      case 'project_type_id':
+        setProjectTypeId(value);
+        break;
+      case 'project_modality_id':
+        setProjectModalityId(value);
+        break;
+      case 'status':
+        setStatus(value);
+        break;
+    }
+    
+    // Build form data with updated value
+    const formData = { ...getCurrentFormData(), [field]: value || null };
+    
+    // Validate before saving - skip if invalid
+    if (!isFormValid(formData)) {
+      return;
+    }
+    
+    saveController.save(formData);
+  }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
 
   // UNIFIED hydration effect - loads ALL data at once, then marks as hydrated
   useEffect(() => {
@@ -294,8 +383,20 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     }
 
     // Mark as hydrated AFTER all state updates are queued
+    // Also seed the controller with initial data for dirty checking
     setTimeout(() => {
       setIsHydrated(true);
+      
+      // Seed lastPersistedData to prevent redundant saves on first blur
+      saveController.setLastPersistedData({
+        name: projectInfo?.name || '',
+        code: projectInfo?.code || '',
+        project_type_id: projectData?.project_type_id || null,
+        project_modality_id: projectData?.project_modality_id || null,
+        status: projectInfo?.status || 'active',
+        description: projectData?.description || '',
+        internal_notes: projectData?.internal_notes || '',
+      });
     }, 100);
   }, [projectInfo, projectData, projectInfoSuccess, projectDataSuccess]);
 
@@ -420,6 +521,8 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
               placeholder="Ej: Casa Unifamiliar López"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
+              onBlur={handleTextFieldBlur}
+              onKeyDown={handleTextFieldKeyDown}
               data-testid="input-project-name"
               required
             />
@@ -441,6 +544,8 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
                   .slice(0, 30);
                 setProjectCode(formatted);
               }}
+              onBlur={handleTextFieldBlur}
+              onKeyDown={handleTextFieldKeyDown}
               data-testid="input-project-code"
               maxLength={30}
             />
@@ -452,7 +557,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="project-type">Tipología</Label>
-              <Select value={projectTypeId} onValueChange={setProjectTypeId}>
+              <Select value={projectTypeId} onValueChange={(value) => handleSelectChange('project_type_id', value)}>
                 <SelectTrigger id="project-type">
                   <SelectValue placeholder="Selecciona un tipo" />
                 </SelectTrigger>
@@ -469,7 +574,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
 
             <div className="space-y-2">
               <Label htmlFor="modality">Modalidad</Label>
-              <Select value={projectModalityId} onValueChange={setProjectModalityId}>
+              <Select value={projectModalityId} onValueChange={(value) => handleSelectChange('project_modality_id', value)}>
                 <SelectTrigger id="modality">
                   <SelectValue placeholder="Selecciona una modalidad" />
                 </SelectTrigger>
@@ -487,7 +592,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
 
           <div className="space-y-2">
             <Label htmlFor="status">Estado</Label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status} onValueChange={(value) => handleSelectChange('status', value)}>
               <SelectTrigger id="status">
                 <SelectValue placeholder="Selecciona un estado" />
               </SelectTrigger>
@@ -508,6 +613,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
               placeholder="Descripción general del proyecto..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              onBlur={handleTextFieldBlur}
               rows={3}
               data-testid="textarea-description"
             />
@@ -520,6 +626,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
               placeholder="Notas internas para el equipo..."
               value={internalNotes}
               onChange={(e) => setInternalNotes(e.target.value)}
+              onBlur={handleTextFieldBlur}
               rows={2}
               data-testid="textarea-internal-notes"
             />
