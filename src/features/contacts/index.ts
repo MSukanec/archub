@@ -6,9 +6,6 @@ export * from './schemas';
 export * from './mappers';
 export * from './utils';
 
-export { ContactAvatarUploader } from './components/ContactAvatarUploader';
-export { ContactAttachmentsPanel } from './components/attachments/ContactAttachmentsPanel';
-export { ContactAvatar } from './components/ContactAvatar';
 export { ContactRow } from './components/ContactRow';
 export { ContactList } from './components/ContactList';
 

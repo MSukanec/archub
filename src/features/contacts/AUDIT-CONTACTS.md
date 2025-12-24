@@ -29,10 +29,6 @@
 ```
 📂 src/features/contacts/
 ├── components/
-│   ├── attachments/
-│   │   └── ContactAttachmentsPanel.tsx
-│   ├── ContactAvatar.tsx
-│   ├── ContactAvatarUploader.tsx
 │   ├── ContactList.tsx
 │   └── ContactRow.tsx
 ├── constants/
