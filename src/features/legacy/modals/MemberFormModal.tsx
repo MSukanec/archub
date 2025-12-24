@@ -8,6 +8,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useOptimisticMutation } from '@/core/save-engine/useOptimisticMutation';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { organizationKeys } from '@/core/query-keys';
 import { FormModalHeader } from '@/components/modal';
 import { FormModalFooter } from '@/components/modal';
 import { FormModalLayout } from '@/components/modal';
@@ -211,22 +212,13 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
 
       return response.json();
     },
-    queryKey: ['organization-members', organizationId],
+    queryKey: organizationKeys.invitations(organizationId),
     optimisticUpdate: (oldData: any, _variables: MemberFormData) => {
       if (!oldData) return oldData;
       return oldData;
     },
     onSuccessMessage: isReinvite ? 'Miembro reinvitado exitosamente' : 'Invitación enviada exitosamente',
     onErrorMessage: 'Error al invitar miembro',
-    additionalQueryKeys: [
-      ['organization-members-full'],
-      ['organization-invitations'],
-      ['organization-former-members'],
-      ['/api/contacts'],
-      ['current-user'],
-      ['member-count'],
-      ['subscription-seats'],
-    ],
   });
 
   const updateMemberMutation = useOptimisticMutation<any, MemberFormData>({
@@ -244,23 +236,27 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
       if (error) throw error;
       return data;
     },
-    queryKey: ['organization-members', organizationId],
+    queryKey: organizationKeys.members(organizationId),
     optimisticUpdate: (oldData: any, variables: MemberFormData) => {
       if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;
+      const selectedRoleData = roles.find(r => r.id === variables.roleId);
       return oldData.map((member: any) =>
         member.id === editingMember?.id
-          ? { ...member, role_id: variables.roleId }
+          ? { 
+              ...member, 
+              role_id: variables.roleId,
+              roles: selectedRoleData ? {
+                id: selectedRoleData.id,
+                name: selectedRoleData.name,
+                type: selectedRoleData.type,
+              } : member.roles
+            }
           : member
       );
     },
     onSuccessMessage: 'Rol del miembro actualizado correctamente',
     onErrorMessage: 'Error al actualizar miembro',
-    additionalQueryKeys: [
-      ['organization-members-full'],
-      ['current-user'],
-      ['member-count'],
-    ],
   });
 
   const handleClose = () => {
@@ -482,7 +478,7 @@ export function MemberFormModal({ editingMember, defaultEmail, onClose }: Member
                   
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Rol:</span>
-                    <Badge variant="secondary" className="text-xs">{selectedRole?.name || pricingData.invitation.roleName}</Badge>
+                    <Badge variant="neutral" className="text-xs">{selectedRole?.name || pricingData.invitation.roleName}</Badge>
                   </div>
 
                   <Separator className="my-2" />
