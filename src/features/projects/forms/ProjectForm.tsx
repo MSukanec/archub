@@ -669,6 +669,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
           }
         });
 
+        // Background operations (non-blocking)
         const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
         logActivity({
           organization_id: organizationId,
@@ -690,24 +691,26 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
 
         callbacks?.onSubmitSuccess?.('edit');
       } else {
-        try {
-          // Create project and wait for real UUID from backend
-          const createdProject = await createProjectAsync({
-            organization_id: organizationId,
-            created_by: currentUserMember!.id,
-            ...cleanedData,
-          } as CreateProjectData);
-
-          // Now we have the real UUID, update everything with it
+        // CREATE MODE - Don't await, close modal immediately with optimistic update
+        // The mutation will complete in background
+        
+        // Start creation in background (don't await)
+        createProjectAsync({
+          organization_id: organizationId,
+          created_by: currentUserMember!.id,
+          ...cleanedData,
+        } as CreateProjectData).then((createdProject) => {
+          // Background operations after creation completes
           if (createdProject?.id && userData?.user?.id) {
             setSelectedProject(createdProject.id, organizationId);
             
-            // Update preferences silently in background
+            // Update checklist in background
             updateChecklist.mutateAsync({ 
               key: 'create_project', 
               value: true 
             }).catch(err => console.error('Error updating checklist:', err));
             
+            // Update preferences in background
             Promise.resolve(supabase.from('user_organization_preferences').upsert({
               user_id: userData.user.id,
               organization_id: organizationId,
@@ -721,9 +724,9 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
               console.error('Error setting project as active:', error);
             });
 
-            // Log activity with REAL UUID
+            // Log activity with real UUID in background
             const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
-            void logActivity({
+            logActivity({
               organization_id: organizationId,
               user_id: userData?.user?.id || '',
               action: ACTIVITY_ACTIONS.CREATE_PROJECT,
@@ -732,7 +735,7 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
               metadata: { name: cleanedData.name, project_type: projectTypeName }
             }).catch((err: any) => console.error('Error logging activity:', err));
 
-            // Upload image in background if selected (non-blocking)
+            // Upload image in background if selected
             if (selectedImageFile) {
               handleImageUpload(createdProject.id)
                 .catch(err => {
@@ -741,12 +744,11 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
                 });
             }
           }
+        }).catch((error: any) => {
+          console.error('Error during background project creation:', error);
+        });
 
-          callbacks?.onSubmitSuccess?.('create');
-        } catch (error: any) {
-          callbacks?.onSubmitError?.(error);
-          return;
-        }
+        callbacks?.onSubmitSuccess?.('create');
       }
 
       onSuccess?.();
