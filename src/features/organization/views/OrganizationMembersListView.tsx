@@ -157,7 +157,7 @@ export function OrganizationMembersListView() {
   const suspendedMembersCount = members.filter((m: any) => m.is_over_limit === true).length;
 
   const { data: pendingInvites = [], isLoading: invitesLoading } = useQuery({
-    queryKey: [...organizationKeys.all, 'invitations', organizationId],
+    queryKey: organizationKeys.invitations(organizationId),
     queryFn: async () => {
       if (!supabase || !organizationId) return [];
       
@@ -195,7 +195,7 @@ export function OrganizationMembersListView() {
   });
 
   const { data: formerMembersRaw = [] } = useQuery({
-    queryKey: [...organizationKeys.all, 'former-members', organizationId],
+    queryKey: organizationKeys.formerMembers(organizationId),
     queryFn: async () => {
       if (!supabase || !organizationId) return [];
       
@@ -246,7 +246,7 @@ export function OrganizationMembersListView() {
         .eq('id', invitationId);
       if (error) throw error;
     },
-    queryKey: [...organizationKeys.all, 'invitations', organizationId],
+    queryKey: organizationKeys.invitations(organizationId),
     optimisticUpdate: (oldData, invitationId) => {
       if (!oldData) return oldData;
       return oldData.filter((inv: any) => inv.id !== invitationId);
@@ -262,7 +262,7 @@ export function OrganizationMembersListView() {
         description: 'Esta funcionalidad estará disponible pronto.',
       });
     },
-    queryKey: [...organizationKeys.all, 'invitations', organizationId],
+    queryKey: organizationKeys.invitations(organizationId),
     optimisticUpdate: (oldData) => {
       if (!oldData) return oldData;
       return oldData;

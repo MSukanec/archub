@@ -69,6 +69,28 @@ export const organizationKeys = {
     [...organizationKeys.membersBase(), organizationId ?? undefined] as const,
 
   // ═══════════════════════════════════════════════════════════════
+  // INVITATIONS
+  // ═══════════════════════════════════════════════════════════════
+  
+  /** Base para invitaciones */
+  invitationsBase: () => [...organizationKeys.all, 'invitations'] as const,
+  
+  /** Invitaciones pendientes por organización */
+  invitations: (organizationId: NullableId) => 
+    [...organizationKeys.invitationsBase(), organizationId ?? undefined] as const,
+
+  // ═══════════════════════════════════════════════════════════════
+  // FORMER MEMBERS
+  // ═══════════════════════════════════════════════════════════════
+  
+  /** Base para ex miembros */
+  formerMembersBase: () => [...organizationKeys.all, 'former-members'] as const,
+  
+  /** Ex miembros por organización */
+  formerMembers: (organizationId: NullableId) => 
+    [...organizationKeys.formerMembersBase(), organizationId ?? undefined] as const,
+
+  // ═══════════════════════════════════════════════════════════════
   // ESTADÍSTICAS
   // ═══════════════════════════════════════════════════════════════
   
