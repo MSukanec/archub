@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/lib/supabase'
@@ -31,6 +31,7 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
 
   // Hydration state - CRITICAL for preventing auto-save on page load
   const [isHydrated, setIsHydrated] = useState(false);
+  const hasHydratedRef = useRef(false);
 
   // Form states - Location
   const [addressFull, setAddressFull] = useState('');
@@ -200,14 +201,19 @@ export function ProjectLocationView({ projectId }: ProjectLocationViewProps) {
   // Reset hydration when project changes
   useEffect(() => {
     setIsHydrated(false);
+    hasHydratedRef.current = false;
   }, [activeProjectId]);
 
   // UNIFIED hydration effect - loads ALL data at once, then marks as hydrated
+  // Uses ref to prevent re-hydration on each render
   useEffect(() => {
-    // Only hydrate when query has completed (even if projectData is null)
-    if (!projectDataSuccess) {
+    // Only hydrate when query has completed (even if projectData is null) AND not yet hydrated
+    if (!projectDataSuccess || hasHydratedRef.current) {
       return;
     }
+
+    // Mark as hydrating to prevent multiple hydrations
+    hasHydratedRef.current = true;
 
     // Load project data (may be null for new projects)
     if (projectData) {
