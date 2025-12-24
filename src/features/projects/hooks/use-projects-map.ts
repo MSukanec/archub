@@ -21,10 +21,10 @@ export function useProjectsMap(organizationId: string | undefined) {
     queryFn: () => getProjects(organizationId!),
     enabled: !!organizationId,
     staleTime: 5 * 60 * 1000,
-    select: (projects: Project[]): ProjectsMap => {
+    select: (projects: Project[] | undefined): ProjectsMap => {
       const projectsMap: ProjectsMap = {};
       
-      projects
+      (projects ?? [])
         .filter((p: Project) => p.is_active && !p.is_deleted)
         .forEach((project: Project) => {
           projectsMap[project.id] = {

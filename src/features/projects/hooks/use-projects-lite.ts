@@ -29,7 +29,7 @@ export function useProjectsLite(organizationId?: string | undefined) {
     queryFn: () => getProjects(effectiveOrganizationId!),
     enabled: !!effectiveOrganizationId,
     staleTime: 5 * 60 * 1000,
-    select: (projects): ProjectLite[] => projects.map(p => ({
+    select: (projects): ProjectLite[] => (projects ?? []).map(p => ({
       id: p.id,
       name: p.name || '',
       color: p.color ?? null,
