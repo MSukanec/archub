@@ -720,7 +720,8 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
   const linkedUserId = editingContact?.linked_user_id || form.watch('linked_user_id');
 
   const { data: roles = [] } = useQuery<{ id: string; name: string }[]>({
-    queryKey: ['/api/roles'],
+    queryKey: ['/api/roles', organizationId],
+    enabled: !!organizationId,
     staleTime: 10 * 60 * 1000,
   });
 
