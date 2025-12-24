@@ -269,7 +269,7 @@ export function OrganizationProfileView() {
           <div className="flex items-center gap-2 mb-6">
             <Building2 className="h-5 w-5 text-[var(--accent)]" />
             <h2 className="text-lg font-semibold">Logo de la Organización</h2>
-            {organizationInfo?.settings?.is_founder && (
+            {organizationInfo?.settings?.is_founder === true && (
               <Badge variant="organization-founder">Fundador</Badge>
             )}
           </div>
