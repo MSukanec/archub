@@ -1,6 +1,6 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { updateContact, upsertContactTypeLinks } from '../services';
-import { CONTACT_QUERY_KEYS } from '../constants';
+import { contactsKeys } from '@/core/query-keys';
 import { PERSONNEL_QUERY_KEYS } from '@/features/personnel/constants';
 import type { ContactInput } from '../types';
 
@@ -23,7 +23,7 @@ export function useUpdateContact(
 
       return contact;
     },
-    queryKey: CONTACT_QUERY_KEYS.lists(),
+    queryKey: contactsKeys.list(organizationId),
     optimisticUpdate: (oldData, input) => {
       if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;
@@ -32,7 +32,7 @@ export function useUpdateContact(
       );
     },
     additionalQueryKeys: [
-      CONTACT_QUERY_KEYS.detail(organizationId, contactId),
+      contactsKeys.detail(organizationId, contactId),
       PERSONNEL_QUERY_KEYS.all,
     ],
     onSuccessMessage: 'Contacto actualizado',

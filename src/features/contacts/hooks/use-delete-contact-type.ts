@@ -1,11 +1,11 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { softDeleteContactType } from '../services';
-import { CONTACT_TYPE_QUERY_KEYS } from '../constants';
+import { contactTypesKeys } from '@/core/query-keys';
 
 export function useDeleteContactType(organizationId: string) {
   return useOptimisticMutation({
     mutationFn: (typeId: string) => softDeleteContactType(typeId, organizationId),
-    queryKey: CONTACT_TYPE_QUERY_KEYS.lists(),
+    queryKey: contactTypesKeys.list(organizationId),
     optimisticUpdate: (oldData, typeId) => {
       if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;

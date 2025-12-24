@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { listContactAttachments } from '../services';
-import { CONTACT_ATTACHMENT_QUERY_KEYS } from '../constants';
+import { contactsKeys } from '@/core/query-keys';
 
 export function useContactAttachments(contactId: string | undefined) {
   return useQuery({
-    queryKey: CONTACT_ATTACHMENT_QUERY_KEYS.list(contactId!),
+    queryKey: contactsKeys.attachmentList(contactId),
     queryFn: () => listContactAttachments(contactId!),
     enabled: !!contactId,
   });

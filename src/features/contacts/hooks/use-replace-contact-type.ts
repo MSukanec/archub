@@ -1,6 +1,6 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { replaceContactType } from '../services';
-import { CONTACT_TYPE_QUERY_KEYS, CONTACT_QUERY_KEYS } from '../constants';
+import { contactsKeys, contactTypesKeys } from '@/core/query-keys';
 
 interface ReplaceContactTypeParams {
   oldTypeId: string;
@@ -8,17 +8,17 @@ interface ReplaceContactTypeParams {
   organizationId: string;
 }
 
-export function useReplaceContactType() {
+export function useReplaceContactType(organizationId: string) {
   return useOptimisticMutation({
     mutationFn: ({ oldTypeId, newTypeId, organizationId }: ReplaceContactTypeParams) => 
       replaceContactType(oldTypeId, newTypeId, organizationId),
-    queryKey: CONTACT_TYPE_QUERY_KEYS.lists(),
+    queryKey: contactTypesKeys.list(organizationId),
     optimisticUpdate: (oldData, { oldTypeId }) => {
       if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;
       return oldData.filter((t: any) => t.id !== oldTypeId);
     },
-    additionalQueryKeys: [CONTACT_QUERY_KEYS.lists()],
+    additionalQueryKeys: [contactsKeys.list(organizationId)],
     onSuccessMessage: 'Tipo de contacto reemplazado',
     onErrorMessage: 'No se pudo reemplazar el tipo de contacto',
   });

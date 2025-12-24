@@ -14,7 +14,7 @@ export function ContactSettingsView() {
   
   const { data: contactTypes = [], isLoading } = useContactTypes(organizationId);
   const deleteMutation = useDeleteContactType(organizationId || '');
-  const replaceMutation = useReplaceContactType();
+  const replaceMutation = useReplaceContactType(organizationId || '');
 
   const sortedTypes = [...contactTypes].sort((a: ContactType, b: ContactType) => 
     a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
@@ -122,7 +122,7 @@ export function ContactSettingsView() {
                     </div>
                     <div className="flex items-center gap-1 ml-4">
                       {isSystemType ? (
-                        <Badge variant="default">
+                        <Badge variant="info">
                           Sistema
                         </Badge>
                       ) : (

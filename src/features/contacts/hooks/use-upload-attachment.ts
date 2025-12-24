@@ -1,13 +1,13 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { uploadContactAttachment } from '../services';
-import { CONTACT_ATTACHMENT_QUERY_KEYS } from '../constants';
+import { contactsKeys } from '@/core/query-keys';
 import type { ContactAttachmentInput } from '../types';
 
 export function useUploadContactAttachment(contactId: string, createdBy: string) {
   return useOptimisticMutation({
     mutationFn: (input: ContactAttachmentInput) => 
       uploadContactAttachment(contactId, input, createdBy),
-    queryKey: CONTACT_ATTACHMENT_QUERY_KEYS.list(contactId),
+    queryKey: contactsKeys.attachmentList(contactId),
     optimisticUpdate: (oldData) => {
       if (!oldData) return oldData;
       return oldData;

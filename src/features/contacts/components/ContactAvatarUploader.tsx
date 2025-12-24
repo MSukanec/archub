@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface ContactAvatarUploaderProps {
   contactId: string;
+  organizationId: string;
   contact: {
     first_name?: string;
     last_name?: string;
@@ -16,7 +17,7 @@ interface ContactAvatarUploaderProps {
   };
 }
 
-export function ContactAvatarUploader({ contactId, contact }: ContactAvatarUploaderProps) {
+export function ContactAvatarUploader({ contactId, organizationId, contact }: ContactAvatarUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -24,8 +25,8 @@ export function ContactAvatarUploader({ contactId, contact }: ContactAvatarUploa
   
   const { data: userData } = useCurrentUser();
   const { data: attachments } = useContactAttachments(contactId);
-  const createAttachment = useCreateContactAttachment();
-  const setAvatar = useSetContactAvatar();
+  const createAttachment = useCreateContactAttachment(contactId, organizationId);
+  const setAvatar = useSetContactAvatar(organizationId);
   const { toast } = useToast();
 
   const currentAvatarAttachment = attachments?.find(
@@ -63,7 +64,6 @@ export function ContactAvatarUploader({ contactId, contact }: ContactAvatarUploa
 
     try {
       const attachment = await createAttachment.mutateAsync({
-        contactId,
         file,
         category: 'photo',
         createdBy: userData.user.id

@@ -1,22 +1,10 @@
-export const CONTACT_QUERY_KEYS = {
-  all: ['contacts'] as const,
-  lists: () => [...CONTACT_QUERY_KEYS.all, 'list'] as const,
-  list: (organizationId: string) => [...CONTACT_QUERY_KEYS.lists(), organizationId] as const,
-  details: () => [...CONTACT_QUERY_KEYS.all, 'detail'] as const,
-  detail: (organizationId: string, contactId: string) => [...CONTACT_QUERY_KEYS.details(), organizationId, contactId] as const,
-} as const;
-
-export const CONTACT_TYPE_QUERY_KEYS = {
-  all: ['contact-types'] as const,
-  lists: () => [...CONTACT_TYPE_QUERY_KEYS.all, 'list'] as const,
-  list: (organizationId: string) => [...CONTACT_TYPE_QUERY_KEYS.lists(), organizationId] as const,
-} as const;
-
-export const CONTACT_ATTACHMENT_QUERY_KEYS = {
-  all: ['contact-attachments'] as const,
-  lists: () => [...CONTACT_ATTACHMENT_QUERY_KEYS.all, 'list'] as const,
-  list: (contactId: string) => [...CONTACT_ATTACHMENT_QUERY_KEYS.lists(), contactId] as const,
-} as const;
+/**
+ * Query keys migrated to @/core/query-keys/contacts.keys.ts
+ * Import from: import { contactsKeys, contactTypesKeys } from '@/core/query-keys'
+ * 
+ * @deprecated Use contactsKeys and contactTypesKeys from @/core/query-keys
+ */
+export { contactsKeys as CONTACT_QUERY_KEYS, contactTypesKeys as CONTACT_TYPE_QUERY_KEYS } from '@/core/query-keys';
 
 export const ATTACHMENT_CATEGORIES = {
   dni_front: { value: 'dni_front', label: 'DNI (Frente)' },

@@ -1,17 +1,18 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { setContactAvatar } from '../services';
-import { CONTACT_QUERY_KEYS } from '../constants';
+import { contactsKeys } from '@/core/query-keys';
 
 interface SetAvatarParams {
   contactId: string;
   attachmentId: string;
+  organizationId: string;
 }
 
-export function useSetContactAvatar() {
+export function useSetContactAvatar(organizationId: string) {
   return useOptimisticMutation({
-    mutationFn: ({ contactId, attachmentId }: SetAvatarParams) =>
+    mutationFn: ({ contactId, attachmentId }: Omit<SetAvatarParams, 'organizationId'>) =>
       setContactAvatar(contactId, attachmentId),
-    queryKey: CONTACT_QUERY_KEYS.all,
+    queryKey: contactsKeys.list(organizationId),
     optimisticUpdate: (oldData) => {
       if (!oldData) return oldData;
       return oldData;

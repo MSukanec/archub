@@ -31,7 +31,7 @@ export function ContactsView() {
   const organizationId = userData?.organization?.id;
   const { data: contacts = [], isLoading: contactsLoading } = useContacts(organizationId);
   const { data: contactTypes = [] } = useContactTypes(organizationId);
-  const deleteContactMutation = useDeleteContact();
+  const deleteContactMutation = useDeleteContact(organizationId || '');
   const { toast } = useToast();
   const { setActions, setShowActionBar, clearActions, setFilterConfig } = useActionBarMobile();
   const isMobile = useMobile();

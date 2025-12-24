@@ -1,17 +1,17 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { deleteContactAttachment } from '../services';
-import { CONTACT_ATTACHMENT_QUERY_KEYS, CONTACT_QUERY_KEYS } from '../constants';
+import { contactsKeys } from '@/core/query-keys';
 
-export function useDeleteContactAttachment() {
+export function useDeleteContactAttachment(contactId: string, organizationId: string) {
   return useOptimisticMutation({
     mutationFn: (attachmentId: string) => deleteContactAttachment(attachmentId),
-    queryKey: CONTACT_ATTACHMENT_QUERY_KEYS.all,
+    queryKey: contactsKeys.attachmentList(contactId),
     optimisticUpdate: (oldData, attachmentId) => {
       if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;
       return oldData.filter((a: any) => a.id !== attachmentId);
     },
-    additionalQueryKeys: [CONTACT_QUERY_KEYS.all],
+    additionalQueryKeys: [contactsKeys.detail(organizationId, contactId)],
     onSuccessMessage: 'Adjunto eliminado correctamente',
     onErrorMessage: 'No se pudo eliminar el adjunto',
   });

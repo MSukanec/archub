@@ -1,12 +1,12 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { createContactType } from '../services';
-import { CONTACT_TYPE_QUERY_KEYS } from '../constants';
+import { contactTypesKeys } from '@/core/query-keys';
 import type { ContactTypeInput } from '../types';
 
 export function useCreateContactType(organizationId: string) {
   return useOptimisticMutation({
     mutationFn: (input: ContactTypeInput) => createContactType(organizationId, input),
-    queryKey: CONTACT_TYPE_QUERY_KEYS.lists(),
+    queryKey: contactTypesKeys.list(organizationId),
     optimisticUpdate: (oldData) => {
       if (!oldData) return oldData;
       return oldData;

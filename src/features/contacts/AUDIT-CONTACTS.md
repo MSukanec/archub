@@ -19,7 +19,7 @@
 | Forms con FormPanel | ✅ Patrón aplicado |
 | Named exports | ✅ Implementado |
 | Barrel exports | ✅ Actualizado |
-| Query Keys centralizadas | ⚠️ En constants/ (no en core/) |
+| Query Keys centralizadas | ✅ Migradas a src/core/query-keys/contacts.keys.ts |
 | Tipado TypeScript | ✅ Corregido (40 errores → 0) |
 
 ---

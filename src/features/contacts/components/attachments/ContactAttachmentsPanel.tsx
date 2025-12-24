@@ -41,6 +41,7 @@ import {
 
 interface ContactAttachmentsPanelProps {
   contactId: string;
+  organizationId: string;
   contact: {
     avatar_attachment_id?: string;
   };
@@ -63,14 +64,14 @@ const categoryColors = {
   other: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
 };
 
-export function ContactAttachmentsPanel({ contactId, contact, showUpload = true }: ContactAttachmentsPanelProps) {
+export function ContactAttachmentsPanel({ contactId, organizationId, contact, showUpload = true }: ContactAttachmentsPanelProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('photo');
   
   const { data: userData } = useCurrentUser();
   const { data: attachments = [], isLoading } = useContactAttachments(contactId);
-  const createAttachment = useCreateContactAttachment();
-  const deleteAttachment = useDeleteContactAttachment();
-  const setAvatar = useSetContactAvatar();
+  const createAttachment = useCreateContactAttachment(contactId, organizationId);
+  const deleteAttachment = useDeleteContactAttachment(contactId, organizationId);
+  const setAvatar = useSetContactAvatar(organizationId);
   const { toast } = useToast();
 
   const imageUrls = useMemo(() => 
@@ -97,10 +98,10 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: async (acceptedFiles) => {
+    onDrop: async (acceptedFiles: File[]) => {
       for (const file of acceptedFiles) {
         try {
-          let fileToUpload = file;
+          let fileToUpload: File = file;
           
           // Compress images based on category
           if (shouldCompress(file)) {
@@ -115,7 +116,8 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
             }
             
             try {
-              fileToUpload = await compressImage(file, preset) as File;
+              const compressedFile = await compressImage(file, preset);
+              fileToUpload = compressedFile as File;
               
               // Show compression stats if there was significant reduction
               if (originalSize !== fileToUpload.size) {
@@ -145,7 +147,6 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
           }
           
           await createAttachment.mutateAsync({
-            contactId,
             file: fileToUpload,
             category: selectedCategory as 'photo' | 'dni_front' | 'dni_back' | 'document' | 'other',
             createdBy: userData?.user?.id || ''
@@ -318,7 +319,7 @@ export function ContactAttachmentsPanel({ contactId, contact, showUpload = true 
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge
-                        variant="secondary"
+                        variant="neutral"
                         className={categoryColors[attachment.category]}
                       >
                         {categoryLabels[attachment.category]}

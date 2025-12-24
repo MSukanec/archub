@@ -1,19 +1,18 @@
 import { useOptimisticMutation } from '@/core/save-engine';
 import { uploadContactAttachment } from '../services';
-import { CONTACT_ATTACHMENT_QUERY_KEYS, CONTACT_QUERY_KEYS } from '../constants';
+import { contactsKeys } from '@/core/query-keys';
 import type { ContactAttachmentInput } from '../types';
 
 interface CreateAttachmentParams {
-  contactId: string;
   file: File;
   category: 'dni_front' | 'dni_back' | 'document' | 'photo' | 'other';
   createdBy: string;
   metadata?: any;
 }
 
-export function useCreateContactAttachment() {
+export function useCreateContactAttachment(contactId: string, organizationId: string) {
   return useOptimisticMutation({
-    mutationFn: async ({ contactId, file, category, createdBy, metadata }: CreateAttachmentParams) => {
+    mutationFn: async ({ file, category, createdBy, metadata }: CreateAttachmentParams) => {
       const input: ContactAttachmentInput = {
         file,
         category,
@@ -21,12 +20,12 @@ export function useCreateContactAttachment() {
       };
       return uploadContactAttachment(contactId, input, createdBy);
     },
-    queryKey: CONTACT_ATTACHMENT_QUERY_KEYS.all,
+    queryKey: contactsKeys.attachmentList(contactId),
     optimisticUpdate: (oldData) => {
       if (!oldData) return oldData;
       return oldData;
     },
-    additionalQueryKeys: [CONTACT_QUERY_KEYS.all],
+    additionalQueryKeys: [contactsKeys.detail(organizationId, contactId)],
     onSuccessMessage: 'Adjunto subido correctamente',
     onErrorMessage: 'No se pudo subir el adjunto',
   });

@@ -25,3 +25,6 @@
 
 export { projectsKeys } from './projects.keys';
 export type { ProjectsQueryKey } from './projects.keys';
+
+export { contactsKeys, contactTypesKeys } from './contacts.keys';
+export type { ContactsQueryKey, ContactTypesQueryKey } from './contacts.keys';
