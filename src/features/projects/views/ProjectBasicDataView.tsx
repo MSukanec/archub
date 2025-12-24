@@ -211,7 +211,10 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
       };
     },
     onErrorMessage: "No se pudo guardar el color del proyecto",
-    additionalQueryKeys: [['projects']],
+    additionalQueryKeys: [
+      ['projects', organizationId],
+      ['projects-lite', organizationId],
+    ],
   });
 
   // Centralized auto-save using useSaveEngine
@@ -264,7 +267,7 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     },
     delay: 1500,
     enabled: !!userData && !!activeProjectId,
-    additionalQueryKeys: [['project-info', activeProjectId], ['projects'], ['projects-lite', organizationId], ['active-projects']],
+    additionalQueryKeys: [['project-info', activeProjectId], ['projects', organizationId], ['projects-lite', organizationId], ['projects-map', organizationId], ['active-projects']],
   });
 
   // UNIFIED hydration effect - loads ALL data at once, then marks as hydrated
