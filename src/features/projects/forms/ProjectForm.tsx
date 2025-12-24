@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -585,9 +585,13 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
   });
 
   const currentCurrencyId = form.watch('currency_id');
-  if (mode === 'create' && !currentCurrencyId && defaultCurrencyId) {
-    form.setValue('currency_id', defaultCurrencyId);
-  }
+  
+  // ⚠️ CRITICAL: Move setValue to useEffect (NOT render path)
+  useEffect(() => {
+    if (mode === 'create' && !currentCurrencyId && defaultCurrencyId) {
+      form.setValue('currency_id', defaultCurrencyId);
+    }
+  }, [mode, currentCurrencyId, defaultCurrencyId, form]);
 
   const handleFileSelect = (file: File | null) => {
     if (!file) {
@@ -704,18 +708,18 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
               value: true 
             }).catch(err => console.error('Error updating checklist:', err));
             
-            supabase.from('user_organization_preferences').upsert({
+            Promise.resolve(supabase.from('user_organization_preferences').upsert({
               user_id: userData.user.id,
               organization_id: organizationId,
               last_project_id: createdProject.id,
               updated_at: new Date().toISOString()
-            }, { onConflict: 'user_id,organization_id' })
-              .then(() => {
-                queryClient.invalidateQueries({
-                  queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
-                });
-              })
-              .catch((error: any) => console.error('Error setting project as active:', error));
+            }, { onConflict: 'user_id,organization_id' })).then(() => {
+              queryClient.invalidateQueries({
+                queryKey: USER_ORGANIZATION_PREFERENCES_QUERY_KEYS.detail(userData.user.id, organizationId)
+              });
+            }).catch((error: any) => {
+              console.error('Error setting project as active:', error);
+            });
 
             // Log activity with REAL UUID
             const projectTypeName = projectTypes.find(t => t.id === cleanedData.project_type_id)?.name || null;
