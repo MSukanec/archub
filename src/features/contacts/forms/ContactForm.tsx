@@ -825,17 +825,17 @@ export function useContactForm({ contactId, contact, mode, onSuccess }: UseConta
     try {
       // Email uniqueness validation
       if (data.email && data.email.trim().length > 0) {
-        const emailQuery = supabase
+        let query = supabase
           .from('contacts')
           .select('id, first_name, last_name, email')
           .eq('organization_id', organizationId)
           .ilike('email', data.email.trim());
         
         if (mode === 'edit' && editingContact) {
-          emailQuery.neq('id', editingContact.id);
+          query = query.neq('id', editingContact.id);
         }
         
-        const { data: existingContact, error: checkError } = await emailQuery.maybeSingle();
+        const { data: existingContact, error: checkError } = await query.maybeSingle();
         if (checkError) throw checkError;
         if (existingContact) {
           const contactName = `${existingContact.first_name} ${existingContact.last_name || ''}`.trim();
