@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Building2, FileText, Users, Globe } from 'lucide-react';
 
 import { AvatarUploader } from '@/components/shared/fields/AvatarUploader';
@@ -9,11 +9,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { PhoneField } from '@/components/shared/fields/PhoneField';
 
 import { useCurrentUser } from '@/hooks/use-current-user';
-
-import { useSaveEngine } from '@/core/save-engine';
-import { useQuery } from '@tanstack/react-query';
+import { useAutosaveController, normalizeStringValue } from '@/core/autosave';
+import { organizationKeys } from '@/core/query-keys';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { getOrganizationInitials } from '@/utils/initials';
 import { uploadOrgLogo } from '@/lib/storage';
@@ -21,11 +20,15 @@ import { uploadOrgLogo } from '@/lib/storage';
 export function OrganizationProfileView() {
   const { data: userData } = useCurrentUser();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const organizationId = userData?.organization?.id;
 
-  const { data: organizationData } = useQuery({
-    queryKey: ['organization-data', organizationId],
+  const [isHydrated, setIsHydrated] = useState(false);
+  const hasHydratedRef = useRef(false);
+
+  const { data: organizationData, isSuccess: organizationDataSuccess } = useQuery({
+    queryKey: organizationKeys.data(organizationId),
     queryFn: async () => {
       if (!organizationId || !supabase) return null;
       
@@ -45,8 +48,8 @@ export function OrganizationProfileView() {
     enabled: !!organizationId && !!supabase
   });
 
-  const { data: organizationInfo } = useQuery({
-    queryKey: ['organization-info', organizationId],
+  const { data: organizationInfo, isSuccess: organizationInfoSuccess } = useQuery({
+    queryKey: organizationKeys.info(organizationId),
     queryFn: async () => {
       if (!organizationId || !supabase) return null;
       
@@ -74,91 +77,118 @@ export function OrganizationProfileView() {
   const [email, setEmail] = useState('');
   const [website, setWebsite] = useState('');
   const [taxId, setTaxId] = useState('');
-  const [isInitialized, setIsInitialized] = useState(false);
   const [isLogoUploading, setIsLogoUploading] = useState(false);
 
-  const { isSaving, hasUnsavedChanges } = useSaveEngine({
-    data: {
-      name: organizationName,
-      description,
-      phone,
-      email,
-      website,
-      tax_id: taxId
-    },
-    queryKey: ['organization-data', organizationId],
-    saveFn: async (dataToSave) => {
-      if (!organizationId || !supabase) return;
+  const saveController = useAutosaveController({
+    queryKey: organizationKeys.data(organizationId),
+    saveFn: async (dataToSave: any) => {
+      if (!organizationId || !supabase) throw new Error('Organization or Supabase not available');
 
-      if (dataToSave.name !== undefined) {
-        const orgFields = {
-          name: dataToSave.name,
-        };
+      const normalizedData = {
+        name: normalizeStringValue(dataToSave.name),
+        description: normalizeStringValue(dataToSave.description),
+        phone: normalizeStringValue(dataToSave.phone),
+        email: normalizeStringValue(dataToSave.email),
+        website: normalizeStringValue(dataToSave.website),
+        tax_id: normalizeStringValue(dataToSave.tax_id),
+      };
 
-        const cleanOrgData = Object.fromEntries(
-          Object.entries(orgFields).filter(([_, value]) => value !== undefined)
-        );
+      if (normalizedData.name !== undefined && normalizedData.name !== null) {
+        const { error: orgError } = await supabase
+          .from('organizations')
+          .update({ name: normalizedData.name })
+          .eq('id', organizationId);
 
-        if (Object.keys(cleanOrgData).length > 0) {
-          const { error: orgError } = await supabase
-            .from('organizations')
-            .update(cleanOrgData)
-            .eq('id', organizationId);
-
-          if (orgError) throw orgError;
-        }
+        if (orgError) throw orgError;
       }
 
       const organizationDataFields = {
-        description: dataToSave.description,
-        phone: dataToSave.phone,
-        email: dataToSave.email,
-        website: dataToSave.website,
-        tax_id: dataToSave.tax_id,
+        description: normalizedData.description,
+        phone: normalizedData.phone,
+        email: normalizedData.email,
+        website: normalizedData.website,
+        tax_id: normalizedData.tax_id,
       };
 
-      const cleanData = Object.fromEntries(
-        Object.entries(organizationDataFields).filter(([_, value]) => value !== undefined)
-      );
+      const { data: existingData } = await supabase
+        .from('organization_data')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .single();
 
-      if (Object.keys(cleanData).length > 0) {
-        const { data: existingData } = await supabase
+      if (existingData) {
+        const { error } = await supabase
           .from('organization_data')
-          .select('id')
-          .eq('organization_id', organizationId)
-          .single();
+          .update(organizationDataFields)
+          .eq('organization_id', organizationId);
 
-        if (existingData) {
-          const { error } = await supabase
-            .from('organization_data')
-            .update(cleanData)
-            .eq('organization_id', organizationId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('organization_data')
+          .insert({
+            organization_id: organizationId,
+            ...organizationDataFields
+          });
 
-          if (error) throw error;
-        } else {
-          const { error } = await supabase
-            .from('organization_data')
-            .insert({
-              organization_id: organizationId,
-              ...cleanData
-            });
-
-          if (error) throw error;
-        }
+        if (error) throw error;
       }
     },
-    delay: 1500,
-    enabled: !!organizationId && !!supabase && isInitialized,
-    additionalQueryKeys: [
-      ['organization-info', organizationId],
-      ['current-user']
-    ],
-    showSuccessToast: true,
-    successMessage: "Datos guardados",
+    additionalQueryKeys: [organizationKeys.info(organizationId), ['current-user']],
     errorMessage: "No se pudieron guardar los cambios",
+    debounceMs: 500,
   });
 
+  const { isSaving, hasUnsavedChanges } = saveController;
+
+  const getCurrentFormData = useCallback(() => ({
+    name: organizationName,
+    description,
+    phone,
+    email,
+    website,
+    tax_id: taxId
+  }), [organizationName, description, phone, email, website, taxId]);
+
+  const isFormValid = useCallback((formData: any): boolean => {
+    const nameValue = formData.name?.trim();
+    if (!nameValue) return false;
+    return true;
+  }, []);
+
+  const handleTextFieldBlur = useCallback(() => {
+    if (!isHydrated) return;
+    
+    const formData = getCurrentFormData();
+    if (!isFormValid(formData)) return;
+    
+    saveController.save(formData);
+  }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+
+  const handleTextFieldKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!isHydrated) return;
+      
+      const formData = getCurrentFormData();
+      if (!isFormValid(formData)) return;
+      
+      saveController.save(formData);
+    }
+  }, [isHydrated, saveController, getCurrentFormData, isFormValid]);
+
   useEffect(() => {
+    setIsHydrated(false);
+    hasHydratedRef.current = false;
+  }, [organizationId]);
+
+  useEffect(() => {
+    if (!organizationInfoSuccess || !organizationDataSuccess || hasHydratedRef.current) {
+      return;
+    }
+
+    hasHydratedRef.current = true;
+
     if (organizationInfo) {
       setOrganizationName(organizationInfo.name || '');
       if (organizationInfo.image_bucket && organizationInfo.image_path) {
@@ -170,9 +200,7 @@ export function OrganizationProfileView() {
         setLogoUrl('');
       }
     }
-  }, [organizationInfo]);
 
-  useEffect(() => {
     if (organizationData) {
       setDescription(organizationData.description || '');
       setPhone(organizationData.phone || '');
@@ -180,16 +208,20 @@ export function OrganizationProfileView() {
       setWebsite(organizationData.website || '');
       setTaxId(organizationData.tax_id || '');
     }
-  }, [organizationData]);
 
-  useEffect(() => {
-    if (organizationInfo !== undefined && organizationData !== undefined) {
-      const timer = setTimeout(() => {
-        setIsInitialized(true);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [organizationInfo, organizationData]);
+    setTimeout(() => {
+      setIsHydrated(true);
+      
+      saveController.setLastPersistedData({
+        name: organizationInfo?.name || '',
+        description: organizationData?.description || '',
+        phone: organizationData?.phone || '',
+        email: organizationData?.email || '',
+        website: organizationData?.website || '',
+        tax_id: organizationData?.tax_id || '',
+      });
+    }, 100);
+  }, [organizationInfo, organizationData, organizationInfoSuccess, organizationDataSuccess, saveController]);
 
   const handleLogoSelect = async (file: File) => {
     if (!organizationId) return;
@@ -212,7 +244,7 @@ export function OrganizationProfileView() {
         setLogoUrl(result.file_url);
       }
       
-      queryClient.invalidateQueries({ queryKey: ['organization-info', organizationId] });
+      queryClient.invalidateQueries({ queryKey: organizationKeys.info(organizationId) });
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
       
       toast({
@@ -277,6 +309,8 @@ export function OrganizationProfileView() {
                 placeholder="Ej: Constructora López SA"
                 value={organizationName}
                 onChange={(e) => setOrganizationName(e.target.value)}
+                onBlur={handleTextFieldBlur}
+                onKeyDown={handleTextFieldKeyDown}
               />
             </div>
 
@@ -287,6 +321,7 @@ export function OrganizationProfileView() {
                 placeholder="Descripción de la organización..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                onBlur={handleTextFieldBlur}
                 rows={3}
               />
             </div>
@@ -314,6 +349,7 @@ export function OrganizationProfileView() {
               <PhoneField 
                 value={phone}
                 onChange={setPhone}
+                onBlur={handleTextFieldBlur}
                 placeholder="Número de teléfono"
               />
             </div>
@@ -326,6 +362,8 @@ export function OrganizationProfileView() {
                 placeholder="Ej: contacto@constructora.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onBlur={handleTextFieldBlur}
+                onKeyDown={handleTextFieldKeyDown}
               />
             </div>
 
@@ -337,6 +375,8 @@ export function OrganizationProfileView() {
                 placeholder="Ej: https://www.constructora.com"
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
+                onBlur={handleTextFieldBlur}
+                onKeyDown={handleTextFieldKeyDown}
               />
             </div>
           </div>
@@ -365,6 +405,8 @@ export function OrganizationProfileView() {
                 placeholder="Ej: 20-12345678-9"
                 value={taxId}
                 onChange={(e) => setTaxId(e.target.value)}
+                onBlur={handleTextFieldBlur}
+                onKeyDown={handleTextFieldKeyDown}
               />
             </div>
           </div>

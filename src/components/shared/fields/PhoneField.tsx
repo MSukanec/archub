@@ -36,13 +36,14 @@ const countries = [
 interface PhoneFieldProps {
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
 }
 
 export const PhoneField = forwardRef<HTMLInputElement, PhoneFieldProps>(
-  ({ value, onChange, placeholder = 'Número de teléfono', disabled, className }, ref) => {
+  ({ value, onChange, onBlur, placeholder = 'Número de teléfono', disabled, className }, ref) => {
     const [selectedCountry, setSelectedCountry] = useState(countries[0]); // Default: Argentina
     const [open, setOpen] = useState(false);
 
@@ -133,6 +134,7 @@ export const PhoneField = forwardRef<HTMLInputElement, PhoneFieldProps>(
           placeholder={placeholder}
           value={value}
           onChange={handlePhoneNumberChange}
+          onBlur={onBlur}
           disabled={disabled}
           className={cn(
             "rounded-l-none border-l-0 flex-1",

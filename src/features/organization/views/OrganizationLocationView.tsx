@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { useSaveEngine } from '@/core/save-engine'
+import { useAutosaveController, normalizeStringValue } from '@/core/autosave'
+import { organizationKeys } from '@/core/query-keys'
 import { useToast } from '@/hooks/use-toast'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -13,6 +14,7 @@ import { GooglePlacesAutocomplete, GoogleMap } from '@/components/shared/integra
 
 export function OrganizationLocationView() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { data: userData } = useCurrentUser();
   
   const organizationId = userData?.organization?.id
@@ -20,6 +22,7 @@ export function OrganizationLocationView() {
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
   const [isHydrated, setIsHydrated] = useState(false);
+  const hasHydratedRef = useRef(false);
 
   const [addressFull, setAddressFull] = useState('');
   const [address, setAddress] = useState('');
@@ -36,7 +39,7 @@ export function OrganizationLocationView() {
   const [accessibilityNotes, setAccessibilityNotes] = useState('');
 
   const { data: organizationData, isSuccess: organizationDataSuccess } = useQuery({
-    queryKey: ['organization-data', organizationId],
+    queryKey: organizationKeys.data(organizationId),
     queryFn: async () => {
       if (!organizationId || !supabase) return null;
 
@@ -56,24 +59,25 @@ export function OrganizationLocationView() {
     enabled: !!organizationId && !!supabase
   });
 
-  const { isSaving, hasUnsavedChanges } = useSaveEngine({
-    data: {
-      address: address,
-      city: city,
-      state: state,
-      country: country,
-      postal_code: postalCode,
-      address_full: addressFull,
-      place_id: placeId || null,
-      lat: lat,
-      lng: lng,
-      timezone: timezone || null,
-      location_type: locationType && locationType !== '' ? locationType : null,
-      accessibility_notes: accessibilityNotes || null,
-    },
-    queryKey: ['organization-data', organizationId],
-    saveFn: async (dataToSave) => {
-      if (!organizationId || !supabase) return;
+  const saveController = useAutosaveController({
+    queryKey: organizationKeys.data(organizationId),
+    saveFn: async (dataToSave: any) => {
+      if (!organizationId || !supabase) throw new Error('Organization or Supabase not available');
+
+      const normalizedData = {
+        address: normalizeStringValue(dataToSave.address),
+        city: normalizeStringValue(dataToSave.city),
+        state: normalizeStringValue(dataToSave.state),
+        country: normalizeStringValue(dataToSave.country),
+        postal_code: normalizeStringValue(dataToSave.postal_code),
+        address_full: normalizeStringValue(dataToSave.address_full),
+        place_id: normalizeStringValue(dataToSave.place_id),
+        lat: dataToSave.lat,
+        lng: dataToSave.lng,
+        timezone: normalizeStringValue(dataToSave.timezone),
+        ...(dataToSave.location_type ? { location_type: dataToSave.location_type } : {}),
+        accessibility_notes: normalizeStringValue(dataToSave.accessibility_notes),
+      };
 
       const { data: existingData } = await supabase
         .from('organization_data')
@@ -84,7 +88,7 @@ export function OrganizationLocationView() {
       if (existingData) {
         const { error } = await supabase
           .from('organization_data')
-          .update(dataToSave)
+          .update(normalizedData)
           .eq('organization_id', organizationId);
 
         if (error) throw error;
@@ -93,28 +97,85 @@ export function OrganizationLocationView() {
           .from('organization_data')
           .insert({
             organization_id: organizationId,
-            ...dataToSave
+            ...normalizedData
           });
 
         if (error) throw error;
       }
     },
-    delay: 2000,
-    enabled: !!organizationId && !!supabase && isHydrated,
     additionalQueryKeys: [['current-user']],
-    showSuccessToast: true,
-    successMessage: "Ubicación guardada",
     errorMessage: "No se pudo guardar la ubicación",
+    debounceMs: 500,
   });
+
+  const validateCoordinates = (lat: number | null, lng: number | null) => {
+    if (lat !== null || lng !== null) {
+      if (lat === null || lng === null) return false;
+      if (typeof lat !== 'number' || typeof lng !== 'number') return false;
+      if (lat < -90 || lat > 90) return false;
+      if (lng < -180 || lng > 180) return false;
+    }
+    return true;
+  };
+
+  const getCurrentFormData = useCallback(() => ({
+    address: address,
+    city: city,
+    state: state,
+    country: country,
+    postal_code: postalCode,
+    address_full: addressFull,
+    place_id: placeId,
+    lat: lat,
+    lng: lng,
+    timezone: timezone,
+    location_type: locationType || null,
+    accessibility_notes: accessibilityNotes,
+  }), [address, city, state, country, postalCode, addressFull, placeId, lat, lng, timezone, locationType, accessibilityNotes]);
+
+  const handleTextFieldBlur = useCallback(() => {
+    if (!isHydrated) return;
+    if (!validateCoordinates(lat, lng)) return;
+    
+    saveController.save(getCurrentFormData());
+  }, [isHydrated, saveController, getCurrentFormData, lat, lng]);
+
+  const handleTextFieldKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!isHydrated) return;
+      if (!validateCoordinates(lat, lng)) return;
+      
+      saveController.save(getCurrentFormData());
+    }
+  }, [isHydrated, saveController, getCurrentFormData, lat, lng]);
+
+  const handleSelectChange = useCallback((value: string) => {
+    if (!isHydrated) return;
+    
+    setLocationType(value);
+    
+    setTimeout(() => {
+      if (!validateCoordinates(lat, lng)) return;
+      
+      saveController.save({
+        ...getCurrentFormData(),
+        location_type: value || null
+      });
+    }, 0);
+  }, [isHydrated, saveController, getCurrentFormData, lat, lng]);
 
   useEffect(() => {
     setIsHydrated(false);
+    hasHydratedRef.current = false;
   }, [organizationId]);
 
   useEffect(() => {
-    if (!organizationDataSuccess) {
+    if (!organizationDataSuccess || hasHydratedRef.current) {
       return;
     }
+
+    hasHydratedRef.current = true;
 
     if (organizationData) {
       setAddress(organizationData.address || '');
@@ -133,8 +194,23 @@ export function OrganizationLocationView() {
 
     setTimeout(() => {
       setIsHydrated(true);
+      
+      saveController.setLastPersistedData({
+        address: organizationData?.address || '',
+        address_full: organizationData?.address_full || organizationData?.address || '',
+        city: organizationData?.city || '',
+        state: organizationData?.state || '',
+        country: organizationData?.country || '',
+        postal_code: organizationData?.postal_code || '',
+        place_id: organizationData?.place_id || '',
+        lat: organizationData?.lat != null ? Number(organizationData.lat) : null,
+        lng: organizationData?.lng != null ? Number(organizationData.lng) : null,
+        timezone: organizationData?.timezone || '',
+        location_type: organizationData?.location_type || '',
+        accessibility_notes: organizationData?.accessibility_notes || '',
+      });
     }, 100);
-  }, [organizationData, organizationDataSuccess]);
+  }, [organizationData, organizationDataSuccess, saveController]);
 
   const handlePlaceSelected = (place: any) => {
     setAddressFull(place.address_full);
@@ -147,6 +223,25 @@ export function OrganizationLocationView() {
     setLat(place.lat);
     setLng(place.lng);
     setTimezone(place.timezone || '');
+    
+    if (isHydrated && validateCoordinates(place.lat, place.lng)) {
+      setTimeout(() => {
+        saveController.save({
+          address: place.address_full,
+          address_full: place.address_full,
+          city: place.city,
+          state: place.state,
+          country: place.country,
+          postal_code: place.postal_code,
+          place_id: place.place_id,
+          lat: place.lat,
+          lng: place.lng,
+          timezone: place.timezone || '',
+          location_type: locationType || null,
+          accessibility_notes: accessibilityNotes
+        });
+      }, 10);
+    }
   };
 
   const handleLatChange = async (value: string) => {
@@ -282,6 +377,8 @@ export function OrganizationLocationView() {
                   placeholder="Ej: Av. Corrientes 1234, Buenos Aires, Argentina"
                   value={addressFull}
                   onChange={(e) => setAddressFull(e.target.value)}
+                  onBlur={handleTextFieldBlur}
+                  onKeyDown={handleTextFieldKeyDown}
                   data-testid="input-address-full"
                 />
               </>
@@ -297,6 +394,8 @@ export function OrganizationLocationView() {
               placeholder="Ej: -34.603722"
               value={lat !== null ? lat : ''}
               onChange={(e) => handleLatChange(e.target.value)}
+              onBlur={handleTextFieldBlur}
+              onKeyDown={handleTextFieldKeyDown}
               data-testid="input-latitude"
             />
           </div>
@@ -310,6 +409,8 @@ export function OrganizationLocationView() {
               placeholder="Ej: -58.381592"
               value={lng !== null ? lng : ''}
               onChange={(e) => handleLngChange(e.target.value)}
+              onBlur={handleTextFieldBlur}
+              onKeyDown={handleTextFieldKeyDown}
               data-testid="input-longitude"
             />
           </div>
@@ -358,6 +459,8 @@ export function OrganizationLocationView() {
               placeholder="Ej: Buenos Aires"
               value={city}
               onChange={(e) => setCity(e.target.value)}
+              onBlur={handleTextFieldBlur}
+              onKeyDown={handleTextFieldKeyDown}
               data-testid="input-city"
             />
           </div>
@@ -369,6 +472,8 @@ export function OrganizationLocationView() {
               placeholder="Ej: C1043AAX"
               value={postalCode}
               onChange={(e) => setPostalCode(e.target.value)}
+              onBlur={handleTextFieldBlur}
+              onKeyDown={handleTextFieldKeyDown}
               data-testid="input-postal-code"
             />
           </div>
@@ -382,6 +487,8 @@ export function OrganizationLocationView() {
               placeholder="Ej: Buenos Aires"
               value={state}
               onChange={(e) => setState(e.target.value)}
+              onBlur={handleTextFieldBlur}
+              onKeyDown={handleTextFieldKeyDown}
               data-testid="input-state"
             />
           </div>
@@ -393,6 +500,8 @@ export function OrganizationLocationView() {
               placeholder="Ej: Argentina"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
+              onBlur={handleTextFieldBlur}
+              onKeyDown={handleTextFieldKeyDown}
               data-testid="input-country"
             />
           </div>
@@ -400,7 +509,7 @@ export function OrganizationLocationView() {
 
         <div className="space-y-2">
           <Label htmlFor="location-type">Tipo de Ubicación</Label>
-          <Select value={locationType} onValueChange={setLocationType}>
+          <Select value={locationType} onValueChange={handleSelectChange}>
             <SelectTrigger id="location-type" data-testid="select-location-type">
               <SelectValue placeholder="Seleccionar tipo de ubicación" />
             </SelectTrigger>
@@ -425,6 +534,7 @@ export function OrganizationLocationView() {
             placeholder="Ej: Acceso por calle lateral, estacionamiento disponible en la esquina, horario de entregas de 8 a 18hs"
             value={accessibilityNotes}
             onChange={(e) => setAccessibilityNotes(e.target.value)}
+            onBlur={handleTextFieldBlur}
             rows={3}
             data-testid="textarea-accessibility-notes"
           />
