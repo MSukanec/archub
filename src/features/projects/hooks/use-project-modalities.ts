@@ -76,6 +76,6 @@ export function useReplaceProjectModality(organizationId?: string) {
     },
     onSuccessMessage: 'Modalidad de proyecto reemplazada',
     onErrorMessage: 'No se pudo reemplazar la modalidad de proyecto',
-    additionalQueryKeys: [projectsKeys.lists()],
+    additionalQueryKeys: [],
   });
 }

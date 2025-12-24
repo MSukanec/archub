@@ -6,7 +6,7 @@ export function useUpdateProjectLastActive() {
   return useOptimisticMutation({
     mutationFn: ({ projectId, organizationId }: { projectId: string; organizationId: string }) =>
       updateProjectLastActive(projectId, organizationId),
-    queryKey: projectsKeys.all,
+    queryKey: projectsKeys.lists(),
     optimisticUpdate: (oldData: any, variables: { projectId: string }) => {
       if (!oldData) return oldData;
       if (!Array.isArray(oldData)) return oldData;
@@ -18,5 +18,7 @@ export function useUpdateProjectLastActive() {
     },
     onSuccessMessage: undefined,
     onErrorMessage: 'No se pudo actualizar la actividad del proyecto',
+    invalidateOnSuccess: false,
+    additionalQueryKeys: [],
   });
 }

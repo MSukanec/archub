@@ -76,6 +76,6 @@ export function useReplaceProjectType(organizationId?: string) {
     },
     onSuccessMessage: 'Tipo de proyecto reemplazado',
     onErrorMessage: 'No se pudo reemplazar el tipo de proyecto',
-    additionalQueryKeys: [projectsKeys.lists()],
+    additionalQueryKeys: [],
   });
 }
