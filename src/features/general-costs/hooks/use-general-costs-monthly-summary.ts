@@ -5,7 +5,10 @@ import { generalCostsKeys } from '@/core/query-keys';
 export function useGeneralCostsMonthlySummary(organizationId: string | null) {
   return useQuery({
     queryKey: generalCostsKeys.monthlySummaryList(organizationId),
-    queryFn: () => getGeneralCostsMonthlySummary(organizationId!),
+    queryFn: async () => {
+      if (!organizationId) return [];
+      return getGeneralCostsMonthlySummary(organizationId);
+    },
     enabled: !!organizationId,
     staleTime: 30000,
   });

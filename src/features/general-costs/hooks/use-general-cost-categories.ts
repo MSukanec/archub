@@ -13,7 +13,10 @@ import type { GeneralCostCategory } from '../types';
 export function useGeneralCostCategories(organizationId: string | undefined) {
   return useQuery({
     queryKey: generalCostsKeys.categoryList(organizationId),
-    queryFn: () => getGeneralCostCategories(organizationId!),
+    queryFn: async () => {
+      if (!organizationId) return [];
+      return getGeneralCostCategories(organizationId);
+    },
     enabled: !!organizationId,
     staleTime: 30000,
   });
@@ -22,7 +25,10 @@ export function useGeneralCostCategories(organizationId: string | undefined) {
 export function useGeneralCostCategory(categoryId: string | undefined, organizationId: string | undefined) {
   return useQuery({
     queryKey: generalCostsKeys.category(categoryId),
-    queryFn: () => getGeneralCostCategoryById(categoryId!, organizationId!),
+    queryFn: async () => {
+      if (!categoryId || !organizationId) return null;
+      return getGeneralCostCategoryById(categoryId, organizationId);
+    },
     enabled: !!categoryId && !!organizationId,
     staleTime: 30000,
   });

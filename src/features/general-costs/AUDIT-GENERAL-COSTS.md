@@ -52,7 +52,7 @@ export const generalCostsKeys = {
 | use-general-cost-payment-media.ts | ✅ | useQuery + staleTime: 30000 |
 | use-general-cost-categories.ts | ✅ | useQuery + CRUD mutations with useOptimisticMutation |
 | use-replace-general-cost-category.ts | ✅ | useOptimisticMutation |
-| use-general-costs-metrics.ts | ✅ | useQuery + staleTime: 30000 |
+| use-general-costs-metrics.ts | ✅ | useMemo (local calculation, no query) |
 | use-general-costs-monthly-summary.ts | ✅ | useQuery + staleTime: 30000 |
 | use-general-costs-by-category.ts | ✅ | useQuery + staleTime: 30000 |
 
@@ -80,6 +80,7 @@ export const generalCostsKeys = {
 | staleTime on queries | 30000ms | ✅ Applied to all queries |
 | Optimistic updates | Required | ✅ All mutations use useOptimisticMutation |
 | Scoped invalidations | Required | ✅ No global invalidations |
+| Null-safe queryFn | Required | ✅ All queryFn check for null before calling services |
 
 ### 6. Code Quality
 | Item | Status | Notes |
@@ -143,9 +144,10 @@ const mutation = useOptimisticMutation<ReturnType, Input>({
   queryKey: generalCostsKeys.list(organizationId),
   optimisticUpdate: (oldData, input) => {
     if (!oldData) return oldData;
-    // Optimistic update logic
+    // Optimistic update logic - adds temp entry
   },
   additionalQueryKeys: [
+    // Scoped invalidation after success (with organizationId)
     generalCostsKeys.monthlySummary(organizationId),
     generalCostsKeys.byCategory(organizationId),
   ],
@@ -153,6 +155,14 @@ const mutation = useOptimisticMutation<ReturnType, Input>({
   onErrorMessage: 'Error en la operación',
 });
 ```
+
+**Cache Reconciliation Strategy:**
+The useOptimisticMutation hook uses a standard TanStack Query pattern:
+1. **onMutate**: Applies optimistic update with temp entry
+2. **onError**: Rolls back to previousData
+3. **onSettled**: Invalidates queryKey to refetch server data (replaces temp entries)
+
+This pattern ensures data consistency by refetching from the server after mutations, which automatically replaces any temporary entries with actual server-returned data.
 
 ### Query with staleTime Pattern
 ```typescript
