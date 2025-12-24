@@ -137,10 +137,21 @@ create table public.organization_data (
   email text null,
   website text null,
   tax_id text null,
+  lat numeric(9, 6) null,
+  lng numeric(9, 6) null,
+  address_full text null,
+  place_id text null,
+  timezone text null,
+  location_type text null,
+  accessibility_notes text null,
   constraint organization_data_pkey primary key (id),
   constraint organization_data_organization_id_key unique (organization_id),
   constraint organization_data_organization_id_fkey foreign KEY (organization_id) references organizations (id) on delete CASCADE
 ) TABLESPACE pg_default;
+
+create index IF not exists organization_data_city_idx on public.organization_data using btree (city) TABLESPACE pg_default;
+
+create index IF not exists organization_data_country_idx on public.organization_data using btree (country) TABLESPACE pg_default;
 
 ## Tabla ORGANIZATION_INVITATIONS:
 
