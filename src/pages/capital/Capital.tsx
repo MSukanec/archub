@@ -199,63 +199,57 @@ export default function Capital() {
     />
   ) : null;
 
-  const secondaryRightContent = (
-    <div className="flex items-center gap-3">
-      {activeTab === 'dashboard' && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              data-testid="button-period-filter"
+  const periodContent = (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-2 text-muted-foreground hover:text-foreground"
+          data-testid="button-period-filter"
+        >
+          <Calendar className="h-4 w-4" />
+          <span>{PERIOD_OPTIONS.find(p => p.value === validSelectedPeriod)?.label}</span>
+          <ChevronDown className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-[180px]">
+        {PERIOD_OPTIONS.map((option) => {
+          const isAvailable = availablePeriods[option.value];
+          return (
+            <DropdownMenuItem
+              key={option.value}
+              onClick={() => isAvailable && setSelectedPeriod(option.value)}
+              disabled={!isAvailable}
+              className={validSelectedPeriod === option.value ? "font-medium" : ""}
+              data-testid={`menu-item-period-${option.value}`}
             >
-              <Calendar className="h-4 w-4" />
-              <span>{PERIOD_OPTIONS.find(p => p.value === validSelectedPeriod)?.label}</span>
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-[180px]">
-            {PERIOD_OPTIONS.map((option) => {
-              const isAvailable = availablePeriods[option.value];
-              return (
-                <DropdownMenuItem
-                  key={option.value}
-                  onClick={() => isAvailable && setSelectedPeriod(option.value)}
-                  disabled={!isAvailable}
-                  className={validSelectedPeriod === option.value ? "font-medium" : ""}
-                  data-testid={`menu-item-period-${option.value}`}
-                >
-                  <span>{option.label}</span>
-                  {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-      {activeTab === 'list' && (
-        <Button
-          size="sm"
-          onClick={handleAddParticipant}
-          data-testid="button-add-participant"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Agregar Participante
-        </Button>
-      )}
-      {activeTab === 'transactions' && hasPartners && (
-        <Button
-          size="sm"
-          onClick={handleAddTransaction}
-          data-testid="button-add-transaction"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nueva Transacción
-        </Button>
-      )}
-    </div>
+              <span>{option.label}</span>
+              {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
+
+  const getActionButton = () => {
+    if (activeTab === 'list') {
+      return {
+        label: "Agregar Participante",
+        icon: Plus,
+        onClick: handleAddParticipant
+      };
+    }
+    if (activeTab === 'transactions' && hasPartners) {
+      return {
+        label: "Nueva Transacción",
+        icon: Plus,
+        onClick: handleAddTransaction
+      };
+    }
+    return undefined;
+  };
 
   const tabs = CAPITAL_TABS.map(tab => ({
     ...tab,
@@ -284,35 +278,6 @@ export default function Capital() {
     );
   }
 
-  const periodFilterComponent = activeTab === 'dashboard' ? (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        className="bg-accent text-white hover:bg-accent/90 rounded-lg px-3 py-1.5 gap-2 text-sm font-medium shadow-button-normal hover:shadow-button-hover hover:-translate-y-0.5 inline-flex items-center transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
-        data-testid="button-period-filter"
-      >
-        {PERIOD_OPTIONS.find(p => p.value === validSelectedPeriod)?.label}
-        <ChevronDown className="h-4 w-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[180px]">
-        {PERIOD_OPTIONS.map((option) => {
-          const isAvailable = availablePeriods[option.value];
-          return (
-            <DropdownMenuItem
-              key={option.value}
-              onClick={() => isAvailable && setSelectedPeriod(option.value)}
-              disabled={!isAvailable}
-              className={validSelectedPeriod === option.value ? "font-medium text-black dark:text-white" : ""}
-              data-testid={`menu-item-period-${option.value}`}
-            >
-              <span>{option.label}</span>
-              {!isAvailable && option.value !== 'all' && <span className="ml-auto text-xs text-muted-foreground">(sin datos)</span>}
-            </DropdownMenuItem>
-          );
-        })}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  ) : null;
-
   const headerProps = {
     icon: HandHeart,
     title: "Capital",
@@ -321,23 +286,8 @@ export default function Capital() {
     showMembers: true,
     tabs,
     onTabChange: setActiveTab,
-    ...(activeTab === 'dashboard' && {
-      actions: periodFilterComponent ? [periodFilterComponent] : []
-    }),
-    ...(activeTab === 'list' && {
-      actionButton: {
-        label: "Agregar Participante",
-        icon: Plus,
-        onClick: handleAddParticipant
-      }
-    }),
-    ...(activeTab === 'transactions' && hasPartners && {
-      actionButton: {
-        label: "Nueva Transacción",
-        icon: Plus,
-        onClick: handleAddTransaction
-      }
-    })
+    actions: activeTab === 'dashboard' ? [periodContent] : [],
+    actionButton: getActionButton(),
   };
 
   return (
