@@ -5,6 +5,7 @@ Seencel is a comprehensive construction management platform designed to optimize
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
+**CRITICAL PERFORMANCE REQUIREMENT:** System must be INSTANTANEOUS. All cache invalidations must be scoped (no `featureKeys.lists()`/`all()`). Auto-save delays ≤500ms.
 
 ## System Architecture
 
@@ -59,7 +60,14 @@ Preferred communication style: Simple, everyday language.
 - **Operations Center (Admin Ops)**: Enterprise-grade monitoring and incident management at `/admin/ops`, featuring automated health checks, persistent alerts, preventive flow blocking, guided repair actions, and runbooks.
 - **Badge Semantic Architecture**: All badges use a semantic color system, mapping variants to CSS variables for consistent styling.
 - **Data Health Micro Rules Architecture**: Modular validation rule system in `src/core/data-health/rules/micro/` for atomic, reusable checks.
-- **Save Engine (Centralized Saving)**: Enterprise-grade saving system in `/core/save-engine/` with optimistic updates, automatic rollback, and debounced auto-save. Hooks: `useSaveEngine` for auto-save forms, `useOptimisticMutation` for point actions. Documentation at `/docs/save-architecture.md`.
+- **Save Engine (Centralized Saving)**: Enterprise-grade saving system in `/core/save-engine/` with optimistic updates, automatic rollback, and debounced auto-save. Hooks: `useSaveEngine` for auto-save forms (delay ≤500ms), `useOptimisticMutation` for point actions. Documentation at `/docs/save-architecture.md`.
+- **Performance Standards (CRITICAL)**: 
+  - Auto-save delays: 500ms MAX (NOT 1500ms)
+  - Cache invalidations: SCOPED to organizationId/id (NEVER use `featureKeys.lists()` or `featureKeys.all()`)
+  - Query keys: ALWAYS use centralized factory from `/core/query-keys/`
+  - Optimistic updates: MUST work without backend dependency
+  - Rule: If a change takes >500ms, it's too slow - audit cache invalidations
+  - Audit guideline in `prompts/FEATURE-AUDIT.md` section 5.3
 
 ## External Dependencies
 - **Supabase**: Authentication.

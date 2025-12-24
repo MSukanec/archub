@@ -436,6 +436,83 @@ export function useFeatureLite(organizationId: NullableId) {
 
 ---
 
+### 5.3 AUDITORÍA DE PERFORMANCE & CACHE OPTIMIZATION (CRÍTICO)
+
+**OBJETIVO:** Asegurar que el sistema sea **INSTANTÁNEO** eliminando invalidaciones globales innecesarias y optimizando delays.
+
+**🚨 INVALIDACIONES GLOBALES PROHIBIDAS:**
+- ❌ `featureKeys.lists()` → Invalida TODO (causa refetch masivo)
+- ❌ `featureKeys.all()` → Invalida TODO
+- ❌ Queries sin organizationId/id → Cache global corrupta
+- ✅ `featureKeys.list(organizationId)` → CORRECTO (scoped)
+- ✅ `featureKeys.detail(id)` → CORRECTO (specific)
+
+**Checklist de Performance:**
+- [ ] ¿`additionalQueryKeys` NUNCA usa `featureKeys.lists()` o `featureKeys.all()`?
+- [ ] ¿TODAS las invalidaciones están scopeadas a `organizationId` o `id`?
+- [ ] ¿Delays en `useSaveEngine` ≤ 500ms? (NO 1500ms)
+- [ ] ¿`optimisticUpdate` funciona correctamente (sin dependencias de backend)?
+- [ ] ¿NO hay refetch innecesarios tras mutations?
+- [ ] ¿Query keys son ESPECÍFICAS, NO genéricas?
+
+**ANTI-PATTERNS a eliminar:**
+
+```typescript
+// ❌ INCORRECTO - Invalida TODO
+const { mutate } = useOptimisticMutation({
+  queryKey: projectsKeys.lists(),  // ← GLOBAL, causa lag
+  additionalQueryKeys: [projectsKeys.all()],  // ← Más global
+});
+
+// ❌ INCORRECTO - Delay muy longo
+const { isSaving } = useSaveEngine({
+  delay: 1500,  // ← Usuario ve 1.5 segundos de espera
+});
+
+// ❌ INCORRECTO - Cache fragmentada
+useQuery({
+  queryKey: ['projects-lite'],  // ← Separada del resto
+  queryFn: fetchProjectsLite,
+});
+```
+
+**PATRONES CORRECTOS:**
+
+```typescript
+// ✅ CORRECTO - Scoped a organizationId
+const { mutate } = useOptimisticMutation({
+  queryKey: projectsKeys.list(organizationId),  // ← SPECIFIC
+  additionalQueryKeys: [projectsKeys.info(projectId)],  // ← SPECIFIC
+});
+
+// ✅ CORRECTO - Delay corto (instantáneo)
+const { isSaving } = useSaveEngine({
+  delay: 500,  // ← Usuario no espera
+});
+
+// ✅ CORRECTO - Derivada de la cache principal con select
+useQuery({
+  queryKey: projectsKeys.list(organizationId),
+  select: (data) => data?.map(p => ({ id: p.id, name: p.name })),
+});
+```
+
+**Verificación POST-IMPLEMENTACIÓN:**
+1. Abre DevTools → Network tab
+2. Haz cambios en un formulario (cambiar modalidad, tipo, etc)
+3. Debería ser **INSTANTÁNEO** (sin esperar)
+4. Si tarda >500ms, busca invalidaciones innecesarias
+
+**Referencia: Commit que lo arregló:**
+```
+- ProjectBasicDataView: delay 1500ms → 500ms
+- ProjectLocationView: delay 1500ms → 500ms + remove projectsKeys.lists()
+- ProjectForm: remove projectsKeys.lists()
+- ProjectActivesView: remove projectsKeys.lists()
+```
+
+---
+
 ### 6. AUDITORÍA DE MODALES
 
 **REGLA:** El Modal es un ENVASE puro. Solo maneja:
