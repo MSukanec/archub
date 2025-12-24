@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Activity as ActivityIcon } from 'lucide-react';
@@ -12,6 +13,7 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { getOrganizationActivityLogs } from '@/features/organization/services/getOrganizationActivityLogs';
 import { getActivityDisplayInfo } from '@/features/organization/utils';
+import { organizationKeys } from '@/core/query-keys';
 import type { ActivityLog } from '@/features/organization/types';
 
 interface OrganizationActivityLogsViewProps {
@@ -20,24 +22,12 @@ interface OrganizationActivityLogsViewProps {
 
 export function OrganizationActivityLogsView({ organizationId }: OrganizationActivityLogsViewProps) {
   const [, navigate] = useLocation();
-  const [activities, setActivities] = useState<ActivityLog[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchActivities() {
-      if (!organizationId) return;
-      setIsLoading(true);
-      try {
-        const logs = await getOrganizationActivityLogs(organizationId);
-        setActivities(logs);
-      } catch (error) {
-        console.error('Error fetching activities:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchActivities();
-  }, [organizationId]);
+  const { data: activities = [], isLoading } = useQuery<ActivityLog[]>({
+    queryKey: organizationKeys.activityLogs(organizationId),
+    queryFn: () => getOrganizationActivityLogs(organizationId),
+    enabled: !!organizationId,
+  });
 
   // Handle activity click
   const handleActivityClick = (activity: any) => {
@@ -148,10 +138,6 @@ export function OrganizationActivityLogsView({ organizationId }: OrganizationAct
           data={activities}
           columns={columns}
           onRowClick={handleActivityClick}
-          emptyStateConfig={{
-            title: "No hay actividades registradas",
-            description: "Cuando se realicen acciones en la organización, aparecerán aquí."
-          }}
         />
       )}
     </div>
