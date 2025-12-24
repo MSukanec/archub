@@ -151,13 +151,21 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
         throw new Error('Project ID and Organization ID are required');
       }
       
-      if (projectData?.image_bucket && projectData?.image_path) {
-        await deleteProjectImage(activeProjectId, organizationId, projectData.image_bucket, projectData.image_path);
+      // Capture current values BEFORE they might change
+      const currentBucket = projectData?.image_bucket;
+      const currentPath = projectData?.image_path;
+      
+      if (currentBucket && currentPath) {
+        await deleteProjectImage(activeProjectId, organizationId, currentBucket, currentPath);
       }
     },
     queryKey: projectsKeys.data(activeProjectId),
     optimisticUpdate: (oldData) => {
       if (!oldData) return oldData;
+      
+      // Also directly set image cache to null for instant UI update
+      queryClient.setQueryData(projectsKeys.image(activeProjectId), null);
+      
       return {
         ...oldData,
         image_bucket: null,
@@ -169,7 +177,6 @@ export function ProjectBasicDataView({ projectId }: ProjectBasicDataViewProps) {
     additionalQueryKeys: [
       projectsKeys.info(activeProjectId),
       projectsKeys.list(organizationId),
-      projectsKeys.image(activeProjectId),
     ],
   });
 
