@@ -64,7 +64,6 @@ import Profile from "@/pages/profile/Profile";
 import Onboarding from "@/pages/public/Onboarding";
 import SelectMode from "@/pages/public/SelectMode";
 import Home from "@/pages/Home";
-import { OrganizationActivityPage } from "@/pages/dashboard/OrganizationActivityPage";
 
 // Lab Pages (Lazy Loaded - experimental POCs)
 const FinancialLatticePage = lazy(() => import("@/pages/lab/FinancialLatticePage"));
@@ -120,10 +119,8 @@ const SubscriptionCheckout = lazy(() => import("@/pages/checkout/SubscriptionChe
 import { OrganizationFinancesPage } from "@/pages/dashboard/OrganizationFinancesPage";
 import { ProjectFinancesPage } from "@/pages/dashboard/ProjectFinancesPage";
 
-// Settings Pages (legacy - keeping for backwards compatibility)
+// Settings Pages
 import PricingPlan from "@/pages/settings/PricingPlan";
-import { OrganizationBillingPage } from "@/pages/dashboard/OrganizationBillingPage";
-import { OrganizationMembersPage } from "@/pages/dashboard/OrganizationMembersPage";
 import Capital from "@/pages/capital/Capital";
 
 // User Page
@@ -190,7 +187,7 @@ function Router() {
         {/* Organization Routes - ORDEN IMPORTANTE: rutas específicas primero */}
         <Route path="/organization/dashboard" component={OrganizationDashboardPage} />
         <Route path="/organization/basic-data" component={OrganizationDataPage} />
-        <Route path="/organization/activity" component={OrganizationActivityPage} />
+        <Route path="/organization/activity" component={OrganizationSettingsPage} />
         <Route path="/organization/founders-portal">
           <Suspense fallback={<LazyLoadFallback />}>
             <FoundersPortalPage />
@@ -251,9 +248,9 @@ function Router() {
         <Route path="/community" component={Community} />
 
         {/* Organization Settings Routes */}
-        <Route path="/organization/billing" component={OrganizationBillingPage} />
+        <Route path="/organization/billing" component={OrganizationSettingsPage} />
         <Route path="/organization/settings" component={OrganizationSettingsPage} />
-        <Route path="/organization/members" component={OrganizationMembersPage} />
+        <Route path="/organization/members" component={OrganizationSettingsPage} />
         <Route path="/organization/capital" component={Capital} />
         <Route path="/settings/pricing-plan" component={PricingPlan} />
         
