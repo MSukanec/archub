@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table } from '@/components/shared/trees/Table';
+import { Table } from '@/components/shared/table/Table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CreditCard, Download, ArrowUpCircle, Inbox, XCircle, AlertCircle, RefreshCw, Activity, ExternalLink, Clock, RotateCcw, ArrowDownCircle } from 'lucide-react';
@@ -22,6 +22,7 @@ import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useGlobalModalStore } from '@/components/modal';
 import { useLocation } from 'wouter';
 import { getPlanConfig } from '@/features/shared-content/pricing/data/plans-config';
+import { organizationKeys } from '@/core/query-keys';
 
 interface OrganizationSubscription {
   id: string;
@@ -99,9 +100,9 @@ export function OrganizationBillingView() {
 
       if (paymentStatus === 'success') {
         refreshCurrentUserCache(queryClient).then(() => {
-          queryClient.invalidateQueries({ queryKey: ['current-subscription', currentOrganizationId] });
-          queryClient.invalidateQueries({ queryKey: ['subscription-payments', currentOrganizationId] });
-          queryClient.invalidateQueries({ queryKey: ['organization', currentOrganizationId] });
+          queryClient.invalidateQueries({ queryKey: organizationKeys.subscription(currentOrganizationId) });
+          queryClient.invalidateQueries({ queryKey: organizationKeys.payments(currentOrganizationId) });
+          queryClient.invalidateQueries({ queryKey: organizationKeys.info(currentOrganizationId) });
         });
         
         openModal('payment-feedback', {
@@ -118,7 +119,7 @@ export function OrganizationBillingView() {
   }, [currentOrganizationId, openModal, userData]);
 
   const { data: subscription, isLoading: subscriptionLoading, error: subscriptionError, refetch: refetchSubscription } = useQuery<OrganizationSubscription | null>({
-    queryKey: ['current-subscription', currentOrganizationId],
+    queryKey: organizationKeys.subscription(currentOrganizationId),
     queryFn: async () => {
       if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
 
@@ -176,7 +177,7 @@ export function OrganizationBillingView() {
   });
 
   const { data: payments = [], isLoading: paymentsLoading, error: paymentsError, refetch: refetchPayments } = useQuery<Payment[]>({
-    queryKey: ['subscription-payments', currentOrganizationId],
+    queryKey: organizationKeys.payments(currentOrganizationId),
     queryFn: async () => {
       if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
 
@@ -212,7 +213,7 @@ export function OrganizationBillingView() {
   });
 
   const { data: organization } = useQuery<{ name: string; logo_url: string | null; plan_id: string | null; plans: { name: string; slug: string } | null }>({
-    queryKey: ['organization', currentOrganizationId],
+    queryKey: organizationKeys.info(currentOrganizationId),
     queryFn: async () => {
       if (!supabase || !currentOrganizationId) throw new Error('Missing required data');
 
@@ -242,12 +243,22 @@ export function OrganizationBillingView() {
   const isTeamsPlan = planSlug === 'teams';
 
   const { data: nextInvoice } = useQuery<NextInvoice>({
-    queryKey: ['/api/billing/next-invoice', currentOrganizationId],
+    queryKey: organizationKeys.nextInvoice(currentOrganizationId),
+    queryFn: async () => {
+      const response = await fetch(`/api/billing/next-invoice?organizationId=${currentOrganizationId}`);
+      if (!response.ok) throw new Error('Failed to fetch next invoice');
+      return response.json();
+    },
     enabled: !!currentOrganizationId && isTeamsPlan,
   });
 
   const { data: billingCycles = [] } = useQuery<any[]>({
-    queryKey: ['/api/billing/cycles', currentOrganizationId],
+    queryKey: organizationKeys.billingCycles(currentOrganizationId),
+    queryFn: async () => {
+      const response = await fetch(`/api/billing/cycles?organizationId=${currentOrganizationId}`);
+      if (!response.ok) throw new Error('Failed to fetch billing cycles');
+      return response.json();
+    },
     enabled: !!currentOrganizationId && isTeamsPlan,
   });
 
@@ -255,28 +266,26 @@ export function OrganizationBillingView() {
     mutationFn: async (subscriptionId: string) => {
       return await apiRequest('POST', `/api/subscriptions/${subscriptionId}/cancel`);
     },
-    queryKey: ['current-subscription', currentOrganizationId],
+    queryKey: organizationKeys.subscription(currentOrganizationId),
     optimisticUpdate: (oldData, _subscriptionId) => {
       if (!oldData) return oldData;
       return { ...oldData, status: 'cancelled' };
     },
     onSuccessMessage: 'Suscripción cancelada. Mantendrás acceso hasta la fecha de expiración.',
     onErrorMessage: 'No se pudo cancelar la suscripción',
-    additionalQueryKeys: [['subscription-payments', currentOrganizationId]],
   });
 
   const cancelScheduledDowngradeMutation = useOptimisticMutation<unknown, void>({
     mutationFn: async () => {
       return await apiRequest('DELETE', '/api/subscriptions/cancel-scheduled-downgrade');
     },
-    queryKey: ['current-subscription', currentOrganizationId],
+    queryKey: organizationKeys.subscription(currentOrganizationId),
     optimisticUpdate: (oldData) => {
       if (!oldData) return oldData;
       return { ...oldData, scheduled_downgrade_plan_id: null, scheduled_downgrade_plan: null };
     },
     onSuccessMessage: 'El cambio de plan programado ha sido cancelado.',
     onErrorMessage: 'No se pudo cancelar el cambio programado',
-    additionalQueryKeys: [['/api/current-user']],
   });
 
   const planName = organization?.plans?.name || subscription?.plans?.name || 'Free';
@@ -399,7 +408,7 @@ export function OrganizationBillingView() {
       label: 'Factura',
       width: '20%',
       render: () => (
-        <Badge variant="secondary" className="text-xs bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400">
+        <Badge variant="success" className="text-xs">
           Pagado
         </Badge>
       ),
@@ -455,16 +464,16 @@ export function OrganizationBillingView() {
             <div className="flex items-center gap-2">
               {isCancelled && (
                 <Badge 
-                  variant="outline"
-                  className="text-xs bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700"
+                  variant="warning"
+                  className="text-xs"
                 >
                   Cancelada
                 </Badge>
               )}
               {subscription?.scheduled_downgrade_plan_id && !isCancelled && (
                 <Badge 
-                  variant="outline"
-                  className="text-xs bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700"
+                  variant="info"
+                  className="text-xs"
                 >
                   Cambio Programado → {subscription?.scheduled_downgrade_plan?.name}
                 </Badge>
@@ -538,7 +547,7 @@ export function OrganizationBillingView() {
                           <h4 className="text-sm font-semibold text-orange-900 dark:text-orange-100">
                             Cambio de Plan Programado
                           </h4>
-                          <Badge variant="outline" className="text-xs bg-orange-200 dark:bg-orange-900 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700">
+                          <Badge variant="info" className="text-xs">
                             {subscription.scheduled_downgrade_plan.name}
                           </Badge>
                         </div>
@@ -790,7 +799,7 @@ export function OrganizationBillingView() {
                             {cycle.currency_code} ${parseFloat(cycle.total_amount).toFixed(2)}
                           </td>
                           <td className="py-3 px-4">
-                            <Badge variant={cycle.status === 'paid' ? 'default' : 'secondary'} className="text-xs">
+                            <Badge variant={cycle.status === 'paid' ? 'success' : cycle.status === 'pending' ? 'pending' : 'warning'} className="text-xs">
                               {cycle.status === 'paid' ? 'Pagado' : cycle.status === 'pending' ? 'Pendiente' : 'Cancelado'}
                             </Badge>
                           </td>
@@ -805,23 +814,38 @@ export function OrganizationBillingView() {
         </div>
       )}
 
-      <Table
-        columns={columns}
-        data={payments}
-        isLoading={paymentsLoading}
-        rowActions={(payment: Payment) => [
-          {
-            icon: Download,
-            label: 'Descargar',
-            onClick: () => handleDownloadInvoice(payment)
-          }
-        ]}
-        emptyStateConfig={{
-          icon: <Inbox />,
-          title: 'No hay facturas',
-          description: 'Tus facturas aparecerán aquí cuando realices pagos.',
-        }}
-      />
+      {paymentsLoading ? (
+        <Card className="p-6">
+          <div className="space-y-3">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </Card>
+      ) : payments.length === 0 ? (
+        <Card className="p-12">
+          <div className="flex flex-col items-center justify-center text-center">
+            <Inbox className="h-12 w-12 text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-medium mb-2">No hay facturas</h3>
+            <p className="text-sm text-muted-foreground">
+              Tus facturas aparecerán aquí cuando realices pagos.
+            </p>
+          </div>
+        </Card>
+      ) : (
+        <Table
+          columns={columns}
+          data={payments}
+          isLoading={false}
+          rowActions={(payment: Payment) => [
+            {
+              icon: Download,
+              label: 'Descargar',
+              onClick: () => handleDownloadInvoice(payment)
+            }
+          ]}
+        />
+      )}
     </div>
   );
 }

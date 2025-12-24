@@ -144,6 +144,43 @@ export const organizationKeys = {
   /** Roles y permisos por organización */
   rolesPermissions: (organizationId: NullableId) => 
     [...organizationKeys.rolesPermissionsBase(), organizationId ?? undefined] as const,
+
+  // ═══════════════════════════════════════════════════════════════
+  // SUBSCRIPTIONS
+  // ═══════════════════════════════════════════════════════════════
+  
+  /** Base para suscripciones */
+  subscriptionBase: () => [...organizationKeys.all, 'subscription'] as const,
+  
+  /** Suscripción actual por organización */
+  subscription: (organizationId: NullableId) => 
+    [...organizationKeys.subscriptionBase(), organizationId ?? undefined] as const,
+
+  // ═══════════════════════════════════════════════════════════════
+  // PAYMENTS
+  // ═══════════════════════════════════════════════════════════════
+  
+  /** Base para pagos */
+  paymentsBase: () => [...organizationKeys.all, 'payments'] as const,
+  
+  /** Pagos por organización */
+  payments: (organizationId: NullableId) => 
+    [...organizationKeys.paymentsBase(), organizationId ?? undefined] as const,
+
+  // ═══════════════════════════════════════════════════════════════
+  // BILLING
+  // ═══════════════════════════════════════════════════════════════
+  
+  /** Base para facturación */
+  billingBase: () => [...organizationKeys.all, 'billing'] as const,
+  
+  /** Próxima factura por organización */
+  nextInvoice: (organizationId: NullableId) => 
+    [...organizationKeys.billingBase(), 'next-invoice', organizationId ?? undefined] as const,
+  
+  /** Ciclos de facturación por organización */
+  billingCycles: (organizationId: NullableId) => 
+    [...organizationKeys.billingBase(), 'cycles', organizationId ?? undefined] as const,
 } as const;
 
 export const userOrgPreferencesKeys = {
