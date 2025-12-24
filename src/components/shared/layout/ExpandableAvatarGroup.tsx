@@ -30,13 +30,22 @@ export function ExpandableAvatarGroup({
   const visibleMembers = members.slice(0, maxCollapsed);
   const remainingCount = Math.max(0, members.length - maxCollapsed);
 
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return "?";
     return name
       .split(" ")
       .map(n => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const getMemberName = (member: typeof members[0]) => {
+    return member.users?.full_name || "Usuario";
+  };
+
+  const getMemberAvatar = (member: typeof members[0]) => {
+    return member.users?.avatar_url || undefined;
   };
 
   return (
@@ -59,9 +68,9 @@ export function ExpandableAvatarGroup({
               className="h-8 w-8"
               style={{ zIndex: visibleMembers.length - index }}
             >
-              <AvatarImage src={member.avatar_url} alt={member.full_name} />
+              <AvatarImage src={getMemberAvatar(member)} alt={getMemberName(member)} />
               <AvatarFallback className="text-xs bg-[var(--accent)] text-white">
-                {getInitials(member.full_name)}
+                {getInitials(getMemberName(member))}
               </AvatarFallback>
             </Avatar>
           ))}
@@ -85,19 +94,22 @@ export function ExpandableAvatarGroup({
         style={{ minWidth: "280px" }}
       >
         <div className="grid grid-cols-4 gap-4 mb-4">
-          {members.map((member) => (
-            <div key={member.id} className="flex flex-col items-center gap-1.5">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={member.avatar_url} alt={member.full_name} />
-                <AvatarFallback className="text-xs bg-[var(--accent)] text-white">
-                  {getInitials(member.full_name)}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-xs text-center text-foreground truncate w-full px-1">
-                {member.full_name.split(" ")[0]}
-              </span>
-            </div>
-          ))}
+          {members.map((member) => {
+            const name = getMemberName(member);
+            return (
+              <div key={member.id} className="flex flex-col items-center gap-1.5">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={getMemberAvatar(member)} alt={name} />
+                  <AvatarFallback className="text-xs bg-[var(--accent)] text-white">
+                    {getInitials(name)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-xs text-center text-foreground truncate w-full px-1">
+                  {name.split(" ")[0]}
+                </span>
+              </div>
+            );
+          })}
         </div>
         
         <Button

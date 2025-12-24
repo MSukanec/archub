@@ -49,9 +49,9 @@ export function CardFormModal({ modalData, onClose }: CardFormModalProps) {
   // Convert members to users format for UserSelector
   const users = members.map(member => ({
     id: member.id, // Use organization member ID, not user_id
-    full_name: member.full_name || member.email || 'Usuario',
-    email: member.email || '',
-    avatar_url: member.avatar_url
+    full_name: member.users?.full_name || member.users?.email || 'Usuario',
+    email: member.users?.email || '',
+    avatar_url: member.users?.avatar_url || undefined
   }));
 
   const form = useForm<CardFormData>({

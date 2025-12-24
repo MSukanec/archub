@@ -67,8 +67,8 @@ export async function getActivityData(
     membersData.forEach((member: any) => {
       memberMap.set(member.user_id, {
         id: member.user_id,
-        full_name: member.full_name,
-        avatar_url: member.avatar_url
+        full_name: member.users?.full_name,
+        avatar_url: member.users?.avatar_url
       });
     });
 

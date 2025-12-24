@@ -372,9 +372,9 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
   // Convert members to users format for UserSelector
   const users = organizationMembers.map(member => ({
     id: member.user_id,
-    full_name: member.full_name || member.email || 'Usuario',
-    email: member.email || '',
-    avatar_url: member.avatar_url
+    full_name: member.users?.full_name || member.users?.email || 'Usuario',
+    email: member.users?.email || '',
+    avatar_url: member.users?.avatar_url || undefined
   }))
   
   // Set default creator when data loads
@@ -1348,7 +1348,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                 <CardContent className="p-4">
                   <div className="grid grid-cols-12 gap-4 items-center">
                     <div className="col-span-1 text-center">
-                      <Badge variant="outline" className="text-xs font-mono w-8 h-6 font-bold">{String.fromCharCode(65 + index)}</Badge>
+                      <Badge variant="neutral" className="text-xs font-mono w-8 h-6 font-bold">{String.fromCharCode(65 + index)}</Badge>
                     </div>
                     <div className="col-span-4">
                       <div className="font-medium text-sm text-foreground">{header}</div>
@@ -1379,11 +1379,11 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                     </div>
                     <div className="col-span-2 text-right">
                       {mappedField ? (
-                        <Badge variant="default" className="bg-green-100 text-green-800 text-xs border-green-200">
+                        <Badge variant="success" className="text-xs">
                           ✓ Vinculado
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="neutral" className="text-xs">
                           Sin vincular
                         </Badge>
                       )}
@@ -1705,7 +1705,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
       {parsedData && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <Badge variant="outline">
+            <Badge variant="neutral">
               {parsedData.rows.length} filas encontradas
             </Badge>
             <Button
@@ -1743,7 +1743,7 @@ export function MovementImportStepModal({ modalData, onClose }: MovementImportSt
                     <TableHead key={index}>
                       {header}
                       {columnMapping[index.toString()] && (
-                        <Badge variant="secondary" className="ml-2 text-xs">
+                        <Badge variant="info" className="ml-2 text-xs">
                           {AVAILABLE_FIELDS.find(f => f.value === columnMapping[index.toString()])?.label}
                         </Badge>
                       )}
