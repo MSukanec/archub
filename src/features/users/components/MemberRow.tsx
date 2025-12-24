@@ -37,12 +37,11 @@ const getMemberInitials = (member: Member): string => {
 };
 
 // Helper para obtener el variant del badge del rol
-const getRoleBadgeVariant = (roleName: string) => {
+const getRoleBadgeVariant = (roleName: string): "info" | "success" | "neutral" => {
   const role = roleName?.toLowerCase() || '';
-  if (role.includes('admin')) return 'default';
-  if (role.includes('manager') || role.includes('editor')) return 'secondary';
-  if (role.includes('viewer') || role.includes('guest')) return 'outline';
-  return 'outline';
+  if (role.includes('admin')) return 'info';
+  if (role.includes('manager') || role.includes('editor')) return 'success';
+  return 'neutral';
 };
 
 // Helper para obtener la clase CSS del badge del rol
@@ -88,7 +87,7 @@ export default function MemberRow({
       <div className="shrink-0 ml-3 flex items-center gap-2">
         {isSuspended && (
           <Badge 
-            variant="outline"
+            variant="warning"
             className="bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 text-[10px] px-1.5 py-0"
           >
             Suspendido

@@ -2,12 +2,30 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { HttpError } from "../../auth/helpers.js";
 
+export interface OrganizationMemberUser {
+  id: string;
+  full_name: string | null;
+  email: string;
+  avatar_url: string | null;
+}
+
+export interface OrganizationMemberRole {
+  id: string;
+  name: string;
+  type: string;
+}
+
 export interface OrganizationMember {
   id: string;
   user_id: string;
-  full_name: string;
-  avatar_url: string;
-  email: string;
+  organization_id: string;
+  role_id: string | null;
+  joined_at: string | null;
+  last_active_at: string | null;
+  is_active: boolean;
+  is_over_limit: boolean;
+  users: OrganizationMemberUser | null;
+  roles: OrganizationMemberRole | null;
 }
 
 export async function getOrganizationMembers(
@@ -37,17 +55,28 @@ export async function getOrganizationMembers(
     throw new HttpError(403, 'User is not a member of this organization');
   }
 
-  // Query organization members with user information
+  // Query organization members with user and role information (nested structure)
   const { data: members, error } = await supabase
     .from('organization_members')
     .select(`
       id,
       user_id,
-      users!inner (
+      organization_id,
+      role_id,
+      joined_at,
+      last_active_at,
+      is_active,
+      is_over_limit,
+      users (
         id,
         full_name,
         email,
         avatar_url
+      ),
+      roles (
+        id,
+        name,
+        type
       )
     `)
     .eq('organization_id', organizationId)
@@ -58,14 +87,19 @@ export async function getOrganizationMembers(
     throw new HttpError(500, 'Failed to fetch organization members');
   }
 
-  // Transform to flat structure
+  // Transform arrays to objects (Supabase returns arrays for relations)
   const transformedMembers = (members || []).map((m: any) => ({
     id: m.id,
-    user_id: m.users?.id || m.user_id,
-    full_name: m.users?.full_name || 'Usuario',
-    email: m.users?.email || '',
-    avatar_url: m.users?.avatar_url || null,
+    user_id: m.user_id,
+    organization_id: m.organization_id,
+    role_id: m.role_id,
+    joined_at: m.joined_at,
+    last_active_at: m.last_active_at,
+    is_active: m.is_active,
+    is_over_limit: m.is_over_limit,
+    users: Array.isArray(m.users) ? m.users[0] : m.users,
+    roles: Array.isArray(m.roles) ? m.roles[0] : m.roles,
   }));
 
-  return transformedMembers;
+  return transformedMembers as OrganizationMember[];
 }

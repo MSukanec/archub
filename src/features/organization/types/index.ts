@@ -1,9 +1,27 @@
+export interface OrganizationMemberUser {
+  id: string;
+  full_name: string | null;
+  email: string;
+  avatar_url: string | null;
+}
+
+export interface OrganizationMemberRole {
+  id: string;
+  name: string;
+  type: string;
+}
+
 export interface OrganizationMember {
   id: string;
   user_id: string;
-  full_name: string;
-  avatar_url: string;
-  email: string;
+  organization_id: string;
+  role_id: string | null;
+  joined_at: string | null;
+  last_active_at: string | null;
+  is_active: boolean;
+  is_over_limit: boolean;
+  users: OrganizationMemberUser | null;
+  roles: OrganizationMemberRole | null;
 }
 
 export interface OrganizationStats {
