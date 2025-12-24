@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { organizationKeys } from '@/core/query-keys'
 
 export interface Currency {
   id: string
@@ -34,7 +35,7 @@ export const useCurrencies = () => {
 
 export const useOrganizationCurrencies = (organizationId?: string) => {
   return useQuery({
-    queryKey: ['organization-currencies', organizationId],
+    queryKey: organizationKeys.currencies(organizationId),
     queryFn: async () => {
       if (!organizationId) return []
       
@@ -61,7 +62,7 @@ export const useOrganizationCurrencies = (organizationId?: string) => {
 
 export const useOrganizationDefaultCurrency = (organizationId?: string) => {
   return useQuery({
-    queryKey: ['organization-default-currency', organizationId],
+    queryKey: organizationKeys.defaultCurrency(organizationId),
     queryFn: async () => {
       if (!organizationId) return null
       
