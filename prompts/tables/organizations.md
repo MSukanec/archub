@@ -296,6 +296,75 @@ select
 from
   user_presence up;
 
+## Vista ORGANIZATION_MEMBERS_FULL_VIEW:
+
+create view public.organization_members_full_view as
+select
+  om.id,
+  om.user_id,
+  om.organization_id,
+  om.role_id,
+  om.is_active,
+  om.is_billable,
+  om.is_over_limit,
+  om.joined_at,
+  om.last_active_at,
+  om.invited_by,
+  om.created_at,
+  om.updated_at,
+  u.full_name as user_full_name,
+  u.email as user_email,
+  u.avatar_url as user_avatar_url,
+  r.id as role_id_ref,
+  r.name as role_name,
+  r.type as role_type
+from
+  organization_members om
+  left join users u on om.user_id = u.id
+  left join roles r on om.role_id = r.id;
+
+## Vista ORGANIZATION_WALLETS_VIEW:
+
+create view public.organization_wallets_view as
+select
+  ow.id,
+  ow.organization_id,
+  ow.wallet_id,
+  ow.is_active,
+  ow.is_default,
+  ow.is_deleted,
+  ow.deleted_at,
+  ow.created_at,
+  ow.updated_at,
+  ow.created_by,
+  w.name as wallet_name,
+  w.is_active as wallet_is_active,
+  w.created_at as wallet_created_at
+from
+  organization_wallets ow
+  left join wallets w on ow.wallet_id = w.id;
+
+## Vista ORGANIZATION_CURRENCIES_VIEW:
+
+create view public.organization_currencies_view as
+select
+  oc.id,
+  oc.organization_id,
+  oc.currency_id,
+  oc.is_active,
+  oc.is_default,
+  oc.is_deleted,
+  oc.deleted_at,
+  oc.created_at,
+  oc.updated_at,
+  c.code as currency_code,
+  c.name as currency_name,
+  c.symbol as currency_symbol,
+  c.country as currency_country
+from
+  organization_currencies oc
+  left join currencies c on oc.currency_id = c.id;
+
 ## Tabla ORGANIZATION_PREFERENCES:
 
 create table public.organization_preferences (

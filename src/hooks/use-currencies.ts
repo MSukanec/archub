@@ -39,22 +39,32 @@ export const useOrganizationCurrencies = (organizationId?: string) => {
     queryFn: async () => {
       if (!organizationId) return []
       
+      // Query from optimized view (organization_currencies_view)
       const { data, error } = await supabase
-        .from('organization_currencies')
-        .select(`
-          id,
-          organization_id,
-          currency_id,
-          is_default,
-          is_active,
-          currency:currencies(*)
-        `)
+        .from('organization_currencies_view')
+        .select('*')
         .eq('organization_id', organizationId)
         .eq('is_deleted', false)
         .order('is_default', { ascending: false })
       
       if (error) throw error
-      return (data || []) as unknown as OrganizationCurrency[]
+      
+      // Transform flat view data to nested structure expected by frontend
+      const transformedData = (data || []).map((c: any) => ({
+        id: c.id,
+        organization_id: c.organization_id,
+        currency_id: c.currency_id,
+        is_default: c.is_default,
+        is_active: c.is_active,
+        currency: {
+          id: c.currency_id,
+          name: c.currency_name,
+          symbol: c.currency_symbol,
+          code: c.currency_code,
+        },
+      }))
+      
+      return transformedData as OrganizationCurrency[]
     },
     enabled: !!organizationId,
   })
@@ -66,15 +76,24 @@ export const useOrganizationDefaultCurrency = (organizationId?: string) => {
     queryFn: async () => {
       if (!organizationId) return null
       
+      // Query from optimized view (organization_currencies_view)
       const { data, error } = await supabase
-        .from('organization_currencies')
-        .select('*, currency:currency_id(id, name, symbol, code)')
+        .from('organization_currencies_view')
+        .select('*')
         .eq('organization_id', organizationId)
         .eq('is_default', true)
         .maybeSingle()
       
       if (error) throw error
-      return (data?.currency || null) as unknown as Currency | null
+      if (!data) return null
+      
+      // Transform to Currency structure
+      return {
+        id: data.currency_id,
+        name: data.currency_name,
+        symbol: data.currency_symbol,
+        code: data.currency_code,
+      } as Currency
     },
     enabled: !!organizationId,
   })

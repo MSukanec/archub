@@ -55,30 +55,10 @@ export async function getOrganizationMembers(
     throw new HttpError(403, 'User is not a member of this organization');
   }
 
-  // Query organization members with user and role information (nested structure)
+  // Query from optimized view (organization_members_full_view)
   const { data: members, error } = await supabase
-    .from('organization_members')
-    .select(`
-      id,
-      user_id,
-      organization_id,
-      role_id,
-      joined_at,
-      last_active_at,
-      is_active,
-      is_over_limit,
-      users (
-        id,
-        full_name,
-        email,
-        avatar_url
-      ),
-      roles (
-        id,
-        name,
-        type
-      )
-    `)
+    .from('organization_members_full_view')
+    .select('*')
     .eq('organization_id', organizationId)
     .eq('is_active', true);
 
@@ -87,7 +67,7 @@ export async function getOrganizationMembers(
     throw new HttpError(500, 'Failed to fetch organization members');
   }
 
-  // Transform arrays to objects (Supabase returns arrays for relations)
+  // Transform flat view data to nested structure expected by frontend
   const transformedMembers = (members || []).map((m: any) => ({
     id: m.id,
     user_id: m.user_id,
@@ -97,8 +77,17 @@ export async function getOrganizationMembers(
     last_active_at: m.last_active_at,
     is_active: m.is_active,
     is_over_limit: m.is_over_limit,
-    users: Array.isArray(m.users) ? m.users[0] : m.users,
-    roles: Array.isArray(m.roles) ? m.roles[0] : m.roles,
+    users: {
+      id: m.user_id,
+      full_name: m.user_full_name,
+      email: m.user_email,
+      avatar_url: m.user_avatar_url,
+    },
+    roles: m.role_id ? {
+      id: m.role_id,
+      name: m.role_name,
+      type: m.role_type,
+    } : null,
   }));
 
   return transformedMembers as OrganizationMember[];

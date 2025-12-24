@@ -19,17 +19,10 @@ export async function getOrganizationWallets(
 ): Promise<OrganizationWallet[]> {
   if (!organizationId) return [];
   
+  // Query from optimized view (organization_wallets_view)
   const { data, error } = await supabase
-    .from('organization_wallets')
-    .select(`
-      *,
-      wallets:wallet_id (
-        id,
-        name,
-        created_at,
-        is_active
-      )
-    `)
+    .from('organization_wallets_view')
+    .select('*')
     .eq('organization_id', organizationId)
     .eq('is_active', true)
     .order('is_default', { ascending: false })
@@ -40,5 +33,25 @@ export async function getOrganizationWallets(
     throw error;
   }
   
-  return data as OrganizationWallet[];
+  // Transform flat view data to nested structure expected by frontend
+  const transformedData = (data || []).map((w: any) => ({
+    id: w.id,
+    organization_id: w.organization_id,
+    wallet_id: w.wallet_id,
+    is_active: w.is_active,
+    is_default: w.is_default,
+    is_deleted: w.is_deleted,
+    deleted_at: w.deleted_at,
+    created_at: w.created_at,
+    updated_at: w.updated_at,
+    created_by: w.created_by,
+    wallets: {
+      id: w.wallet_id,
+      name: w.wallet_name,
+      created_at: w.wallet_created_at,
+      is_active: w.wallet_is_active,
+    },
+  }));
+  
+  return transformedData as OrganizationWallet[];
 }
