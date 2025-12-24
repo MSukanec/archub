@@ -30,6 +30,7 @@ import MemberRow from "@/features/users/components/MemberRow";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/lib/supabase";
+import { organizationKeys } from "@/core/query-keys";
 import { useToast } from "@/hooks/use-toast";
 import { useOptimisticMutation } from "@/core/save-engine";
 import { useGlobalModalStore } from "@/components/modal";
@@ -46,12 +47,12 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-function getRoleBadgeVariant(roleName: string) {
+function getRoleBadgeVariant(roleName: string): "info" | "neutral" | "success" | "warning" {
   const role = roleName?.toLowerCase() || '';
-  if (role.includes('admin')) return 'default';
-  if (role.includes('manager') || role.includes('editor')) return 'secondary';
-  if (role.includes('viewer') || role.includes('guest')) return 'outline';
-  return 'outline';
+  if (role.includes('admin')) return 'info';
+  if (role.includes('manager') || role.includes('editor')) return 'success';
+  if (role.includes('viewer') || role.includes('guest')) return 'neutral';
+  return 'neutral';
 }
 
 function getRoleBadgeClassName(roleName: string) {
@@ -71,7 +72,7 @@ export function OrganizationMembersListView() {
   const organizationId = userData?.organization?.id;
 
   const { data: membersRaw = [], isLoading: membersLoading } = useQuery({
-    queryKey: ['organization-members-full', organizationId],
+    queryKey: organizationKeys.members(organizationId),
     queryFn: async () => {
       if (!supabase || !organizationId) return [];
       
@@ -156,7 +157,7 @@ export function OrganizationMembersListView() {
   const suspendedMembersCount = members.filter((m: any) => m.is_over_limit === true).length;
 
   const { data: pendingInvites = [], isLoading: invitesLoading } = useQuery({
-    queryKey: ['organization-invitations', organizationId],
+    queryKey: [...organizationKeys.all, 'invitations', organizationId],
     queryFn: async () => {
       if (!supabase || !organizationId) return [];
       
@@ -194,7 +195,7 @@ export function OrganizationMembersListView() {
   });
 
   const { data: formerMembersRaw = [] } = useQuery({
-    queryKey: ['organization-former-members', organizationId],
+    queryKey: [...organizationKeys.all, 'former-members', organizationId],
     queryFn: async () => {
       if (!supabase || !organizationId) return [];
       
@@ -245,7 +246,7 @@ export function OrganizationMembersListView() {
         .eq('id', invitationId);
       if (error) throw error;
     },
-    queryKey: ['organization-invitations', organizationId],
+    queryKey: [...organizationKeys.all, 'invitations', organizationId],
     optimisticUpdate: (oldData, invitationId) => {
       if (!oldData) return oldData;
       return oldData.filter((inv: any) => inv.id !== invitationId);
@@ -261,7 +262,7 @@ export function OrganizationMembersListView() {
         description: 'Esta funcionalidad estará disponible pronto.',
       });
     },
-    queryKey: ['organization-invitations', organizationId],
+    queryKey: [...organizationKeys.all, 'invitations', organizationId],
     optimisticUpdate: (oldData) => {
       if (!oldData) return oldData;
       return oldData;
@@ -284,14 +285,13 @@ export function OrganizationMembersListView() {
       }
       return response.json();
     },
-    queryKey: ['organization-members-full', organizationId],
+    queryKey: organizationKeys.members(organizationId),
     optimisticUpdate: (oldData, memberId) => {
       if (!oldData) return oldData;
       return oldData.filter((m: any) => m.id !== memberId);
     },
     onSuccessMessage: 'Miembro eliminado correctamente',
     onErrorMessage: 'Error al eliminar el miembro',
-    additionalQueryKeys: [['organization-members']],
   });
 
   const handleRemoveMember = (member: any) => {
@@ -434,7 +434,7 @@ export function OrganizationMembersListView() {
 
                           {isSuspended && (
                             <Badge 
-                              variant="outline"
+                              variant="neutral"
                               className="bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 text-[10px] px-1.5 py-0"
                             >
                               Suspendido
@@ -594,7 +594,7 @@ export function OrganizationMembersListView() {
                       </div>
 
                       <div className="flex items-center gap-4">
-                        <Badge variant="outline">
+                        <Badge variant="neutral">
                           {(Array.isArray(invite.roles) ? invite.roles[0] : invite.roles)?.name || 'Sin rol'}
                         </Badge>
 
@@ -692,7 +692,7 @@ export function OrganizationMembersListView() {
                               </div>
                             </div>
 
-                            <Badge variant="outline" className="text-muted-foreground">
+                            <Badge variant="neutral" className="text-muted-foreground">
                               {roleData?.name || 'Sin rol'}
                             </Badge>
 
