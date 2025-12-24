@@ -60,8 +60,7 @@ const PAGE_CONFIG: Record<string, { name: string; icon: any }> = {
   '/analysis': { name: 'Análisis de Costos', icon: FileText },
   '/organization/capital': { name: 'Capital', icon: Calculator },
   '/general-costs': { name: 'Gastos Generales', icon: FolderOpen },
-  '/organization/activity': { name: 'Actividad', icon: Activity },
-  '/organization/preferences': { name: 'Preferencias', icon: Settings },
+  '/organization/settings': { name: 'Ajustes', icon: Settings },
   
   // Project level
   '/project/dashboard': { name: 'Resumen de Proyecto', icon: Home },

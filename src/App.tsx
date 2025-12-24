@@ -23,7 +23,7 @@ import PricingPlanPublic from "@/pages/public/PricingPlan";
 // Protected Pages
 
 
-import ProjectsPage from "@/pages/dashboard/ProjectsPage";
+import OrganizationProjectsPage from "@/pages/dashboard/OrganizationProjectsPage";
 import ProjectDashboardPage from "@/pages/dashboard/ProjectDashboardPage";
 import ProjectDataPage from "@/pages/dashboard/ProjectDataPage";
 
@@ -194,7 +194,7 @@ function Router() {
           </Suspense>
         </Route>
         <Route path="/contacts" component={ContactsPage} />
-        <Route path="/organization/projects" component={ProjectsPage} />
+        <Route path="/organization/projects" component={OrganizationProjectsPage} />
         
         {/* General Costs Route */}
         <Route path="/general-costs" component={GeneralCosts} />
@@ -209,7 +209,7 @@ function Router() {
 
 
         {/* Projects Routes */}
-        <Route path="/projects" component={ProjectsPage} />
+        <Route path="/projects" component={OrganizationProjectsPage} />
 
         {/* General Routes */}
         <Route path="/project/dashboard" component={ProjectDashboardPage} />
