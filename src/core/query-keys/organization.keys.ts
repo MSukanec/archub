@@ -36,6 +36,28 @@ export const organizationKeys = {
   all: ['organization'] as const,
 
   // ═══════════════════════════════════════════════════════════════
+  // INFORMACIÓN BASE DE ORGANIZACIÓN (organizations table)
+  // ═══════════════════════════════════════════════════════════════
+  
+  /** Base para info */
+  infoBase: () => [...organizationKeys.all, 'info'] as const,
+  
+  /** Info de organización (de tabla organizations) */
+  info: (organizationId: NullableId) => 
+    [...organizationKeys.infoBase(), organizationId ?? undefined] as const,
+
+  // ═══════════════════════════════════════════════════════════════
+  // DATOS EXTENDIDOS DE ORGANIZACIÓN (organization_data table)
+  // ═══════════════════════════════════════════════════════════════
+  
+  /** Base para data */
+  dataBase: () => [...organizationKeys.all, 'data'] as const,
+  
+  /** Datos extendidos de organización (de tabla organization_data) */
+  data: (organizationId: NullableId) => 
+    [...organizationKeys.dataBase(), organizationId ?? undefined] as const,
+
+  // ═══════════════════════════════════════════════════════════════
   // MIEMBROS
   // ═══════════════════════════════════════════════════════════════
   
