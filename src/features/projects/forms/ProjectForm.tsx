@@ -752,12 +752,11 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
             // INSTANT PRECACHE: Update projects list with new project marked as active
             const projectsList = queryClient.getQueryData<any[]>(projectsKeys.list(organizationId));
             if (Array.isArray(projectsList)) {
-              const updatedList = projectsList
-                // Mark all projects as not active
-                .map(p => ({ ...p, is_active: false }))
-                // Add new project at the beginning with is_active: true
-                // (prepend so active project appears first)
-                ;
+              // Find type and modality objects once
+              const selectedType = projectTypes?.find(t => t.id === cleanedData.project_type_id);
+              const selectedModality = projectModalities?.find(m => m.id === cleanedData.project_modality_id);
+              
+              const updatedList = projectsList.map(p => ({ ...p, is_active: false }));
               
               const newProjectWithMeta = {
                 ...createdProject,
@@ -765,12 +764,8 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
                 project_data: {
                   project_type_id: cleanedData.project_type_id || null,
                   project_modality_id: cleanedData.project_modality_id || null,
-                  project_type: projectTypes.find(t => t.id === cleanedData.project_type_id) 
-                    ? { id: projectTypes.find(t => t.id === cleanedData.project_type_id)!.id, name: projectTypes.find(t => t.id === cleanedData.project_type_id)!.name }
-                    : null,
-                  project_modality: projectModalities.find(m => m.id === cleanedData.project_modality_id)
-                    ? { id: projectModalities.find(m => m.id === cleanedData.project_modality_id)!.id, name: projectModalities.find(m => m.id === cleanedData.project_modality_id)!.name }
-                    : null,
+                  project_type: selectedType ? { id: selectedType.id, name: selectedType.name } : null,
+                  project_modality: selectedModality ? { id: selectedModality.id, name: selectedModality.name } : null,
                 }
               };
               
