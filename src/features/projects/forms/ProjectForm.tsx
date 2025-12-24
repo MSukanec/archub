@@ -510,12 +510,12 @@ export function useProjectForm({ project, mode = 'create', onSuccess, callbacks 
   });
 
   // Mutation to upload project image using optimistic mutation
-  const { mutateAsync: uploadImageAsync, isPending: isUploadingImage } = useOptimisticMutation<void, { file: File; projectId: string }>({
+  const { mutateAsync: uploadImageAsync, isPending: isUploadingImage } = useOptimisticMutation<any, { file: File; projectId: string }>({
     mutationFn: async ({ file, projectId }) => {
       if (!projectId || !organizationId) {
         throw new Error('Project ID and Organization ID are required');
       }
-      await uploadProjectImage(file, projectId, organizationId);
+      return await uploadProjectImage(file, projectId, organizationId);
     },
     queryKey: projectsKeys.data(project?.id),
     optimisticUpdate: (oldData) => oldData,
