@@ -213,7 +213,6 @@ export function DocumentInfo({
             size="sm" 
             variant="ghost" 
             onClick={() => {
-              console.log('Opening document edit modal');
               openModal('document-upload', { 
                 mode: 'edit',
                 documentId: document.id,
@@ -238,9 +237,7 @@ export function DocumentInfo({
                 itemType: 'documento',
                 onConfirm: async () => {
                   try {
-                    console.log('Deleting document:', document.id);
                     await deleteDocumentMutation.mutateAsync(document.id);
-                    console.log('Document deleted successfully');
                   } catch (error) {
                     console.error('Error deleting document:', error);
                   }

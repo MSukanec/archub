@@ -992,7 +992,6 @@ const InlineUnitCostEditor = ({
         id: task.id,
         unit_price: unitPrice
       });
-      console.log('Unit price saved:', unitPrice);
     } catch (error) {
       console.error('Error saving unit price:', error);
     }
@@ -1608,7 +1607,6 @@ export function BudgetTree({
           id: taskId,
           quantity: quantity,
         });
-        console.log('Quantity saved successfully for task:', taskId, 'quantity:', quantity);
       } catch (error) {
         console.error(`Error saving quantity for task ${taskId}:`, error);
         throw error; // Re-throw to let the auto-save hook handle it
@@ -1629,7 +1627,6 @@ export function BudgetTree({
           id: taskId,
           markup_pct: margin,
         });
-        console.log('Margin saved successfully for task:', taskId, 'margin:', margin);
       } catch (error) {
         console.error(`Error saving margin for task ${taskId}:`, error);
         throw error;
@@ -1651,7 +1648,6 @@ export function BudgetTree({
           cost_scope: costScope as 'materials_and_labor' | 'materials_only' | 'labor_only',
           unit_price: 0 // Reset to 0 so the new archubCost based on cost_scope is used
         });
-        console.log('Cost scope saved successfully for task:', taskId, 'cost_scope:', costScope);
       } catch (error) {
         console.error(`Error saving cost scope for task ${taskId}:`, error);
         throw error;
@@ -1669,7 +1665,6 @@ export function BudgetTree({
 
   // Handle local margin changes
   const handleMarginChange = useCallback((taskId: string, margin: number) => {
-    console.log('Margin change (local):', taskId, margin);
     setLocalMargins(prev => ({
       ...prev,
       [taskId]: margin
@@ -1678,7 +1673,6 @@ export function BudgetTree({
 
   // Handle local cost scope changes
   const handleCostScopeChange = useCallback((taskId: string, costScope: string) => {
-    console.log('Cost scope change (local):', taskId, costScope);
     setLocalCostScopes(prev => ({
       ...prev,
       [taskId]: costScope
@@ -1711,7 +1705,6 @@ export function BudgetTree({
 
   // Handle local quantity changes
   const handleLocalQuantityChange = (taskId: string, quantity: number) => {
-    console.log('Quantity change:', taskId, quantity);
     setLocalQuantities(prev => ({
       ...prev,
       [taskId]: quantity

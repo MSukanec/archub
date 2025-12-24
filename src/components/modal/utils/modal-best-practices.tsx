@@ -71,7 +71,7 @@ export const ExampleModalWithReadiness = () => {
       projectId: projectId,
     },
     onReady: () => {
-      console.log('Modal ready - all critical data loaded');
+      // Modal is ready
     },
     onError: (error) => {
       console.error('Modal readiness error:', error);

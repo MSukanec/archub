@@ -216,7 +216,6 @@ export function UnifiedViewer({
       };
 
       await page.render(renderContext).promise;
-      console.log('PDF page rendered successfully');
     } catch (error) {
       console.error('Error rendering PDF page:', error);
     }

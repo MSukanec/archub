@@ -227,7 +227,6 @@ export function initializeModalRegistry(): void {
     ...generalConfig, 
     size: 'xl',
     mapDataToProps: (data) => {
-      console.log('[registerModal:contact] mapDataToProps input:', data);
       const mapped = {
         modalData: {
           contactId: data?.contactId || data?.contact?.id,
@@ -235,7 +234,6 @@ export function initializeModalRegistry(): void {
         },
         mode: data?.mode || 'create',
       };
-      console.log('[registerModal:contact] mapDataToProps output:', mapped);
       return mapped;
     },
   });

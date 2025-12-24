@@ -43,10 +43,7 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
 
   // Debug logging to understand data structure
   React.useEffect(() => {
-    console.log('TaskSelectionTable - allTasks:', allTasks);
-    console.log('TaskSelectionTable - allTasks length:', allTasks.length);
     if (allTasks.length > 0) {
-      console.log('TaskSelectionTable - sample task:', JSON.stringify(allTasks[0], null, 2));
     }
   }, [allTasks]);
 
@@ -55,14 +52,12 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
     const filtered = allTasks.filter(task => 
       !excludeTaskIds.includes(task.task_instance_id)
     );
-    console.log('TaskSelectionTable - availableTasks:', filtered.length);
     return filtered;
   }, [allTasks, excludeTaskIds]);
 
   // Filtrar tareas por término de búsqueda
   const filteredTasks = useMemo(() => {
     if (!searchTerm.trim()) {
-      console.log('TaskSelectionTable - no search term, returning all available tasks:', availableTasks.length);
       return availableTasks;
     }
     
@@ -73,14 +68,12 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
       const rubroName = task.task?.rubro_name || task.rubro_name;
       const taskCode = task.task_code || task.task?.code;
       
-      console.log('TaskSelectionTable - checking task:', { displayName, rubroName, taskCode });
       
       return displayName?.toLowerCase().includes(term) ||
              rubroName?.toLowerCase().includes(term) ||
              taskCode?.toLowerCase().includes(term);
     });
     
-    console.log('TaskSelectionTable - filtered by search:', filtered.length, 'from', availableTasks.length);
     return filtered;
   }, [availableTasks, searchTerm]);
 
@@ -97,7 +90,6 @@ export const TaskSelectionTable = React.memo(function TaskSelectionTable({
       groups[rubroName].push(task);
     });
     
-    console.log('TaskSelectionTable - groups by rubro:', Object.keys(groups), groups);
     return groups;
   }, [filteredTasks]);
 
