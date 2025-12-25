@@ -4,6 +4,18 @@ export { UserPreferencesView } from './views/UserPreferencesView';
 export { UserOrganizationsView } from './views/UserOrganizationsView';
 export { UserNotificationsView } from './views/UserNotificationsView';
 
+// Hooks
+export { useCurrentUser, refreshCurrentUserCache, type UserData } from './hooks';
+
+// Services
+export { 
+  updateUserProfile, 
+  updateUserPreferences, 
+  switchOrganization,
+  type UpdateProfileData,
+  type UpdatePreferencesData 
+} from './services';
+
 // Admin Modals
 export { UserFormModal } from './modals/admin/UserFormModal';
 export { PlanFormModal } from './modals/admin/PlanFormModal';

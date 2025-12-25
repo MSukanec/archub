@@ -16,6 +16,12 @@ src/features/users/
 │   ├── UserPreferencesView.tsx    # Theme, sidebar settings
 │   ├── UserOrganizationsView.tsx  # Organization switcher
 │   └── UserNotificationsView.tsx  # Notification center
+├── hooks/
+│   ├── index.ts                   # Hook exports
+│   └── useCurrentUser.ts          # Main user data hook (uses usersKeys.current())
+├── services/
+│   ├── index.ts                   # Service exports
+│   └── userProfileService.ts      # Profile update operations
 ├── components/
 │   ├── admin/              # Admin-specific components
 │   ├── announcements/      # Global announcements
@@ -29,7 +35,7 @@ src/features/users/
 ├── modals/
 │   ├── admin/              # Admin modals (UserFormModal, etc.)
 │   └── plans/              # Plan upgrade modals
-└── hooks/                  # Feature-specific hooks
+└── forms/                  # User-related forms
 ```
 
 ### 2. Query Keys ✅ COMPLIANT
@@ -117,3 +123,4 @@ Uses semantic badge variants:
 ## Last Updated
 2025-12-25 - Initial audit compliance
 2025-12-25 - Fixed badge variants and cache invalidation guards
+2025-12-25 - Added hooks/ and services/ with useCurrentUser and userProfileService
