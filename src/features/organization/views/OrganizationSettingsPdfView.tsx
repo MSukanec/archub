@@ -417,36 +417,36 @@ export function OrganizationSettingsPdfView({ onHasChanges }: OrganizationSettin
   };
 
   useEffect(() => {
-    if (onHasChanges) {
-      if (hasChanges) {
-        const actions = [
-          <Button
-            key="reset"
-            variant="outline"
-            onClick={handleReset}
-            className="h-8 px-3 text-xs"
-            data-testid="button-reset-pdf-settings"
-          >
-            <RotateCcw className="w-4 h-4 mr-1" />
-            Descartar
-          </Button>,
-          <Button
-            key="save"
-            onClick={handleSave}
-            disabled={updateTemplate.isPending}
-            className="h-8 px-3 text-xs"
-            data-testid="button-save-pdf-settings"
-          >
-            <Save className="w-4 h-4 mr-1" />
-            {updateTemplate.isPending ? 'Guardando...' : 'Guardar'}
-          </Button>
-        ];
-        onHasChanges(true, actions);
-      } else {
-        onHasChanges(false);
-      }
+    if (!onHasChanges) return;
+    
+    if (hasChanges) {
+      const actions = [
+        <Button
+          key="reset"
+          variant="outline"
+          onClick={handleReset}
+          className="h-8 px-3 text-xs"
+          data-testid="button-reset-pdf-settings"
+        >
+          <RotateCcw className="w-4 h-4 mr-1" />
+          Descartar
+        </Button>,
+        <Button
+          key="save"
+          onClick={handleSave}
+          disabled={updateTemplate.isPending}
+          className="h-8 px-3 text-xs"
+          data-testid="button-save-pdf-settings"
+        >
+          <Save className="w-4 h-4 mr-1" />
+          {updateTemplate.isPending ? 'Guardando...' : 'Guardar'}
+        </Button>
+      ];
+      onHasChanges(true, actions);
+    } else {
+      onHasChanges(false);
     }
-  }, [hasChanges, updateTemplate.isPending]);
+  }, [hasChanges, updateTemplate.isPending, onHasChanges]);
 
   if (isLoading) {
     return (

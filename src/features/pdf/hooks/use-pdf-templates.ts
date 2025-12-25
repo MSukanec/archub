@@ -15,16 +15,23 @@ export function usePdfTemplate(organizationId: string | undefined) {
     queryKey: PDF_TEMPLATE_QUERY_KEYS.detail(organizationId || ''),
     queryFn: async () => {
       if (!organizationId) return null;
-      const response = await fetch(`/api/organizations/${organizationId}/pdf-template`, {
-        credentials: 'include',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch PDF template');
+      try {
+        const response = await fetch(`/api/organizations/${organizationId}/pdf-template`, {
+          credentials: 'include',
+        });
+        if (response.status === 404 || !response.ok) {
+          return null;
+        }
+        const data = await response.json();
+        return data.template || null;
+      } catch (error) {
+        console.error('Error fetching PDF template:', error);
+        return null;
       }
-      const data = await response.json();
-      return data.template;
     },
     enabled: !!organizationId,
+    retry: 1,
+    staleTime: 1000 * 60 * 5,
   });
 }
 
