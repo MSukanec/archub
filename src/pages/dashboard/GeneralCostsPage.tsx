@@ -15,6 +15,8 @@ import { useLabDrawerStore } from '@/layouts/lab/stores/useLabDrawerStore'
 import GeneralCostPaymentDrawer from '@/features/general-costs/drawer/GeneralCostPaymentDrawer'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { useGeneralCostsDataHealth, DataHealthAlertMulti } from '@/core/data-health'
+import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies'
 
 export type PeriodFilter = '30d' | '3m' | '6m' | '1y' | 'all'
 
@@ -59,6 +61,17 @@ export default function GeneralCostsPage() {
   
   const { data: allPayments = [] } = useGeneralCostsPayments(organizationId)
   const availablePeriods = useMemo(() => calculateAvailablePeriods(allPayments), [allPayments])
+  
+  // Data health for payments
+  const { data: defaultCurrency } = useOrganizationDefaultCurrency(organizationId)
+  const { isMultiCurrency } = useOrgCurrencyContext(organizationId)
+  const dataHealth = useGeneralCostsDataHealth(allPayments, {
+    organizationId: organizationId ?? '',
+    defaultCurrencyId: defaultCurrency?.code ?? undefined,
+    isMultiCurrency,
+    enabled: !!organizationId && allPayments.length > 0,
+    filterTags: ['general-costs'],
+  })
   
   const validSelectedPeriod = useMemo(() => {
     if (availablePeriods[selectedPeriod]) return selectedPeriod
@@ -228,7 +241,19 @@ export default function GeneralCostsPage() {
           secondaryRightSlot: periodContent,
         }}
       >
-        {renderView()}
+        <div className="space-y-6">
+          {allPayments.length > 0 && (
+            <DataHealthAlertMulti
+              issues={dataHealth.result?.issues || []}
+              entityLabel="pago"
+              dismissedIssueIds={dismissedIssueIds}
+              onDismissIssue={(issueId: string) => {
+                setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
+              }}
+            />
+          )}
+          {renderView()}
+        </div>
       </LabLayout>
     )
   }
@@ -321,7 +346,20 @@ export default function GeneralCostsPage() {
 
   return (
     <Layout headerProps={headerProps} wide={false}>
-      {renderView()}
+      <div className="space-y-6">
+        {allPayments.length > 0 && (
+          <DataHealthAlertMulti
+            issues={dataHealth.result?.issues || []}
+            entityLabel="pago"
+            dismissedIssueIds={dismissedIssueIds}
+            onDismissIssue={(issueId: string) => {
+              setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
+            }}
+            
+          />
+        )}
+        {renderView()}
+      </div>
     </Layout>
   )
 }
