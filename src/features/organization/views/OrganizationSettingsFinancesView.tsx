@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Coins, Wallet } from 'lucide-react';
 
 import { Label } from '@/components/ui/label';
@@ -15,43 +15,18 @@ import { supabase } from '@/lib/supabase';
 
 export function OrganizationSettingsFinancesView() {
   const { data: userData } = useCurrentUser();
-  const { data: allCurrencies } = useCurrencies();
-  const { data: organizationCurrencies } = useOrganizationCurrencies(userData?.organization?.id);
+  const organizationId = userData?.organization?.id;
+  const { data: allCurrencies, isLoading: isLoadingAllCurrencies } = useCurrencies();
+  const { data: organizationCurrencies, isLoading: isLoadingOrgCurrencies } = useOrganizationCurrencies(organizationId);
   const { data: allWallets } = useAllWallets();
-  const { data: organizationWallets } = useOrganizationWallets(userData?.organization?.id);
+  const { data: organizationWallets } = useOrganizationWallets(organizationId);
 
   const [defaultCurrency, setDefaultCurrency] = useState<string>('');
   const [secondaryCurrencies, setSecondaryCurrencies] = useState<string[]>([]);
   const [defaultWallet, setDefaultWallet] = useState<string>('');
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (organizationCurrencies?.length) {
-      const defaultCur = organizationCurrencies.find(c => c.is_default);
-      const secondaryCurs = organizationCurrencies.filter(c => !c.is_default);
-      
-      if (defaultCur) {
-        setDefaultCurrency(defaultCur.currency_id);
-      }
-      setSecondaryCurrencies(secondaryCurs.map(c => c.currency_id));
-    }
-  }, [organizationCurrencies]);
-
-  useEffect(() => {
-    if (organizationWallets?.length) {
-      const defaultWal = organizationWallets.find(w => w.is_default);
-      const secondaryWals = organizationWallets.filter(w => !w.is_default);
-      
-      if (defaultWal) {
-        setDefaultWallet(defaultWal.wallet_id);
-      }
-      setSecondaryWallets(secondaryWals.map(w => w.wallet_id));
-    } else if (organizationWallets && organizationWallets.length === 0) {
-      setDefaultWallet('');
-      setSecondaryWallets([]);
-    }
-  }, [organizationWallets]);
-
+  
+  const autoSelectAttemptedForOrg = useRef<string | null>(null);
 
   const saveDefaultCurrencyMutation = useOptimisticMutation({
     mutationFn: async (currencyId: string) => {
@@ -311,6 +286,51 @@ export function OrganizationSettingsFinancesView() {
     onSuccessMessage: 'Billeteras secundarias actualizadas',
     onErrorMessage: 'No se pudieron actualizar las billeteras secundarias',
   });
+
+  useEffect(() => {
+    if (isLoadingOrgCurrencies || isLoadingAllCurrencies) return;
+    if (saveDefaultCurrencyMutation.isPending) return;
+    
+    if (organizationCurrencies?.length) {
+      const defaultCur = organizationCurrencies.find(c => c.is_default);
+      const secondaryCurs = organizationCurrencies.filter(c => !c.is_default);
+      
+      if (defaultCur) {
+        setDefaultCurrency(defaultCur.currency_id);
+        if (autoSelectAttemptedForOrg.current === organizationId) {
+          autoSelectAttemptedForOrg.current = null;
+        }
+      } else if (autoSelectAttemptedForOrg.current !== organizationId) {
+        const firstCurrency = organizationCurrencies[0].currency_id;
+        setDefaultCurrency(firstCurrency);
+        autoSelectAttemptedForOrg.current = organizationId ?? null;
+        saveDefaultCurrencyMutation.mutate(firstCurrency);
+      }
+      setSecondaryCurrencies(secondaryCurs.map(c => c.currency_id));
+    } else if (allCurrencies?.length && organizationCurrencies !== undefined && organizationCurrencies.length === 0) {
+      if (autoSelectAttemptedForOrg.current !== organizationId) {
+        const firstCurrency = allCurrencies[0].id;
+        setDefaultCurrency(firstCurrency);
+        autoSelectAttemptedForOrg.current = organizationId ?? null;
+        saveDefaultCurrencyMutation.mutate(firstCurrency);
+      }
+    }
+  }, [organizationCurrencies, allCurrencies, isLoadingOrgCurrencies, isLoadingAllCurrencies, saveDefaultCurrencyMutation.isPending, organizationId]);
+
+  useEffect(() => {
+    if (organizationWallets?.length) {
+      const defaultWal = organizationWallets.find(w => w.is_default);
+      const secondaryWals = organizationWallets.filter(w => !w.is_default);
+      
+      if (defaultWal) {
+        setDefaultWallet(defaultWal.wallet_id);
+      }
+      setSecondaryWallets(secondaryWals.map(w => w.wallet_id));
+    } else if (organizationWallets && organizationWallets.length === 0) {
+      setDefaultWallet('');
+      setSecondaryWallets([]);
+    }
+  }, [organizationWallets]);
 
 
   const handleDefaultCurrencyChange = (currencyId: string) => {
