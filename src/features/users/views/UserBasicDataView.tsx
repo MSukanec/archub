@@ -1,214 +1,226 @@
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Upload, Link as LinkIcon, LogOut, Crown, MessageCircle, Camera, User, Settings, Building, Package, Hammer, Eye, CalendarIcon } from 'lucide-react'
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Camera, User, Settings, Building, Package, Hammer, Eye, CalendarIcon } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { useLocation } from 'wouter';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useToast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/stores/authStore';
+import { supabase } from '@/lib/supabase';
+import { useCountries } from '@/hooks/use-countries';
+import { useAutosaveController, normalizeStringValue } from '@/core/autosave';
+import { usersKeys } from '@/core/query-keys';
+import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 
-import { useState, useEffect } from 'react'
-import { useLocation } from 'wouter'
-import { useCurrentUser } from '@/hooks/use-current-user'
-import { useAutoSave } from '@/hooks/useAutoSave'
-import { useMutation } from '@tanstack/react-query'
-import { queryClient } from '@/lib/queryClient'
-import { useToast } from '@/hooks/use-toast'
-import { useAuthStore } from '@/stores/authStore'
-import { supabase } from '@/lib/supabase'
-import { useCountries } from '@/hooks/use-countries'
-
-interface ProfileBasicDataProps {
-  user: any;
-}
-
-export function ProfileBasicData({ user }: ProfileBasicDataProps) {
-  const { data: userData, isLoading } = useCurrentUser()
-  const { toast } = useToast()
-  const [, navigate] = useLocation()
-  const { logout } = useAuthStore()
-  
-  // Function to get user mode info
-  const getUserModeInfo = (userType: string | null) => {
-    switch (userType) {
-      case 'professional':
-        return { icon: Building, label: 'Profesional', description: 'Estudios y constructoras' };
-      case 'provider':
-        return { icon: Package, label: 'Proveedor de Materiales', description: 'Suministro de materiales' };
-      case 'worker':
-        return { icon: Hammer, label: 'Mano de Obra', description: 'Contratistas y maestros' };
-      case 'visitor':
-        return { icon: Eye, label: 'Solo Exploración', description: 'Modo exploración' };
-      default:
-        return { icon: Settings, label: 'No definido', description: 'Selecciona tu modo de uso' };
-    }
-  };
-  
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [country, setCountry] = useState('')
-  const [birthdate, setBirthdate] = useState<Date | undefined>(undefined)
-  const [avatarUrl, setAvatarUrl] = useState('')
-  const [showAvatarUpload, setShowAvatarUpload] = useState(false)
-
-  // Profile data object for debounced auto-save
-  const profileData = {
-    firstName,
-    lastName,
-    country,
-    birthdate,
-    avatarUrl
+const getUserModeInfo = (userType: string | null) => {
+  switch (userType) {
+    case 'professional':
+      return { icon: Building, label: 'Profesional', description: 'Estudios y constructoras' };
+    case 'provider':
+      return { icon: Package, label: 'Proveedor de Materiales', description: 'Suministro de materiales' };
+    case 'worker':
+      return { icon: Hammer, label: 'Mano de Obra', description: 'Contratistas y maestros' };
+    case 'visitor':
+      return { icon: Eye, label: 'Solo Exploración', description: 'Modo exploración' };
+    default:
+      return { icon: Settings, label: 'No definido', description: 'Selecciona tu modo de uso' };
   }
+};
 
-  // Auto-save mutation for profile data
-  const saveProfileMutation = useMutation({
-    mutationFn: async (data: typeof profileData) => {
-      console.log('Saving profile data:', data)
-      
+export function UserBasicDataView() {
+  const { data: userData, isLoading } = useCurrentUser();
+  const { toast } = useToast();
+  const [, navigate] = useLocation();
+  const { logout } = useAuthStore();
+  
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [country, setCountry] = useState('');
+  const [birthdate, setBirthdate] = useState<Date | undefined>(undefined);
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  const hasHydratedRef = useRef(false);
+  const lastHydratedIdRef = useRef<string | null>(null);
+
+  const { data: countries = [] } = useCountries();
+
+  const saveController = useAutosaveController({
+    queryKey: usersKeys.current(),
+    saveFn: async (dataToSave: any) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No active session');
       
-      // Use the server endpoint to update user data and avatar
-      const profileUpdates: any = {
-        user_id: userData?.user?.id,
-      }
-      
-      // Handle user_data updates
-      // Usar componentes de fecha en lugar de toISOString() para evitar problemas de timezone
       let birthdateString: string | null = null;
-      if (data.birthdate) {
-        const year = data.birthdate.getFullYear();
-        const month = String(data.birthdate.getMonth() + 1).padStart(2, '0');
-        const day = String(data.birthdate.getDate()).padStart(2, '0');
+      if (dataToSave.birthdate) {
+        const year = dataToSave.birthdate.getFullYear();
+        const month = String(dataToSave.birthdate.getMonth() + 1).padStart(2, '0');
+        const day = String(dataToSave.birthdate.getDate()).padStart(2, '0');
         birthdateString = `${year}-${month}-${day}`;
       }
-      const currentBirthdateString = userData?.user_data?.birthdate || null
       
-      if (data.firstName !== userData?.user_data?.first_name ||
-          data.lastName !== userData?.user_data?.last_name ||
-          data.country !== userData?.user_data?.country ||
-          birthdateString !== currentBirthdateString) {
-        
-        profileUpdates.first_name = data.firstName
-        profileUpdates.last_name = data.lastName
-        profileUpdates.country = data.country || null
-        profileUpdates.birthdate = birthdateString
+      const profileUpdates: any = {
+        user_id: userData?.user?.id,
+        first_name: normalizeStringValue(dataToSave.firstName),
+        last_name: normalizeStringValue(dataToSave.lastName),
+        country: normalizeStringValue(dataToSave.country),
+        birthdate: birthdateString,
+      };
+      
+      if (dataToSave.avatarUrl !== userData?.user?.avatar_url) {
+        profileUpdates.avatar_url = dataToSave.avatarUrl;
       }
       
-      // Handle avatar URL update if changed
-      if (data.avatarUrl !== userData?.user?.avatar_url) {
-        profileUpdates.avatar_url = data.avatarUrl
-      }
+      const response = await fetch('/api/user/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(profileUpdates),
+      });
       
-      // Only make request if there are updates beyond user_id
-      if (Object.keys(profileUpdates).length > 1) {
-        const response = await fetch('/api/user/profile', {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`
-          },
-          body: JSON.stringify(profileUpdates),
-        })
-        
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
-        }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
-      
-      return data
     },
-    onSuccess: () => {
-      console.log('Auto-save completed successfully')
-      queryClient.invalidateQueries({ queryKey: ['current-user'] })
-    },
-    onError: (error) => {
-      console.error('Auto-save error:', error)
-      toast({
-        title: "Error",
-        description: "No se pudieron guardar los cambios automáticamente.",
-        variant: "destructive",
-      })
-    },
-  })
+    additionalQueryKeys: [],
+  });
 
-  // Set up debounced auto-save with 3 second delay
-  const { isSaving } = useAutoSave({
-    data: profileData,
-    saveFn: async (data) => { await saveProfileMutation.mutateAsync(data); },
-    delay: 3000,
-    enabled: !!userData
-  })
-
-  // Handle changes
-  const handleFirstNameChange = (value: string) => setFirstName(value)
-  const handleLastNameChange = (value: string) => setLastName(value)
-  const handleCountryChange = (value: string) => setCountry(value)
-  const handleBirthdateChange = (value: Date | undefined) => setBirthdate(value)
-
-  // Countries query - using optimized hook
-  const { data: countries = [] } = useCountries()
-
-  // Load profile data
   useEffect(() => {
-    if (userData) {
-      setFirstName(userData.user_data?.first_name || '')
-      setLastName(userData.user_data?.last_name || '')
-      setCountry(userData.user_data?.country || '')
-      
-      // Parsear fecha correctamente para evitar problemas de timezone
-      if (userData.user_data?.birthdate) {
-        const [year, month, day] = userData.user_data.birthdate.split('-').map(Number);
-        setBirthdate(new Date(year, month - 1, day, 12, 0, 0, 0));
-      } else {
-        setBirthdate(undefined);
-      }
-      
-      setAvatarUrl(userData.user?.avatar_url || '')
+    if (!userData) return;
+    
+    const userId = userData.user?.id;
+    if (hasHydratedRef.current && lastHydratedIdRef.current === userId) {
+      return;
     }
-  }, [userData])
+    
+    hasHydratedRef.current = true;
+    lastHydratedIdRef.current = userId ?? null;
+    
+    setFirstName(userData.user_data?.first_name || '');
+    setLastName(userData.user_data?.last_name || '');
+    setCountry(userData.user_data?.country || '');
+    
+    if (userData.user_data?.birthdate) {
+      const [year, month, day] = userData.user_data.birthdate.split('-').map(Number);
+      setBirthdate(new Date(year, month - 1, day, 12, 0, 0, 0));
+    } else {
+      setBirthdate(undefined);
+    }
+    
+    setAvatarUrl(userData.user?.avatar_url || '');
+    
+    setTimeout(() => {
+      setIsHydrated(true);
+      saveController.setLastPersistedData({
+        firstName: userData.user_data?.first_name || '',
+        lastName: userData.user_data?.last_name || '',
+        country: userData.user_data?.country || '',
+        birthdate: userData.user_data?.birthdate ? new Date(userData.user_data.birthdate) : undefined,
+        avatarUrl: userData.user?.avatar_url || '',
+      });
+    }, 100);
+  }, [userData]);
 
-  // Handle logout using authStore
+  const handleBlur = () => {
+    if (!isHydrated || !userData?.user?.id) return;
+    saveController.save({
+      firstName,
+      lastName,
+      country,
+      birthdate,
+      avatarUrl,
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleBlur();
+    }
+  };
+
+  const handleCountryChange = (value: string) => {
+    setCountry(value);
+    if (isHydrated) {
+      setTimeout(() => {
+        saveController.save({
+          firstName,
+          lastName,
+          country: value,
+          birthdate,
+          avatarUrl,
+        });
+      }, 10);
+    }
+  };
+
+  const handleBirthdateChange = (value: Date | undefined) => {
+    setBirthdate(value);
+    if (isHydrated) {
+      setTimeout(() => {
+        saveController.save({
+          firstName,
+          lastName,
+          country,
+          birthdate: value,
+          avatarUrl,
+        });
+      }, 10);
+    }
+  };
+
   const handleLogout = async () => {
     try {
-      await logout()
+      await logout();
     } catch (error) {
-      console.error('Logout error:', error)
       toast({
         title: "Error",
         description: "No se pudo cerrar la sesión. Inténtalo de nuevo.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const getInitials = () => {
     if (firstName && lastName) {
-      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
     }
-    return userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U'
-  }
+    return userData?.user?.full_name?.charAt(0)?.toUpperCase() || 'U';
+  };
 
   if (isLoading) {
     return (
-      <div className="text-center text-muted-foreground">
-        Loading profile...
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="lg" />
       </div>
-    )
+    );
+  }
+
+  if (!userData?.user) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-muted-foreground">Usuario no encontrado</div>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-8">
-      {/* Perfil Section */}
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Left Column - Title and Description */}
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Camera className="h-5 w-5 text-[var(--accent)]" />
@@ -219,9 +231,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
             </p>
           </div>
 
-          {/* Right Column - Form Fields */}
           <div className="space-y-6">
-            {/* Avatar */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Avatar</Label>
               <div className="flex items-center gap-4">
@@ -232,10 +242,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
                   </AvatarFallback>
                 </Avatar>
                 <div className="space-y-2">
-                  <Button
-                    size="sm"
-                    onClick={() => setShowAvatarUpload(!showAvatarUpload)}
-                  >
+                  <Button size="sm" data-testid="button-change-avatar">
                     Cambiar
                   </Button>
                   <p className="text-xs text-muted-foreground">
@@ -245,26 +252,26 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
               </div>
             </div>
             
-            {/* Name */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Nombre completo</Label>
               <Input
-                value={userData?.user?.full_name || ''}
+                value={userData.user.full_name || ''}
                 disabled
                 className="bg-muted"
+                data-testid="input-full-name"
               />
               <p className="text-xs text-muted-foreground">
                 Este es tu nombre para mostrar. Puede ser tu nombre real o un seudónimo.
               </p>
             </div>
             
-            {/* Email */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Dirección de email</Label>
               <Input
-                value={userData?.user?.email || ''}
+                value={userData.user.email || ''}
                 disabled
                 className="bg-muted"
+                data-testid="input-email"
               />
               <p className="text-xs text-muted-foreground">
                 Esta es la dirección de email de tu cuenta.
@@ -276,10 +283,8 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
 
       <hr className="border-t border-[var(--section-divider)] my-8" />
 
-      {/* Información Personal Section */}
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Left Column - Title and Description */}
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <User className="h-5 w-5 text-[var(--accent)]" />
@@ -290,21 +295,26 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
             </p>
           </div>
 
-          {/* Right Column - Form Fields */}
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Nombre</Label>
                 <Input
                   value={firstName}
-                  onChange={(e) => handleFirstNameChange(e.target.value)}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                  data-testid="input-first-name"
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Apellido</Label>
                 <Input
                   value={lastName}
-                  onChange={(e) => handleLastNameChange(e.target.value)}
+                  onChange={(e) => setLastName(e.target.value)}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                  data-testid="input-last-name"
                 />
               </div>
             </div>
@@ -313,14 +323,14 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
               <div className="space-y-2">
                 <Label className="text-sm font-medium">País</Label>
                 <Select value={country} onValueChange={handleCountryChange}>
-                  <SelectTrigger>
+                  <SelectTrigger data-testid="select-country">
                     <SelectValue placeholder="Selecciona un país" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Sin seleccionar</SelectItem>
-                    {countries.map((country) => (
-                      <SelectItem key={country.id} value={country.id}>
-                        {country.name}
+                    {countries.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -336,6 +346,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
                         value={birthdate ? format(birthdate, 'dd/MM/yyyy', { locale: es }) : ''}
                         className="pr-10 cursor-pointer"
                         readOnly
+                        data-testid="input-birthdate"
                       />
                       <CalendarIcon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                     </div>
@@ -359,10 +370,8 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
 
       <hr className="border-t border-[var(--section-divider)] my-8" />
 
-      {/* Modo de Usuario */}
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Left Column - Title and Description */}
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Settings className="h-5 w-5 text-[var(--accent)]" />
@@ -373,11 +382,10 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
             </p>
           </div>
 
-          {/* Right Column - Current Mode and Change Button */}
           <div className="space-y-6">
             <div className="space-y-4 p-4 border border-[var(--accent)] rounded-lg">
               {(() => {
-                const modeInfo = getUserModeInfo(userData?.preferences?.last_user_type);
+                const modeInfo = getUserModeInfo(userData.preferences?.last_user_type);
                 const ModeIcon = modeInfo.icon;
                 return (
                   <>
@@ -402,6 +410,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
                         color: 'var(--accent-foreground)'
                       }}
                       className="hover:opacity-90"
+                      data-testid="button-change-mode"
                     >
                       Elegir modo de uso
                     </Button>
@@ -415,10 +424,8 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
 
       <hr className="border-t border-[var(--section-divider)] my-8" />
 
-      {/* Zona de Peligro */}
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Left Column - Title and Description */}
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Settings className="h-5 w-5 text-[var(--accent)]" />
@@ -429,7 +436,6 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
             </p>
           </div>
 
-          {/* Right Column - Form Fields */}
           <div className="space-y-6">
             <div className="space-y-4 p-4 border border-destructive rounded-lg">
               <div className="space-y-2">
@@ -441,7 +447,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="sm">
+                  <Button variant="destructive" size="sm" data-testid="button-logout">
                     Cerrar sesión
                   </Button>
                 </AlertDialogTrigger>
@@ -454,9 +460,7 @@ export function ProfileBasicData({ user }: ProfileBasicDataProps) {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={handleLogout}
-                    >
+                    <AlertDialogAction onClick={handleLogout}>
                       Cerrar sesión
                     </AlertDialogAction>
                   </AlertDialogFooter>

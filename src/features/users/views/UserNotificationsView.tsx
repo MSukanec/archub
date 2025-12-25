@@ -12,11 +12,8 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { markAsRead, markAllAsRead, resolveNotificationHref, type UserNotificationRow } from '@/lib/notifications';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { usersKeys } from '@/core/query-keys';
 
-/**
- * View: User Notifications
- * Displays all user notifications with read/unread status management
- */
 export function UserNotificationsView() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -25,7 +22,7 @@ export function UserNotificationsView() {
   const userId = userData?.user?.id;
 
   const { data: notifications = [], isLoading: notificationsLoading } = useQuery({
-    queryKey: ['notifications', userId],
+    queryKey: usersKeys.notifications(userId || ''),
     queryFn: async () => {
       if (!supabase || !userId) {
         throw new Error('No user available');
@@ -64,7 +61,7 @@ export function UserNotificationsView() {
       await markAsRead(notificationId, userId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: usersKeys.notifications(userId || '') });
     },
     onError: () => {
       toast({
@@ -81,7 +78,7 @@ export function UserNotificationsView() {
       await markAllAsRead(userId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: usersKeys.notifications(userId || '') });
       toast({
         title: "Listo",
         description: "Todas las notificaciones han sido marcadas como leídas"
@@ -215,6 +212,7 @@ export function UserNotificationsView() {
         icon={<Bell className="w-8 h-8 text-muted-foreground" />}
         title="No tienes notificaciones"
         description="Cuando recibas notificaciones, aparecerán aquí"
+        data-testid="empty-notifications-state"
       />
     );
   }

@@ -59,7 +59,7 @@ import { OrganizationDashboardPage } from "@/pages/dashboard/OrganizationDashboa
 import { OrganizationDataPage } from "@/pages/dashboard/OrganizationDataPage";
 import { OrganizationSettingsPage } from "@/pages/dashboard/OrganizationSettingsPage";
 
-import Profile from "@/pages/profile/Profile";
+import UserPage from "@/pages/dashboard/UserPage";
 
 import Onboarding from "@/pages/public/Onboarding";
 import SelectMode from "@/pages/public/SelectMode";
@@ -124,7 +124,6 @@ import PricingPlan from "@/pages/settings/PricingPlan";
 import Capital from "@/pages/capital/Capital";
 
 // User Page
-import User from "@/pages/user/User";
 
 
 
@@ -255,7 +254,7 @@ function Router() {
         <Route path="/settings/pricing-plan" component={PricingPlan} />
         
         {/* User Page */}
-        <Route path="/user" component={User} />
+        <Route path="/user" component={UserPage} />
         
         {/* Legacy pricing route - redirect to settings */}
         <Route path="/pricing-plan" component={PricingPlan} />
@@ -306,14 +305,10 @@ function Router() {
 
         <Route path="/finances/capital" component={FinancesCapitalMovements} />
         
-        {/* Profile Routes - ORDEN IMPORTANTE: rutas específicas primero */}
-        <Route path="/clients" component={Clients} />
-
-
-        {/* Profile Routes - ORDEN IMPORTANTE: rutas específicas primero */}
-        <Route path="/profile/organizations" component={Profile} />
-        <Route path="/profile/preferences" component={Profile} />
-        <Route path="/profile" component={Profile} />
+        {/* Profile Routes - redirect to /user */}
+        <Route path="/profile/organizations" component={UserPage} />
+        <Route path="/profile/preferences" component={UserPage} />
+        <Route path="/profile" component={UserPage} />
 
 
 

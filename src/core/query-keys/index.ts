@@ -34,3 +34,6 @@ export type { OrganizationQueryKey, UserOrgPreferencesQueryKey } from './organiz
 
 export { generalCostsKeys } from './general-costs.keys';
 export type { GeneralCostsQueryKey } from './general-costs.keys';
+
+export { usersKeys } from './users.keys';
+export type { UsersQueryKey } from './users.keys';

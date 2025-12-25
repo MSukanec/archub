@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { User as UserIcon } from 'lucide-react';
-
+import { User as UserIcon, Plus } from 'lucide-react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { LabLayout } from '@/layouts/lab/LabLayout';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
+import { useIsAdmin } from '@/hooks/use-admin-permissions';
+import { useGlobalModalStore } from '@/components/modal';
 
-import { UserBasicDataView } from '@/features/user/views/UserBasicDataView';
-import { UserPreferencesView } from '@/features/user/views/UserPreferencesView';
-import { UserOrganizationsView } from '@/features/user/views/UserOrganizationsView';
-import { UserNotificationsView } from '@/features/user/views/UserNotificationsView';
+import { UserBasicDataView } from '@/features/users/views/UserBasicDataView';
+import { UserPreferencesView } from '@/features/users/views/UserPreferencesView';
+import { UserOrganizationsView } from '@/features/users/views/UserOrganizationsView';
+import { UserNotificationsView } from '@/features/users/views/UserNotificationsView';
 
 const USER_TABS = [
   { id: 'basic-data', label: 'Datos Básicos' },
@@ -18,14 +19,11 @@ const USER_TABS = [
   { id: 'notifications', label: 'Notificaciones' },
 ];
 
-/**
- * PAGE: User Settings
- * Orquestador que maneja layout selection, tab state, y renderización de views
- * Permite cambiar entre layouts (DashboardLayout vs LabLayout) dinámicamente
- */
-export default function User() {
+export default function UserPage() {
   const [activeTab, setActiveTab] = useState('basic-data');
   const { data: userData, isLoading } = useCurrentUser();
+  const { openModal } = useGlobalModalStore();
+  const isAdmin = useIsAdmin();
 
   const layoutPreference = userData?.preferences?.layout || 'experimental';
   const isLabLayout = layoutPreference === 'lab';
@@ -37,7 +35,6 @@ export default function User() {
     description: 'Administra tu perfil, preferencias y configuración de cuenta.',
   };
 
-  // Renderizar contenido según activeTab
   const renderView = () => {
     switch (activeTab) {
       case 'basic-data':
@@ -51,6 +48,17 @@ export default function User() {
       default:
         return <UserBasicDataView />;
     }
+  };
+
+  const getActionButton = () => {
+    if (activeTab === 'organizations' && isAdmin) {
+      return {
+        label: 'Nueva Organización',
+        icon: Plus,
+        onClick: () => openModal('organization')
+      };
+    }
+    return undefined;
   };
 
   if (isLoading) {
@@ -79,7 +87,6 @@ export default function User() {
     );
   }
 
-  // LabLayout: utiliza mega-menu y toolbar para tabs
   if (isLabLayout) {
     return (
       <LabLayout
@@ -92,7 +99,6 @@ export default function User() {
     );
   }
 
-  // DashboardLayout: utiliza header inline para tabs
   return (
     <Layout 
       headerProps={{
@@ -102,6 +108,7 @@ export default function User() {
           isActive: activeTab === tab.id
         })),
         onTabChange: setActiveTab,
+        actionButton: getActionButton(),
       }}
       wide={false}
     >

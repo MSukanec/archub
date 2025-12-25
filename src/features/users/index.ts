@@ -1,3 +1,9 @@
+// Views
+export { UserBasicDataView } from './views/UserBasicDataView';
+export { UserPreferencesView } from './views/UserPreferencesView';
+export { UserOrganizationsView } from './views/UserOrganizationsView';
+export { UserNotificationsView } from './views/UserNotificationsView';
+
 // Admin Modals
 export { UserFormModal } from './modals/admin/UserFormModal';
 export { PlanFormModal } from './modals/admin/PlanFormModal';
