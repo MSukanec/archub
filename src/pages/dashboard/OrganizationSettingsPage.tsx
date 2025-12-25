@@ -144,7 +144,7 @@ export function OrganizationSettingsPage() {
   };
 
   return (
-    <Layout headerProps={headerProps} wide={activeTab === 'pdf'}>
+    <Layout headerProps={headerProps}>
       {renderTabContent()}
     </Layout>
   );
