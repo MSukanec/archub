@@ -29,7 +29,13 @@ export { AdminLaborModal } from './modals/admin/AdminLaborModal';
 
 // Export modals (nuevo patrón agnóstico)
 export { PersonnelPaymentModal } from './modals/PersonnelPaymentModal';
-export { PersonnelPaymentFormFields } from './forms/PersonnelPaymentForm';
+
+// Export forms (patrón CONTACTS: FormPanel + ViewPanel + wrapper)
+export { 
+  FormPanel as PersonnelPaymentFormPanel,
+  ViewPanel as PersonnelPaymentViewPanel,
+  PersonnelPaymentFormFields 
+} from './forms/PersonnelPaymentForm';
 
 // Export utils
 export { getPersonnelPaymentStatusBadgeConfig } from './utils/statusBadge';

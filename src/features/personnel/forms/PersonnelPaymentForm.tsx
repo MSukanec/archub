@@ -48,7 +48,7 @@ const personnelPaymentSchema = z.object({
 
 type PersonnelPaymentFormData = z.infer<typeof personnelPaymentSchema>
 
-function FormPanel({
+export function FormPanel({
   form,
   onSubmit,
   currencies,
@@ -367,7 +367,7 @@ function FormPanel({
   )
 }
 
-function ViewPanel({
+export function ViewPanel({
   existingPayment,
   attachments,
 }: {
