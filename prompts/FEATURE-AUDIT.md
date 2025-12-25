@@ -257,7 +257,7 @@ src/
 
 ---
 
-### 4. AUDITORÍA DE PÁGINAS (3 CAPAS)
+### 4. AUDITORÍA DE PÁGINAS Y VISTAS (ARQUITECTURA 3-CAPAS)
 
 **Arquitectura esperada:**
 ```
@@ -268,26 +268,89 @@ LAYOUT (Estructura)    → DashboardLayout o LabLayout
 VIEW (Contenido)       → Tablas, KPIs, gráficos, formularios
 ```
 
-**NOMENCLATURA OBLIGATORIA:**
+**NOMENCLATURA Y UBICACIÓN - OBLIGATORIA Y NO NEGOCIABLE:**
+
 | Tipo | Ubicación | Nombre | Ejemplo |
 |------|-----------|--------|---------|
-| **Page** | `src/pages/{feature}/` | `*Page.tsx` | `ProjectsPage.tsx` |
-| **View** | `src/features/{feature}/views/` | `*View.tsx` | `ProjectListView.tsx` |
+| **Page** | `src/pages/dashboard/` | `*Page.tsx` | `ProjectsPage.tsx`, `GeneralCostsPage.tsx` |
+| **View** | `src/features/{feature}/views/` | `*View.tsx` | `ProjectListView.tsx`, `GeneralCostsPaymentsView.tsx` |
+| **View (Detail)** | `src/features/{feature}/views/` | `*DetailView.tsx` | `ProjectDetailView.tsx`, `GeneralCostDetailView.tsx` |
+
+**⚠️ REGLAS CRÍTICAS:**
+- ✅ Pages SIEMPRE en `src/pages/dashboard/` (nunca en `src/pages/{feature}/`)
+- ✅ Pages SIEMPRE terminan en `*Page.tsx`
+- ✅ Views SIEMPRE en `src/features/{feature}/views/`
+- ✅ Views SIEMPRE terminan en `*View.tsx` (NO `*Tab.tsx`, NO `*Panel.tsx`)
+- ✅ Si era un Tab (pestañas), se convierte a View y se mueve a features/views
+- ❌ NO views en `src/pages/`
+- ❌ NO pages en `src/features/`
+
+**Checklist:**
+- [ ] ¿Existe `src/pages/dashboard/{feature}Page.tsx`?
+- [ ] ¿TODOS los tabs fueron renombrados a *View.tsx?
+- [ ] ¿TODAS las views están en `src/features/{feature}/views/`?
+- [ ] ¿NO hay archivos con nombres como `*Tab.tsx` o `*Panel.tsx`?
+- [ ] ¿Page importa views de `src/features/{feature}/views/`?
 
 ---
 
-### 5. AUDITORÍA DE FORMULARIOS (FORMS)
+### 5. AUDITORÍA DE FORMULARIOS, MODALES Y DRAWERS
 
-**REGLA CRÍTICA:** 
-- **CADA FORM tiene su MODAL correspondiente** (1:1)
-- El FORM es **agnóstico** (puede usarse en modal, drawer, o página)
-- El MODAL es el **envase** que abre el usuario
+**ARQUITECTURA DE FORMULARIOS:**
+- El **FORM** es agnóstico (puede usarse en modal, drawer, página o cualquier lado)
+- El **MODAL** es un contenedor que ENVUELVE el form y lo abre el usuario
+- El **DRAWER** es otro contenedor similar al modal
 
-**Nomenclatura OBLIGATORIA:**
+**NOMENCLATURA Y UBICACIÓN - OBLIGATORIA:**
+
 | Tipo | Ubicación | Nombre | Contenido |
 |------|-----------|--------|-----------|
-| **Form** | `forms/` | `*Form.tsx` | FormPanel + ViewPanel + useFeatureForm hook |
-| **Modal** | `modals/` | `*Modal.tsx` | ModalLayout + consume el Form |
+| **Form** | `src/features/{feature}/forms/` | `*Form.tsx` | Lógica de formulario + campos + hooks |
+| **Modal** | `src/features/{feature}/modals/` | `*Modal.tsx` | ModalLayout + consumidor del Form |
+| **Drawer** | `src/features/{feature}/drawer/` | `*Drawer.tsx` | Drawer layout + consumidor del Form |
+
+**⚠️ REGLAS CRÍTICAS:**
+- ✅ Forms en `forms/` - termina en `*Form.tsx`
+- ✅ Modals en `modals/` - termina en `*Modal.tsx`
+- ✅ Drawers en `drawer/` - termina en `*Drawer.tsx`
+- ❌ NO hay archivos `*FormFields.tsx`, `*Fields.tsx` (todo es `*Form.tsx`)
+- ❌ NO hay `*FormDrawerContent.tsx` (es `*Drawer.tsx` en la carpeta `drawer/`)
+- ❌ NO hay archivos Form en la carpeta `modals/`
+
+**EJEMPLO CORRECTO:**
+```
+src/features/general-costs/
+├── forms/
+│   ├── GeneralCostForm.tsx              ← Lógica + campos
+│   ├── GeneralCostPaymentForm.tsx       ← Lógica + campos
+│   └── GeneralCostCategoryForm.tsx      ← Lógica + campos
+├── modals/
+│   ├── GeneralCostModal.tsx             ← ModalLayout + GeneralCostForm
+│   └── GeneralCostPaymentModal.tsx      ← ModalLayout + GeneralCostPaymentForm
+└── drawer/
+    └── GeneralCostPaymentDrawer.tsx     ← DrawerLayout + GeneralCostPaymentForm
+```
+
+**⚠️ ERROR COMÚN - NO HAGAS ESTO:**
+```
+src/features/general-costs/
+├── forms/
+│   ├── GeneralCostPaymentForm.tsx       ← Form correcto
+│   └── GeneralCostPaymentFormFields.tsx ← ❌ INCORRECTO - TODO DEBE SER *Form.tsx
+├── modals/
+│   └── GeneralCostPaymentFormDrawerContent.tsx  ← ❌ INCORRECTO - Va en drawer/, termina en *Drawer.tsx
+```
+
+**Checklist:**
+- [ ] ¿Carpeta `forms/` existe y TODOS los archivos terminan en `*Form.tsx`?
+- [ ] ¿NO hay `*Fields.tsx`, `*FormFields.tsx` o similar?
+- [ ] ¿Carpeta `modals/` existe si hay modales?
+- [ ] ¿TODOS los modales terminan en `*Modal.tsx`?
+- [ ] ¿Carpeta `drawer/` existe si hay drawers?
+- [ ] ¿TODOS los drawers terminan en `*Drawer.tsx`?
+- [ ] ¿Forms son AGNÓSTICOS (NO importan ModalLayout ni DrawerLayout)?
+- [ ] ¿Modals SOLO contienen ModalLayout + consumidor del Form?
+- [ ] ¿Drawers SOLO contienen DrawerLayout + consumidor del Form?
 
 ---
 
