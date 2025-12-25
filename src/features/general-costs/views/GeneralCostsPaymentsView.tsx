@@ -938,7 +938,7 @@ export default function GeneralCostsPaymentsView({
       render: (payment: GeneralCostPayment) => (
         <div className="flex flex-col items-end">
           <span className="font-bold">{formatAmount(payment.amount, payment.currency?.symbol)}</span>
-          {isMultiCurrency && payment.exchange_rate != null && (
+          {isMultiCurrency && payment.exchange_rate != null && payment.exchange_rate > 0 && (
             <span className="text-xs text-muted-foreground" style={{ fontSize: '12px' }}>
               Cot. {payment.exchange_rate.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
             </span>

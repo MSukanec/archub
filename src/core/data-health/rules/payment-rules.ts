@@ -39,11 +39,11 @@ export const paymentsMissingExchangeRateRule: DataHealthRule<NormalizedPayment> 
   category: 'currency',
   appliesTo: ['payments', 'general-costs', 'finances'],
   check: (payments, ctx) => {
-    const minValidRate = 1.0;
+    const minValidRate = 0.01; // Minimum valid rate (must be positive)
     
     const affected = payments.filter(p => {
       const isForeignCurrency = p.currencyId && ctx.defaultCurrencyId && p.currencyId !== ctx.defaultCurrencyId;
-      const hasInvalidRate = !p.exchangeRate || p.exchangeRate <= minValidRate;
+      const hasInvalidRate = !p.exchangeRate || p.exchangeRate <= 0 || p.exchangeRate < minValidRate;
       return isForeignCurrency && hasInvalidRate;
     });
     
