@@ -35,16 +35,21 @@ export const paymentsWithoutCategoryRule: DataHealthRule<NormalizedPayment> = {
 export const paymentsMissingExchangeRateRule: DataHealthRule<NormalizedPayment> = {
   id: 'payments-missing-exchange-rate',
   name: 'Cotización de moneda no configurada',
-  description: 'Detecta pagos en moneda extranjera sin cotización válida. La cotización es necesaria para calcular correctamente los totales.',
+  description: 'Detecta pagos sin cotización válida cuando hay múltiples monedas. La cotización es necesaria para calcular correctamente los totales.',
   category: 'currency',
   appliesTo: ['payments', 'general-costs', 'finances'],
   check: (payments, ctx) => {
-    const minValidRate = 0.01; // Minimum valid rate (must be positive)
+    // Only check exchange rates if organization has multiple currencies
+    if (!ctx.isMultiCurrency) {
+      return null;
+    }
+    
+    const minValidRate = 1.01; // Minimum valid rate (must be > 1)
     
     const affected = payments.filter(p => {
-      const isForeignCurrency = p.currencyId && ctx.defaultCurrencyId && p.currencyId !== ctx.defaultCurrencyId;
-      const hasInvalidRate = !p.exchangeRate || p.exchangeRate <= 0 || p.exchangeRate < minValidRate;
-      return isForeignCurrency && hasInvalidRate;
+      // When multi-currency, all payments must have valid exchange rate (> 1)
+      const hasInvalidRate = !p.exchangeRate || p.exchangeRate <= 1;
+      return hasInvalidRate;
     });
     
     if (affected.length === 0) return null;
@@ -52,8 +57,8 @@ export const paymentsMissingExchangeRateRule: DataHealthRule<NormalizedPayment> 
     return {
       id: `${ctx.organizationId}-payments-missing-exchange-rate`,
       ruleId: 'payments-missing-exchange-rate',
-      title: `pago${affected.length > 1 ? 's' : ''} sin cotización válida`,
-      description: `Tu organización opera con múltiples monedas. ${affected.length} pago${affected.length > 1 ? 's' : ''} está${affected.length > 1 ? 'n' : ''} registrado${affected.length > 1 ? 's' : ''} en moneda extranjera pero no ${affected.length > 1 ? 'tienen' : 'tiene'} cotización válida (debe ser mayor a 1). Sin esta información, el sistema no puede convertir correctamente los montos a la moneda base.\n\nEjemplos de cotización válida:\n• Si tu moneda base es ARS: 1 USD = 1400 ARS\n• Si tu moneda base es USD: 1 ARS = 0.0007 USD\n\nSin la cotización correcta, los totales del balance y los reportes financieros serán incorrectos.`,
+      title: `${affected.length} pago${affected.length > 1 ? 's' : ''} sin cotización válida`,
+      description: `Tu organización opera con múltiples monedas. ${affected.length} pago${affected.length > 1 ? 's' : ''} no ${affected.length > 1 ? 'tienen' : 'tiene'} cotización válida (debe ser mayor a 1). Sin esta información, el sistema no puede convertir correctamente los montos a la moneda base.\n\nEjemplos de cotización válida:\n• Si tu moneda base es ARS: 1 USD = 1400 ARS\n• Si tu moneda base es USD: 1 ARS = 0.0007 USD\n\nSin la cotización correcta, los totales del balance y los reportes financieros serán incorrectos.`,
       severity: 'critical',
       affectedCount: affected.length,
       affectedEntities: affected.slice(0, 5).map(p => ({ 
@@ -62,7 +67,7 @@ export const paymentsMissingExchangeRateRule: DataHealthRule<NormalizedPayment> 
       })),
       recommendedAction: {
         label: 'Configurar cotización',
-        description: 'Editar cada pago y establecer la cotización correcta del tipo de cambio. La cotización se utiliza para convertir correctamente el monto a la moneda base de tu organización.',
+        description: 'Editar cada pago y establecer la cotización correcta del tipo de cambio (debe ser mayor a 1). La cotización se utiliza para convertir correctamente el monto a la moneda base de tu organización.',
         actionType: 'bulk_edit',
         targetIds: affected.map(p => p.id),
       },
