@@ -14,7 +14,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { useGeneralCosts } from "@/features/general-costs/hooks/use-general-costs";
 import { useDeleteGeneralCost } from "@/features/general-costs/hooks/use-delete-general-cost";
 import { useReplaceGeneralCost } from "@/features/general-costs/hooks/use-replace-general-cost";
-import { useGeneralCostsPayments } from "@/hooks/use-general-costs-payments";
+import { useGeneralCostsPayments } from "../hooks/use-general-costs-payments";
 import GeneralCostRow from "@/features/finances/components/GeneralCostRow";
 import type { GeneralCost } from "@/features/general-costs/types";
 import { useActionBarMobile } from '@/layouts';
@@ -28,7 +28,7 @@ interface GeneralCostsListProps {
   onNewGeneralCost?: () => void;
 }
 
-export default function GeneralCostsList({ onNewGeneralCost }: GeneralCostsListProps) {
+export default function GeneralCostsConceptsView({ onNewGeneralCost }: GeneralCostsListProps) {
   const { data: userData } = useCurrentUser();
   const { openModal } = useGlobalModalStore();
   const organizationId = userData?.organization?.id || null;

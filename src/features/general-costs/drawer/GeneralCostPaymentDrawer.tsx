@@ -1,9 +1,9 @@
 import { DollarSign } from 'lucide-react'
-import { GeneralCostPaymentFormFields } from './GeneralCostPaymentFormFields'
+import { GeneralCostPaymentFormFields } from '../forms/GeneralCostPaymentFormFields'
 import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
 
-interface GeneralCostPaymentFormDrawerContentProps {
+interface GeneralCostPaymentDrawerProps {
   modalData?: any
   organizationId?: string
   paymentId?: string
@@ -11,13 +11,13 @@ interface GeneralCostPaymentFormDrawerContentProps {
   onClose: () => void
 }
 
-export default function GeneralCostPaymentFormDrawerContent({ 
+export default function GeneralCostPaymentDrawer({ 
   modalData, 
   organizationId: orgIdProp, 
   paymentId: paymentIdProp, 
   mode: modeProp, 
   onClose 
-}: GeneralCostPaymentFormDrawerContentProps) {
+}: GeneralCostPaymentDrawerProps) {
   const formRef = useRef<HTMLFormElement>(null)
   
   const organizationId = orgIdProp || modalData?.organizationId

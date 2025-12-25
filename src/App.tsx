@@ -91,7 +91,7 @@ const Products = lazy(() => import("@/pages/providers/products/Products"));
 import Analysis from "@/pages/professional/analysis/Analysis";
 import TaskView from "@/pages/professional/analysis/TaskView";
 import MaterialsView from "@/pages/professional/analysis/material-costs/MaterialsView";
-import GeneralCosts from "@/pages/general-costs/GeneralCosts";
+import GeneralCostsPage from "@/pages/dashboard/GeneralCostsPage";
 
 // Community Pages
 import Community from "@/pages/community/Community";
@@ -197,7 +197,7 @@ function Router() {
         <Route path="/organization/projects" component={OrganizationProjectsPage} />
         
         {/* General Costs Route */}
-        <Route path="/general-costs" component={GeneralCosts} />
+        <Route path="/general-costs" component={GeneralCostsPage} />
         
         {/* Finances Routes */}
         <Route path="/finances" component={OrganizationFinancesPage} />

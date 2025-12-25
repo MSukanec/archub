@@ -3,8 +3,8 @@
 ## Overview
 Audit and refactor of the GENERAL-COSTS feature to achieve 100% compliance with FEATURE-AUDIT.md standards.
 
-**Date:** 2024-12-24
-**Status:** ✅ COMPLETED
+**Date:** 2024-12-25
+**Status:** ✅ COMPLETED (v2 - Full reorganization)
 
 ---
 
@@ -67,11 +67,22 @@ export const generalCostsKeys = {
 ### 4. File Organization
 | Category | Status | Notes |
 |----------|--------|-------|
-| views/ folder | ✅ | Created `src/features/general-costs/views/` |
-| GeneralCostDetailView.tsx | ✅ | Moved from forms/ |
-| GeneralCostPaymentDetailView.tsx | ✅ | Moved from forms/, fixed Badge variants |
-| Forms remain in forms/ | ✅ | GeneralCostForm, GeneralCostPaymentForm, etc. |
-| Modal registry updated | ✅ | `registerModals.ts` uses new paths |
+| Page file | ✅ | `src/pages/dashboard/GeneralCostsPage.tsx` |
+| views/ folder | ✅ | `src/features/general-costs/views/` with 6 views |
+| drawer/ folder | ✅ | `src/features/general-costs/drawer/` |
+| Forms in forms/ | ✅ | GeneralCostForm.tsx, GeneralCostPaymentForm.tsx, etc. |
+| Modal registry | ✅ | Uses new view paths |
+
+**Views Structure:**
+- `GeneralCostsDashboardView.tsx` - Main dashboard with KPIs
+- `GeneralCostsConceptsView.tsx` - General costs concepts list
+- `GeneralCostsPaymentsView.tsx` - Payments list with filters
+- `GeneralCostsSettingsView.tsx` - Categories management
+- `GeneralCostDetailView.tsx` - Single cost detail modal
+- `GeneralCostPaymentDetailView.tsx` - Single payment detail modal
+
+**Drawer Structure:**
+- `GeneralCostPaymentDrawer.tsx` - Payment form in drawer format
 
 ### 5. Performance Standards
 | Metric | Target | Status |
@@ -93,45 +104,37 @@ export const generalCostsKeys = {
 ### 7. Page Architecture
 | Item | Status | Notes |
 |------|--------|-------|
-| Pages exist in src/pages/ | ✅ | `src/pages/general-costs/` |
-| Page/View separation | ✅ | GeneralCosts.tsx is page, tabs are views |
+| Page in src/pages/dashboard/ | ✅ | `GeneralCostsPage.tsx` |
+| Page ends with Page.tsx | ✅ | Renamed from GeneralCosts.tsx |
+| Views in features/views/ | ✅ | All 4 tab views + 2 detail views |
+| Views end with View.tsx | ✅ | Renamed from *Tab.tsx |
+| Drawer in features/drawer/ | ✅ | `GeneralCostPaymentDrawer.tsx` |
 | Uses Layout components | ✅ | DashboardLayout and LabLayout |
 
 ---
 
 ## Files Modified
 
-### New Files
-- `src/core/query-keys/general-costs.keys.ts`
-- `src/features/general-costs/views/GeneralCostDetailView.tsx` (moved)
-- `src/features/general-costs/views/GeneralCostPaymentDetailView.tsx` (moved)
+### New/Moved Files
+- `src/core/query-keys/general-costs.keys.ts` - Centralized query keys factory
+- `src/pages/dashboard/GeneralCostsPage.tsx` - Page file (moved from src/pages/general-costs/)
+- `src/features/general-costs/views/GeneralCostsDashboardView.tsx` - Dashboard view
+- `src/features/general-costs/views/GeneralCostsConceptsView.tsx` - Concepts view
+- `src/features/general-costs/views/GeneralCostsPaymentsView.tsx` - Payments view
+- `src/features/general-costs/views/GeneralCostsSettingsView.tsx` - Settings view
+- `src/features/general-costs/views/GeneralCostDetailView.tsx` - Detail view
+- `src/features/general-costs/views/GeneralCostPaymentDetailView.tsx` - Payment detail view
+- `src/features/general-costs/drawer/GeneralCostPaymentDrawer.tsx` - Drawer form
 
 ### Modified Files
+- `src/App.tsx` - Updated import path for GeneralCostsPage
 - `src/core/query-keys/index.ts` - Added export
-- `src/features/general-costs/hooks/use-general-costs.ts`
-- `src/features/general-costs/hooks/use-general-cost.ts`
-- `src/features/general-costs/hooks/use-create-general-cost.ts`
-- `src/features/general-costs/hooks/use-update-general-cost.ts`
-- `src/features/general-costs/hooks/use-delete-general-cost.ts`
-- `src/features/general-costs/hooks/use-replace-general-cost.ts`
-- `src/features/general-costs/hooks/use-general-costs-payments.ts`
-- `src/features/general-costs/hooks/use-general-cost-payment.ts`
-- `src/features/general-costs/hooks/use-create-general-cost-payment.ts`
-- `src/features/general-costs/hooks/use-update-general-cost-payment.ts`
-- `src/features/general-costs/hooks/use-delete-general-cost-payment.ts`
-- `src/features/general-costs/hooks/use-general-cost-payment-media.ts`
-- `src/features/general-costs/hooks/use-general-cost-categories.ts`
-- `src/features/general-costs/hooks/use-replace-general-cost-category.ts`
-- `src/features/general-costs/hooks/use-general-costs-metrics.ts`
-- `src/features/general-costs/hooks/use-general-costs-monthly-summary.ts`
-- `src/features/general-costs/hooks/use-general-costs-by-category.ts`
-- `src/features/general-costs/forms/GeneralCostCategoryForm.tsx`
-- `src/components/modal/factory/registerModals.ts`
-- `src/pages/general-costs/GeneralCosts.tsx`
+- `src/features/general-costs/index.ts` - Added generalCostsKeys export
+- All hooks in `src/features/general-costs/hooks/` - Migrated to useOptimisticMutation
+- `src/components/modal/factory/registerModals.ts` - Updated view paths
 
-### Deleted Files
-- `src/features/general-costs/forms/GeneralCostView.tsx` (moved to views/)
-- `src/features/general-costs/forms/GeneralCostPaymentView.tsx` (moved to views/)
+### Deleted Directories
+- `src/pages/general-costs/` - Entire directory removed (files moved)
 
 ---
 

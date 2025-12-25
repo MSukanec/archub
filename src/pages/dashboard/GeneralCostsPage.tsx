@@ -3,16 +3,16 @@ import { Layout } from "@/layouts/dashboard/DashboardLayout"
 import { LabLayout } from "@/layouts/lab/LabLayout"
 import { useNavigationStore } from '@/stores/navigationStore'
 import { CreditCard, Plus, Calendar, ChevronDown } from 'lucide-react'
-import GeneralCostsDashboardTab, { calculateAvailablePeriods } from './GeneralCostsDashboardTab'
-import GeneralCostsConceptsTab from './GeneralCostsConceptsTab'
-import GeneralCostsPaymentsTab from './GeneralCostsPaymentsTab'
-import GeneralCostsSettingsTab from './GeneralCostsSettingsTab'
+import GeneralCostsDashboardView, { calculateAvailablePeriods } from '@/features/general-costs/views/GeneralCostsDashboardView'
+import GeneralCostsConceptsView from '@/features/general-costs/views/GeneralCostsConceptsView'
+import GeneralCostsPaymentsView from '@/features/general-costs/views/GeneralCostsPaymentsView'
+import GeneralCostsSettingsView from '@/features/general-costs/views/GeneralCostsSettingsView'
 import { useGlobalModalStore } from '@/components/modal'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useGeneralCosts } from '@/features/general-costs/hooks/use-general-costs'
 import { useGeneralCostsPayments } from '@/features/general-costs/hooks/use-general-costs-payments'
 import { useLabDrawerStore } from '@/layouts/lab/stores/useLabDrawerStore'
-import GeneralCostPaymentFormDrawerContent from '@/features/general-costs/forms/GeneralCostPaymentFormDrawerContent'
+import GeneralCostPaymentDrawer from '@/features/general-costs/drawer/GeneralCostPaymentDrawer'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
@@ -39,7 +39,7 @@ export interface DrillDownFilters {
   filterCategory?: string;
 }
 
-export default function GeneralCosts() {
+export default function GeneralCostsPage() {
   const { setSidebarContext } = useNavigationStore()
   const { openModal } = useGlobalModalStore()
   const { openDrawer, closeDrawer } = useLabDrawerStore()
@@ -87,7 +87,7 @@ export default function GeneralCosts() {
         title: 'Nuevo Pago de Gastos Generales',
         subtitle: 'Registra un nuevo pago de gastos generales',
         content: (
-          <GeneralCostPaymentFormDrawerContent
+          <GeneralCostPaymentDrawer
             organizationId={userData?.organization?.id}
             onClose={closeDrawer}
           />
@@ -105,7 +105,7 @@ export default function GeneralCosts() {
     switch (activeTab) {
       case 'dashboard':
         return (
-          <GeneralCostsDashboardTab 
+          <GeneralCostsDashboardView 
             onNavigateToConceptos={() => setActiveTab('conceptos')} 
             onNavigateToPayments={() => setActiveTab('pagos')}
             onNavigateToTab={(tab, filters) => {
@@ -127,10 +127,10 @@ export default function GeneralCosts() {
           />
         )
       case 'conceptos':
-        return <GeneralCostsConceptsTab onNewGeneralCost={handleNewGeneralCost} />
+        return <GeneralCostsConceptsView onNewGeneralCost={handleNewGeneralCost} />
       case 'pagos':
         return (
-          <GeneralCostsPaymentsTab 
+          <GeneralCostsPaymentsView 
             initialFilterMonth={drillDownFilters.filterMonth}
             initialFilterGeneralCost={drillDownFilters.filterGeneralCost}
             initialFilterCategory={drillDownFilters.filterCategory}
@@ -138,10 +138,10 @@ export default function GeneralCosts() {
           />
         )
       case 'ajustes':
-        return <GeneralCostsSettingsTab />
+        return <GeneralCostsSettingsView />
       default:
         return (
-          <GeneralCostsDashboardTab 
+          <GeneralCostsDashboardView 
             onNavigateToConceptos={() => setActiveTab('conceptos')} 
             onNavigateToPayments={() => setActiveTab('pagos')}
             onNavigateToTab={(tab, filters) => {

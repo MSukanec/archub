@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getGeneralCostCategoryUsageCount } from '@/features/general-costs/services/generalCostCategories';
 import type { GeneralCostCategory } from '@/features/general-costs/types';
 
-export default function GeneralCostsSettingsTab() {
+export default function GeneralCostsSettingsView() {
   const { toast } = useToast();
   const { data: userData } = useCurrentUser();
   const organizationId = userData?.organization?.id ?? null;

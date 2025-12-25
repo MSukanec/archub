@@ -5,9 +5,9 @@ import { calculateMonetaryKPI, calculateCountKPI, calculateTextKPI, formatBreakd
 import { format, convertToBaseCurrency } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency, useOrgCurrencyContext } from '@/hooks/use-currencies';
-import { useGeneralCostsPayments } from '@/hooks/use-general-costs-payments';
-import { useGeneralCostsMonthlySummary } from '@/features/general-costs/hooks/use-general-costs-monthly-summary';
-import { useGeneralCostsByCategory } from '@/features/general-costs/hooks/use-general-costs-by-category';
+import { useGeneralCostsPayments } from '../hooks/use-general-costs-payments';
+import { useGeneralCostsMonthlySummary } from '../hooks/use-general-costs-monthly-summary';
+import { useGeneralCostsByCategory } from '../hooks/use-general-costs-by-category';
 import { 
   StatCard, 
   StatCardTitle, 
@@ -35,7 +35,7 @@ import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatDateShort, parseLocalDate } from '@/lib/date-utils';
-import { type PeriodFilter } from './GeneralCosts';
+import { type PeriodFilter } from '@/pages/dashboard/GeneralCostsPage';
 
 interface GeneralCostsDashboardTabProps {
   onNavigateToConceptos?: () => void;
@@ -150,7 +150,7 @@ export function calculateAvailablePeriods(allPayments: any[]): Record<PeriodFilt
   return result;
 }
 
-export default function GeneralCostsDashboardTab({ 
+export default function GeneralCostsDashboardView({ 
   onNavigateToConceptos, 
   onNavigateToPayments,
   onNavigateToTab,
