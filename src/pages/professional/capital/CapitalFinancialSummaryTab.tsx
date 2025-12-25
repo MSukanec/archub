@@ -11,7 +11,7 @@ import { WalletCurrencyBalanceTable } from '@/components/charts/legacy/WalletCur
 import { formatDateShort } from '@/lib/date-utils'
 import { Link } from 'wouter'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { CapitalChart } from '@/components/charts/organization/dashboard/CapitalChart'
+import { CapitalChart } from '@/components/charts/legacy/CapitalChart'
 import { useMovements } from '@/hooks/use-movements'
 import { useMovementKPIs } from '@/hooks/use-movement-kpis'
 
