@@ -2,6 +2,8 @@ export * from './types';
 export * from './constants';
 export * from './schemas';
 
+export { generalCostsKeys } from '@/core/query-keys/general-costs.keys';
+
 export * from './services/getGeneralCosts';
 export * from './services/getGeneralCost';
 export * from './services/createGeneralCost';

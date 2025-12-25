@@ -23,7 +23,7 @@ import { useActionBarMobile } from '@/layouts';
 import { useMobile } from '@/hooks/use-mobile';
 import { parseLocalDate } from '@/lib/date-utils';
 import { useOrganizationWallets, useOrganizationMembers } from '@/features/organization/hooks';
-import { useGeneralCosts, useCreateGeneralCostPayment, GENERAL_COSTS_QUERY_KEYS } from '@/features/general-costs';
+import { useGeneralCosts, useCreateGeneralCostPayment, generalCostsKeys } from '@/features/general-costs';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
 import { format as formatMoneyAmount } from '@/lib/money';
@@ -615,11 +615,11 @@ export default function GeneralCostsPaymentsTab({
             });
           }
 
-          // Invalidar cache para refrescar la lista y dashboard
-          if (successCount > 0) {
-            queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.payments() });
-            queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.monthlySummary() });
-            queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.byCategory() });
+          // Invalidar cache para refrescar la lista y dashboard (scoped by organizationId)
+          if (successCount > 0 && organizationId) {
+            queryClient.invalidateQueries({ queryKey: generalCostsKeys.paymentList(organizationId) });
+            queryClient.invalidateQueries({ queryKey: generalCostsKeys.monthlySummaryList(organizationId) });
+            queryClient.invalidateQueries({ queryKey: generalCostsKeys.byCategoryList(organizationId) });
           }
         },
       } as ImportConfig,

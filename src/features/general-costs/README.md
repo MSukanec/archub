@@ -264,21 +264,22 @@ const generalCostPaymentSchema = z.object({
 ## Query Keys (Cache Invalidation)
 
 ```typescript
-const GENERAL_COSTS_QUERY_KEYS = {
+// Centralized in @/core/query-keys/general-costs.keys.ts
+const generalCostsKeys = {
   all: ['general-costs'],
   lists: () => [...all, 'list'],
   list: (orgId) => [...lists(), orgId],
   details: () => [...all, 'detail'],
   detail: (id) => [...details(), id],
   payments: () => [...all, 'payment'],
-  paymentsList: (orgId) => [...payments(), orgId],
+  paymentList: (orgId) => [...payments(), 'list', orgId],
   payment: (id) => [...payments(), id],
   monthlySummary: () => [...all, 'monthly-summary'],
   monthlySummaryList: (orgId) => [...monthlySummary(), orgId],
   byCategory: () => [...all, 'by-category'],
   byCategoryList: (orgId) => [...byCategory(), orgId],
   categories: () => [...all, 'categories'],
-  categoriesList: (orgId) => [...categories(), orgId],
+  categoryList: (orgId) => [...categories(), orgId],
   category: (id) => [...categories(), id],
 };
 ```
@@ -688,11 +689,12 @@ Usar siempre `parseLocalDate()` de `src/lib/date-utils.ts` para evitar problemas
 Obtener con `useOrganizationDefaultCurrency(organizationId)` y usar para conversiones.
 
 ### Cache Invalidation
-Después de mutaciones, invalidar todas las queries relacionadas:
+Después de mutaciones, usar invalidaciones scoped por organizationId:
 ```typescript
-queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.lists() });
-queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.payments() });
-queryClient.invalidateQueries({ queryKey: GENERAL_COSTS_QUERY_KEYS.monthlySummary() });
+// IMPORTANTE: Usar invalidaciones scoped, NUNCA globales
+queryClient.invalidateQueries({ queryKey: generalCostsKeys.list(organizationId) });
+queryClient.invalidateQueries({ queryKey: generalCostsKeys.paymentList(organizationId) });
+queryClient.invalidateQueries({ queryKey: generalCostsKeys.monthlySummaryList(organizationId) });
 ```
 
 ---
