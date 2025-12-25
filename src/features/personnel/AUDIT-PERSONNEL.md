@@ -113,3 +113,27 @@ src/features/personnel/
 - Los archivos legacy (`InsuranceTab`) se exportan como alias para compatibilidad retroactiva
 - La página principal sigue en `src/pages/professional/personnel/` (legacy, fuera de alcance de esta auditoría)
 - Considerar migrar páginas a `src/pages/dashboard/PersonnelPage.tsx` en auditoría futura
+
+---
+
+## 8. EXPORTS ACTUALIZADOS (2025-12-25)
+
+```typescript
+// Patrón CONTACTS aplicado:
+export { 
+  FormPanel as PersonnelPaymentFormPanel,
+  ViewPanel as PersonnelPaymentViewPanel,
+  PersonnelPaymentFormFields   // Wrapper para Drawer/NewMovementModal
+} from './forms/PersonnelPaymentForm';
+
+export { InsuranceView } from './views/InsuranceView';
+export { InsuranceView as InsuranceTab } from './views/InsuranceView'; // Legacy alias
+```
+
+---
+
+## 9. MEJORAS FUTURAS (LOW PRIORITY)
+
+- [ ] Extraer `usePersonnelPaymentForm` hook para desacoplar completamente la lógica
+- [ ] Actualizar PersonnelPaymentModal para consumir FormPanel/ViewPanel directamente
+- [ ] Migrar páginas de `src/pages/professional/personnel/` a `src/pages/dashboard/`
