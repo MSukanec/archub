@@ -61,7 +61,9 @@ export function UserNotificationsView() {
       await markAsRead(notificationId, userId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: usersKeys.notifications(userId || '') });
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: usersKeys.notifications(userId) });
+      }
     },
     onError: () => {
       toast({
@@ -78,7 +80,9 @@ export function UserNotificationsView() {
       await markAllAsRead(userId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: usersKeys.notifications(userId || '') });
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: usersKeys.notifications(userId) });
+      }
       toast({
         title: "Listo",
         description: "Todas las notificaciones han sido marcadas como leídas"
@@ -107,15 +111,15 @@ export function UserNotificationsView() {
   };
 
   const getTypeBadge = (type: string) => {
-    const typeMap: Record<string, { label: string; variant: any }> = {
-      'task_assigned': { label: 'Tarea', variant: 'default' },
-      'task_completed': { label: 'Tarea', variant: 'secondary' },
-      'comment_added': { label: 'Comentario', variant: 'outline' },
-      'mention': { label: 'Mención', variant: 'default' },
-      'system': { label: 'Sistema', variant: 'secondary' },
+    const typeMap: Record<string, { label: string; variant: 'info' | 'success' | 'neutral' | 'pending' | 'warning' }> = {
+      'task_assigned': { label: 'Tarea', variant: 'info' },
+      'task_completed': { label: 'Tarea', variant: 'success' },
+      'comment_added': { label: 'Comentario', variant: 'neutral' },
+      'mention': { label: 'Mención', variant: 'info' },
+      'system': { label: 'Sistema', variant: 'neutral' },
     };
 
-    const config = typeMap[type] || { label: type, variant: 'outline' };
+    const config = typeMap[type] || { label: type, variant: 'neutral' };
     
     return (
       <Badge variant={config.variant} className="text-xs">
