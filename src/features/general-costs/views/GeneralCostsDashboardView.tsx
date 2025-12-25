@@ -26,7 +26,6 @@ import {
 } from '@/components/dashboard';
 import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/lib/analytics';
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
-import { useGeneralCostsDataHealth, DataHealthAlertMulti } from '@/core/data-health';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
 import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
@@ -244,13 +243,6 @@ export default function GeneralCostsDashboardView({
     });
   }, [allPayments, dateFrom]);
 
-  const dataHealth = useGeneralCostsDataHealth(allPayments, {
-    organizationId: organizationId ?? '',
-    defaultCurrencyId: defaultCurrencyId ?? undefined,
-    isMultiCurrency,
-    enabled: !!organizationId && allPayments.length > 0,
-    filterTags: ['general-costs'],
-  });
 
   const filteredMonthlySummary = useMemo(() => {
     if (!dateFrom) return monthlySummary;
@@ -679,15 +671,6 @@ export default function GeneralCostsDashboardView({
 
   return (
     <div className="space-y-6" data-testid="general-costs-dashboard">
-      <DataHealthAlertMulti
-        issues={dataHealth.result?.issues || []}
-        entityLabel="pago"
-        dismissedIssueIds={dismissedIssueIds}
-        onDismissIssue={(issueId: string) => {
-          onDismissIssue?.(issueId);
-        }}
-      />
-
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard data-testid="kpi-total-gasto">
           <StatCardTitle>

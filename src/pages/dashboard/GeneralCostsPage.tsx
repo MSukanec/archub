@@ -355,7 +355,7 @@ export default function GeneralCostsPage() {
             onDismissIssue={(issueId: string) => {
               setDismissedIssueIds(prev => new Set([...Array.from(prev), issueId]));
             }}
-            
+            onToggleFilter={() => setActiveTab('pagos')}
           />
         )}
         {renderView()}
