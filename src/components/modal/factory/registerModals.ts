@@ -24,9 +24,7 @@ import { ProjectModalityModal } from '@/features/projects/modals/ProjectModality
 import { PersonnelAttendanceModal, PersonnelAddModal, PersonnelDataModal, PersonnelRatesModal, AdminLaborModal, PersonnelPaymentModal } from '@/features/personnel';
 import { SubcontractFormModal, SubcontractBidFormModal, SubcontractAwardModal, SubcontractTaskFormModal } from '@/features/subcontracts';
 import { PDFExporterModal } from '@/features/pdf';
-import GeneralCostForm from '@/features/general-costs/forms/GeneralCostForm';
 import GeneralCostModal from '@/features/general-costs/modals/GeneralCostModal';
-import GeneralCostPaymentForm from '@/features/general-costs/forms/GeneralCostPaymentForm';
 import GeneralCostPaymentModal from '@/features/general-costs/modals/GeneralCostPaymentModal';
 import GeneralCostCategoryModal from '@/features/general-costs/modals/GeneralCostCategoryModal';
 import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal, TestimonialForm } from '@/features/learning';
@@ -328,40 +326,52 @@ export function initializeModalRegistry(): void {
     }),
   });
   
-  registerModal('general-costs', GeneralCostForm as any, { 
+  registerModal('generalCost', GeneralCostModal as any, { 
     ...financeConfig, 
-    size: 'md',
-    mapDataToProps: (data) => ({
-      organizationId: data?.organizationId,
-      generalCostId: data?.generalCostId,
-      mode: data?.generalCostId ? (data?.mode || 'edit') : (data?.mode || 'create')
-    })
-  });
-  registerModal('general-costs-view', GeneralCostModal as any, {
-    ...financeConfig,
     size: 'md',
     mapDataToProps: (data) => ({
       modalData: {
         generalCostId: data?.generalCostId,
       },
+      mode: data?.mode || (data?.generalCostId ? 'edit' : 'create')
+    })
+  });
+  registerModal('general-costs', GeneralCostModal as any, { 
+    ...financeConfig, 
+    size: 'md',
+    mapDataToProps: (data) => ({
+      modalData: {
+        generalCostId: data?.generalCostId,
+      },
+      mode: data?.mode || (data?.generalCostId ? 'edit' : 'create')
     })
   });
   
-  registerModal('general-costs-payment', GeneralCostPaymentForm as any, {
+  registerModal('generalCostPayment', GeneralCostPaymentModal as any, {
     ...financeConfig,
     mapDataToProps: (data) => ({
-      organizationId: data?.organizationId,
-      paymentId: data?.paymentId,
-      mode: data?.paymentId ? 'edit' : 'create'
+      modalData: {
+        paymentId: data?.paymentId,
+      },
+      mode: data?.mode || (data?.paymentId ? 'edit' : 'create')
+    })
+  });
+  registerModal('general-costs-payment', GeneralCostPaymentModal as any, {
+    ...financeConfig,
+    mapDataToProps: (data) => ({
+      modalData: {
+        paymentId: data?.paymentId,
+      },
+      mode: data?.mode || (data?.paymentId ? 'edit' : 'create')
     })
   });
   registerModal('general-costs-payment-view', GeneralCostPaymentModal as any, {
     ...financeConfig,
     mapDataToProps: (data) => ({
       modalData: {
-        organizationId: data?.organizationId,
         paymentId: data?.paymentId,
       },
+      mode: 'view'
     })
   });
   registerModal('generalCostCategory', GeneralCostCategoryModal as any, { 

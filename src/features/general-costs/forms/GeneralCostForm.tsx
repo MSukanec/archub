@@ -1,9 +1,7 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Receipt } from 'lucide-react'
 
-import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -18,25 +16,131 @@ import { useUpdateGeneralCost } from '../hooks/use-update-general-cost'
 import { useGeneralCost } from '../hooks/use-general-cost'
 import { useGeneralCosts } from '../hooks/use-general-costs'
 import { generalCostSchema, type GeneralCostFormData } from '../schemas'
+import type { GeneralCost } from '../types'
 
-interface GeneralCostFormProps {
-  modalData?: {
-    organizationId?: string
-    generalCostId?: string
-  }
-  onClose: () => void
-  mode?: 'create' | 'edit'
+interface FormPanelProps {
+  form: ReturnType<typeof useForm<GeneralCostFormData>>
+  categories: any[]
 }
 
-export default function GeneralCostForm({ modalData, onClose, mode = 'create' }: GeneralCostFormProps) {
+export function FormPanel({ form, categories }: FormPanelProps) {
+  return (
+    <Form {...form}>
+      <form className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre *</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: Servicios administrativos, Gastos de oficina..."
+                  {...field}
+                  data-testid="input-general-cost-name"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="category_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categoría</FormLabel>
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger data-testid="select-general-cost-category">
+                    <SelectValue placeholder="Seleccionar categoría (opcional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Sin categoría</SelectItem>
+                    {categories?.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Descripción detallada del gasto general..."
+                  rows={3}
+                  {...field}
+                  data-testid="textarea-general-cost-description"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
+  )
+}
+
+interface ViewPanelProps {
+  generalCost: GeneralCost
+}
+
+export function ViewPanel({ generalCost }: ViewPanelProps) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="text-sm text-muted-foreground mb-1">Nombre</p>
+        <p className="font-medium" data-testid="text-general-cost-name">
+          {generalCost?.name}
+        </p>
+      </div>
+      {generalCost?.description && (
+        <div>
+          <p className="text-sm text-muted-foreground mb-1">Descripción</p>
+          <p className="text-sm whitespace-pre-wrap" data-testid="text-general-cost-description">
+            {generalCost.description}
+          </p>
+        </div>
+      )}
+      {generalCost?.category && (
+        <div>
+          <p className="text-sm text-muted-foreground mb-1">Categoría</p>
+          <p className="text-sm" data-testid="text-general-cost-category">
+            {generalCost.category.name}
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+interface UseGeneralCostFormOptions {
+  generalCostId?: string
+  mode: 'create' | 'edit' | 'view'
+  onSuccess: () => void
+}
+
+export function useGeneralCostForm({ generalCostId, mode, onSuccess }: UseGeneralCostFormOptions) {
   const { toast } = useToast()
   const { data: userData } = useCurrentUser()
-
-  const organizationId = modalData?.organizationId || userData?.organization?.id
+  const organizationId = userData?.organization?.id
 
   const { data: members = [] } = useOrganizationMembers(organizationId || undefined)
-  const { data: existingGeneralCost, isLoading } = useGeneralCost(
-    mode === 'edit' ? modalData?.generalCostId || null : null
+  const { data: existingGeneralCost, isLoading: generalCostLoading } = useGeneralCost(
+    mode === 'edit' || mode === 'view' ? generalCostId || null : null
   )
   const { data: allGeneralCosts = [] } = useGeneralCosts(organizationId || null)
   const { data: categories = [] } = useGeneralCostCategories(organizationId)
@@ -69,11 +173,10 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
       return
     }
 
-    // Verificar si ya existe un gasto general con el mismo nombre
     const normalizedName = data.name.trim().toLowerCase()
     const duplicate = allGeneralCosts.find((gc: any) => {
       const isSameName = gc.name.trim().toLowerCase() === normalizedName
-      const isDifferentId = mode === 'edit' ? gc.id !== modalData?.generalCostId : true
+      const isDifferentId = mode === 'edit' ? gc.id !== generalCostId : true
       return isSameName && isDifferentId
     })
 
@@ -87,10 +190,10 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
     }
 
     try {
-      if (mode === 'edit' && modalData?.generalCostId) {
+      if (mode === 'edit' && generalCostId) {
         await updateMutation.mutateAsync({
-          generalCostId: modalData.generalCostId,
-          organizationId: organizationId!,
+          generalCostId,
+          organizationId,
           generalCost: {
             name: data.name,
             description: data.description || undefined,
@@ -117,7 +220,7 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
         })
       }
 
-      onClose()
+      onSuccess()
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -127,102 +230,12 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
     }
   }
 
-  if (mode === 'edit' && isLoading) {
-    return (
-      <ModalLayout onClose={onClose} size="md">
-        <ModalBody>
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" />
-          </div>
-        </ModalBody>
-      </ModalLayout>
-    )
+  return {
+    form,
+    onSubmit,
+    editingGeneralCost: existingGeneralCost,
+    categories,
+    isSubmitting: createMutation.isPending || updateMutation.isPending,
+    generalCostLoading,
   }
-
-  return (
-    <ModalLayout onClose={onClose} size="md">
-      <ModalHeader
-        title={mode === 'edit' ? 'Editar Gasto General' : 'Nuevo Gasto General'}
-        description={mode === 'edit' ? 'Modifica los datos del gasto general' : 'Agrega un nuevo concepto de gasto para tu organización'}
-        icon={Receipt}
-      />
-
-      <ModalBody>
-        <Form {...form}>
-          <form className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre *</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ej: Servicios administrativos, Gastos de oficina..."
-                      {...field}
-                      data-testid="input-general-cost-name"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="category_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Categoría</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger data-testid="select-general-cost-category">
-                        <SelectValue placeholder="Seleccionar categoría (opcional)" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Sin categoría</SelectItem>
-                        {categories?.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Descripción detallada del gasto general..."
-                      rows={3}
-                      {...field}
-                      data-testid="textarea-general-cost-description"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </form>
-        </Form>
-      </ModalBody>
-
-      <ModalFooter
-        leftLabel="Cancelar"
-        onLeftClick={onClose}
-        submitText={mode === 'create' ? 'Crear' : 'Actualizar'}
-        onSubmit={form.handleSubmit(onSubmit)}
-        isSubmitting={createMutation.isPending || updateMutation.isPending}
-      />
-    </ModalLayout>
-  )
 }

@@ -26,4 +26,6 @@ export * from './hooks/use-delete-general-cost-payment';
 export * from './hooks/use-general-cost-payment';
 export * from './hooks/use-general-cost-payment-media';
 
-export { GeneralCostPaymentFormFields } from './forms/GeneralCostPaymentForm';
+export { FormPanel as GeneralCostFormPanel, ViewPanel as GeneralCostViewPanel, useGeneralCostForm } from './forms/GeneralCostForm';
+export { FormPanel as GeneralCostPaymentFormPanel, ViewPanel as GeneralCostPaymentViewPanel, useGeneralCostPaymentForm, GeneralCostPaymentFormFields } from './forms/GeneralCostPaymentForm';
+export { FormPanel as GeneralCostCategoryFormPanel, ViewPanel as GeneralCostCategoryViewPanel, useCategoryForm } from './forms/GeneralCostCategoryForm';
