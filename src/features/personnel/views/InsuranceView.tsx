@@ -3,12 +3,12 @@ import { Shield, Plus } from 'lucide-react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useInsuranceList } from '@/features/personnel'
 import { useGlobalModalStore } from '@/components/modal'
-import { InsuranceKpis } from './InsuranceKpis'
-import { InsuranceGrid } from './InsuranceGrid'
+import { InsuranceKpis } from '../components/InsuranceKpis'
+import { InsuranceGrid } from '../components/InsuranceGrid'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Button } from '@/components/ui/button'
 
-export function InsuranceTab() {
+export function InsuranceView() {
   const { openModal } = useGlobalModalStore()
   const { data: userData } = useCurrentUser()
   const [statusFilter, setStatusFilter] = useState<string | null>(null)

@@ -14,7 +14,8 @@ import { useGlobalModalStore } from '@/components/modal';
 import { useDeleteConfirmation } from '@/hooks/useDeleteConfirmation';
 import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { useGeneralCostsPayments, useDeleteGeneralCostPayment, type GeneralCostPayment } from '../hooks/use-general-costs-payments';
+import { useGeneralCostsPayments, type GeneralCostPayment } from '../hooks/use-general-costs-payments';
+import { useDeleteGeneralCostPayment } from '../hooks/use-delete-general-cost-payment';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import GeneralCostPaymentRow from '@/features/finances/components/GeneralCostPaymentRow';
@@ -64,14 +65,14 @@ export default function GeneralCostsPaymentsView({
   const [selectedPayments, setSelectedPayments] = useState<GeneralCostPayment[]>([]);
 
   const { data: allPayments = [], isLoading } = useGeneralCostsPayments(organizationId);
-  const deletePaymentMutation = useDeleteGeneralCostPayment();
+  const deletePaymentMutation = useDeleteGeneralCostPayment(organizationId ?? null);
   const { data: defaultCurrency = null } = useOrganizationDefaultCurrency(organizationId);
   
   const { data: organizationWallets = [] } = useOrganizationWallets(organizationId);
   const { data: organizationCurrencies = [] } = useOrganizationCurrencies(organizationId);
   const { data: generalCostsData = [] } = useGeneralCosts(organizationId ?? null);
   const { data: members = [] } = useOrganizationMembers(organizationId);
-  const createPaymentMutation = useCreateGeneralCostPayment();
+  const createPaymentMutation = useCreateGeneralCostPayment(organizationId ?? null);
   const { toast } = useToast();
   const { isMultiCurrency } = useOrgCurrencyContext(organizationId);
 
@@ -229,7 +230,7 @@ export default function GeneralCostsPaymentsView({
       itemName: paymentLabel,
       destructiveActionText: "Eliminar pago",
       onDelete: () => deletePaymentMutation.mutate({
-        paymentId: payment.id,
+        id: payment.id,
         organizationId,
       }),
       isLoading: deletePaymentMutation.isPending
@@ -254,7 +255,7 @@ export default function GeneralCostsPaymentsView({
         for (const payment of selectedPayments) {
           try {
             await deletePaymentMutation.mutateAsync({
-              paymentId: payment.id,
+              id: payment.id,
               organizationId,
             });
             successCount++;
@@ -680,7 +681,7 @@ export default function GeneralCostsPaymentsView({
           payment_date: p.payment_date,
           amount: p.amount,
           exchange_rate: p.exchange_rate,
-          status: p.status,
+          status: p.status === 'void' ? 'cancelled' : p.status === 'rejected' ? 'cancelled' : p.status as 'confirmed' | 'pending' | 'overdue' | 'cancelled',
           reference: p.reference,
           notes: p.notes,
           currency_symbol: p.currency?.symbol,
@@ -950,15 +951,15 @@ export default function GeneralCostsPaymentsView({
       label: 'Estado',
       sortable: true,
       render: (payment: GeneralCostPayment) => {
-        const validStatus = (payment.status === 'confirmed' || payment.status === 'pending' || payment.status === 'overdue' || payment.status === 'cancelled')
+        const mappedStatus = (payment.status === 'confirmed' || payment.status === 'pending')
           ? payment.status
-          : 'cancelled';
+          : (payment.status === 'void' || payment.status === 'rejected') ? 'cancelled' : 'pending';
         return (
           <Badge 
-            variant="default"
-            style={getStatusBadgeStyle(validStatus)}
+            variant="neutral"
+            style={getStatusBadgeStyle(mappedStatus)}
           >
-            {getStatusLabel(validStatus)}
+            {getStatusLabel(mappedStatus)}
           </Badge>
         );
       },

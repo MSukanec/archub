@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { Users } from 'lucide-react'
 import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@/components/modal'
-import { PersonnelPaymentFormFields } from '../forms/PersonnelPaymentFormFields'
+import { PersonnelPaymentFormFields } from '../forms/PersonnelPaymentForm'
 
 interface PersonnelPaymentModalProps {
   modalData?: {

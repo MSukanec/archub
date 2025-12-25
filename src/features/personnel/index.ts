@@ -12,8 +12,10 @@ export * from './types';
 // Export constants
 export * from './constants';
 
+// Export views
+export { InsuranceView, InsuranceView as InsuranceTab } from './views/InsuranceView';
+
 // Export components
-export { InsuranceTab } from './components/InsuranceTab';
 export { InsuranceKpis } from './components/InsuranceKpis';
 export { InsuranceGrid } from './components/InsuranceGrid';
 export { InsuranceActions } from './components/InsuranceActions';
@@ -27,7 +29,7 @@ export { AdminLaborModal } from './modals/admin/AdminLaborModal';
 
 // Export modals (nuevo patrón agnóstico)
 export { PersonnelPaymentModal } from './modals/PersonnelPaymentModal';
-export { PersonnelPaymentFormFields } from './forms/PersonnelPaymentFormFields';
+export { PersonnelPaymentFormFields } from './forms/PersonnelPaymentForm';
 
 // Export utils
 export { getPersonnelPaymentStatusBadgeConfig } from './utils/statusBadge';
