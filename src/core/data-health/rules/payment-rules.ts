@@ -44,8 +44,6 @@ export const paymentsMissingExchangeRateRule: DataHealthRule<NormalizedPayment> 
       return null;
     }
     
-    const minValidRate = 1.01; // Minimum valid rate (must be > 1)
-    
     const affected = payments.filter(p => {
       // When multi-currency, all payments must have valid exchange rate (> 1)
       const hasInvalidRate = !p.exchangeRate || p.exchangeRate <= 1;
