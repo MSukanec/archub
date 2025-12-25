@@ -41,7 +41,7 @@ export default function GeneralCostsSettingsView() {
     try {
       const usageCount = await getGeneralCostCategoryUsageCount(category.id);
       
-      const otherCategories = categories.filter(c => c.id !== category.id && !c.is_system);
+      const otherCategories = categories.filter(c => c.id !== category.id);
       const canReplace = usageCount > 0 && otherCategories.length > 0;
 
       const consequences: string[] = [];

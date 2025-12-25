@@ -213,7 +213,7 @@ export function useCategoryForm({ category, mode: initialMode, onSuccess }: UseC
           },
         });
       } else {
-        const otherCategories = allCategories.filter((c) => c.id !== category.id && !c.is_system);
+        const otherCategories = allCategories.filter((c) => c.id !== category.id);
 
         if (otherCategories.length === 0) {
           toast({
