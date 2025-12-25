@@ -11,7 +11,7 @@ import { ClientPaymentFormFields } from '@/features/clients/forms/ClientPaymentF
 import { MaterialPaymentFormFields } from '@/features/materials/forms/MaterialPaymentFormFields'
 import { PersonnelPaymentFormFields } from '@/features/personnel/forms/PersonnelPaymentFormFields'
 import { PartnerContributionFormFields, PartnerWithdrawalFormFields } from '@/features/capital'
-import { GeneralCostPaymentFormFields } from '@/features/general-costs/forms/GeneralCostPaymentFormFields'
+import { GeneralCostPaymentFormFields } from '@/features/general-costs/forms/GeneralCostPaymentForm'
 import { WalletTransferFormFields } from '../forms/WalletTransferFormFields'
 import { CurrencyExchangeFormFields } from '../forms/CurrencyExchangeFormFields'
 

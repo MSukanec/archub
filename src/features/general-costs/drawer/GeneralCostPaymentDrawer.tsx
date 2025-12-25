@@ -1,5 +1,5 @@
 import { DollarSign } from 'lucide-react'
-import { GeneralCostPaymentFormFields } from '../forms/GeneralCostPaymentFormFields'
+import { GeneralCostPaymentFormFields } from '../forms/GeneralCostPaymentForm'
 import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
 

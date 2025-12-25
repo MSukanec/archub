@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
+import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useOrganizationCurrencies, useOrgCurrencyContext } from '@/hooks/use-currencies'
@@ -631,5 +632,279 @@ export default function GeneralCostPaymentForm({
         </Form>
       </ModalBody>
     </ModalLayout>
+  )
+}
+
+export interface GeneralCostPaymentFormFieldsProps {
+  projectId?: string;
+  organizationId?: string;
+  paymentId?: string;
+  mode: 'create' | 'edit';
+  onSuccess: () => void;
+  onCancel: () => void;
+  hideActions?: boolean;
+  formRef?: React.RefObject<HTMLFormElement>;
+}
+
+export function GeneralCostPaymentFormFields({
+  organizationId: orgIdProp,
+  paymentId,
+  mode,
+  onSuccess,
+  onCancel,
+  hideActions = false,
+  formRef,
+}: GeneralCostPaymentFormFieldsProps) {
+  const { data: userData } = useCurrentUser()
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  
+  const organizationId = orgIdProp || userData?.organization?.id
+  const orgCurrencyContext = useOrgCurrencyContext(organizationId)
+
+  const [filesToUpload, setFilesToUpload] = useState<any[]>([])
+  const [existingFiles, setExistingFiles] = useState<any[]>([])
+  const [openDatePicker, setOpenDatePicker] = useState(false)
+
+  const form = useForm<GeneralCostPaymentFormData>({
+    resolver: zodResolver(generalCostPaymentSchema),
+    defaultValues: {
+      payment_date: new Date(),
+      general_cost_id: '',
+      currency_id: '',
+      wallet_id: '',
+      amount: 0,
+      exchange_rate: undefined,
+      notes: '',
+      reference: '',
+      status: 'confirmed',
+    },
+  })
+
+  const { data: existingPayment, isLoading: loadingPayment, isSuccess: paymentLoaded } = useGeneralCostPayment(
+    mode === 'edit' ? paymentId : undefined,
+    organizationId
+  )
+  const { data: mediaFiles = [] } = useGeneralCostPaymentMedia(mode === 'edit' ? paymentId : undefined)
+  const { data: currencies, isLoading: currenciesLoading } = useOrganizationCurrencies(organizationId)
+  const { data: generalCosts, isLoading: generalCostsLoading } = useGeneralCosts(organizationId || null)
+  const { data: wallets, isLoading: walletsLoading } = useOrganizationWallets(organizationId)
+  const { data: members = [] } = useOrganizationMembers(organizationId)
+
+  const visibility = getCurrencyFieldsVisibility({
+    context: orgCurrencyContext,
+    selectedCurrencyId: form.watch('currency_id')
+  })
+
+  const isLoading = currenciesLoading || generalCostsLoading || walletsLoading || (mode === 'edit' && loadingPayment) || orgCurrencyContext.isLoading
+
+  const hasLoadedPaymentRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (mode !== 'edit' || !paymentLoaded || !existingPayment) return
+    if (hasLoadedPaymentRef.current === paymentId) return
+    
+    hasLoadedPaymentRef.current = paymentId ?? null
+    
+    let paymentDate: Date
+    if (existingPayment.payment_date) {
+      const [year, month, day] = existingPayment.payment_date.split('-').map(Number)
+      paymentDate = new Date(year, month - 1, day)
+    } else {
+      paymentDate = new Date()
+    }
+    
+    form.reset({
+      payment_date: paymentDate,
+      general_cost_id: existingPayment.general_cost?.id || '',
+      currency_id: existingPayment.currency?.id || '',
+      wallet_id: existingPayment.wallet?.id || '',
+      amount: existingPayment.amount || 0,
+      exchange_rate: existingPayment.exchange_rate ?? undefined,
+      notes: existingPayment.notes || '',
+      reference: existingPayment.reference || '',
+      status: (existingPayment.status || 'confirmed') as 'pending' | 'confirmed' | 'rejected' | 'void',
+    })
+  }, [paymentId, paymentLoaded, existingPayment, mode, form])
+
+  const mediaFilesRef = useRef<string>('')
+  useEffect(() => {
+    const currentMediaIds = (mediaFiles || []).map((f: any) => f.id).sort().join(',')
+    if (mediaFilesRef.current === currentMediaIds) return
+    mediaFilesRef.current = currentMediaIds
+
+    if (mediaFiles && mediaFiles.length > 0) {
+      setExistingFiles(mediaFiles)
+    } else {
+      setExistingFiles([])
+    }
+  }, [mediaFiles])
+
+  const hasSetDefaultsRef = useRef(false)
+  useEffect(() => {
+    if (mode !== 'create' || paymentId || hasSetDefaultsRef.current) return
+    
+    if (currencies && currencies.length > 0 && wallets && wallets.length > 0) {
+      hasSetDefaultsRef.current = true
+      
+      const defaultCurrency = currencies.find((c) => c.is_default)?.currency?.id
+      if (defaultCurrency) {
+        form.setValue('currency_id', defaultCurrency)
+      } else if (currencies[0].currency?.id) {
+        form.setValue('currency_id', currencies[0].currency?.id)
+      }
+      
+      const defaultWallet = wallets.find((w) => w.is_default)
+      if (defaultWallet && defaultWallet.id) {
+        form.setValue('wallet_id', defaultWallet.id)
+      } else if (wallets[0].id) {
+        form.setValue('wallet_id', wallets[0].id)
+      }
+    }
+  }, [currencies, wallets, mode, paymentId, form])
+
+  const createPaymentMutation = useCreateGeneralCostPayment()
+  const updatePaymentMutation = useUpdateGeneralCostPayment()
+
+  const handleExistingFileDelete = async (fileId: string) => {
+    try {
+      await deleteFile(fileId, false)
+      queryClient.invalidateQueries({ queryKey: ['general-cost-payment-media', paymentId] })
+      toast({
+        title: 'Archivo eliminado',
+        description: 'El archivo ha sido eliminado correctamente',
+      })
+    } catch (error: any) {
+      toast({
+        title: 'Error al eliminar archivo',
+        description: error.message,
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const currentMember = useMemo(() => {
+    return members.find((m: any) => m.user_id === userData?.user?.id)
+  }, [members, userData?.user?.id])
+
+  const isSubmitting = createPaymentMutation.isPending || updatePaymentMutation.isPending
+
+  const onSubmit = async (data: GeneralCostPaymentFormData) => {
+    if (!organizationId || !userData?.user?.id) {
+      toast({ title: 'Error', description: 'Organization ID or User ID not found', variant: 'destructive' })
+      return
+    }
+
+    if (!data.wallet_id) {
+      toast({ title: 'Error', description: 'Wallet ID is required', variant: 'destructive' })
+      return
+    }
+
+    const selectedWallet = wallets?.find((w) => w.id === data.wallet_id)
+    if (!selectedWallet) {
+      toast({ title: 'Error', description: `Wallet with ID ${data.wallet_id} not found`, variant: 'destructive' })
+      return
+    }
+
+    if (!currentMember) {
+      toast({ title: 'Error', description: 'No se encontró el miembro de la organización', variant: 'destructive' })
+      return
+    }
+
+    const paymentData = {
+      organization_id: organizationId,
+      payment_date: data.payment_date.toISOString().split('T')[0],
+      currency_id: data.currency_id,
+      wallet_id: data.wallet_id,
+      amount: data.amount,
+      notes: data.notes || null,
+      exchange_rate: data.exchange_rate ?? undefined,
+      reference: data.reference || null,
+      general_cost_id: data.general_cost_id || null,
+      status: data.status || 'confirmed',
+      created_by: currentMember.id,
+    }
+
+    try {
+      let savedPaymentId = paymentId
+
+      if (mode === 'edit' && paymentId) {
+        await updatePaymentMutation.mutateAsync({
+          id: paymentId,
+          organizationId: organizationId,
+          updates: paymentData,
+        })
+      } else {
+        const result = await createPaymentMutation.mutateAsync(paymentData)
+        savedPaymentId = result.id
+      }
+
+      if (filesToUpload.length > 0 && savedPaymentId) {
+        for (const fileInput of filesToUpload) {
+          try {
+            await uploadFile(fileInput.file, {
+              entity: 'general_cost_payment_attachment',
+              organization_id: organizationId,
+              created_by_member_id: currentMember.id,
+              link_to: { general_cost_payment_id: savedPaymentId },
+              category: 'document',
+              description: fileInput.description || fileInput.file.name,
+            })
+          } catch (uploadError: any) {
+            toast({ title: 'Error al subir archivo', description: uploadError.message, variant: 'destructive' })
+          }
+        }
+        queryClient.invalidateQueries({ queryKey: ['general-cost-payment-media', savedPaymentId] })
+        setFilesToUpload([])
+      }
+
+      toast({
+        title: mode === 'edit' ? 'Pago actualizado' : 'Pago creado',
+        description: mode === 'edit' ? 'El pago ha sido actualizado correctamente' : 'El pago ha sido creado correctamente',
+      })
+
+      onSuccess()
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Error al guardar el pago', variant: 'destructive' })
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form
+        ref={formRef}
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="w-full space-y-4"
+        data-testid="general-cost-payment-form-fields"
+      >
+        <FormPanel
+          form={form}
+          currencies={currencies || []}
+          currenciesLoading={currenciesLoading}
+          wallets={wallets || []}
+          walletsLoading={walletsLoading}
+          generalCosts={generalCosts || []}
+          generalCostsLoading={generalCostsLoading}
+          isLoading={isLoading}
+          filesToUpload={filesToUpload}
+          setFilesToUpload={setFilesToUpload}
+          existingFiles={existingFiles}
+          onExistingFileDelete={handleExistingFileDelete}
+          openDatePicker={openDatePicker}
+          setOpenDatePicker={setOpenDatePicker}
+          visibility={visibility}
+        />
+
+        {!hideActions && (
+          <div className="flex gap-2 pt-4 border-t">
+            <Button type="button" variant="secondary" onClick={onCancel} className="flex-1">
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={isSubmitting} className="flex-[3]">
+              {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Actualizar Pago' : 'Guardar Pago'}
+            </Button>
+          </div>
+        )}
+      </form>
+    </Form>
   )
 }
