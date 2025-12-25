@@ -5,7 +5,6 @@ import { Table, Column } from '@/components/shared/table'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
-import InstallmentDetailCard from '@/components/ui/cards/InstallmentDetailCard'
 import { Receipt, Plus, Wallet } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
