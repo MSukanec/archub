@@ -56,8 +56,8 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
     }
   }, [existingGeneralCost, form])
 
-  const createMutation = useCreateGeneralCost()
-  const updateMutation = useUpdateGeneralCost()
+  const createMutation = useCreateGeneralCost(organizationId || null)
+  const updateMutation = useUpdateGeneralCost(organizationId || null)
 
   const onSubmit = async (data: GeneralCostFormData) => {
     if (!organizationId) {
@@ -90,6 +90,7 @@ export default function GeneralCostForm({ modalData, onClose, mode = 'create' }:
       if (mode === 'edit' && modalData?.generalCostId) {
         await updateMutation.mutateAsync({
           generalCostId: modalData.generalCostId,
+          organizationId: organizationId!,
           generalCost: {
             name: data.name,
             description: data.description || undefined,
