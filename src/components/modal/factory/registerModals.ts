@@ -25,9 +25,9 @@ import { PersonnelAttendanceModal, PersonnelAddModal, PersonnelDataModal, Person
 import { SubcontractFormModal, SubcontractBidFormModal, SubcontractAwardModal, SubcontractTaskFormModal } from '@/features/subcontracts';
 import { PDFExporterModal } from '@/features/pdf';
 import GeneralCostForm from '@/features/general-costs/forms/GeneralCostForm';
-import GeneralCostDetailView from '@/features/general-costs/views/GeneralCostDetailView';
+import GeneralCostModal from '@/features/general-costs/modals/GeneralCostModal';
 import GeneralCostPaymentForm from '@/features/general-costs/forms/GeneralCostPaymentForm';
-import GeneralCostPaymentDetailView from '@/features/general-costs/views/GeneralCostPaymentDetailView';
+import GeneralCostPaymentModal from '@/features/general-costs/modals/GeneralCostPaymentModal';
 import GeneralCostCategoryForm from '@/features/general-costs/forms/GeneralCostCategoryForm';
 import { CourseModal, CourseModuleFormModal, LessonFormModal, CourseEnrollmentModal, CouponFormModal, PaymentMethodModal, TestimonialForm } from '@/features/learning';
 import { HeroSectionForm } from '@/features/layout';
@@ -337,7 +337,7 @@ export function initializeModalRegistry(): void {
       mode: data?.generalCostId ? (data?.mode || 'edit') : (data?.mode || 'create')
     })
   });
-  registerModal('general-costs-view', GeneralCostDetailView as any, {
+  registerModal('general-costs-view', GeneralCostModal as any, {
     ...financeConfig,
     size: 'md',
     mapDataToProps: (data) => ({
@@ -355,7 +355,7 @@ export function initializeModalRegistry(): void {
       mode: data?.paymentId ? 'edit' : 'create'
     })
   });
-  registerModal('general-costs-payment-view', GeneralCostPaymentDetailView as any, {
+  registerModal('general-costs-payment-view', GeneralCostPaymentModal as any, {
     ...financeConfig,
     mapDataToProps: (data) => ({
       modalData: {

@@ -10,7 +10,7 @@ interface GeneralCostViewProps {
   onClose: () => void
 }
 
-export default function GeneralCostView({ modalData, onClose }: GeneralCostViewProps) {
+export default function GeneralCostModal({ modalData, onClose }: GeneralCostViewProps) {
   const { data: generalCost, isLoading } = useGeneralCost(modalData?.generalCostId || null)
 
   if (isLoading) {

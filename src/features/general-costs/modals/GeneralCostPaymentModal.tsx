@@ -26,7 +26,7 @@ const STATUS_MAP: Record<string, { label: string; variant: BadgeVariant }> = {
   void: { label: 'Anulado', variant: 'neutral' },
 }
 
-export default function GeneralCostPaymentView({ 
+export default function GeneralCostPaymentModal({ 
   modalData, 
   organizationId: orgIdProp, 
   paymentId: paymentIdProp, 
