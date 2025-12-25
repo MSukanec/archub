@@ -26,7 +26,7 @@ export function OrganizationSettingsFinancesView() {
   const [defaultWallet, setDefaultWallet] = useState<string>('');
   const [secondaryWallets, setSecondaryWallets] = useState<string[]>([]);
   
-  const autoSelectAttemptedForOrg = useRef<string | null>(null);
+  const prevOrganizationId = useRef<string | undefined>(undefined);
 
   const saveDefaultCurrencyMutation = useOptimisticMutation({
     mutationFn: async (currencyId: string) => {
@@ -288,8 +288,24 @@ export function OrganizationSettingsFinancesView() {
   });
 
   useEffect(() => {
+    if (prevOrganizationId.current !== organizationId) {
+      prevOrganizationId.current = organizationId;
+      setDefaultCurrency('');
+      setSecondaryCurrencies([]);
+      setDefaultWallet('');
+      setSecondaryWallets([]);
+    }
+  }, [organizationId]);
+
+  const hasDefaultCurrency = organizationCurrencies?.some(c => c.is_default) ?? false;
+  const needsDefaultCurrency = !isLoadingOrgCurrencies && 
+                                !isLoadingAllCurrencies && 
+                                organizationCurrencies !== undefined && 
+                                !hasDefaultCurrency &&
+                                !saveDefaultCurrencyMutation.isPending;
+
+  useEffect(() => {
     if (isLoadingOrgCurrencies || isLoadingAllCurrencies) return;
-    if (saveDefaultCurrencyMutation.isPending) return;
     
     if (organizationCurrencies?.length) {
       const defaultCur = organizationCurrencies.find(c => c.is_default);
@@ -297,25 +313,27 @@ export function OrganizationSettingsFinancesView() {
       
       if (defaultCur) {
         setDefaultCurrency(defaultCur.currency_id);
-        if (autoSelectAttemptedForOrg.current === organizationId) {
-          autoSelectAttemptedForOrg.current = null;
-        }
-      } else if (autoSelectAttemptedForOrg.current !== organizationId) {
-        const firstCurrency = organizationCurrencies[0].currency_id;
-        setDefaultCurrency(firstCurrency);
-        autoSelectAttemptedForOrg.current = organizationId ?? null;
-        saveDefaultCurrencyMutation.mutate(firstCurrency);
       }
       setSecondaryCurrencies(secondaryCurs.map(c => c.currency_id));
-    } else if (allCurrencies?.length && organizationCurrencies !== undefined && organizationCurrencies.length === 0) {
-      if (autoSelectAttemptedForOrg.current !== organizationId) {
-        const firstCurrency = allCurrencies[0].id;
-        setDefaultCurrency(firstCurrency);
-        autoSelectAttemptedForOrg.current = organizationId ?? null;
-        saveDefaultCurrencyMutation.mutate(firstCurrency);
-      }
     }
-  }, [organizationCurrencies, allCurrencies, isLoadingOrgCurrencies, isLoadingAllCurrencies, saveDefaultCurrencyMutation.isPending, organizationId]);
+  }, [organizationCurrencies, isLoadingOrgCurrencies, isLoadingAllCurrencies]);
+
+  useEffect(() => {
+    if (!needsDefaultCurrency) return;
+    
+    let currencyToSet: string | undefined;
+    
+    if (organizationCurrencies?.length) {
+      currencyToSet = organizationCurrencies[0].currency_id;
+    } else if (allCurrencies?.length) {
+      currencyToSet = allCurrencies[0].id;
+    }
+    
+    if (currencyToSet) {
+      setDefaultCurrency(currencyToSet);
+      saveDefaultCurrencyMutation.mutate(currencyToSet);
+    }
+  }, [needsDefaultCurrency, organizationCurrencies, allCurrencies]);
 
   useEffect(() => {
     if (organizationWallets?.length) {
