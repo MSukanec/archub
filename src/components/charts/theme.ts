@@ -14,24 +14,25 @@
 export const CHART_COLORS = {
   // Primary palette for categories/series (10 colors: 1-5 from light, 6-10 from dark)
   // Only add new colors beyond these if absolutely necessary (11+)
+  // Values correspond to CSS variables in index.css
   palette: [
-    'var(--chart-1)',
-    'var(--chart-2)',
-    'var(--chart-3)',
-    'var(--chart-4)',
-    'var(--chart-5)',
-    'var(--chart-6)',
-    'var(--chart-7)',
-    'var(--chart-8)',
-    'var(--chart-9)',
-    'var(--chart-10)',
+    '#84cc16', // --chart-1: hsl(76, 100%, 40%)
+    '#1fa384', // --chart-2: hsl(173, 58%, 39%)
+    '#1c4a6b', // --chart-3: hsl(197, 37%, 24%)
+    '#d4a574', // --chart-4: hsl(43, 74%, 66%)
+    '#f44747', // --chart-5: hsl(0, 87%, 67%)
+    '#4a8fd4', // --chart-6: hsl(210, 40%, 55%)
+    '#2ba49d', // --chart-7: hsl(173, 58%, 45%)
+    '#2d5986', // --chart-8: hsl(197, 37%, 35%)
+    '#e6b886', // --chart-9: hsl(43, 74%, 70%)
+    '#f59a56', // --chart-10: hsl(27, 87%, 70%)
   ] as const,
   
-  // Semantic colors
-  positive: 'var(--positive)',
-  negative: 'var(--negative)',
-  neutral: 'var(--neutral)',
-  accent: 'var(--accent)',
+  // Semantic colors (must be hex for Recharts)
+  positive: '#22c55e', // Green for positive values
+  negative: '#ef4444', // Red for negative values
+  neutral: '#6b7280',  // Gray for neutral values
+  accent: '#84cc16',   // Lime green accent
   
   // Grid and axes
   grid: 'var(--chart-grid)',
