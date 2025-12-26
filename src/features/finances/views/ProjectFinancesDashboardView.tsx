@@ -22,7 +22,7 @@ import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/li
 import { generateFinancialInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MultiSeriesTrendChart } from '@/components/charts/MonthlyTrendChart';
-import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
+import { DonutChart } from '@/components/charts/pie/DonutChart';
 import { HorizontalBarChart } from '@/components/charts/bar/HorizontalBarChart';
 import { cn } from '@/lib/utils';
 import { Wallet, Coins } from 'lucide-react';
@@ -690,12 +690,12 @@ export function ProjectFinancesDashboardView({
           description="Hacé click en un tipo para ver sus movimientos"
           data-testid="chart-category-breakdown"
         >
-          <CategoryBreakdownChart 
-            data={categoryChartData} 
+          <DonutChart 
+            data={categoryChartData.map(d => ({ label: d.name, value: d.value }))} 
             height={280}
             emptyText="No hay movimientos registrados"
             clickable
-            onSliceClick={(name) => handleCategoryDrillDown(name)}
+            onClick={(label) => handleCategoryDrillDown(label)}
           />
         </DashboardCard>
 

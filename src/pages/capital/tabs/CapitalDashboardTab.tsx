@@ -34,7 +34,7 @@ import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/li
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
-import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
+import { DonutChart } from '@/components/charts/pie/DonutChart';
 import { SparklineChart } from '@/components/charts/sparkline/SparklineChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -704,10 +704,10 @@ export default function CapitalDashboardTab({
           data-testid="chart-partner-distribution"
         >
           {partnerDistributionData.length > 0 ? (
-            <CategoryBreakdownChart 
-              data={partnerDistributionData} 
+            <DonutChart 
+              data={partnerDistributionData.map(d => ({ label: d.name, value: d.value }))} 
               height={280}
-              onSliceClick={handlePartnerDrillDown}
+              onClick={handlePartnerDrillDown}
             />
           ) : (
             <div className="flex items-center justify-center h-[280px] text-muted-foreground text-sm">

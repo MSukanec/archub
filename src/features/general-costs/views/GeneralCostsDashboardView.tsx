@@ -28,7 +28,7 @@ import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/li
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
-import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
+import { DonutChart } from '@/components/charts/pie/DonutChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
 import { Button } from '@/components/ui/button';
@@ -753,12 +753,12 @@ export default function GeneralCostsDashboardView({
           description="Hacé click en una categoría para ver sus pagos"
           data-testid="chart-category-breakdown"
         >
-          <CategoryBreakdownChart 
-            data={categoryChartData}
+          <DonutChart 
+            data={categoryChartData.map(d => ({ label: d.name, value: d.value }))}
             height={280}
             emptyText="No hay categorías con gastos registrados"
             clickable
-            onSliceClick={(name) => handleCategoryDrillDown(name)}
+            onClick={(label) => handleCategoryDrillDown(label)}
           />
         </DashboardCard>
       </div>

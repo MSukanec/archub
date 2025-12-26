@@ -26,7 +26,7 @@ import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/li
 import { generateInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
-import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
+import { DonutChart } from '@/components/charts/pie/DonutChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
@@ -598,12 +598,12 @@ export default function ClientsVisionGeneralTab({
           description="Hacé click en un cliente para ver sus pagos"
           data-testid="chart-client-breakdown"
         >
-          <CategoryBreakdownChart 
-            data={clientChartData}
+          <DonutChart 
+            data={clientChartData.map(d => ({ label: d.name, value: d.value }))}
             height={280}
             emptyText="No hay clientes con pagos registrados"
             clickable
-            onSliceClick={(name) => handleClientDrillDown(name)}
+            onClick={(label) => handleClientDrillDown(label)}
           />
         </DashboardCard>
       </div>

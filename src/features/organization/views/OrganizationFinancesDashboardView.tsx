@@ -24,7 +24,7 @@ import { calculateHistoricalComparison, getPeriodMeta, getKPILabels } from '@/li
 import { generateFinancialInsights, buildInsightContext, toInsightItems } from '@/components/dashboard/insights';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MultiSeriesTrendChart } from '@/components/charts/MonthlyTrendChart';
-import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
+import { DonutChart } from '@/components/charts/pie/DonutChart';
 import { HorizontalBarChart } from '@/components/charts/bar/HorizontalBarChart';
 import { cn } from '@/lib/utils';
 import { Wallet, Coins } from 'lucide-react';
@@ -738,11 +738,10 @@ export function OrganizationFinancesDashboardView({
           icon={<PieChart className="h-4 w-4" />}
         >
           {categoryChartData.length > 0 ? (
-            <CategoryBreakdownChart
-              data={categoryChartData}
+            <DonutChart
+              data={categoryChartData.map(d => ({ label: d.name, value: d.value }))}
               height={280}
-              currencySymbol={currencySymbol}
-              onCategoryClick={handleCategoryDrillDown}
+              onClick={handleCategoryDrillDown}
             />
           ) : (
             <div className="flex items-center justify-center h-[280px] text-muted-foreground">

@@ -25,7 +25,7 @@ import { generateInsights, buildInsightContext, toInsightItems } from '@/compone
 import { DataHealthAlertMulti } from '@/core/data-health';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
-import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
+import { DonutChart } from '@/components/charts/pie/DonutChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
@@ -847,12 +847,12 @@ export default function MaterialsDashboardTab({
           description="Hacé click en un proveedor para ver sus pagos"
           data-testid="chart-supplier-breakdown"
         >
-          <CategoryBreakdownChart 
-            data={supplierChartData}
+          <DonutChart 
+            data={supplierChartData.map(d => ({ label: d.name, value: d.value }))}
             height={280}
             emptyText="No hay proveedores con pagos registrados"
             clickable
-            onSliceClick={(name) => handleCategoryDrillDown(name)}
+            onClick={(label) => handleCategoryDrillDown(label)}
           />
         </DashboardCard>
       </div>

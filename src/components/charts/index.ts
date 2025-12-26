@@ -74,8 +74,5 @@ export type { HeatmapDataPoint, HeatmapGridProps } from './heatmap/HeatmapGrid'
 export { CategoryBalanceTable } from './CategoryBalanceTable'
 export type { CategoryBalanceRow } from './CategoryBalanceTable'
 
-// CategoryBreakdownChart - Donut chart (consider migrating to DonutChart)
-export { CategoryBreakdownChart } from './CategoryBreakdownChart'
-
 // MonthlyTrendChart & MultiSeriesTrendChart - Area/Composed charts
 export { MonthlyTrendChart, MultiSeriesTrendChart } from './MonthlyTrendChart'

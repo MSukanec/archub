@@ -26,7 +26,7 @@ import { generateInsights, buildInsightContext, toInsightItems } from '@/compone
 import { DataHealthAlertMulti, type DataIssue } from '@/core/data-health';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { MonthlyTrendChart } from '@/components/charts/MonthlyTrendChart';
-import { CategoryBreakdownChart } from '@/components/charts/CategoryBreakdownChart';
+import { DonutChart } from '@/components/charts/pie/DonutChart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { PaymentStatusBadge } from '@/components/shared/PaymentStatusBadge';
@@ -768,12 +768,12 @@ export default function PersonnelDashboardTab({
           description="Hacé click en un trabajador para ver sus pagos"
           data-testid="chart-personnel-breakdown"
         >
-          <CategoryBreakdownChart 
-            data={personnelChartData}
+          <DonutChart 
+            data={personnelChartData.map(d => ({ label: d.name, value: d.value }))}
             height={280}
             emptyText="No hay personal con pagos registrados"
             clickable
-            onSliceClick={(name) => handlePersonnelDrillDown(name)}
+            onClick={(label) => handlePersonnelDrillDown(label)}
           />
         </DashboardCard>
       </div>
