@@ -80,8 +80,6 @@ export { CategoryBreakdownChart } from './CategoryBreakdownChart'
 // MonthlyTrendChart & MultiSeriesTrendChart - Area/Composed charts
 export { MonthlyTrendChart, MultiSeriesTrendChart } from './MonthlyTrendChart'
 
-// IncomeExpenseChart - Grouped bar chart
-export { IncomeExpenseChart } from './IncomeExpenseChart'
 
 // BalanceBreakdownChart - Horizontal bar chart
 export { BalanceBreakdownChart } from './BalanceBreakdownChart'
