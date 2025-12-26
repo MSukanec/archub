@@ -156,12 +156,12 @@ const ChartGalleryView = () => {
         
         <ChartGroup title="LINE">
           <ChartCard title="TrendLineChart">
-            <div className="h-48">
+            <div className="h-48 overflow-hidden">
               <TrendLineChart data={MOCK_LINE_DATA} height={180} />
             </div>
           </ChartCard>
           <ChartCard title="MultiLineChart">
-            <div className="h-48">
+            <div className="h-48 overflow-hidden">
               <MultiLineChart 
                 data={MOCK_MULTI_LINE_DATA} 
                 series={[
@@ -176,12 +176,12 @@ const ChartGalleryView = () => {
 
         <ChartGroup title="SPARKLINE">
           <ChartCard title="SparklineChart">
-            <div className="h-48 flex items-center justify-center">
+            <div className="h-48 flex items-center justify-center overflow-hidden">
               <SparklineChart data={MOCK_SPARKLINE_DATA} height={60} color="var(--chart-1)" />
             </div>
           </ChartCard>
           <ChartCard title="SparklineChart (Colors)">
-            <div className="h-48 flex items-center justify-center">
+            <div className="h-48 flex items-center justify-center overflow-hidden">
               <SparklineChart data={MOCK_SPARKLINE_DATA} height={60} color="var(--chart-2)" />
             </div>
           </ChartCard>
@@ -189,17 +189,17 @@ const ChartGalleryView = () => {
 
         <ChartGroup title="BAR">
           <ChartCard title="VerticalBarChart">
-            <div className="h-48">
+            <div className="h-48 overflow-hidden">
               <VerticalBarChart data={MOCK_BAR_DATA} height={180} />
             </div>
           </ChartCard>
           <ChartCard title="HorizontalBarChart">
-            <div className="h-48">
+            <div className="h-48 overflow-hidden">
               <HorizontalBarChart data={MOCK_HORIZONTAL_BAR_DATA} height={180} />
             </div>
           </ChartCard>
           <ChartCard title="GroupedBarChart">
-            <div className="h-48">
+            <div className="h-48 overflow-hidden">
               <GroupedBarChart 
                 data={MOCK_GROUPED_BAR_DATA}
                 series={[
@@ -211,7 +211,7 @@ const ChartGalleryView = () => {
             </div>
           </ChartCard>
           <ChartCard title="SegmentedBarChart">
-            <div className="h-48">
+            <div className="h-48 overflow-hidden">
               <SegmentedBarChart 
                 data={MOCK_SEGMENTED_BAR_DATA}
                 height={180}
@@ -222,12 +222,12 @@ const ChartGalleryView = () => {
 
         <ChartGroup title="PIE">
           <ChartCard title="DonutChart">
-            <div className="h-48">
+            <div className="h-48 overflow-hidden">
               <DonutChart data={MOCK_DONUT_DATA} height={180} />
             </div>
           </ChartCard>
           <ChartCard title="DonutChart (sin legend)">
-            <div className="h-48">
+            <div className="h-48 overflow-hidden">
               <DonutChart 
                 data={MOCK_DONUT_DATA} 
                 height={180}
@@ -239,12 +239,12 @@ const ChartGalleryView = () => {
 
         <ChartGroup title="RADIAL">
           <ChartCard title="ProgressRingChart">
-            <div className="h-48 flex items-center justify-center">
+            <div className="h-48 flex items-center justify-center overflow-hidden">
               <ProgressRingChart value={75} height={160} />
             </div>
           </ChartCard>
           <ChartCard title="ProgressRingChart (con label)">
-            <div className="h-48 flex items-center justify-center">
+            <div className="h-48 flex items-center justify-center overflow-hidden">
               <ProgressRingChart value={42} height={160} label="Completado" showPercentage />
             </div>
           </ChartCard>
@@ -252,7 +252,7 @@ const ChartGalleryView = () => {
 
         <ChartGroup title="COMPOSED">
           <ChartCard title="ComposedBarLineChart">
-            <div className="h-48">
+            <div className="h-48 overflow-hidden">
               <ComposedBarLineChart 
                 data={MOCK_COMPOSED_DATA}
                 barName="Ventas"
@@ -262,7 +262,7 @@ const ChartGalleryView = () => {
             </div>
           </ChartCard>
           <ChartCard title="FinancialFlowChart">
-            <div className="h-48">
+            <div className="h-48 overflow-hidden">
               <FinancialFlowChart 
                 data={MOCK_FINANCIAL_FLOW_DATA}
                 height={180}
@@ -273,7 +273,7 @@ const ChartGalleryView = () => {
             </div>
           </ChartCard>
           <ChartCard title="BalanceTimelineChart">
-            <div className="h-48">
+            <div className="h-48 overflow-hidden">
               <BalanceTimelineChart 
                 data={MOCK_BALANCE_TIMELINE_DATA}
                 height={180}
@@ -284,7 +284,7 @@ const ChartGalleryView = () => {
 
         <ChartGroup title="HEATMAP">
           <ChartCard title="HeatmapGrid">
-            <div className="h-48">
+            <div className="h-48 overflow-hidden">
               <HeatmapGrid 
                 data={MOCK_HEATMAP_DATA}
                 columns={4}

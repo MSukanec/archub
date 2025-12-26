@@ -13,7 +13,7 @@ export interface HeatmapGridProps {
   loadingText?: string
   emptyText?: string
   valueFormatter?: (value: number) => string
-  colorScale?: (value: number) => { bg: string; text: string }
+  colorScale?: (value: number) => { bg: string; text: string; bgColor?: string }
   columns?: number
 }
 
