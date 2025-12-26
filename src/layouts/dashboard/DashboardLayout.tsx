@@ -26,7 +26,7 @@ import { OrganizationRemovedModal } from "@/features/organization/modals";
 import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 import { useProjectReadOnly } from "@/hooks/use-project-readonly";
 import { ProjectReadOnlyProvider } from "@/contexts/ProjectReadOnlyContext";
-import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, ANNOUNCEMENT_HEIGHT_MOBILE, AnnouncementProvider } from "@/features/users/components/GlobalAnnouncement";
+import { GlobalAnnouncementBanner, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, ANNOUNCEMENT_HEIGHT_MOBILE, AnnouncementProvider } from "@/features/users/components/GlobalAnnouncementBanner";
 import { useLocation } from "wouter";
 import { type WidthProp, resolveWidthMode, getContainerClasses, getContentPaddingClasses } from "./layoutWidth";
 
@@ -211,7 +211,7 @@ function LayoutContent({
   return (
     <>
       {/* Global Announcements Banner - Fixed at top */}
-      <GlobalAnnouncement />
+      <GlobalAnnouncementBanner />
       
       <div 
         className={isMobile ? "min-h-screen flex flex-col" : "flex flex-col min-h-screen"}

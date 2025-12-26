@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
-import { GlobalAnnouncement, AnnouncementProvider, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, ANNOUNCEMENT_HEIGHT_MOBILE } from "@/features/users/components/GlobalAnnouncement";
+import { GlobalAnnouncementBanner, AnnouncementProvider, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, ANNOUNCEMENT_HEIGHT_MOBILE } from "@/features/users/components/GlobalAnnouncementBanner";
 import { useMobile } from "@/hooks/use-mobile";
 
 interface SEOProps {
@@ -176,7 +176,7 @@ function MarketingLayoutContent({
   if (heroSlot) {
     return (
       <>
-        <GlobalAnnouncement />
+        <GlobalAnnouncementBanner />
         <div className="min-h-screen overflow-x-hidden">
           <Header navigation={headerNavigation} hasAnnouncement={hasActiveAnnouncement} announcementHeight={announcementHeight} />
           
@@ -214,7 +214,7 @@ function MarketingLayoutContent({
   // Normal layout (for standard marketing pages)
   return (
     <>
-      <GlobalAnnouncement />
+      <GlobalAnnouncementBanner />
       <div 
         className="min-h-screen bg-background flex flex-col overflow-x-hidden"
         style={{ paddingTop: `${totalOffset}px` }}

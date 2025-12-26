@@ -120,7 +120,7 @@ export function AnnouncementProvider({ children }: { children: React.ReactNode }
 }
 
 // Banner component that ONLY renders (reads from context)
-export function GlobalAnnouncement() {
+export function GlobalAnnouncementBanner() {
   const { activeAnnouncement, handleDismiss } = useAnnouncementBanner();
   const [, navigate] = useLocation();
 
