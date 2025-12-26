@@ -379,14 +379,6 @@ export function OrganizationSettingsFinancesView() {
   };
 
   const handleSecondaryWalletsChange = (walletIds: string[]) => {
-    if (walletIds.length > 1) {
-      toast({
-        title: 'Solo una billetera secundaria permitida',
-        description: 'Puedes tener como máximo 1 billetera secundaria junto con tu billetera principal.',
-        variant: 'destructive',
-      });
-      return;
-    }
     setSecondaryWallets(walletIds);
     updateSecondaryWalletsMutation.mutate(walletIds);
   };
@@ -471,7 +463,7 @@ export function OrganizationSettingsFinancesView() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="secondary-wallets">Billetera Secundaria (Opcional)</Label>
+            <Label htmlFor="secondary-wallets">Billeteras Secundarias</Label>
             <ComboBoxMultiSelectField
               options={availableSecondaryWallets.map(wallet => ({
                 value: wallet.id,
@@ -479,9 +471,8 @@ export function OrganizationSettingsFinancesView() {
               }))}
               value={secondaryWallets}
               onChange={handleSecondaryWalletsChange}
-              placeholder="Selecciona 1 billetera secundaria"
+              placeholder="Selecciona billeteras secundarias"
             />
-            <p className="text-xs text-muted-foreground">Máximo 1 billetera secundaria permitida</p>
           </div>
         </div>
       </div>
