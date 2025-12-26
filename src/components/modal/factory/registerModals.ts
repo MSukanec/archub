@@ -1,6 +1,6 @@
 import { registerModal, ModalConfig } from './registry';
 
-import { InviteMemberModal, OrganizationModal, MemberActionConfirmationModal } from '@/features/organization';
+import { InviteMemberModal, OrganizationModal, MemberActionConfirmationModal, UpgradeModal } from '@/features/organization';
 import { CapitalParticipantModal, PartnerContributionModal, PartnerWithdrawalModal, CapitalTransactionModal } from '@/features/capital';
 import { ProjectModal } from '@/features/projects';
 import { GalleryFormModal, DocumentFolderFormModal, DocumentUploadFormModal, BudgetFormModal, BudgetTaskFormModal, ConstructionPhaseFormModal, ConstructionTaskScheduleModal, DependencyConnectionModal, IndirectModal, InsuranceFormModal, RenewInsuranceFormModal, TaskMultiModal, BudgetItemModal, CostModal, TaskCategoryFormModal, TaskDivisionFormModal, TaskParameterFormModal, TaskParameterOptionFormModal, ParameterVisibilityConfigModal, AddParameterToCanvasModal, TaskModal, BoardFormModal, CardFormModal, ListFormModal, OrganizationMovementConceptFormModal, ProfileOrganizationFormModal, MemberFormModal } from '@/features/legacy';
@@ -16,7 +16,7 @@ import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConf
 import { default as PaymentFeedbackModal } from '@/components/forms/PaymentFeedbackModal';
 import { UniversalImportForm } from '@/features/imports';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal, MaterialPaymentModal, PurchaseOrderForm, MaterialPurchaseForm } from '@/features/materials';
-import { UserModal, ChangelogModal, NotificationModal, AnnouncementModal, SupportConversationStartModal, PlanModal, PlanPriceFormModal, DowngradeModal, UpgradeModal, ResetTestDataModal } from '@/features/users';
+import { UserModal, ChangelogModal, NotificationModal, AnnouncementModal, SupportConversationStartModal, PlanModal, PlanPriceFormModal, DowngradeModal, ResetTestDataModal } from '@/features/users';
 import SiteLogForm from '@/features/sitelog/forms/SiteLogForm';
 import { SiteLogTypeForm } from '@/features/sitelog/forms/SiteLogTypeForm';
 import { ProjectTypeModal } from '@/features/projects/modals/ProjectTypeModal';

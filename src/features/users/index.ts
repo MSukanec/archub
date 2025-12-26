@@ -23,10 +23,9 @@ export { SupportConversationStartModal } from './modals/SupportConversationStart
 export { AnnouncementModal } from './modals/AnnouncementModal';
 export { ChangelogModal } from './modals/ChangelogModal';
 export { default as ResetTestDataModal } from './modals/ResetTestDataModal';
-export { UpgradeModal } from './modals/UpgradeModal';
 
 // Organization Modals & Forms (re-export from organization)
-export { PlanModal, PlanUpgradeModal, DowngradeModal, InvitationModal } from '@/features/organization';
+export { PlanModal, PlanUpgradeModal, DowngradeModal, InvitationModal, UpgradeModal } from '@/features/organization';
 
 // Auth Components
 export { AuthGuard } from './components/AuthGuard';

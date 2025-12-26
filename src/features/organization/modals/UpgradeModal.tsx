@@ -1,79 +1,14 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, ArrowUpCircle, ShieldAlert, Sparkles, Check, Gift, Info } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { useProjectContext } from "@/stores/projectContext";
+import { AlertCircle, ArrowUpCircle, ShieldAlert, Check, Gift } from "lucide-react";
 import { FormModalHeader } from "@/components/modal";
 import { FormModalFooter } from "@/components/modal";
 import { FormModalLayout } from "@/components/modal";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useLocation } from "wouter";
-import { supabase } from "@/lib/supabase";
-import { useQuery } from "@tanstack/react-query";
+import { useUpgradeForm, type UpgradeFormData, type UseUpgradeFormProps } from "../forms/UpgradeForm";
 
 interface UpgradeModalProps {
-  modalData?: {
-    currentPlan: {
-      name: string;
-      slug: string;
-    };
-    targetPlan: {
-      name: string;
-      slug: string;
-      monthly_amount: number;
-      annual_amount: number;
-      features?: {
-        max_projects?: number;
-        max_storage_mb?: number;
-        max_file_size_mb?: number;
-        max_members?: number;
-        [key: string]: any;
-      };
-    };
-    billingPeriod: 'monthly' | 'annual';
-    isManualPlan: boolean;
-  };
+  modalData?: UpgradeFormData;
   onClose: () => void;
-}
-
-interface ProrationResult {
-  hasActiveSubscription: boolean;
-  currentPlan: {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
-  currentSubscription: {
-    id: string;
-    started_at: string;
-    expires_at: string;
-    billing_period: string;
-    amount: number;
-    currency: string;
-  } | null;
-  credit: {
-    daysRemaining: number;
-    totalDays: number;
-    percentageRemaining: number;
-    creditAmount: number;
-    creditCurrency: string;
-  } | null;
-  targetPlan: {
-    id: string;
-    name: string;
-    slug: string;
-    priceUSD: number;
-    priceARS: number;
-  };
-  finalPrice: {
-    usd: number;
-    ars: number;
-  };
-  savings: {
-    usd: number;
-    ars: number;
-  };
 }
 
 function formatLimit(value: number | null | undefined): string {
@@ -100,110 +35,27 @@ function formatFileSize(mb: number | null | undefined): string {
 }
 
 export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
-  const { toast } = useToast();
-  const { currentOrganizationId } = useProjectContext();
-  const { data: userData } = useCurrentUser();
-  const [, navigate] = useLocation();
-  
-  const [prorationData, setProrationData] = useState<ProrationResult | null>(null);
-  const [isLoadingProration, setIsLoadingProration] = useState(true);
-  const [prorationError, setProrationError] = useState<Error | null>(null);
-
-  const { currentPlan, targetPlan, billingPeriod, isManualPlan } = modalData || {
+  const formData = modalData || {
     currentPlan: { name: '', slug: '' },
     targetPlan: { name: '', slug: '', monthly_amount: 0, annual_amount: 0, features: {} },
     billingPeriod: 'annual' as const,
     isManualPlan: false
   };
 
-  useEffect(() => {
-    const loadProration = async () => {
-      if (!currentOrganizationId || !targetPlan.slug) {
-        setIsLoadingProration(false);
-        return;
-      }
+  const {
+    prorationData,
+    isLoadingProration,
+    prorationError,
+    validationError,
+    isManualPlan,
+    hasProration,
+    isConfirmDisabled,
+    handleConfirm,
+    userData,
+  } = useUpgradeForm({ formData, onClose });
 
-      try {
-        setIsLoadingProration(true);
-        setProrationError(null);
-        
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.access_token) {
-          setIsLoadingProration(false);
-          return;
-        }
-
-        const response = await fetch('/api/checkout/calculate-proration', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            organization_id: currentOrganizationId,
-            target_plan_slug: targetPlan.slug,
-            billing_period: billingPeriod,
-          }),
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to calculate proration');
-        }
-        
-        const data = await response.json();
-        setProrationData(data.data);
-      } catch (error) {
-        console.error('[UpgradeModal] Proration error:', error);
-        setProrationError(error as Error);
-      } finally {
-        setIsLoadingProration(false);
-      }
-    };
-
-    loadProration();
-  }, [currentOrganizationId, targetPlan.slug, billingPeriod]);
-
-  const isOwner = useMemo(() => {
-    if (!userData?.user?.id || !userData?.organization) {
-      return false;
-    }
-    return userData.organization.owner_id === userData.user.id;
-  }, [userData?.user?.id, userData?.organization?.owner_id]);
-
-  const validationError = useMemo(() => {
-    if (!targetPlan?.slug) {
-      return "Plan de destino no válido";
-    }
-    if (!currentOrganizationId) {
-      return "No se ha seleccionado una organización";
-    }
-    if (!userData?.user) {
-      return "No se pudo verificar tu identidad";
-    }
-    if (!userData?.organization) {
-      return "No se pudo verificar la organización";
-    }
-    if (!isOwner) {
-      return "Solo el propietario de la organización puede cambiar el plan";
-    }
-    return null;
-  }, [targetPlan?.slug, currentOrganizationId, userData?.user, userData?.organization, isOwner]);
-
-  const handleClose = () => {
-    onClose();
-  };
-
-  const handleConfirm = () => {
-    if (validationError || isManualPlan) return;
-    navigate(`/subscription/checkout?plan=${targetPlan.slug}&billing=${billingPeriod}`);
-    onClose();
-  };
-
-  const hasProration = prorationData?.hasActiveSubscription && prorationData?.credit && prorationData.credit.creditAmount > 0;
+  const { currentPlan, targetPlan, billingPeriod } = formData;
   const isAnnual = billingPeriod === 'annual';
-
-  const needsProration = currentPlan.slug !== 'free';
-  const isConfirmDisabled = !!validationError || isManualPlan || (needsProration && isLoadingProration);
 
   const editPanel = (
     <div className="space-y-4">
@@ -329,7 +181,6 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
               </div>
             </div>
           </div>
-
         </>
       )}
     </div>
@@ -346,7 +197,7 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
   const footerContent = (
     <FormModalFooter
       leftLabel="Cancelar"
-      onLeftClick={handleClose}
+      onLeftClick={onClose}
       rightLabel={isLoadingProration ? "Calculando..." : "Continuar al Pago"}
       onRightClick={handleConfirm}
       isSubmitting={false}
@@ -361,7 +212,7 @@ export function UpgradeModal({ modalData, onClose }: UpgradeModalProps) {
       editPanel={editPanel}
       headerContent={headerContent}
       footerContent={footerContent}
-      onClose={handleClose}
+      onClose={onClose}
       isEditing={true}
     />
   );
