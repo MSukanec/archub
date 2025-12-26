@@ -246,15 +246,15 @@ export function CapitalDashboardView({
     };
   }, [capitalKpiData, partners]);
 
-  // Data for deviation bar chart
+  // Data for deviation bar chart (no truncation - chart handles width)
   const deviationChartData = useMemo(() => {
     return capitalHealthKPIs.deviationByPartner.map(item => ({
-      label: item.name.length > 15 ? item.name.substring(0, 15) + '...' : item.name,
+      label: item.name,
       value: item.value
     }));
   }, [capitalHealthKPIs.deviationByPartner]);
 
-  // Data for expected vs real contribution chart
+  // Data for expected vs real contribution chart (no truncation - chart handles it)
   const expectedVsRealData = useMemo(() => {
     return capitalKpiData
       .filter(kpi => kpi.expected_contribution !== null)
@@ -264,7 +264,7 @@ export function CapitalDashboardView({
           || partnerData?.contacts?.company_name 
           || 'Sin nombre';
         return {
-          label: name.length > 12 ? name.substring(0, 12) + '...' : name,
+          label: name,
           expected: kpi.expected_contribution ?? 0,
           real: kpi.total_contributed
         };
@@ -894,13 +894,13 @@ export function CapitalDashboardView({
           data-testid="card-partner-distribution"
         >
           {partnerDistributionData.length > 0 ? (
-            <div className="h-52 overflow-hidden">
               <DonutChart 
                 data={partnerDistributionData} 
-                height={200}
+                height={280}
+                innerRadius={50}
+                outerRadius={80}
                 showLegend
               />
-            </div>
           ) : (
             <div className="h-52 flex items-center justify-center text-muted-foreground text-sm">
               No hay datos de distribución
@@ -918,15 +918,14 @@ export function CapitalDashboardView({
           data-testid="card-deviation-by-partner"
         >
           {deviationChartData.length > 0 ? (
-            <div className="h-52 overflow-hidden">
               <HorizontalBarChart 
                 data={deviationChartData}
-                height={200}
+                height={220}
                 valueFormatter={(v) => `${currencySymbol} ${formatKPI(Math.abs(v))}`}
                 colorByValue={true}
                 showZeroLine={true}
+                yAxisWidth={120}
               />
-            </div>
           ) : (
             <div className="h-52 flex items-center justify-center text-muted-foreground text-sm">
               No hay desvíos registrados
@@ -941,18 +940,16 @@ export function CapitalDashboardView({
           data-testid="card-expected-vs-real"
         >
           {expectedVsRealData.length > 0 ? (
-            <div className="h-52 overflow-hidden">
               <GroupedBarChart 
                 data={expectedVsRealData}
                 series={[
-                  { key: 'expected', name: 'Esperado', color: 'hsl(var(--muted-foreground))' },
-                  { key: 'real', name: 'Real', color: 'hsl(var(--chart-positive))' }
+                  { key: 'expected', name: 'Esperado', color: '#6b7280' },
+                  { key: 'real', name: 'Real', color: '#22c55e' }
                 ]}
-                height={200}
+                height={220}
                 valueFormatter={(v) => `${currencySymbol} ${formatKPI(v)}`}
                 showLegend={true}
               />
-            </div>
           ) : (
             <div className="h-52 flex items-center justify-center text-muted-foreground text-sm">
               No hay datos de porcentaje de participación

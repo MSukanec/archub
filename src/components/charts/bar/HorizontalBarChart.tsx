@@ -17,6 +17,7 @@ export interface HorizontalBarChartProps {
   barSize?: number
   showZeroLine?: boolean
   colorByValue?: boolean
+  yAxisWidth?: number
 }
 
 export function HorizontalBarChart({
@@ -29,6 +30,7 @@ export function HorizontalBarChart({
   barSize = CHART_SHAPES.bar.barSize,
   showZeroLine = true,
   colorByValue = true,
+  yAxisWidth = 80,
 }: HorizontalBarChartProps) {
   if (isLoading) {
     return (
@@ -62,7 +64,7 @@ export function HorizontalBarChart({
           <YAxis
             type="category"
             dataKey="label"
-            width={80}
+            width={yAxisWidth}
             tick={{ fontSize: 12 }}
             className="text-muted-foreground fill-muted-foreground"
             axisLine={false}
