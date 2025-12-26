@@ -140,6 +140,58 @@ export interface CapitalWithdrawalCreateInput {
   created_by: string
 }
 
+export interface CapitalAdjustment {
+  id: string
+  organization_id: string
+  partner_id: string | null
+  project_id: string | null
+  currency_id: string
+  exchange_rate: number
+  amount: number // SIGNED: can be + or -
+  adjustment_date: string
+  reason: string
+  notes: string | null
+  reference: string | null
+  status: 'confirmed' | 'pending' | 'rejected' | 'void'
+  created_by: string | null
+  created_at: string
+  updated_at: string
+  is_deleted: boolean
+  deleted_at: string | null
+  partner?: CapitalParticipant
+  currency?: { id: string; name: string; symbol: string; code: string }
+}
+
+export interface CapitalAdjustmentCreateInput {
+  organization_id: string
+  partner_id: string | null
+  project_id: string | null
+  currency_id: string
+  exchange_rate?: number
+  amount: number // SIGNED
+  adjustment_date: string
+  reason: string
+  notes?: string | null
+  reference?: string | null
+  status: 'confirmed' | 'pending' | 'rejected' | 'void'
+  created_by: string
+}
+
+export interface CapitalAdjustmentUpdateInput {
+  amount?: number
+  adjustment_date?: string
+  reason?: string
+  notes?: string | null
+  reference?: string | null
+  status?: 'confirmed' | 'pending' | 'rejected' | 'void'
+}
+
+// Unified ledger (union of all 3 movement types)
+export type LedgerEntry = 
+  | (CapitalContribution & { type: 'contribution'; signedAmount: number })
+  | (CapitalWithdrawal & { type: 'withdrawal'; signedAmount: number })
+  | (CapitalAdjustment & { type: 'adjustment'; signedAmount: number })
+
 // Backward compatibility aliases (to be removed later)
 export type Partner = CapitalParticipant
 export type PartnerContact = CapitalParticipantContact

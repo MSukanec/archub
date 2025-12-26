@@ -58,6 +58,13 @@ export const capitalKeys = {
   withdrawal: (withdrawalId: NullableId) =>
     [...capitalKeys.withdrawals(), withdrawalId ?? undefined] as const,
 
+  // Adjustments
+  adjustments: () => [...capitalKeys.all, 'adjustments'] as const,
+  adjustmentsList: (organizationId: NullableId, projectId?: NullableId) =>
+    [...capitalKeys.adjustments(), organizationId ?? undefined, projectId ?? undefined] as const,
+  adjustment: (adjustmentId: NullableId) =>
+    [...capitalKeys.adjustments(), adjustmentId ?? undefined] as const,
+
   // Unified movements (for dashboard)
   unifiedMovements: () => [...capitalKeys.all, 'unified-movements'] as const,
   partnerMovements: (organizationId?: NullableId, projectId?: NullableId) =>

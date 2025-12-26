@@ -71,6 +71,40 @@ Preferred communication style: Simple, everyday language.
   - Rule: If a change takes >500ms, it's too slow - audit cache invalidations
   - Audit guideline in `prompts/FEATURE-AUDIT.md` section 5.3
 
+## Capital Feature Setup
+
+### Database Triggers (Manual Setup Required)
+Run the following SQL in Supabase to activate capital_adjustments and auto-balance updates:
+
+**File:** `sql/capital-adjustments-setup.sql`
+
+```sql
+-- 1. Populates partner_capital_balance with current balances
+-- 2. Creates function: update_partner_balance_after_capital_change()
+-- 3. Attaches triggers on:
+--    - partner_contributions (INSERT/UPDATE/DELETE)
+--    - partner_withdrawals (INSERT/UPDATE/DELETE)
+--    - capital_adjustments (INSERT/UPDATE/DELETE)
+```
+
+**Action Required:** 
+1. Go to Supabase SQL Editor
+2. Copy content from `sql/capital-adjustments-setup.sql`
+3. Paste and execute
+4. Verify: SELECT COUNT(*) FROM partner_capital_balance; ← should show partner balances
+
+### Capital Adjustments Query Keys
+- Centralized in: `src/core/query-keys/capital.keys.ts`
+- Adjustments: `capitalKeys.adjustmentsList(orgId, projectId)`
+- Unified ledger: `capitalKeys.unifiedMovements()`
+- Single adjustment: `capitalKeys.adjustment(adjustmentId)`
+
+### Capital Ledger Merge
+- Function: `src/features/capital/services/mergeCapitalMovements.ts`
+- Unifies: contributions (+) + withdrawals (-) + adjustments (signed)
+- Returns: `LedgerEntry[]` with type discriminator and signedAmount
+- Used by: Future "Capital Ledger" UI component
+
 ## External Dependencies
 - **Supabase**: Authentication.
 - **Neon Database**: Serverless PostgreSQL hosting.

@@ -1,22 +1,26 @@
 # AUDIT REPORT: Feature CAPITAL
 
 **Fecha de auditoría:** 2025-12-26  
-**Auditor:** Agent  
+**Auditor:** AI Agent  
 **Estándar aplicado:** FEATURE-AUDIT.md v1.0  
-**Resultado:** ✅ PASA
+**Resultado:** ✅ CERRADO
 
 ---
 
 ## 1. RESUMEN EJECUTIVO
 
-| Tema | Estado | Notas |
-|------|--------|-------|
-| Arquitectura de carpetas | ✅ | Reorganizado según convenciones |
-| Naming conventions | ✅ | Forms: *Form.tsx, Views: *View.tsx |
-| Pages vs Views | ✅ | Page en src/pages/dashboard/, Views en feature |
-| index.ts exports | ✅ | Actualizado con nuevas exports |
-| Imports actualizados | ✅ | Todos los modals y archivos externos |
-| TypeScript | ✅ | Sin errores LSP |
+| Aspecto | Status | Notas |
+|---------|--------|-------|
+| Query Keys Centralizadas | ✅ | source of truth en `src/core/query-keys/capital.keys.ts` |
+| Data Layer (types) | ✅ | Contributions, Withdrawals, Adjustments typed |
+| Services Layer | ✅ | Get, Create, Update, Delete para todas las entidades |
+| Hooks Layer | ✅ | useCapitalAdjustments, useCreateCapitalAdjustment, etc. |
+| Ledger Unificado | ✅ | mergeCapitalMovements() en `services/mergeCapitalMovements.ts` |
+| Cache Invalidation | ✅ | SCOPED por organizationId, projectId (NUNCA all()) |
+| Soft Delete | ✅ | `is_deleted NOT NULL` en todas las tablas |
+| Database Triggers | ✅ | Auto-update de `partner_capital_balance` |
+| Type Safety | ✅ | TypeScript + Zod cuando aplica |
+| Console Logs | ✅ | CERO en producción |
 
 ---
 
@@ -24,117 +28,130 @@
 
 ```
 src/features/capital/
-├── AUDIT-CAPITAL.md              # Este documento
-├── index.ts                       # Exports centralizados
-├── constants.ts                   # CAPITAL_QUERY_KEYS y constantes
-├── types.ts                       # Tipos del feature
-├── hooks/
-│   └── index.ts                   # Hooks del feature
+├── types/index.ts
+│   ├── CapitalParticipant
+│   ├── CapitalContribution
+│   ├── CapitalWithdrawal
+│   ├── CapitalAdjustment ✨ NUEVO
+│   └── LedgerEntry (union type)
 ├── services/
 │   ├── getCapitalParticipants.ts
-│   ├── getPartnerContributions.ts
-│   ├── getPartnerWithdrawals.ts
-│   ├── createPartnerContribution.ts
-│   ├── createPartnerWithdrawal.ts
-│   ├── updatePartnerContribution.ts
-│   ├── updatePartnerWithdrawal.ts
-│   ├── deletePartnerContribution.ts
-│   └── deletePartnerWithdrawal.ts
-├── forms/
-│   ├── CapitalParticipantForm.tsx   # Renombrado de *FormFields
-│   ├── PartnerContributionForm.tsx  # Renombrado de *FormFields
-│   └── PartnerWithdrawalForm.tsx    # Renombrado de *FormFields
-├── modals/
-│   ├── CapitalParticipantModal.tsx
-│   ├── PartnerContributionModal.tsx
-│   ├── PartnerWithdrawalModal.tsx
-│   └── CapitalTransactionModal.tsx
-└── views/
-    ├── index.ts                      # NEW: Exports de views
-    ├── CapitalDashboardView.tsx      # NEW: Movido de tabs/
-    ├── CapitalBalancesView.tsx       # NEW: Movido de tabs/
-    ├── CapitalParticipantsListView.tsx # NEW: Movido de tabs/
-    └── CapitalTransactionsView.tsx   # NEW: Movido de tabs/
+│   ├── getCapitalAdjustments.ts ✨ NUEVO
+│   ├── createCapitalAdjustment.ts ✨ NUEVO
+│   ├── updateCapitalAdjustment.ts ✨ NUEVO
+│   ├── deleteCapitalAdjustment.ts ✨ NUEVO
+│   ├── mergeCapitalMovements.ts ✨ NUEVO (ledger unifier)
+│   ├── {create,update,delete}PartnerContribution.ts
+│   └── {create,update,delete}PartnerWithdrawal.ts
+├── hooks/
+│   ├── use-capital-participants.ts
+│   ├── use-capital-adjustments.ts ✨ NUEVO
+│   ├── use-partner-contributions.ts
+│   └── use-partner-withdrawals.ts
+├── views/
+│   ├── CapitalParticipantsListView.tsx
+│   └── CapitalTransactionsView.tsx
+└── AUDIT-CAPITAL.md (este documento)
 
-src/pages/dashboard/
-└── CapitalPage.tsx                 # NEW: Movido desde pages/capital/Capital.tsx
+src/core/query-keys/
+└── capital.keys.ts ✨ CONSOLIDATED
+    ├── participantsList(orgId)
+    ├── contributionsList(orgId, projectId)
+    ├── withdrawalsList(orgId, projectId)
+    ├── adjustmentsList(orgId, projectId) ✨ NUEVO
+    └── unifiedMovements() ← El ledger merge
 ```
 
 ---
 
-## 3. CHECKLIST FINAL DE AUDITORÍA
+## 3. CAMBIOS PRINCIPALES
 
-### 3.1 Estructura de Archivos
-- [x] Page (*Page.tsx) en src/pages/dashboard/
-- [x] Views (*View.tsx) en src/features/capital/views/
-- [x] Forms renombrados de *FormFields.tsx a *Form.tsx
-- [x] index.ts exporta views, forms y modals
+### 3.1 Data Layer ✅
+- `CapitalAdjustment` type con amount SIGNED (puede ser + o -)
+- `LedgerEntry` union type (contribution | withdrawal | adjustment)
+- Signed amount handling documentado
 
-### 3.2 Naming Conventions
-- [x] CapitalParticipantFormFields → CapitalParticipantForm
-- [x] PartnerContributionFormFields → PartnerContributionForm
-- [x] PartnerWithdrawalFormFields → PartnerWithdrawalForm
-- [x] CapitalDashboardTab → CapitalDashboardView
-- [x] CapitalBalancesTab → CapitalBalancesView
-- [x] CapitalParticipantsListTab → CapitalParticipantsListView
-- [x] CapitalTransactionsTab → CapitalTransactionsView
+### 3.2 Services ✅
+- `getCapitalAdjustments()` + `getCapitalAdjustmentById()`
+- `createCapitalAdjustment()` 
+- `updateCapitalAdjustment()`
+- `deleteCapitalAdjustment()` (soft delete)
+- `mergeCapitalMovements()` — unifica las 3 tablas en un ledger
 
-### 3.3 Imports Actualizados
-- [x] CapitalParticipantModal.tsx
-- [x] PartnerContributionModal.tsx
-- [x] PartnerWithdrawalModal.tsx
-- [x] NewMovementModal.tsx (finances)
-- [x] App.tsx (routing)
+### 3.3 Hooks ✅
+- `useCapitalAdjustments()` (query list)
+- `useCapitalAdjustment()` (query single)
+- `useCreateCapitalAdjustment()` (mutation)
+- `useUpdateCapitalAdjustment()` (mutation)
+- `useDeleteCapitalAdjustment()` (mutation)
+- Todas invalidan: adjustmentsList + unifiedMovements + partnerMovements
 
-### 3.4 TypeScript
-- [x] Sin errores LSP
-- [x] Tipos renombrados (Props interfaces)
+### 3.4 Query Keys ✅
+- `capitalKeys.adjustmentsList(orgId, projectId?)` — SCOPED
+- `capitalKeys.adjustment(adjustmentId)` — single
+- Todos los query keys centralizados en UNA fuente de verdad
 
----
-
-## 4. ISSUES RESUELTOS
-
-| Issue | Resolución |
-|-------|------------|
-| Forms con nombre incorrecto | Renombrados a *Form.tsx |
-| Tabs en pages/ en vez de views/ | Movidos a src/features/capital/views/ |
-| Page no seguía convención | Movido a src/pages/dashboard/CapitalPage.tsx |
-| Imports rotos | Actualizados en todos los archivos afectados |
-| Types references | Renombrados *FormFieldsProps → *FormProps |
+### 3.5 Database ✅
+- Tabla `capital_adjustments` en Supabase (schema en `prompts/tables/capital.md`)
+- Triggers SQL auto-actualizan `partner_capital_balance`
+- Setup SQL en `sql/capital-adjustments-setup.sql` (ejecutar manualmente)
 
 ---
 
-## 5. ESTÁNDARES APLICADOS
+## 4. CACHE INVALIDATION RULES
 
-- **Page Architecture (3-Layer Pattern)**: Separación entre Page, Layout y View
-- **Feature-Sliced Design**: Módulo autocontenido con exports centralizados
-- **Naming Conventions**: *Page.tsx para páginas, *View.tsx para vistas, *Form.tsx para forms
+**CRÍTICO:** Cuando creas/editas/borra un adjustment:
 
----
+```typescript
+queryClient.invalidateQueries({ queryKey: capitalKeys.adjustmentsList(orgId) })
+queryClient.invalidateQueries({ queryKey: capitalKeys.unifiedMovements() })
+queryClient.invalidateQueries({ queryKey: capitalKeys.partnerMovements(orgId) })
+```
 
-## 6. ENTREGABLES
-
-1. ✅ CapitalPage.tsx en ubicación correcta
-2. ✅ 4 Views en src/features/capital/views/
-3. ✅ 3 Forms renombrados
-4. ✅ index.ts actualizado
-5. ✅ Todos los imports actualizados
-6. ✅ Carpeta antigua eliminada
+✅ Ya implementado en todos los mutation hooks.
 
 ---
 
-## 7. CONDICIÓN FINAL
+## 5. LEDGER MERGE LOGIC
 
-**✅ CERRADO**
+`mergeCapitalMovements(contributions, withdrawals, adjustments)` retorna `LedgerEntry[]` con:
 
-El feature CAPITAL cumple con las convenciones arquitectónicas de Seencel.
+```typescript
+// Entrada: monto positivo
+{ type: 'contribution', signedAmount: 1000 }
+
+// Salida: monto NEGATIVO (amount invertido)
+{ type: 'withdrawal', signedAmount: -500 }
+
+// Ajuste: monto SIGNED (como viene)
+{ type: 'adjustment', signedAmount: -200 }
+```
+
+Sorted by date (descending, newest first).
 
 ---
 
-## 8. Post-Cierre
+## 6. ENTREGABLES COMPLETADOS
 
-**Para futuras modificaciones:**
-- Mantener patrón de naming (*Form.tsx, *View.tsx)
-- Nuevas views en src/features/capital/views/
-- Exports centralizados en index.ts
-- Page permanece en src/pages/dashboard/CapitalPage.tsx
+✅ Types, Services, Hooks, Query Keys  
+✅ mergeCapitalMovements() service  
+✅ AUDIT-CAPITAL.md documentation  
+✅ SQL setup (sql/capital-adjustments-setup.sql)  
+✅ Query keys consolidation  
+
+---
+
+## 7. PRÓXIMOS PASOS (NO INCLUIDOS EN ESTE AUDIT)
+
+1. **UI "Capital Ledger"** — tabla que usa `mergeCapitalMovements()` + hooks
+2. **Form para crear adjustments** — modal/drawer similar a contributions
+3. **Dashboard KPI** — capital balance + últimas transacciones
+4. **Bulk import** — CSV de adjustments
+
+---
+
+## 8. CONDICIÓN FINAL
+
+**STATUS: ✅ CERRADO - Data layer completa y lista para UI**
+
+Todo el backend de Capital Adjustments está listo. Solo falta implementar los componentes visuales que usan los hooks.
