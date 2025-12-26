@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Star, Crown, Users } from "lucide-react";
+import { Star, Crown, Users, Zap } from "lucide-react";
 import { useProjectContext } from "@/stores/projectContext";
 
 interface PlanBadgeProps {
@@ -33,9 +33,9 @@ export default function PlanBadge({ isExpanded }: PlanBadgeProps) {
     teams: '#8b5cf6'      // --plan-teams: hsl(271, 76%, 53%)
   };
 
-  // Get plan from organization, fallback to user plan
-  const organizationPlan = organizationData?.subscription?.plan || organizationData?.plan;
-  const currentPlan = organizationPlan?.name?.toLowerCase() || userData?.plan?.name?.toLowerCase() || 'free';
+  // Get plan from current user (primary source - always accurate)
+  // userData.plan comes from the active subscription
+  const currentPlan = userData?.plan?.name?.toLowerCase() || 'free';
   const bgColor = planColors[currentPlan as keyof typeof planColors];
   const borderColor = planColors[currentPlan as keyof typeof planColors];
 
