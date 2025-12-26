@@ -53,7 +53,11 @@ src/features/personnel/
 ├── utils/
 │   └── statusBadge.ts
 ├── views/                        ✅ (nueva carpeta)
-│   └── InsuranceView.tsx        ✅ (movido y renombrado)
+│   ├── PersonnelDashboardView.tsx   ✅
+│   ├── PersonnelListView.tsx        ✅
+│   ├── PersonnelAttendanceView.tsx  ✅
+│   ├── PersonnelPaymentsView.tsx    ✅
+│   └── PersonnelInsuranceView.tsx   ✅
 └── index.ts                     ✅ (actualizado)
 ```
 
@@ -111,8 +115,8 @@ src/features/personnel/
 ## 7. NOTAS POST-CIERRE
 
 - Los archivos legacy (`InsuranceTab`) se exportan como alias para compatibilidad retroactiva
-- La página principal sigue en `src/pages/professional/personnel/` (legacy, fuera de alcance de esta auditoría)
-- Considerar migrar páginas a `src/pages/dashboard/PersonnelPage.tsx` en auditoría futura
+- ✅ La página principal fue migrada a `src/pages/dashboard/PersonnelPage.tsx` (2025-12-26)
+- ✅ Todas las Tabs fueron renombradas a *View.tsx y movidas a `src/features/personnel/views/`
 
 ---
 
@@ -126,8 +130,12 @@ export {
   PersonnelPaymentFormFields   // Wrapper para Drawer/NewMovementModal
 } from './forms/PersonnelPaymentForm';
 
-export { InsuranceView } from './views/InsuranceView';
-export { InsuranceView as InsuranceTab } from './views/InsuranceView'; // Legacy alias
+// Views
+export { InsuranceView as PersonnelInsuranceView, InsuranceView as InsuranceTab } from './views/PersonnelInsuranceView';
+export { default as PersonnelDashboardView, calculateAvailablePeriods, type PeriodFilter } from './views/PersonnelDashboardView';
+export { default as PersonnelListView } from './views/PersonnelListView';
+export { default as PersonnelAttendanceView } from './views/PersonnelAttendanceView';
+export { default as PersonnelPaymentsView } from './views/PersonnelPaymentsView';
 ```
 
 ---
@@ -136,4 +144,19 @@ export { InsuranceView as InsuranceTab } from './views/InsuranceView'; // Legacy
 
 - [ ] Extraer `usePersonnelPaymentForm` hook para desacoplar completamente la lógica
 - [ ] Actualizar PersonnelPaymentModal para consumir FormPanel/ViewPanel directamente
-- [ ] Migrar páginas de `src/pages/professional/personnel/` a `src/pages/dashboard/`
+- [x] ✅ Migrar páginas de `src/pages/professional/personnel/` a `src/pages/dashboard/` (COMPLETADO 2025-12-26)
+
+---
+
+## 10. CAMBIOS 2025-12-26: Migración de Páginas y Views
+
+### Cambios realizados:
+1. **PersonnelPage.tsx** creado en `src/pages/dashboard/PersonnelPage.tsx`
+2. **Carpeta legacy eliminada:** `src/pages/professional/personnel/`
+3. **Views creadas en `src/features/personnel/views/`:**
+   - PersonnelDashboardView.tsx (antes PersonnelDashboardTab.tsx)
+   - PersonnelListView.tsx (antes PersonnelListTab.tsx)
+   - PersonnelAttendanceView.tsx (antes PersonnelAttendanceTab.tsx)
+   - PersonnelPaymentsView.tsx (antes PersonnelPaymentsTab.tsx)
+   - PersonnelInsuranceView.tsx (antes InsuranceView.tsx)
+4. **Exports actualizados en index.ts** para exponer todas las views
