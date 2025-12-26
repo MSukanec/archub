@@ -184,6 +184,23 @@ create table public.partner_capital_balance (
   constraint fk_balance_partner foreign KEY (partner_id) references capital_participants (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
+## Vista PARTNER_CAPITAL_KPI_VIEW:
+
+create view public.partner_capital_kpi_view as
+select
+  pbs.partner_id,
+  pbs.organization_id,
+  pbs.total_balance,
+  pbs.total_balance / NULLIF(
+    sum(pbs.total_balance) over (
+      partition by
+        pbs.organization_id
+    ),
+    0::numeric
+  ) as ownership_ratio
+from
+  partner_balance_summary_view pbs;
+
 ## Tabla PARTNER_CONTRIBUTIONS:
 
 create table public.partner_contributions (
