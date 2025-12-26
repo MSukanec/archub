@@ -669,9 +669,9 @@ export function ProjectFinancesDashboardView({
             balance: d.balance
           }))}
           series={[
-            { key: 'income', label: 'Ingresos', color: 'var(--chart-1)', type: 'bar' },
-            { key: 'expense', label: 'Egresos', color: 'var(--chart-2)', type: 'bar' },
-            { key: 'balance', label: 'Balance', color: 'var(--chart-3)', type: 'line' }
+            { key: 'income', label: 'Ingresos', color: 'var(--positive)', type: 'bar' },
+            { key: 'expense', label: 'Egresos', color: 'var(--negative)', type: 'bar' },
+            { key: 'balance', label: 'Balance', color: 'var(--neutral)', type: 'line' }
           ]}
           height={280}
           emptyText="No hay movimientos registrados"
