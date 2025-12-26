@@ -7,7 +7,7 @@ import { useCourseLanding, useCourseEnrollment, useCourseProgress } from '@/feat
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useNavigationStore } from '@/stores/navigationStore';
 
-export default function CourseInfo() {
+export default function CourseLandingPage() {
   const { slug } = useParams<{ slug: string }>();
   const [, navigate] = useLocation();
   const { setSidebarContext, setSidebarLevel, sidebarLevel } = useNavigationStore();
