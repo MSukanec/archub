@@ -279,7 +279,6 @@ export function PartnerWithdrawalForm({
               description: fileInput.description || fileInput.file.name,
             })
           } catch (uploadError: any) {
-            console.error('Error uploading file:', uploadError)
             toast({
               variant: 'destructive',
               title: 'Error al subir archivo',
@@ -298,7 +297,6 @@ export function PartnerWithdrawalForm({
 
       onSuccess()
     } catch (error: any) {
-      console.error('Error creating partner withdrawal:', error)
       toast({
         title: "Error al registrar retiro",
         description: error.message || "Ocurrió un error al registrar el retiro",

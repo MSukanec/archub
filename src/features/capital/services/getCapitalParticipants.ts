@@ -38,7 +38,6 @@ export async function getCapitalParticipants(organizationId: string): Promise<Ca
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('[getCapitalParticipants] Error fetching participants:', error);
     throw error;
   }
   

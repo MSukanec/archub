@@ -86,7 +86,6 @@ export function CapitalParticipantForm({
         .order('first_name');
 
       if (error) {
-        console.error('Error fetching contacts:', error);
         throw error;
       }
       return data || [];
@@ -123,7 +122,6 @@ export function CapitalParticipantForm({
         .eq('is_deleted', false);
 
       if (error) {
-        console.error('Error fetching existing partner contact ids:', error);
         return [];
       }
       return (data || []).map(p => p.contact_id).filter(Boolean);
