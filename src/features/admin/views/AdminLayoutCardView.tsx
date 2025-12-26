@@ -16,15 +16,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Home, Users, DollarSign, TrendingUp } from 'lucide-react';
 
-const AdminLayoutTab = () => {
+const AdminLayoutCardView = () => {
   return (
-    <div className="space-y-8" data-testid="admin-layout-tab">
-      {/* Sección: Card Component (shadcn/ui) */}
+    <div className="space-y-8" data-testid="admin-layout-card-view">
       <div>
         <h2 className="text-2xl font-bold mb-4" data-testid="heading-card-section">Card Component (shadcn/ui)</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           
-          {/* Card básica */}
           <Card data-testid="card-basic">
             <CardHeader>
               <CardTitle>Card Básica</CardTitle>
@@ -37,7 +35,6 @@ const AdminLayoutTab = () => {
             </CardContent>
           </Card>
 
-          {/* Card con ícono en header */}
           <Card data-testid="card-with-icon">
             <CardHeader icon={Home} title="Card con Ícono" description="Header con ícono personalizado" />
             <CardContent>
@@ -47,7 +44,6 @@ const AdminLayoutTab = () => {
             </CardContent>
           </Card>
 
-          {/* Card con footer */}
           <Card data-testid="card-with-footer">
             <CardHeader>
               <CardTitle>Card con Footer</CardTitle>
@@ -64,7 +60,6 @@ const AdminLayoutTab = () => {
             </CardFooter>
           </Card>
 
-          {/* Card sin border */}
           <Card className="border-0 shadow-none bg-muted/30" data-testid="card-no-border">
             <CardHeader>
               <CardTitle>Card Sin Borde</CardTitle>
@@ -77,7 +72,6 @@ const AdminLayoutTab = () => {
             </CardContent>
           </Card>
 
-          {/* Card con contenido personalizado */}
           <Card data-testid="card-custom-content">
             <CardHeader>
               <CardTitle>Card Personalizada</CardTitle>
@@ -95,7 +89,6 @@ const AdminLayoutTab = () => {
             </CardContent>
           </Card>
 
-          {/* Card clickeable */}
           <Card className="cursor-pointer hover:shadow-xl transition-shadow" data-testid="card-clickable">
             <CardHeader>
               <CardTitle>Card Clickeable</CardTitle>
@@ -111,33 +104,28 @@ const AdminLayoutTab = () => {
         </div>
       </div>
 
-      {/* Sección: StatCard Component (ui-custom) */}
       <div>
         <h2 className="text-2xl font-bold mb-4" data-testid="heading-statcard-section">StatCard Component (ui-custom) - KPI Cards</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           
-          {/* StatCard básica */}
           <StatCard data-testid="statcard-total-users">
             <StatCardTitle showArrow={false} data-testid="title-total-users">Total Usuarios</StatCardTitle>
             <StatCardValue data-testid="value-total-users">1,234</StatCardValue>
             <StatCardMeta data-testid="meta-total-users">+12% desde el mes pasado</StatCardMeta>
           </StatCard>
 
-          {/* StatCard con link */}
           <StatCard href="/admin/administration" data-testid="statcard-active-users">
             <StatCardTitle data-testid="title-active-users">Usuarios Activos</StatCardTitle>
             <StatCardValue data-testid="value-active-users">856</StatCardValue>
             <StatCardMeta className="text-accent" data-testid="meta-active-users">Clickeable - Ver más</StatCardMeta>
           </StatCard>
 
-          {/* StatCard con onClick */}
           <StatCard onCardClick={() => alert('Card clicked!')} data-testid="statcard-total-revenue">
             <StatCardTitle data-testid="title-total-revenue">Ingresos Totales</StatCardTitle>
             <StatCardValue data-testid="value-total-revenue">$45,231</StatCardValue>
             <StatCardMeta data-testid="meta-total-revenue">+20.1% respecto al trimestre anterior</StatCardMeta>
           </StatCard>
 
-          {/* StatCard con contenido personalizado */}
           <StatCard data-testid="statcard-active-projects">
             <StatCardTitle showArrow={false} data-testid="title-active-projects">Proyectos Activos</StatCardTitle>
             <StatCardValue data-testid="value-active-projects">12</StatCardValue>
@@ -149,28 +137,24 @@ const AdminLayoutTab = () => {
             </StatCardContent>
           </StatCard>
 
-          {/* StatCard variant minimal */}
           <StatCard variant="minimal" data-testid="statcard-pending-tasks">
             <StatCardTitle showArrow={false} data-testid="title-pending-tasks">Tareas Pendientes</StatCardTitle>
             <StatCardValue className="text-4xl" data-testid="value-pending-tasks">48</StatCardValue>
             <StatCardMeta data-testid="meta-pending-tasks">15 de alta prioridad</StatCardMeta>
           </StatCard>
 
-          {/* StatCard con número largo */}
           <StatCard data-testid="statcard-total-sales">
             <StatCardTitle showArrow={false} data-testid="title-total-sales">Total Ventas</StatCardTitle>
             <StatCardValue className="text-3xl" data-testid="value-total-sales">$1,234,567</StatCardValue>
             <StatCardMeta data-testid="meta-total-sales">Año fiscal 2024</StatCardMeta>
           </StatCard>
 
-          {/* StatCard con porcentaje */}
           <StatCard data-testid="statcard-conversion-rate">
             <StatCardTitle showArrow={false} data-testid="title-conversion-rate">Tasa de Conversión</StatCardTitle>
             <StatCardValue className="text-accent" data-testid="value-conversion-rate">68.5%</StatCardValue>
             <StatCardMeta data-testid="meta-conversion-rate">Objetivo: 70%</StatCardMeta>
           </StatCard>
 
-          {/* StatCard con custom className */}
           <StatCard className="bg-accent/10 border-accent/30" data-testid="statcard-uptime">
             <StatCardTitle showArrow={false} className="text-accent" data-testid="title-uptime">
               Destacado
@@ -182,7 +166,6 @@ const AdminLayoutTab = () => {
         </div>
       </div>
 
-      {/* Sección: Comparativa de uso */}
       <div>
         <h2 className="text-2xl font-bold mb-4" data-testid="heading-usage-guide">Guía de Uso</h2>
         <Card data-testid="card-usage-guide">
@@ -215,4 +198,4 @@ const AdminLayoutTab = () => {
   );
 };
 
-export default AdminLayoutTab;
+export default AdminLayoutCardView;

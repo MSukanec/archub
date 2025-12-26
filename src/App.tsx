@@ -80,7 +80,7 @@ import AdminTasks from "@/pages/admin/tasks/AdminTasks";
 import AdminGeneral from "@/pages/admin/general/AdminGeneral";
 import AdminCourses from "@/pages/admin/courses/AdminCourses";
 import AdminCourseView from "@/pages/admin/courses/AdminCourseView";
-import AdminLayout from "@/pages/admin/layout/AdminLayout";
+import AdminLayoutPage from "@/pages/admin/AdminLayoutPage";
 import AdminEmailTemplates from "@/pages/admin/email-templates/EmailTemplatesAdmin";
 import AdminOps from "@/pages/admin/ops/AdminOps";
 
@@ -393,7 +393,7 @@ function Router() {
         <Route path="/admin/layout">
           <Suspense fallback={<LazyLoadFallback />}>
             <AuthAdmin>
-              <AdminLayout />
+              <AdminLayoutPage />
             </AuthAdmin>
           </Suspense>
         </Route>

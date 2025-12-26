@@ -3,14 +3,16 @@ import { Layout as LayoutIcon, Plus } from 'lucide-react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { Button } from '@/components/ui/button';
 import { useGlobalModalStore } from '@/components/modal';
-import AdminLayoutTab from './AdminLayoutTab';
-import AdminLayoutContentTab from './AdminLayoutContentTab';
+import AdminLayoutContentView from '@/features/admin/views/AdminLayoutContentView';
+import AdminLayoutCardView from '@/features/admin/views/AdminLayoutCardView';
+import ChartGalleryView from '@/features/admin/views/ChartGalleryView';
 
-const AdminLayout = () => {
-  const [activeTab, setActiveTab] = useState('content');
+const AdminLayoutPage = () => {
+  const [activeTab, setActiveTab] = useState('charts');
   const { openModal } = useGlobalModalStore();
 
   const tabs = [
+    { id: 'charts', label: 'Charts', isActive: activeTab === 'charts' },
     { id: 'content', label: 'Contenido', isActive: activeTab === 'content' },
     { id: 'components', label: 'Componentes', isActive: activeTab === 'components' }
   ];
@@ -21,12 +23,14 @@ const AdminLayout = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'charts':
+        return <ChartGalleryView />;
       case 'content':
-        return <AdminLayoutContentTab />;
+        return <AdminLayoutContentView />;
       case 'components':
-        return <AdminLayoutTab />;
+        return <AdminLayoutCardView />;
       default:
-        return <AdminLayoutContentTab />;
+        return <ChartGalleryView />;
     }
   };
 
@@ -54,4 +58,4 @@ const AdminLayout = () => {
   );
 };
 
-export default AdminLayout;
+export default AdminLayoutPage;

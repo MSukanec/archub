@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
 
-const AdminLayoutContentTab = () => {
+const AdminLayoutContentView = () => {
   const { data: heroSections = [], isLoading } = useHeroSections('learning_dashboard')
   const deleteHeroMutation = useDeleteHeroSection()
   const reorderMutation = useReorderHeroSections()
@@ -87,9 +87,7 @@ const AdminLayoutContentTab = () => {
   }
 
   return (
-    <div className="space-y-6" data-testid="admin-layout-content-tab">
-
-      {/* Hero Sections */}
+    <div className="space-y-6" data-testid="admin-layout-content-view">
       {heroSections.length > 0 ? (
         <div className="space-y-3">
           {(heroSections as any[]).map((section, index) => (
@@ -108,7 +106,7 @@ const AdminLayoutContentTab = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="font-semibold truncate">{section.title}</h3>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="neutral" className="text-xs">
                       {index + 1}
                     </Badge>
                     {section.is_active && (
@@ -125,7 +123,7 @@ const AdminLayoutContentTab = () => {
                   <div className="flex items-center gap-2 mt-3 flex-wrap">
                     {section.media_url && (
                       <Badge
-                        variant="secondary"
+                        variant="info"
                         className="text-xs"
                         data-testid="badge-media-type"
                       >
@@ -134,13 +132,13 @@ const AdminLayoutContentTab = () => {
                     )}
 
                     {section.primary_button_text && (
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="neutral" className="text-xs">
                         {section.primary_button_text}
                       </Badge>
                     )}
 
                     {section.secondary_button_text && (
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="neutral" className="text-xs">
                         {section.secondary_button_text}
                       </Badge>
                     )}
@@ -186,4 +184,4 @@ const AdminLayoutContentTab = () => {
   )
 }
 
-export default AdminLayoutContentTab
+export default AdminLayoutContentView
