@@ -260,5 +260,6 @@ export {
   AppCardValue as StatCardValue,
   AppCardMeta as StatCardMeta,
   AppCardContent as StatCardContent,
+  AppCardHistoricalComparison as StatCardHistoricalComparison,
   AppCard as DashboardCard,
 }
