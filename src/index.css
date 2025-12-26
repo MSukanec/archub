@@ -197,6 +197,8 @@ body[data-scroll-locked] {
   --card-foreground: hsl(0, 0%, 35%);
   --background: hsl(0, 0%, 99%);
   --foreground: hsl(0, 0%, 45%);
+  --destructive: hsl(0, 75%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
 
   /* Radius */
   --radius-sm: 6px;
@@ -361,6 +363,8 @@ body[data-scroll-locked] {
   --card-foreground: hsl(0, 0%, 70%);
   --background: hsl(0, 0%, 16%);
   --foreground: hsl(0, 0%, 90%);
+  --destructive: hsl(0, 70%, 55%);
+  --destructive-foreground: hsl(0, 0%, 100%);
 
   /* Radius */
   --radius-sm: 4px;

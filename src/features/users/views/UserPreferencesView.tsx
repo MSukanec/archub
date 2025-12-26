@@ -1,31 +1,43 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Settings } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/use-current-user';
-import { useToast } from '@/hooks/use-toast';
+import { Settings, Loader2 } from 'lucide-react';
+import { useCurrentUser, type UserData } from '@/hooks/use-current-user';
 import { useSidebarStore } from '@/stores/sidebarStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { supabase } from '@/lib/supabase';
-import { useAutosaveController } from '@/core/autosave';
+import { useSaveEngine } from '@/core/save-engine';
 import { usersKeys } from '@/core/query-keys';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
 
+interface PreferencesData {
+  sidebarDocked: boolean;
+  theme: 'light' | 'dark';
+}
+
 export function UserPreferencesView() {
   const { data: userData, isLoading } = useCurrentUser();
-  const { toast } = useToast();
   const { isDocked: sidebarDockedFromStore, setDocked: setMainSidebarDocked } = useSidebarStore();
   const { isDark, setTheme } = useThemeStore();
   
   const [sidebarDocked, setSidebarDocked] = useState(false);
+  const [themeValue, setThemeValue] = useState<'light' | 'dark'>('light');
   const [isHydrated, setIsHydrated] = useState(false);
 
   const hasHydratedRef = useRef(false);
   const lastHydratedIdRef = useRef<string | null>(null);
 
-  const saveController = useAutosaveController({
+  const formData = useMemo<PreferencesData>(() => ({
+    sidebarDocked,
+    theme: themeValue,
+  }), [sidebarDocked, themeValue]);
+
+  const { isSaving, hasUnsavedChanges } = useSaveEngine<PreferencesData>({
+    data: formData,
     queryKey: usersKeys.current(),
-    saveFn: async (dataToSave: any) => {
+    delay: 500,
+    enabled: isHydrated && !!userData?.user?.id,
+    saveFn: async (dataToSave) => {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.access_token) {
         throw new Error('No se pudo obtener el token de autenticación');
@@ -49,7 +61,18 @@ export function UserPreferencesView() {
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
     },
-    additionalQueryKeys: [],
+    optimisticUpdate: (oldData: UserData | null, newData: PreferencesData) => {
+      if (!oldData) return oldData;
+      
+      return {
+        ...oldData,
+        preferences: {
+          ...oldData.preferences,
+          sidebar_docked: newData.sidebarDocked,
+          theme: newData.theme,
+        },
+      };
+    },
   });
 
   useEffect(() => {
@@ -67,43 +90,27 @@ export function UserPreferencesView() {
     hasHydratedRef.current = true;
     lastHydratedIdRef.current = userId ?? null;
     
-    setSidebarDocked(userData.preferences.sidebar_docked || false);
-    setTheme(userData.preferences.theme === 'dark');
+    const initialSidebarDocked = userData.preferences.sidebar_docked || false;
+    const initialTheme = userData.preferences.theme === 'dark' ? 'dark' : 'light';
+    
+    setSidebarDocked(initialSidebarDocked);
+    setThemeValue(initialTheme);
+    setTheme(initialTheme === 'dark');
     
     setTimeout(() => {
       setIsHydrated(true);
-      saveController.setLastPersistedData({
-        sidebarDocked: userData.preferences?.sidebar_docked || false,
-        theme: userData.preferences?.theme || 'light',
-      });
     }, 100);
   }, [userData?.preferences, setTheme]);
 
   const handleSidebarDockedChange = (value: boolean) => {
     setSidebarDocked(value);
     setMainSidebarDocked(value);
-    
-    if (isHydrated && userData?.user?.id) {
-      setTimeout(() => {
-        saveController.save({
-          sidebarDocked: value,
-          theme: isDark ? 'dark' : 'light',
-        });
-      }, 10);
-    }
   };
 
   const handleThemeChange = (value: boolean) => {
+    const newTheme = value ? 'dark' : 'light';
+    setThemeValue(newTheme);
     setTheme(value);
-    
-    if (isHydrated && userData?.user?.id) {
-      setTimeout(() => {
-        saveController.save({
-          sidebarDocked,
-          theme: value ? 'dark' : 'light',
-        });
-      }, 10);
-    }
   };
 
   if (isLoading) {
@@ -130,6 +137,18 @@ export function UserPreferencesView() {
             <div className="flex items-center gap-2">
               <Settings className="h-5 w-5 text-[var(--accent)]" />
               <h3 className="text-lg font-semibold">Preferencias</h3>
+              {(isSaving || hasUnsavedChanges) && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Guardando...
+                    </>
+                  ) : (
+                    'Sin guardar'
+                  )}
+                </span>
+              )}
             </div>
             <p className="text-sm text-muted-foreground">
               Configura las preferencias de tu aplicación.

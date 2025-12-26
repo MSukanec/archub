@@ -1,24 +1,32 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Camera, User, Settings, Building, Package, Hammer, Eye, CalendarIcon } from 'lucide-react';
+import { Camera, User, Settings, Building, Package, Hammer, Eye, CalendarIcon, Loader2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useLocation } from 'wouter';
-import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCurrentUser, type UserData } from '@/hooks/use-current-user';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { supabase } from '@/lib/supabase';
 import { useCountries } from '@/hooks/use-countries';
-import { useAutosaveController, normalizeStringValue } from '@/core/autosave';
+import { useSaveEngine } from '@/core/save-engine';
 import { usersKeys } from '@/core/query-keys';
 import { LoadingSpinner } from '@/components/shared/layout/LoadingSpinner';
+
+interface FormData {
+  firstName: string;
+  lastName: string;
+  country: string;
+  birthdate: Date | undefined;
+  avatarUrl: string;
+}
 
 const getUserModeInfo = (userType: string | null) => {
   switch (userType) {
@@ -33,6 +41,12 @@ const getUserModeInfo = (userType: string | null) => {
     default:
       return { icon: Settings, label: 'No definido', description: 'Selecciona tu modo de uso' };
   }
+};
+
+const normalizeStringValue = (value: string | null | undefined): string | null => {
+  if (!value) return null;
+  const trimmed = value.trim();
+  return trimmed === '' ? null : trimmed;
 };
 
 export function UserBasicDataView() {
@@ -51,11 +65,22 @@ export function UserBasicDataView() {
   const hasHydratedRef = useRef(false);
   const lastHydratedIdRef = useRef<string | null>(null);
 
-  const { data: countries = [] } = useCountries();
+  const { data: countries = [], isLoading: countriesLoading } = useCountries();
 
-  const saveController = useAutosaveController({
+  const formData = useMemo<FormData>(() => ({
+    firstName,
+    lastName,
+    country,
+    birthdate,
+    avatarUrl,
+  }), [firstName, lastName, country, birthdate, avatarUrl]);
+
+  const { isSaving, hasUnsavedChanges } = useSaveEngine<FormData>({
+    data: formData,
     queryKey: usersKeys.current(),
-    saveFn: async (dataToSave: any) => {
+    delay: 500,
+    enabled: isHydrated && !!userData?.user?.id,
+    saveFn: async (dataToSave) => {
       if (!supabase) throw new Error('Supabase not initialized');
       
       const { data: { session } } = await supabase.auth.getSession();
@@ -69,7 +94,7 @@ export function UserBasicDataView() {
         birthdateString = `${year}-${month}-${day}`;
       }
       
-      const profileUpdates: any = {
+      const profileUpdates: Record<string, any> = {
         user_id: userData?.user?.id,
         first_name: normalizeStringValue(dataToSave.firstName),
         last_name: normalizeStringValue(dataToSave.lastName),
@@ -95,7 +120,32 @@ export function UserBasicDataView() {
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
     },
-    additionalQueryKeys: [],
+    optimisticUpdate: (oldData: UserData | null, newData: FormData) => {
+      if (!oldData) return oldData;
+      
+      let birthdateString: string | null = null;
+      if (newData.birthdate) {
+        const year = newData.birthdate.getFullYear();
+        const month = String(newData.birthdate.getMonth() + 1).padStart(2, '0');
+        const day = String(newData.birthdate.getDate()).padStart(2, '0');
+        birthdateString = `${year}-${month}-${day}`;
+      }
+      
+      return {
+        ...oldData,
+        user_data: {
+          ...oldData.user_data,
+          first_name: newData.firstName,
+          last_name: newData.lastName,
+          country: newData.country,
+          birthdate: birthdateString,
+        },
+        user: {
+          ...oldData.user,
+          avatar_url: newData.avatarUrl,
+        },
+      };
+    },
   });
 
   useEffect(() => {
@@ -124,63 +174,8 @@ export function UserBasicDataView() {
     
     setTimeout(() => {
       setIsHydrated(true);
-      saveController.setLastPersistedData({
-        firstName: userData.user_data?.first_name || '',
-        lastName: userData.user_data?.last_name || '',
-        country: userData.user_data?.country || '',
-        birthdate: userData.user_data?.birthdate ? new Date(userData.user_data.birthdate) : undefined,
-        avatarUrl: userData.user?.avatar_url || '',
-      });
     }, 100);
   }, [userData]);
-
-  const handleBlur = () => {
-    if (!isHydrated || !userData?.user?.id) return;
-    saveController.save({
-      firstName,
-      lastName,
-      country,
-      birthdate,
-      avatarUrl,
-    });
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleBlur();
-    }
-  };
-
-  const handleCountryChange = (value: string) => {
-    setCountry(value);
-    if (isHydrated) {
-      setTimeout(() => {
-        saveController.save({
-          firstName,
-          lastName,
-          country: value,
-          birthdate,
-          avatarUrl,
-        });
-      }, 10);
-    }
-  };
-
-  const handleBirthdateChange = (value: Date | undefined) => {
-    setBirthdate(value);
-    if (isHydrated) {
-      setTimeout(() => {
-        saveController.save({
-          firstName,
-          lastName,
-          country,
-          birthdate: value,
-          avatarUrl,
-        });
-      }, 10);
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -225,6 +220,18 @@ export function UserBasicDataView() {
             <div className="flex items-center gap-2">
               <Camera className="h-5 w-5 text-[var(--accent)]" />
               <h3 className="text-lg font-semibold">Perfil</h3>
+              {(isSaving || hasUnsavedChanges) && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Guardando...
+                    </>
+                  ) : (
+                    'Sin guardar'
+                  )}
+                </span>
+              )}
             </div>
             <p className="text-sm text-muted-foreground">
               Esta información se mostrará públicamente, así que ten cuidado con lo que compartes.
@@ -302,8 +309,6 @@ export function UserBasicDataView() {
                 <Input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  onBlur={handleBlur}
-                  onKeyDown={handleKeyDown}
                   data-testid="input-first-name"
                 />
               </div>
@@ -312,8 +317,6 @@ export function UserBasicDataView() {
                 <Input
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  onBlur={handleBlur}
-                  onKeyDown={handleKeyDown}
                   data-testid="input-last-name"
                 />
               </div>
@@ -322,9 +325,16 @@ export function UserBasicDataView() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">País</Label>
-                <Select value={country} onValueChange={handleCountryChange}>
+                <Select value={country} onValueChange={setCountry}>
                   <SelectTrigger data-testid="select-country">
-                    <SelectValue placeholder="Selecciona un país" />
+                    {countriesLoading ? (
+                      <span className="text-muted-foreground flex items-center gap-2">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Cargando...
+                      </span>
+                    ) : (
+                      <SelectValue placeholder="Selecciona un país" />
+                    )}
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Sin seleccionar</SelectItem>
@@ -355,7 +365,7 @@ export function UserBasicDataView() {
                     <Calendar
                       mode="single"
                       selected={birthdate}
-                      onSelect={handleBirthdateChange}
+                      onSelect={setBirthdate}
                       disabled={(date) => date > new Date()}
                       initialFocus
                       locale={es}
