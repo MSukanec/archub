@@ -16,7 +16,7 @@ import { default as DeleteConfirmationForm } from '@/components/forms/DeleteConf
 import { default as PaymentFeedbackModal } from '@/components/forms/PaymentFeedbackModal';
 import { UniversalImportForm } from '@/features/imports';
 import { MaterialFormModal, MaterialCategoryFormModal, BrandFormModal, UnitPresentationFormModal, AdminProductModal, ProductModal, ProviderProductModal, MaterialPaymentModal, PurchaseOrderForm, MaterialPurchaseForm } from '@/features/materials';
-import { AdminUserModal, AdminChangelogModal, AdminNotificationModal, AdminAnnouncementModal, AdminSupportConversationStartModal, PlanModal, PlanPriceFormModal, DowngradeModal, AdminResetTestDataModal } from '@/features/users';
+import { AdminUserModal, AdminChangelogModal, AdminNotificationModal, AdminAnnouncementModal, AdminSupportConversationStartModal, PlanModal, DowngradeModal, AdminResetTestDataModal } from '@/features/users';
 import SiteLogForm from '@/features/sitelog/forms/SiteLogForm';
 import { SiteLogTypeForm } from '@/features/sitelog/forms/SiteLogTypeForm';
 import { ProjectTypeModal } from '@/features/projects/modals/ProjectTypeModal';
@@ -482,7 +482,6 @@ export function initializeModalRegistry(): void {
   registerModal('announcement', AdminAnnouncementModal as any, adminConfig);
   registerModal('support-conversation-start', AdminSupportConversationStartModal as any, adminConfig);
   registerModal('plan', PlanModal as any, adminConfig);
-  registerModal('plan-price', PlanPriceFormModal as any, adminConfig);
   registerModal('downgrade', DowngradeModal as any, adminConfig);
   registerModal('upgrade', UpgradeModal as any, adminConfig);
   registerModal('reset-test-data', AdminResetTestDataModal as any, { ...adminConfig, size: 'md' });

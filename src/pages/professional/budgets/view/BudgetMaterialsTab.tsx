@@ -9,7 +9,7 @@ import { useBudgetItems } from '@/hooks/use-budget-items'
 import { Package, Plus } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { CommercialCalculationPopover } from '@/components/construction/CommercialCalculationPopover'
+import { CommercialCalculationPopover } from '@/components/shared/construction/CommercialCalculationPopover'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 

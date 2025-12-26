@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Layout } from "@/layouts/dashboard/DashboardLayout";
 import { useNavigationStore } from '@/stores/navigationStore';
 import { MapPin } from 'lucide-react';
-import { InteractiveProjectsMap } from '@/components/community/InteractiveProjectsMap';
+import { InteractiveProjectsMap } from '@/components/shared/InteractiveProjectsMap';
 
 export default function CommunityMap() {
   const { setSidebarLevel } = useNavigationStore();

@@ -1,6 +1,6 @@
 import { Settings } from 'lucide-react'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { PhaseOrderManager } from '@/components/construction/PhaseOrderManager'
+import { PhaseOrderManager } from '@/components/shared/construction/PhaseOrderManager'
 
 interface EstimatePhasesProps {
   projectPhases: any[]

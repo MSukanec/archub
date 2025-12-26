@@ -21,7 +21,7 @@ import { Edit, Trash2, Target, Zap, CheckSquare, Clock, Plus, TreePine, ChevronR
 import { EditableParametersTable } from '@/features/legacy/components/admin/EditableParametersTable'
 import { exportToExcel, createExportColumns } from '@/lib/export-utils'
 import { TaskCostPopover } from '@/features/legacy/components/tasks/TaskCostPopover'
-import TaskLaborCost from '@/components/construction/TaskLaborCost'
+import TaskLaborCost from '@/components/shared/construction/TaskLaborCost'
 import { useLocation } from 'wouter'
 
 const AdminTaskList = () => {

@@ -1,7 +1,7 @@
 import DataRowCard, { DataRowCardProps } from '@/components/shared/DataRowCard';
 import { TaskCostPopover } from '@/features/legacy/components/tasks/TaskCostPopover';
-import TaskCostPerUnit from '@/components/construction/TaskCostPerUnit';
-import TaskTotalSubtotal from '@/components/construction/TaskTotalSubtotal';
+import TaskCostPerUnit from '@/components/shared/construction/TaskCostPerUnit';
+import TaskTotalSubtotal from '@/components/shared/construction/TaskTotalSubtotal';
 
 // Interface para la tarea de construcción
 interface TaskRowProps {
