@@ -32,37 +32,41 @@ export { DowngradeModal } from './modals/DowngradeModal';
 export { UpgradeModal } from './modals/UpgradeModal';
 
 // Auth Components
-export { AuthGuard } from './components/auth/AuthGuard';
-export { AuthAdmin } from './components/auth/AuthAdmin';
+export { AuthGuard } from './components/AuthGuard';
+export { AuthAdmin } from './components/AuthAdmin';
 
 // Notification Components
-export { NotificationBell } from './components/notifications/NotificationBell';
-export { NotificationBellHeader } from './components/notifications/NotificationBellHeader';
-export { NotificationDropdown } from './components/notifications/NotificationDropdown';
+export { NotificationBell } from './components/NotificationBell';
+export { NotificationBellHeader } from './components/NotificationBellHeader';
+export { NotificationDropdown } from './components/NotificationDropdown';
 
 // Support Components
-export { SupportModal } from './components/support/SupportModal';
-export { SupportPanel } from './components/support/SupportPanel';
+export { SupportModal } from './components/SupportModal';
+export { SupportPanel } from './components/SupportPanel';
 
 // Plan Components
-export { default as PlanBadge } from './components/plans/PlanBadge';
+export { default as PlanBadge } from './components/PlanBadge';
 export { PlanRestricted } from '@/components/shared/restrictions';
 
 // Restriction Components (re-export from new architecture)
 export { RoleRestricted, ContextRestricted, RestrictionOverlay, EmptyStateBlock } from '@/components/shared/restrictions';
 
 // Announcement Components
-export { GlobalAnnouncement, AnnouncementProvider, useAnnouncementBanner } from './components/announcements/GlobalAnnouncement';
+export { GlobalAnnouncement, AnnouncementProvider, useAnnouncementBanner } from './components/GlobalAnnouncement';
 
 // Presence Components
-export { OnlineUsersIndicator } from './components/presence/OnlineUsersIndicator';
+export { OnlineUsersIndicator } from './components/OnlineUsersIndicator';
 
 // Field Components
-export { default as UserSelectorField } from './components/fields/UserSelectorField';
-export { UserQuickAccess } from './components/fields/UserQuickAccess';
+export { default as UserSelectorField } from './components/UserSelectorField';
+export { UserQuickAccess } from './components/UserQuickAccess';
 
 // Admin Components
-export { default as AdminUserRow } from './components/admin/AdminUserRow';
+export { default as AdminUserRow } from './components/AdminUserRow';
+export { default as AdminChangelogRow } from './components/AdminChangelogRow';
 
 // Onboarding Components
-export { Step1UserData } from './components/onboarding/Step1UserData';
+export { Step1UserData } from './components/Step1UserData';
+
+// Member Components
+export { default as MemberRow } from './components/MemberRow';

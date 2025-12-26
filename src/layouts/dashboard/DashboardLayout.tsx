@@ -26,7 +26,7 @@ import { OrganizationRemovedModal } from "@/features/organization/modals";
 import { usePendingInvitations } from "@/hooks/use-pending-invitations";
 import { useProjectReadOnly } from "@/hooks/use-project-readonly";
 import { ProjectReadOnlyProvider } from "@/contexts/ProjectReadOnlyContext";
-import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, ANNOUNCEMENT_HEIGHT_MOBILE, AnnouncementProvider } from "@/features/users/components/announcements/GlobalAnnouncement";
+import { GlobalAnnouncement, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, ANNOUNCEMENT_HEIGHT_MOBILE, AnnouncementProvider } from "@/features/users/components/GlobalAnnouncement";
 import { useLocation } from "wouter";
 import { type WidthProp, resolveWidthMode, getContainerClasses, getContentPaddingClasses } from "./layoutWidth";
 

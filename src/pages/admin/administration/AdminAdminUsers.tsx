@@ -10,7 +10,7 @@ import { Edit, Trash2, Building, Users } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useGlobalModalStore } from '@/components/modal'
-import AdminUserRow from '@/features/users/components/admin/AdminUserRow'
+import AdminUserRow from '@/features/users/components/AdminUserRow'
 
 // Helper to format user acquisition origin
 function formatAcquisitionOrigin(acquisition: { source?: string; medium?: string; campaign?: string } | null): string {

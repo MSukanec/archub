@@ -22,16 +22,23 @@ src/features/users/
 ├── services/
 │   ├── index.ts                   # Service exports
 │   └── userProfileService.ts      # Profile update operations
-├── components/
-│   ├── admin/              # Admin-specific components
-│   ├── announcements/      # Global announcements
-│   ├── auth/               # AuthGuard, AuthAdmin
-│   ├── fields/             # User selector fields
-│   ├── notifications/      # Bell, dropdown
-│   ├── onboarding/         # Onboarding steps
-│   ├── plans/              # Plan badges
-│   ├── presence/           # Online users
-│   └── support/            # Support modal/panel
+├── components/                    # Flattened: NO SUBFOLDERS
+│   ├── AuthGuard.tsx              # Authentication protection
+│   ├── AuthAdmin.tsx              # Admin auth component
+│   ├── NotificationBell.tsx       # Bell icon in header
+│   ├── NotificationBellHeader.tsx # Bell with label
+│   ├── NotificationDropdown.tsx   # Notification list
+│   ├── SupportModal.tsx           # Support form modal
+│   ├── SupportPanel.tsx           # Support panel
+│   ├── PlanBadge.tsx              # Plan display badge
+│   ├── GlobalAnnouncement.tsx     # Global notification banner
+│   ├── OnlineUsersIndicator.tsx   # Presence indicator
+│   ├── UserSelectorField.tsx      # User dropdown selector
+│   ├── UserQuickAccess.tsx        # Quick user menu
+│   ├── AdminUserRow.tsx           # Admin user list row
+│   ├── AdminChangelogRow.tsx      # Admin changelog row
+│   ├── Step1UserData.tsx          # Onboarding step
+│   └── MemberRow.tsx              # Member list row
 ├── modals/
 │   ├── admin/              # Admin modals (UserFormModal, etc.)
 │   └── plans/              # Plan upgrade modals
@@ -124,3 +131,4 @@ Uses semantic badge variants:
 2025-12-25 - Initial audit compliance
 2025-12-25 - Fixed badge variants and cache invalidation guards
 2025-12-25 - Added hooks/ and services/ with useCurrentUser and userProfileService
+2025-12-25 - Flattened components/ - removed all subfolders, moved 16 files directly to components/

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
-import { GlobalAnnouncement, AnnouncementProvider, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, ANNOUNCEMENT_HEIGHT_MOBILE } from "@/features/users/components/announcements/GlobalAnnouncement";
+import { GlobalAnnouncement, AnnouncementProvider, useAnnouncementBanner, ANNOUNCEMENT_HEIGHT, ANNOUNCEMENT_HEIGHT_MOBILE } from "@/features/users/components/GlobalAnnouncement";
 import { useMobile } from "@/hooks/use-mobile";
 
 interface SEOProps {
