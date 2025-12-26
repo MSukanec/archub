@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useOptimisticMutation } from '@/core/save-engine';
 import { useProjectContext } from '@/stores/projectContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/dashboard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/shared/table/Table';
@@ -458,7 +458,7 @@ export function OrganizationBillingView() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <StatCard>
+        <AppCard>
           <div className="flex items-center justify-between mb-4">
             <CardTitle className="text-lg">Plan Actual</CardTitle>
             <div className="flex items-center gap-2">
@@ -646,9 +646,9 @@ export function OrganizationBillingView() {
               </div>
             </>
           )}
-        </StatCard>
+        </AppCard>
 
-        <StatCard>
+        <AppCard>
           <CardTitle className="text-lg mb-4">Método de Pago</CardTitle>
           <CardDescription className="mb-4">
             Administra tu información de pago
@@ -714,7 +714,7 @@ export function OrganizationBillingView() {
               No hay métodos de pago registrados
             </div>
           )}
-        </StatCard>
+        </AppCard>
       </div>
 
       {isTeamsPlan && (

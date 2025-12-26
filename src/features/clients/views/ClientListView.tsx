@@ -9,7 +9,7 @@ import { useNavigationStore } from '@/stores/navigationStore'
 import { Table } from '@/components/shared/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard'
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/dashboard'
 import { useGlobalModalStore } from '@/components/modal'
 import { IdentityBadge } from '@/components/shared/IdentityBadge'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -364,44 +364,44 @@ export function ClientListView({ projectId }: ClientListViewProps) {
     <div className="space-y-6">
       {projectClients.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard data-testid="stat-card-total-clients" className="col-span-2">
-            <StatCardTitle showArrow={false}>
+          <AppCard data-testid="stat-card-total-clients" className="col-span-2">
+            <AppCardTitle showArrow={false}>
               <Users className="w-4 h-4 inline mr-1" />
               Total Clientes
-            </StatCardTitle>
-            <StatCardValue>
+            </AppCardTitle>
+            <AppCardValue>
               {metrics.totalClients}
-            </StatCardValue>
-            <StatCardMeta>
+            </AppCardValue>
+            <AppCardMeta>
               Clientes en el proyecto
-            </StatCardMeta>
-          </StatCard>
+            </AppCardMeta>
+          </AppCard>
 
-          <StatCard data-testid="stat-card-active-commitments">
-            <StatCardTitle showArrow={false}>
+          <AppCard data-testid="stat-card-active-commitments">
+            <AppCardTitle showArrow={false}>
               <FileText className="w-4 h-4 inline mr-1" />
               Compromisos
-            </StatCardTitle>
-            <StatCardValue>
+            </AppCardTitle>
+            <AppCardValue>
               {metrics.activeCommitments}
-            </StatCardValue>
-            <StatCardMeta>
+            </AppCardValue>
+            <AppCardMeta>
               Compromisos activos
-            </StatCardMeta>
-          </StatCard>
+            </AppCardMeta>
+          </AppCard>
 
-          <StatCard data-testid="stat-card-recent-payments">
-            <StatCardTitle showArrow={false}>
+          <AppCard data-testid="stat-card-recent-payments">
+            <AppCardTitle showArrow={false}>
               <Calendar className="w-4 h-4 inline mr-1" />
               Recientes
-            </StatCardTitle>
-            <StatCardValue>
+            </AppCardTitle>
+            <AppCardValue>
               {metrics.recentPayments}
-            </StatCardValue>
-            <StatCardMeta>
+            </AppCardValue>
+            <AppCardMeta>
               Pagos del último mes
-            </StatCardMeta>
-          </StatCard>
+            </AppCardMeta>
+          </AppCard>
         </div>
       )}
 

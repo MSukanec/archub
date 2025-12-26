@@ -18,7 +18,7 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { useToast } from '@/hooks/use-toast'
 import { queryClient } from '@/lib/queryClient'
 import ClientPaymentRow from '@/features/clients/components/ClientPaymentRow'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard'
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/dashboard'
 import {
   useClientPayments,
   useDeleteClientPayment,
@@ -1059,49 +1059,49 @@ export function ClientPaymentsView({ projectId, initialFilterMonth, initialFilte
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard className="col-span-2" data-testid="stat-card-total-confirmado">
-          <StatCardTitle showArrow={false}>
+        <AppCard className="col-span-2" data-testid="stat-card-total-confirmado">
+          <AppCardTitle showArrow={false}>
             <CheckCircle2 className="w-4 h-4 inline mr-1" />
             Total Confirmado
-          </StatCardTitle>
-          <StatCardValue>
+          </AppCardTitle>
+          <AppCardValue>
             {metricsKPIs?.total_confirmado_kpi?.breakdown && metricsKPIs.total_confirmado_kpi.breakdown.length > 0
               ? formatMoney(metricsKPIs.total_confirmado_kpi.value, metricsKPIs.total_confirmado_kpi.breakdown[0].currencySymbol)
               : formatKPI(metricsKPIs?.total_confirmado_kpi?.value ?? 0)
             }
-          </StatCardValue>
-          <StatCardMeta>
+          </AppCardValue>
+          <AppCardMeta>
             {metricsKPIs?.total_confirmado_kpi?.breakdown && metricsKPIs.total_confirmado_kpi.breakdown.length > 0
               ? formatBreakdown(metricsKPIs.total_confirmado_kpi)
               : 'Sin pagos confirmados'
             }
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
 
-        <StatCard data-testid="stat-card-total-pagos">
-          <StatCardTitle showArrow={false}>
+        <AppCard data-testid="stat-card-total-pagos">
+          <AppCardTitle showArrow={false}>
             <DollarSign className="w-4 h-4 inline mr-1" />
             Total Pagos
-          </StatCardTitle>
-          <StatCardValue>
+          </AppCardTitle>
+          <AppCardValue>
             {metricsData?.total_count ?? 0}
-          </StatCardValue>
-          <StatCardMeta>Cantidad de pagos registrados</StatCardMeta>
-        </StatCard>
+          </AppCardValue>
+          <AppCardMeta>Cantidad de pagos registrados</AppCardMeta>
+        </AppCard>
 
-        <StatCard data-testid="stat-card-ultimo-pago">
-          <StatCardTitle showArrow={false}>
+        <AppCard data-testid="stat-card-ultimo-pago">
+          <AppCardTitle showArrow={false}>
             <Calendar className="w-4 h-4 inline mr-1" />
             Último Pago
-          </StatCardTitle>
-          <StatCardValue>
+          </AppCardTitle>
+          <AppCardValue>
             {metricsData?.latest_payment_date 
               ? format(parseLocalDate(metricsData.latest_payment_date)!, 'd/M/yyyy')
               : '-'
             }
-          </StatCardValue>
-          <StatCardMeta>Fecha del último pago registrado</StatCardMeta>
-        </StatCard>
+          </AppCardValue>
+          <AppCardMeta>Fecha del último pago registrado</AppCardMeta>
+        </AppCard>
       </div>
 
       <Table

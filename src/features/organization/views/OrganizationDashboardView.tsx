@@ -16,7 +16,7 @@ import { Folder, ArrowRight, Camera, Loader2, Users, FileText, Users2 } from 'lu
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta, StatCardContent } from '@/components/dashboard';
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta, AppCardContent } from '@/components/dashboard';
 import { ProjectItemCard } from '@/features/projects';
 import { getOrganizationInitials } from '@/utils/initials';
 import { cn } from '@/lib/utils';
@@ -129,65 +129,65 @@ function StatsPanel({
 }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard href="/organization/projects" data-testid="stat-card-proyectos-activos">
+      <AppCard href="/organization/projects" data-testid="stat-card-proyectos-activos">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <StatCardTitle>Proyectos Activos</StatCardTitle>
-            <StatCardValue className="mt-2">
+            <AppCardTitle>Proyectos Activos</AppCardTitle>
+            <AppCardValue className="mt-2">
               {isLoading ? '-' : activeProjectsCount}
-            </StatCardValue>
-            <StatCardMeta>
+            </AppCardValue>
+            <AppCardMeta>
               {isLoading ? 'Cargando...' : `de ${projectsCount} totales`}
-            </StatCardMeta>
+            </AppCardMeta>
           </div>
           <Folder className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
         </div>
-      </StatCard>
+      </AppCard>
 
-      <StatCard href="/contacts" data-testid="stat-card-contactos">
+      <AppCard href="/contacts" data-testid="stat-card-contactos">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <StatCardTitle>Contactos</StatCardTitle>
-            <StatCardValue className="mt-2">
+            <AppCardTitle>Contactos</AppCardTitle>
+            <AppCardValue className="mt-2">
               {isLoading ? '-' : contactsCount}
-            </StatCardValue>
-            <StatCardMeta>
+            </AppCardValue>
+            <AppCardMeta>
               {isLoading ? 'Cargando...' : 'Personal y clientes'}
-            </StatCardMeta>
+            </AppCardMeta>
           </div>
           <Users className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
         </div>
-      </StatCard>
+      </AppCard>
 
-      <StatCard data-testid="stat-card-bitacoras-org">
+      <AppCard data-testid="stat-card-bitacoras-org">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <StatCardTitle>Bitácoras</StatCardTitle>
-            <StatCardValue className="mt-2">
+            <AppCardTitle>Bitácoras</AppCardTitle>
+            <AppCardValue className="mt-2">
               {isLoading ? '-' : siteLogsCount}
-            </StatCardValue>
-            <StatCardMeta>
+            </AppCardValue>
+            <AppCardMeta>
               {isLoading ? 'Cargando...' : 'Registros totales'}
-            </StatCardMeta>
+            </AppCardMeta>
           </div>
           <FileText className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
         </div>
-      </StatCard>
+      </AppCard>
 
-      <StatCard data-testid="stat-card-equipo" className="opacity-75 cursor-default hover:shadow-none">
+      <AppCard data-testid="stat-card-equipo" className="opacity-75 cursor-default hover:shadow-none">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <StatCardTitle>Equipo</StatCardTitle>
-            <StatCardValue className="mt-2">
+            <AppCardTitle>Equipo</AppCardTitle>
+            <AppCardValue className="mt-2">
               {isLoading ? '-' : teamCount}
-            </StatCardValue>
-            <StatCardMeta>
+            </AppCardValue>
+            <AppCardMeta>
               {isLoading ? 'Cargando...' : 'Miembros activos'}
-            </StatCardMeta>
+            </AppCardMeta>
           </div>
           <Users2 className="w-5 h-5 text-muted-foreground opacity-40 mt-1" />
         </div>
-      </StatCard>
+      </AppCard>
     </div>
   );
 }
@@ -221,9 +221,9 @@ function ProjectsPanel({
   const activeProjects = sortedProjects.filter(p => p.status === 'active');
 
   return (
-    <StatCard href="/organization/projects">
-      <StatCardTitle>Proyectos Activos</StatCardTitle>
-      <StatCardContent>
+    <AppCard href="/organization/projects">
+      <AppCardTitle>Proyectos Activos</AppCardTitle>
+      <AppCardContent>
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
             <LoadingSpinner size="lg" />
@@ -261,8 +261,8 @@ function ProjectsPanel({
             }
           />
         )}
-      </StatCardContent>
-    </StatCard>
+      </AppCardContent>
+    </AppCard>
   );
 }
 

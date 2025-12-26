@@ -21,13 +21,12 @@ import { format as formatMoneyAmount, formatKPI } from '@/lib/money';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { 
-  StatCard, 
-  StatCardTitle, 
-  StatCardValue, 
-  StatCardMeta,
-  StatCardTrend,
-  StatCardHistoricalComparison,
-  DashboardCard,
+  AppCard, 
+  AppCardTitle, 
+  AppCardValue, 
+  AppCardMeta,
+  AppCardTrend,
+  AppCardHistoricalComparison,
   ActivityCard,
   InsightCard,
   type ActivityItem,
@@ -733,133 +732,133 @@ export function CapitalDashboardView({
     <div className="space-y-6">
       {/* Row 1: Core Capital Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-        <StatCard 
+        <AppCard 
           data-testid="kpi-net-capital"
           onClick={onNavigateToBalances}
         >
-          <StatCardTitle>
+          <AppCardTitle>
             <Wallet className="h-4 w-4" />
             Capital Neto Total
-          </StatCardTitle>
-          <StatCardValue className={kpis.netCapital.value >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}>
+          </AppCardTitle>
+          <AppCardValue className={kpis.netCapital.value >= 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]'}>
             {kpis.netCapital.value >= 0 ? '' : '-'}{currencySymbol} {formatKPI(Math.abs(kpis.netCapital.value))}
-          </StatCardValue>
+          </AppCardValue>
           {kpis.capitalTrendValue && (
-            <StatCardTrend 
+            <AppCardTrend 
               direction={kpis.capitalTrend} 
               value={kpis.capitalTrendValue} 
             />
           )}
-          <StatCardMeta>
+          <AppCardMeta>
             {kpis.contributions.breakdown && kpis.contributions.breakdown.length > 1
               ? formatBreakdown(kpis.netCapital)
               : 'Aportes - Retiros'
             }
-          </StatCardMeta>
+          </AppCardMeta>
           {sparklineData.length >= 3 && (
             <div className="mt-2">
               <SparklineChart data={sparklineData} height={24} />
             </div>
           )}
-        </StatCard>
+        </AppCard>
 
-        <StatCard 
+        <AppCard 
           data-testid="kpi-total-contributions"
           onClick={onNavigateToTransactions}
         >
-          <StatCardTitle>
+          <AppCardTitle>
             <TrendingUp className="h-4 w-4" />
             Total Aportes
-          </StatCardTitle>
-          <StatCardValue className="text-[var(--positive)]">
+          </AppCardTitle>
+          <AppCardValue className="text-[var(--positive)]">
             {currencySymbol} {formatKPI(kpis.contributions.value)}
-          </StatCardValue>
+          </AppCardValue>
           {kpis.contributionsTrendValue && (
-            <StatCardTrend 
+            <AppCardTrend 
               direction={kpis.contributionsTrend} 
               value={kpis.contributionsTrendValue} 
             />
           )}
-          <StatCardMeta>
+          <AppCardMeta>
             {confirmedContributions.length} aporte{confirmedContributions.length !== 1 ? 's' : ''} confirmado{confirmedContributions.length !== 1 ? 's' : ''}
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
 
-        <StatCard 
+        <AppCard 
           data-testid="kpi-total-withdrawals"
           onClick={onNavigateToTransactions}
         >
-          <StatCardTitle>
+          <AppCardTitle>
             <TrendingDown className="h-4 w-4" />
             Total Retiros
-          </StatCardTitle>
-          <StatCardValue className="text-[var(--negative)]">
+          </AppCardTitle>
+          <AppCardValue className="text-[var(--negative)]">
             {currencySymbol} {formatKPI(kpis.withdrawals.value)}
-          </StatCardValue>
+          </AppCardValue>
           {kpis.withdrawalsTrendValue && (
-            <StatCardTrend 
+            <AppCardTrend 
               direction={kpis.withdrawalsTrend} 
               value={kpis.withdrawalsTrendValue} 
             />
           )}
-          <StatCardMeta>
+          <AppCardMeta>
             {confirmedWithdrawals.length} retiro{confirmedWithdrawals.length !== 1 ? 's' : ''} confirmado{confirmedWithdrawals.length !== 1 ? 's' : ''}
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
 
-        <StatCard 
+        <AppCard 
           data-testid="kpi-total-deviation"
           onClick={onNavigateToBalances}
         >
-          <StatCardTitle>
+          <AppCardTitle>
             <Scale className="h-4 w-4" />
             Desbalance Total
-          </StatCardTitle>
-          <StatCardValue className={capitalHealthKPIs.totalDeviation > 0 ? 'text-[var(--pending)]' : 'text-[var(--neutral)]'}>
+          </AppCardTitle>
+          <AppCardValue className={capitalHealthKPIs.totalDeviation > 0 ? 'text-[var(--pending)]' : 'text-[var(--neutral)]'}>
             {currencySymbol} {formatKPI(capitalHealthKPIs.totalDeviation)}
-          </StatCardValue>
-          <StatCardMeta>
+          </AppCardValue>
+          <AppCardMeta>
             Suma de desvíos absolutos
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
 
-        <StatCard 
+        <AppCard 
           data-testid="kpi-under-contributed"
           onClick={onNavigateToBalances}
         >
-          <StatCardTitle>
+          <AppCardTitle>
             <AlertTriangle className="h-4 w-4" />
             Socios Bajo Aporte
-          </StatCardTitle>
-          <StatCardValue className={capitalHealthKPIs.underContributedCount > 0 ? 'text-[var(--negative)]' : 'text-[var(--positive)]'}>
+          </AppCardTitle>
+          <AppCardValue className={capitalHealthKPIs.underContributedCount > 0 ? 'text-[var(--negative)]' : 'text-[var(--positive)]'}>
             {capitalHealthKPIs.underContributedCount}
-          </StatCardValue>
-          <StatCardMeta>
+          </AppCardValue>
+          <AppCardMeta>
             {capitalHealthKPIs.underContributedCount === 0 ? 'Todos al día' : 'Requieren atención'}
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
 
-        <StatCard 
+        <AppCard 
           data-testid="kpi-top-over-contributor"
           onClick={onNavigateToBalances}
         >
-          <StatCardTitle>
+          <AppCardTitle>
             <Crown className="h-4 w-4" />
             Mayor Sobreaporte
-          </StatCardTitle>
-          <StatCardValue className="text-[var(--positive)] text-lg truncate">
+          </AppCardTitle>
+          <AppCardValue className="text-[var(--positive)] text-lg truncate">
             {capitalHealthKPIs.topOverContributorName 
               ? `${currencySymbol} ${formatKPI(capitalHealthKPIs.topOverContributorAmount)}`
               : '—'}
-          </StatCardValue>
-          <StatCardMeta className="truncate">
+          </AppCardValue>
+          <AppCardMeta className="truncate">
             {capitalHealthKPIs.topOverContributorName || 'Sin sobreaportes'}
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DashboardCard
+        <AppCard
           title="Evolución del Capital"
           icon={<Clock className="h-5 w-5" />}
           description={`Movimientos netos mensuales`}
@@ -874,7 +873,7 @@ export function CapitalDashboardView({
                 />
               </div>
               {currentMonthComparison && (
-                <StatCardHistoricalComparison comparison={currentMonthComparison} />
+                <AppCardHistoricalComparison comparison={currentMonthComparison} />
               )}
             </div>
           ) : (
@@ -882,9 +881,9 @@ export function CapitalDashboardView({
               Necesitas al menos 2 meses de datos para ver la evolución
             </div>
           )}
-        </DashboardCard>
+        </AppCard>
 
-        <DashboardCard
+        <AppCard
           title="Distribución por Socio"
           icon={<PieChart className="h-5 w-5" />}
           description="Balance neto por participante"
@@ -903,12 +902,12 @@ export function CapitalDashboardView({
               No hay datos de distribución
             </div>
           )}
-        </DashboardCard>
+        </AppCard>
       </div>
 
       {/* Row 4: Deviation Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DashboardCard
+        <AppCard
           title="Desvío por Socio"
           icon={<BarChart3 className="h-5 w-5" />}
           description="Verde = sobreaportado, Rojo = bajo aportado"
@@ -930,9 +929,9 @@ export function CapitalDashboardView({
               No hay desvíos registrados
             </div>
           )}
-        </DashboardCard>
+        </AppCard>
 
-        <DashboardCard
+        <AppCard
           title="Aporte Esperado vs Real"
           icon={<Scale className="h-5 w-5" />}
           description="Comparación por participante"
@@ -954,7 +953,7 @@ export function CapitalDashboardView({
               No hay datos de porcentaje de participación
             </div>
           )}
-        </DashboardCard>
+        </AppCard>
       </div>
 
       {/* Row 5: Insights & Activity */}

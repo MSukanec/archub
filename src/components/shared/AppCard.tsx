@@ -1,30 +1,11 @@
 import { forwardRef, ReactNode } from 'react'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { cva, type VariantProps } from 'class-variance-authority'
 import { ArrowRight, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { useLocation } from 'wouter'
 import type { HistoricalComparisonResult } from '@/lib/analytics'
 
-const appCardVariants = cva(
-  "p-4",
-  {
-    variants: {
-      variant: {
-        kpi: "",
-        chart: "",
-        neutral: "",
-      },
-    },
-    defaultVariants: {
-      variant: "neutral",
-    },
-  }
-)
-
-export interface AppCardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof appCardVariants> {
+export interface AppCardProps extends React.HTMLAttributes<HTMLDivElement> {
   href?: string;
   onCardClick?: () => void;
   'data-testid'?: string;
@@ -38,7 +19,6 @@ export interface AppCardProps
 const AppCard = forwardRef<HTMLDivElement, AppCardProps>(
   ({ 
     className, 
-    variant, 
     href, 
     onCardClick, 
     onClick, 
@@ -64,13 +44,13 @@ const AppCard = forwardRef<HTMLDivElement, AppCardProps>(
       }
     };
 
-    const hasHeader = (title || icon) && variant === 'chart';
+    const hasHeader = !!(title || icon);
 
     return (
       <Card
         ref={ref}
         className={cn(
-          appCardVariants({ variant }),
+          "p-4",
           isClickable && "relative group cursor-pointer hover:shadow-md transition-shadow",
           className
         )}
@@ -86,7 +66,7 @@ const AppCard = forwardRef<HTMLDivElement, AppCardProps>(
             actions={actions}
           />
         )}
-        {hasHeader ? <div>{children}</div> : children}
+        {children}
       </Card>
     );
   }
@@ -183,17 +163,27 @@ export type TrendDirection = 'up' | 'down' | 'neutral'
 interface AppCardTrendProps extends React.HTMLAttributes<HTMLDivElement> {
   direction: TrendDirection
   value?: string
+  invertColors?: boolean
 }
 
-const AppCardTrend = ({ direction, value, className, ...props }: AppCardTrendProps) => {
-  const colorStyle = direction === 'up' 
-    ? { color: 'var(--positive)' }
-    : direction === 'down' 
-      ? { color: 'var(--negative)' }
-      : { color: 'var(--neutral)' }
+const AppCardTrend = ({ direction, value, invertColors = false, className, ...props }: AppCardTrendProps) => {
+  const getColor = () => {
+    if (invertColors) {
+      return direction === 'up' 
+        ? { color: 'var(--negative)' }
+        : direction === 'down' 
+          ? { color: 'var(--positive)' }
+          : { color: 'var(--neutral)' }
+    }
+    return direction === 'up' 
+      ? { color: 'var(--positive)' }
+      : direction === 'down' 
+        ? { color: 'var(--negative)' }
+        : { color: 'var(--neutral)' }
+  }
   
   return (
-    <div className={cn("flex items-center gap-1 text-xs", className)} style={colorStyle} {...props}>
+    <div className={cn("flex items-center gap-1 text-xs", className)} style={getColor()} {...props}>
       {direction === 'up' && <span>↑</span>}
       {direction === 'down' && <span>↓</span>}
       {direction === 'neutral' && <span>→</span>}
@@ -217,7 +207,7 @@ interface AppCardContentProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const AppCardContent = ({ children, className, ...props }: AppCardContentProps) => (
-  <div className={cn("mt-4", className)} {...props}>
+  <div className={cn("", className)} {...props}>
     {children}
   </div>
 )
@@ -250,21 +240,6 @@ const AppCardHistoricalComparison = ({ comparison, label = 'vs promedio', classN
   )
 }
 
-const StatCard = AppCard
-const StatCardTitle = AppCardTitle
-const StatCardValue = AppCardValue
-const StatCardMeta = AppCardMeta
-const StatCardMetaContainer = AppCardMetaContainer
-const StatCardSubValue = AppCardSubValue
-const StatCardTrend = AppCardTrend
-const StatCardContent = AppCardContent
-const StatCardHistoricalComparison = AppCardHistoricalComparison
-
-const DashboardCard = forwardRef<HTMLDivElement, AppCardProps>(
-  (props, ref) => <AppCard ref={ref} variant="chart" {...props} />
-)
-DashboardCard.displayName = "DashboardCard"
-
 export { 
   AppCard, 
   AppCardHeader,
@@ -276,14 +251,4 @@ export {
   AppCardTrend, 
   AppCardContent, 
   AppCardHistoricalComparison,
-  StatCard,
-  StatCardTitle,
-  StatCardValue,
-  StatCardMeta,
-  StatCardMetaContainer,
-  StatCardSubValue,
-  StatCardTrend,
-  StatCardContent,
-  StatCardHistoricalComparison,
-  DashboardCard,
 }

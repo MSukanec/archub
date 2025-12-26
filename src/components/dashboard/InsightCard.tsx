@@ -1,29 +1,19 @@
 import { ReactNode } from 'react';
-import { Card } from '@/components/ui/card';
+import { AppCard } from '@/components/shared/AppCard';
 import { Button } from '@/components/ui/button';
-import { AppCardHeader } from '@/components/shared/AppCard';
-import { cn } from '@/lib/utils';
 import { Info, AlertTriangle, CheckCircle2, XCircle, LucideIcon, ChevronRight } from 'lucide-react';
 import { type InsightAction } from './insights/types';
 
 type InsightVariant = 'info' | 'warning' | 'success' | 'danger';
 
-/**
- * Highlights important values in text (percentages, money amounts, numbers with units)
- * Wraps them in <strong> tags for visual emphasis
- */
 function highlightValues(text: string): ReactNode {
-  // Pattern matches: percentages (15%), money ($1.234, $1,234.56), numbers with context (~15, 3 meses)
   const pattern = /(\$[\d.,]+|~?\d+(?:[.,]\d+)?%|~\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s*(?:meses?|días?|pagos?|veces?))/gi;
-  
-  // When using split with capturing group, matches are included in the result array
   const parts = text.split(pattern);
   
   if (parts.length === 1) return text;
   
   return parts.map((part, i) => {
     if (!part) return null;
-    // Odd indices are the captured matches
     if (i % 2 === 1) {
       return (
         <strong key={i} className="font-semibold text-foreground">
@@ -46,10 +36,15 @@ export interface InsightItem {
 export interface InsightCardProps {
   title?: string;
   titleIcon?: ReactNode;
-  items: InsightItem[];
+  icon?: ReactNode;
+  description?: string;
+  items?: InsightItem[];
+  insights?: InsightItem[];
   emptyText?: string;
   className?: string;
   onAction?: (action: InsightAction) => void;
+  dismissedIds?: Set<string>;
+  onDismiss?: (issueId: string) => void;
   'data-testid'?: string;
 }
 
@@ -79,22 +74,27 @@ const variantStyles: Record<InsightVariant, { borderVar: string; icon: LucideIco
 export function InsightCard({
   title,
   titleIcon,
-  items = [],
+  icon,
+  description,
+  items,
+  insights,
   emptyText,
   className,
   onAction,
   'data-testid': testId,
 }: InsightCardProps) {
-  const safeItems = items || [];
+  const resolvedIcon = icon || titleIcon;
+  const resolvedItems = items || insights || [];
+  const safeItems = resolvedItems || [];
   
   return (
-    <Card className={cn('p-4', className)} data-testid={testId}>
-      {title && (
-        <AppCardHeader
-          icon={titleIcon}
-          title={title}
-        />
-      )}
+    <AppCard 
+      title={title} 
+      icon={resolvedIcon} 
+      description={description}
+      className={className} 
+      data-testid={testId}
+    >
       {safeItems.length === 0 ? (
         <div className="flex items-center justify-center py-8 text-center">
           <p className="text-sm text-muted-foreground">
@@ -148,6 +148,6 @@ export function InsightCard({
           })}
         </ul>
       )}
-    </Card>
+    </AppCard>
   );
 }

@@ -4,7 +4,7 @@ import { Table } from '@/components/shared/table';
 import type { Column } from '@/components/shared/table';
 import { Badge } from '@/components/ui/badge';
 import { IdentityBadge } from '@/components/shared/IdentityBadge';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/dashboard';
 import { calculateCountKPI, calculatePercentageKPI } from '@/lib/kpis';
 import type { ContactWithRelations } from '@/features/contacts/types';
 
@@ -153,40 +153,40 @@ export function ContactList({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard data-testid="kpi-total-contacts">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-total-contacts">
+          <AppCardTitle>
             <Users className="h-4 w-4" />
             Total Contactos
-          </StatCardTitle>
-          <StatCardValue>{kpis.total.formatted}</StatCardValue>
-        </StatCard>
+          </AppCardTitle>
+          <AppCardValue>{kpis.total.formatted}</AppCardValue>
+        </AppCard>
         
-        <StatCard data-testid="kpi-archub-users">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-archub-users">
+          <AppCardTitle>
             <UserCheck className="h-4 w-4" />
             Usuarios Archub
-          </StatCardTitle>
-          <StatCardValue>{kpis.archubUsers.formatted}</StatCardValue>
-          <StatCardMeta>{kpis.archubUsersPercent.formatted} del total</StatCardMeta>
-        </StatCard>
+          </AppCardTitle>
+          <AppCardValue>{kpis.archubUsers.formatted}</AppCardValue>
+          <AppCardMeta>{kpis.archubUsersPercent.formatted} del total</AppCardMeta>
+        </AppCard>
         
-        <StatCard data-testid="kpi-organization-members">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-organization-members">
+          <AppCardTitle>
             <Building2 className="h-4 w-4" />
             Miembros
-          </StatCardTitle>
-          <StatCardValue>{kpis.organizationMembers.formatted}</StatCardValue>
-          <StatCardMeta>En la organización</StatCardMeta>
-        </StatCard>
+          </AppCardTitle>
+          <AppCardValue>{kpis.organizationMembers.formatted}</AppCardValue>
+          <AppCardMeta>En la organización</AppCardMeta>
+        </AppCard>
         
-        <StatCard data-testid="kpi-unique-types">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-unique-types">
+          <AppCardTitle>
             <Tags className="h-4 w-4" />
             Tipos Únicos
-          </StatCardTitle>
-          <StatCardValue>{kpis.uniqueTypes.formatted}</StatCardValue>
-          <StatCardMeta>Categorías diferentes</StatCardMeta>
-        </StatCard>
+          </AppCardTitle>
+          <AppCardValue>{kpis.uniqueTypes.formatted}</AppCardValue>
+          <AppCardMeta>Categorías diferentes</AppCardMeta>
+        </AppCard>
       </div>
 
       <Table

@@ -7,7 +7,7 @@ import { useCurrentUser } from '@/hooks/use-current-user'
 import { useProjectContext } from '@/stores/projectContext'
 import { Button } from '@/components/ui/button'
 import { useGlobalModalStore } from '@/components/modal'
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard'
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/dashboard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import CommitmentAccordion from '@/features/clients/components/CommitmentAccordion'
 import {
@@ -247,64 +247,64 @@ export function ClientObligationsView({ projectId }: ClientObligationsViewProps)
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard data-testid="stat-card-compromiso-total">
-          <StatCardTitle showArrow={false}>
+        <AppCard data-testid="stat-card-compromiso-total">
+          <AppCardTitle showArrow={false}>
             <DollarSign className="w-4 h-4 inline mr-1" />
             Compromiso Total
-          </StatCardTitle>
-          <StatCardValue>
+          </AppCardTitle>
+          <AppCardValue>
             {kpis.totalCommittedKPI?.formatted || '0'}
-          </StatCardValue>
-          <StatCardMeta>
+          </AppCardValue>
+          <AppCardMeta>
             {kpis.totalCommittedKPI?.breakdown && kpis.totalCommittedKPI.breakdown.length > 1
               ? formatBreakdown(kpis.totalCommittedKPI)
               : 'Sin compromisos registrados'
             }
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
 
-        <StatCard data-testid="stat-card-pagado">
-          <StatCardTitle showArrow={false}>
+        <AppCard data-testid="stat-card-pagado">
+          <AppCardTitle showArrow={false}>
             <CheckCircle2 className="w-4 h-4 inline mr-1" />
             Pagado
-          </StatCardTitle>
-          <StatCardValue>
+          </AppCardTitle>
+          <AppCardValue>
             {kpis.totalPaidKPI?.formatted || '0'}
-          </StatCardValue>
-          <StatCardMeta>
+          </AppCardValue>
+          <AppCardMeta>
             {kpis.totalPaidKPI?.breakdown && kpis.totalPaidKPI.breakdown.length > 1
               ? formatBreakdown(kpis.totalPaidKPI)
               : commitmentCurrency?.code || '-'
             }
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
 
-        <StatCard data-testid="stat-card-saldo">
-          <StatCardTitle showArrow={false}>
+        <AppCard data-testid="stat-card-saldo">
+          <AppCardTitle showArrow={false}>
             <AlertCircle className="w-4 h-4 inline mr-1" />
             Saldo
-          </StatCardTitle>
-          <StatCardValue>
+          </AppCardTitle>
+          <AppCardValue>
             {kpis.totalBalanceKPI?.formatted || '0'}
-          </StatCardValue>
-          <StatCardMeta>
+          </AppCardValue>
+          <AppCardMeta>
             {kpis.totalBalanceKPI?.breakdown && kpis.totalBalanceKPI.breakdown.length > 1
               ? formatBreakdown(kpis.totalBalanceKPI)
               : commitmentCurrency?.code || '-'
             }
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
 
-        <StatCard data-testid="stat-card-items-pago">
-          <StatCardTitle showArrow={false}>
+        <AppCard data-testid="stat-card-items-pago">
+          <AppCardTitle showArrow={false}>
             <ListChecks className="w-4 h-4 inline mr-1" />
             Items de Pago
-          </StatCardTitle>
-          <StatCardValue>
+          </AppCardTitle>
+          <AppCardValue>
             {kpis.totalSchedulePaid}/{kpis.totalScheduleItems}
-          </StatCardValue>
-          <StatCardMeta>{kpis.schedulePercentage.toFixed(1)}% completado</StatCardMeta>
-        </StatCard>
+          </AppCardValue>
+          <AppCardMeta>{kpis.schedulePercentage.toFixed(1)}% completado</AppCardMeta>
+        </AppCard>
       </div>
 
       {isLoading ? (

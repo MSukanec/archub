@@ -9,14 +9,13 @@ import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { useClientPayments, useClientDashboard } from '@/features/clients';
 import { useProjectContext } from '@/stores/projectContext';
 import { 
-  StatCard, 
-  StatCardTitle, 
-  StatCardValue, 
-  StatCardMeta,
-  StatCardMetaContainer,
-  StatCardTrend,
-  StatCardHistoricalComparison,
-  DashboardCard,
+  AppCard, 
+  AppCardTitle, 
+  AppCardValue, 
+  AppCardMeta,
+  AppCardMetaContainer,
+  AppCardTrend,
+  AppCardHistoricalComparison,
   ActivityCard,
   InsightCard,
   type ActivityItem,
@@ -524,61 +523,61 @@ export function ClientsDashboardView({
   return (
     <div className="space-y-6" data-testid="clients-dashboard">
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard data-testid="kpi-total-cobrado">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-total-cobrado">
+          <AppCardTitle>
             <DollarSign className="h-4 w-4" />
             {kpiLabels.totalTitle.replace('Gasto', 'Cobrado')}
-          </StatCardTitle>
-          <StatCardValue>{defaultCurrency?.symbol} {kpis.totalCobrado.formatted}</StatCardValue>
-          <StatCardMetaContainer>
+          </AppCardTitle>
+          <AppCardValue>{defaultCurrency?.symbol} {kpis.totalCobrado.formatted}</AppCardValue>
+          <AppCardMetaContainer>
             {kpis.totalCobradoTrendValue && (
-              <StatCardTrend direction={kpis.totalCobradoTrend} value={kpis.totalCobradoTrendValue} />
+              <AppCardTrend direction={kpis.totalCobradoTrend} value={kpis.totalCobradoTrendValue} />
             )}
             {!periodMeta.isShortPeriod && (
-              <StatCardHistoricalComparison 
+              <AppCardHistoricalComparison 
                 comparison={currentMonthComparison} 
                 label="vs promedio mensual"
               />
             )}
-          </StatCardMetaContainer>
-        </StatCard>
+          </AppCardMetaContainer>
+        </AppCard>
 
-        <StatCard data-testid="kpi-average-monthly">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-average-monthly">
+          <AppCardTitle>
             <TrendingUp className="h-4 w-4" />
             {kpiLabels.averageTitle.replace('Gasto', 'Cobro')}
-          </StatCardTitle>
-          <StatCardValue>{defaultCurrency?.symbol} {kpis.periodAverage?.formatted ?? kpis.averageMonthly.formatted}</StatCardValue>
-          <StatCardMetaContainer>
-            <StatCardMeta>{kpiLabels.averageHelper}</StatCardMeta>
-          </StatCardMetaContainer>
-        </StatCard>
+          </AppCardTitle>
+          <AppCardValue>{defaultCurrency?.symbol} {kpis.periodAverage?.formatted ?? kpis.averageMonthly.formatted}</AppCardValue>
+          <AppCardMetaContainer>
+            <AppCardMeta>{kpiLabels.averageHelper}</AppCardMeta>
+          </AppCardMetaContainer>
+        </AppCard>
 
-        <StatCard data-testid="kpi-total-payments">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-total-payments">
+          <AppCardTitle>
             <Receipt className="h-4 w-4" />
             Total Pagos
-          </StatCardTitle>
-          <StatCardValue>{kpis.totalPayments.formatted}</StatCardValue>
-          <StatCardMetaContainer>
-            <StatCardMeta>≈ {kpis.paymentsPerMonth} pagos por mes</StatCardMeta>
-          </StatCardMetaContainer>
-        </StatCard>
+          </AppCardTitle>
+          <AppCardValue>{kpis.totalPayments.formatted}</AppCardValue>
+          <AppCardMetaContainer>
+            <AppCardMeta>≈ {kpis.paymentsPerMonth} pagos por mes</AppCardMeta>
+          </AppCardMetaContainer>
+        </AppCard>
 
-        <StatCard data-testid="kpi-total-clients">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-total-clients">
+          <AppCardTitle>
             <Users className="h-4 w-4" />
             Clientes Activos
-          </StatCardTitle>
-          <StatCardValue>{kpis.totalClients.formatted}</StatCardValue>
-          <StatCardMetaContainer>
-            <StatCardMeta>En este proyecto</StatCardMeta>
-          </StatCardMetaContainer>
-        </StatCard>
+          </AppCardTitle>
+          <AppCardValue>{kpis.totalClients.formatted}</AppCardValue>
+          <AppCardMetaContainer>
+            <AppCardMeta>En este proyecto</AppCardMeta>
+          </AppCardMetaContainer>
+        </AppCard>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DashboardCard 
+        <AppCard 
           title="Evolución de Cobros"
           icon={<BarChart3 />}
           description="Hacé click en un punto para ver los pagos de ese mes"
@@ -591,9 +590,9 @@ export function ClientsDashboardView({
             clickable
             onBarClick={(month) => handleMonthDrillDown(month)}
           />
-        </DashboardCard>
+        </AppCard>
 
-        <DashboardCard 
+        <AppCard 
           title="Distribución por Cliente"
           icon={<PieChart />}
           description="Hacé click en un cliente para ver sus pagos"
@@ -606,7 +605,7 @@ export function ClientsDashboardView({
             clickable
             onClick={(label) => handleClientDrillDown(label)}
           />
-        </DashboardCard>
+        </AppCard>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -25,7 +25,7 @@ import { useGlobalModalStore } from '@/components/modal';
 import { format, isPast, isToday, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { parseLocalDate } from '@/lib/date-utils';
-import { StatCard, StatCardTitle, StatCardValue, StatCardMeta } from '@/components/dashboard';
+import { AppCard, AppCardTitle, AppCardValue, AppCardMeta } from '@/components/dashboard';
 import {
   useClientPaymentSchedule,
   useDeleteClientPaymentSchedule,
@@ -386,69 +386,69 @@ export function ClientScheduleView({ projectId }: ClientScheduleViewProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
+        <AppCard 
           className="cursor-pointer hover:border-amber-500/50 transition-colors"
           onClick={() => setFilterStatus(filterStatus === 'pending' ? 'all' : 'pending')}
           data-testid="stat-pending"
         >
-          <StatCardTitle>
+          <AppCardTitle>
             <Clock className="h-4 w-4 text-amber-500" />
             Pendientes
-          </StatCardTitle>
-          <StatCardValue className="text-amber-500">
+          </AppCardTitle>
+          <AppCardValue className="text-amber-500">
             {formatCurrency(kpis.totalPending, kpis.currency)}
-          </StatCardValue>
-          <StatCardMeta>{kpis.countPending} cuotas por cobrar</StatCardMeta>
-        </StatCard>
+          </AppCardValue>
+          <AppCardMeta>{kpis.countPending} cuotas por cobrar</AppCardMeta>
+        </AppCard>
 
-        <StatCard 
+        <AppCard 
           className="cursor-pointer hover:border-destructive/50 transition-colors"
           onClick={() => setFilterStatus(filterStatus === 'overdue' ? 'all' : 'overdue')}
           data-testid="stat-overdue"
         >
-          <StatCardTitle>
+          <AppCardTitle>
             <AlertCircle className="h-4 w-4 text-destructive" />
             Vencidas
-          </StatCardTitle>
-          <StatCardValue className="text-destructive">
+          </AppCardTitle>
+          <AppCardValue className="text-destructive">
             {formatCurrency(kpis.totalOverdue, kpis.currency)}
-          </StatCardValue>
-          <StatCardMeta>{kpis.countOverdue} cuotas vencidas</StatCardMeta>
-        </StatCard>
+          </AppCardValue>
+          <AppCardMeta>{kpis.countOverdue} cuotas vencidas</AppCardMeta>
+        </AppCard>
 
-        <StatCard 
+        <AppCard 
           className="cursor-pointer hover:border-green-500/50 transition-colors"
           onClick={() => setFilterStatus(filterStatus === 'paid' ? 'all' : 'paid')}
           data-testid="stat-paid"
         >
-          <StatCardTitle>
+          <AppCardTitle>
             <CheckCircle2 className="h-4 w-4 text-green-500" />
             Cobradas
-          </StatCardTitle>
-          <StatCardValue className="text-green-500">
+          </AppCardTitle>
+          <AppCardValue className="text-green-500">
             {formatCurrency(kpis.totalPaid, kpis.currency)}
-          </StatCardValue>
-          <StatCardMeta>{kpis.countPaid} cuotas cobradas</StatCardMeta>
-        </StatCard>
+          </AppCardValue>
+          <AppCardMeta>{kpis.countPaid} cuotas cobradas</AppCardMeta>
+        </AppCard>
 
-        <StatCard data-testid="stat-next-due">
-          <StatCardTitle>
+        <AppCard data-testid="stat-next-due">
+          <AppCardTitle>
             <CalendarCheck className="h-4 w-4 text-blue-500" />
             Próximo Vencimiento
-          </StatCardTitle>
-          <StatCardValue className="text-blue-500">
+          </AppCardTitle>
+          <AppCardValue className="text-blue-500">
             {kpis.nextDueDate 
               ? format(new Date(kpis.nextDueDate), 'dd/MM/yyyy', { locale: es })
               : '-'
             }
-          </StatCardValue>
-          <StatCardMeta>
+          </AppCardValue>
+          <AppCardMeta>
             {kpis.nextDueDate 
               ? formatCurrency(kpis.nextDueAmount, kpis.currency)
               : 'Sin cuotas pendientes'
             }
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
       </div>
 
       {filterStatus !== 'all' && (

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
-import { Card } from '@/components/ui/card';
-import { AppCardHeader } from '@/components/shared/AppCard';
-import { cn } from '@/lib/utils';
+import { AppCard } from '@/components/shared/AppCard';
+import { Button } from '@/components/ui/button';
+import { ChevronRight } from 'lucide-react';
 
 export interface ActivityItem {
   id: string | number;
@@ -14,8 +14,11 @@ export interface ActivityItem {
 export interface ActivityCardProps {
   title?: string;
   titleIcon?: ReactNode;
+  description?: string;
   items: ActivityItem[];
   emptyText?: string;
+  emptyMessage?: string;
+  onViewAll?: () => void;
   className?: string;
   'data-testid'?: string;
 }
@@ -23,21 +26,34 @@ export interface ActivityCardProps {
 export function ActivityCard({
   title,
   titleIcon,
+  description,
   items,
-  emptyText = 'No hay actividad reciente',
+  emptyText,
+  emptyMessage,
+  onViewAll,
   className,
   'data-testid': testId,
 }: ActivityCardProps) {
+  const resolvedEmptyText = emptyText || emptyMessage || 'No hay actividad reciente';
+
+  const viewAllAction = onViewAll ? (
+    <Button variant="ghost" size="sm" onClick={onViewAll} className="h-7 px-2 text-xs">
+      Ver todos
+      <ChevronRight className="h-3 w-3 ml-1" />
+    </Button>
+  ) : undefined;
+  
   return (
-    <Card className={cn('p-4', className)} data-testid={testId}>
-      {title && (
-        <AppCardHeader
-          icon={titleIcon}
-          title={title}
-        />
-      )}
+    <AppCard 
+      title={title} 
+      icon={titleIcon} 
+      description={description}
+      actions={viewAllAction}
+      className={className} 
+      data-testid={testId}
+    >
       {items.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-6">{emptyText}</p>
+        <p className="text-sm text-muted-foreground text-center py-6">{resolvedEmptyText}</p>
       ) : (
         <ul className="space-y-3">
           {items.map((item, index) => (
@@ -60,6 +76,6 @@ export function ActivityCard({
           ))}
         </ul>
       )}
-    </Card>
+    </AppCard>
   );
 }

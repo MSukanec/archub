@@ -6,15 +6,14 @@ import { format as formatMoney, formatKPI, convertToBaseCurrency } from '@/lib/m
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useOrganizationDefaultCurrency } from '@/hooks/use-currencies';
 import { 
-  StatCard, 
-  StatCardTitle, 
-  StatCardValue, 
-  StatCardMeta,
-  StatCardMetaContainer,
-  StatCardSubValue,
-  StatCardTrend,
-  StatCardHistoricalComparison,
-  DashboardCard,
+  AppCard, 
+  AppCardTitle, 
+  AppCardValue, 
+  AppCardMeta,
+  AppCardMetaContainer,
+  AppCardSubValue,
+  AppCardTrend,
+  AppCardHistoricalComparison,
   ActivityCard,
   InsightCard,
   type ActivityItem,
@@ -598,7 +597,7 @@ export function OrganizationFinancesDashboardView({
         return {
           id: movement.id,
           title: movement.entity_name || movement.description || MOVEMENT_TYPE_LABELS[movement.movement_type],
-          subtitle: formatDateShort(movement.payment_date),
+          description: formatDateShort(movement.payment_date),
           rightContent: (
             <span className={cn(
               "font-medium tabular-nums",
@@ -633,79 +632,79 @@ export function OrganizationFinancesDashboardView({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard data-testid="kpi-total-ingresos">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-total-ingresos">
+          <AppCardTitle>
             <ArrowUpRight className="h-4 w-4" style={{ color: 'var(--positive)' }} />
             Total Ingresos
-          </StatCardTitle>
-          <StatCardValue style={{ color: 'var(--positive)' }}>
+          </AppCardTitle>
+          <AppCardValue style={{ color: 'var(--positive)' }}>
             {formatMoney(kpis.totalIngresos.value, currencySymbol)}
-          </StatCardValue>
+          </AppCardValue>
           {showMultiCurrencyBreakdown && hasMultipleCurrencies(kpis.totalIngresos) && (
-            <StatCardSubValue>{formatBreakdown(kpis.totalIngresos)}</StatCardSubValue>
+            <AppCardSubValue>{formatBreakdown(kpis.totalIngresos)}</AppCardSubValue>
           )}
-          <StatCardMetaContainer>
+          <AppCardMetaContainer>
             {kpis.ingresosTrendValue && (
-              <StatCardTrend 
+              <AppCardTrend 
                 direction={kpis.ingresosTrend} 
                 value={kpis.ingresosTrendValue}
                 invertColors={false}
               />
             )}
-          </StatCardMetaContainer>
-        </StatCard>
+          </AppCardMetaContainer>
+        </AppCard>
 
-        <StatCard data-testid="kpi-total-egresos">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-total-egresos">
+          <AppCardTitle>
             <ArrowDownRight className="h-4 w-4" style={{ color: 'var(--negative)' }} />
             Total Egresos
-          </StatCardTitle>
-          <StatCardValue style={{ color: 'var(--negative)' }}>
+          </AppCardTitle>
+          <AppCardValue style={{ color: 'var(--negative)' }}>
             {formatMoney(kpis.totalEgresos.value, currencySymbol)}
-          </StatCardValue>
+          </AppCardValue>
           {showMultiCurrencyBreakdown && hasMultipleCurrencies(kpis.totalEgresos) && (
-            <StatCardSubValue>{formatBreakdown(kpis.totalEgresos)}</StatCardSubValue>
+            <AppCardSubValue>{formatBreakdown(kpis.totalEgresos)}</AppCardSubValue>
           )}
-          <StatCardMetaContainer>
+          <AppCardMetaContainer>
             {kpis.egresosTrendValue && (
-              <StatCardTrend 
+              <AppCardTrend 
                 direction={kpis.egresosTrend} 
                 value={kpis.egresosTrendValue}
                 invertColors={true}
               />
             )}
-          </StatCardMetaContainer>
-        </StatCard>
+          </AppCardMetaContainer>
+        </AppCard>
 
-        <StatCard data-testid="kpi-balance">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-balance">
+          <AppCardTitle>
             <Scale className="h-4 w-4" />
             Balance
-          </StatCardTitle>
-          <StatCardValue style={{ color: kpis.balance >= 0 ? 'var(--positive)' : 'var(--negative)' }}>
+          </AppCardTitle>
+          <AppCardValue style={{ color: kpis.balance >= 0 ? 'var(--positive)' : 'var(--negative)' }}>
             {kpis.balance >= 0 ? '+' : ''}{formatMoney(kpis.balance, currencySymbol)}
-          </StatCardValue>
-          <StatCardMeta>
+          </AppCardValue>
+          <AppCardMeta>
             {kpis.balance >= 0 ? 'Superávit' : 'Déficit'} en el período
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
 
-        <StatCard data-testid="kpi-movimientos">
-          <StatCardTitle>
+        <AppCard data-testid="kpi-movimientos">
+          <AppCardTitle>
             <BarChart3 className="h-4 w-4" />
             Movimientos
-          </StatCardTitle>
-          <StatCardValue>{kpis.totalMovements.formatted}</StatCardValue>
-          <StatCardMeta>
+          </AppCardTitle>
+          <AppCardValue>{kpis.totalMovements.formatted}</AppCardValue>
+          <AppCardMeta>
             En {kpis.monthCount} {kpis.monthCount === 1 ? 'mes' : 'meses'}
-          </StatCardMeta>
-        </StatCard>
+          </AppCardMeta>
+        </AppCard>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <DashboardCard 
+        <AppCard 
           title="Ingresos vs Egresos"
-          subtitle={getPeriodLabel(selectedPeriod)}
+          description={getPeriodLabel(selectedPeriod)}
           icon={<BarChart3 className="h-4 w-4" />}
           className="lg:col-span-2"
         >
@@ -727,14 +726,14 @@ export function OrganizationFinancesDashboardView({
           )}
           {currentMonthComparison && (
             <div className="mt-4 pt-4 border-t">
-              <StatCardHistoricalComparison comparison={currentMonthComparison} />
+              <AppCardHistoricalComparison comparison={currentMonthComparison} />
             </div>
           )}
-        </DashboardCard>
+        </AppCard>
 
-        <DashboardCard 
+        <AppCard 
           title="Distribución por Tipo"
-          subtitle="Volumen por categoría"
+          description="Volumen por categoría"
           icon={<PieChart className="h-4 w-4" />}
         >
           {categoryChartData.length > 0 ? (
@@ -748,13 +747,13 @@ export function OrganizationFinancesDashboardView({
               Sin datos para mostrar
             </div>
           )}
-        </DashboardCard>
+        </AppCard>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <DashboardCard 
+        <AppCard 
           title="Balance por Moneda"
-          subtitle="Saldo en cada divisa"
+          description="Saldo en cada divisa"
           icon={<Coins className="h-4 w-4" />}
           id="currency-balances"
         >
@@ -768,11 +767,11 @@ export function OrganizationFinancesDashboardView({
               Sin datos de monedas
             </div>
           )}
-        </DashboardCard>
+        </AppCard>
 
-        <DashboardCard 
+        <AppCard 
           title="Balance por Billetera"
-          subtitle="Saldo en cada cuenta"
+          description="Saldo en cada cuenta"
           icon={<Wallet className="h-4 w-4" />}
           id="wallet-balances"
         >
@@ -786,7 +785,7 @@ export function OrganizationFinancesDashboardView({
               Sin datos de billeteras
             </div>
           )}
-        </DashboardCard>
+        </AppCard>
 
         <ActivityCard
           title="Actividad Reciente"
