@@ -19,6 +19,7 @@ export interface Column<T = any> {
   /** @deprecated Use `type` property for semantic column widths instead */
   width?: string;
   cellClassName?: string;
+  labelClassName?: string;
   align?: ColumnAlignment;
 }
 

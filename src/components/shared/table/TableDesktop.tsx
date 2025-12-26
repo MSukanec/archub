@@ -205,7 +205,8 @@ export function TableDesktop<T>({
                 alignment === "left" && "text-left",
                 alignment === "center" && "text-center",
                 alignment === "right" && "text-right",
-                column.sortable !== false && "cursor-pointer"
+                column.sortable !== false && "cursor-pointer",
+                column.labelClassName
               )}
               onClick={() =>
                 column.sortable !== false &&

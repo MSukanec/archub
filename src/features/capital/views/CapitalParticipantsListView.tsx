@@ -163,6 +163,7 @@ export function CapitalParticipantsListView() {
     {
       key: 'partnerName',
       label: 'Socio',
+      labelClassName: 'text-[var(--text-default)] font-semibold',
       type: 'medium-text' as const,
       sortable: true,
       render: (partner: EnrichedPartner) => {
@@ -185,6 +186,7 @@ export function CapitalParticipantsListView() {
     {
       key: 'ownership_percentage',
       label: 'Participación',
+      labelClassName: 'text-[var(--accent)]',
       type: 'short-text' as const,
       sortable: true,
       sortType: 'number' as const,
@@ -199,6 +201,7 @@ export function CapitalParticipantsListView() {
     {
       key: 'email',
       label: 'Mail',
+      labelClassName: 'text-[var(--info)]',
       type: 'long-text' as const,
       sortable: true,
       render: (partner: EnrichedPartner) => {
@@ -208,6 +211,7 @@ export function CapitalParticipantsListView() {
     {
       key: 'phone',
       label: 'Teléfono',
+      labelClassName: 'text-[var(--pending)]',
       type: 'medium-text' as const,
       sortable: true,
       render: (partner: EnrichedPartner) => {

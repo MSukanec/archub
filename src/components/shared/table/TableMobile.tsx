@@ -173,7 +173,7 @@ export function TableMobile<T>({
               {columns.slice(0, 4).map((column) => (
                 <div key={String(column.key)} className="flex justify-between">
                   <span className="text-xs text-muted-foreground">
-                    {column.label}
+                    <span className={column.labelClassName}>{column.label}</span>
                   </span>
                   <span className="text-sm font-medium">
                     {column.render
